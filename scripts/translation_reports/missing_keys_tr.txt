@@ -1,0 +1,13 @@
+Missing translations for TR
+Coverage: 99.8%
+Missing: 2 keys
+================================================================================
+
+Key: language
+EN:  Language
+TR:  [MISSING - NEEDS TRANSLATION]
+
+Key: languageDescription
+EN:  Select your preferred language
+TR:  [MISSING - NEEDS TRANSLATION]
+

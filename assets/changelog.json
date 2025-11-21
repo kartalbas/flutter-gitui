@@ -1,0 +1,538 @@
+{
+  "releases": [
+    {
+      "date": "2025-11-21T13:12:59Z",
+      "version": "0.137.0+1",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.136.0+1",
+      "commit": "d5277481"
+    },
+    {
+      "date": "2025-11-21T13:06:06Z",
+      "version": "0.136.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "d225925e"
+    },
+    {
+      "date": "2025-11-21T13:01:09Z",
+      "version": "0.135.0+1",
+      "changelog": "### 🔧 Improvements\n- Remove launcher references from codebase\n- Fix build system configuration",
+      "commit": "d225925e"
+    },
+    {
+      "date": "2025-11-21T12:58:35Z",
+      "version": "0.134.0+1",
+      "changelog": "### 🧹 Chores\n\n- Bump version to 0.133.0+1",
+      "commit": "74a4cff6"
+    },
+    {
+      "date": "2025-11-21T12:48:22Z",
+      "version": "0.133.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "88bff2bc"
+    },
+    {
+      "date": "2025-11-21T12:32:25Z",
+      "version": "0.132.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "88bff2bc"
+    },
+    {
+      "date": "2025-11-21T11:57:31Z",
+      "version": "0.131.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "88bff2bc"
+    },
+    {
+      "date": "2025-11-21T11:42:48Z",
+      "version": "0.130.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Fix changelog return key and transcript file locking\n- Update icon sync for platform-specific builds",
+      "commit": "88bff2bc"
+    },
+    {
+      "date": "2025-11-21T11:26:01Z",
+      "version": "0.129.0+1",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Remove unused launcher files and module\n- Remove launcher creation from platform-specific builds",
+      "commit": "32f74898"
+    },
+    {
+      "date": "2025-11-20T17:21:00Z",
+      "version": "0.128.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add comprehensive build logging to release scripts",
+      "commit": "3138a695"
+    },
+    {
+      "date": "2025-11-20T17:12:18Z",
+      "version": "0.127.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add collapsible settings sections with persistent state\n- Add Config and Logs section with complete translations and log file access from notifications\n- Add resizable tree view panel with keyboard navigation and advanced search modes\n- Add separate code font size setting\n- Add searchable dropdown component with overlay\n- Add manual download option to update dialog and global progress tracking\n- Add batch operations infrastructure for consolidated git refreshes\n- Add tag-based history navigation\n\n### 🐛 Bug Fixes\n- Update auto-updater for platform-specific manifest and download URLs\n- Prevent FileSystemException when running shell commands in GUI\n- Resolve build warnings and update dependencies\n- Update tree view when files are restored externally\n- Fix UTF-8 decoding for update manifest to handle special characters\n- Disable shell verbose mode to prevent Windows FileSystemException\n\n### 🔧 Improvements\n- Restructure build system from universal to platform-specific release architecture\n- Replace context menus with Speed Dial FAB with improved dismissal behavior\n- Implement commit diff navigation in file history panel\n- Bundle 13 Google Fonts for offline use\n- Enforce design system compliance across all components (BaseDialog, BaseDropdown, BaseBadge, BaseIconButton, BaseLabel)\n- Standardize error handling with NotificationService\n- Limit cross-repo checkout to protected branches only",
+      "commit": "928886d9"
+    },
+    {
+      "date": "2025-11-20T14:45:22Z",
+      "version": "0.125.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Make settings sections collapsable with persistent state\n\n### 🧹 Chores\n- Bump version to 0.124.0+1\n- Remove shared data folder",
+      "commit": "11f79851"
+    },
+    {
+      "commit": "cde924ce",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.123.0+1\n- Update Claude settings\n- Remove copyright info",
+      "version": "0.124.0+1",
+      "date": "2025-11-20T13:45:53Z"
+    },
+    {
+      "date": "2025-11-20T09:02:47Z",
+      "version": "0.123.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add Config and Logs section with complete translations\n\n### 🧹 Chores\n- Bump version to 0.122.0+1",
+      "commit": "a1bfefcf"
+    },
+    {
+      "date": "2025-11-20T08:00:09Z",
+      "version": "0.122.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Change English language flag from UK to US\n\n### 🧹 Chores\n- Bump version to 0.121.0+1\n- Bump version to 0.120.0+1",
+      "commit": "deff897e"
+    },
+    {
+      "date": "2025-11-20T07:19:14Z",
+      "version": "0.121.0+1",
+      "changelog": "### ✨ Features\n\n- Add open log files button to error/warning notifications",
+      "commit": "14346502"
+    },
+    {
+      "commit": "5529b411",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.119.0+1",
+      "version": "0.120.0+1",
+      "date": "2025-11-20T07:03:31Z"
+    },
+    {
+      "date": "2025-11-19T15:15:58Z",
+      "version": "0.119.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Prevent FileSystemException when running shell commands in GUI\n- Add static Inter font files for google_fonts package\n\n### 🧹 Chores\n- Bump version to 0.118.0+1",
+      "commit": "b6048839"
+    },
+    {
+      "date": "2025-11-19T14:32:44Z",
+      "version": "0.118.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Resolve build warnings and update dependencies\n\n### 🧹 Chores\n- Bump version to 0.117.0+1",
+      "commit": "c8992c38"
+    },
+    {
+      "commit": "974fda7d",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add resizable tree view panel with drag-to-resize functionality\n- Add keyboard navigation and advanced search modes to browse view\n- Add separate Code Font Size setting for better customization\n\n### 🐛 Bug Fixes\n- Update tree view automatically when files are restored externally\n\n### 🔧 Improvements\n- Extract shared tree view components to reduce code duplication\n- Improve notification system behavior\n\n### 🧹 Chores\n- Bump version to 0.116.0+1",
+      "version": "0.117.0+1",
+      "date": "2025-11-19T14:21:35Z"
+    },
+    {
+      "date": "2025-11-19T06:24:28Z",
+      "version": "0.116.0+1",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.115.0+1",
+      "commit": "93955cdb"
+    },
+    {
+      "date": "2025-11-18T16:46:56Z",
+      "version": "0.115.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add `avoid_null_color_in_copy_with` lint rule\n- Add SearchableBaseDropdown component with search overlay\n- Limit cross-repo checkout to protected branches only\n\n### 🐛 Bug Fixes\n- Resolve all custom lint violations and improve lint rules\n\n### 🔧 Improvements\n- Center content and remove redundant license text in about section\n\n### 🧹 Chores\n- Bump version to 0.114.0+1",
+      "commit": "6faa0587"
+    },
+    {
+      "date": "2025-11-18T10:17:41Z",
+      "version": "0.114.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add manual download option to Update Available dialog\n\n### 🐛 Bug Fixes\n- Disable Shell verbose mode to prevent FileSystemException on Windows\n\n### 🔧 Improvements\n- Unify all dialogs to use BaseDialog/BaseViewerDialog architecture\n\n### 🧹 Chores\n- Bump version to 0.113.0+1",
+      "commit": "b9f812ce"
+    },
+    {
+      "date": "2025-11-18T09:18:18Z",
+      "version": "0.113.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add batch operations infrastructure for consolidated git refreshes\n\n### 🐛 Bug Fixes\n- Add lint ignore comments to BaseIconBadge component\n- Use UTF-8 decoding for update manifest to fix emoji/special characters\n\n### 🧹 Chores\n- Bump version to 0.112.0+1",
+      "commit": "1d2b9cb5"
+    },
+    {
+      "date": "2025-11-18T08:32:11Z",
+      "version": "0.112.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add custom lint rules including `avoid_dialog`, `avoid_print`, and comprehensive design system enforcement\n- Add `BaseDropdown` component for standardized dropdown behavior\n- Add global progress tracking and tag-based history navigation\n- Implement commit diff navigation in file history panel\n- Replace context menus with Speed Dial FAB in history and diff viewer with tap-outside, ESC, and scroll dismissal\n- Bundle 13 Google Fonts for offline use\n\n### 🐛 Bug Fixes\n- Replace all `Chip` widgets with `BaseBadge` for design system consistency\n- Replace `DropdownButtonFormField` with `BaseDropdown` in merge branches dialog\n- Resolve Riverpod 3.x StateNotifier compatibility and type errors\n- Fix radiusXS errors and resolve analyzer warnings\n\n### 🔧 Improvements\n- Enforce design system compliance by migrating all components to Base* system (buttons, dialogs, text fields, list items)\n- Standardize error handling with NotificationService across all file operations\n- Replace hardcoded spacing and colors with AppTheme constants\n- Move Speed Dial FAB to BrowseScreen level and improve ESC key handling\n- Update custom lint rules to use DiagnosticReporter API\n\n### 📝 Documentation\n- Add comprehensive UI migration documentation (UI-CONCEPT.md, UI-MIGRATION-PLAN.md, UI-MIGRATION-STATUS.md)\n- Declare 100% UI migration completion\n- Add comprehensive UX documentation with automated enforcement (All 3 Tiers)\n- Clean up and archive outdated documentation",
+      "commit": "c6496ede"
+    },
+    {
+      "date": "2025-11-16T15:57:54Z",
+      "version": "0.111.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- **Changes View**: Add draggable Speed Dial FAB with multiple actions to diff viewer\n- **Changes View**: Add split view with live diff and keyboard navigation\n- **Changes View**: Replace tabs with unified tree view for git changes\n- **Branches**: Add protected branches support with configurable detection\n- **Branches**: Add delete all unprotected branches functionality\n- **Branches**: Add global branch switcher across repositories\n- **Pull Requests**: Apply merge dialog UI pattern to create PR dialog and add merge button\n- **History**: Add force push option after reset to commit\n- **Logging**: Add comprehensive Git command logging to git.log\n\n### 🐛 Bug Fixes\n- **Blame**: Fix commit details not opening for boundary commits\n- **Blame**: Fix text readability and alternating row contrast in dark mode\n- **Global Branch**: Optimize rebuild triggers and fix Riverpod assertion errors\n- **Global Branch**: Check branch existence before checkout\n- **Config**: Resolve endless repository validation loop on startup\n- **Merge Dialog**: Add constraints to multi-line TextField to prevent layout errors\n\n### 🔧 Improvements\n- **Performance**: Optimize keyboard navigation and selection performance in changes view\n- **Diff Viewer**: Create unified diff viewer architecture\n- **Stashes**: Improve UI consistency and input field theming\n- **Error Handling**: Capture all Flutter errors and log them",
+      "commit": "af51b09"
+    },
+    {
+      "date": "2025-11-15T02:44:19Z",
+      "version": "0.110.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add Inter font to available fonts and set as default\n\n### 🐛 Bug Fixes\n- Use correct default font (JetBrains Mono) in splash screen\n\n### 🧹 Chores\n- Bump version to 0.109.0+1",
+      "commit": "b60f94e"
+    },
+    {
+      "date": "2025-11-14T18:28:42Z",
+      "version": "0.109.0+1",
+      "changelog": "# Changelog\n\n### 📝 Documentation\n- Fix HTML formatting warnings in updater.dart doc comments",
+      "commit": "c473d37"
+    },
+    {
+      "date": "2025-11-14T18:27:51Z",
+      "version": "0.108.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add checkbox multi-select for repositories with improved operation feedback\n- Add ESC key handling to BaseDialog for better keyboard navigation\n- Add success and dangerSecondary variants to BaseButton component\n\n### 🐛 Bug Fixes\n- Fix race conditions and improve batch repository operations in drag-drop functionality\n- Fix syntax error by removing extra closing parenthesis in git_output_dialog\n- Ensure dialog title text is readable in both light and dark themes\n- Suppress analyzer info warnings for BuildContext and deprecated Radio API\n\n### 🔧 Improvements\n- Migrate 17+ dialogs to new BaseDialog component for consistency\n- Move batch operations to app shell and simplify UI\n- Standardize repository icons and remove redundant toggles\n- Move 3-dot menu to far right and remove icon to standalone button in list view\n- Convert settings widget buttons to BaseButton for consistency\n- Clean up analyzer warnings and info messages\n\n### 🧹 Chores\n- Bump version to 0.107.0+1",
+      "commit": "0de941b"
+    },
+    {
+      "date": "2025-11-13T16:15:07Z",
+      "version": "0.107.0+1",
+      "changelog": "### 🐛 Bug Fixes\n\n- Call committerDateDisplay method with locale parameter in history",
+      "commit": "2870d7a"
+    },
+    {
+      "date": "2025-11-13T16:11:49Z",
+      "version": "0.106.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "840ae73"
+    },
+    {
+      "date": "2025-11-13T15:41:54Z",
+      "version": "0.105.0+1",
+      "changelog": "### 🔧 Improvements\n\n- Unify logging system to use centralized Logger service across the application\n- Consolidate updater logging to unified app.log file",
+      "commit": "840ae73"
+    },
+    {
+      "date": "2025-11-13T14:19:34Z",
+      "version": "0.104.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add timeago localization support for all languages\n\n### 🐛 Bug Fixes\n- Add comprehensive logging to diagnose changelog dialog show issues\n\n### 🧹 Chores\n- Bump version to 0.103.0+1",
+      "commit": "be70f11"
+    },
+    {
+      "date": "2025-11-13T14:05:10Z",
+      "version": "0.103.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Show release notes after auto-update regardless of settings state\n\n### 🔧 Improvements\n- Implement explicit use case behavior for changelog dialog display\n\n### 🧹 Chores\n- Bump version to 0.102.0+1",
+      "commit": "6504e26"
+    },
+    {
+      "date": "2025-11-13T13:46:23Z",
+      "version": "0.102.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Upload latest.json manifest to Azure Blob Storage\n\n### 🔧 Improvements\n- Align build steps with modular architecture\n\n### 🧹 Chores\n- Bump version to 0.101.0+1",
+      "commit": "e31dd78"
+    },
+    {
+      "date": "2025-11-13T13:31:49Z",
+      "version": "0.101.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Fix compilation errors in localization code",
+      "commit": "2dedfc6"
+    },
+    {
+      "date": "2025-11-13T13:18:13Z",
+      "version": "0.100.0+1",
+      "changelog": "# Changelog\n\n## 🐛 Bug Fixes\n\n- Add commit details and branches translations for all 8 supported languages\n- Replace hardcoded strings with proper localizations throughout the application\n- Skip version detection for diff tools that launch GUI windows\n- Correct build process total steps count from 13 to 12\n\n## 🔧 Improvements\n\n- Refactor diff tool handling to use VersionDetector for file properties without GUI launch\n\n## 🧹 Chores\n\n- Bump version to 0.99.0+1",
+      "commit": "e41f856"
+    },
+    {
+      "date": "2025-11-13T12:50:53Z",
+      "version": "0.99.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Make PDF generation mandatory in build process\n- Remove hardcoded paths in diff functionality\n- Add automatic version detection for diff operations\n\n### 📝 Documentation\n- Document PDF generation prerequisites\n\n### 🧹 Chores\n- Bump version to 0.98.0+1",
+      "commit": "4e9b7e6"
+    },
+    {
+      "date": "2025-11-13T11:30:37Z",
+      "version": "0.98.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Implement mandatory strict error handling for all build steps\n\n### 🐛 Bug Fixes\n- Add multiple PDF engine fallbacks and better error messages\n\n### 🔧 Improvements\n- Reorganize entire build system into universal-build folder structure\n- Modularize build system into focused lib/ components\n- Isolate build tracking to universal-build folder\n- Archive legacy builders and consolidate build scripts\n\n### 🧹 Chores\n- Bump version to 0.97.0+1",
+      "commit": "447c75c"
+    },
+    {
+      "date": "2025-11-13T10:35:13Z",
+      "version": "0.97.0+1",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add automatic PDF generation for README in releases\n- Clean up old updater logs before creating new one\n\n### 🔧 Improvements\n- Simplify PDF generation to use only cross-platform pandoc\n\n### 🧹 Chores\n- Bump version to 0.96.0+1",
+      "commit": "613f181"
+    },
+    {
+      "date": "2025-11-13T10:25:35Z",
+      "version": "0.96.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "4366358"
+    },
+    {
+      "date": "2025-11-13T10:24:43Z",
+      "version": "0.95.0+1",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.94.0+1",
+      "commit": "4366358"
+    },
+    {
+      "date": "2025-11-13T10:22:26Z",
+      "version": "0.94.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Skip locked updater executable during self-update process\n\n### 🧹 Chores\n- Bump version to 0.93.0+1",
+      "commit": "272ec53"
+    },
+    {
+      "date": "2025-11-13T10:16:15Z",
+      "version": "0.93.0+1",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.92.0+1",
+      "commit": "db773e3"
+    },
+    {
+      "date": "2025-11-13T10:11:36Z",
+      "version": "0.92.0+1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Remove win32 dependencies and fix universal build updater paths\n\n### 🔧 Improvements\n- Enable Windows build support\n\n### 🧹 Chores\n- Bump version to 0.91.0+1",
+      "commit": "c20c16b"
+    },
+    {
+      "version": "0.91.0+1",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.90.0+1",
+      "commit": "3da7026",
+      "date": "2025-11-13T00:20:17Z"
+    },
+    {
+      "version": "0.90.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "91c02f5",
+      "date": "2025-11-13T00:15:33Z"
+    },
+    {
+      "version": "0.89.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "91c02f5",
+      "date": "2025-11-13T00:12:08Z"
+    },
+    {
+      "version": "0.88.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "91c02f5",
+      "date": "2025-11-13T00:07:10Z"
+    },
+    {
+      "version": "0.87.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "91c02f5",
+      "date": "2025-11-13T00:04:42Z"
+    },
+    {
+      "version": "0.86.0+1",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "commit": "91c02f5",
+      "date": "2025-11-12T23:58:39Z"
+    },
+    {
+      "date": "2025-11-12T18:33:33Z",
+      "version": "0.85.0+1",
+      "commit": "8343ab2",
+      "changelog": "### 🧹 Chores\n\n- Bump version to 0.84.0+1"
+    },
+    {
+      "date": "2025-11-12T18:30:33Z",
+      "version": "0.84.0+1",
+      "commit": "94283b1",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Standardize Linux launcher naming in build process\n\n### 🧹 Chores\n- Auto-commit version changes during build"
+    },
+    {
+      "date": "2025-11-12T18:24:39Z",
+      "version": "0.83.0+1",
+      "commit": "85a3330",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n\n- **Updater**: Extract update to root directory instead of platform subdirectory\n- **Linux Launcher**: Properly detect missing libraries and show installation guide\n- **Update Process**: Eliminate popup windows and enable single-terminal update process"
+    },
+    {
+      "date": "2025-11-12T17:59:00Z",
+      "version": "0.82.0+1",
+      "commit": "56efa35",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T17:54:51Z",
+      "version": "0.81.0+1",
+      "commit": "56efa35",
+      "changelog": "### ✨ Features\n- Add force console logging for release builds to debug update failures"
+    },
+    {
+      "date": "2025-11-12T17:24:35Z",
+      "version": "0.80.0+1",
+      "commit": "2b937d8",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.79.0+1"
+    },
+    {
+      "date": "2025-11-12T17:20:05Z",
+      "version": "0.79.0+1",
+      "commit": "173f116",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Add missing shared_preferences dependency\n- Fix dialog layout issues\n\n### 🧹 Chores\n- Update changelog for version 0.78.0+1"
+    },
+    {
+      "date": "2025-11-12T17:10:02Z",
+      "version": "0.78.0+1",
+      "commit": "6ba2206",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Prevent update dialog from showing repeatedly and add dismiss option\n\n### 🧹 Chores\n- Bump version to 0.77.0+1"
+    },
+    {
+      "date": "2025-11-12T14:02:10Z",
+      "version": "0.77.0+1",
+      "commit": "4cf615b",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add Linux updater compilation and integration\n\n### 🐛 Bug Fixes\n- Fix Windows updater path for universal build structure"
+    },
+    {
+      "date": "2025-11-12T13:55:32Z",
+      "version": "0.76.0+1",
+      "commit": "8d4f138",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T13:52:18Z",
+      "version": "0.75.0+1",
+      "commit": "8d4f138",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Fix manifest file path resolution error in build process"
+    },
+    {
+      "date": "2025-11-12T13:48:29Z",
+      "version": "0.74.0+1",
+      "commit": "219dd8c",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Make manifest upload mandatory for auto-update in build process"
+    },
+    {
+      "date": "2025-11-12T13:44:39Z",
+      "version": "0.73.0+1",
+      "commit": "88f6433",
+      "changelog": "### ✨ Features\n- Add comprehensive auto-update system with dedicated updater executable"
+    },
+    {
+      "date": "2025-11-12T13:40:08Z",
+      "version": "0.72.0+1",
+      "commit": "a0ca5bf",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T13:04:48Z",
+      "version": "0.71.0+1",
+      "commit": "a0ca5bf",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T12:58:46Z",
+      "version": "0.70.0+1",
+      "commit": "a0ca5bf",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T12:50:24Z",
+      "version": "0.69.0+1",
+      "commit": "a0ca5bf",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T12:44:04Z",
+      "version": "0.68.0+1",
+      "commit": "a0ca5bf",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-12T12:23:15Z",
+      "version": "0.67.0+1",
+      "commit": "a0ca5bf",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add file picker for diff and merge tool selection with cross-platform support\n- Auto-copy error and warning messages to clipboard with visual indicator\n- Require manual dismissal for error and warning notifications\n- Add git validation warnings and improve merge conflict detection\n- Centralize font scaling for all buttons and menu items\n\n### 🐛 Bug Fixes\n- Prevent popup menu text from becoming too small with small font size setting\n- Fix section header text size in quick settings menu\n- Implement missing configure buttons for diff and merge tools\n- Ignore temporary Git lock files to prevent excessive command execution\n- Fix build errors from missing import and leftover notification calls\n\n### 🔧 Improvements\n- Remove success and info notifications, keep only error/warning messages for reduced noise\n\n### 🧹 Chores\n- Update watcher package from 1.1.0 to 1.1.4"
+    },
+    {
+      "date": "2025-11-11T21:53:06Z",
+      "version": "0.65.0+1",
+      "commit": "4527804",
+      "changelog": "### 🐛 Bug Fixes\n\n- Fix validation logic for diff/merge tools settings\n- Add version display for diff/merge tools"
+    },
+    {
+      "date": "2025-11-11T21:40:10Z",
+      "version": "0.64.0+1",
+      "commit": "8c0fee0",
+      "changelog": "### 🐛 Bug Fixes\n\n- Pre-select current tools in detection dialog and set both diff/merge tools in settings"
+    },
+    {
+      "date": "2025-11-11T21:29:09Z",
+      "version": "0.63.0+1",
+      "commit": "93ec26c",
+      "changelog": "### ✨ Features\n- Improve tool configuration with dedicated diff/merge tool sections in settings"
+    },
+    {
+      "date": "2025-11-11T21:08:21Z",
+      "version": "0.62.0+1",
+      "commit": "4cfad07",
+      "changelog": "### 🐛 Bug Fixes\n\n- Change environment variable approach to user-configurable settings for WSL2"
+    },
+    {
+      "date": "2025-11-11T20:55:55Z",
+      "version": "0.61.0+1",
+      "commit": "51aa889",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add comprehensive tool detection for Linux systems\n- Add WSL2-specific optimizations"
+    },
+    {
+      "date": "2025-11-11T20:43:18Z",
+      "version": "0.60.0+1",
+      "commit": "0ac2d94",
+      "changelog": "### ✨ Features\n\n- Add tool auto-detection dialog for easier setup on Linux"
+    },
+    {
+      "date": "2025-11-11T20:39:41Z",
+      "version": "0.59.0+1",
+      "commit": "caa71c4",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-11T20:29:18Z",
+      "version": "0.58.0+1",
+      "commit": "caa71c4",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-11T20:27:20Z",
+      "version": "0.57.0+1",
+      "commit": "caa71c4",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-11T20:17:30Z",
+      "version": "0.56.0+1",
+      "commit": "caa71c4",
+      "changelog": "### ✨ Features\n\n- Add immediate fail-fast error handling with detailed output to build process"
+    },
+    {
+      "date": "2025-11-11T20:10:44Z",
+      "version": "0.55.0+1",
+      "commit": "ab7e937",
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Use correct `Logger.warning` method name instead of deprecated `Logger.warn` in diff functionality\n\n### 🧹 Chores\n- Update version to 0.54.0+1 and changelog"
+    },
+    {
+      "date": "2025-11-11T20:05:45Z",
+      "version": "0.54.0+1",
+      "commit": "b528d51",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add comprehensive logging for diff tool detection\n- Implement smart diff tool detection for Linux using git config and package managers\n\n### 🐛 Bug Fixes\n- Properly isolate Windows and Linux builds to prevent cross-platform contamination"
+    },
+    {
+      "date": "2025-11-11T19:57:01Z",
+      "version": "0.53.0+1",
+      "commit": "49bd606",
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Add complete release folder cleanup before builds"
+    },
+    {
+      "date": "2025-11-11T19:50:37Z",
+      "version": "0.52.0+1",
+      "commit": "ba074bd",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-11T19:50:16Z",
+      "changelog": "## Changes\n\n- fix(linux): Fix platform compatibility issues\n- feat(linux): Add automatic dependency detection and installation guide",
+      "commit": "ba074bd",
+      "version": "0.51.0+1"
+    },
+    {
+      "date": "2025-11-11T19:31:35Z",
+      "version": "0.50.0+1",
+      "commit": "6159f42",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add Azure REST API fallback support\n\n### 🔧 Improvements\n- Enhance changelog generation and structure"
+    },
+    {
+      "date": "2025-11-11T19:06:15Z",
+      "version": "0.49.0+1",
+      "commit": "0579955",
+      "changelog": "## Changes\n\nNo changes since last build."
+    },
+    {
+      "date": "2025-11-11T15:59:40Z",
+      "version": "0.48.0+1",
+      "commit": "0579955",
+      "changelog": "### ✨ Features\n- Implement event-driven repository validation\n\n### 🐛 Bug Fixes\n- Fix UTF-8 encoding issues"
+    },
+    {
+      "date": "2025-11-11T14:41:19Z",
+      "version": "0.47.0+1",
+      "commit": "b3780ec",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Implement comprehensive text rendering system with specialized label components\n- Complete text rendering refactor across all dialogs and widgets\n- Implement parallel Windows/Linux builds with Docker isolation\n\n### 🐛 Bug Fixes\n- Clean up root-level *.obj files after launcher compilation\n\n### 🧹 Chores\n- Add build artifacts to .gitignore"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# Use local base image (built from Dockerfile.linux-base)
+FROM flutter-gitui-linux-base:latest
+
+WORKDIR /app
+
+# Copy source code (builds completely isolated from Windows)
+COPY . .
+
+# Build command - artifacts go to /app/build which gets copied out
+# Create final structure: main executable at root, libs and data in linux/ subdirectory
+CMD ["sh", "-c", "flutter pub get && flutter build linux --release --verbose && \
+     cd release/updater && dart pub get && dart compile exe updater.dart -o updater && cd ../.. && \
+     cd build/linux/x64/release && \
+     mkdir -p universal/linux && \
+     mv bundle/flutter_gitui universal/flutter-gitui && \
+     mv bundle/lib universal/linux/ && \
+     mv bundle/data universal/linux/ && \
+     if [ -f /app/release/updater/updater ]; then cp /app/release/updater/updater universal/linux/updater && chmod +x universal/linux/updater && echo 'Updater compiled and copied'; fi && \
+     chmod +x universal/flutter-gitui"]

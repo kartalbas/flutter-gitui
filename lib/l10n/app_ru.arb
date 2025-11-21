@@ -1,0 +1,2053 @@
+{
+  "@@locale": "ru",
+  "appTitle": "Flutter GitUI",
+  "workspaces": "Рабочие области",
+  "repositories": "Репозитории",
+  "changes": "Изменения",
+  "history": "История",
+  "browse": "Обзор",
+  "branches": "Ветки",
+  "remotes": "Удалённые",
+  "stashes": "Stash",
+  "tags": "Теги",
+  "settings": "Настройки",
+  "cancel": "Отмена",
+  "ok": "ОК",
+  "save": "Сохранить",
+  "delete": "Удалить",
+  "create": "Создать",
+  "close": "Закрыть",
+  "done": "Готово",
+  "refresh": "Обновить",
+  "search": "Поиск",
+  "browse_": "Обзор",
+  "apply": "Применить",
+  "checkout": "Переключить",
+  "push": "Отправить",
+  "pull": "Получить",
+  "repositoriesSelected": "Выбрано: {count}",
+  "@repositoriesSelected": {
+    "description": "Count of selected repositories",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "checkoutToMain": "Переключить на Main",
+  "checkoutAllReposTooltip": "Переключить все выбранные репозитории на их главную ветку",
+  "allReposMustHaveCleanStatus": "Все выбранные репозитории должны иметь чистый статус",
+  "pullAllReposTooltip": "Получить изменения для всех выбранных репозиториев",
+  "createBranchTooltip": "Создать новую ветку в выбранном репозитории",
+  "selectOnlyOneRepoForBranch": "Выберите только один репозиторий для создания ветки",
+  "createPr": "Создать PR",
+  "createPrTooltip": "Создать pull request для выбранного репозитория",
+  "selectOnlyOneRepoForPr": "Выберите только один репозиторий для создания PR",
+  "fetch": "Загрузить",
+  "merge": "Объединить",
+  "commit": "Зафиксировать",
+  "stash": "Отложить",
+  "diff": "Различия",
+  "pop": "Извлечь",
+  "drop": "Удалить",
+  "branch": "Ветка",
+  "noRepositoryOpen": "Репозиторий не открыт",
+  "openRepositoryToContinue": "Откройте репозиторий для продолжения",
+  "errorLoadingData": "Ошибка загрузки {dataType}",
+  "@errorLoadingData": {
+    "description": "Generic error loading message",
+    "placeholders": {
+      "dataType": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "error": "Ошибка",
+  "retry": "Повторить",
+  "selectedCount": "Выбрано: {count}",
+  "@selectedCount": {
+    "description": "Count of selected items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "exitSelection": "Выйти из режима выбора",
+  "selectAll": "Выбрать всё",
+  "clearSelection": "Очистить выбор",
+  "clearAll": "Очистить всё",
+  "resetAll": "Сбросить всё",
+  "deselectAll": "Снять выбор со всего",
+  "searchPlaceholder": "Поиск {itemType}...",
+  "@searchPlaceholder": {
+    "description": "Search field placeholder",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      }
+    }
+  },
+  "regexSearchPlaceholder": "Поиск по регулярному выражению...",
+  "itemCount": "{count, plural, =1{{count} {itemType}} other{{count} {itemTypePlural}}}",
+  "@itemCount": {
+    "description": "Count of items with proper pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "itemType": {
+        "type": "String",
+        "example": "Tag"
+      },
+      "itemTypePlural": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "ofTotal": "из {total}",
+  "@ofTotal": {
+    "description": "Showing count of total",
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "noMatchesFound": "Нет {itemType}, соответствующих \"{query}\"",
+  "@noMatchesFound": {
+    "description": "Empty search results message",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      },
+      "query": {
+        "type": "String",
+        "example": "search term"
+      }
+    }
+  },
+  "createTag": "Создать тег",
+  "selectTags": "Выбрать теги",
+  "fetchTags": "Загрузить теги",
+  "advancedFilters": "Расширенные фильтры",
+  "sortTags": "Сортировать теги",
+  "sortNameAZ": "Имя (А-Я)",
+  "sortNameZA": "Имя (Я-А)",
+  "sortDateNewest": "Дата (Новые)",
+  "sortDateOldest": "Дата (Старые)",
+  "sortVersionLowHigh": "Версия (По возрастанию)",
+  "sortVersionHighLow": "Версия (По убыванию)",
+  "groupTags": "Группировать теги",
+  "noGrouping": "Без группировки",
+  "byPrefix": "По префиксу",
+  "byVersion": "По версии",
+  "byAuthor": "По автору",
+  "byDate": "По дате",
+  "allWithCount": "Все ({count})",
+  "annotatedWithCount": "С аннотацией ({count})",
+  "lightweightWithCount": "Облегчённые ({count})",
+  "pushCount": "Отправить {count}",
+  "syncStatus": "Статус синхронизации",
+  "tagsNotPushed": "{count, plural, =1{{count} тег не отправлен} other{{count} тегов не отправлено}}",
+  "tagsAvailableToFetch": "{count, plural, =1{{count} тег доступен} other{{count} тегов доступно}}",
+  "pushAll": "Отправить всё",
+  "fetchAll": "Загрузить всё",
+  "noTags": "Нет тегов",
+  "createTagToMarkHistory": "Создайте тег для отметки важных точек в истории",
+  "authorFilter": "Автор: {author}",
+  "regex": "Regex",
+  "pushTagsCount": "{count, plural, =1{Отправить {count} тег} other{Отправить {count} тегов}}",
+  "deleteTagsCount": "{count, plural, =1{Удалить {count} тег} other{Удалить {count} тегов}}",
+  "dateRange": "Диапазон дат",
+  "authorTagger": "Автор / Создатель тега",
+  "allAuthors": "Все авторы",
+  "noAuthorsFound": "Авторы в тегах не найдены",
+  "useRegularExpressions": "Использовать регулярные выражения",
+  "enableRegexMatching": "Включить сопоставление с регулярными выражениями в поиске",
+  "today": "Сегодня",
+  "lastWeek": "На прошлой неделе",
+  "lastMonth": "В прошлом месяце",
+  "lastYear": "В прошлом году",
+  "customRange": "Пользовательский диапазон",
+  "allTime": "За всё время",
+  "createTagDialogTitle": "Создать тег",
+  "createTagDescription": "Создать новый тег на текущем HEAD",
+  "tagName": "Имя тега",
+  "tagNameHint": "v1.0.0",
+  "annotatedTag": "Тег с аннотацией",
+  "includeMessageWithTag": "Включить сообщение с тегом",
+  "message": "Сообщение",
+  "releaseNotesPlaceholder": "Заметки о выпуске или описание...",
+  "tagCreatedSuccess": "Тег \"{tagName}\" успешно создан",
+  "tagCreatedError": "Ошибка создания тега: {error}",
+  "tagsFetchedSuccess": "Теги успешно загружены",
+  "tagsFetchedError": "Ошибка загрузки тегов: {error}",
+  "noRemotesConfigured": "Удалённые репозитории не настроены",
+  "selectRemote": "Выбрать удалённый репозиторий",
+  "allTagsPushedSuccess": "Все теги отправлены в {remoteName}",
+  "pushTagsError": "Ошибка отправки тегов: {error}",
+  "pushingTags": "Отправка тегов",
+  "pushedTagToRemote": "{tagName} отправлен в {remoteName}",
+  "tagsPushedSuccess": "{count, plural, =1{{count} тег отправлен в {remoteName}} other{{count} тегов отправлено в {remoteName}}}",
+  "deleteTagsDialogTitle": "Удалить теги?",
+  "deleteTagsConfirmation": "Удалить {count, plural, =1{{count} тег} other{{count} тегов}}?\n\nЭто действие нельзя отменить.",
+  "tagsToDelete": "Теги для удаления:",
+  "alsoDeleteFromRemote": "Также удалить с удалённого репозитория",
+  "deleteFromRemoteDescription": "Удалить теги из удалённого репозитория, чтобы они не вернулись при загрузке",
+  "deletingTagsLocalAndRemote": "Удаление тегов (Локально и удалённо)",
+  "deletingTagsLocal": "Удаление тегов",
+  "deletedTagLocally": "{tagName} удалён локально",
+  "deletedTagFromRemote": "{tagName} удалён из {remoteName}",
+  "tagsDeletedSuccess": "{count, plural, =1{{count} тег удалён} other{{count} тегов удалено}}",
+  "deleteTagsError": "Ошибка удаления тегов: {error}",
+  "localBadge": "ЛОКАЛЬНЫЙ",
+  "viewDiff": "Показать различия",
+  "type": "Тип",
+  "annotated": "С аннотацией",
+  "lightweight": "Облегчённый",
+  "tagger": "Создатель тега",
+  "date": "Дата",
+  "checkoutTagDialogTitle": "Переключиться на тег?",
+  "checkoutTagConfirmation": "Переключиться на тег \"{tagName}\"?\n\nЭто переведёт вас в состояние отделённого HEAD.",
+  "checkedOutTagSuccess": "Переключено на тег \"{tagName}\"",
+  "checkoutTagError": "Ошибка переключения на тег: {error}",
+  "tagPushedSuccess": "Тег \"{tagName}\" отправлен в {remoteName}",
+  "pushTagError": "Ошибка отправки тега: {error}",
+  "deleteTagDialogTitle": "Удалить тег?",
+  "deletingTagLocalAndRemote": "Удаление тега (Локально и удалённо)",
+  "deletingTag": "Удаление тега",
+  "deletingTagLocally": "Удаление \"{tagName}\" локально...",
+  "deletingTagFromRemote": "Удаление \"{tagName}\" из {remoteName}...",
+  "updatingList": "Обновление списка...",
+  "tagDeletedSuccess": "Тег \"{tagName}\" удалён",
+  "deleteTagError": "Ошибка удаления тега: {error}",
+  "thisWeek": "На этой неделе",
+  "thisMonth": "В этом месяце",
+  "thisYear": "В этом году",
+  "yearsAgo": "{count, plural, =1{1 год назад} other{{count} лет назад}}",
+  "nonVersioned": "Без версии",
+  "groupTagCount": "{count, plural, =1{{count} тег} other{{count} тегов}}",
+  "noStashes": "Нет отложенных изменений",
+  "createStashToSaveWork": "Создайте stash для сохранения вашей работы",
+  "createStash": "Создать stash",
+  "openRepositoryToManageStashes": "Откройте репозиторий для управления stash",
+  "stashCount": "{count, plural, =1{{count} Stash} other{{count} Stash}}",
+  "createStashDialogTitle": "Создать stash",
+  "saveChangesToStash": "Сохранить текущие изменения в stash",
+  "messageOptional": "Сообщение (необязательно)",
+  "describeWorkPlaceholder": "Опишите, над чем вы работали...",
+  "stashAllFiles": "Отложить все файлы",
+  "toggleSelectSpecificFiles": "Переключить для выбора конкретных файлов",
+  "selectFilesToStash": "Выбрать файлы для stash ({selected}/{total})",
+  "noFilesToStash": "Нет файлов для stash",
+  "includeUntrackedFiles": "Включить неотслеживаемые файлы",
+  "keepStagedChanges": "Сохранить проиндексированные изменения",
+  "keepChangesInIndex": "Сохранить изменения в индексе после stash",
+  "stashCreatedSuccess": "Stash успешно создан",
+  "createStashError": "Ошибка создания stash: {error}",
+  "clearAllStashesDialogTitle": "Очистить все stash?",
+  "clearAllStashesConfirmation": "Это навсегда удалит все stash.\n\nЭто действие нельзя отменить.",
+  "allStashesClearedSuccess": "Все stash очищены",
+  "clearStashesError": "Ошибка очистки stash: {error}",
+  "createBranch": "Создать ветку",
+  "appliedStashSuccess": "{stashRef} применён",
+  "applyStashError": "Ошибка применения stash: {error}",
+  "poppedStashSuccess": "{stashRef} извлечён",
+  "popStashError": "Ошибка извлечения stash: {error}",
+  "loadDiffError": "Ошибка загрузки различий: {error}",
+  "createBranchFromStash": "Создать ветку из stash",
+  "createBranchFromStashDescription": "Создать новую ветку из {stashRef}",
+  "branchName": "Имя ветки",
+  "createdBranchFromStashSuccess": "Ветка \"{branchName}\" создана из {stashRef}",
+  "createBranchError": "Ошибка создания ветки: {error}",
+  "dropStashDialogTitle": "Удалить stash?",
+  "dropStashConfirmation": "Удалить {stashRef}?\n\nЭто действие нельзя отменить.",
+  "droppedStashSuccess": "{stashRef} удалён",
+  "dropStashError": "Ошибка удаления stash: {error}",
+  "stashDiffDialogTitle": "Различия stash - {stashRef}",
+  "noChanges": "Нет изменений",
+  "cloneRepository": "Клонировать репозиторий",
+  "cloneRepositoryDescription": "Клонировать Git-репозиторий из URL",
+  "repositoryUrl": "URL репозитория",
+  "repositoryUrlHint": "https://github.com/user/repo.git",
+  "destinationPath": "Путь назначения",
+  "destinationPathHint": "C:\\Users\\...\\repo",
+  "branchOptional": "Ветка (необязательно)",
+  "mainBranchHint": "main",
+  "shallowClone": "Поверхностное клонирование",
+  "shallowCloneDescription": "Клонировать только последнюю историю для экономии места",
+  "depth": "Глубина:",
+  "cloningRepositoryProgress": "Клонирование репозитория... Это может занять некоторое время.",
+  "clone": "Клонировать",
+  "directorySelectionNotAvailableInBrowser": "Выбор каталога недоступен в веб-браузерах",
+  "selectDestinationForClone": "Выбрать место назначения для клонирования",
+  "pleaseEnterRepositoryUrl": "Пожалуйста, введите URL репозитория",
+  "pleaseEnterDestinationPath": "Пожалуйста, введите путь назначения",
+  "repositoryClonedSuccess": "Репозиторий успешно клонирован в {path}",
+  "repositoryClonedButFailedToOpen": "Репозиторий клонирован, но не удалось открыть",
+  "cloneRepositoryError": "Ошибка клонирования репозитория: {error}",
+  "reference": "Ссылка",
+  "created": "Создано",
+  "openRepositoryToManageTags": "Откройте репозиторий для управления тегами",
+  "abort": "Прервать",
+  "abortIfFastForwardNotPossible": "Прервать, если быстрая перемотка невозможна",
+  "abortToCancelAndReturnToOriginalState": "Прервать, чтобы отменить и вернуться к исходному состоянию",
+  "add": "Добавить",
+  "addRemote": "Добавить удалённый репозиторий",
+  "addRemoteDialog": "Добавить удалённый репозиторий",
+  "addRemoteError": "Не удалось добавить удалённый репозиторий: {error}",
+  "@addRemoteError": {
+    "description": "Error message when adding remote fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addRemoteToCollaborate": "Добавьте удалённый репозиторий для совместной работы",
+  "addRepositoryToGetStarted": "Добавьте репозиторий для начала работы",
+  "addedRemoteSuccess": "Удалённый репозиторий \"{remoteName}\" добавлен",
+  "@addedRemoteSuccess": {
+    "description": "Success message when remote is added",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "advancedFiltersDialog": "Расширенные фильтры",
+  "advancedSearch": "Расширенный поиск",
+  "advancedSearchButton": "Поиск",
+  "alwaysCreateMergeCommit": "Всегда создавать коммит слияния",
+  "amend": "Исправить",
+  "amendLastCommitConfirm": "Это исправит последний коммит текущими проиндексированными изменениями. Сообщение коммита останется прежним. Продолжить?",
+  "amendLastCommitDialog": "Исправить последний коммит",
+  "appearance": "Внешний вид",
+  "approximatelyStepsRemaining": "Примерно {stepsRemaining} шагов осталось",
+  "@approximatelyStepsRemaining": {
+    "description": "Progress message for bisect",
+    "placeholders": {
+      "stepsRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "authorLabel": "Автор",
+  "autoFetch": "Автоматическая загрузка",
+  "autoFetchDescription": "Автоматически загружать из удалённого репозитория периодически",
+  "autoFetchInterval": "Интервал автоматической загрузки",
+  "autoFetchIntervalMinutes": "{minutes} минут",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "available": "Доступно",
+  "bad": "Плохой",
+  "badCommitWhereBugIsPresent": "Плохой коммит (где ошибка ПРИСУТСТВУЕТ)",
+  "badCommits": "Плохих коммитов: {count}",
+  "@badCommits": {
+    "description": "Label for bad commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bareRepository": "Голый репозиторий",
+  "bareRepositoryDescription": "Создать репозиторий без рабочего каталога (для серверов)",
+  "batchOperationProgressDialogTitle": "{title}",
+  "@batchOperationProgressDialogTitle": {
+    "description": "Title for batch operation progress dialog",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "behavior": "Поведение",
+  "bisectComplete": "Bisect завершён!",
+  "bisectHelpsFindCommitThatIntroducedBug": "Bisect помогает найти коммит, который внёс ошибку, выполняя бинарный поиск.",
+  "bisectHistory": "История Bisect",
+  "bisectInProgress": "Bisect выполняется",
+  "bisectReset": "Bisect сброшен",
+  "bisectStarted": "Bisect запущен - протестируйте текущий коммит",
+  "blame": "Blame",
+  "branchNameCannotBeEmpty": "Имя ветки не может быть пустым",
+  "branchNameHint": "например, user-authentication",
+  "branchNameInvalidCharacters": "Имя ветки содержит недопустимые символы",
+  "branchNameLabel": "Имя ветки",
+  "branchPointerWillMove": "Это переместит указатель ветки на этот коммит.",
+  "branchPrefixLabel": "Префикс ветки:",
+  "branchSwitchFailed": "Не удалось переключить ветку",
+  "branchToMerge": "Ветка для слияния",
+  "browseExistingRepository": "Обзор существующего репозитория",
+  "browseForDiffTool": "Выбрать инструмент сравнения",
+  "browseForMergeTool": "Выбрать инструмент слияния",
+  "bugfixPrefix": "Исправление",
+  "cannotSquashRootCommit": "Невозможно объединить: Самый старый выбранный коммит является корневым коммитом (нет родительского коммита)",
+  "caseSensitive": "Учитывать регистр",
+  "checkoutAfterCreationDescription": "Переключиться на новую ветку сразу",
+  "checkoutAfterCreationLabel": "Переключиться после создания",
+  "checkoutTagConfirm": "Переключиться на тег \"{tagName}\"?\n\nЭто переведёт вас в состояние отделённого HEAD.",
+  "@checkoutTagConfirm": {
+    "description": "Confirmation message for checking out tag",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutTagDialog": "Переключиться на тег?",
+  "cherryPickCommitDialog": "Cherry-pick коммита",
+  "cherryPickCommitInstructions": "Чтобы выполнить cherry-pick коммита:\n\n1. Перейдите на вкладку История\n2. Щёлкните правой кнопкой мыши на коммите, который хотите применить\n3. Выберите \"Cherry-pick этот коммит\"\n\nЭто применит изменения из этого коммита к вашей текущей ветке.",
+  "cherryPickFailed": "Cherry-pick не удался: {error}",
+  "@cherryPickFailed": {
+    "description": "Error message when cherry-pick fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cherryPickedSuccess": "Cherry-pick выполнен для {count, plural, =1{{count} коммита} other{{count} коммитов}} успешно",
+  "@cherryPickedSuccess": {
+    "description": "Success message after cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickingCommits": "Выполняется cherry-pick {count, plural, =1{{count} коммита} other{{count} коммитов}}...",
+  "@cherryPickingCommits": {
+    "description": "Progress message when cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseResetMode": "Выберите режим сброса:",
+  "clean": "Очистить",
+  "cleanWorkingDirectoryConfirm": "Это безвозвратно удалит все неотслеживаемые файлы и каталоги из вашего рабочего каталога.\n\nВнимание: Эту операцию нельзя отменить!\n\nВы хотите продолжить?",
+  "cleanWorkingDirectoryDialog": "Очистить рабочий каталог",
+  "clear": "Очистить",
+  "clearAllStashesConfirm": "Это безвозвратно удалит все stash.\n\nЭто действие нельзя отменить.",
+  "clearAllStashesDialog": "Очистить все stash?",
+  "clearFilters": "Очистить фильтры ({count})",
+  "@clearFilters": {
+    "description": "Clear filters button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearFiltersButton": "Очистить фильтры",
+  "clearLog": "Очистить журнал",
+  "clearSearch": "Очистить поиск",
+  "cloneFromRemoteUrl": "Клонировать из удалённого URL",
+  "cloneGitRepositoryFromUrl": "Клонировать Git-репозиторий из URL",
+  "cloningRepository": "Клонирование репозитория... Это может занять некоторое время.",
+  "closeRepository": "Закрыть репозиторий",
+  "collapse": "Свернуть",
+  "collapseAll": "Свернуть всё",
+  "colorScheme": "Цветовая схема",
+  "colorSchemeBlue": "Синий",
+  "colorSchemeBlueGrey": "Сине-серый",
+  "colorSchemeDeepOrange": "Тёмно-оранжевый",
+  "colorSchemeDeepPurple": "Тёмно-фиолетовый",
+  "colorSchemeGreen": "Зелёный",
+  "colorSchemeIndigo": "Индиго",
+  "colorSchemePink": "Розовый",
+  "colorSchemePurple": "Фиолетовый",
+  "colorSchemeRed": "Красный",
+  "colorSchemeTeal": "Бирюзовый",
+  "colorSchemeUpdated": "Цветовая схема обновлена",
+  "combineAllCommitsIntoSingleCommit": "Объединить все коммиты в один коммит",
+  "commandAmendLastCommit": "Исправить последний коммит",
+  "commandAmendLastCommitDesc": "Исправить последний коммит новыми изменениями",
+  "commandApplyStash": "Применить Stash",
+  "commandApplyStashDesc": "Применить stash без его удаления",
+  "commandCategoryAdvanced": "Расширенные",
+  "commandCategoryBranches": "Ветки",
+  "commandCategoryChanges": "Изменения и коммиты",
+  "commandCategoryHistory": "История и различия",
+  "commandCategoryRemotes": "Удалённые",
+  "commandCategoryRepository": "Репозиторий",
+  "commandCategorySettings": "Настройки",
+  "commandCategoryStashes": "Stash",
+  "commandCategorySubmodules": "Подмодули",
+  "commandCategoryTags": "Теги",
+  "commandCheckoutBranch": "Переключить ветку",
+  "commandCheckoutBranchDesc": "Переключиться на другую ветку",
+  "commandCherryPickCommit": "Cherry-pick коммита",
+  "commandCherryPickCommitDesc": "Применить коммит из другой ветки",
+  "commandCleanWorkingDirectory": "Очистить рабочий каталог",
+  "commandCleanWorkingDirectoryDesc": "Удалить неотслеживаемые файлы",
+  "commandCloneRepository": "Клонировать репозиторий",
+  "commandCloneRepositoryDesc": "Клонировать репозиторий из URL",
+  "commandCommitChanges": "Зафиксировать изменения",
+  "commandCommitChangesDesc": "Зафиксировать проиндексированные изменения в репозиторий",
+  "commandCompareBranches": "Сравнить ветки",
+  "commandCompareBranchesDesc": "Сравнить две ветки",
+  "commandConfigureDiffTools": "Настроить инструменты сравнения",
+  "commandConfigureDiffToolsDesc": "Настроить внешние инструменты сравнения и слияния",
+  "commandCopiedToClipboard": "Команда скопирована в буфер обмена",
+  "commandCreateBranch": "Создать ветку",
+  "commandCreateBranchDesc": "Создать новую ветку",
+  "commandCreateTag": "Создать тег",
+  "commandCreateTagDesc": "Создать новый тег",
+  "commandDeleteBranch": "Удалить ветку",
+  "commandDeleteBranchDesc": "Удалить локальную ветку",
+  "commandDeleteTag": "Удалить тег",
+  "commandDeleteTagDesc": "Удалить существующий тег",
+  "commandDiscardAllChanges": "Отменить все изменения",
+  "commandDiscardAllChangesDesc": "Отменить все незафиксированные изменения",
+  "commandFetchFromRemote": "Загрузить из удалённого репозитория",
+  "commandFetchFromRemoteDesc": "Загрузить изменения из удалённого репозитория",
+  "commandInitializeRepository": "Инициализировать репозиторий",
+  "commandInitializeRepositoryDesc": "Создать новый Git-репозиторий",
+  "commandManageRemotes": "Управление удалёнными репозиториями",
+  "commandManageRemotesDesc": "Добавить, удалить или изменить удалённые репозитории",
+  "commandMergeBranch": "Объединить ветку",
+  "commandMergeBranchDesc": "Объединить другую ветку с текущей",
+  "commandOpenRepository": "Открыть репозиторий",
+  "commandOpenRepositoryDesc": "Открыть существующий локальный репозиторий",
+  "commandOpenSettings": "Открыть настройки",
+  "commandOpenSettingsDesc": "Настроить параметры приложения",
+  "commandPaletteTooltip": "Палитра команд (Ctrl+K)",
+  "commandPopStash": "Извлечь Stash",
+  "commandPopStashDesc": "Применить и удалить последний stash",
+  "commandPullChanges": "Получить изменения",
+  "commandPullChangesDesc": "Получить изменения из удалённого репозитория (fetch + merge)",
+  "commandPullWithRebase": "Получить с перебазированием",
+  "commandPullWithRebaseDesc": "Получить изменения и выполнить перебазирование вместо слияния",
+  "commandPushChanges": "Отправить изменения",
+  "commandPushChangesDesc": "Отправить коммиты в удалённый репозиторий",
+  "commandPushTag": "Отправить тег",
+  "commandPushTagDesc": "Отправить тег в удалённый репозиторий",
+  "commandRebaseBranch": "Перебазировать ветку",
+  "commandRebaseBranchDesc": "Перебазировать текущую ветку на другую",
+  "commandRenameBranch": "Переименовать ветку",
+  "commandRenameBranchDesc": "Переименовать текущую ветку",
+  "commandResetToCommit": "Сбросить до коммита",
+  "commandResetToCommitDesc": "Сбросить текущую ветку до определённого коммита",
+  "commandRevertCommit": "Отменить коммит",
+  "commandRevertCommitDesc": "Создать новый коммит, отменяющий предыдущий коммит",
+  "commandStageAllFiles": "Проиндексировать все файлы",
+  "commandStageAllFilesDesc": "Проиндексировать все изменённые файлы для коммита",
+  "commandStartBisect": "Запустить Bisect",
+  "commandStartBisectDesc": "Начать бинарный поиск коммита с ошибкой",
+  "commandStashChanges": "Отложить изменения",
+  "commandStashChangesDesc": "Сохранить изменения на потом без коммита",
+  "commandUnstageAllFiles": "Убрать из индекса все файлы",
+  "commandUnstageAllFilesDesc": "Убрать из индекса все проиндексированные файлы",
+  "commandViewAllStashes": "Посмотреть все Stash",
+  "commandViewAllStashesDesc": "Просмотреть и управлять всеми stash",
+  "commandViewCommitHistory": "Посмотреть историю коммитов",
+  "commandViewCommitHistoryDesc": "Просмотреть граф истории коммитов",
+  "commandViewFileHistory": "Посмотреть историю файла",
+  "commandViewFileHistoryDesc": "Просмотреть историю определённого файла",
+  "commandViewReflog": "Посмотреть Reflog",
+  "commandViewReflogDesc": "Просмотреть журнал ссылок",
+  "commitHashLabel": "Хеш коммита",
+  "commitDetails": "Детали коммита",
+  "commitMessage": "Сообщение коммита",
+  "additionalDetails": "Дополнительные детали",
+  "show": "Показать",
+  "hide": "Скрыть",
+  "name": "Имя",
+  "hash": "Хеш",
+  "parent": "Родитель",
+  "parents": "Родители",
+  "references": "Ссылки",
+  "localTab": "Локальные",
+  "remoteTab": "Удалённые",
+  "commitMessageCannotBeEmpty": "Сообщение коммита не может быть пустым",
+  "commitSkipped": "Коммит пропущен",
+  "commits": "Коммиты",
+  "commitsHint": "100",
+  "commitsSquashedSuccess": "Коммиты успешно объединены",
+  "committerLabel": "Фиксатор",
+  "completed": "Завершено",
+  "configureDiffMergeTools": "Настроить инструменты сравнения/слияния",
+  "configureYourPreferredTools": "Настройте предпочитаемые инструменты для сравнения и слияния файлов. Обнаружено инструментов: {toolCount}.",
+  "@configureYourPreferredTools": {
+    "description": "Info banner in diff tools config dialog",
+    "placeholders": {
+      "toolCount": {
+        "type": "int"
+      }
+    }
+  },
+  "confirm": "Подтвердить",
+  "confirmDelete": "Подтвердить удаление",
+  "confirmDeleteDescription": "Показывать подтверждение перед удалением веток",
+  "confirmForcePush": "Подтвердить принудительную отправку",
+  "confirmForcePushDescription": "Показывать подтверждение перед принудительной отправкой",
+  "confirmPush": "Подтвердить отправку",
+  "confirmPushDescription": "Показывать подтверждение перед отправкой",
+  "conflictsDetected": "Обнаружены конфликты",
+  "continueOperation": "Продолжить",
+  "createAsDraftLabel": "Создать как черновик",
+  "createBranchButton": "Создать ветку",
+  "createBranchDialogTitle": "Создать ветку",
+  "createNewGitRepository": "Создать новый Git-репозиторий в каталоге",
+  "createNewTagAtHead": "Создать новый тег на текущем HEAD",
+  "createPRButton": "Создать PR",
+  "createProjectButton": "Создать",
+  "createPullRequestDialogTitle": "Создать Pull Request",
+  "createStashDialog": "Создать Stash",
+  "createStashToSaveWorkInProgress": "Создайте stash для сохранения текущей работы",
+  "createTagDialog": "Создать тег",
+  "createTagDialogDescription": "Создайте тег для отметки важной точки в истории репозитория.",
+  "createWorkspaceToOrganize": "Создайте рабочую область для организации ваших репозиториев",
+  "currentBranch": "Текущая ветка",
+  "currentCommit": "Текущий коммит",
+  "customMergeMessage": "Пользовательское сообщение слияния",
+  "customPrefix": "Пользовательский",
+  "customPrefixHelper": "Должен заканчиваться на /",
+  "customPrefixHint": "например, experiment/",
+  "customPrefixLabel": "Пользовательский префикс",
+  "customPrefixMustEndWithSlash": "Пользовательский префикс должен заканчиваться на /",
+  "dateRangeSection": "Диапазон дат",
+  "defaultCommitLimit": "Лимит коммитов по умолчанию",
+  "defaultCommitLimitDescription": "Загружать {count} коммитов по умолчанию",
+  "@defaultCommitLimitDescription": {
+    "description": "Subtitle for default commit limit setting",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "defaultUserEmail": "Email пользователя по умолчанию",
+  "defaultUserName": "Имя пользователя по умолчанию",
+  "deleteBranchConfirm": "Удалить ветку \"{branchName}\"?\n\nЭто действие нельзя отменить.",
+  "@deleteBranchConfirm": {
+    "description": "Confirmation message for deleting branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBranchDialog": "Удалить ветку",
+  "deleteFromRemoteSubtitle": "Удалить теги из удалённого репозитория, чтобы они не вернулись при загрузке",
+  "deleteRemote": "Удалить \"{remoteName}\"",
+  "@deleteRemote": {
+    "description": "Title for delete remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteRemoteConfirm": "Это безвозвратно удалит этот удалённый репозиторий.\n\nВы уверены?",
+  "deleteTagsConfirm": "Удалить {count, plural, =1{{count} тег} other{{count} тегов}}?\n\nЭто действие нельзя отменить.\n\nТеги для удаления:\n{tagList}{ellipsis}",
+  "@deleteTagsConfirm": {
+    "description": "Confirmation message for deleting tags with list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "tagList": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagsDialog": "Удалить теги?",
+  "describeWork": "Опишите, над чем вы работали...",
+  "descriptionLabel": "Описание",
+  "diffAndMergeTools": "Инструменты сравнения и слияния",
+  "diffMergeToolSettingsSaved": "Настройки инструментов сравнения/слияния сохранены",
+  "diffTool": "Инструмент сравнения",
+  "diffToolCleared": "Инструмент сравнения очищен",
+  "diffToolNotSet": "Не задан - Пожалуйста, выберите инструмент сравнения вручную",
+  "diffToolSetSuccessfully": "Инструмент сравнения успешно установлен",
+  "directoryPath": "Путь к каталогу",
+  "directoryPathHint": "C:\\Users\\...\\my-project",
+  "directorySelectionNotAvailable": "Выбор каталога недоступен в веб-браузерах",
+  "discardAll": "Отменить всё",
+  "discardAllChangesConfirm": "Отменить все непроиндексированные изменения?\n\nЭто действие нельзя отменить.",
+  "discardAllChangesDialog": "Отменить все изменения?",
+  "discardAllChangesHard": "отменить все изменения",
+  "draftPRDescription": "Черновики pull request не могут быть объединены до отметки как готовые",
+  "dropStashConfirm": "Удалить {stashRef}?\n\nЭто действие нельзя отменить.",
+  "@dropStashConfirm": {
+    "description": "Confirmation message for dropping stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashDialog": "Удалить Stash?",
+  "edit": "Изменить",
+  "editCommitsDuringRebase": "Изменить коммиты во время перебазирования (расширенное)",
+  "editRemoteUrl": "Изменить URL \"{remoteName}\"",
+  "@editRemoteUrl": {
+    "description": "Title for edit remote URL dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "email": "Email",
+  "emailHint": "john@example.com",
+  "enableRegexPatternMatching": "Включить сопоставление с регулярными выражениями в поиске",
+  "endDate": "Дата окончания",
+  "enterBranchName": "Пожалуйста, введите имя ветки",
+  "enterBranchNameLabel": "(введите имя ветки)",
+  "enterCommitMessageForSquashed": "Введите сообщение коммита для объединённого коммита",
+  "enterCustomMergeCommitMessage": "Введите пользовательское сообщение коммита слияния",
+  "enterDestinationPath": "Пожалуйста, введите путь назначения",
+  "enterDirectoryPath": "Пожалуйста, введите путь к каталогу",
+  "enterName": "Пожалуйста, введите имя",
+  "enterPRDescription": "Введите описание PR (необязательно)",
+  "enterPRTitle": "Введите заголовок PR",
+  "enterPRTitleValidation": "Пожалуйста, введите заголовок",
+  "enterProjectDescription": "Введите описание проекта",
+  "enterProjectName": "Введите имя проекта",
+  "enterProjectNameValidation": "Пожалуйста, введите имя проекта",
+  "enterRemoteName": "Пожалуйста, введите имя удалённого репозитория",
+  "enterRemoteUrl": "Пожалуйста, введите URL удалённого репозитория",
+  "enterRepositoryUrl": "Пожалуйста, введите URL репозитория",
+  "enterTagMessage": "Пожалуйста, введите сообщение для тега с аннотацией",
+  "enterTagName": "Пожалуйста, введите имя тега",
+  "enterUrl": "Пожалуйста, введите URL",
+  "errorDetectingTools": "Ошибка обнаружения инструментов",
+  "errorLoadingBranches": "Ошибка загрузки веток: {error}",
+  "@errorLoadingBranches": {
+    "description": "Error message when loading branches fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "errorLoadingReflog": "Ошибка загрузки Reflog",
+  "errorLoadingRemotes": "Ошибка загрузки удалённых репозиториев",
+  "errorLoadingStashes": "Ошибка загрузки Stash",
+  "errorLoadingStatus": "Ошибка загрузки статуса",
+  "errorLoadingTags": "Ошибка загрузки тегов",
+  "executionFailed": "Не удалось выполнить",
+  "executionFailedMessage": "Не удалось выполнить выбранный файл.\n\nВыбран: {path}\n\nОшибка: {error}",
+  "@executionFailedMessage": {
+    "description": "Error message when file execution fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "expand": "Развернуть",
+  "expandAll": "Развернуть всё",
+  "failed": "Не удалось",
+  "failedToAbortRebase": "Не удалось прервать перебазирование: {error}",
+  "@failedToAbortRebase": {
+    "description": "Error message when aborting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToAmendCommit": "Не удалось исправить коммит: {error}",
+  "@failedToAmendCommit": {
+    "description": "Error message when amend fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "no changes staged for commit"
+      }
+    }
+  },
+  "failedToCleanWorkingDirectory": "Не удалось очистить рабочий каталог: {error}",
+  "@failedToCleanWorkingDirectory": {
+    "description": "Error message when clean fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "permission denied"
+      }
+    }
+  },
+  "failedToCloneRepository": "Не удалось клонировать репозиторий: {error}",
+  "@failedToCloneRepository": {
+    "description": "Error message when cloning fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToContinueRebase": "Не удалось продолжить перебазирование: {error}",
+  "@failedToContinueRebase": {
+    "description": "Error message when continuing rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToInitializeRepository": "Не удалось инициализировать репозиторий: {error}",
+  "@failedToInitializeRepository": {
+    "description": "Error message when initialization fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToLoadTools": "Не удалось загрузить инструменты",
+  "failedToMarkCommit": "Не удалось отметить коммит: {error}",
+  "@failedToMarkCommit": {
+    "description": "Error message when marking commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToMergeBranch": "Не удалось объединить ветку: {error}",
+  "@failedToMergeBranch": {
+    "description": "Error message when merge fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToResetBisect": "Не удалось сбросить bisect: {error}",
+  "@failedToResetBisect": {
+    "description": "Error message when resetting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSkip": "Не удалось пропустить: {error}",
+  "@failedToSkip": {
+    "description": "Error message when skipping commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSquashCommits": "Не удалось объединить коммиты: {error}",
+  "@failedToSquashCommits": {
+    "description": "Error message when squashing commits fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToStartBisect": "Не удалось запустить bisect: {error}",
+  "@failedToStartBisect": {
+    "description": "Error message when starting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToStartRebase": "Не удалось начать перебазирование: {error}",
+  "@failedToStartRebase": {
+    "description": "Error message when starting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSwitchBranch": "Не удалось переключить ветку: {error}",
+  "@failedToSwitchBranch": {
+    "description": "Error message when switching branch fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSwitchToBranch": "Не удалось переключиться на ветку \"{branchName}\":\n\n{error}",
+  "@failedToSwitchToBranch": {
+    "description": "Error message when switching to a branch fails",
+    "placeholders": {
+      "branchName": {
+        "type": "String",
+        "example": "feature/new-feature"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "fastForwardOnly": "Только быстрая перемотка",
+  "featurePrefix": "Функция",
+  "fetchRemotesError": "Не удалось загрузить: {error}",
+  "@fetchRemotesError": {
+    "description": "Error message when fetching from remotes fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchedAllRemotesSuccess": "Загружено из всех удалённых репозиториев",
+  "filePathLabel": "Путь к файлу",
+  "filterByAuthorNameOrEmail": "Фильтр по имени или email автора",
+  "filterByCommitHashPrefix": "Фильтр по префиксу хеша коммита (например, abc123)",
+  "filterByCommitterNameOrEmail": "Фильтр по имени или email фиксатора",
+  "filterByFilePathExample": "Фильтр по пути к файлу (например, src/main.dart)",
+  "folderSelectionNotAvailableWeb": "Выбор папки недоступен в веб-браузерах",
+  "fontChangedTo": "Шрифт изменён на {fontName}",
+  "@fontChangedTo": {
+    "description": "Success message when font is changed",
+    "placeholders": {
+      "fontName": {
+        "type": "String"
+      }
+    }
+  },
+  "fontFamily": "Семейство шрифтов",
+  "fontSize": "Размер шрифта",
+  "fontSizeLarge": "Большой",
+  "fontSizeMedium": "Средний",
+  "fontSizeSmall": "Маленький",
+  "fontSizeUpdated": "Размер шрифта обновлён",
+  "forcePush": "Принудительная отправка",
+  "forcePushCannotBeEasilyUndone": "Это действие сложно отменить",
+  "forcePushOnlyIfAlone": "Делайте это только если работаете в одиночку или согласовали с командой",
+  "forcePushOthersNeedReset": "Другим потребуется сбросить их локальные ветки",
+  "forcePushWarningOverwriteRemote": "Внимание: Принудительная отправка перезапишет удалённую историю!",
+  "foundFirstBadCommit": "Найден первый плохой коммит:",
+  "fromDate": "С даты",
+  "fullBranchNameLabel": "Полное имя ветки:",
+  "fuzzyMatch": "Нечёткое сопоставление",
+  "generalSearch": "Общий поиск",
+  "gitBisect": "Git Bisect",
+  "gitConfiguration": "Конфигурация Git",
+  "gitExecutableCleared": "Исполняемый файл Git очищен",
+  "gitExecutableNotSet": "Не задан - Пожалуйста, выберите git.exe вручную",
+  "gitExecutablePath": "Путь к исполняемому файлу Git",
+  "gitReflog": "Git Reflog",
+  "gitVersion": "Версия Git: {version}",
+  "@gitVersion": {
+    "description": "Display text for git version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "gitVersionDetected": "Git {version} успешно обнаружен",
+  "@gitVersionDetected": {
+    "description": "Success message when git executable is validated",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "2.43.0"
+      }
+    }
+  },
+  "goToChanges": "Перейти к изменениям",
+  "goToSettings": "Перейти к настройкам",
+  "good": "Хороший",
+  "goodCommitWhereBugWasNotPresent": "Хороший коммит (где ошибки НЕ было)",
+  "goodCommits": "Хороших коммитов: {count}",
+  "@goodCommits": {
+    "description": "Label for good commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hard": "Жёсткий",
+  "headCurrentCommit": "HEAD (текущий коммит)",
+  "hidePassword": "Скрыть пароль",
+  "hotfixPrefix": "Горячее исправление",
+  "initialBranchName": "Имя начальной ветки",
+  "initialize": "Инициализировать",
+  "initializeRepository": "Инициализировать репозиторий",
+  "initializeRepositoryInfo": "Это создаст новый каталог .git{bareText} в указанном месте.",
+  "@initializeRepositoryInfo": {
+    "description": "Info message for initialize repository dialog",
+    "placeholders": {
+      "bareText": {
+        "type": "String"
+      }
+    }
+  },
+  "initializeRepositoryInfoBare": " и инициализирует систему контроля версий Git",
+  "initializingRepository": "Инициализация репозитория...",
+  "installToolsSuchAs": "Установите инструменты, такие как VS Code, Beyond Compare, KDiff3 или Meld.",
+  "interactiveRebase": "Интерактивное перебазирование",
+  "invalidGitExecutable": "Недействительный исполняемый файл Git",
+  "invalidGitExecutableMessage": "Выбранный файл не является действительным исполняемым файлом Git.\n\nВыбран: {path}\n\nВывод: {output}",
+  "@invalidGitExecutableMessage": {
+    "description": "Error message when selected file is not git",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidRepository": "Недействительный репозиторий",
+  "invalidWindowsFilename": "Недопустимое имя файла Windows: {filePath}",
+  "@invalidWindowsFilename": {
+    "description": "Generic error message for invalid Windows filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      }
+    }
+  },
+  "keepChangesStagedSoft": "сохранить изменения проиндексированными",
+  "keepChangesUnstagedMixed": "сохранить изменения непроиндексированными",
+  "keepStagedChangesSubtitle": "Сохранить изменения в индексе после stash",
+  "last30Days": "Последние 30 дней",
+  "lastCommitAmendedSuccess": "Последний коммит успешно исправлен",
+  "loadingAvailableTools": "Загрузка доступных инструментов...",
+  "markedAs": "Отмечено как {status}",
+  "@markedAs": {
+    "description": "Success message when commit marked in bisect",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "good"
+      }
+    }
+  },
+  "mergeABranchInto": "Объединить ветку в {currentBranch}",
+  "@mergeABranchInto": {
+    "description": "Description text in merge branch dialog",
+    "placeholders": {
+      "currentBranch": {
+        "type": "String",
+        "example": "main"
+      }
+    }
+  },
+  "mergeBranchConfirm": "Объединить \"{branchName}\" с текущей веткой?",
+  "@mergeBranchConfirm": {
+    "description": "Confirmation message for merging branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "mergeBranchDialog": "Объединить ветку",
+  "mergeHasConflicts": "Слияние содержит конфликты: требуется разрешение {count} файлов",
+  "@mergeHasConflicts": {
+    "description": "Error message when merge has conflicts",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mergeMessage": "Сообщение слияния",
+  "mergeOptions": "Параметры слияния",
+  "mergeTool": "Инструмент слияния",
+  "mergeToolCleared": "Инструмент слияния очищен",
+  "mergeToolNotSet": "Не задан - Пожалуйста, выберите инструмент слияния вручную",
+  "mergeToolSetSuccessfully": "Инструмент слияния успешно установлен",
+  "mergingBranch": "Объединение ветки...",
+  "minutes": "Минуты",
+  "minutesHint": "5",
+  "mixed": "Смешанный",
+  "nameCannotContainSpaces": "Имя не может содержать пробелы",
+  "navigatedToTagsScreenDeleteYourTagThere": "Выполнен переход на экран Теги - удалите ваш тег там",
+  "navigatedToTagsScreenPushYourTagsThere": "Выполнен переход на экран Теги - отправьте ваши теги там",
+  "needToForcePushChanges": "Чтобы отправить эти изменения, вам нужно выполнить принудительную отправку.",
+  "newBranchName": "Новое имя ветки",
+  "newCommitMessage": "Новое сообщение коммита:",
+  "newName": "Новое имя",
+  "noBranchesFound": "Ветки не найдены",
+  "noChangesToCommit": "Нет изменений для фиксации",
+  "noCommitsAvailable": "Нет доступных коммитов",
+  "noDiffToolsFound": "Инструменты сравнения не найдены",
+  "noExternalDiffMergeToolsDetected": "Внешние инструменты сравнения/слияния не обнаружены в вашей системе.",
+  "noFastForward": "Без быстрой перемотки",
+  "noFileSelected": "Файл не выбран",
+  "noLocalBranches": "Нет локальных веток",
+  "noNodesAvailable": "Нет других доступных веток",
+  "noOtherBranchesAvailable": "Нет других доступных веток для слияния",
+  "noPrefix": "Без префикса",
+  "noReflogEntries": "Нет записей Reflog",
+  "noRemoteBranches": "Нет удалённых веток",
+  "noRemotes": "Нет удалённых репозиториев",
+  "noRemotesMatchQuery": "Нет удалённых репозиториев, соответствующих \"{query}\"",
+  "@noRemotesMatchQuery": {
+    "description": "Message when no remotes match search query",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "noRepositoriesFound": "Репозитории не найдены",
+  "noRepositoriesYet": "Репозиториев пока нет",
+  "noResults": "Нет результатов",
+  "noWorkspacesYet": "Рабочих областей пока нет",
+  "notValidGitRepository": "Не является действительным Git-репозиторием",
+  "openRepository": "Открыть репозиторий",
+  "openRepositoryToBrowseFiles": "Откройте репозиторий для просмотра файлов",
+  "openedRepository": "Открыт репозиторий: {repositoryName}",
+  "@openedRepository": {
+    "description": "Success message when repository opened",
+    "placeholders": {
+      "repositoryName": {
+        "type": "String",
+        "example": "my-repo"
+      }
+    }
+  },
+  "operationCompletedSuccessfully": "Операция успешно завершена",
+  "operationInProgress": "Ожидание...",
+  "operationsCompleted": "Все операции успешно завершены",
+  "operationsCompletedWithErrors": "Завершено с ошибками",
+  "prInfoMessage": "Это откроет браузер для создания pull request с предзаполненной информацией",
+  "preferredDiffTool": "Предпочитаемый инструмент сравнения",
+  "preferredMergeTool": "Предпочитаемый инструмент слияния",
+  "preferredTextEditor": "Предпочитаемый текстовый редактор",
+  "preview": "Предпросмотр",
+  "previewLabel": "Предпросмотр",
+  "projectColorLabel": "Цвет проекта",
+  "projectDescriptionLabel": "Описание (необязательно)",
+  "projectDialogCreateTitle": "Создать проект",
+  "projectDialogEditTitle": "Изменить проект",
+  "projectNameLabel": "Имя проекта",
+  "projectNamePreviewPlaceholder": "Имя проекта",
+  "prune": "Очистить",
+  "pruneRemote": "Очистить \"{remoteName}\"",
+  "@pruneRemote": {
+    "description": "Title for prune remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pruneRemoteConfirm": "Это удалит отслеживаемые удалённые ветки, которых больше нет на удалённом репозитории.\n\nПродолжить?",
+  "pullFailed": "Получение не удалось: {error}",
+  "@pullFailed": {
+    "description": "Error message when pull fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pullRequestTitleLabel": "Заголовок Pull Request",
+  "pullSuccess": "Получение успешно завершено",
+  "pullingFromRemote": "Получение из удалённого репозитория...",
+  "pushFailed": "Отправка не удалась: {error}",
+  "@pushFailed": {
+    "description": "Error message when push fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushRejected": "Отправка отклонена",
+  "pushRejectedHistoryRewritten": "Ваша отправка была отклонена, потому что вы переписали историю (например, объединив коммиты).",
+  "pushSuccess": "Отправка успешно завершена",
+  "rebaseAborted": "Перебазирование прервано",
+  "rebaseBranch": "Перебазировать ветку",
+  "rebaseConflicts": "Конфликты перебазирования",
+  "rebaseContinued": "Перебазирование продолжено",
+  "rebaseInProgress": "Выполняется перебазирование",
+  "rebaseIsInProgress": "Выполняется перебазирование. Вы можете:",
+  "rebaseOntoBranch": "Перебазировать на ветку",
+  "rebaseStartedConflictNeedsResolution": "Перебазирование начато - необходимо разрешить конфликты",
+  "rebaseStartedSuccessfully": "Перебазирование успешно начато",
+  "rebaseWarning": "Внимание: Перебазирование перезаписывает историю коммитов. Перебазируйте только коммиты, которые не были отправлены в общий репозиторий.",
+  "rebaseWillReplayCommits": "Перебазирование воспроизведёт коммиты вашей текущей ветки поверх другой ветки.",
+  "rebasingOnto": "Перебазирование на",
+  "referenceLogEmpty": "Журнал ссылок пуст",
+  "reflogEntriesInfo": "{count} записей reflog, показывающих историю репозитория",
+  "@reflogEntriesInfo": {
+    "description": "Info message showing number of reflog entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "regularExpression": "Регулярное выражение",
+  "releaseNotesHint": "Заметки о выпуске или описание...",
+  "releasePrefix": "Выпуск",
+  "remote": "(удалённый)",
+  "remoteName": "Имя удалённого репозитория",
+  "remoteNameHint": "например, origin, upstream",
+  "remoteNameNoSpaces": "Имя удалённого репозитория не может содержать пробелы",
+  "remoteNameOrUrl": "Имя или URL удалённого репозитория",
+  "remoteUrlHintDialog": "https://github.com/user/repo.git",
+  "remoteUrlLabel": "URL удалённого репозитория",
+  "rename": "Переименовать",
+  "renameBranch": "Переименовать ветку",
+  "renameRemote": "Переименовать \"{remoteName}\"",
+  "@renameRemote": {
+    "description": "Title for rename remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "repository": "репозиторий",
+  "repositoryClosed": "Репозиторий закрыт",
+  "repositoryInitializedButFailedToOpen": "Репозиторий инициализирован, но не удалось открыть",
+  "repositoryInitializedSuccess": "Репозиторий успешно инициализирован в {path}",
+  "@repositoryInitializedSuccess": {
+    "description": "Success message after initializing repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryInvalidOrMissing": "Репозиторий недействителен или отсутствует",
+  "reset": "Сбросить",
+  "resetCurrentBranchTo": "Сбросить текущую ветку до:",
+  "resetFailed": "Сброс не удался: {error}",
+  "@resetFailed": {
+    "description": "Error message when reset fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "resetSettings": "Сбросить настройки",
+  "resetSettingsMessage": "Сбросить все настройки к значениям по умолчанию?\n\nЭто действие нельзя отменить.",
+  "resetSuccess": "Сброс до {hash} выполнен успешно",
+  "@resetSuccess": {
+    "description": "Success message after resetting",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetToCommit": "Сбросить до коммита",
+  "resetToCommitDialog": "Сбросить до коммита",
+  "resetToCommitInstructions": "Чтобы сбросить вашу ветку до определённого коммита:\n\n1. Перейдите на вкладку История\n2. Щёлкните правой кнопкой мыши на коммите, до которого хотите сбросить\n3. Выберите \"Сбросить текущую ветку сюда\"\n4. Выберите режим сброса (soft/mixed/hard)\n\nВнимание: Жёсткий сброс отменит все изменения!",
+  "resetToDefaults": "Сбросить к значениям по умолчанию",
+  "resettingToCommit": "Сброс до {hash}...",
+  "@resettingToCommit": {
+    "description": "Progress message when resetting to a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resolve": "Разрешить",
+  "resolveConflictsInChangesScreen": "Разрешите конфликты на экране Изменения, затем нажмите Продолжить для продолжения перебазирования.",
+  "revertCommitDialog": "Отменить коммит",
+  "revertCommitInstructions": "Чтобы отменить коммит:\n\n1. Перейдите на вкладку История\n2. Щёлкните правой кнопкой мыши на коммите, который хотите отменить\n3. Выберите \"Отменить этот коммит\"\n\nЭто создаст новый коммит, который отменит изменения из выбранного коммита.",
+  "revertFailed": "Отмена не удалась: {error}",
+  "@revertFailed": {
+    "description": "Error message when revert fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "revertedSuccess": "Коммит {hash} успешно отменён",
+  "@revertedSuccess": {
+    "description": "Success message after reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertingCommit": "Отмена коммита {hash}...",
+  "@revertingCommit": {
+    "description": "Progress message when reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "saveProjectButton": "Сохранить",
+  "searchBranches": "Поиск веток...",
+  "searchBranchesDialog": "Поиск веток",
+  "searchInCommitOrAuthorOrHash": "Поиск в сообщении коммита, авторе или хеше...",
+  "searchOrSelectBranch": "Найти или выбрать ветку",
+  "searchQuery": "Поисковый запрос",
+  "searchRemotesDialog": "Поиск удалённых репозиториев",
+  "searchRepositories": "Поиск репозиториев...",
+  "searchSyntax": "Синтаксис поиска",
+  "selectABadCommitDefaultsToHead": "Выберите плохой коммит (по умолчанию HEAD)...",
+  "selectABranch": "Выберите ветку",
+  "selectAGoodCommit": "Выберите хороший коммит...",
+  "selectDate": "Выберите дату",
+  "selectDiffToolExecutable": "Выберите исполняемый файл инструмента сравнения",
+  "selectDirectoryToInitialize": "Выберите каталог для инициализации",
+  "selectFileToViewHistoryOrPreview": "Выберите файл из дерева для просмотра его истории или предпросмотра",
+  "selectGitExecutable": "Выберите исполняемый файл Git",
+  "selectGitRepository": "Выберите Git-репозиторий",
+  "selectMergeToolExecutable": "Выберите исполняемый файл инструмента слияния",
+  "selectRemoteDialog": "Выберите удалённый репозиторий",
+  "selectTargetBranch": "Выберите целевую ветку...",
+  "selectTextEditor": "Выберите текстовый редактор",
+  "selectDiffTool": "Выберите инструмент сравнения",
+  "selectMergeTool": "Выберите инструмент слияния",
+  "selectedCommitsMustBeConsecutive": "Выбранные коммиты должны идти последовательно во времени (без пропусков между ними)",
+  "selectedFileDoesNotExist": "Выбранный файл не существует",
+  "setUpstreamDescription": "Отправить ветку и установить отслеживание удалённого репозитория",
+  "setUpstreamLabel": "Установить upstream (push -u origin)",
+  "settingsResetToDefaults": "Настройки сброшены к значениям по умолчанию",
+  "showCommitGraph": "Показывать граф коммитов",
+  "showCommitGraphDescription": "Отображать визуальный граф веток в истории",
+  "showHiddenFiles": "Показывать скрытые файлы",
+  "showIgnoredFiles": "Показывать игнорируемые файлы",
+  "showPassword": "Показать пароль",
+  "showRemoteBranches": "Показывать удалённые ветки",
+  "skip": "Пропустить",
+  "soft": "Мягкий",
+  "sourceBranchLabel": "Исходная ветка",
+  "specificFilters": "Специфические фильтры",
+  "squashCommits": "Объединить коммиты",
+  "squashCommitsDialog": "Объединить коммиты",
+  "squashCommitsInfo": "Это объединит выбранные коммиты в один коммит с новым сообщением.",
+  "squashMergeWillCombineAllCommits": "Объединяющее слияние объединит все коммиты. Вам нужно будет выполнить коммит вручную после слияния.",
+  "squashingCommitsCount": "Объединение {count} коммитов в один:",
+  "@squashingCommitsCount": {
+    "description": "Message showing number of commits being squashed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "startBisect": "Запустить Bisect",
+  "startDate": "Дата начала",
+  "startRebase": "Начать перебазирование",
+  "stashAllFilesToggle": "Переключить для выбора конкретных файлов",
+  "stashDiffTitle": "Различия Stash - {stashRef}",
+  "@stashDiffTitle": {
+    "description": "Title for stash diff dialog",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "step": "Шаг {progressText}",
+  "@step": {
+    "description": "Progress indicator for rebase steps",
+    "placeholders": {
+      "progressText": {
+        "type": "String"
+      }
+    }
+  },
+  "successCount": "{successCount} успешно, {failureCount} с ошибкой",
+  "@successCount": {
+    "description": "Summary of operation results",
+    "placeholders": {
+      "successCount": {
+        "type": "int"
+      },
+      "failureCount": {
+        "type": "int"
+      }
+    }
+  },
+  "successfullyMergedBranch": "Успешно объединена {branchName} в {currentBranch}",
+  "@successfullyMergedBranch": {
+    "description": "Success message after merge",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "currentBranch": {
+        "type": "String"
+      }
+    }
+  },
+  "switchAnyway": "Переключить в любом случае",
+  "switchBranch": "Переключить ветку",
+  "switchRepository": "Переключить репозиторий",
+  "switchedToBranch": "Переключено на ветку: {name}",
+  "@switchedToBranch": {
+    "description": "SnackBar message after switching branch",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "switchedToRepository": "Переключено на: {name}",
+  "@switchedToRepository": {
+    "description": "SnackBar message after switching repository",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "syntaxAuthorFilter": "Фильтр по автору",
+  "syntaxExactPhrase": "Точная фраза (используйте кавычки)",
+  "syntaxFileFilter": "Фильтр по пути к файлу",
+  "syntaxFromDateFilter": "С даты (ГГГГ-ММ-ДД)",
+  "syntaxHashFilter": "Фильтр по префиксу хеша",
+  "syntaxToDateFilter": "До даты (или \"yesterday\", \"week\")",
+  "tagNameNoSpaces": "Имя тега не может содержать пробелы",
+  "targetBranchLabel": "Целевая ветка",
+  "targetCommit": "Целевой коммит",
+  "testThisCommitAndMark": "Протестируйте этот коммит и отметьте его:",
+  "textEditor": "Текстовый редактор",
+  "textEditorCleared": "Текстовый редактор очищен",
+  "searchToolsAutoDetect": "Инструменты поиска (Автоопределение)",
+  "diffToolTitle": "Инструмент сравнения",
+  "diffToolNotSet": "Не задан",
+  "diffToolCleared": "Инструмент сравнения очищен",
+  "mergeToolTitle": "Инструмент слияния",
+  "mergeToolNotSet": "Не задан",
+  "mergeToolCleared": "Инструмент слияния очищен",
+  "configure": "Настроить",
+  "textEditorNotSet": "Не задан - Пожалуйста, выберите текстовый редактор вручную",
+  "textEditorSetSuccessfully": "Текстовый редактор успешно установлен",
+  "thisWillMergeSelectedBranch": "Это объединит выбранную ветку с вашей текущей веткой.",
+  "toDate": "До даты",
+  "toggleCommandLogTooltip": "Переключить журнал команд (Ctrl+L)",
+  "uncommittedChanges": "Незафиксированные изменения",
+  "unknownDiffTool": "Неизвестный инструмент сравнения",
+  "unknownDiffToolMessage": "Выбранный файл \"{fileName}\" не является распознанным инструментом сравнения/слияния.\n\nИзвестные инструменты сравнения:\n• VS Code (Code.exe)\n• Beyond Compare (BCompare.exe)\n• KDiff3 (kdiff3.exe)\n• WinMerge (WinMergeU.exe)\n• P4Merge (p4merge.exe)\n• Meld (meld.exe)\n• TortoiseMerge (TortoiseGitMerge.exe)\n• Araxis Merge (compare.exe)\n• и т.д.\n\nВы хотите использовать этот файл в любом случае?",
+  "@unknownDiffToolMessage": {
+    "description": "Warning message for unknown diff tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownMergeTool": "Неизвестный инструмент слияния",
+  "unknownMergeToolMessage": "Выбранный файл \"{fileName}\" не является распознанным инструментом сравнения/слияния.\n\nИзвестные инструменты слияния:\n• VS Code (Code.exe)\n• Beyond Compare (BCompare.exe)\n• KDiff3 (kdiff3.exe)\n• WinMerge (WinMergeU.exe)\n• P4Merge (p4merge.exe)\n• Meld (meld.exe)\n• TortoiseMerge (TortoiseGitMerge.exe)\n• Araxis Merge (compare.exe)\n• и т.д.\n\nВы хотите использовать этот файл в любом случае?",
+  "@unknownMergeToolMessage": {
+    "description": "Warning message for unknown merge tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownTextEditor": "Неизвестный текстовый редактор",
+  "unknownTextEditorMessage": "Выбранный файл \"{fileName}\" не является распознанным текстовым редактором.\n\nИзвестные текстовые редакторы:\n• Visual Studio Code (code.exe)\n• Notepad (notepad.exe)\n• Notepad++ (notepad++.exe)\n• Sublime Text (sublime_text.exe)\n• Vim (vim.exe, gvim.exe, nvim.exe)\n• Emacs (emacs.exe)\n• Atom (atom.exe)\n• и т.д.\n\nВы хотите использовать этот файл в любом случае?",
+  "@unknownTextEditorMessage": {
+    "description": "Warning message for unknown text editor",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "useAnyway": "Использовать в любом случае",
+  "usedForComparingFileChanges": "Используется для сравнения изменений в файлах",
+  "usedForResolvingMergeConflicts": "Используется для разрешения конфликтов слияния",
+  "userEmail": "Email пользователя",
+  "userEmailNotSet": "Не задан - Пожалуйста, введите ваш email",
+  "userName": "Имя пользователя",
+  "userNameHint": "Иван Иванов",
+  "userNameNotSet": "Не задано - Пожалуйста, введите ваше имя",
+  "validationError": "Ошибка проверки",
+  "validationErrorMessage": "Произошла ошибка при проверке выбранного файла.\n\nВыбран: {path}\n\nОшибка: {error}",
+  "@validationErrorMessage": {
+    "description": "Error message when validation fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "version": "Версия: {version}",
+  "@version": {
+    "description": "Display text for tool version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "viewOptions": "Параметры просмотра",
+  "waitForRebaseToCompleteAutomatically": "Дождитесь автоматического завершения перебазирования",
+  "willCreateInRepositories": "Будет создано в {count} {repositoryLabel}:",
+  "@willCreateInRepositories": {
+    "description": "Label showing how many repositories will get the branch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "repositoryLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "windowsReservedNameError": "Файл \"{filePath}\" содержит зарезервированное имя Windows \"{reservedName}\".\n\nWindows не разрешает файлы с именами: {reservedNames}.\n\nЭтот файл, вероятно, был создан в Linux/Unix и не может быть проиндексирован в Windows.\n\nРешения:\n• Используйте WSL или Linux для удаления/переименования файла\n• Используйте git из Git Bash с командой: git rm \"{filePath}\"\n• Пропустите этот файл и проиндексируйте другие по отдельности",
+  "@windowsReservedNameError": {
+    "description": "Error message for Windows reserved filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      },
+      "reservedName": {
+        "type": "String"
+      },
+      "reservedNames": {
+        "type": "String"
+      }
+    }
+  },
+  "workingDirectoryClean": "Рабочий каталог чист",
+  "workingDirectoryCleanedSuccess": "Рабочий каталог успешно очищен",
+  "youHaveUncommittedChanges": "У вас есть {changeCount} незафиксированное изменение{plural}.\n\nПереключение веток может привести к потере данных. Пожалуйста, зафиксируйте или отложите ваши изменения сначала.",
+  "@youHaveUncommittedChanges": {
+    "description": "Message about uncommitted changes before branch switch",
+    "placeholders": {
+      "changeCount": {
+        "type": "int",
+        "example": "3"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "secondsAgo": "{count, plural, =1{1 секунду назад} few{{count} секунды назад} other{{count} секунд назад}}",
+  "@secondsAgo": {
+    "description": "Relative time: seconds ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minuteAgo": "1 минуту назад",
+  "minutesAgo": "{count} минут назад",
+  "@minutesAgo": {
+    "description": "Relative time: minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hourAgo": "1 час назад",
+  "hoursAgo": "{count} часов назад",
+  "@hoursAgo": {
+    "description": "Relative time: hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dayAgo": "1 день назад",
+  "daysAgo": "{count} дней назад",
+  "@daysAgo": {
+    "description": "Relative time: days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthJan": "Янв",
+  "monthFeb": "Фев",
+  "monthMar": "Мар",
+  "monthApr": "Апр",
+  "monthMay": "Май",
+  "monthJun": "Июн",
+  "monthJul": "Июл",
+  "monthAug": "Авг",
+  "monthSep": "Сен",
+  "monthOct": "Окт",
+  "monthNov": "Ноя",
+  "monthDec": "Дек",
+  "am": "AM",
+  "pm": "PM",
+  "systemDefault": "Системный по умолчанию",
+  "english": "Английский",
+  "arabic": "Арабский",
+  "german": "Немецкий",
+  "spanish": "Испанский",
+  "french": "Французский",
+  "italian": "Итальянский",
+  "russian": "Русский",
+  "turkish": "Турецкий",
+  "chinese": "Китайский (Упрощенный)",
+  "languageUpdated": "Язык обновлён",
+  "tooltipLanguage": "Язык",
+  "tooltipQuickSettings": "Быстрые настройки",
+  "tooltipCopyCommand": "Скопировать команду",
+  "tooltipCopyToClipboard": "Скопировать в буфер обмена",
+  "tooltipNewWorkspace": "Новая рабочая область",
+  "tooltipBlameStatistics": "Статистика авторства",
+  "tooltipOpenEnhancedViewer": "Открыть в расширенном просмотрщике",
+  "tooltipPreviousPage": "Предыдущая страница",
+  "tooltipNextPage": "Следующая страница",
+  "tooltipDiscardAllChanges": "Отменить все изменения",
+  "tooltipViewDiff": "Показать различия",
+  "tooltipUnstage": "Убрать из индекса",
+  "tooltipStage": "Добавить в индекс",
+  "tooltipDiscardChanges": "Отменить изменения",
+  "tooltipFileActions": "Действия с файлом",
+  "tooltipAbortMerge": "Прервать слияние",
+  "tooltipCopy": "Копировать",
+  "tooltipAddRepository": "Добавить репозиторий",
+  "tooltipMoreActions": "Дополнительные действия",
+  "tooltipRemoveFromWorkspace": "Удалить из рабочей области",
+  "tooltipRemoveFromFavorites": "Удалить из избранного",
+  "tooltipAddToFavorites": "Добавить в избранное",
+  "tooltipSwitchBranch": "Переключить ветку (Ctrl+B)",
+  "tooltipSwitchRepository": "Переключить репозиторий (Ctrl+R)",
+  "tooltipSwitchWorkspace": "Переключить рабочую область",
+  "current": "Текущий",
+  "openInEditor": "Открыть в редакторе",
+  "copyFile": "Копировать файл",
+  "paste": "Вставить",
+  "keepBoth": "Сохранить оба",
+  "replace": "Заменить",
+  "deleteFile": "Удалить файл",
+  "renameFile": "Переименовать файл",
+  "stageAllAndCommit": "Подготовить все и зафиксировать",
+  "discardChangesQuestion": "Отменить изменения?",
+  "discardAllChangesQuestion": "Отменить все изменения?",
+  "stageAllChangesQuestion": "Подготовить все изменения?",
+  "unstageAllChangesQuestion": "Отменить подготовку всех изменений?",
+  "webBrowserLimitation": "Ограничение веб-браузера",
+  "windowsReservedFilename": "Зарезервированное имя файла Windows",
+  "mergeConflicts": "Конфликты слияния",
+  "selectConflictToResolve": "Выберите конфликт для разрешения",
+  "resolved": "Разрешено",
+  "continueMerge": "Продолжить слияние",
+  "abortMerge": "Прервать слияние",
+  "commitChanges": "Зафиксировать изменения",
+  "amendLastCommit": "Изменить последний коммит",
+  "viewFiles": "Просмотреть файлы",
+  "cleanOnly": "Только чистые",
+  "withRemote": "С удаленным",
+  "removeRepository": "Удалить репозиторий",
+  "clearAllRepositories": "Очистить все репозитории",
+  "editProject": "Редактировать проект",
+  "deleteWorkspace": "Удалить рабочую область",
+  "blameStatistics": "Статистика blame",
+  "fileHistory": "История файла",
+  "filePreview": "Предпросмотр файла",
+  "totalLines": "Всего строк",
+  "authors": "Авторы",
+  "commitsLabel": "Коммиты",
+  "contributors": "Участники:",
+  "emptyCsvFile": "Пустой CSV файл",
+  "stageAll": "Подготовить все",
+  "unstageAll": "Отменить подготовку всех",
+  "acceptOurs": "Принять наш",
+  "acceptTheirs": "Принять их",
+  "acceptBoth": "Принять оба",
+  "manualResolution": "Ручное разрешение",
+  "resolvingConflict": "Разрешение конфликта...",
+  "allConflictsResolved": "Все конфликты разрешены!",
+  "readyToContinueMerge": "Готово к продолжению слияния",
+  "conflictsToResolve": "{count} конфликтов для разрешения",
+  "useVersionFromCurrentBranch": "Использовать версию из текущей ветки",
+  "useVersionFromMergingBranch": "Использовать версию из сливаемой ветки",
+  "keepBothVersionsConcatenated": "Сохранить обе версии (объединенные)",
+  "noMergeInProgress": "Нет слияния в процессе",
+  "allMergeConflictsResolved": "Все конфликты слияния разрешены.",
+  "mergeCompletedSuccessfully": "Слияние успешно завершено",
+  "mergeAborted": "Слияние прервано",
+  "resolvedUsing": "Разрешено {fileName} используя {choice}",
+  "thisMayTakeAWhile": "Это может занять некоторое время.",
+  "noUnstagedChanges": "Нет неподготовленных изменений",
+  "noStagedChanges": "Нет подготовленных изменений",
+  "stageFilesFromUnstagedTab": "Подготовить файлы с вкладки неподготовленных",
+  "changesCommittedSuccessfully": "Изменения успешно зафиксированы",
+  "commitFailed": "Сбой коммита: {error}",
+  "defaultLabel": "По умолчанию",
+  "emptyStateNoHistory": "Нет истории",
+  "emptyStateNoHistoryMessage": "У этого файла нет истории коммитов",
+  "emptyStateNoCommits": "Нет коммитов",
+  "emptyStateNoCommitsMessage": "У этого репозитория нет истории коммитов",
+  "emptyStateNoCommitSelected": "Коммит не выбран",
+  "emptyStateNoCommitSelectedMessage": "Выберите коммит для просмотра деталей",
+  "emptyStateNoFilesChanged": "Нет измененных файлов",
+  "emptyStateNoCommandsYet": "Пока нет команд",
+  "emptyStateNoCommandsYetMessage": "Команды Git будут отображаться здесь",
+  "emptyStateNoData": "Нет данных",
+  "emptyStateNoItemsFound": "Элементы не найдены",
+  "emptyStateNoResultsFound": "Результаты не найдены",
+  "emptyStateTryAdjustingSearchCriteria": "Попробуйте изменить критерии поиска",
+  "emptyStateNoRepository": "Нет репозитория",
+  "emptyStateNoSearchResults": "Нет {itemType}, соответствующих \"{query}\"",
+  "emptyStateNoValidRepositories": "Действительные репозитории Git не найдены",
+  "messageNoFileCopied": "Файл не скопирован",
+  "messageNoRepositoryOpen": "Репозиторий не открыт",
+  "messageNoRemotesConfigured": "Удаленные репозитории не настроены",
+  "messageGitServiceNotAvailable": "Служба Git недоступна",
+  "messageCommitNotFound": "Коммит не найден",
+  "messageNoTextEditorConfigured": "Текстовый редактор не настроен. Установите его в Настройках.",
+  "messageNoMergeInProgress": "Слияние не выполняется",
+  "messageCopiedToClipboard": "Скопировано в буфер обмена",
+  "messageNoRemoteConfigured": "Удаленный репозиторий не настроен",
+  "messageNoDateGroup": "Нет даты",
+  "snackbarFetchedFrom": "Получено из \"{remoteName}\"",
+  "snackbarFailedToFetch": "Ошибка получения: {error}",
+  "snackbarPulledFrom": "Извлечено из \"{remoteName}\"",
+  "snackbarFailedToPull": "Ошибка извлечения: {error}",
+  "snackbarPushedTo": "Отправлено в \"{remoteName}\"",
+  "snackbarFailedToPush": "Ошибка отправки: {error}",
+  "snackbarUpdatedRemoteUrl": "URL \"{remoteName}\" обновлен",
+  "snackbarFailedToUpdateUrl": "Ошибка обновления URL: {error}",
+  "snackbarFailedToRename": "Ошибка переименования: {error}",
+  "snackbarPruned": "\"{remoteName}\" очищен",
+  "snackbarFailedToPrune": "Ошибка очистки: {error}",
+  "snackbarDeleted": "\"{remoteName}\" удален",
+  "snackbarFailedToDelete": "Ошибка удаления: {error}",
+  "snackbarAppliedStash": "{stashRef} применен",
+  "snackbarPoppedStash": "{stashRef} восстановлен",
+  "snackbarCreatedBranchFrom": "Ветка \"{branchName}\" создана из {stashRef}",
+  "snackbarDroppedStash": "{stashRef} удален",
+  "snackbarTagCreated": "Тег \"{tagName}\" успешно создан",
+  "snackbarTagsFetched": "Теги успешно получены",
+  "snackbarErrorLoadingCommit": "Ошибка загрузки коммита: {error}",
+  "snackbarFailedToCreateTag": "Не удалось создать тег: {error}",
+  "snackbarFailedToFetchTags": "Не удалось получить теги: {error}",
+  "snackbarNoRemotesConfigured": "Нет настроенных удалённых репозиториев",
+  "snackbarAllTagsPushed": "Все теги отправлены в {remoteName}",
+  "snackbarTagPushed": "Тег \"{tagName}\" отправлен в {remoteName}",
+  "snackbarFailedToPushTag": "Не удалось отправить тег: {error}",
+  "snackbarTagsPushed": "{count, plural, =1{Отправлен 1 тег} other{Отправлено {count} тегов}} в {remoteName}",
+  "snackbarFailedToPushTags": "Не удалось отправить теги: {error}",
+  "snackbarCheckedOutTag": "Переключено на тег \"{tagName}\"",
+  "snackbarFailedToCheckoutTag": "Не удалось переключиться на тег: {error}",
+  "snackbarTagDeleted": "Тег \"{tagName}\" удалён",
+  "snackbarTagsDeleted": "{count, plural, =1{Удалён 1 тег} other{Удалено {count} тегов}}",
+  "snackbarFailedToDeleteTag": "Не удалось удалить тег: {error}",
+  "snackbarFailedToDeleteTags": "Не удалось удалить теги: {error}",
+  "snackbarDiffCopied": "Различия скопированы в буфер обмена",
+  "snackbarCopiedToClipboard": "Скопировано в буфер обмена",
+  "snackbarLineCopied": "Строка скопирована в буфер обмена",
+  "snackbarPathCopied": "Путь скопирован: {filePath}",
+  "snackbarFileCopied": "Скопировано: {fileName}",
+  "snackbarOutputCopied": "Вывод скопирован в буфер обмена",
+  "snackbarGitServiceNotAvailable": "Служба Git недоступна",
+  "snackbarCommitNotFound": "Коммит не найден",
+  "snackbarNoRepositoryOpen": "Нет открытого репозитория",
+  "snackbarRepositoryPathNotAvailable": "Путь к репозиторию недоступен",
+  "snackbarFailedToOpenExternalTool": "Не удалось открыть внешний инструмент: {error}",
+  "snackbarFailedToLoadDiff": "Не удалось загрузить различия: {error}",
+  "snackbarFileNotFound": "Файл не найден",
+  "snackbarSourceFileNotFound": "Исходный файл не найден",
+  "snackbarNoFileCopied": "Файл не скопирован",
+  "snackbarFileRenamed": "Переименовано в {newName}",
+  "snackbarFailedToRenameFile": "Не удалось переименовать файл: {error}",
+  "snackbarFileDeleted": "Удалено: {fileName}",
+  "snackbarFailedToDeleteFile": "Не удалось удалить файл: {error}",
+  "snackbarFilePasted": "Вставлено: {newFileName}",
+  "snackbarFailedToPasteFile": "Не удалось вставить файл: {error}",
+  "snackbarFileSaved": "Файл сохранён в {outputPath}",
+  "snackbarFileDownloaded": "Файл загружен в репозиторий и папка открыта",
+  "snackbarFailedToDownloadFile": "Не удалось загрузить файл: {error}",
+  "snackbarFailedToDownloadAndOpenFolder": "Не удалось загрузить и открыть папку: {error}",
+  "snackbarFailedToOpenFileManager": "Не удалось открыть файловый менеджер: {error}",
+  "snackbarFailedToOpenEditor": "Не удалось открыть редактор: {error}",
+  "snackbarFailedToOpenFileInEditor": "Не удалось открыть файл в редакторе: {error}",
+  "snackbarMergeCompleted": "Слияние успешно завершено",
+  "snackbarMergeAborted": "Слияние отменено",
+  "snackbarConflictResolved": "{fileName} разрешён с использованием {choice}",
+  "snackbarFailedToApplyStash": "Не удалось применить сохранение: {error}",
+  "snackbarFailedToPopStash": "Не удалось восстановить сохранение: {error}",
+  "snackbarFailedToCreateBranch": "Не удалось создать ветку: {error}",
+  "snackbarFailedToDropStash": "Не удалось удалить сохранение: {error}",
+  "snackbarRemoteRenamed": "\"{remoteName}\" переименовано в \"{newName}\"",
+  "snackbarViewDiffComingSoon": "Просмотр различий для {commitHash} (скоро)",
+  "clearFiltersAction": "Очистить фильтры",
+  "noBranchAvailable": "Нет ветки",
+  "hintTextCommandPalette": "Что вы хотите сделать?",
+  "hintTextSearchFiles": "Поиск файлов...",
+  "hintTextCommitMessage": "Введите сообщение коммита...",
+  "hintTextSearchCommits": "Поиск коммитов (попробуйте: author:john, hash:abc123, date:today)",
+  "hintTextSearchStashes": "Поиск сохранений...",
+  "hintTextDefaultBranch": "main",
+  "dialogTitleNoMergeInProgress": "Нет активного слияния",
+  "dialogTitleResolveConflicts": "Разрешить конфликты: {branchName}",
+  "dialogContentSelectConflict": "Выберите конфликт для разрешения",
+  "dialogContentChooseResolutionStrategy": "Выберите стратегию разрешения:",
+  "dialogContentManualResolutionInfo": "Вы также можете вручную отредактировать файл в предпочитаемом редакторе для разрешения конфликтов, затем подготовить файл, используя экран Изменения.",
+  "dialogContentAllMergeConflictsResolved": "Все конфликты слияния были разрешены.",
+  "dialogContentFailedToResolveConflict": "Не удалось разрешить конфликт: {error}",
+  "dialogContentFailedToContinueMerge": "Не удалось продолжить слияние: {error}",
+  "dialogContentFailedToAbortMerge": "Не удалось прервать слияние: {error}",
+  "dialogTitleContinueMerge": "Продолжить слияние",
+  "dialogContentContinueMerge": "Это завершит слияние и создаст коммит слияния. Продолжить?",
+  "dialogActionContinue": "Продолжить",
+  "dialogTitleAbortMerge": "Прервать слияние",
+  "dialogContentAbortMerge": "Это прервёт слияние и вернёт состояние до слияния. Все разрешения конфликтов будут потеряны. Продолжить?",
+  "dialogContentResolvedConflict": "Разрешён {fileName} используя {choice}",
+  "snackbarMergeCompleted": "Слияние успешно завершено",
+  "snackbarMergeAborted": "Слияние прервано",
+  "dialogContentDeleteWorkspace": "Вы уверены, что хотите удалить \"{workspaceName}\"? Репозитории не будут удалены.",
+  "dialogTitleRenameFile": "Переименовать файл",
+  "dialogLabelNewName": "Новое имя",
+  "dialogActionRename": "Переименовать",
+  "dialogTitleDeleteFile": "Удалить файл",
+  "dialogContentDeleteFile": "Вы уверены, что хотите удалить \"{fileName}\"?\n\nЭто действие нельзя отменить.",
+  "dialogTitleCopyFile": "Копировать файл",
+  "dialogTitleFileExists": "Файл существует",
+  "dialogContentCopyFileExists": "Файл с именем \"{fileName}\" уже существует в этом расположении.\n\nЧто вы хотите сделать?",
+  "dialogContentFileExistsDestination": "{fileName} уже существует в месте назначения.\n\nЧто вы хотите сделать?",
+  "dialogActionKeepBoth": "Сохранить оба",
+  "contextMenuRename": "Переименовать",
+  "contextMenuCopyPath": "Копировать путь",
+  "contextMenuRevealInExplorer": "Показать в Проводнике",
+  "snackbarPathCopied": "Путь скопирован: {path}",
+  "snackbarFileNotFound": "Файл не найден",
+  "snackbarFailedToOpenFileManager": "Не удалось открыть файловый менеджер: {error}",
+  "snackbarRenamedTo": "Переименован в {newName}",
+  "snackbarFailedToRenameFile": "Не удалось переименовать файл: {error}",
+  "snackbarCopiedFile": "Скопировано: {fileName}",
+  "snackbarNoFileCopied": "Файл не скопирован",
+  "snackbarSourceFileNotFound": "Исходный файл не найден",
+  "snackbarPastedFile": "Вставлено: {fileName}",
+  "snackbarFailedToPasteFile": "Не удалось вставить файл: {error}",
+  "snackbarDeletedFile": "Удалено: {fileName}",
+  "snackbarFailedToDeleteFile": "Не удалось удалить файл: {error}",
+  "dialogTitleDeleteTag": "Удалить тег?",
+  "dialogContentDeleteTagLocal": "Удалить тег \"{tagName}\"?\n\nЭтот тег существует только локально и будет удалён из вашего репозитория.\n\nЭто действие нельзя отменить.",
+  "dialogContentDeleteTagRemote": "Удалить тег \"{tagName}\"?\n\nЭтот тег существует на удалённом сервере и будет удалён как локально, так и удалённо.\n\nЭто действие нельзя отменить.",
+  "progressDeletingTagLocalRemote": "Удаление тега (Локально и удалённо)",
+  "progressDeletingTag": "Удаление тега",
+  "progressDeletingTagLocally": "Удаление \"{tagName}\" локально...",
+  "progressDeletingTagFromRemote": "Удаление \"{tagName}\" из {remoteName}...",
+  "progressUpdatingList": "Обновление списка...",
+  "snackbarTagDeletedLocalAndRemote": "Тег \"{tagName}\" удалён локально и удалённо",
+  "snackbarTagDeleted": "Тег \"{tagName}\" удалён",
+  "tagDetailsType": "Тип",
+  "tagDetailsCommit": "Коммит",
+  "tagDetailsTagger": "Автор тега",
+  "tagDetailsDate": "Дата",
+  "tagDetailsMessage": "Сообщение:",
+  "tagTypeAnnotated": "Аннотированный",
+  "tagTypeLightweight": "Лёгкий",
+  "dialogTitleWebBrowserLimitation": "Ограничение веб-браузера",
+  "dialogContentWebBrowserLimitationChanges": "Выбор папок недоступен в веб-браузерах.\n\nДля использования Flutter GitUI с полной функциональностью запустите его как настольное приложение:\n\nflutter run -d windows\n\nЭто требует Visual Studio 2022 с установленным \"Desktop development with C++\".",
+  "dialogContentWebBrowserLimitationRepositories": "Выбор папок недоступен в веб-браузерах.\n\nДля использования Flutter GitUI с полной функциональностью запустите его как настольное приложение.",
+  "dialogContentStageAllAndCommit": "У вас {count} не подготовленный файл{plural}.\n\nВсе не подготовленные изменения будут подготовлены перед созданием коммита.\n\nВы хотите продолжить?",
+  "dialogContentDiscardChangesFile": "Отменить изменения в {filePath}?\n\nЭто нельзя отменить.",
+  "dialogTitleWindowsReservedFilename": "Зарезервированное имя файла Windows",
+  "dialogContentStageAllFiles": "Подготовить все {count} не подготовленный файл{plural}?",
+  "menuItemCreateBranch": "Создать ветку",
+  "menuItemViewDiff": "Просмотреть различия",
+  "snackbarOutputCopied": "Вывод скопирован в буфер обмена",
+  "gitCommandSuccessful": "Команда Git выполнена успешно",
+  "gitCommandFailed": "Команда Git не выполнена",
+  "closingInSeconds": "Закрытие через {seconds}",
+  "checkboxKeepDialogOpen": "Держать этот диалог открытым",
+  "checkboxAmendLastCommit": "Изменить последний коммит",
+  "checkboxAmendLastCommitSubtitle": "Заменить последний коммит этим",
+  "labelCopyPath": "Копировать путь",
+  "labelRevealInExplorer": "Показать в проводнике",
+  "labelChangedFiles": "Измененные файлы",
+  "labelBinaryFile": "Двоичный файл",
+  "labelCannotPreviewFile": "Невозможно просмотреть файл",
+  "labelThisFileCannotBePreviewed": "Этот файл нельзя просмотреть",
+  "labelDownloadFile": "Скачать файл",
+  "labelDownloadAndOpenFolder": "Скачать и открыть папку",
+  "labelDiffViewer": "Просмотр различий",
+  "labelStaged": "Проиндексировано",
+  "labelCopyAll": "Копировать всё",
+  "labelOpenInExternalTool": "Открыть во внешнем инструменте",
+  "labelCommitMessage": "Сообщение коммита",
+  "labelAmendCommit": "Изменить коммит",
+  "labelLines": "строк",
+  "labelFile": "файл",
+  "labelFiles": "файлов",
+  "messageFileNotFound": "Файл не найден",
+  "messageNoFileCopied": "Файл не скопирован",
+  "messageSourceFileNotFound": "Исходный файл не найден",
+  "messageErrorLoadingDiff": "Ошибка загрузки различий: {error}",
+  "messageLineCopiedToClipboard": "Строка скопирована в буфер обмена",
+  "messageCommitMessageRequired": "Требуется сообщение коммита",
+  "messageErrorLoadingHistory": "Ошибка загрузки истории",
+  "messageNoFilesChanged": "Нет измененных файлов",
+  "messageFileTooLargeToPreview": "Файл слишком большой для предпросмотра ({size})",
+  "messageFailedToDownloadFile": "Не удалось скачать файл: {error}",
+  "messageNoTextEditorConfigured": "Текстовый редактор не настроен. Установите его в настройках.",
+  "messageFailedToOpenEditor": "Не удалось открыть редактор: {error}",
+  "messageFailedToOpenFileInEditor": "Не удалось открыть файл в редакторе: {error}",
+  "messageRepositoryPathNotAvailable": "Путь к репозиторию недоступен",
+  "messageFileDownloadedAndFolderOpened": "Файл загружен в репозиторий и папка открыта",
+  "messageFailedToDownloadAndOpenFolder": "Не удалось скачать и открыть папку: {error}",
+  "messageFileSavedTo": "Файл сохранен в {path}",
+  "messageViewDiffForCommit": "Просмотр различий для {hash} (скоро)",
+  "messageFilesStaged": "{count} {plural} проиндексировано",
+  "messageFileInfo": "{lineCount} строк • {fileSize}",
+  "tipCommitMessage": "Совет: Используйте настоящее время (\"Добавить функцию\", а не \"Добавлена функция\")",
+  "editUrl": "Изменить URL",
+  "fetchUrl": "URL получения",
+  "pushUrl": "URL отправки",
+  "mergeIntoCurrent": "Слить в текущую",
+  "moreActions": "Дополнительные действия",
+  "switchBranch": "Переключить ветку",
+  "createPullRequest": "Создать запрос на слияние",
+  "removeFromWorkspace": "Удалить из рабочего пространства",
+  "repositoriesCount": "{count} репозиториев",
+  "unassignedRepositories": "Неназначенные репозитории",
+  "editProject": "Редактировать проект",
+  "deleteProject": "Удалить проект",
+  "blame": "Blame",
+  "couldNotLoadBlame": "Не удалось загрузить информацию о blame",
+  "emptyFile": "Пустой файл",
+  "noContent": "Этот файл не имеет содержимого",
+  "errorLoadingBlame": "Ошибка загрузки blame",
+  "commitShortHash": "Коммит {hash}",
+  "linesCount": "{count} строк",
+  "outputCopiedToClipboard": "Вывод скопирован в буфер обмена",
+  "copyOutput": "Копировать вывод",
+  "exitCode": "Код выхода",
+  "time": "Время",
+  "noOutput": "Нет вывода",
+  "commitDiff": "Разница коммита",
+  "errorLoadingDiff": "Ошибка загрузки различий",
+  "noChanges": "Нет изменений",
+  "lineCopiedToClipboard": "Строка скопирована в буфер обмена",
+  "copyAll": "Копировать все",
+  "local": "ЛОКАЛЬНЫЙ",
+  "annotatedCount": "Аннотированных ({count})",
+  "lightweightCount": "Легких ({count})",
+  "allCount": "Всего ({count})",
+  "dropFoldersHere": "Перетащите папки сюда, чтобы добавить репозитории",
+  "webBrowserLimitation": "Ограничение веб-браузера",
+  "cloneRepository": "Клонировать репозиторий",
+  "initializeRepository": "Инициализировать репозиторий",
+  "validateAll": "Проверить все",
+  "clearAll": "Очистить все",
+  "onBranchAt": "на {branch} • {timestamp}",
+  "quickFilters": "Быстрые фильтры:",
+  "thisWeek": "На этой неделе",
+  "thisMonth": "В этом месяце",
+  "last30Days": "Последние 30 дней",
+  "commitsCount": "{count} коммитов",
+  "accessed": "Доступ:",
+  "edit": "Редактировать",
+  "pullFromRemote": "Получить с удалённого",
+  "pullFromRemoteWithCount": "Получить с удалённого ({count} коммитов позади)",
+  "pushToRemote": "Отправить на удалённый",
+  "pushToRemoteWithCount": "Отправить на удалённый ({count} коммитов впереди)",
+  "squashCommits": "Объединить коммиты",
+  "cherryPick": "Cherry-pick",
+  "revert": "Отменить",
+  "resetToHere": "Сбросить до этого места",
+  "forcePushingToRemote": "Принудительная отправка на удалённый...",
+  "pushingToRemote": "Отправка на удалённый...",
+  "pushAll": "Отправить все",
+  "fetchAll": "Получить все",
+  "openRepository": "Открыть репозиторий",
+  "remove": "Удалить",
+  "emptyCsvFile": "Пустой CSV-файл",
+  "errorLoadingDiff": "Ошибка загрузки различий:",
+  "switchedToBranch": "Переключено на ветку: {branch}",
+  "selectedCount": "{count} выбрано",
+  "errorLoadingCommits": "Ошибка загрузки коммитов",
+  "errorLoadingBranches": "Ошибка загрузки веток: {error}",
+  "error": "Ошибка: {error}",
+  "configAndLogs": "Конфигурация и журналы",
+  "openAppLog": "Открыть app.log",
+  "openGitLog": "Открыть git.log",
+  "openConfigFolder": "Открыть папку конфигурации",
+  "deleteAppLog": "Удалить app.log",
+  "deleteGitLog": "Удалить git.log",
+  "allWorkspaces": "Все рабочие пространства",
+  "animationSpeed": "Скорость анимации",
+  "animationSpeedFast": "Быстрая",
+  "animationSpeedInfo": "Управляет скоростью анимации интерфейса, таких как меню, диалоги и переходы. Выберите 'Нет' для отключения анимации для лучшей доступности или более быстрого отклика.",
+  "animationSpeedNone": "Нет (Мгновенно)",
+  "animationSpeedNormal": "Нормальная",
+  "animationSpeedSlow": "Медленная",
+  "animationSpeedUpdated": "Скорость анимации обновлена",
+  "animations": "Анимации",
+  "branchNameRequired": "Требуется имя ветки",
+  "checkoutBranchAfterCreation": "Переключиться на ветку после создания",
+  "checkoutBranchAfterCreationHint": "Немедленно переключиться на новую ветку",
+  "createBranchFromTag": "Создать ветку из тега",
+  "deleteAll": "Удалить все",
+  "deleteAllUnprotectedBranches": "Удалить все незащищённые ветки",
+  "deleteAllUnprotectedBranchesConfirm": "Это удалит {count} ветку/и/ок:",
+  "deleteBranch": "Удалить ветку",
+  "failedToRebaseBranch": "Ошибка перебазирования ветки: {error}",
+  "fontSizeTiny": "Крошечный",
+  "forcePushFailed": "Принудительная отправка не удалась: {error}",
+  "forcePushSuccessful": "Успешно выполнена принудительная отправка на удалённый репозиторий",
+  "includeRemoteBranchesInList": "Включить удалённые ветки в список выбора",
+  "interactiveRebaseDescription": "Редактировать коммиты во время перебазирования (расширенное)",
+  "mergeBranches": "Слить ветки",
+  "mergeSourceIntoTarget": "Слить {source} в {target}",
+  "mergingBranches": "Слияние веток...",
+  "preserveMerges": "Сохранить слияния",
+  "preserveMergesDescription": "Сохранить коммиты слияния в перебазированной истории",
+  "previewFontFamily": "Шрифт кода",
+  "previewFontSize": "Размер шрифта кода",
+  "protectedBranchesNotDeleted": "Защищённые ветки и текущая ветка не будут удалены.",
+  "rebase": "Перебазировать",
+  "rebaseHasConflicts": "Перебазирование имеет конфликты: {count} файл(ов) требуют разрешения",
+  "rebaseOptions": "Опции перебазирования",
+  "rebaseSourceOntoTarget": "Перебазировать {source} на {target}",
+  "rebasingBranches": "Перебазирование веток...",
+  "repositoryCount": "{count} репозиториев",
+  "selectBothBranchesToMerge": "Выберите обе ветки для слияния/перебазирования",
+  "selectSourceAndTargetBranches": "Выберите исходную и целевую ветки для слияния или перебазирования",
+  "selectSourceBranch": "Выберите исходную ветку",
+  "snackbarBranchCreatedSuccess": "Ветка \"{branchName}\" создана",
+  "sourceBranch": "Исходная ветка",
+  "sourceTag": "Исходный тег",
+  "strategy": "Стратегия",
+  "successfullyRebasedBranch": "Успешно перебазирована {targetBranch} на {sourceBranch}",
+  "targetBranch": "Целевая ветка",
+  "viewCommitInHistory": "Просмотреть коммит в истории",
+  "language": "Язык",
+  "languageDescription": "Выберите предпочитаемый язык"
+}

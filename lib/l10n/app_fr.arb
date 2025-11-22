@@ -1,0 +1,2481 @@
+{
+  "@@locale": "fr",
+  "appTitle": "Flutter GitUI",
+  "workspaces": "Espaces de travail",
+  "repositories": "Dépôts",
+  "changes": "Changements",
+  "history": "Historique",
+  "browse": "Parcourir",
+  "branches": "Branches",
+  "remotes": "Distants",
+  "stashes": "Stashes",
+  "tags": "Tags",
+  "settings": "Paramètres",
+  "cancel": "Annuler",
+  "ok": "OK",
+  "save": "Enregistrer",
+  "delete": "Supprimer",
+  "create": "Créer",
+  "close": "Fermer",
+  "done": "Terminé",
+  "refresh": "Actualiser",
+  "search": "Rechercher",
+  "browse_": "Parcourir",
+  "apply": "Appliquer",
+  "checkout": "Checkout",
+  "push": "Push",
+  "pull": "Pull",
+  "repositoriesSelected": "{count} sélectionnés",
+  "@repositoriesSelected": {
+    "description": "Count of selected repositories",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "checkoutToMain": "Basculer vers Main",
+  "checkoutAllReposTooltip": "Basculer tous les dépôts sélectionnés vers leur branche principale",
+  "allReposMustHaveCleanStatus": "Tous les dépôts sélectionnés doivent avoir un statut propre",
+  "pullAllReposTooltip": "Tirer les modifications pour tous les dépôts sélectionnés",
+  "createBranchTooltip": "Créer une nouvelle branche dans le dépôt sélectionné",
+  "selectOnlyOneRepoForBranch": "Sélectionnez un seul dépôt pour créer une branche",
+  "createPr": "Créer PR",
+  "createPrTooltip": "Créer une pull request pour le dépôt sélectionné",
+  "selectOnlyOneRepoForPr": "Sélectionnez un seul dépôt pour créer un PR",
+  "fetch": "Fetch",
+  "merge": "Merge",
+  "commit": "Commit",
+  "stash": "Stash",
+  "diff": "Diff",
+  "pop": "Pop",
+  "drop": "Abandonner",
+  "branch": "Branche",
+  "noRepositoryOpen": "Aucun dépôt ouvert",
+  "openRepositoryToContinue": "Ouvrez un dépôt pour continuer",
+  "errorLoadingData": "Erreur de chargement de {dataType}",
+  "@errorLoadingData": {
+    "description": "Generic error loading message",
+    "placeholders": {
+      "dataType": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "error": "Erreur",
+  "retry": "Réessayer",
+  "selectedCount": "{count} Sélectionné(s)",
+  "@selectedCount": {
+    "description": "Count of selected items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "exitSelection": "Quitter la sélection",
+  "selectAll": "Tout sélectionner",
+  "clearSelection": "Effacer la sélection",
+  "clearAll": "Tout effacer",
+  "resetAll": "Tout réinitialiser",
+  "deselectAll": "Tout désélectionner",
+  "searchPlaceholder": "Rechercher {itemType}...",
+  "@searchPlaceholder": {
+    "description": "Search field placeholder",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      }
+    }
+  },
+  "regexSearchPlaceholder": "Recherche regex...",
+  "itemCount": "{count, plural, =1{{count} {itemType}} other{{count} {itemTypePlural}}}",
+  "@itemCount": {
+    "description": "Count of items with proper pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "itemType": {
+        "type": "String",
+        "example": "Tag"
+      },
+      "itemTypePlural": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "ofTotal": "sur {total}",
+  "@ofTotal": {
+    "description": "Showing count of total",
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "noMatchesFound": "Aucun {itemType} ne correspond à \"{query}\"",
+  "@noMatchesFound": {
+    "description": "Empty search results message",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      },
+      "query": {
+        "type": "String",
+        "example": "search term"
+      }
+    }
+  },
+  "createTag": "Créer un tag",
+  "selectTags": "Sélectionner des tags",
+  "fetchTags": "Récupérer les tags",
+  "advancedFilters": "Filtres avancés",
+  "sortTags": "Trier les tags",
+  "sortNameAZ": "Nom (A-Z)",
+  "sortNameZA": "Nom (Z-A)",
+  "sortDateNewest": "Date (Plus récent)",
+  "sortDateOldest": "Date (Plus ancien)",
+  "sortVersionLowHigh": "Version (Bas-Haut)",
+  "sortVersionHighLow": "Version (Haut-Bas)",
+  "groupTags": "Grouper les tags",
+  "noGrouping": "Pas de groupement",
+  "byPrefix": "Par préfixe",
+  "byVersion": "Par version",
+  "byAuthor": "Par auteur",
+  "byDate": "Par date",
+  "allWithCount": "Tous ({count})",
+  "@allWithCount": {
+    "description": "All items filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
+  },
+  "annotatedWithCount": "Annotés ({count})",
+  "@annotatedWithCount": {
+    "description": "Annotated tags filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "15"
+      }
+    }
+  },
+  "lightweightWithCount": "Légers ({count})",
+  "@lightweightWithCount": {
+    "description": "Lightweight tags filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "27"
+      }
+    }
+  },
+  "pushCount": "Pousser {count}",
+  "@pushCount": {
+    "description": "Push count of items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "syncStatus": "État de synchronisation",
+  "tagsNotPushed": "{count, plural, =1{{count} tag non poussé} other{{count} tags non poussés}}",
+  "@tagsNotPushed": {
+    "description": "Count of local-only tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsAvailableToFetch": "{count, plural, =1{{count} tag disponible} other{{count} tags disponibles}}",
+  "@tagsAvailableToFetch": {
+    "description": "Count of remote-only tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pushAll": "Tout pousser",
+  "fetchAll": "Tout récupérer",
+  "noTags": "Aucun tag",
+  "createTagToMarkHistory": "Créez un tag pour marquer les points importants de l'historique",
+  "authorFilter": "Auteur: {author}",
+  "@authorFilter": {
+    "description": "Active author filter chip",
+    "placeholders": {
+      "author": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  "regex": "Regex",
+  "pushTagsCount": "{count, plural, =1{Pousser {count} tag} other{Pousser {count} tags}}",
+  "@pushTagsCount": {
+    "description": "Push tags button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTagsCount": "{count, plural, =1{Supprimer {count} tag} other{Supprimer {count} tags}}",
+  "@deleteTagsCount": {
+    "description": "Delete tags button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dateRange": "Plage de dates",
+  "authorTagger": "Auteur / Tagger",
+  "allAuthors": "Tous les auteurs",
+  "noAuthorsFound": "Aucun auteur trouvé dans les tags",
+  "useRegularExpressions": "Utiliser les expressions régulières",
+  "enableRegexMatching": "Activer la correspondance de motif regex dans la recherche",
+  "today": "Aujourd'hui",
+  "lastWeek": "La semaine dernière",
+  "lastMonth": "Le mois dernier",
+  "lastYear": "L'année dernière",
+  "customRange": "Plage personnalisée",
+  "allTime": "Tout le temps",
+  "createTagDialogTitle": "Créer un tag",
+  "createTagDescription": "Créer un nouveau tag au HEAD actuel",
+  "tagName": "Nom du tag",
+  "tagNameHint": "v1.0.0",
+  "annotatedTag": "Tag annoté",
+  "includeMessageWithTag": "Inclure un message avec le tag",
+  "message": "Message",
+  "releaseNotesPlaceholder": "Notes de version ou description...",
+  "tagCreatedSuccess": "Tag \"{tagName}\" créé avec succès",
+  "@tagCreatedSuccess": {
+    "description": "Tag creation success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String",
+        "example": "v1.0.0"
+      }
+    }
+  },
+  "tagCreatedError": "Échec de la création du tag: {error}",
+  "@tagCreatedError": {
+    "description": "Tag creation error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsFetchedSuccess": "Tags récupérés avec succès",
+  "tagsFetchedError": "Échec de la récupération des tags: {error}",
+  "@tagsFetchedError": {
+    "description": "Tags fetch error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noRemotesConfigured": "Aucun distant configuré",
+  "selectRemote": "Sélectionner un distant",
+  "allTagsPushedSuccess": "Tous les tags poussés vers {remoteName}",
+  "@allTagsPushedSuccess": {
+    "description": "All tags pushed success message",
+    "placeholders": {
+      "remoteName": {
+        "type": "String",
+        "example": "origin"
+      }
+    }
+  },
+  "pushTagsError": "Échec de l'envoi des tags: {error}",
+  "@pushTagsError": {
+    "description": "Push tags error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushingTags": "Envoi des tags",
+  "pushedTagToRemote": "{tagName} poussé vers {remoteName}",
+  "@pushedTagToRemote": {
+    "description": "Tag pushed progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsPushedSuccess": "{count, plural, =1{{count} tag poussé vers {remoteName}} other{{count} tags poussés vers {remoteName}}}",
+  "@tagsPushedSuccess": {
+    "description": "Multiple tags pushed success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagsDialogTitle": "Supprimer les tags?",
+  "deleteTagsConfirmation": "Supprimer {count, plural, =1{{count} tag} other{{count} tags}}?\n\nCette action ne peut pas être annulée.",
+  "@deleteTagsConfirmation": {
+    "description": "Delete tags confirmation message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsToDelete": "Tags à supprimer:",
+  "alsoDeleteFromRemote": "Supprimer également du distant",
+  "deleteFromRemoteDescription": "Supprimer les tags du dépôt distant pour éviter qu'ils ne reviennent lors de la récupération",
+  "deletingTagsLocalAndRemote": "Suppression des tags (Local et Distant)",
+  "deletingTagsLocal": "Suppression des tags",
+  "deletedTagLocally": "{tagName} supprimé localement",
+  "@deletedTagLocally": {
+    "description": "Tag deleted locally progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deletedTagFromRemote": "{tagName} supprimé de {remoteName}",
+  "@deletedTagFromRemote": {
+    "description": "Tag deleted from remote progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsDeletedSuccess": "{count, plural, =1{{count} tag supprimé} other{{count} tags supprimés}}",
+  "@tagsDeletedSuccess": {
+    "description": "Tags deleted success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTagsError": "Échec de la suppression des tags: {error}",
+  "@deleteTagsError": {
+    "description": "Delete tags error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "localBadge": "LOCAL",
+  "viewDiff": "Voir les différences",
+  "type": "Type",
+  "annotated": "Annoté",
+  "lightweight": "Léger",
+  "tagger": "Tagger",
+  "date": "Date",
+  "checkoutTagDialogTitle": "Checkout du tag?",
+  "checkoutTagConfirmation": "Checkout du tag \"{tagName}\"?\n\nCela vous placera dans un état HEAD détaché.",
+  "@checkoutTagConfirmation": {
+    "description": "Checkout tag confirmation message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkedOutTagSuccess": "Checkout du tag \"{tagName}\" effectué",
+  "@checkedOutTagSuccess": {
+    "description": "Checkout tag success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutTagError": "Échec du checkout du tag: {error}",
+  "@checkoutTagError": {
+    "description": "Checkout tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tagPushedSuccess": "Tag \"{tagName}\" poussé vers {remoteName}",
+  "@tagPushedSuccess": {
+    "description": "Tag pushed success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pushTagError": "Échec de l'envoi du tag: {error}",
+  "@pushTagError": {
+    "description": "Push tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagDialogTitle": "Supprimer le tag?",
+  "deletingTagLocalAndRemote": "Suppression du tag (Local et Distant)",
+  "deletingTag": "Suppression du tag",
+  "deletingTagLocally": "Suppression de \"{tagName}\" localement...",
+  "@deletingTagLocally": {
+    "description": "Deleting tag locally progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deletingTagFromRemote": "Suppression de \"{tagName}\" de {remoteName}...",
+  "@deletingTagFromRemote": {
+    "description": "Deleting tag from remote progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "updatingList": "Mise à jour de la liste...",
+  "tagDeletedSuccess": "Tag \"{tagName}\" supprimé",
+  "@tagDeletedSuccess": {
+    "description": "Tag deleted success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagError": "Échec de la suppression du tag: {error}",
+  "@deleteTagError": {
+    "description": "Delete tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWeek": "Cette semaine",
+  "thisMonth": "Ce mois-ci",
+  "thisYear": "Cette année",
+  "yearsAgo": "{count, plural, =1{Il y a 1 an} other{Il y a {count} ans}}",
+  "@yearsAgo": {
+    "description": "Years ago date group",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nonVersioned": "Non versionné",
+  "groupTagCount": "{count, plural, =1{{count} tag} other{{count} tags}}",
+  "@groupTagCount": {
+    "description": "Tag count in group header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStashes": "Aucun stash",
+  "createStashToSaveWork": "Créez un stash pour sauvegarder votre travail en cours",
+  "createStash": "Créer un stash",
+  "openRepositoryToManageStashes": "Ouvrez un dépôt pour gérer les stashes",
+  "stashCount": "{count, plural, =1{{count} Stash} other{{count} Stashes}}",
+  "@stashCount": {
+    "description": "Stash count label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createStashDialogTitle": "Créer un stash",
+  "saveChangesToStash": "Enregistrer vos modifications actuelles dans un stash",
+  "messageOptional": "Message (optionnel)",
+  "describeWorkPlaceholder": "Décrivez ce sur quoi vous travailliez...",
+  "stashAllFiles": "Stash de tous les fichiers",
+  "toggleSelectSpecificFiles": "Basculer pour sélectionner des fichiers spécifiques",
+  "selectFilesToStash": "Sélectionner les fichiers à stasher ({selected}/{total})",
+  "@selectFilesToStash": {
+    "description": "Label for file selection section with counts",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noFilesToStash": "Aucun fichier à stasher",
+  "includeUntrackedFiles": "Inclure les fichiers non suivis",
+  "keepStagedChanges": "Conserver les modifications indexées",
+  "keepChangesInIndex": "Conserver les modifications dans l'index après le stash",
+  "stashCreatedSuccess": "Stash créé avec succès",
+  "createStashError": "Échec de la création du stash: {error}",
+  "@createStashError": {
+    "description": "Create stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "clearAllStashesDialogTitle": "Effacer tous les stashes?",
+  "clearAllStashesConfirmation": "Cela supprimera définitivement tous les stashes.\n\nCette action ne peut pas être annulée.",
+  "allStashesClearedSuccess": "Tous les stashes effacés",
+  "clearStashesError": "Échec de l'effacement des stashes: {error}",
+  "@clearStashesError": {
+    "description": "Clear stashes error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranch": "Créer une branche",
+  "appliedStashSuccess": "{stashRef} appliqué",
+  "@appliedStashSuccess": {
+    "description": "Applied stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "applyStashError": "Échec de l'application du stash: {error}",
+  "@applyStashError": {
+    "description": "Apply stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "poppedStashSuccess": "{stashRef} extrait",
+  "@poppedStashSuccess": {
+    "description": "Popped stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "popStashError": "Échec de l'extraction du stash: {error}",
+  "@popStashError": {
+    "description": "Pop stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loadDiffError": "Échec du chargement des différences: {error}",
+  "@loadDiffError": {
+    "description": "Load diff error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranchFromStash": "Créer une branche depuis le stash",
+  "createBranchFromStashDescription": "Créer une nouvelle branche depuis {stashRef}",
+  "@createBranchFromStashDescription": {
+    "description": "Description for create branch from stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "branchName": "Nom de la branche",
+  "createdBranchFromStashSuccess": "Branche \"{branchName}\" créée depuis {stashRef}",
+  "@createdBranchFromStashSuccess": {
+    "description": "Created branch from stash success message",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranchError": "Échec de la création de la branche: {error}",
+  "@createBranchError": {
+    "description": "Create branch error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashDialogTitle": "Abandonner le stash?",
+  "dropStashConfirmation": "Abandonner {stashRef}?\n\nCette action ne peut pas être annulée.",
+  "@dropStashConfirmation": {
+    "description": "Drop stash confirmation message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "droppedStashSuccess": "{stashRef} abandonné",
+  "@droppedStashSuccess": {
+    "description": "Dropped stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashError": "Échec de l'abandon du stash: {error}",
+  "@dropStashError": {
+    "description": "Drop stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "stashDiffDialogTitle": "Différences du stash - {stashRef}",
+  "@stashDiffDialogTitle": {
+    "description": "Stash diff dialog title",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "noChanges": "Aucun changement",
+  "cloneRepository": "Cloner le dépôt",
+  "cloneRepositoryDescription": "Cloner un dépôt Git depuis une URL",
+  "repositoryUrl": "URL du dépôt",
+  "repositoryUrlHint": "https://github.com/user/repo.git",
+  "destinationPath": "Chemin de destination",
+  "destinationPathHint": "C:\\Users\\...\\depot",
+  "branchOptional": "Branche (optionnelle)",
+  "mainBranchHint": "main",
+  "shallowClone": "Clone superficiel",
+  "shallowCloneDescription": "Cloner uniquement l'historique récent pour économiser de l'espace",
+  "depth": "Profondeur:",
+  "cloningRepositoryProgress": "Clonage du dépôt... Cela peut prendre un moment.",
+  "clone": "Cloner",
+  "directorySelectionNotAvailableInBrowser": "La sélection de répertoire n'est pas disponible dans les navigateurs web",
+  "selectDestinationForClone": "Sélectionner la destination pour le clone",
+  "pleaseEnterRepositoryUrl": "Veuillez entrer une URL de dépôt",
+  "pleaseEnterDestinationPath": "Veuillez entrer un chemin de destination",
+  "repositoryClonedSuccess": "Dépôt cloné avec succès vers {path}",
+  "@repositoryClonedSuccess": {
+    "description": "Success message after cloning repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryClonedButFailedToOpen": "Dépôt cloné mais échec de l'ouverture",
+  "cloneRepositoryError": "Échec du clonage du dépôt: {error}",
+  "@cloneRepositoryError": {
+    "description": "Clone repository error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reference": "Référence",
+  "created": "Créé",
+  "openRepositoryToManageTags": "Ouvrez un dépôt pour gérer les tags",
+  "workingDirectoryClean": "Répertoire de travail propre",
+  "noChangesToCommit": "Aucune modification à valider",
+  "errorLoadingStatus": "Erreur lors du chargement du statut",
+  "errorLoadingStashes": "Erreur lors du chargement des stashes",
+  "createStashToSaveWorkInProgress": "Créez un stash pour sauvegarder votre travail en cours",
+  "errorLoadingTags": "Erreur lors du chargement des tags",
+  "openRepositoryToBrowseFiles": "Ouvrez un dépôt pour parcourir les fichiers",
+  "noFileSelected": "Aucun fichier sélectionné",
+  "selectFileToViewHistoryOrPreview": "Sélectionnez un fichier pour voir l'historique ou l'aperçu",
+  "noLocalBranches": "Aucune branche locale",
+  "noRemoteBranches": "Aucune branche distante",
+  "errorLoadingBranches": "Erreur lors du chargement des branches",
+  "@errorLoadingBranches": {
+    "description": "Error message when loading branches fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noRemotes": "Aucun distant",
+  "addRemoteToCollaborate": "Ajouter un dépôt distant pour collaborer",
+  "addRemote": "Ajouter un distant",
+  "noResults": "Aucun résultat",
+  "noRemotesMatchQuery": "Aucun distant ne correspond à la requête",
+  "@noRemotesMatchQuery": {
+    "description": "Message when no remotes match search query",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "clearSearch": "Effacer la recherche",
+  "errorLoadingRemotes": "Erreur lors du chargement des distants",
+  "noWorkspacesYet": "Aucun espace de travail pour le moment",
+  "createWorkspaceToOrganize": "Créez un espace de travail pour organiser vos dépôts",
+  "noRepositoriesYet": "Aucun dépôt pour le moment",
+  "addRepositoryToGetStarted": "Ajoutez un dépôt pour commencer",
+  "openRepository": "Ouvrir un dépôt",
+  "browseExistingRepository": "Parcourir un dépôt existant",
+  "cloneFromRemoteUrl": "Cloner depuis une URL distante",
+  "initializeRepository": "Initialiser un dépôt",
+  "createNewGitRepository": "Créer un nouveau dépôt Git dans un répertoire",
+  "addedRemoteSuccess": "Distant \"{remoteName}\" ajouté",
+  "@addedRemoteSuccess": {
+    "description": "Success message when remote is added",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "addRemoteError": "Échec de l'ajout du distant: {error}",
+  "@addRemoteError": {
+    "description": "Error message when adding remote fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchedAllRemotesSuccess": "Tous les distants récupérés avec succès",
+  "fetchRemotesError": "Échec de la récupération des distants: {error}",
+  "@fetchRemotesError": {
+    "description": "Error message when fetching from remotes fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "blame": "Blame",
+  "preview": "Aperçu",
+  "viewOptions": "Options d'affichage",
+  "showHiddenFiles": "Afficher les fichiers cachés",
+  "showIgnoredFiles": "Afficher les fichiers ignorés",
+  "expandAll": "Tout développer",
+  "collapseAll": "Tout réduire",
+  "advancedSearch": "Recherche avancée",
+  "clearFilters": "Effacer les filtres ({count})",
+  "@clearFilters": {
+    "description": "Clear filters button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commitsSquashedSuccess": "Commits fusionnés avec succès",
+  "cherryPickingCommits": "Cherry-pick de {count, plural, =1{{count} commit} other{{count} commits}}...",
+  "@cherryPickingCommits": {
+    "description": "Progress message when cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickedSuccess": "Cherry-pick de {count, plural, =1{{count} commit} other{{count} commits}} réussi",
+  "@cherryPickedSuccess": {
+    "description": "Success message after cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickFailed": "Échec du cherry-pick: {error}",
+  "@cherryPickFailed": {
+    "description": "Error message when cherry-pick fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "revertingCommit": "Annulation du commit...",
+  "@revertingCommit": {
+    "description": "Progress message when reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertedSuccess": "Commit {hash} annulé avec succès",
+  "@revertedSuccess": {
+    "description": "Success message after reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertFailed": "Échec de l'annulation: {error}",
+  "@revertFailed": {
+    "description": "Error message when revert fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "resettingToCommit": "Réinitialisation au commit...",
+  "@resettingToCommit": {
+    "description": "Progress message when resetting to a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetSuccess": "Réinitialisation à {hash} réussie",
+  "@resetSuccess": {
+    "description": "Success message after resetting",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFailed": "Échec de la réinitialisation: {error}",
+  "@resetFailed": {
+    "description": "Error message when reset fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pullingFromRemote": "Pull depuis le distant...",
+  "pullSuccess": "Pull depuis \"{remoteName}\" réussi",
+  "pullFailed": "Échec du pull: {error}",
+  "@pullFailed": {
+    "description": "Error message when pull fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushSuccess": "Push vers \"{remoteName}\" réussi",
+  "pushFailed": "Échec du push: {error}",
+  "@pushFailed": {
+    "description": "Error message when push fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryPath": "Chemin du répertoire",
+  "directoryPathHint": "C:\\Users\\...\\mon-projet",
+  "initialBranchName": "Nom de la branche initiale",
+  "bareRepository": "Dépôt nu",
+  "bareRepositoryDescription": "Créer un dépôt sans répertoire de travail (pour les serveurs)",
+  "initializeRepositoryInfo": "Cela créera un nouveau dépôt Git dans le répertoire spécifié.",
+  "@initializeRepositoryInfo": {
+    "description": "Info message for initialize repository dialog",
+    "placeholders": {
+      "bareText": {
+        "type": "String"
+      }
+    }
+  },
+  "initializeRepositoryInfoBare": "Un dépôt nu ne contient pas de répertoire de travail et est généralement utilisé pour les serveurs.",
+  "initialize": "Initialiser",
+  "directorySelectionNotAvailable": "La sélection de répertoire n'est pas disponible dans les navigateurs web",
+  "selectDirectoryToInitialize": "Sélectionner le répertoire à initialiser",
+  "enterDirectoryPath": "Veuillez entrer un chemin de répertoire",
+  "initializingRepository": "Initialisation du dépôt...",
+  "repositoryInitializedSuccess": "Dépôt initialisé avec succès à {path}",
+  "@repositoryInitializedSuccess": {
+    "description": "Success message after initializing repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryInitializedButFailedToOpen": "Dépôt initialisé mais échec de l'ouverture",
+  "failedToInitializeRepository": "Échec de l'initialisation du dépôt: {error}",
+  "@failedToInitializeRepository": {
+    "description": "Error message when initialization fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cloneGitRepositoryFromUrl": "Cloner un dépôt Git depuis une URL",
+  "enterRepositoryUrl": "Veuillez entrer une URL de dépôt",
+  "enterDestinationPath": "Veuillez entrer un chemin de destination",
+  "cloningRepository": "Clonage du dépôt... Cela peut prendre un moment.",
+  "failedToCloneRepository": "Échec du clonage du dépôt: {error}",
+  "@failedToCloneRepository": {
+    "description": "Error message when cloning fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "switchRepository": "Changer de dépôt",
+  "searchRepositories": "Rechercher des dépôts",
+  "noRepositoriesFound": "Aucun dépôt trouvé",
+  "invalidRepository": "Dépôt invalide",
+  "closeRepository": "Fermer le dépôt",
+  "repositoryInvalidOrMissing": "Le dépôt est invalide ou manquant",
+  "switchedToRepository": "Basculé vers le dépôt {path}",
+  "@switchedToRepository": {
+    "description": "SnackBar message after switching repository",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryClosed": "Dépôt fermé",
+  "switchBranch": "Changer de branche",
+  "searchBranches": "Rechercher des branches",
+  "showRemoteBranches": "Afficher les branches distantes",
+  "noBranchesFound": "Aucune branche trouvée",
+  "switchedToBranch": "Basculé vers la branche {branchName}",
+  "@switchedToBranch": {
+    "description": "SnackBar message after switching branch",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSwitchBranch": "Échec du changement de branche: {error}",
+  "@failedToSwitchBranch": {
+    "description": "Error message when switching branch fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gitReflog": "Reflog Git",
+  "noReflogEntries": "Aucune entrée reflog",
+  "referenceLogEmpty": "Le journal de référence est vide",
+  "errorLoadingReflog": "Erreur lors du chargement du reflog",
+  "reflogEntriesInfo": "Le reflog enregistre toutes les mises à jour des références de branche. Utile pour récupérer les commits perdus.",
+  "@reflogEntriesInfo": {
+    "description": "Info message showing number of reflog entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchBranchesDialog": "Rechercher des branches",
+  "clear": "Effacer",
+  "renameBranch": "Renommer la branche",
+  "newBranchName": "Nom de la nouvelle branche",
+  "enterBranchName": "Entrez le nom de la branche",
+  "rename": "Renommer",
+  "mergeBranchDialog": "Fusionner la branche",
+  "mergeBranchConfirm": "Fusionner \"{sourceBranch}\" dans \"{targetBranch}\"?",
+  "@mergeBranchConfirm": {
+    "description": "Confirmation message for merging branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBranchDialog": "Supprimer la branche?",
+  "deleteBranchConfirm": "Supprimer la branche \"{branchName}\"?\n\nCette action ne peut pas être annulée.",
+  "@deleteBranchConfirm": {
+    "description": "Confirmation message for deleting branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRemotesDialog": "Rechercher des distants",
+  "searchQuery": "Requête de recherche",
+  "remoteNameOrUrl": "Nom ou URL du distant",
+  "addRemoteDialog": "Ajouter un distant",
+  "remoteName": "Nom du distant",
+  "remoteNameHint": "ex: origin",
+  "enterRemoteName": "Entrez le nom du distant",
+  "remoteNameNoSpaces": "Le nom du distant ne peut pas contenir d'espaces",
+  "remoteUrlLabel": "URL du distant",
+  "remoteUrlHintDialog": "https://github.com/utilisateur/depot.git",
+  "enterRemoteUrl": "Entrez l'URL du distant",
+  "add": "Ajouter",
+  "editRemoteUrl": "Modifier l'URL de \"{remoteName}\"",
+  "@editRemoteUrl": {
+    "description": "Title for edit remote URL dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "enterUrl": "Veuillez entrer une URL",
+  "renameRemote": "Renommer \"{remoteName}\"",
+  "@renameRemote": {
+    "description": "Title for rename remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "newName": "Nouveau nom",
+  "enterName": "Veuillez entrer un nom",
+  "nameCannotContainSpaces": "Le nom ne peut pas contenir d'espaces",
+  "pruneRemote": "Nettoyer le distant",
+  "@pruneRemote": {
+    "description": "Title for prune remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pruneRemoteConfirm": "Nettoyer \"{remoteName}\"?\n\nCela supprimera les références aux branches distantes qui n'existent plus sur le distant.",
+  "prune": "Nettoyer",
+  "deleteRemote": "Supprimer le distant",
+  "@deleteRemote": {
+    "description": "Title for delete remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteRemoteConfirm": "Supprimer le distant \"{remoteName}\"?",
+  "clearAllStashesDialog": "Effacer tous les stashes?",
+  "clearAllStashesConfirm": "Cela supprimera définitivement tous les stashes.\n\nCette action ne peut pas être annulée.",
+  "branchNameLabel": "Nom de la branche",
+  "dropStashDialog": "Abandonner le stash?",
+  "dropStashConfirm": "Abandonner {stashRef}?\n\nCette action ne peut pas être annulée.",
+  "@dropStashConfirm": {
+    "description": "Confirmation message for dropping stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "stashDiffTitle": "Diff du Stash - {stashRef}",
+  "@stashDiffTitle": {
+    "description": "Title for stash diff dialog",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "createStashDialog": "Créer un stash",
+  "describeWork": "Décrivez ce sur quoi vous travailliez...",
+  "stashAllFilesToggle": "Basculer pour sélectionner des fichiers spécifiques",
+  "keepStagedChangesSubtitle": "Conserver les modifications dans l'index après le stash",
+  "createTagDialog": "Créer un tag",
+  "createNewTagAtHead": "Créer un nouveau tag au HEAD actuel",
+  "releaseNotesHint": "Notes de version ou description...",
+  "deleteTagsDialog": "Supprimer les tags?",
+  "deleteTagsConfirm": "Supprimer {count, plural, =1{{count} tag} other{{count} tags}}?\n\nCette action ne peut pas être annulée.\n\nTags à supprimer:\n{tagList}{ellipsis}",
+  "@deleteTagsConfirm": {
+    "description": "Confirmation message for deleting tags with list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "tagList": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFromRemoteSubtitle": "Supprimer les tags du dépôt distant pour éviter qu'ils ne reviennent lors de la récupération",
+  "checkoutTagDialog": "Checkout du tag?",
+  "checkoutTagConfirm": "Checkout du tag \"{tagName}\"?\n\nCela vous placera dans un état HEAD détaché.",
+  "@checkoutTagConfirm": {
+    "description": "Confirmation message for checking out tag",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "selectRemoteDialog": "Sélectionner un distant",
+  "advancedFiltersDialog": "Filtres avancés",
+  "enableRegexPatternMatching": "Activer la correspondance de motif regex dans la recherche",
+  "startDate": "Date de début",
+  "endDate": "Date de fin",
+  "squashCommitsDialog": "Fusionner les commits",
+  "squashingCommitsCount": "Fusion de {count} commits en un:",
+  "@squashingCommitsCount": {
+    "description": "Message showing number of commits being squashed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "newCommitMessage": "Nouveau message de commit:",
+  "enterCommitMessageForSquashed": "Entrez le message de commit pour le commit fusionné",
+  "squashCommitsInfo": "Cela combinera les commits sélectionnés en un seul commit avec le message fourni.",
+  "selectedCommitsMustBeConsecutive": "Les commits sélectionnés doivent être consécutifs dans l'historique",
+  "cannotSquashRootCommit": "Impossible de fusionner: Le commit sélectionné le plus ancien est le commit racine (aucun parent n'existe)",
+  "commitMessageCannotBeEmpty": "Le message du commit ne peut pas être vide",
+  "failedToSquashCommits": "Échec de la fusion des commits: {error}",
+  "@failedToSquashCommits": {
+    "description": "Error message when squashing commits fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "squashCommits": "Fusionner les commits",
+  "resetToCommit": "Réinitialiser au commit",
+  "resetCurrentBranchTo": "Réinitialiser la branche actuelle à:",
+  "chooseResetMode": "Choisissez le mode de réinitialisation:",
+  "branchPointerWillMove": "Cela déplacera le pointeur de la branche vers ce commit.",
+  "soft": "Douce",
+  "keepChangesStagedSoft": "conserver les modifications indexées",
+  "mixed": "Mixte",
+  "keepChangesUnstagedMixed": "conserver les modifications non indexées",
+  "hard": "Forte",
+  "discardAllChangesHard": "abandonner toutes les modifications",
+  "pushRejected": "Push refusé",
+  "pushRejectedHistoryRewritten": "Push refusé car l'historique a été réécrit",
+  "needToForcePushChanges": "Pour pousser ces modifications, vous devez faire un push forcé.",
+  "forcePushWarningOverwriteRemote": "Attention: Le push forcé écrasera l'historique distant!",
+  "forcePushOnlyIfAlone": "Faites cela uniquement si vous travaillez seul ou si vous êtes coordonné avec l'équipe",
+  "forcePushOthersNeedReset": "Les autres devront réinitialiser leurs branches locales",
+  "forcePushCannotBeEasilyUndone": "Cela ne peut pas être facilement annulé",
+  "forcePush": "Push forcé",
+  "uncommittedChanges": "Modifications non validées",
+  "youHaveUncommittedChanges": "Vous avez des modifications non validées",
+  "@youHaveUncommittedChanges": {
+    "description": "Message about uncommitted changes before branch switch",
+    "placeholders": {
+      "changeCount": {
+        "type": "int",
+        "example": "3"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "switchAnyway": "Changer quand même",
+  "branchSwitchFailed": "Échec du changement de branche",
+  "failedToSwitchToBranch": "Échec du basculement vers la branche \"{branchName}\":\n\n{error}",
+  "@failedToSwitchToBranch": {
+    "description": "Error message when switching to a branch fails",
+    "placeholders": {
+      "branchName": {
+        "type": "String",
+        "example": "feature/new-feature"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "generalSearch": "Recherche générale",
+  "searchInCommitOrAuthorOrHash": "Rechercher dans le commit, l'auteur ou le hash",
+  "caseSensitive": "Sensible à la casse",
+  "regularExpression": "Expression régulière",
+  "fuzzyMatch": "Correspondance floue",
+  "specificFilters": "Filtres spécifiques",
+  "authorLabel": "Auteur",
+  "filterByAuthorNameOrEmail": "Filtrer par nom ou email de l'auteur",
+  "committerLabel": "Valideur",
+  "filterByCommitterNameOrEmail": "Filtrer par nom ou email du valideur",
+  "filePathLabel": "Chemin du fichier",
+  "filterByFilePathExample": "Filtrer par chemin de fichier (ex: src/main.dart)",
+  "commitHashLabel": "Hash du commit",
+  "filterByCommitHashPrefix": "Filtrer par préfixe de hash de commit (ex: abc123)",
+  "commitDetails": "Détails du commit",
+  "commitMessage": "Message du commit",
+  "additionalDetails": "Détails supplémentaires",
+  "show": "Afficher",
+  "hide": "Masquer",
+  "name": "Nom",
+  "hash": "Hash",
+  "parent": "Parent",
+  "parents": "Parents",
+  "references": "Références",
+  "localTab": "Local",
+  "remoteTab": "Distant",
+  "dateRangeSection": "Plage de dates",
+  "fromDate": "Date de début",
+  "toDate": "Date de fin",
+  "last30Days": "30 derniers jours",
+  "searchSyntax": "Syntaxe de recherche",
+  "syntaxAuthorFilter": "author:nom - Filtrer par auteur",
+  "syntaxFileFilter": "file:chemin - Filtrer par fichier",
+  "syntaxHashFilter": "hash:préfixe - Filtrer par hash",
+  "syntaxFromDateFilter": "from:AAAA-MM-JJ - Depuis la date",
+  "syntaxToDateFilter": "to:AAAA-MM-JJ - Jusqu'à la date",
+  "syntaxExactPhrase": "\"phrase exacte\" - Correspondance exacte",
+  "selectDate": "Sélectionner la date",
+  "clearFiltersButton": "Effacer les filtres",
+  "advancedSearchButton": "Rechercher",
+  "batchOperationProgressDialogTitle": "{title}",
+  "@batchOperationProgressDialogTitle": {
+    "description": "Title for batch operation progress dialog",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "operationInProgress": "En attente...",
+  "operationsCompleted": "Toutes les opérations terminées avec succès",
+  "operationsCompletedWithErrors": "Terminé avec des erreurs",
+  "successCount": "{count} réussi(e)s",
+  "@successCount": {
+    "description": "Summary of operation results",
+    "placeholders": {
+      "successCount": {
+        "type": "int"
+      },
+      "failureCount": {
+        "type": "int"
+      }
+    }
+  },
+  "completed": "Terminé",
+  "failed": "Échec",
+  "createBranchDialogTitle": "Créer une branche",
+  "branchPrefixLabel": "Préfixe de branche:",
+  "noPrefix": "Aucun préfixe",
+  "featurePrefix": "Fonctionnalité",
+  "releasePrefix": "Version",
+  "hotfixPrefix": "Correctif urgent",
+  "bugfixPrefix": "Correctif",
+  "customPrefix": "Personnalisé",
+  "customPrefixLabel": "Préfixe personnalisé",
+  "customPrefixHint": "ex: experience/",
+  "customPrefixHelper": "Doit se terminer par /",
+  "branchNameHint": "ex: authentification-utilisateur",
+  "fullBranchNameLabel": "Nom complet de la branche:",
+  "enterBranchNameLabel": "(entrez le nom de la branche)",
+  "branchNameCannotBeEmpty": "Le nom de la branche ne peut pas être vide",
+  "branchNameInvalidCharacters": "Le nom de la branche contient des caractères invalides",
+  "customPrefixMustEndWithSlash": "Le préfixe personnalisé doit se terminer par /",
+  "willCreateInRepositories": "Créera dans les dépôts suivants:",
+  "@willCreateInRepositories": {
+    "description": "Label showing how many repositories will get the branch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "repositoryLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "repository": "Dépôt",
+  "setUpstreamLabel": "Définir la branche en amont",
+  "setUpstreamDescription": "Configurer le suivi de la branche distante",
+  "checkoutAfterCreationLabel": "Checkout après création",
+  "checkoutAfterCreationDescription": "Basculer vers la nouvelle branche immédiatement",
+  "createBranchButton": "Créer la branche",
+  "createPullRequestDialogTitle": "Créer une pull request",
+  "sourceBranchLabel": "Branche source",
+  "targetBranchLabel": "Branche cible",
+  "searchOrSelectBranch": "Rechercher ou sélectionner une branche",
+  "selectTargetBranch": "Sélectionner la branche cible",
+  "pullRequestTitleLabel": "Titre de la pull request",
+  "enterPRTitle": "Entrez le titre de la PR",
+  "enterPRTitleValidation": "Veuillez entrer un titre",
+  "descriptionLabel": "Description",
+  "enterPRDescription": "Entrez la description de la PR (optionnel)",
+  "createAsDraftLabel": "Créer comme brouillon",
+  "draftPRDescription": "Les pull requests brouillon ne peuvent pas être fusionnées tant qu'elles ne sont pas marquées comme prêtes",
+  "prInfoMessage": "Cela ouvrira votre navigateur pour créer une pull request avec votre service Git",
+  "createPRButton": "Créer la PR",
+  "projectDialogCreateTitle": "Créer un projet",
+  "projectDialogEditTitle": "Modifier le projet",
+  "projectNameLabel": "Nom du projet",
+  "enterProjectName": "Entrez le nom du projet",
+  "enterProjectNameValidation": "Veuillez entrer un nom de projet",
+  "projectDescriptionLabel": "Description (Optionnelle)",
+  "enterProjectDescription": "Entrez la description du projet",
+  "projectColorLabel": "Couleur du projet",
+  "previewLabel": "Aperçu",
+  "projectNamePreviewPlaceholder": "Nom du projet",
+  "saveProjectButton": "Sauvegarder le projet",
+  "createProjectButton": "Créer",
+  "createTagDialogDescription": "Créer un tag pour marquer un point important dans l'historique du dépôt.",
+  "targetCommit": "Commit cible",
+  "headCurrentCommit": "HEAD (commit actuel)",
+  "enterTagName": "Entrez le nom du tag",
+  "tagNameNoSpaces": "Le nom du tag ne peut pas contenir d'espaces",
+  "enterTagMessage": "Veuillez entrer un message pour le tag annoté",
+  "mergeABranchInto": "Fusionner une branche dans {currentBranch}",
+  "@mergeABranchInto": {
+    "description": "Description text in merge branch dialog",
+    "placeholders": {
+      "currentBranch": {
+        "type": "String",
+        "example": "main"
+      }
+    }
+  },
+  "noOtherBranchesAvailable": "Aucune autre branche disponible à fusionner",
+  "branchToMerge": "Branche à fusionner",
+  "selectABranch": "Sélectionner une branche",
+  "remote": "Distant",
+  "mergeOptions": "Options de fusion",
+  "fastForwardOnly": "Fast-forward uniquement",
+  "abortIfFastForwardNotPossible": "Abandonner si le fast-forward n'est pas possible",
+  "noFastForward": "Pas de fast-forward",
+  "alwaysCreateMergeCommit": "Toujours créer un commit de fusion",
+  "combineAllCommitsIntoSingleCommit": "Combiner tous les commits en un seul commit",
+  "customMergeMessage": "Message de fusion personnalisé",
+  "enterCustomMergeCommitMessage": "Entrez un message de commit de fusion personnalisé",
+  "mergeMessage": "Message de fusion",
+  "squashMergeWillCombineAllCommits": "La fusion par squash combinera tous les commits en un seul",
+  "thisWillMergeSelectedBranch": "Cela fusionnera la branche sélectionnée dans la branche actuelle",
+  "mergingBranch": "Fusion de la branche...",
+  "mergeHasConflicts": "La fusion a des conflits: {count} fichier(s) nécessitent une résolution",
+  "@mergeHasConflicts": {
+    "description": "Error message when merge has conflicts",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resolve": "Résoudre",
+  "successfullyMergedBranch": "Branche fusionnée avec succès",
+  "@successfullyMergedBranch": {
+    "description": "Success message after merge",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "currentBranch": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToMergeBranch": "Échec de la fusion de la branche: {error}",
+  "@failedToMergeBranch": {
+    "description": "Error message when merge fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseBranch": "Rebaser la branche",
+  "rebaseWillReplayCommits": "Le rebase rejouera vos commits au-dessus de la branche cible",
+  "currentBranch": "Branche actuelle",
+  "rebaseOntoBranch": "Rebaser sur la branche",
+  "interactiveRebase": "Rebase interactif",
+  "editCommitsDuringRebase": "Modifier les commits pendant le rebase (avancé)",
+  "rebaseWarning": "Attention: Le rebase réécrit l'historique. Évitez de rebaser des commits déjà push és.",
+  "rebaseConflicts": "Conflits de rebase",
+  "rebaseInProgress": "Rebase en cours",
+  "step": "Étape",
+  "@step": {
+    "description": "Progress indicator for rebase steps",
+    "placeholders": {
+      "progressText": {
+        "type": "String"
+      }
+    }
+  },
+  "rebasingOnto": "Rebase sur {branchName}",
+  "currentCommit": "Commit actuel",
+  "conflictsDetected": "Conflits détectés",
+  "resolveConflictsInChangesScreen": "Résolvez les conflits dans l'écran Modifications, puis continuez le rebase",
+  "goToChanges": "Aller aux modifications",
+  "rebaseIsInProgress": "Un rebase est en cours",
+  "abortToCancelAndReturnToOriginalState": "Abandonner pour annuler et revenir à l'état d'origine",
+  "waitForRebaseToCompleteAutomatically": "Attendez que le rebase se termine automatiquement",
+  "startRebase": "Démarrer le rebase",
+  "startBisect": "Démarrer Bisect",
+  "abort": "Abandonner",
+  "skip": "Ignorer",
+  "continueOperation": "Continuer",
+  "rebaseStartedSuccessfully": "Rebase démarré avec succès",
+  "rebaseStartedConflictNeedsResolution": "Rebase démarré avec des conflits - résolution nécessaire",
+  "failedToStartRebase": "Échec du démarrage du rebase: {error}",
+  "@failedToStartRebase": {
+    "description": "Error message when starting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseContinued": "Rebase continué",
+  "failedToContinueRebase": "Échec de la continuation du rebase: {error}",
+  "@failedToContinueRebase": {
+    "description": "Error message when continuing rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "commitSkipped": "Commit ignoré",
+  "failedToSkip": "Échec de l'omission: {error}",
+  "@failedToSkip": {
+    "description": "Error message when skipping commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseAborted": "Rebase abandonné",
+  "failedToAbortRebase": "Échec de l'abandon du rebase: {error}",
+  "@failedToAbortRebase": {
+    "description": "Error message when aborting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noNodesAvailable": "Aucune autre branche disponible",
+  "gitBisect": "Git Bisect",
+  "bisectHelpsFindCommitThatIntroducedBug": "Bisect aide à trouver quel commit a introduit un bug en effectuant une recherche binaire.",
+  "goodCommitWhereBugWasNotPresent": "Commit sain (où le bug N'ÉTAIT PAS présent)",
+  "selectAGoodCommit": "Sélectionner un commit sain",
+  "badCommitWhereBugIsPresent": "Commit défectueux (où le bug EST présent)",
+  "selectABadCommitDefaultsToHead": "Sélectionner un commit défectueux (par défaut: HEAD)",
+  "noCommitsAvailable": "Aucun commit disponible",
+  "bisectInProgress": "Bisect en cours",
+  "approximatelyStepsRemaining": "Environ {stepsRemaining} étapes restantes",
+  "@approximatelyStepsRemaining": {
+    "description": "Progress message for bisect",
+    "placeholders": {
+      "stepsRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "testThisCommitAndMark": "Testez ce commit et marquez-le comme bon ou mauvais",
+  "good": "Bon",
+  "bad": "Mauvais",
+  "bisectHistory": "Historique Bisect",
+  "goodCommits": "Commits sains: {count}",
+  "@goodCommits": {
+    "description": "Label for good commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "badCommits": "Commits défectueux: {count}",
+  "@badCommits": {
+    "description": "Label for bad commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bisectComplete": "Bisect terminé!",
+  "foundFirstBadCommit": "Premier commit défectueux trouvé:",
+  "bisectStarted": "Bisect démarré - testez le commit actuel",
+  "failedToStartBisect": "Échec du démarrage de bisect: {error}",
+  "@failedToStartBisect": {
+    "description": "Error message when starting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "markedAs": "Marqué comme {status}",
+  "@markedAs": {
+    "description": "Success message when commit marked in bisect",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "good"
+      }
+    }
+  },
+  "failedToMarkCommit": "Échec du marquage du commit: {error}",
+  "@failedToMarkCommit": {
+    "description": "Error message when marking commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bisectReset": "Bisect réinitialisé",
+  "failedToResetBisect": "Échec de la réinitialisation de bisect: {error}",
+  "@failedToResetBisect": {
+    "description": "Error message when resetting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reset": "Réinitialiser",
+  "configureDiffMergeTools": "Configurer les outils de diff/fusion",
+  "noDiffToolsFound": "Aucun outil de diff trouvé",
+  "noExternalDiffMergeToolsDetected": "Aucun outil externe de diff/fusion n'a été détecté sur votre système.",
+  "installToolsSuchAs": "Installez des outils comme VS Code, Beyond Compare, KDiff3 ou Meld.",
+  "errorDetectingTools": "Erreur lors de la détection des outils",
+  "configureYourPreferredTools": "Configurez vos outils préférés pour comparer et fusionner des fichiers. {toolCount} outils détectés.",
+  "@configureYourPreferredTools": {
+    "description": "Info banner in diff tools config dialog",
+    "placeholders": {
+      "toolCount": {
+        "type": "int"
+      }
+    }
+  },
+  "diffTool": "Outil de différence",
+  "usedForComparingFileChanges": "Utilisé pour comparer les modifications de fichiers",
+  "mergeTool": "Outil de fusion",
+  "usedForResolvingMergeConflicts": "Utilisé pour résoudre les conflits de fusion",
+  "available": "Disponible",
+  "diffMergeToolSettingsSaved": "Paramètres des outils de diff/fusion sauvegardés",
+  "amend": "Modifier",
+  "discardAll": "Tout abandonner",
+  "clean": "Nettoyer",
+  "commandCategoryRepository": "Dépôt",
+  "commandCategoryChanges": "Modifications & Commits",
+  "commandCategoryHistory": "Historique & Différences",
+  "commandCategoryBranches": "Branches",
+  "commandCategoryRemotes": "Distants",
+  "commandCategoryStashes": "Stashes",
+  "commandCategoryTags": "Tags",
+  "commandCategorySubmodules": "Sous-modules",
+  "commandCategoryAdvanced": "Avancé",
+  "commandCategorySettings": "Paramètres",
+  "commandCloneRepository": "Cloner un dépôt",
+  "commandCloneRepositoryDesc": "Cloner un dépôt depuis une URL",
+  "commandOpenRepository": "Ouvrir un dépôt",
+  "commandOpenRepositoryDesc": "Ouvrir un dépôt Git existant",
+  "commandInitializeRepository": "Initialiser un dépôt",
+  "commandInitializeRepositoryDesc": "Créer un nouveau dépôt Git",
+  "commandCommitChanges": "Valider les modifications",
+  "commandCommitChangesDesc": "Valider les modifications indexées dans le dépôt",
+  "commandAmendLastCommit": "Modifier le dernier commit",
+  "commandAmendLastCommitDesc": "Modifier le dernier commit avec de nouvelles modifications",
+  "commandStageAllFiles": "Indexer tous les fichiers",
+  "commandStageAllFilesDesc": "Indexer tous les fichiers modifiés pour le commit",
+  "commandUnstageAllFiles": "Désindexer tous les fichiers",
+  "commandUnstageAllFilesDesc": "Désindexer tous les fichiers indexés",
+  "commandDiscardAllChanges": "Abandonner toutes les modifications",
+  "commandDiscardAllChangesDesc": "Abandonner toutes les modifications non validées",
+  "commandViewCommitHistory": "Voir l'historique des commits",
+  "commandViewCommitHistoryDesc": "Voir le graphe de l'historique des commits",
+  "commandViewFileHistory": "Voir l'historique du fichier",
+  "commandViewFileHistoryDesc": "Afficher l'historique des commits d'un fichier",
+  "commandCompareBranches": "Comparer les branches",
+  "commandCompareBranchesDesc": "Comparer deux branches",
+  "commandCreateBranch": "Créer une branche",
+  "commandCreateBranchDesc": "Créer une nouvelle branche",
+  "commandCheckoutBranch": "Checkout de branche",
+  "commandCheckoutBranchDesc": "Basculer vers une branche différente",
+  "commandRenameBranch": "Renommer une branche",
+  "commandRenameBranchDesc": "Changer le nom d'une branche",
+  "commandDeleteBranch": "Supprimer une branche",
+  "commandDeleteBranchDesc": "Supprimer une branche locale",
+  "commandMergeBranch": "Fusionner une branche",
+  "commandMergeBranchDesc": "Fusionner une branche dans la branche actuelle",
+  "commandRebaseBranch": "Rebaser une branche",
+  "commandRebaseBranchDesc": "Rebaser la branche actuelle sur une autre",
+  "commandFetchFromRemote": "Récupérer depuis un distant",
+  "commandFetchFromRemoteDesc": "Télécharger les modifications depuis un dépôt distant",
+  "commandPullChanges": "Pull des modifications",
+  "commandPullChangesDesc": "Pull des modifications depuis le distant (fetch + merge)",
+  "commandPullWithRebase": "Pull avec rebase",
+  "commandPullWithRebaseDesc": "Pull des modifications et rebaser au lieu de fusionner",
+  "commandPushChanges": "Push des modifications",
+  "commandPushChangesDesc": "Push des commits vers le dépôt distant",
+  "commandManageRemotes": "Gérer les distants",
+  "commandManageRemotesDesc": "Ajouter, supprimer ou modifier des distants",
+  "commandStashChanges": "Stasher les modifications",
+  "commandStashChangesDesc": "Sauvegarder les modifications pour plus tard sans commiter",
+  "commandPopStash": "Extraire un stash",
+  "commandPopStashDesc": "Appliquer et supprimer le stash le plus récent",
+  "commandApplyStash": "Appliquer un stash",
+  "commandApplyStashDesc": "Appliquer un stash sans le supprimer",
+  "commandViewAllStashes": "Voir tous les stashes",
+  "commandViewAllStashesDesc": "Voir et gérer tous les stashes",
+  "commandCreateTag": "Créer un tag",
+  "commandCreateTagDesc": "Créer un nouveau tag",
+  "commandDeleteTag": "Supprimer un tag",
+  "commandDeleteTagDesc": "Supprimer un tag local ou distant",
+  "commandPushTag": "Push un tag",
+  "commandPushTagDesc": "Push un tag vers le distant",
+  "commandStartBisect": "Démarrer Bisect",
+  "commandStartBisectDesc": "Commencer une recherche binaire de bug",
+  "commandViewReflog": "Voir le reflog",
+  "commandViewReflogDesc": "Voir les journaux de référence",
+  "commandCherryPickCommit": "Cherry-pick de commit",
+  "commandCherryPickCommitDesc": "Appliquer un commit depuis une autre branche",
+  "commandRevertCommit": "Annuler un commit",
+  "commandRevertCommitDesc": "Créer un nouveau commit qui annule les modifications",
+  "commandResetToCommit": "Réinitialiser à un commit",
+  "commandResetToCommitDesc": "Réinitialiser la branche à un commit spécifique",
+  "commandCleanWorkingDirectory": "Nettoyer le répertoire de travail",
+  "commandCleanWorkingDirectoryDesc": "Supprimer les fichiers non suivis",
+  "commandOpenSettings": "Ouvrir les paramètres",
+  "commandOpenSettingsDesc": "Configurer les paramètres de l'application",
+  "commandConfigureDiffTools": "Configurer les outils de diff",
+  "commandConfigureDiffToolsDesc": "Configurer les outils externes de diff et fusion",
+  "folderSelectionNotAvailableWeb": "La sélection de dossier n'est pas disponible dans les navigateurs web",
+  "openedRepository": "Dépôt ouvert: {repositoryName}",
+  "@openedRepository": {
+    "description": "Success message when repository opened",
+    "placeholders": {
+      "repositoryName": {
+        "type": "String",
+        "example": "my-repo"
+      }
+    }
+  },
+  "notValidGitRepository": "Pas un dépôt Git valide",
+  "selectGitRepository": "Select Git Repository",
+  "amendLastCommitDialog": "Modifier le dernier commit",
+  "amendLastCommitConfirm": "Cela modifiera le dernier commit avec les modifications actuellement indexées. Le message du commit restera le même. Continuer?",
+  "lastCommitAmendedSuccess": "Dernier commit modifié avec succès",
+  "failedToAmendCommit": "Échec de la modification du commit: {error}",
+  "@failedToAmendCommit": {
+    "description": "Error message when amend fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "no changes staged for commit"
+      }
+    }
+  },
+  "discardAllChangesDialog": "Abandonner toutes les modifications?",
+  "discardAllChangesConfirm": "Abandonner toutes les modifications non indexées?\n\nCela ne peut pas être annulé.",
+  "cherryPickCommitDialog": "Cherry-pick de commit",
+  "cherryPickCommitInstructions": "Pour faire un cherry-pick d'un commit:\n\n1. Naviguez vers l'onglet Historique\n2. Cliquez avec le bouton droit sur le commit que vous voulez cherry-pick\n3. Sélectionnez \"Cherry-pick ce commit\"\n\nCela appliquera les modifications de ce commit à votre branche actuelle.",
+  "revertCommitDialog": "Annuler le commit",
+  "revertCommitInstructions": "Pour annuler un commit:\n\n1. Naviguez vers l'onglet Historique\n2. Cliquez avec le bouton droit sur le commit que vous voulez annuler\n3. Sélectionnez \"Annuler ce commit\"\n\nCela créera un nouveau commit qui annule les modifications du commit sélectionné.",
+  "resetToCommitDialog": "Réinitialiser à un commit",
+  "resetToCommitInstructions": "Pour réinitialiser à un commit:\n\n1. Naviguez vers l'onglet Historique\n2. Cliquez avec le bouton droit sur le commit vers lequel réinitialiser\n3. Sélectionnez \"Réinitialiser à ce commit\"\n4. Choisissez le mode de réinitialisation (soft, mixed ou hard)",
+  "cleanWorkingDirectoryDialog": "Nettoyer le répertoire de travail",
+  "cleanWorkingDirectoryConfirm": "Cela supprimera définitivement tous les fichiers et répertoires non suivis de votre répertoire de travail.\n\nAttention: Cette opération ne peut pas être annulée!\n\nVoulez-vous continuer?",
+  "workingDirectoryCleanedSuccess": "Répertoire de travail nettoyé avec succès",
+  "failedToCleanWorkingDirectory": "Échec du nettoyage du répertoire de travail: {error}",
+  "@failedToCleanWorkingDirectory": {
+    "description": "Error message when clean fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "permission denied"
+      }
+    }
+  },
+  "navigatedToTagsScreenDeleteYourTagThere": "Navigation vers l'écran Tags - Supprimez vos tags là-bas",
+  "navigatedToTagsScreenPushYourTagsThere": "Navigation vers l'écran Tags - Poussez vos tags là-bas",
+  "collapse": "Réduire",
+  "expand": "Développer",
+  "commandPaletteTooltip": "Palette de commandes (Ctrl+K)",
+  "toggleCommandLogTooltip": "Basculer le journal des commandes",
+  "goToSettings": "Aller aux paramètres",
+  "resetToDefaults": "Réinitialiser aux valeurs par défaut",
+  "selectGitExecutable": "Sélectionner l'exécutable Git",
+  "gitVersionDetected": "Version Git détectée: {version}",
+  "@gitVersionDetected": {
+    "description": "Success message when git executable is validated",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "2.43.0"
+      }
+    }
+  },
+  "invalidGitExecutable": "Exécutable Git invalide",
+  "invalidGitExecutableMessage": "Le fichier sélectionné n'est pas un exécutable Git valide.",
+  "@invalidGitExecutableMessage": {
+    "description": "Error message when selected file is not git",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "executionFailed": "Échec de l'exécution",
+  "executionFailedMessage": "L'exécutable sélectionné n'a pas pu être exécuté.",
+  "@executionFailedMessage": {
+    "description": "Error message when file execution fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "validationError": "Erreur de validation",
+  "validationErrorMessage": "Une erreur s'est produite lors de la validation du fichier sélectionné.\n\nSélectionné: {path}\n\nErreur: {error}",
+  "@validationErrorMessage": {
+    "description": "Error message when validation fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectTextEditor": "Sélectionner l'éditeur de texte",
+  "selectDiffTool": "Sélectionner l'outil de diff",
+  "selectMergeTool": "Sélectionner l'outil de fusion",
+  "selectedFileDoesNotExist": "Le fichier sélectionné n'existe pas ou n'est pas exécutable",
+  "unknownTextEditor": "Éditeur de texte inconnu",
+  "unknownTextEditorMessage": "L'éditeur sélectionné n'est pas reconnu comme un éditeur de texte valide.",
+  "@unknownTextEditorMessage": {
+    "description": "Warning message for unknown text editor",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "useAnyway": "Utiliser quand même",
+  "textEditorSetSuccessfully": "Éditeur de texte défini avec succès",
+  "defaultUserName": "Nom d'utilisateur par défaut",
+  "userName": "Nom d'utilisateur",
+  "userNameHint": "Jean Dupont",
+  "defaultUserEmail": "Email utilisateur par défaut",
+  "email": "Email",
+  "emailHint": "jean@exemple.com",
+  "autoFetchInterval": "Intervalle de récupération automatique",
+  "minutes": "Minutes",
+  "minutesHint": "15",
+  "defaultCommitLimit": "Limite de commits par défaut",
+  "commits": "Commits",
+  "commitsHint": "100",
+  "resetSettings": "Réinitialiser les paramètres",
+  "resetSettingsMessage": "Cela réinitialisera tous les paramètres à leurs valeurs par défaut.\n\nÊtes-vous sûr?",
+  "settingsResetToDefaults": "Paramètres réinitialisés aux valeurs par défaut",
+  "selectDiffToolExecutable": "Sélectionner l'exécutable de l'outil de diff",
+  "unknownDiffTool": "Outil de diff inconnu",
+  "unknownDiffToolMessage": "L'outil sélectionné n'est pas reconnu comme un outil de diff valide.",
+  "@unknownDiffToolMessage": {
+    "description": "Warning message for unknown diff tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "diffToolSetSuccessfully": "Outil de diff défini avec succès",
+  "selectMergeToolExecutable": "Sélectionner l'exécutable de l'outil de fusion",
+  "unknownMergeTool": "Outil de fusion inconnu",
+  "unknownMergeToolMessage": "L'outil sélectionné n'est pas reconnu comme un outil de fusion valide.",
+  "@unknownMergeToolMessage": {
+    "description": "Warning message for unknown merge tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "mergeToolSetSuccessfully": "Outil de fusion défini avec succès",
+  "colorSchemeDeepPurple": "Violet foncé",
+  "colorSchemeIndigo": "Indigo",
+  "colorSchemeBlue": "Bleu",
+  "colorSchemeTeal": "Sarcelle",
+  "colorSchemeGreen": "Vert",
+  "colorSchemeRed": "Rouge",
+  "colorSchemePink": "Rose",
+  "colorSchemePurple": "Violet",
+  "colorSchemeDeepOrange": "Orange foncé",
+  "colorSchemeBlueGrey": "Bleu gris",
+  "fontSizeSmall": "Petite",
+  "fontSizeMedium": "Moyenne",
+  "fontSizeLarge": "Grande",
+  "gitConfiguration": "Configuration Git",
+  "gitExecutablePath": "Chemin de l'exécutable Git",
+  "gitExecutableNotSet": "Non défini - Utilisation de 'git' dans PATH",
+  "gitVersion": "Version Git",
+  "@gitVersion": {
+    "description": "Display text for git version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "gitExecutableCleared": "Exécutable Git effacé",
+  "preferredTextEditor": "Éditeur de texte préféré",
+  "textEditorNotSet": "Non défini - Aucun éditeur configuré",
+  "version": "Version",
+  "@version": {
+    "description": "Display text for tool version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "textEditorCleared": "Éditeur de texte effacé",
+  "searchToolsAutoDetect": "Outils de recherche (Détection automatique)",
+  "diffToolTitle": "Outil de différences",
+  "diffToolNotSet": "Non défini",
+  "diffToolCleared": "Outil de différences effacé",
+  "mergeToolTitle": "Outil de fusion",
+  "mergeToolNotSet": "Non défini",
+  "mergeToolCleared": "Outil de fusion effacé",
+  "configure": "Configurer",
+  "edit": "Modifier",
+  "userNameNotSet": "Non défini - Aucun nom par défaut",
+  "userEmailNotSet": "Non défini - Aucun email par défaut",
+  "appearance": "Apparence",
+  "colorScheme": "Schéma de couleurs",
+  "fontFamily": "Famille de police",
+  "colorSchemeUpdated": "Schéma de couleurs mis à jour",
+  "fontChangedTo": "Police changée en {fontFamily}",
+  "@fontChangedTo": {
+    "description": "Success message when font is changed",
+    "placeholders": {
+      "fontName": {
+        "type": "String"
+      }
+    }
+  },
+  "fontSize": "Taille de police",
+  "fontSizeUpdated": "Taille de police mise à jour",
+  "diffAndMergeTools": "Outils de diff et fusion",
+  "preferredDiffTool": "Outil de diff préféré",
+  "diffToolNotSet": "Non défini - Veuillez sélectionner un outil de diff manuellement",
+  "diffToolCleared": "Outil de diff effacé",
+  "browseForDiffTool": "Parcourir pour l'outil de différence",
+  "preferredMergeTool": "Outil de fusion préféré",
+  "mergeToolNotSet": "Non défini - Veuillez sélectionner un outil de fusion manuellement",
+  "mergeToolCleared": "Outil de fusion effacé",
+  "browseForMergeTool": "Parcourir pour l'outil de fusion",
+  "loadingAvailableTools": "Chargement des outils disponibles...",
+  "failedToLoadTools": "Échec du chargement des outils: {error}",
+  "behavior": "Comportement",
+  "autoFetch": "Récupération automatique",
+  "autoFetchDescription": "Récupérer automatiquement depuis le distant périodiquement",
+  "autoFetchIntervalMinutes": "{minutes} minutes",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmPush": "Confirmer le push",
+  "confirmPushDescription": "Afficher une confirmation avant le push",
+  "confirmForcePush": "Confirmer le push forcé",
+  "confirmForcePushDescription": "Afficher une confirmation avant le push forcé",
+  "confirmDelete": "Confirmer la suppression",
+  "confirmDeleteDescription": "Afficher une confirmation avant de supprimer des branches",
+  "defaultCommitLimitDescription": "Charger {count} commits par défaut",
+  "@defaultCommitLimitDescription": {
+    "description": "Subtitle for default commit limit setting",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "showCommitGraph": "Afficher le graphe des commits",
+  "showCommitGraphDescription": "Afficher une représentation visuelle de l'historique des commits",
+  "showPassword": "Afficher le mot de passe",
+  "hidePassword": "Masquer le mot de passe",
+  "clearLog": "Effacer le journal",
+  "commandCopiedToClipboard": "Commande copiée dans le presse-papier",
+  "confirm": "Confirmer",
+  "operationCompletedSuccessfully": "Opération terminée avec succès",
+  "textEditor": "Éditeur de texte",
+  "userEmail": "Email utilisateur",
+  "windowsReservedNameError": "Nom réservé Windows",
+  "@windowsReservedNameError": {
+    "description": "Error message for Windows reserved filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      },
+      "reservedName": {
+        "type": "String"
+      },
+      "reservedNames": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidWindowsFilename": "Nom de fichier Windows invalide",
+  "@invalidWindowsFilename": {
+    "description": "Generic error message for invalid Windows filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      }
+    }
+  },
+  "secondsAgo": "{count, plural, =1{il y a 1 seconde} other{il y a {count} secondes}}",
+  "@secondsAgo": {
+    "description": "Relative time: seconds ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minuteAgo": "il y a 1 minute",
+  "minutesAgo": "il y a {count} minutes",
+  "@minutesAgo": {
+    "description": "Relative time: minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hourAgo": "il y a 1 heure",
+  "hoursAgo": "il y a {count} heures",
+  "@hoursAgo": {
+    "description": "Relative time: hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dayAgo": "il y a 1 jour",
+  "daysAgo": "il y a {count} jours",
+  "@daysAgo": {
+    "description": "Relative time: days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthJan": "Jan",
+  "monthFeb": "Fév",
+  "monthMar": "Mar",
+  "monthApr": "Avr",
+  "monthMay": "Mai",
+  "monthJun": "Juin",
+  "monthJul": "Juil",
+  "monthAug": "Aoû",
+  "monthSep": "Sep",
+  "monthOct": "Oct",
+  "monthNov": "Nov",
+  "monthDec": "Déc",
+  "am": "AM",
+  "pm": "PM",
+  "systemDefault": "Système par défaut",
+  "english": "Anglais",
+  "arabic": "Arabe",
+  "german": "Allemand",
+  "spanish": "Espagnol",
+  "french": "Français",
+  "italian": "Italien",
+  "russian": "Russe",
+  "turkish": "Turc",
+  "chinese": "Chinois (Simplifié)",
+  "languageUpdated": "Langue mise à jour",
+  "tooltipLanguage": "Langue",
+  "tooltipQuickSettings": "Paramètres Rapides",
+  "tooltipCopyCommand": "Copier la commande",
+  "tooltipCopyToClipboard": "Copier dans le presse-papiers",
+  "tooltipNewWorkspace": "Nouvel Espace de Travail",
+  "tooltipBlameStatistics": "Statistiques Blame",
+  "tooltipOpenEnhancedViewer": "Ouvrir dans le Visualiseur Amélioré",
+  "tooltipPreviousPage": "Page précédente",
+  "tooltipNextPage": "Page suivante",
+  "tooltipDiscardAllChanges": "Abandonner Toutes les Modifications",
+  "tooltipViewDiff": "Voir les Différences",
+  "tooltipUnstage": "Retirer de l'Index",
+  "tooltipStage": "Ajouter à l'Index",
+  "tooltipDiscardChanges": "Abandonner les Modifications",
+  "tooltipFileActions": "Actions de fichier",
+  "tooltipAbortMerge": "Annuler la Fusion",
+  "tooltipCopy": "Copier",
+  "tooltipAddRepository": "Ajouter un Dépôt",
+  "tooltipMoreActions": "Plus d'Actions",
+  "tooltipRemoveFromWorkspace": "Retirer de l'espace de travail",
+  "tooltipRemoveFromFavorites": "Retirer des favoris",
+  "tooltipAddToFavorites": "Ajouter aux favoris",
+  "tooltipSwitchBranch": "Changer de Branche (Ctrl+B)",
+  "tooltipSwitchRepository": "Changer de Dépôt (Ctrl+R)",
+  "tooltipSwitchWorkspace": "Changer d'Espace de Travail",
+  "current": "Actuel",
+  "openInEditor": "Ouvrir dans l'éditeur",
+  "copyFile": "Copier le fichier",
+  "paste": "Coller",
+  "keepBoth": "Garder les deux",
+  "replace": "Remplacer",
+  "deleteFile": "Supprimer le fichier",
+  "renameFile": "Renommer le fichier",
+  "stageAllAndCommit": "Tout indexer et valider",
+  "discardChangesQuestion": "Abandonner les modifications ?",
+  "discardAllChangesQuestion": "Abandonner toutes les modifications ?",
+  "stageAllChangesQuestion": "Indexer toutes les modifications ?",
+  "unstageAllChangesQuestion": "Désindexer toutes les modifications ?",
+  "webBrowserLimitation": "Limitation du navigateur Web",
+  "windowsReservedFilename": "Nom de fichier réservé Windows",
+  "mergeConflicts": "Conflits de fusion",
+  "selectConflictToResolve": "Sélectionner un conflit à résoudre",
+  "resolved": "Résolu",
+  "continueMerge": "Continuer la fusion",
+  "abortMerge": "Abandonner la fusion",
+  "commitChanges": "Valider les modifications",
+  "amendLastCommit": "Modifier le dernier commit",
+  "viewFiles": "Voir les fichiers",
+  "cleanOnly": "Propre uniquement",
+  "withRemote": "Avec distant",
+  "removeRepository": "Supprimer le dépôt",
+  "clearAllRepositories": "Effacer tous les dépôts",
+  "editProject": "Modifier le projet",
+  "deleteWorkspace": "Supprimer l'espace de travail",
+  "blameStatistics": "Statistiques de blame",
+  "fileHistory": "Historique du fichier",
+  "filePreview": "Aperçu du fichier",
+  "totalLines": "Lignes totales",
+  "authors": "Auteurs",
+  "commitsLabel": "Commits",
+  "contributors": "Contributeurs :",
+  "emptyCsvFile": "Fichier CSV vide",
+  "stageAll": "Tout indexer",
+  "unstageAll": "Tout désindexer",
+  "acceptOurs": "Accepter le nôtre",
+  "acceptTheirs": "Accepter le leur",
+  "acceptBoth": "Accepter les deux",
+  "manualResolution": "Résolution manuelle",
+  "resolvingConflict": "Résolution du conflit...",
+  "allConflictsResolved": "Tous les conflits résolus !",
+  "readyToContinueMerge": "Prêt à continuer la fusion",
+  "conflictsToResolve": "{count} conflits à résoudre",
+  "useVersionFromCurrentBranch": "Utiliser la version de la branche actuelle",
+  "useVersionFromMergingBranch": "Utiliser la version de la branche fusionnée",
+  "keepBothVersionsConcatenated": "Garder les deux versions (concaténées)",
+  "noMergeInProgress": "Aucune fusion en cours",
+  "allMergeConflictsResolved": "Tous les conflits de fusion ont été résolus.",
+  "mergeCompletedSuccessfully": "Fusion terminée avec succès",
+  "mergeAborted": "Fusion abandonnée",
+  "resolvedUsing": "Résolu {fileName} en utilisant {choice}",
+  "thisMayTakeAWhile": "Cela peut prendre un moment.",
+  "noUnstagedChanges": "Aucune modification non indexée",
+  "noStagedChanges": "Aucune modification indexée",
+  "stageFilesFromUnstagedTab": "Indexer les fichiers depuis l'onglet non indexé",
+  "changesCommittedSuccessfully": "Modifications validées avec succès",
+  "commitFailed": "Échec du commit : {error}",
+  "defaultLabel": "Par défaut",
+  "emptyStateNoHistory": "Aucun historique",
+  "emptyStateNoHistoryMessage": "Ce fichier n'a pas d'historique de commits",
+  "emptyStateNoCommits": "Aucun commit",
+  "emptyStateNoCommitsMessage": "Ce dépôt n'a pas d'historique de commits",
+  "emptyStateNoCommitSelected": "Aucun commit sélectionné",
+  "emptyStateNoCommitSelectedMessage": "Sélectionnez un commit pour voir les détails",
+  "emptyStateNoFilesChanged": "Aucun fichier modifié",
+  "emptyStateNoCommandsYet": "Aucune commande pour le moment",
+  "emptyStateNoCommandsYetMessage": "Les commandes Git apparaîtront ici",
+  "emptyStateNoData": "Aucune donnée",
+  "emptyStateNoItemsFound": "Aucun élément trouvé",
+  "emptyStateNoResultsFound": "Aucun résultat trouvé",
+  "emptyStateTryAdjustingSearchCriteria": "Essayez d'ajuster vos critères de recherche",
+  "emptyStateNoRepository": "Aucun dépôt",
+  "emptyStateNoSearchResults": "Aucun {itemType} ne correspond à \"{query}\"",
+  "emptyStateNoValidRepositories": "Aucun dépôt Git valide trouvé",
+  "messageNoFileCopied": "Aucun fichier copié",
+  "messageNoRepositoryOpen": "Aucun dépôt ouvert",
+  "messageNoRemotesConfigured": "Aucun remote configuré",
+  "messageGitServiceNotAvailable": "Service Git non disponible",
+  "messageCommitNotFound": "Commit non trouvé",
+  "messageNoTextEditorConfigured": "Aucun éditeur de texte configuré. Veuillez en définir un dans les Paramètres.",
+  "messageNoMergeInProgress": "Aucune fusion en cours",
+  "messageCopiedToClipboard": "Copié dans le presse-papiers",
+  "messageNoRemoteConfigured": "Aucun remote configuré",
+  "messageNoDateGroup": "Aucune date",
+  "snackbarFetchedFrom": "Récupéré depuis \"{remoteName}\"",
+  "snackbarFailedToFetch": "Échec de la récupération : {error}",
+  "snackbarPulledFrom": "Tiré depuis \"{remoteName}\"",
+  "snackbarFailedToPull": "Échec du pull : {error}",
+  "snackbarPushedTo": "Poussé vers \"{remoteName}\"",
+  "snackbarFailedToPush": "Échec du push : {error}",
+  "snackbarUpdatedRemoteUrl": "URL de \"{remoteName}\" mise à jour",
+  "snackbarFailedToUpdateUrl": "Échec de la mise à jour de l'URL : {error}",
+  "snackbarFailedToRename": "Échec du renommage : {error}",
+  "snackbarPruned": "\"{remoteName}\" élagué",
+  "snackbarFailedToPrune": "Échec de l'élagage : {error}",
+  "snackbarDeleted": "\"{remoteName}\" supprimé",
+  "snackbarFailedToDelete": "Échec de la suppression : {error}",
+  "snackbarAppliedStash": "{stashRef} appliqué",
+  "snackbarPoppedStash": "{stashRef} restauré",
+  "snackbarCreatedBranchFrom": "Branche \"{branchName}\" créée depuis {stashRef}",
+  "snackbarDroppedStash": "{stashRef} abandonné",
+  "snackbarTagCreated": "Tag \"{tagName}\" créé avec succès",
+  "snackbarTagsFetched": "Tags récupérés avec succès",
+  "snackbarErrorLoadingCommit": "Erreur lors du chargement du commit : {error}",
+  "snackbarFailedToCreateTag": "Échec de création de la balise : {error}",
+  "snackbarFailedToFetchTags": "Échec de récupération des balises : {error}",
+  "snackbarNoRemotesConfigured": "Aucun dépôt distant configuré",
+  "snackbarAllTagsPushed": "Toutes les balises envoyées vers {remoteName}",
+  "snackbarTagPushed": "Balise \"{tagName}\" envoyée vers {remoteName}",
+  "snackbarFailedToPushTag": "Échec d'envoi de la balise : {error}",
+  "snackbarTagsPushed": "{count, plural, =1{1 balise envoyée} other{{count} balises envoyées}} vers {remoteName}",
+  "snackbarFailedToPushTags": "Échec d'envoi des balises : {error}",
+  "snackbarCheckedOutTag": "Balise \"{tagName}\" extraite",
+  "snackbarFailedToCheckoutTag": "Échec d'extraction de la balise : {error}",
+  "snackbarTagDeleted": "Balise \"{tagName}\" supprimée",
+  "snackbarTagsDeleted": "{count, plural, =1{1 balise supprimée} other{{count} balises supprimées}}",
+  "snackbarFailedToDeleteTag": "Échec de suppression de la balise : {error}",
+  "snackbarFailedToDeleteTags": "Échec de suppression des balises : {error}",
+  "snackbarDiffCopied": "Diff copié dans le presse-papiers",
+  "snackbarCopiedToClipboard": "Copié dans le presse-papiers",
+  "snackbarLineCopied": "Ligne copiée dans le presse-papiers",
+  "snackbarPathCopied": "Chemin copié : {filePath}",
+  "snackbarFileCopied": "Copié : {fileName}",
+  "snackbarOutputCopied": "Sortie copiée dans le presse-papiers",
+  "snackbarGitServiceNotAvailable": "Service Git non disponible",
+  "snackbarCommitNotFound": "Commit introuvable",
+  "snackbarNoRepositoryOpen": "Aucun dépôt ouvert",
+  "snackbarRepositoryPathNotAvailable": "Chemin du dépôt non disponible",
+  "snackbarFailedToOpenExternalTool": "Échec d'ouverture de l'outil externe : {error}",
+  "snackbarFailedToLoadDiff": "Échec de chargement du diff : {error}",
+  "snackbarFileNotFound": "Fichier introuvable",
+  "snackbarSourceFileNotFound": "Fichier source introuvable",
+  "snackbarNoFileCopied": "Aucun fichier copié",
+  "snackbarFileRenamed": "Renommé en {newName}",
+  "snackbarFailedToRenameFile": "Échec de renommage du fichier : {error}",
+  "snackbarFileDeleted": "Supprimé : {fileName}",
+  "snackbarFailedToDeleteFile": "Échec de suppression du fichier : {error}",
+  "snackbarFilePasted": "Collé : {newFileName}",
+  "snackbarFailedToPasteFile": "Échec de collage du fichier : {error}",
+  "snackbarFileSaved": "Fichier enregistré dans {outputPath}",
+  "snackbarFileDownloaded": "Fichier téléchargé dans le dépôt et dossier ouvert",
+  "snackbarFailedToDownloadFile": "Échec de téléchargement du fichier : {error}",
+  "snackbarFailedToDownloadAndOpenFolder": "Échec de téléchargement et d'ouverture du dossier : {error}",
+  "snackbarFailedToOpenFileManager": "Échec d'ouverture du gestionnaire de fichiers : {error}",
+  "snackbarFailedToOpenEditor": "Échec d'ouverture de l'éditeur : {error}",
+  "snackbarFailedToOpenFileInEditor": "Échec d'ouverture du fichier dans l'éditeur : {error}",
+  "snackbarMergeCompleted": "Fusion terminée avec succès",
+  "snackbarMergeAborted": "Fusion annulée",
+  "snackbarConflictResolved": "{fileName} résolu en utilisant {choice}",
+  "snackbarFailedToApplyStash": "Échec d'application du stash : {error}",
+  "snackbarFailedToPopStash": "Échec de restauration du stash : {error}",
+  "snackbarFailedToCreateBranch": "Échec de création de la branche : {error}",
+  "snackbarFailedToDropStash": "Échec de suppression du stash : {error}",
+  "snackbarRemoteRenamed": "\"{remoteName}\" renommé en \"{newName}\"",
+  "snackbarViewDiffComingSoon": "Voir le diff pour {commitHash} (bientôt disponible)",
+  "clearFiltersAction": "Effacer les filtres",
+  "noBranchAvailable": "Aucune branche",
+  "hintTextCommandPalette": "Que voulez-vous faire ?",
+  "hintTextSearchFiles": "Rechercher des fichiers...",
+  "hintTextCommitMessage": "Entrez le message du commit...",
+  "hintTextSearchCommits": "Rechercher des commits (essayez : author:john, hash:abc123, date:today)",
+  "hintTextSearchStashes": "Rechercher des stashes...",
+  "hintTextDefaultBranch": "main",
+  "dialogTitleNoMergeInProgress": "Aucune fusion en cours",
+  "dialogTitleResolveConflicts": "Résoudre les conflits : {branchName}",
+  "dialogContentSelectConflict": "Sélectionnez un conflit à résoudre",
+  "dialogContentChooseResolutionStrategy": "Choisissez une stratégie de résolution :",
+  "dialogContentManualResolutionInfo": "Vous pouvez également modifier le fichier manuellement dans votre éditeur préféré pour résoudre les conflits, puis mettre en attente le fichier à l'aide de l'écran Modifications.",
+  "dialogContentAllMergeConflictsResolved": "Tous les conflits de fusion ont été résolus.",
+  "dialogContentFailedToResolveConflict": "Échec de la résolution du conflit : {error}",
+  "dialogContentFailedToContinueMerge": "Échec de la poursuite de la fusion : {error}",
+  "dialogContentFailedToAbortMerge": "Échec de l'annulation de la fusion : {error}",
+  "dialogTitleContinueMerge": "Continuer la fusion",
+  "dialogContentContinueMerge": "Cela va compléter la fusion et créer un commit de fusion. Continuer ?",
+  "dialogActionContinue": "Continuer",
+  "dialogTitleAbortMerge": "Annuler la fusion",
+  "dialogContentAbortMerge": "Cela va annuler la fusion et revenir à l'état avant la fusion. Toutes les résolutions de conflits seront perdues. Continuer ?",
+  "dialogContentResolvedConflict": "Résolu {fileName} en utilisant {choice}",
+  "snackbarMergeCompleted": "Fusion terminée avec succès",
+  "snackbarMergeAborted": "Fusion annulée",
+  "dialogContentDeleteWorkspace": "Êtes-vous sûr de vouloir supprimer \"{workspaceName}\" ? Les dépôts ne seront pas supprimés.",
+  "dialogTitleRenameFile": "Renommer le fichier",
+  "dialogLabelNewName": "Nouveau nom",
+  "dialogActionRename": "Renommer",
+  "dialogTitleDeleteFile": "Supprimer le fichier",
+  "dialogContentDeleteFile": "Êtes-vous sûr de vouloir supprimer \"{fileName}\" ?\n\nCette action ne peut pas être annulée.",
+  "dialogTitleCopyFile": "Copier le fichier",
+  "dialogTitleFileExists": "Le fichier existe",
+  "dialogContentCopyFileExists": "Un fichier nommé \"{fileName}\" existe déjà à cet emplacement.\n\nQue voulez-vous faire ?",
+  "dialogContentFileExistsDestination": "{fileName} existe déjà dans la destination.\n\nQue voulez-vous faire ?",
+  "dialogActionKeepBoth": "Conserver les deux",
+  "contextMenuRename": "Renommer",
+  "contextMenuCopyPath": "Copier le chemin",
+  "contextMenuRevealInExplorer": "Révéler dans l'Explorateur",
+  "snackbarPathCopied": "Chemin copié : {path}",
+  "snackbarFileNotFound": "Fichier non trouvé",
+  "snackbarFailedToOpenFileManager": "Échec de l'ouverture du gestionnaire de fichiers : {error}",
+  "snackbarRenamedTo": "Renommé en {newName}",
+  "snackbarFailedToRenameFile": "Échec du renommage du fichier : {error}",
+  "snackbarCopiedFile": "Copié : {fileName}",
+  "snackbarNoFileCopied": "Aucun fichier copié",
+  "snackbarSourceFileNotFound": "Fichier source non trouvé",
+  "snackbarPastedFile": "Collé : {fileName}",
+  "snackbarFailedToPasteFile": "Échec du collage du fichier : {error}",
+  "snackbarDeletedFile": "Supprimé : {fileName}",
+  "snackbarFailedToDeleteFile": "Échec de la suppression du fichier : {error}",
+  "dialogTitleDeleteTag": "Supprimer l'étiquette ?",
+  "dialogContentDeleteTagLocal": "Supprimer l'étiquette \"{tagName}\" ?\n\nCette étiquette est locale uniquement et sera supprimée de votre dépôt.\n\nCette action ne peut pas être annulée.",
+  "dialogContentDeleteTagRemote": "Supprimer l'étiquette \"{tagName}\" ?\n\nCette étiquette existe sur le distant et sera supprimée à la fois localement et sur le distant.\n\nCette action ne peut pas être annulée.",
+  "progressDeletingTagLocalRemote": "Suppression de l'étiquette (Local et Distant)",
+  "progressDeletingTag": "Suppression de l'étiquette",
+  "progressDeletingTagLocally": "Suppression de \"{tagName}\" localement...",
+  "progressDeletingTagFromRemote": "Suppression de \"{tagName}\" de {remoteName}...",
+  "progressUpdatingList": "Mise à jour de la liste...",
+  "snackbarTagDeletedLocalAndRemote": "Étiquette \"{tagName}\" supprimée localement et sur le distant",
+  "snackbarTagDeleted": "Étiquette \"{tagName}\" supprimée",
+  "tagDetailsType": "Type",
+  "tagDetailsCommit": "Commit",
+  "tagDetailsTagger": "Étiqueteur",
+  "tagDetailsDate": "Date",
+  "tagDetailsMessage": "Message :",
+  "tagTypeAnnotated": "Annotée",
+  "tagTypeLightweight": "Légère",
+  "dialogTitleWebBrowserLimitation": "Limitation du navigateur Web",
+  "dialogContentWebBrowserLimitationChanges": "La sélection de dossiers n'est pas disponible dans les navigateurs Web.\n\nPour utiliser Flutter GitUI avec toutes les fonctionnalités, veuillez l'exécuter en tant qu'application de bureau :\n\nflutter run -d windows\n\nCela nécessite Visual Studio 2022 avec \"Desktop development with C++\" installé.",
+  "dialogContentWebBrowserLimitationRepositories": "La sélection de dossiers n'est pas disponible dans les navigateurs Web.\n\nPour utiliser Flutter GitUI avec toutes les fonctionnalités, veuillez l'exécuter en tant qu'application de bureau.",
+  "dialogContentStageAllAndCommit": "Vous avez {count} fichier{plural} non préparé{plural}.\n\nToutes les modifications non préparées seront préparées avant de créer le commit.\n\nVoulez-vous continuer ?",
+  "dialogContentDiscardChangesFile": "Annuler les modifications dans {filePath} ?\n\nCela ne peut pas être annulé.",
+  "dialogTitleWindowsReservedFilename": "Nom de fichier réservé Windows",
+  "dialogContentStageAllFiles": "Préparer tous les {count} fichier{plural} non préparé{plural} ?",
+  "menuItemCreateBranch": "Créer une branche",
+  "menuItemViewDiff": "Voir les différences",
+  "snackbarOutputCopied": "Sortie copiée dans le presse-papiers",
+  "gitCommandSuccessful": "Commande Git réussie",
+  "gitCommandFailed": "Commande Git échouée",
+  "closingInSeconds": "Fermeture dans {seconds}",
+  "checkboxKeepDialogOpen": "Garder ce dialogue ouvert",
+  "checkboxAmendLastCommit": "Modifier le dernier commit",
+  "checkboxAmendLastCommitSubtitle": "Remplacer le dernier commit par celui-ci",
+  "labelCopyPath": "Copier le chemin",
+  "labelRevealInExplorer": "Afficher dans l'Explorateur",
+  "labelChangedFiles": "Fichiers modifiés",
+  "labelBinaryFile": "Fichier binaire",
+  "labelCannotPreviewFile": "Impossible de prévisualiser le fichier",
+  "labelThisFileCannotBePreviewed": "Ce fichier ne peut pas être prévisualisé",
+  "labelDownloadFile": "Télécharger le fichier",
+  "labelDownloadAndOpenFolder": "Télécharger et ouvrir le dossier",
+  "labelDiffViewer": "Visualiseur de diff",
+  "labelStaged": "Indexé",
+  "labelCopyAll": "Tout copier",
+  "labelOpenInExternalTool": "Ouvrir dans un outil externe",
+  "labelCommitMessage": "Message de commit",
+  "labelAmendCommit": "Modifier le commit",
+  "labelLines": "lignes",
+  "labelFile": "fichier",
+  "labelFiles": "fichiers",
+  "messageFileNotFound": "Fichier introuvable",
+  "messageNoFileCopied": "Aucun fichier copié",
+  "messageSourceFileNotFound": "Fichier source introuvable",
+  "messageErrorLoadingDiff": "Erreur lors du chargement du diff : {error}",
+  "messageLineCopiedToClipboard": "Ligne copiée dans le presse-papiers",
+  "messageCommitMessageRequired": "Message de commit requis",
+  "messageErrorLoadingHistory": "Erreur lors du chargement de l'historique",
+  "messageNoFilesChanged": "Aucun fichier modifié",
+  "messageFileTooLargeToPreview": "Fichier trop volumineux pour la prévisualisation ({size})",
+  "messageFailedToDownloadFile": "Échec du téléchargement du fichier : {error}",
+  "messageNoTextEditorConfigured": "Aucun éditeur de texte configuré. Veuillez en définir un dans les paramètres.",
+  "messageFailedToOpenEditor": "Échec de l'ouverture de l'éditeur : {error}",
+  "messageFailedToOpenFileInEditor": "Échec de l'ouverture du fichier dans l'éditeur : {error}",
+  "messageRepositoryPathNotAvailable": "Chemin du dépôt non disponible",
+  "messageFileDownloadedAndFolderOpened": "Fichier téléchargé dans le dépôt et dossier ouvert",
+  "messageFailedToDownloadAndOpenFolder": "Échec du téléchargement et de l'ouverture du dossier : {error}",
+  "messageFileSavedTo": "Fichier enregistré dans {path}",
+  "messageViewDiffForCommit": "Voir le diff pour {hash} (bientôt disponible)",
+  "messageFilesStaged": "{count} {plural} indexé{plural}",
+  "messageFileInfo": "{lineCount} lignes • {fileSize}",
+  "tipCommitMessage": "Astuce : Utilisez le présent (\"Ajouter une fonctionnalité\" et non \"Ajouté une fonctionnalité\")",
+  "editUrl": "Modifier l'URL",
+  "fetchUrl": "URL de récupération",
+  "pushUrl": "URL de poussée",
+  "mergeIntoCurrent": "Fusionner dans l'actuel",
+  "moreActions": "Plus d'actions",
+  "switchBranch": "Changer de branche",
+  "createPullRequest": "Créer une demande de fusion",
+  "removeFromWorkspace": "Supprimer de l'espace de travail",
+  "repositoriesCount": "{count} dépôts",
+  "unassignedRepositories": "Dépôts non attribués",
+  "editProject": "Modifier le projet",
+  "deleteProject": "Supprimer le projet",
+  "blame": "Blâme",
+  "couldNotLoadBlame": "Impossible de charger les informations de blâme",
+  "emptyFile": "Fichier vide",
+  "noContent": "Ce fichier n'a pas de contenu",
+  "errorLoadingBlame": "Erreur lors du chargement du blâme",
+  "commitShortHash": "Commit {hash}",
+  "linesCount": "{count} lignes",
+  "outputCopiedToClipboard": "Sortie copiée dans le presse-papiers",
+  "copyOutput": "Copier la sortie",
+  "exitCode": "Code de sortie",
+  "time": "Temps",
+  "noOutput": "Aucune sortie",
+  "commitDiff": "Différence de commit",
+  "errorLoadingDiff": "Erreur lors du chargement de la différence",
+  "noChanges": "Aucun changement",
+  "lineCopiedToClipboard": "Ligne copiée dans le presse-papiers",
+  "copyAll": "Tout copier",
+  "local": "LOCAL",
+  "annotatedCount": "Annoté ({count})",
+  "lightweightCount": "Léger ({count})",
+  "allCount": "Tous ({count})",
+  "dropFoldersHere": "Déposez des dossiers ici pour ajouter des dépôts",
+  "webBrowserLimitation": "Limitation du navigateur Web",
+  "cloneRepository": "Cloner le dépôt",
+  "initializeRepository": "Initialiser le dépôt",
+  "validateAll": "Tout valider",
+  "clearAll": "Tout effacer",
+  "onBranchAt": "sur {branch} • {timestamp}",
+  "quickFilters": "Filtres rapides:",
+  "thisWeek": "Cette semaine",
+  "thisMonth": "Ce mois",
+  "last30Days": "30 derniers jours",
+  "commitsCount": "{count} commits",
+  "accessed": "Accédé:",
+  "edit": "Modifier",
+  "pullFromRemote": "Tirer du distant",
+  "pullFromRemoteWithCount": "Tirer du distant ({count} commits en retard)",
+  "pushToRemote": "Pousser vers le distant",
+  "pushToRemoteWithCount": "Pousser vers le distant ({count} commits en avance)",
+  "squashCommits": "Écraser les commits",
+  "cherryPick": "Cherry-pick",
+  "revert": "Annuler",
+  "resetToHere": "Réinitialiser ici",
+  "forcePushingToRemote": "Forcer le push vers le distant...",
+  "pushingToRemote": "Push vers le distant...",
+  "pushAll": "Tout pousser",
+  "fetchAll": "Tout récupérer",
+  "openRepository": "Ouvrir le dépôt",
+  "remove": "Supprimer",
+  "emptyCsvFile": "Fichier CSV vide",
+  "errorLoadingDiff": "Erreur de chargement des différences:",
+  "switchedToBranch": "Basculé vers la branche: {branch}",
+  "selectedCount": "{count} sélectionné",
+  "errorLoadingCommits": "Erreur de chargement des commits",
+  "errorLoadingBranches": "Erreur de chargement des branches: {error}",
+  "error": "Erreur: {error}",
+  "configAndLogs": "Config et journaux",
+  "openAppLog": "Ouvrir app.log",
+  "openGitLog": "Ouvrir git.log",
+  "openConfigFolder": "Ouvrir le dossier de configuration",
+  "deleteAppLog": "Supprimer app.log",
+  "deleteGitLog": "Supprimer git.log",
+  "allWorkspaces": "Tous les espaces de travail",
+  "animationSpeed": "Vitesse d'animation",
+  "animationSpeedFast": "Rapide",
+  "animationSpeedInfo": "Contrôle la vitesse des animations de l'interface comme les menus, dialogues et transitions. Sélectionnez 'Aucune' pour désactiver les animations pour une meilleure accessibilité ou une réponse plus rapide.",
+  "animationSpeedNone": "Aucune (Instantané)",
+  "animationSpeedNormal": "Normale",
+  "animationSpeedSlow": "Lente",
+  "animationSpeedUpdated": "Vitesse d'animation mise à jour",
+  "animations": "Animations",
+  "branchNameRequired": "Le nom de la branche est requis",
+  "checkoutBranchAfterCreation": "Basculer vers la branche après création",
+  "checkoutBranchAfterCreationHint": "Basculer immédiatement vers la nouvelle branche",
+  "createBranchFromTag": "Créer une branche depuis un tag",
+  "deleteAll": "Tout supprimer",
+  "deleteAllUnprotectedBranches": "Supprimer toutes les branches non protégées",
+  "deleteAllUnprotectedBranchesConfirm": "Cela supprimera {count} branche(s):",
+  "deleteBranch": "Supprimer la branche",
+  "failedToRebaseBranch": "Échec du rebasage de la branche: {error}",
+  "fontSizeTiny": "Minuscule",
+  "forcePushFailed": "Échec du push forcé: {error}",
+  "forcePushSuccessful": "Push forcé vers le distant réussi",
+  "includeRemoteBranchesInList": "Inclure les branches distantes dans la liste de sélection",
+  "interactiveRebaseDescription": "Éditer les commits pendant le rebasage (avancé)",
+  "mergeBranches": "Fusionner les branches",
+  "mergeSourceIntoTarget": "Fusionner {source} dans {target}",
+  "mergingBranches": "Fusion des branches...",
+  "preserveMerges": "Préserver les fusions",
+  "preserveMergesDescription": "Préserver les commits de fusion dans l'historique rebasé",
+  "previewFontFamily": "Police de code",
+  "previewFontSize": "Taille de police de code",
+  "protectedBranchesNotDeleted": "Les branches protégées et la branche actuelle ne seront pas supprimées.",
+  "rebase": "Rebaser",
+  "rebaseHasConflicts": "Le rebasage a des conflits: {count} fichier(s) nécessitent une résolution",
+  "rebaseOptions": "Options de rebasage",
+  "rebaseSourceOntoTarget": "Rebaser {source} sur {target}",
+  "rebasingBranches": "Rebasage des branches...",
+  "repositoryCount": "{count} dépôts",
+  "selectBothBranchesToMerge": "Sélectionner les deux branches à fusionner/rebaser",
+  "selectSourceAndTargetBranches": "Sélectionner les branches source et cible à fusionner ou rebaser",
+  "selectSourceBranch": "Sélectionner la branche source",
+  "snackbarBranchCreatedSuccess": "Branche \"{branchName}\" créée",
+  "sourceBranch": "Branche source",
+  "sourceTag": "Tag source",
+  "strategy": "Stratégie",
+  "successfullyRebasedBranch": "{targetBranch} rebasé avec succès sur {sourceBranch}",
+  "targetBranch": "Branche cible",
+  "viewCommitInHistory": "Voir le commit dans l'historique",
+  "language": "Langue",
+  "languageDescription": "Sélectionnez votre langue préférée"
+}

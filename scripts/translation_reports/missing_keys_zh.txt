@@ -1,0 +1,13 @@
+Missing translations for ZH
+Coverage: 99.8%
+Missing: 2 keys
+================================================================================
+
+Key: language
+EN:  Language
+ZH:  [MISSING - NEEDS TRANSLATION]
+
+Key: languageDescription
+EN:  Select your preferred language
+ZH:  [MISSING - NEEDS TRANSLATION]
+

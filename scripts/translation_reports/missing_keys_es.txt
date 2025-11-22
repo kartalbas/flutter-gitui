@@ -1,0 +1,193 @@
+Missing translations for ES
+Coverage: 96.2%
+Missing: 47 keys
+================================================================================
+
+Key: allWorkspaces
+EN:  All Workspaces
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeed
+EN:  Animation Speed
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeedFast
+EN:  Fast
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeedInfo
+EN:  Controls the speed of UI animations like menus, dialogs, and transitions. Select 'None' to disable animations for better accessibility or faster response.
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeedNone
+EN:  None (Instant)
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeedNormal
+EN:  Normal
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeedSlow
+EN:  Slow
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animationSpeedUpdated
+EN:  Animation speed updated
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: animations
+EN:  Animations
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: branchNameRequired
+EN:  Branch name is required
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: checkoutBranchAfterCreation
+EN:  Checkout branch after creation
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: checkoutBranchAfterCreationHint
+EN:  Switch to the new branch immediately
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: createBranchFromTag
+EN:  Create Branch from Tag
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: deleteAll
+EN:  Delete All
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: deleteAllUnprotectedBranches
+EN:  Delete all unprotected branches
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: deleteAllUnprotectedBranchesConfirm
+EN:  This will delete {count} branch(es):
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: deleteBranch
+EN:  Delete Branch
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: failedToRebaseBranch
+EN:  Failed to rebase branch: {error}
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: fontSizeTiny
+EN:  Tiny
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: forcePushFailed
+EN:  Force push failed: {error}
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: forcePushSuccessful
+EN:  Successfully force pushed to remote
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: includeRemoteBranchesInList
+EN:  Include remote branches in the selection list
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: interactiveRebaseDescription
+EN:  Edit commits during rebase (advanced)
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: mergeBranches
+EN:  Merge Branches
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: mergeSourceIntoTarget
+EN:  Merge {source} into {target}
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: mergingBranches
+EN:  Merging branches...
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: preserveMerges
+EN:  Preserve Merges
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: preserveMergesDescription
+EN:  Preserve merge commits in the rebased history
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: previewFontFamily
+EN:  Code Font
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: previewFontSize
+EN:  Code Font Size
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: protectedBranchesNotDeleted
+EN:  Protected branches and the current branch will not be deleted.
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: rebase
+EN:  Rebase
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: rebaseHasConflicts
+EN:  Rebase has conflicts: {count} file(s) need resolution
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: rebaseOptions
+EN:  Rebase Options
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: rebaseSourceOntoTarget
+EN:  Rebase {source} onto {target}
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: rebasingBranches
+EN:  Rebasing branches...
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: repositoryCount
+EN:  {count} repositories
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: selectBothBranchesToMerge
+EN:  Select both branches to merge/rebase
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: selectSourceAndTargetBranches
+EN:  Select source and target branches to merge or rebase
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: selectSourceBranch
+EN:  Select source branch
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: snackbarBranchCreatedSuccess
+EN:  Created branch "{branchName}"
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: sourceBranch
+EN:  Source Branch
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: sourceTag
+EN:  Source Tag
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: strategy
+EN:  Strategy
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: successfullyRebasedBranch
+EN:  Successfully rebased {targetBranch} onto {sourceBranch}
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: targetBranch
+EN:  Target Branch
+ES:  [MISSING - NEEDS TRANSLATION]
+
+Key: viewCommitInHistory
+EN:  View Commit in History
+ES:  [MISSING - NEEDS TRANSLATION]
+

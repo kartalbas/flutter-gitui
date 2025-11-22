@@ -1,0 +1,144 @@
+name: flutter_gitui
+description: Flutter-based Git GUI - Modern, cross-platform Git interface
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State Management
+  flutter_riverpod: ^3.0.3              # Robust state management
+  hooks_riverpod: ^3.0.3                 # Riverpod + Flutter hooks integration
+  riverpod: ^3.0.3                       # Core Riverpod library
+  riverpod_annotation: ^3.0.3            # Code generation for riverpod
+  state_notifier: ^1.0.0                 # StateNotifier for legacy compatibility
+
+  # Navigation
+  go_router: ^17.0.0                     # Declarative routing
+
+  # UI Components
+  cupertino_icons: ^1.0.8
+  flutter_hooks: ^0.21.3+1                 # React-style hooks
+  animations: ^2.0.11                     # Smooth transitions
+
+  # Theming
+  flex_color_scheme: ^8.0.2              # Beautiful Material Design 3 themes
+  google_fonts: ^6.2.1                   # Google Fonts
+
+  # Desktop Support
+  window_manager: ^0.5.1                 # Window control
+  window_size:                            # Window size management
+    git:
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/window_size
+      ref: main
+  file_picker: ^10.3.6                    # File/folder dialogs
+  url_launcher: ^6.3.1                   # Launch external apps
+  path_provider: ^2.1.5                  # Standard directories
+  desktop_drop: ^0.7.0                   # Drag and drop files
+  shared_preferences: ^2.3.4             # Persistent key-value storage
+
+  # Git Operations (Multiple options - see GIT_PACKAGES.md)
+  process_run: ^1.2.1                    # Run git CLI (recommended)
+  path: ^1.9.1                           # Path manipulation
+  watcher: ^1.1.4                        # File system change notifications
+
+  # Alternative: Native Git library
+  # libgit2dart: ^1.8.1                  # Dart bindings to libgit2
+
+  # Storage & Settings
+  yaml: ^3.1.2                           # YAML configuration files
+
+  # UI Utilities
+  flutter_typeahead: ^5.2.0              # Autocomplete search
+  fuzzywuzzy: ^1.1.6                     # Fuzzy string matching
+  intl: ^0.20.2                          # Internationalization
+  collection: ^1.19.1                     # Collection utilities
+
+  # Charts & Visualization
+  fl_chart: ^1.1.1                      # Charts for statistics
+  flutter_colorpicker: ^1.1.0            # Color picker for themes
+
+  # Syntax Highlighting (for commit messages, file previews)
+  flutter_highlight: ^0.7.0              # Syntax highlighting
+  highlight: ^0.7.0
+
+  # File Viewers
+  flutter_markdown_plus: ^1.0.5          # Markdown rendering (maintained fork)
+  csv: ^6.0.0                            # CSV parsing for spreadsheets
+  pdfx: ^2.7.0                           # PDF viewer (free)
+  photo_view: ^0.15.0                    # Image zoom/pan viewer
+
+  # Diff Utilities
+  diff_match_patch: ^0.4.1               # Diff algorithms
+
+  # Time & Dates
+  timeago: ^3.7.0                        # Relative time (2 hours ago)
+
+  # Icons
+  phosphor_flutter: ^2.1.0               # Beautiful icon set
+  flutter_svg: ^2.0.16                   # SVG rendering for country flags
+
+  # Notifications
+  local_notifier: ^0.1.6                 # Desktop notifications
+
+  # Utilities
+  freezed_annotation: ^3.1.0             # Immutable models
+  json_annotation: ^4.9.0                # JSON serialization
+  equatable: ^2.0.7                      # Value equality
+  uuid: ^4.5.2                           # UUID generation
+  http: ^1.2.2                           # HTTP client for GitHub/GitLab APIs
+  package_info_plus: ^9.0.0              # App version info
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Custom Lint Rules for UI enforcement
+  custom_lint: ^0.8.1
+  flutter_gitui_lint:
+    path: lint_rules/flutter_gitui_lint
+
+  # Code Generation
+  build_runner: ^2.4.14
+  riverpod_generator: ^3.0.3
+  freezed: ^3.2.3
+  json_serializable: ^6.9.2
+
+  # Testing
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  # Assets
+  assets:
+    - assets/changelog.json
+    # Country flags for language selector
+    - assets/flags/
+    # Google Fonts - bundled locally for offline use
+    # Each font directory must be listed individually
+    - assets/google_fonts/anonymouspro/
+    - assets/google_fonts/courierprime/
+    - assets/google_fonts/dmmono/
+    - assets/google_fonts/firacode/
+    - assets/google_fonts/ibmplexmono/
+    - assets/google_fonts/inconsolata/
+    - assets/google_fonts/inter/
+    - assets/google_fonts/jetbrainsmono/
+    - assets/google_fonts/notosansmono/
+    - assets/google_fonts/overpassmono/
+    - assets/google_fonts/robotomono/
+    - assets/google_fonts/sourcecodepro/
+    - assets/google_fonts/spacemono/

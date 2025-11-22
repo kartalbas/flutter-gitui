@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Flutter GitUI
+Comment=Modern Git GUI built with Flutter
+GenericName=Git Client
+Exec=flutter-gitui %F
+Icon=${SNAP}/meta/gui/app_icon.svg
+Terminal=false
+Type=Application
+Categories=Development;RevisionControl;
+Keywords=git;version control;vcs;
+StartupWMClass=flutter-gitui
+StartupNotify=true

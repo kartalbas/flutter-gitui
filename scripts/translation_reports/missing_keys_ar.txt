@@ -1,0 +1,13 @@
+Missing translations for AR
+Coverage: 99.8%
+Missing: 2 keys
+================================================================================
+
+Key: language
+EN:  Language
+AR:  [MISSING - NEEDS TRANSLATION]
+
+Key: languageDescription
+EN:  Select your preferred language
+AR:  [MISSING - NEEDS TRANSLATION]
+

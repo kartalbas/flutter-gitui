@@ -1,0 +1,2482 @@
+{
+  "@@locale": "ar",
+  "@@x-template": "app_en.arb",
+  "appTitle": "Flutter GitUI",
+  "workspaces": "مساحات العمل",
+  "repositories": "المستودعات:",
+  "changes": "التغييرات",
+  "history": "السجل",
+  "browse": "استعراض",
+  "branches": "الفروع",
+  "remotes": "البعيدة",
+  "stashes": "المخزون",
+  "tags": "الوسوم",
+  "settings": "الإعدادات",
+  "cancel": "إلغاء",
+  "ok": "موافق",
+  "save": "حفظ",
+  "delete": "حذف",
+  "create": "إنشاء",
+  "close": "إغلاق",
+  "done": "تم",
+  "refresh": "تحديث",
+  "search": "بحث",
+  "browse_": "استعراض",
+  "apply": "تطبيق",
+  "checkout": "سحب",
+  "push": "دفع",
+  "pull": "سحب",
+  "repositoriesSelected": "{count} محدد",
+  "@repositoriesSelected": {
+    "description": "Count of selected repositories",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "checkoutToMain": "السحب إلى الرئيسي",
+  "checkoutAllReposTooltip": "سحب جميع المستودعات المحددة إلى فرعها الرئيسي",
+  "allReposMustHaveCleanStatus": "يجب أن تكون جميع المستودعات المحددة بحالة نظيفة",
+  "pullAllReposTooltip": "سحب التغييرات لجميع المستودعات المحددة",
+  "createBranchTooltip": "إنشاء فرع جديد في المستودع المحدد",
+  "selectOnlyOneRepoForBranch": "حدد مستودعاً واحداً فقط لإنشاء فرع",
+  "createPr": "إنشاء طلب سحب",
+  "createPrTooltip": "إنشاء طلب سحب للمستودع المحدد",
+  "selectOnlyOneRepoForPr": "حدد مستودعاً واحداً فقط لإنشاء طلب سحب",
+  "fetch": "جلب",
+  "merge": "دمج",
+  "commit": "إيداع",
+  "stash": "تخزين",
+  "diff": "المقارنة",
+  "pop": "استخراج",
+  "drop": "إسقاط",
+  "branch": "فرع",
+  "noRepositoryOpen": "لا يوجد مستودع مفتوح",
+  "openRepositoryToContinue": "افتح مستودعاً للمتابعة",
+  "errorLoadingData": "خطأ في تحميل {dataType}",
+  "@errorLoadingData": {
+    "description": "Generic error loading message",
+    "placeholders": {
+      "dataType": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "error": "خطأ",
+  "retry": "إعادة المحاولة",
+  "selectedCount": "{count} محدد",
+  "@selectedCount": {
+    "description": "Count of selected items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "exitSelection": "الخروج من التحديد",
+  "selectAll": "تحديد الكل",
+  "clearSelection": "مسح التحديد",
+  "clearAll": "مسح الكل",
+  "resetAll": "إعادة تعيين الكل",
+  "deselectAll": "إلغاء تحديد الكل",
+  "searchPlaceholder": "بحث {itemType}...",
+  "@searchPlaceholder": {
+    "description": "Search field placeholder",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      }
+    }
+  },
+  "regexSearchPlaceholder": "بحث نمطي...",
+  "itemCount": "{count, plural, =0{لا توجد عناصر} =1{عنصر واحد} two{عنصران} few{{count} عناصر} many{{count} عنصرًا} other{{count} عنصر}}",
+  "@itemCount": {
+    "description": "Count of items with proper pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "itemType": {
+        "type": "String",
+        "example": "Tag"
+      },
+      "itemTypePlural": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "ofTotal": "من {total}",
+  "@ofTotal": {
+    "description": "Showing count of total",
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "noMatchesFound": "لا توجد {itemType} مطابقة لـ \"{query}\"",
+  "@noMatchesFound": {
+    "description": "Empty search results message",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      },
+      "query": {
+        "type": "String",
+        "example": "search term"
+      }
+    }
+  },
+  "createTag": "إنشاء وسم",
+  "selectTags": "تحديد الوسوم",
+  "fetchTags": "جلب الوسوم",
+  "advancedFilters": "مرشحات متقدمة",
+  "sortTags": "ترتيب الوسوم",
+  "sortNameAZ": "الاسم (أ-ي)",
+  "sortNameZA": "الاسم (ي-أ)",
+  "sortDateNewest": "التاريخ (الأحدث)",
+  "sortDateOldest": "التاريخ (الأقدم)",
+  "sortVersionLowHigh": "الإصدار (من المنخفض للمرتفع)",
+  "sortVersionHighLow": "الإصدار (من المرتفع للمنخفض)",
+  "groupTags": "تجميع الوسوم",
+  "noGrouping": "بدون تجميع",
+  "byPrefix": "حسب البادئة",
+  "byVersion": "حسب الإصدار",
+  "byAuthor": "حسب المؤلف",
+  "byDate": "حسب التاريخ",
+  "allWithCount": "الكل ({count})",
+  "@allWithCount": {
+    "description": "All items filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
+  },
+  "annotatedWithCount": "مشروحة ({count})",
+  "@annotatedWithCount": {
+    "description": "Annotated tags filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "15"
+      }
+    }
+  },
+  "lightweightWithCount": "خفيفة ({count})",
+  "@lightweightWithCount": {
+    "description": "Lightweight tags filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "27"
+      }
+    }
+  },
+  "pushCount": "دفع {count}",
+  "@pushCount": {
+    "description": "Push count of items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "syncStatus": "حالة المزامنة",
+  "tagsNotPushed": "{count, plural, =1{وسم واحد لم يُدفع إلى المستودع البعيد} other{{count} وسوم لم تُدفع إلى المستودع البعيد}}",
+  "@tagsNotPushed": {
+    "description": "Count of local-only tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsAvailableToFetch": "{count, plural, =1{وسم واحد متاح للجلب} other{{count} وسوم متاحة للجلب}}",
+  "@tagsAvailableToFetch": {
+    "description": "Count of remote-only tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pushAll": "دفع الكل",
+  "fetchAll": "جلب الكل",
+  "noTags": "لا توجد وسوم",
+  "createTagToMarkHistory": "أنشئ وسماً لتحديد نقاط مهمة في السجل",
+  "authorFilter": "المؤلف: {author}",
+  "@authorFilter": {
+    "description": "Active author filter chip",
+    "placeholders": {
+      "author": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  "regex": "نمط",
+  "pushTagsCount": "دفع {count, plural, =1{وسم واحد} other{{count} وسوم}}",
+  "@pushTagsCount": {
+    "description": "Push tags button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTagsCount": "حذف {count, plural, =1{وسم واحد} other{{count} وسوم}}",
+  "@deleteTagsCount": {
+    "description": "Delete tags button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dateRange": "نطاق التاريخ",
+  "authorTagger": "المؤلف / الواسم",
+  "allAuthors": "جميع المؤلفين",
+  "noAuthorsFound": "لم يتم العثور على مؤلفين في الوسوم",
+  "useRegularExpressions": "استخدام التعبيرات النمطية",
+  "enableRegexMatching": "تفعيل البحث بالتعبيرات النمطية",
+  "today": "اليوم",
+  "lastWeek": "الأسبوع الماضي",
+  "lastMonth": "الشهر الماضي",
+  "lastYear": "العام الماضي",
+  "customRange": "نطاق مخصص",
+  "allTime": "كل الأوقات",
+  "createTagDialogTitle": "إنشاء وسم",
+  "createTagDescription": "إنشاء وسم جديد عند HEAD الحالي",
+  "tagName": "اسم الوسم",
+  "tagNameHint": "اسم الوسم",
+  "annotatedTag": "وسم مشروح",
+  "includeMessageWithTag": "تضمين رسالة مع الوسم",
+  "message": "الرسالة",
+  "releaseNotesPlaceholder": "ملاحظات الإصدار أو الوصف...",
+  "tagCreatedSuccess": "تم إنشاء الوسم \"{tagName}\" بنجاح",
+  "@tagCreatedSuccess": {
+    "description": "Tag creation success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String",
+        "example": "v1.0.0"
+      }
+    }
+  },
+  "tagCreatedError": "فشل إنشاء الوسم: {error}",
+  "@tagCreatedError": {
+    "description": "Tag creation error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsFetchedSuccess": "تم جلب الوسوم بنجاح",
+  "tagsFetchedError": "فشل جلب الوسوم: {error}",
+  "@tagsFetchedError": {
+    "description": "Tags fetch error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noRemotesConfigured": "لا توجد مستودعات بعيدة مُعدّة",
+  "selectRemote": "اختر المستودع البعيد",
+  "allTagsPushedSuccess": "تم دفع جميع الوسوم إلى {remoteName}",
+  "@allTagsPushedSuccess": {
+    "description": "All tags pushed success message",
+    "placeholders": {
+      "remoteName": {
+        "type": "String",
+        "example": "origin"
+      }
+    }
+  },
+  "pushTagsError": "فشل دفع الوسوم: {error}",
+  "@pushTagsError": {
+    "description": "Push tags error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushingTags": "جاري دفع الوسوم",
+  "pushedTagToRemote": "تم دفع {tagName} إلى {remoteName}",
+  "@pushedTagToRemote": {
+    "description": "Tag pushed progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsPushedSuccess": "{count, plural, =1{تم دفع وسم واحد إلى {remoteName}} other{تم دفع {count} وسوم إلى {remoteName}}}",
+  "@tagsPushedSuccess": {
+    "description": "Multiple tags pushed success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagsDialogTitle": "حذف الوسوم؟",
+  "deleteTagsConfirmation": "حذف {count, plural, =1{وسم واحد} other{{count} وسوم}}؟\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "@deleteTagsConfirmation": {
+    "description": "Delete tags confirmation message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsToDelete": "الوسوم المراد حذفها:",
+  "alsoDeleteFromRemote": "حذف من المستودع البعيد أيضاً",
+  "deleteFromRemoteDescription": "حذف الوسوم من المستودع البعيد لمنع عودتها عند الجلب",
+  "deletingTagsLocalAndRemote": "جاري حذف الوسوم (محلياً وبعيداً)",
+  "deletingTagsLocal": "جاري حذف الوسوم",
+  "deletedTagLocally": "تم حذف {tagName} محلياً",
+  "@deletedTagLocally": {
+    "description": "Tag deleted locally progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deletedTagFromRemote": "تم حذف {tagName} من {remoteName}",
+  "@deletedTagFromRemote": {
+    "description": "Tag deleted from remote progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsDeletedSuccess": "{count, plural, =1{تم حذف وسم واحد} other{تم حذف {count} وسوم}}",
+  "@tagsDeletedSuccess": {
+    "description": "Tags deleted success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTagsError": "فشل حذف الوسوم: {error}",
+  "@deleteTagsError": {
+    "description": "Delete tags error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "localBadge": "محلي",
+  "viewDiff": "عرض المقارنة",
+  "type": "النوع",
+  "annotated": "مشروح",
+  "lightweight": "خفيف",
+  "tagger": "الواسم",
+  "date": "التاريخ",
+  "checkoutTagDialogTitle": "سحب الوسم؟",
+  "checkoutTagConfirmation": "سحب الوسم \"{tagName}\"؟\n\nسيؤدي هذا إلى وضعك في حالة HEAD منفصل.",
+  "@checkoutTagConfirmation": {
+    "description": "Checkout tag confirmation message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkedOutTagSuccess": "تم سحب الوسم \"{tagName}\"",
+  "@checkedOutTagSuccess": {
+    "description": "Checkout tag success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutTagError": "فشل سحب الوسم: {error}",
+  "@checkoutTagError": {
+    "description": "Checkout tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tagPushedSuccess": "تم دفع الوسم \"{tagName}\" إلى {remoteName}",
+  "@tagPushedSuccess": {
+    "description": "Tag pushed success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pushTagError": "فشل دفع الوسم: {error}",
+  "@pushTagError": {
+    "description": "Push tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagDialogTitle": "حذف الوسم؟",
+  "deletingTagLocalAndRemote": "جاري حذف الوسم (محلياً وبعيداً)",
+  "deletingTag": "جاري حذف الوسم",
+  "deletingTagLocally": "جاري حذف \"{tagName}\" محلياً...",
+  "@deletingTagLocally": {
+    "description": "Deleting tag locally progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deletingTagFromRemote": "جاري حذف \"{tagName}\" من {remoteName}...",
+  "@deletingTagFromRemote": {
+    "description": "Deleting tag from remote progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "updatingList": "جاري تحديث القائمة...",
+  "tagDeletedSuccess": "تم حذف الوسم \"{tagName}\"",
+  "@tagDeletedSuccess": {
+    "description": "Tag deleted success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagError": "فشل حذف الوسم: {error}",
+  "@deleteTagError": {
+    "description": "Delete tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWeek": "هذا الأسبوع",
+  "thisMonth": "هذا الشهر",
+  "thisYear": "هذا العام",
+  "yearsAgo": "{count, plural, =1{منذ عام} other{منذ {count} أعوام}}",
+  "@yearsAgo": {
+    "description": "Years ago date group",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nonVersioned": "بدون إصدار",
+  "groupTagCount": "{count, plural, =1{وسم واحد} other{{count} وسوم}}",
+  "@groupTagCount": {
+    "description": "Tag count in group header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStashes": "لا يوجد مخزون",
+  "createStashToSaveWork": "أنشئ مخزوناً لحفظ عملك الجاري",
+  "createStash": "إنشاء مخزون",
+  "openRepositoryToManageStashes": "افتح مستودعاً لإدارة المخزون",
+  "stashCount": "{count, plural, =1{مخزون واحد} other{{count} مخزونات}}",
+  "@stashCount": {
+    "description": "Stash count label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createStashDialogTitle": "إنشاء مخزون",
+  "saveChangesToStash": "احفظ تغييراتك الحالية في مخزون",
+  "messageOptional": "الرسالة (اختياري)",
+  "describeWorkPlaceholder": "صف ما كنت تعمل عليه...",
+  "stashAllFiles": "تخزين جميع الملفات",
+  "toggleSelectSpecificFiles": "التبديل لتحديد ملفات محددة",
+  "selectFilesToStash": "حدد الملفات للتخزين ({selected}/{total})",
+  "@selectFilesToStash": {
+    "description": "Label for file selection section with counts",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noFilesToStash": "لا توجد ملفات للتخزين",
+  "includeUntrackedFiles": "تضمين الملفات غير المتعقبة",
+  "keepStagedChanges": "الاحتفاظ بالتغييرات المرحلية",
+  "keepChangesInIndex": "الاحتفاظ بالتغييرات في الفهرس بعد التخزين",
+  "stashCreatedSuccess": "تم إنشاء المخزون بنجاح",
+  "createStashError": "فشل إنشاء المخزون: {error}",
+  "@createStashError": {
+    "description": "Create stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "clearAllStashesDialogTitle": "مسح كل المخزون؟",
+  "clearAllStashesConfirmation": "سيؤدي هذا إلى حذف كل المخزون نهائياً.\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "allStashesClearedSuccess": "تم مسح كل المخزون",
+  "clearStashesError": "فشل مسح المخزون: {error}",
+  "@clearStashesError": {
+    "description": "Clear stashes error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranch": "إنشاء فرع",
+  "appliedStashSuccess": "تم تطبيق {stashRef}",
+  "@appliedStashSuccess": {
+    "description": "Applied stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "applyStashError": "فشل تطبيق المخزون: {error}",
+  "@applyStashError": {
+    "description": "Apply stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "poppedStashSuccess": "تم استخراج {stashRef}",
+  "@poppedStashSuccess": {
+    "description": "Popped stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "popStashError": "فشل استخراج المخزون: {error}",
+  "@popStashError": {
+    "description": "Pop stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loadDiffError": "فشل تحميل المقارنة: {error}",
+  "@loadDiffError": {
+    "description": "Load diff error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranchFromStash": "إنشاء فرع من المخزون",
+  "createBranchFromStashDescription": "إنشاء فرع جديد من {stashRef}",
+  "@createBranchFromStashDescription": {
+    "description": "Description for create branch from stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "branchName": "اسم الفرع",
+  "createdBranchFromStashSuccess": "تم إنشاء الفرع \"{branchName}\" من {stashRef}",
+  "@createdBranchFromStashSuccess": {
+    "description": "Created branch from stash success message",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranchError": "فشل إنشاء الفرع: {error}",
+  "@createBranchError": {
+    "description": "Create branch error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashDialogTitle": "إسقاط المخزون؟",
+  "dropStashConfirmation": "إسقاط {stashRef}؟\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "@dropStashConfirmation": {
+    "description": "Drop stash confirmation message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "droppedStashSuccess": "تم إسقاط {stashRef}",
+  "@droppedStashSuccess": {
+    "description": "Dropped stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashError": "فشل إسقاط المخزون: {error}",
+  "@dropStashError": {
+    "description": "Drop stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "stashDiffDialogTitle": "مقارنة المخزون - {stashRef}",
+  "@stashDiffDialogTitle": {
+    "description": "Stash diff dialog title",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "noChanges": "لا توجد تغييرات",
+  "cloneRepository": "استنساخ مستودع",
+  "cloneRepositoryDescription": "استنساخ مستودع Git من عنوان URL بعيد",
+  "repositoryUrl": "عنوان URL للمستودع",
+  "repositoryUrlHint": "https://github.com/user/repo.git",
+  "destinationPath": "مسار الوجهة",
+  "destinationPathHint": "/المسار/إلى/المجلد",
+  "branchOptional": "الفرع (اختياري)",
+  "mainBranchHint": "main",
+  "shallowClone": "استنساخ سطحي",
+  "shallowCloneDescription": "استنساخ أحدث التواريخ فقط (أسرع، حجم أصغر)",
+  "depth": "العمق",
+  "cloningRepositoryProgress": "جارٍ استنساخ المستودع...",
+  "clone": "استنساخ",
+  "directorySelectionNotAvailableInBrowser": "تحديد المجلد غير متاح في المتصفح",
+  "selectDestinationForClone": "اختر وجهة الاستنساخ",
+  "pleaseEnterRepositoryUrl": "يرجى إدخال عنوان URL للمستودع",
+  "pleaseEnterDestinationPath": "يرجى إدخال مسار الوجهة",
+  "repositoryClonedSuccess": "تم استنساخ المستودع بنجاح",
+  "@repositoryClonedSuccess": {
+    "description": "Success message after cloning repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryClonedButFailedToOpen": "تم استنساخ المستودع ولكن فشل في فتحه",
+  "cloneRepositoryError": "فشل استنساخ المستودع",
+  "@cloneRepositoryError": {
+    "description": "Clone repository error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reference": "المرجع",
+  "created": "تم الإنشاء",
+  "openRepositoryToManageTags": "افتح مستودعاً لإدارة الوسوم",
+  "workingDirectoryClean": "مجلد العمل نظيف",
+  "noChangesToCommit": "لا توجد تغييرات للإيداع",
+  "errorLoadingStatus": "خطأ في تحميل الحالة",
+  "errorLoadingStashes": "خطأ في تحميل المخزون",
+  "createStashToSaveWorkInProgress": "أنشئ مخزوناً لحفظ عملك الجاري",
+  "errorLoadingTags": "خطأ في تحميل الوسوم",
+  "openRepositoryToBrowseFiles": "افتح مستودعًا لتصفح الملفات",
+  "noFileSelected": "لم يتم تحديد ملف",
+  "selectFileToViewHistoryOrPreview": "حدد ملفًا لعرض السجل أو المعاينة",
+  "noLocalBranches": "لا توجد فروع محلية",
+  "noRemoteBranches": "لا توجد فروع بعيدة",
+  "errorLoadingBranches": "خطأ في تحميل الفروع",
+  "@errorLoadingBranches": {
+    "description": "Error message when loading branches fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noRemotes": "لا توجد مستودعات بعيدة",
+  "addRemoteToCollaborate": "أضف مستودعًا بعيدًا للتعاون",
+  "addRemote": "إضافة مستودع بعيد",
+  "noResults": "لا توجد نتائج",
+  "noRemotesMatchQuery": "لا توجد مستودعات بعيدة تطابق الاستعلام",
+  "@noRemotesMatchQuery": {
+    "description": "Message when no remotes match search query",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "clearSearch": "مسح البحث",
+  "errorLoadingRemotes": "خطأ في تحميل المستودعات البعيدة",
+  "noWorkspacesYet": "لا توجد مساحات عمل بعد",
+  "createWorkspaceToOrganize": "أنشئ مساحة عمل لتنظيم مستودعاتك",
+  "noRepositoriesYet": "لا توجد مستودعات بعد",
+  "addRepositoryToGetStarted": "أضف مستودعًا للبدء",
+  "openRepository": "فتح مستودع",
+  "browseExistingRepository": "تصفح مستودع موجود",
+  "cloneFromRemoteUrl": "استنساخ من عنوان URL بعيد",
+  "initializeRepository": "تهيئة مستودع",
+  "createNewGitRepository": "إنشاء مستودع Git جديد",
+  "addedRemoteSuccess": "تمت إضافة المستودع البعيد بنجاح",
+  "@addedRemoteSuccess": {
+    "description": "Success message when remote is added",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "addRemoteError": "فشل إضافة المستودع البعيد",
+  "@addRemoteError": {
+    "description": "Error message when adding remote fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchedAllRemotesSuccess": "تم جلب جميع المستودعات البعيدة بنجاح",
+  "fetchRemotesError": "فشل جلب المستودعات البعيدة",
+  "@fetchRemotesError": {
+    "description": "Error message when fetching from remotes fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "blame": "اللوم",
+  "preview": "معاينة",
+  "viewOptions": "خيارات العرض",
+  "showHiddenFiles": "إظهار الملفات المخفية",
+  "showIgnoredFiles": "إظهار الملفات المتجاهلة",
+  "expandAll": "توسيع الكل",
+  "collapseAll": "طي الكل",
+  "advancedSearch": "بحث متقدم",
+  "clearFilters": "مسح المرشحات ({count})",
+  "@clearFilters": {
+    "description": "Clear filters button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commitsSquashedSuccess": "تم دمج التثبيتات بنجاح",
+  "cherryPickingCommits": "جارٍ انتقاء التثبيتات...",
+  "@cherryPickingCommits": {
+    "description": "Progress message when cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickedSuccess": "تم الانتقاء بنجاح",
+  "@cherryPickedSuccess": {
+    "description": "Success message after cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickFailed": "فشل الانتقاء",
+  "@cherryPickFailed": {
+    "description": "Error message when cherry-pick fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "revertingCommit": "جارٍ التراجع عن التثبيت...",
+  "@revertingCommit": {
+    "description": "Progress message when reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertedSuccess": "تم التراجع بنجاح",
+  "@revertedSuccess": {
+    "description": "Success message after reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertFailed": "فشل التراجع",
+  "@revertFailed": {
+    "description": "Error message when revert fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "resettingToCommit": "جارٍ إعادة التعيين إلى التثبيت...",
+  "@resettingToCommit": {
+    "description": "Progress message when resetting to a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetSuccess": "تمت إعادة التعيين بنجاح",
+  "@resetSuccess": {
+    "description": "Success message after resetting",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFailed": "فشلت إعادة التعيين",
+  "@resetFailed": {
+    "description": "Error message when reset fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pullingFromRemote": "جارٍ السحب من المستودع البعيد...",
+  "pullSuccess": "تم السحب بنجاح",
+  "pullFailed": "فشل السحب",
+  "@pullFailed": {
+    "description": "Error message when pull fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushSuccess": "تم الدفع بنجاح",
+  "pushFailed": "فشل الدفع",
+  "@pushFailed": {
+    "description": "Error message when push fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryPath": "مسار المجلد",
+  "directoryPathHint": "/المسار/إلى/المجلد/الجديد",
+  "initialBranchName": "اسم الفرع الأولي",
+  "bareRepository": "مستودع فارغ",
+  "bareRepositoryDescription": "إنشاء مستودع بدون دليل عمل",
+  "initializeRepositoryInfo": "سينشئ هذا مستودع Git جديدًا في المجلد المحدد",
+  "@initializeRepositoryInfo": {
+    "description": "Info message for initialize repository dialog",
+    "placeholders": {
+      "bareText": {
+        "type": "String"
+      }
+    }
+  },
+  "initializeRepositoryInfoBare": "سينشئ هذا مستودع Git فارغًا (بدون ملفات عمل)",
+  "initialize": "تهيئة",
+  "directorySelectionNotAvailable": "تحديد المجلد غير متاح",
+  "selectDirectoryToInitialize": "اختر مجلدًا للتهيئة",
+  "enterDirectoryPath": "أدخل مسار المجلد",
+  "initializingRepository": "جارٍ تهيئة المستودع...",
+  "repositoryInitializedSuccess": "تمت تهيئة المستودع بنجاح",
+  "@repositoryInitializedSuccess": {
+    "description": "Success message after initializing repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryInitializedButFailedToOpen": "تمت تهيئة المستودع ولكن فشل في فتحه",
+  "failedToInitializeRepository": "فشل تهيئة المستودع",
+  "@failedToInitializeRepository": {
+    "description": "Error message when initialization fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cloneGitRepositoryFromUrl": "استنساخ مستودع Git من عنوان URL",
+  "enterRepositoryUrl": "أدخل عنوان URL للمستودع",
+  "enterDestinationPath": "أدخل مسار الوجهة",
+  "cloningRepository": "جارٍ استنساخ المستودع...",
+  "failedToCloneRepository": "فشل استنساخ المستودع",
+  "@failedToCloneRepository": {
+    "description": "Error message when cloning fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "switchRepository": "تبديل المستودع",
+  "searchRepositories": "البحث في المستودعات",
+  "noRepositoriesFound": "لم يتم العثور على مستودعات",
+  "invalidRepository": "مستودع غير صالح",
+  "closeRepository": "إغلاق المستودع",
+  "repositoryInvalidOrMissing": "المستودع غير صالح أو مفقود",
+  "switchedToRepository": "تم التبديل إلى المستودع",
+  "@switchedToRepository": {
+    "description": "SnackBar message after switching repository",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryClosed": "تم إغلاق المستودع",
+  "switchBranch": "تبديل الفرع",
+  "searchBranches": "البحث في الفروع",
+  "showRemoteBranches": "إظهار الفروع البعيدة",
+  "noBranchesFound": "لم يتم العثور على فروع",
+  "switchedToBranch": "تم التبديل إلى الفرع",
+  "@switchedToBranch": {
+    "description": "SnackBar message after switching branch",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSwitchBranch": "فشل التبديل إلى الفرع",
+  "@failedToSwitchBranch": {
+    "description": "Error message when switching branch fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gitReflog": "سجل المراجع",
+  "noReflogEntries": "لا توجد إدخالات في سجل المراجع",
+  "referenceLogEmpty": "سجل المراجع فارغ",
+  "errorLoadingReflog": "خطأ في تحميل سجل المراجع",
+  "reflogEntriesInfo": "{count, plural, =0{لا توجد إدخالات} =1{إدخال واحد} two{إدخالان} few{{count} إدخالات} many{{count} إدخالًا} other{{count} إدخال}}",
+  "@reflogEntriesInfo": {
+    "description": "Info message showing number of reflog entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchBranchesDialog": "البحث في الفروع",
+  "clear": "مسح",
+  "renameBranch": "إعادة تسمية الفرع",
+  "newBranchName": "اسم الفرع الجديد",
+  "enterBranchName": "أدخل اسم الفرع",
+  "rename": "إعادة تسمية",
+  "mergeBranchDialog": "دمج الفرع",
+  "mergeBranchConfirm": "هل أنت متأكد من رغبتك في دمج الفرع {branchName}؟",
+  "@mergeBranchConfirm": {
+    "description": "Confirmation message for merging branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBranchDialog": "حذف الفرع",
+  "deleteBranchConfirm": "هل أنت متأكد من رغبتك في حذف الفرع {branchName}؟",
+  "@deleteBranchConfirm": {
+    "description": "Confirmation message for deleting branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRemotesDialog": "البحث في المستودعات البعيدة",
+  "searchQuery": "استعلام البحث",
+  "remoteNameOrUrl": "اسم أو عنوان URL للمستودع البعيد",
+  "addRemoteDialog": "إضافة مستودع بعيد",
+  "remoteName": "اسم المستودع البعيد",
+  "remoteNameHint": "origin",
+  "enterRemoteName": "أدخل اسم المستودع البعيد",
+  "remoteNameNoSpaces": "يجب ألا يحتوي اسم المستودع البعيد على مسافات",
+  "remoteUrlLabel": "عنوان URL للمستودع البعيد",
+  "remoteUrlHintDialog": "https://github.com/user/repo.git",
+  "enterRemoteUrl": "أدخل عنوان URL للمستودع البعيد",
+  "add": "إضافة",
+  "editRemoteUrl": "تعديل عنوان URL للمستودع البعيد",
+  "@editRemoteUrl": {
+    "description": "Title for edit remote URL dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "enterUrl": "أدخل عنوان URL",
+  "renameRemote": "إعادة تسمية المستودع البعيد",
+  "@renameRemote": {
+    "description": "Title for rename remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "newName": "الاسم الجديد",
+  "enterName": "أدخل الاسم",
+  "nameCannotContainSpaces": "يجب ألا يحتوي الاسم على مسافات",
+  "pruneRemote": "تنظيف المستودع البعيد",
+  "@pruneRemote": {
+    "description": "Title for prune remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pruneRemoteConfirm": "هل تريد تنظيف الفروع البعيدة المحذوفة من {remoteName}؟",
+  "prune": "تقليم",
+  "deleteRemote": "حذف المستودع البعيد",
+  "@deleteRemote": {
+    "description": "Title for delete remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteRemoteConfirm": "هل أنت متأكد من رغبتك في حذف المستودع البعيد {remoteName}؟",
+  "clearAllStashesDialog": "مسح كل المخزون؟",
+  "clearAllStashesConfirm": "سيؤدي هذا إلى حذف كل المخزون نهائياً.\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "branchNameLabel": "اسم الفرع",
+  "dropStashDialog": "إسقاط المخزون؟",
+  "dropStashConfirm": "إسقاط {stashRef}؟\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "@dropStashConfirm": {
+    "description": "Confirmation message for dropping stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "stashDiffTitle": "مقارنة المخزون - {stashRef}",
+  "@stashDiffTitle": {
+    "description": "Title for stash diff dialog",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "createStashDialog": "إنشاء مخزون",
+  "describeWork": "صف ما كنت تعمل عليه...",
+  "stashAllFilesToggle": "التبديل لتحديد ملفات محددة",
+  "keepStagedChangesSubtitle": "الاحتفاظ بالتغييرات في الفهرس بعد التخزين",
+  "createTagDialog": "إنشاء وسم",
+  "createNewTagAtHead": "إنشاء وسم جديد عند HEAD الحالي",
+  "releaseNotesHint": "ملاحظات الإصدار أو الوصف...",
+  "deleteTagsDialog": "حذف الوسوم؟",
+  "deleteTagsConfirm": "حذف {count, plural, =1{وسم واحد} other{{count} وسوم}}؟\n\nلا يمكن التراجع عن هذا الإجراء.\n\nالوسوم المراد حذفها:\n{tagList}{ellipsis}",
+  "@deleteTagsConfirm": {
+    "description": "Confirmation message for deleting tags with list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "tagList": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFromRemoteSubtitle": "حذف الوسوم من المستودع البعيد لمنع عودتها عند الجلب",
+  "checkoutTagDialog": "سحب الوسم؟",
+  "checkoutTagConfirm": "سحب الوسم \"{tagName}\"؟\n\nسيؤدي هذا إلى وضعك في حالة HEAD منفصل.",
+  "@checkoutTagConfirm": {
+    "description": "Confirmation message for checking out tag",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "selectRemoteDialog": "اختر المستودع البعيد",
+  "advancedFiltersDialog": "مرشحات متقدمة",
+  "enableRegexPatternMatching": "تفعيل البحث بالتعبيرات النمطية",
+  "startDate": "تاريخ البداية",
+  "endDate": "تاريخ النهاية",
+  "squashCommitsDialog": "دمج التثبيتات",
+  "squashingCommitsCount": "دمج {count} تثبيت",
+  "@squashingCommitsCount": {
+    "description": "Message showing number of commits being squashed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "newCommitMessage": "رسالة التثبيت الجديدة",
+  "enterCommitMessageForSquashed": "أدخل رسالة التثبيت للتثبيتات المدمجة",
+  "squashCommitsInfo": "سيتم دمج التثبيتات المحددة في تثبيت واحد",
+  "selectedCommitsMustBeConsecutive": "يجب أن تكون التثبيتات المحددة متتالية",
+  "cannotSquashRootCommit": "لا يمكن دمج التثبيت الجذري",
+  "commitMessageCannotBeEmpty": "لا يمكن أن تكون رسالة التثبيت فارغة",
+  "failedToSquashCommits": "فشل دمج التثبيتات",
+  "@failedToSquashCommits": {
+    "description": "Error message when squashing commits fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "squashCommits": "دمج التثبيتات",
+  "resetToCommit": "إعادة التعيين إلى التثبيت",
+  "resetCurrentBranchTo": "إعادة تعيين الفرع الحالي إلى {commitHash}",
+  "chooseResetMode": "اختر وضع إعادة التعيين",
+  "branchPointerWillMove": "سينتقل مؤشر الفرع إلى التثبيت المحدد",
+  "soft": "ناعم",
+  "keepChangesStagedSoft": "الاحتفاظ بالتغييرات محضرة (ناعم)",
+  "mixed": "مختلط",
+  "keepChangesUnstagedMixed": "الاحتفاظ بالتغييرات غير محضرة (مختلط)",
+  "hard": "صارم",
+  "discardAllChangesHard": "تجاهل جميع التغييرات (صارم)",
+  "pushRejected": "تم رفض الدفع",
+  "pushRejectedHistoryRewritten": "تم رفض الدفع: تمت إعادة كتابة السجل",
+  "needToForcePushChanges": "تحتاج إلى فرض الدفع لإرسال التغييرات",
+  "forcePushWarningOverwriteRemote": "سيؤدي فرض الدفع إلى استبدال سجل المستودع البعيد",
+  "forcePushOnlyIfAlone": "افعل هذا فقط إذا كنت المطور الوحيد الذي يعمل على هذا الفرع",
+  "forcePushOthersNeedReset": "سيحتاج المطورون الآخرون إلى إعادة تعيين فروعهم المحلية",
+  "forcePushCannotBeEasilyUndone": "لا يمكن التراجع عن فرض الدفع بسهولة",
+  "forcePush": "فرض الدفع",
+  "uncommittedChanges": "تغييرات غير مثبتة",
+  "youHaveUncommittedChanges": "لديك تغييرات غير مثبتة في دليل العمل الخاص بك",
+  "@youHaveUncommittedChanges": {
+    "description": "Message about uncommitted changes before branch switch",
+    "placeholders": {
+      "changeCount": {
+        "type": "int",
+        "example": "3"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "switchAnyway": "التبديل على أي حال",
+  "branchSwitchFailed": "فشل تبديل الفرع",
+  "failedToSwitchToBranch": "فشل التبديل إلى الفرع {branchName}",
+  "@failedToSwitchToBranch": {
+    "description": "Error message when switching to a branch fails",
+    "placeholders": {
+      "branchName": {
+        "type": "String",
+        "example": "feature/new-feature"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "generalSearch": "بحث عام",
+  "searchInCommitOrAuthorOrHash": "البحث في رسالة التثبيت أو المؤلف أو التجزئة",
+  "caseSensitive": "حساس لحالة الأحرف",
+  "regularExpression": "تعبير نمطي",
+  "fuzzyMatch": "مطابقة غير دقيقة",
+  "specificFilters": "مرشحات محددة",
+  "authorLabel": "المؤلف",
+  "filterByAuthorNameOrEmail": "التصفية حسب اسم المؤلف أو البريد الإلكتروني",
+  "committerLabel": "المثبت",
+  "filterByCommitterNameOrEmail": "التصفية حسب اسم المثبت أو البريد الإلكتروني",
+  "filePathLabel": "مسار الملف",
+  "filterByFilePathExample": "التصفية حسب مسار الملف (مثال: src/main.dart)",
+  "commitHashLabel": "تجزئة التثبيت",
+  "filterByCommitHashPrefix": "التصفية حسب بادئة تجزئة التثبيت",
+  "commitDetails": "تفاصيل التثبيت",
+  "commitMessage": "رسالة التثبيت",
+  "additionalDetails": "تفاصيل إضافية",
+  "show": "إظهار",
+  "hide": "إخفاء",
+  "name": "الاسم",
+  "hash": "التجزئة",
+  "parent": "الأصل",
+  "parents": "الأصول",
+  "references": "المراجع",
+  "localTab": "محلي",
+  "remoteTab": "بعيد",
+  "dateRangeSection": "نطاق التاريخ",
+  "fromDate": "من تاريخ",
+  "toDate": "إلى تاريخ",
+  "last30Days": "آخر 30 يومًا",
+  "searchSyntax": "صياغة البحث",
+  "syntaxAuthorFilter": "author:اسم - التصفية حسب المؤلف",
+  "syntaxFileFilter": "file:مسار - التصفية حسب الملف",
+  "syntaxHashFilter": "hash:تجزئة - التصفية حسب التجزئة",
+  "syntaxFromDateFilter": "from:YYYY-MM-DD - التصفية من تاريخ",
+  "syntaxToDateFilter": "to:YYYY-MM-DD - التصفية إلى تاريخ",
+  "syntaxExactPhrase": "\"عبارة\" - بحث عن عبارة محددة",
+  "selectDate": "اختر تاريخًا",
+  "clearFiltersButton": "مسح المرشحات",
+  "advancedSearchButton": "بحث",
+  "batchOperationProgressDialogTitle": "تقدم العملية المجمعة",
+  "@batchOperationProgressDialogTitle": {
+    "description": "Title for batch operation progress dialog",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "operationInProgress": "جاري الانتظار...",
+  "operationsCompleted": "اكتملت جميع العمليات بنجاح",
+  "operationsCompletedWithErrors": "اكتمل مع أخطاء",
+  "successCount": "{count} نجحت",
+  "@successCount": {
+    "description": "Summary of operation results",
+    "placeholders": {
+      "successCount": {
+        "type": "int"
+      },
+      "failureCount": {
+        "type": "int"
+      }
+    }
+  },
+  "completed": "مكتمل",
+  "failed": "فشل",
+  "createBranchDialogTitle": "إنشاء فرع",
+  "branchPrefixLabel": "بادئة الفرع",
+  "noPrefix": "بدون بادئة",
+  "featurePrefix": "feature/",
+  "releasePrefix": "release/",
+  "hotfixPrefix": "hotfix/",
+  "bugfixPrefix": "bugfix/",
+  "customPrefix": "بادئة مخصصة",
+  "customPrefixLabel": "بادئة مخصصة",
+  "customPrefixHint": "custom/",
+  "customPrefixHelper": "أدخل بادئة مخصصة للفرع (يجب أن تنتهي بـ /)",
+  "branchNameHint": "اسم-الميزة",
+  "fullBranchNameLabel": "الاسم الكامل للفرع",
+  "enterBranchNameLabel": "أدخل اسم الفرع",
+  "branchNameCannotBeEmpty": "لا يمكن أن يكون اسم الفرع فارغًا",
+  "branchNameInvalidCharacters": "يحتوي اسم الفرع على أحرف غير صالحة",
+  "customPrefixMustEndWithSlash": "يجب أن تنتهي البادئة المخصصة بـ /",
+  "willCreateInRepositories": "سيتم الإنشاء في {count} مستودع (مستودعات)",
+  "@willCreateInRepositories": {
+    "description": "Label showing how many repositories will get the branch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "repositoryLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "repository": "المستودع",
+  "setUpstreamLabel": "تعيين المنبع",
+  "setUpstreamDescription": "ربط الفرع المحلي بفرع بعيد للدفع والسحب",
+  "checkoutAfterCreationLabel": "الانتقال بعد الإنشاء",
+  "checkoutAfterCreationDescription": "التبديل تلقائيًا إلى الفرع الجديد بعد إنشائه",
+  "createBranchButton": "إنشاء فرع",
+  "createPullRequestDialogTitle": "إنشاء طلب سحب",
+  "sourceBranchLabel": "الفرع المصدر",
+  "targetBranchLabel": "الفرع المستهدف",
+  "searchOrSelectBranch": "البحث أو تحديد فرع",
+  "selectTargetBranch": "اختر الفرع المستهدف",
+  "pullRequestTitleLabel": "عنوان طلب السحب",
+  "enterPRTitle": "أدخل عنوان طلب السحب",
+  "enterPRTitleValidation": "يرجى إدخال عنوان لطلب السحب",
+  "descriptionLabel": "الوصف",
+  "enterPRDescription": "أدخل وصفًا لطلب السحب (اختياري)",
+  "createAsDraftLabel": "إنشاء كمسودة",
+  "draftPRDescription": "طلب السحب المسودة لا يمكن دمجه حتى يتم وضع علامة عليه كجاهز",
+  "prInfoMessage": "سيتم إنشاء طلب السحب على المنصة البعيدة (GitHub، GitLab، إلخ)",
+  "createPRButton": "إنشاء طلب السحب",
+  "projectDialogCreateTitle": "إنشاء مشروع",
+  "projectDialogEditTitle": "تعديل المشروع",
+  "projectNameLabel": "اسم المشروع",
+  "enterProjectName": "أدخل اسم المشروع",
+  "enterProjectNameValidation": "يرجى إدخال اسم للمشروع",
+  "projectDescriptionLabel": "وصف المشروع",
+  "enterProjectDescription": "أدخل وصفًا للمشروع (اختياري)",
+  "projectColorLabel": "لون المشروع",
+  "previewLabel": "معاينة",
+  "projectNamePreviewPlaceholder": "اسم المشروع",
+  "saveProjectButton": "حفظ",
+  "createProjectButton": "إنشاء",
+  "createTagDialogDescription": "أنشئ وسماً لتحديد نقطة مهمة في تاريخ المستودع.",
+  "targetCommit": "الإيداع المستهدف",
+  "headCurrentCommit": "HEAD (الإيداع الحالي)",
+  "enterTagName": "يرجى إدخال اسم الوسم",
+  "tagNameNoSpaces": "اسم الوسم لا يمكن أن يحتوي على مسافات",
+  "enterTagMessage": "يرجى إدخال رسالة للوسم المشروح",
+  "mergeABranchInto": "دمج فرع في {currentBranch}",
+  "@mergeABranchInto": {
+    "description": "Description text in merge branch dialog",
+    "placeholders": {
+      "currentBranch": {
+        "type": "String",
+        "example": "main"
+      }
+    }
+  },
+  "noOtherBranchesAvailable": "لا توجد فروع أخرى متاحة للدمج",
+  "branchToMerge": "الفرع المراد دمجه",
+  "selectABranch": "اختر فرعًا",
+  "remote": "بعيد",
+  "mergeOptions": "خيارات الدمج",
+  "fastForwardOnly": "تقديم سريع فقط",
+  "abortIfFastForwardNotPossible": "إلغاء إذا لم يكن التقديم السريع ممكنًا",
+  "noFastForward": "بدون تقديم سريع",
+  "alwaysCreateMergeCommit": "إنشاء تثبيت دمج دائمًا",
+  "combineAllCommitsIntoSingleCommit": "دمج جميع التثبيتات في تثبيت واحد",
+  "customMergeMessage": "رسالة دمج مخصصة",
+  "enterCustomMergeCommitMessage": "أدخل رسالة تثبيت دمج مخصصة",
+  "mergeMessage": "رسالة الدمج",
+  "squashMergeWillCombineAllCommits": "سيدمج دمج السحق جميع التثبيتات من الفرع في تثبيت واحد",
+  "thisWillMergeSelectedBranch": "سيدمج هذا الفرع المحدد في الفرع الحالي",
+  "mergingBranch": "جارٍ دمج الفرع...",
+  "mergeHasConflicts": "الدمج به تعارضات",
+  "@mergeHasConflicts": {
+    "description": "Error message when merge has conflicts",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resolve": "حل",
+  "successfullyMergedBranch": "تم دمج الفرع بنجاح",
+  "@successfullyMergedBranch": {
+    "description": "Success message after merge",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "currentBranch": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToMergeBranch": "فشل دمج الفرع",
+  "@failedToMergeBranch": {
+    "description": "Error message when merge fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseBranch": "إعادة تأسيس الفرع",
+  "rebaseWillReplayCommits": "ستعيد إعادة التأسيس تشغيل التثبيتات على قمة الفرع المحدد",
+  "currentBranch": "الفرع الحالي",
+  "rebaseOntoBranch": "إعادة التأسيس على الفرع",
+  "interactiveRebase": "إعادة تأسيس تفاعلية",
+  "editCommitsDuringRebase": "تعديل التثبيتات أثناء إعادة التأسيس",
+  "rebaseWarning": "تحذير: ستغير إعادة التأسيس سجل التثبيت. لا تعد تأسيس التثبيتات التي تم دفعها",
+  "rebaseConflicts": "إعادة التأسيس بها تعارضات",
+  "rebaseInProgress": "إعادة التأسيس قيد التنفيذ",
+  "step": "الخطوة",
+  "@step": {
+    "description": "Progress indicator for rebase steps",
+    "placeholders": {
+      "progressText": {
+        "type": "String"
+      }
+    }
+  },
+  "rebasingOnto": "إعادة التأسيس على",
+  "currentCommit": "التثبيت الحالي",
+  "conflictsDetected": "تم اكتشاف تعارضات",
+  "resolveConflictsInChangesScreen": "حل التعارضات في شاشة التغييرات",
+  "goToChanges": "الانتقال إلى التغييرات",
+  "rebaseIsInProgress": "إعادة التأسيس قيد التنفيذ",
+  "abortToCancelAndReturnToOriginalState": "قم بالإلغاء للإلغاء والعودة إلى الحالة الأصلية",
+  "waitForRebaseToCompleteAutomatically": "انتظر حتى تكتمل إعادة التأسيس تلقائيًا",
+  "startRebase": "بدء إعادة التأسيس",
+  "startBisect": "بدء التقسيم الثنائي",
+  "abort": "إيقاف",
+  "skip": "تخطي",
+  "continueOperation": "متابعة",
+  "rebaseStartedSuccessfully": "بدأت إعادة التأسيس بنجاح",
+  "rebaseStartedConflictNeedsResolution": "بدأت إعادة التأسيس ولكنها تحتوي على تعارضات تحتاج إلى حل",
+  "failedToStartRebase": "فشل بدء إعادة التأسيس",
+  "@failedToStartRebase": {
+    "description": "Error message when starting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseContinued": "استمرت إعادة التأسيس",
+  "failedToContinueRebase": "فشل استمرار إعادة التأسيس",
+  "@failedToContinueRebase": {
+    "description": "Error message when continuing rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "commitSkipped": "تم تخطي التثبيت",
+  "failedToSkip": "فشل التخطي",
+  "@failedToSkip": {
+    "description": "Error message when skipping commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseAborted": "تم إلغاء إعادة التأسيس",
+  "failedToAbortRebase": "فشل إلغاء إعادة التأسيس",
+  "@failedToAbortRebase": {
+    "description": "Error message when aborting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noNodesAvailable": "لا توجد عقد متاحة",
+  "gitBisect": "التقسيم الثنائي",
+  "bisectHelpsFindCommitThatIntroducedBug": "يساعد التقسيم الثنائي في العثور على التثبيت الذي قدم خللًا",
+  "goodCommitWhereBugWasNotPresent": "تثبيت جيد (حيث لم يكن الخلل موجودًا)",
+  "selectAGoodCommit": "اختر تثبيتًا جيدًا",
+  "badCommitWhereBugIsPresent": "تثبيت سيئ (حيث الخلل موجود)",
+  "selectABadCommitDefaultsToHead": "اختر تثبيتًا سيئًا (افتراضيًا إلى HEAD)",
+  "noCommitsAvailable": "لا توجد تثبيتات متاحة",
+  "bisectInProgress": "التقسيم الثنائي قيد التنفيذ",
+  "approximatelyStepsRemaining": "تبقى {steps} خطوة تقريبًا",
+  "@approximatelyStepsRemaining": {
+    "description": "Progress message for bisect",
+    "placeholders": {
+      "stepsRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "testThisCommitAndMark": "اختبر هذا التثبيت وضع علامة عليه",
+  "good": "جيد",
+  "bad": "سيئ",
+  "bisectHistory": "سجل التقسيم الثنائي",
+  "goodCommits": "تثبيتات جيدة",
+  "@goodCommits": {
+    "description": "Label for good commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "badCommits": "تثبيتات سيئة",
+  "@badCommits": {
+    "description": "Label for bad commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bisectComplete": "اكتمل التقسيم الثنائي",
+  "foundFirstBadCommit": "تم العثور على أول تثبيت سيئ",
+  "bisectStarted": "بدأ التقسيم الثنائي",
+  "failedToStartBisect": "فشل بدء التقسيم الثنائي",
+  "@failedToStartBisect": {
+    "description": "Error message when starting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "markedAs": "تم وضع علامة كـ {status}",
+  "@markedAs": {
+    "description": "Success message when commit marked in bisect",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "good"
+      }
+    }
+  },
+  "failedToMarkCommit": "فشل وضع علامة على التثبيت",
+  "@failedToMarkCommit": {
+    "description": "Error message when marking commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bisectReset": "تمت إعادة تعيين التقسيم الثنائي",
+  "failedToResetBisect": "فشلت إعادة تعيين التقسيم الثنائي",
+  "@failedToResetBisect": {
+    "description": "Error message when resetting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reset": "إعادة تعيين",
+  "configureDiffMergeTools": "تكوين أدوات Diff وMerge",
+  "noDiffToolsFound": "لم يتم العثور على أدوات diff",
+  "noExternalDiffMergeToolsDetected": "لم يتم اكتشاف أدوات diff أو merge خارجية",
+  "installToolsSuchAs": "قم بتثبيت أدوات مثل KDiff3 أو Meld أو Beyond Compare",
+  "errorDetectingTools": "خطأ في اكتشاف الأدوات",
+  "configureYourPreferredTools": "قم بتكوين أدواتك المفضلة لمقارنة الملفات وحل التعارضات",
+  "@configureYourPreferredTools": {
+    "description": "Info banner in diff tools config dialog",
+    "placeholders": {
+      "toolCount": {
+        "type": "int"
+      }
+    }
+  },
+  "diffTool": "أداة Diff",
+  "usedForComparingFileChanges": "تستخدم لمقارنة تغييرات الملفات",
+  "mergeTool": "أداة Merge",
+  "usedForResolvingMergeConflicts": "تستخدم لحل تعارضات الدمج",
+  "available": "متاح",
+  "diffMergeToolSettingsSaved": "تم حفظ إعدادات أدوات Diff وMerge",
+  "amend": "تعديل",
+  "discardAll": "تجاهل الكل",
+  "clean": "تنظيف",
+  "commandCategoryRepository": "المستودع",
+  "commandCategoryChanges": "التغييرات",
+  "commandCategoryHistory": "السجل",
+  "commandCategoryBranches": "الفروع",
+  "commandCategoryRemotes": "البعيدة",
+  "commandCategoryStashes": "المخزون",
+  "commandCategoryTags": "الوسوم",
+  "commandCategorySubmodules": "الوحدات الفرعية",
+  "commandCategoryAdvanced": "متقدم",
+  "commandCategorySettings": "الإعدادات",
+  "commandCloneRepository": "استنساخ مستودع",
+  "commandCloneRepositoryDesc": "استنساخ مستودع من عنوان URL بعيد",
+  "commandOpenRepository": "فتح مستودع",
+  "commandOpenRepositoryDesc": "فتح مستودع Git موجود",
+  "commandInitializeRepository": "تهيئة مستودع",
+  "commandInitializeRepositoryDesc": "إنشاء مستودع Git جديد",
+  "commandCommitChanges": "تثبيت التغييرات",
+  "commandCommitChangesDesc": "تثبيت التغييرات المحضرة",
+  "commandAmendLastCommit": "تعديل آخر تثبيت",
+  "commandAmendLastCommitDesc": "تعديل آخر تثبيت",
+  "commandStageAllFiles": "تحضير جميع الملفات",
+  "commandStageAllFilesDesc": "تحضير جميع التغييرات",
+  "commandUnstageAllFiles": "إلغاء تحضير جميع الملفات",
+  "commandUnstageAllFilesDesc": "إلغاء تحضير جميع التغييرات",
+  "commandDiscardAllChanges": "تجاهل جميع التغييرات",
+  "commandDiscardAllChangesDesc": "تجاهل جميع التغييرات غير المثبتة",
+  "commandViewCommitHistory": "عرض سجل التثبيت",
+  "commandViewCommitHistoryDesc": "عرض سجل التثبيت",
+  "commandViewFileHistory": "عرض سجل الملف",
+  "commandViewFileHistoryDesc": "عرض سجل ملف محدد",
+  "commandCompareBranches": "مقارنة الفروع",
+  "commandCompareBranchesDesc": "مقارنة فرعين",
+  "commandCreateBranch": "إنشاء فرع",
+  "commandCreateBranchDesc": "إنشاء فرع جديد",
+  "commandCheckoutBranch": "الانتقال إلى فرع",
+  "commandCheckoutBranchDesc": "التبديل إلى فرع آخر",
+  "commandRenameBranch": "إعادة تسمية الفرع",
+  "commandRenameBranchDesc": "إعادة تسمية الفرع الحالي",
+  "commandDeleteBranch": "حذف فرع",
+  "commandDeleteBranchDesc": "حذف فرع",
+  "commandMergeBranch": "دمج فرع",
+  "commandMergeBranchDesc": "دمج فرع في الفرع الحالي",
+  "commandRebaseBranch": "إعادة تأسيس فرع",
+  "commandRebaseBranchDesc": "إعادة تأسيس الفرع الحالي",
+  "commandFetchFromRemote": "الجلب من المستودع البعيد",
+  "commandFetchFromRemoteDesc": "جلب التغييرات من المستودع البعيد",
+  "commandPullChanges": "سحب التغييرات",
+  "commandPullChangesDesc": "سحب التغييرات من المستودع البعيد",
+  "commandPullWithRebase": "السحب مع إعادة التأسيس",
+  "commandPullWithRebaseDesc": "سحب التغييرات مع إعادة التأسيس",
+  "commandPushChanges": "دفع التغييرات",
+  "commandPushChangesDesc": "دفع التغييرات إلى المستودع البعيد",
+  "commandManageRemotes": "إدارة المستودعات البعيدة",
+  "commandManageRemotesDesc": "إدارة المستودعات البعيدة",
+  "commandStashChanges": "حفظ التغييرات مؤقتًا",
+  "commandStashChangesDesc": "حفظ التغييرات الحالية مؤقتًا",
+  "commandPopStash": "استعادة التغييرات المحفوظة",
+  "commandPopStashDesc": "تطبيق وإزالة أحدث مخزون",
+  "commandApplyStash": "تطبيق المخزون",
+  "commandApplyStashDesc": "تطبيق المخزون بدون إزالته",
+  "commandViewAllStashes": "عرض جميع التغييرات المحفوظة",
+  "commandViewAllStashesDesc": "عرض جميع التغييرات المحفوظة مؤقتًا",
+  "commandCreateTag": "إنشاء وسم",
+  "commandCreateTagDesc": "إنشاء وسم جديد",
+  "commandDeleteTag": "حذف وسم",
+  "commandDeleteTagDesc": "حذف وسم",
+  "commandPushTag": "دفع وسم",
+  "commandPushTagDesc": "دفع وسم إلى المستودع البعيد",
+  "commandStartBisect": "بدء التقسيم الثنائي",
+  "commandStartBisectDesc": "بدء جلسة تقسيم ثنائي",
+  "commandViewReflog": "عرض سجل المراجع",
+  "commandViewReflogDesc": "عرض سجل المراجع",
+  "commandCherryPickCommit": "انتقاء تثبيت",
+  "commandCherryPickCommitDesc": "تطبيق إيداع من فرع آخر",
+  "commandRevertCommit": "التراجع عن تثبيت",
+  "commandRevertCommitDesc": "التراجع عن تثبيت",
+  "commandResetToCommit": "إعادة التعيين إلى تثبيت",
+  "commandResetToCommitDesc": "إعادة تعيين الفرع إلى تثبيت محدد",
+  "commandCleanWorkingDirectory": "تنظيف دليل العمل",
+  "commandCleanWorkingDirectoryDesc": "إزالة الملفات غير المتتبعة",
+  "commandOpenSettings": "فتح الإعدادات",
+  "commandOpenSettingsDesc": "فتح شاشة الإعدادات",
+  "commandConfigureDiffTools": "تكوين أدوات Diff",
+  "commandConfigureDiffToolsDesc": "تكوين أدوات diff وmerge",
+  "folderSelectionNotAvailableWeb": "تحديد المجلد غير متاح على الويب",
+  "openedRepository": "تم فتح المستودع",
+  "@openedRepository": {
+    "description": "Success message when repository opened",
+    "placeholders": {
+      "repositoryName": {
+        "type": "String",
+        "example": "my-repo"
+      }
+    }
+  },
+  "notValidGitRepository": "ليس مستودع Git صالحًا",
+  "selectGitRepository": "اختر مستودع Git",
+  "amendLastCommitDialog": "تعديل آخر تثبيت",
+  "amendLastCommitConfirm": "هل أنت متأكد من رغبتك في تعديل آخر تثبيت؟",
+  "lastCommitAmendedSuccess": "تم تعديل آخر تثبيت بنجاح",
+  "failedToAmendCommit": "فشل تعديل التثبيت",
+  "@failedToAmendCommit": {
+    "description": "Error message when amend fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "no changes staged for commit"
+      }
+    }
+  },
+  "discardAllChangesDialog": "تجاهل جميع التغييرات",
+  "discardAllChangesConfirm": "هل أنت متأكد من رغبتك في تجاهل جميع التغييرات؟",
+  "cherryPickCommitDialog": "انتقاء تثبيت",
+  "cherryPickCommitInstructions": "سيطبق هذا التثبيت المحدد على الفرع الحالي",
+  "revertCommitDialog": "التراجع عن تثبيت",
+  "revertCommitInstructions": "سينشئ هذا تثبيتًا جديدًا يتراجع عن التغييرات من التثبيت المحدد",
+  "resetToCommitDialog": "إعادة التعيين إلى تثبيت",
+  "resetToCommitInstructions": "سيعيد هذا تعيين الفرع الحالي إلى التثبيت المحدد",
+  "cleanWorkingDirectoryDialog": "تنظيف دليل العمل",
+  "cleanWorkingDirectoryConfirm": "هل تريد إزالة جميع الملفات غير المتتبعة؟",
+  "workingDirectoryCleanedSuccess": "تم تنظيف دليل العمل بنجاح",
+  "failedToCleanWorkingDirectory": "فشل تنظيف دليل العمل",
+  "@failedToCleanWorkingDirectory": {
+    "description": "Error message when clean fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "permission denied"
+      }
+    }
+  },
+  "navigatedToTagsScreenDeleteYourTagThere": "تم الانتقال إلى شاشة الوسوم. احذف الوسم من هناك",
+  "navigatedToTagsScreenPushYourTagsThere": "تم الانتقال إلى شاشة الوسوم. ادفع الوسوم من هناك",
+  "collapse": "طي",
+  "expand": "توسيع",
+  "commandPaletteTooltip": "لوحة الأوامر",
+  "toggleCommandLogTooltip": "تبديل سجل الأوامر",
+  "goToSettings": "الانتقال إلى الإعدادات",
+  "resetToDefaults": "إعادة التعيين إلى الافتراضي",
+  "selectGitExecutable": "اختر ملف Git التنفيذي",
+  "gitVersionDetected": "تم اكتشاف إصدار Git: {version}",
+  "@gitVersionDetected": {
+    "description": "Success message when git executable is validated",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "2.43.0"
+      }
+    }
+  },
+  "invalidGitExecutable": "ملف Git تنفيذي غير صالح",
+  "invalidGitExecutableMessage": "الملف المحدد ليس ملف Git تنفيذيًا صالحًا",
+  "@invalidGitExecutableMessage": {
+    "description": "Error message when selected file is not git",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "executionFailed": "فشل التنفيذ",
+  "executionFailedMessage": "فشل تشغيل الملف التنفيذي. تحقق من الأذونات",
+  "@executionFailedMessage": {
+    "description": "Error message when file execution fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "validationError": "خطأ في التحقق",
+  "validationErrorMessage": "حدث خطأ أثناء التحقق من صحة الملف التنفيذي",
+  "@validationErrorMessage": {
+    "description": "Error message when validation fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectTextEditor": "اختر محرر نصوص",
+  "selectDiffTool": "اختر أداة Diff",
+  "selectMergeTool": "اختر أداة Merge",
+  "selectedFileDoesNotExist": "الملف المحدد غير موجود",
+  "unknownTextEditor": "محرر نصوص غير معروف",
+  "unknownTextEditorMessage": "الملف المحدد ليس محرر نصوص معروفًا. هل تريد استخدامه على أي حال؟",
+  "@unknownTextEditorMessage": {
+    "description": "Warning message for unknown text editor",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "useAnyway": "استخدام على أي حال",
+  "textEditorSetSuccessfully": "تم تعيين محرر النصوص بنجاح",
+  "defaultUserName": "اسم المستخدم الافتراضي",
+  "userName": "اسم المستخدم",
+  "userNameHint": "الاسم الكامل",
+  "defaultUserEmail": "البريد الإلكتروني الافتراضي",
+  "email": "البريد الإلكتروني",
+  "emailHint": "user@example.com",
+  "autoFetchInterval": "فاصل الجلب التلقائي",
+  "minutes": "دقائق",
+  "minutesHint": "5",
+  "defaultCommitLimit": "حد التثبيت الافتراضي",
+  "commits": "تثبيتات",
+  "commitsHint": "100",
+  "resetSettings": "إعادة تعيين الإعدادات",
+  "resetSettingsMessage": "هل أنت متأكد من رغبتك في إعادة تعيين جميع الإعدادات إلى القيم الافتراضية؟",
+  "settingsResetToDefaults": "تم إعادة تعيين الإعدادات إلى القيم الافتراضية",
+  "selectDiffToolExecutable": "اختر ملف أداة Diff التنفيذي",
+  "unknownDiffTool": "أداة diff غير معروفة",
+  "unknownDiffToolMessage": "الملف المحدد ليس أداة diff معروفة. هل تريد استخدامه على أي حال؟",
+  "@unknownDiffToolMessage": {
+    "description": "Warning message for unknown diff tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "diffToolSetSuccessfully": "تم تعيين أداة Diff بنجاح",
+  "selectMergeToolExecutable": "اختر ملف أداة Merge التنفيذي",
+  "unknownMergeTool": "أداة merge غير معروفة",
+  "unknownMergeToolMessage": "الملف المحدد ليس أداة merge معروفة. هل تريد استخدامه على أي حال؟",
+  "@unknownMergeToolMessage": {
+    "description": "Warning message for unknown merge tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "mergeToolSetSuccessfully": "تم تعيين أداة Merge بنجاح",
+  "colorSchemeDeepPurple": "بنفسجي غامق",
+  "colorSchemeIndigo": "نيلي",
+  "colorSchemeBlue": "أزرق",
+  "colorSchemeTeal": "أزرق مخضر",
+  "colorSchemeGreen": "أخضر",
+  "colorSchemeRed": "أحمر",
+  "colorSchemePink": "وردي",
+  "colorSchemePurple": "بنفسجي",
+  "colorSchemeDeepOrange": "برتقالي غامق",
+  "colorSchemeBlueGrey": "رمادي مزرق",
+  "fontSizeSmall": "صغير",
+  "fontSizeMedium": "متوسط",
+  "fontSizeLarge": "كبير",
+  "gitConfiguration": "تكوين Git",
+  "gitExecutablePath": "مسار ملف Git التنفيذي",
+  "gitExecutableNotSet": "لم يتم تعيين ملف Git التنفيذي",
+  "gitVersion": "إصدار Git",
+  "@gitVersion": {
+    "description": "Display text for git version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "gitExecutableCleared": "تم مسح ملف Git التنفيذي",
+  "preferredTextEditor": "محرر النصوص المفضل",
+  "textEditorNotSet": "لم يتم تعيين محرر النصوص",
+  "version": "الإصدار",
+  "@version": {
+    "description": "Display text for tool version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "textEditorCleared": "تم مسح محرر النصوص",
+  "searchToolsAutoDetect": "أدوات البحث (الكشف التلقائي)",
+  "diffToolTitle": "أداة المقارنة",
+  "diffToolNotSet": "غير محدد",
+  "diffToolCleared": "تم مسح أداة المقارنة",
+  "mergeToolTitle": "أداة الدمج",
+  "mergeToolNotSet": "غير محدد",
+  "mergeToolCleared": "تم مسح أداة الدمج",
+  "configure": "تكوين",
+  "edit": "تعديل",
+  "userNameNotSet": "لم يتم تعيين اسم المستخدم",
+  "userEmailNotSet": "لم يتم تعيين البريد الإلكتروني",
+  "appearance": "المظهر",
+  "colorScheme": "نظام الألوان",
+  "fontFamily": "عائلة الخط",
+  "colorSchemeUpdated": "تم تحديث نظام الألوان",
+  "fontChangedTo": "تم تغيير الخط إلى {fontFamily}",
+  "@fontChangedTo": {
+    "description": "Success message when font is changed",
+    "placeholders": {
+      "fontName": {
+        "type": "String"
+      }
+    }
+  },
+  "fontSize": "حجم الخط",
+  "fontSizeUpdated": "تم تحديث حجم الخط",
+  "diffAndMergeTools": "أدوات Diff وMerge",
+  "preferredDiffTool": "أداة Diff المفضلة",
+  "diffToolNotSet": "لم يتم تعيين أداة Diff",
+  "diffToolCleared": "تم مسح أداة Diff",
+  "browseForDiffTool": "تصفح لأداة Diff",
+  "preferredMergeTool": "أداة Merge المفضلة",
+  "mergeToolNotSet": "لم يتم تعيين أداة Merge",
+  "mergeToolCleared": "تم مسح أداة Merge",
+  "browseForMergeTool": "تصفح لأداة Merge",
+  "loadingAvailableTools": "جارٍ تحميل الأدوات المتاحة...",
+  "failedToLoadTools": "فشل تحميل الأدوات",
+  "behavior": "السلوك",
+  "autoFetch": "الجلب التلقائي",
+  "autoFetchDescription": "جلب التغييرات من المستودعات البعيدة تلقائيًا",
+  "autoFetchIntervalMinutes": "{minutes} دقيقة",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmPush": "تأكيد الدفع",
+  "confirmPushDescription": "طلب التأكيد قبل دفع التغييرات",
+  "confirmForcePush": "تأكيد فرض الدفع",
+  "confirmForcePushDescription": "طلب التأكيد قبل فرض دفع التغييرات",
+  "confirmDelete": "تأكيد الحذف",
+  "confirmDeleteDescription": "طلب التأكيد قبل حذف الفروع أو الوسوم",
+  "defaultCommitLimitDescription": "تحميل {count} تثبيتات بشكل افتراضي",
+  "@defaultCommitLimitDescription": {
+    "description": "Subtitle for default commit limit setting",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "showCommitGraph": "إظهار رسم التثبيت",
+  "showCommitGraphDescription": "إظهار رسم بياني مرئي لسجل التثبيت",
+  "showPassword": "إظهار كلمة المرور",
+  "hidePassword": "إخفاء كلمة المرور",
+  "clearLog": "مسح السجل",
+  "commandCopiedToClipboard": "تم نسخ الأمر إلى الحافظة",
+  "confirm": "تأكيد",
+  "operationCompletedSuccessfully": "اكتملت العملية بنجاح",
+  "textEditor": "محرر النصوص",
+  "userEmail": "البريد الإلكتروني للمستخدم",
+  "windowsReservedNameError": "اسم محجوز في Windows",
+  "@windowsReservedNameError": {
+    "description": "Error message for Windows reserved filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      },
+      "reservedName": {
+        "type": "String"
+      },
+      "reservedNames": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidWindowsFilename": "اسم ملف Windows غير صالح",
+  "@invalidWindowsFilename": {
+    "description": "Generic error message for invalid Windows filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      }
+    }
+  },
+  "secondsAgo": "{count, plural, =1{منذ ثانية واحدة} other{منذ {count} ثانية}}",
+  "@secondsAgo": {
+    "description": "Relative time: seconds ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minuteAgo": "منذ دقيقة واحدة",
+  "minutesAgo": "منذ {count} دقيقة",
+  "@minutesAgo": {
+    "description": "Relative time: minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hourAgo": "منذ ساعة واحدة",
+  "hoursAgo": "منذ {count} ساعة",
+  "@hoursAgo": {
+    "description": "Relative time: hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dayAgo": "منذ يوم واحد",
+  "daysAgo": "منذ {count} يوم",
+  "@daysAgo": {
+    "description": "Relative time: days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthJan": "يناير",
+  "monthFeb": "فبراير",
+  "monthMar": "مارس",
+  "monthApr": "أبريل",
+  "monthMay": "مايو",
+  "monthJun": "يونيو",
+  "monthJul": "يوليو",
+  "monthAug": "أغسطس",
+  "monthSep": "سبتمبر",
+  "monthOct": "أكتوبر",
+  "monthNov": "نوفمبر",
+  "monthDec": "ديسمبر",
+  "am": "ص",
+  "pm": "م",
+  "systemDefault": "افتراضي النظام",
+  "english": "الإنجليزية",
+  "arabic": "العربية",
+  "german": "الألمانية",
+  "spanish": "الإسبانية",
+  "french": "الفرنسية",
+  "italian": "الإيطالية",
+  "russian": "الروسية",
+  "turkish": "التركية",
+  "chinese": "الصينية (المبسطة)",
+  "languageUpdated": "تم تحديث اللغة",
+  "tooltipLanguage": "اللغة",
+  "tooltipQuickSettings": "الإعدادات السريعة",
+  "tooltipCopyCommand": "نسخ الأمر",
+  "tooltipCopyToClipboard": "نسخ إلى الحافظة",
+  "tooltipNewWorkspace": "مساحة عمل جديدة",
+  "tooltipBlameStatistics": "إحصائيات المسؤولية",
+  "tooltipOpenEnhancedViewer": "فتح في العارض المحسّن",
+  "tooltipPreviousPage": "الصفحة السابقة",
+  "tooltipNextPage": "الصفحة التالية",
+  "tooltipDiscardAllChanges": "تجاهل جميع التغييرات",
+  "tooltipViewDiff": "عرض الفروقات",
+  "tooltipUnstage": "إزالة من التجهيز",
+  "tooltipStage": "إضافة للتجهيز",
+  "tooltipDiscardChanges": "تجاهل التغييرات",
+  "tooltipFileActions": "إجراءات الملف",
+  "tooltipAbortMerge": "إلغاء الدمج",
+  "tooltipCopy": "نسخ",
+  "tooltipAddRepository": "إضافة مستودع",
+  "tooltipMoreActions": "المزيد من الإجراءات",
+  "tooltipRemoveFromWorkspace": "إزالة من مساحة العمل",
+  "tooltipRemoveFromFavorites": "إزالة من المفضلة",
+  "tooltipAddToFavorites": "إضافة إلى المفضلة",
+  "tooltipSwitchBranch": "تبديل الفرع (Ctrl+B)",
+  "tooltipSwitchRepository": "تبديل المستودع (Ctrl+R)",
+  "tooltipSwitchWorkspace": "تبديل مساحة العمل",
+  "current": "الحالي",
+  "openInEditor": "فتح في المحرر",
+  "copyFile": "نسخ الملف",
+  "paste": "لصق",
+  "keepBoth": "الاحتفاظ بكليهما",
+  "replace": "استبدال",
+  "deleteFile": "حذف الملف",
+  "renameFile": "إعادة تسمية الملف",
+  "stageAllAndCommit": "تجهيز الكل والإيداع",
+  "discardChangesQuestion": "تجاهل التغييرات؟",
+  "discardAllChangesQuestion": "تجاهل جميع التغييرات؟",
+  "stageAllChangesQuestion": "تجهيز جميع التغييرات؟",
+  "unstageAllChangesQuestion": "إلغاء تجهيز جميع التغييرات؟",
+  "webBrowserLimitation": "قيود متصفح الويب",
+  "windowsReservedFilename": "اسم ملف محجوز من Windows",
+  "mergeConflicts": "تعارضات الدمج",
+  "selectConflictToResolve": "حدد تعارضاً لحله",
+  "resolved": "تم الحل",
+  "continueMerge": "متابعة الدمج",
+  "abortMerge": "إحباط الدمج",
+  "commitChanges": "إيداع التغييرات",
+  "amendLastCommit": "تعديل آخر إيداع",
+  "viewFiles": "عرض الملفات",
+  "cleanOnly": "نظيف فقط",
+  "withRemote": "مع البعيد",
+  "removeRepository": "إزالة المستودع",
+  "clearAllRepositories": "مسح جميع المستودعات",
+  "editProject": "تحرير المشروع",
+  "deleteWorkspace": "حذف مساحة العمل",
+  "blameStatistics": "إحصائيات اللوم",
+  "fileHistory": "سجل الملف",
+  "filePreview": "معاينة الملف",
+  "totalLines": "إجمالي الأسطر",
+  "authors": "المؤلفون",
+  "commitsLabel": "الإيداعات",
+  "contributors": "المساهمون:",
+  "emptyCsvFile": "ملف CSV فارغ",
+  "stageAll": "تجهيز الكل",
+  "unstageAll": "إلغاء تجهيز الكل",
+  "acceptOurs": "قبول لدينا",
+  "acceptTheirs": "قبول لديهم",
+  "acceptBoth": "قبول كليهما",
+  "manualResolution": "حل يدوي",
+  "resolvingConflict": "جاري حل التعارض...",
+  "allConflictsResolved": "تم حل جميع التعارضات!",
+  "readyToContinueMerge": "جاهز لمتابعة الدمج",
+  "conflictsToResolve": "{count} تعارض للحل",
+  "useVersionFromCurrentBranch": "استخدام الإصدار من الفرع الحالي",
+  "useVersionFromMergingBranch": "استخدام الإصدار من الفرع المدمج",
+  "keepBothVersionsConcatenated": "الاحتفاظ بكلا الإصدارين (متسلسل)",
+  "noMergeInProgress": "لا يوجد دمج قيد التنفيذ",
+  "allMergeConflictsResolved": "تم حل جميع تعارضات الدمج.",
+  "mergeCompletedSuccessfully": "اكتمل الدمج بنجاح",
+  "mergeAborted": "تم إحباط الدمج",
+  "resolvedUsing": "تم حل {fileName} باستخدام {choice}",
+  "thisMayTakeAWhile": "قد يستغرق هذا بعض الوقت.",
+  "noUnstagedChanges": "لا توجد تغييرات غير مجهزة",
+  "noStagedChanges": "لا توجد تغييرات مجهزة",
+  "stageFilesFromUnstagedTab": "تجهيز الملفات من علامة التبويب غير المجهزة",
+  "changesCommittedSuccessfully": "تم إيداع التغييرات بنجاح",
+  "commitFailed": "فشل الإيداع: {error}",
+  "defaultLabel": "الافتراضي",
+  "emptyStateNoHistory": "لا يوجد سجل",
+  "emptyStateNoHistoryMessage": "هذا الملف ليس له سجل إيداع",
+  "emptyStateNoCommits": "لا توجد إيداعات",
+  "emptyStateNoCommitsMessage": "هذا المستودع ليس له سجل إيداع",
+  "emptyStateNoCommitSelected": "لم يتم تحديد إيداع",
+  "emptyStateNoCommitSelectedMessage": "حدد إيداعًا لعرض التفاصيل",
+  "emptyStateNoFilesChanged": "لا توجد ملفات متغيرة",
+  "emptyStateNoCommandsYet": "لا توجد أوامر بعد",
+  "emptyStateNoCommandsYetMessage": "ستظهر أوامر Git هنا",
+  "emptyStateNoData": "لا توجد بيانات",
+  "emptyStateNoItemsFound": "لم يتم العثور على عناصر",
+  "emptyStateNoResultsFound": "لم يتم العثور على نتائج",
+  "emptyStateTryAdjustingSearchCriteria": "حاول ضبط معايير البحث",
+  "emptyStateNoRepository": "لا يوجد مستودع",
+  "emptyStateNoSearchResults": "لا يوجد {itemType} يطابق \"{query}\"",
+  "emptyStateNoValidRepositories": "لم يتم العثور على مستودعات Git صالحة",
+  "messageNoFileCopied": "لم يتم نسخ الملف",
+  "messageNoRepositoryOpen": "لا يوجد مستودع مفتوح",
+  "messageNoRemotesConfigured": "لم يتم تكوين أي ريموت",
+  "messageGitServiceNotAvailable": "خدمة Git غير متاحة",
+  "messageCommitNotFound": "لم يتم العثور على الإيداع",
+  "messageNoTextEditorConfigured": "لم يتم تكوين محرر نصوص. يرجى تعيين واحد في الإعدادات.",
+  "messageNoMergeInProgress": "لا يوجد دمج قيد التقدم",
+  "messageCopiedToClipboard": "تم النسخ إلى الحافظة",
+  "messageNoRemoteConfigured": "لم يتم تكوين ريموت",
+  "messageNoDateGroup": "لا يوجد تاريخ",
+  "snackbarFetchedFrom": "تم الجلب من \"{remoteName}\"",
+  "snackbarFailedToFetch": "فشل الجلب: {error}",
+  "snackbarPulledFrom": "تم السحب من \"{remoteName}\"",
+  "snackbarFailedToPull": "فشل السحب: {error}",
+  "snackbarPushedTo": "تم الدفع إلى \"{remoteName}\"",
+  "snackbarFailedToPush": "فشل الدفع: {error}",
+  "snackbarUpdatedRemoteUrl": "تم تحديث رابط \"{remoteName}\"",
+  "snackbarFailedToUpdateUrl": "فشل تحديث الرابط: {error}",
+  "snackbarFailedToRename": "فشل إعادة التسمية: {error}",
+  "snackbarPruned": "تم تقليم \"{remoteName}\"",
+  "snackbarFailedToPrune": "فشل التقليم: {error}",
+  "snackbarDeleted": "تم حذف \"{remoteName}\"",
+  "snackbarFailedToDelete": "فشل الحذف: {error}",
+  "snackbarAppliedStash": "تم تطبيق {stashRef}",
+  "snackbarPoppedStash": "تم استرجاع {stashRef}",
+  "snackbarCreatedBranchFrom": "تم إنشاء الفرع \"{branchName}\" من {stashRef}",
+  "snackbarDroppedStash": "تم إسقاط {stashRef}",
+  "snackbarTagCreated": "تم إنشاء الوسم \"{tagName}\" بنجاح",
+  "snackbarTagsFetched": "تم جلب الوسوم بنجاح",
+  "snackbarErrorLoadingCommit": "خطأ في تحميل الإيداع: {error}",
+  "snackbarFailedToCreateTag": "فشل إنشاء الوسم: {error}",
+  "snackbarFailedToFetchTags": "فشل جلب الوسوم: {error}",
+  "snackbarNoRemotesConfigured": "لم يتم تكوين أي مستودعات بعيدة",
+  "snackbarAllTagsPushed": "تم دفع جميع الوسوم إلى {remoteName}",
+  "snackbarTagPushed": "تم دفع الوسم \"{tagName}\" إلى {remoteName}",
+  "snackbarFailedToPushTag": "فشل دفع الوسم: {error}",
+  "snackbarTagsPushed": "{count, plural, =1{تم دفع وسم واحد} other{تم دفع {count} وسم}} إلى {remoteName}",
+  "snackbarFailedToPushTags": "فشل دفع الوسوم: {error}",
+  "snackbarCheckedOutTag": "تم التبديل إلى الوسم \"{tagName}\"",
+  "snackbarFailedToCheckoutTag": "فشل التبديل إلى الوسم: {error}",
+  "snackbarTagDeleted": "تم حذف الوسم \"{tagName}\"",
+  "snackbarTagsDeleted": "{count, plural, =1{تم حذف وسم واحد} other{تم حذف {count} وسم}}",
+  "snackbarFailedToDeleteTag": "فشل حذف الوسم: {error}",
+  "snackbarFailedToDeleteTags": "فشل حذف الوسوم: {error}",
+  "snackbarDiffCopied": "تم نسخ الاختلافات إلى الحافظة",
+  "snackbarCopiedToClipboard": "تم النسخ إلى الحافظة",
+  "snackbarLineCopied": "تم نسخ السطر إلى الحافظة",
+  "snackbarPathCopied": "تم نسخ المسار: {filePath}",
+  "snackbarFileCopied": "تم النسخ: {fileName}",
+  "snackbarOutputCopied": "تم نسخ المخرجات إلى الحافظة",
+  "snackbarGitServiceNotAvailable": "خدمة Git غير متاحة",
+  "snackbarCommitNotFound": "لم يتم العثور على الإيداع",
+  "snackbarNoRepositoryOpen": "لا يوجد مستودع مفتوح",
+  "snackbarRepositoryPathNotAvailable": "مسار المستودع غير متاح",
+  "snackbarFailedToOpenExternalTool": "فشل فتح الأداة الخارجية: {error}",
+  "snackbarFailedToLoadDiff": "فشل تحميل الاختلافات: {error}",
+  "snackbarFileNotFound": "لم يتم العثور على الملف",
+  "snackbarSourceFileNotFound": "لم يتم العثور على الملف المصدر",
+  "snackbarNoFileCopied": "لم يتم نسخ أي ملف",
+  "snackbarFileRenamed": "تمت إعادة التسمية إلى {newName}",
+  "snackbarFailedToRenameFile": "فشلت إعادة تسمية الملف: {error}",
+  "snackbarFileDeleted": "تم الحذف: {fileName}",
+  "snackbarFailedToDeleteFile": "فشل حذف الملف: {error}",
+  "snackbarFilePasted": "تم اللصق: {newFileName}",
+  "snackbarFailedToPasteFile": "فشل لصق الملف: {error}",
+  "snackbarFileSaved": "تم حفظ الملف في {outputPath}",
+  "snackbarFileDownloaded": "تم تنزيل الملف إلى المستودع وفتح المجلد",
+  "snackbarFailedToDownloadFile": "فشل تنزيل الملف: {error}",
+  "snackbarFailedToDownloadAndOpenFolder": "فشل التنزيل وفتح المجلد: {error}",
+  "snackbarFailedToOpenFileManager": "فشل فتح مدير الملفات: {error}",
+  "snackbarFailedToOpenEditor": "فشل فتح المحرر: {error}",
+  "snackbarFailedToOpenFileInEditor": "فشل فتح الملف في المحرر: {error}",
+  "snackbarMergeCompleted": "اكتمل الدمج بنجاح",
+  "snackbarMergeAborted": "تم إلغاء الدمج",
+  "snackbarConflictResolved": "تم حل {fileName} باستخدام {choice}",
+  "snackbarFailedToApplyStash": "فشل تطبيق المخبأ: {error}",
+  "snackbarFailedToPopStash": "فشل استخراج المخبأ: {error}",
+  "snackbarFailedToCreateBranch": "فشل إنشاء الفرع: {error}",
+  "snackbarFailedToDropStash": "فشل حذف المخبأ: {error}",
+  "snackbarRemoteRenamed": "تمت إعادة تسمية \"{remoteName}\" إلى \"{newName}\"",
+  "snackbarViewDiffComingSoon": "عرض الاختلافات لـ {commitHash} (قريباً)",
+  "clearFiltersAction": "مسح الفلاتر",
+  "noBranchAvailable": "لا يوجد فرع",
+  "hintTextCommandPalette": "ماذا تريد أن تفعل؟",
+  "hintTextSearchFiles": "البحث عن الملفات...",
+  "hintTextCommitMessage": "أدخل رسالة الالتزام...",
+  "hintTextSearchCommits": "البحث في الالتزامات (جرب: author:john, hash:abc123, date:today)",
+  "hintTextSearchStashes": "البحث في المخبوءات...",
+  "hintTextDefaultBranch": "main",
+  "dialogTitleNoMergeInProgress": "لا يوجد دمج قيد التقدم",
+  "dialogTitleResolveConflicts": "حل التعارضات: {branchName}",
+  "dialogContentSelectConflict": "حدد تعارضًا للحل",
+  "dialogContentChooseResolutionStrategy": "اختر استراتيجية الحل:",
+  "dialogContentManualResolutionInfo": "يمكنك أيضًا تحرير الملف يدويًا في المحرر المفضل لديك لحل التعارضات، ثم تجهيز الملف باستخدام شاشة التغييرات.",
+  "dialogContentAllMergeConflictsResolved": "تم حل جميع تعارضات الدمج.",
+  "dialogContentFailedToResolveConflict": "فشل حل التعارض: {error}",
+  "dialogContentFailedToContinueMerge": "فشل متابعة الدمج: {error}",
+  "dialogContentFailedToAbortMerge": "فشل إلغاء الدمج: {error}",
+  "dialogTitleContinueMerge": "متابعة الدمج",
+  "dialogContentContinueMerge": "سيؤدي هذا إلى إكمال الدمج وإنشاء التزام دمج. متابعة؟",
+  "dialogActionContinue": "متابعة",
+  "dialogTitleAbortMerge": "إلغاء الدمج",
+  "dialogContentAbortMerge": "سيؤدي هذا إلى إلغاء الدمج والعودة إلى الحالة قبل الدمج. سيتم فقدان جميع حلول التعارضات. متابعة؟",
+  "dialogContentResolvedConflict": "تم حل {fileName} باستخدام {choice}",
+  "snackbarMergeCompleted": "اكتمل الدمج بنجاح",
+  "snackbarMergeAborted": "تم إلغاء الدمج",
+  "dialogContentDeleteWorkspace": "هل أنت متأكد من أنك تريد حذف \"{workspaceName}\"؟ لن يتم حذف المستودعات.",
+  "dialogTitleRenameFile": "إعادة تسمية الملف",
+  "dialogLabelNewName": "اسم جديد",
+  "dialogActionRename": "إعادة تسمية",
+  "dialogTitleDeleteFile": "حذف الملف",
+  "dialogContentDeleteFile": "هل أنت متأكد من أنك تريد حذف \"{fileName}\"؟\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "dialogTitleCopyFile": "نسخ الملف",
+  "dialogTitleFileExists": "الملف موجود",
+  "dialogContentCopyFileExists": "يوجد ملف بالاسم \"{fileName}\" في هذا الموقع.\n\nماذا تريد أن تفعل؟",
+  "dialogContentFileExistsDestination": "{fileName} موجود بالفعل في الوجهة.\n\nماذا تريد أن تفعل؟",
+  "dialogActionKeepBoth": "احتفظ بكليهما",
+  "contextMenuRename": "إعادة تسمية",
+  "contextMenuCopyPath": "نسخ المسار",
+  "contextMenuRevealInExplorer": "إظهار في المستكشف",
+  "snackbarPathCopied": "تم نسخ المسار: {path}",
+  "snackbarFileNotFound": "الملف غير موجود",
+  "snackbarFailedToOpenFileManager": "فشل فتح مدير الملفات: {error}",
+  "snackbarRenamedTo": "تمت إعادة التسمية إلى {newName}",
+  "snackbarFailedToRenameFile": "فشلت إعادة تسمية الملف: {error}",
+  "snackbarCopiedFile": "تم النسخ: {fileName}",
+  "snackbarNoFileCopied": "لم يتم نسخ أي ملف",
+  "snackbarSourceFileNotFound": "الملف المصدر غير موجود",
+  "snackbarPastedFile": "تم اللصق: {fileName}",
+  "snackbarFailedToPasteFile": "فشل لصق الملف: {error}",
+  "snackbarDeletedFile": "تم الحذف: {fileName}",
+  "snackbarFailedToDeleteFile": "فشل حذف الملف: {error}",
+  "dialogTitleDeleteTag": "حذف الوسم؟",
+  "dialogContentDeleteTagLocal": "حذف الوسم \"{tagName}\"؟\n\nهذا الوسم محلي فقط وسيتم حذفه من المستودع الخاص بك.\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "dialogContentDeleteTagRemote": "حذف الوسم \"{tagName}\"؟\n\nهذا الوسم موجود على الخادم البعيد وسيتم حذفه من كلا المستودعين المحلي والبعيد.\n\nلا يمكن التراجع عن هذا الإجراء.",
+  "progressDeletingTagLocalRemote": "حذف الوسم (محلي وبعيد)",
+  "progressDeletingTag": "حذف الوسم",
+  "progressDeletingTagLocally": "حذف \"{tagName}\" محليًا...",
+  "progressDeletingTagFromRemote": "حذف \"{tagName}\" من {remoteName}...",
+  "progressUpdatingList": "تحديث القائمة...",
+  "snackbarTagDeletedLocalAndRemote": "تم حذف الوسم \"{tagName}\" من المحلي والبعيد",
+  "snackbarTagDeleted": "تم حذف الوسم \"{tagName}\"",
+  "tagDetailsType": "النوع",
+  "tagDetailsCommit": "الالتزام",
+  "tagDetailsTagger": "الموسم",
+  "tagDetailsDate": "التاريخ",
+  "tagDetailsMessage": "الرسالة:",
+  "tagTypeAnnotated": "موسوم",
+  "tagTypeLightweight": "خفيف",
+  "dialogTitleWebBrowserLimitation": "قيود متصفح الويب",
+  "dialogContentWebBrowserLimitationChanges": "تحديد المجلد غير متاح في متصفحات الويب.\n\nلاستخدام Flutter GitUI بكامل الوظائف، يرجى التشغيل كتطبيق سطح مكتب:\n\nflutter run -d windows\n\nيتطلب ذلك Visual Studio 2022 مع \"Desktop development with C++\" المثبت.",
+  "dialogContentWebBrowserLimitationRepositories": "تحديد المجلد غير متاح في متصفحات الويب.\n\nلاستخدام Flutter GitUI بكامل الوظائف، يرجى التشغيل كتطبيق سطح مكتب.",
+  "dialogContentStageAllAndCommit": "لديك {count} ملف غير مُجهز{plural}.\n\nسيتم تجهيز جميع التغييرات غير المُجهزة قبل إنشاء الالتزام.\n\nهل تريد المتابعة؟",
+  "dialogContentDiscardChangesFile": "تجاهل التغييرات في {filePath}؟\n\nلا يمكن التراجع عن هذا.",
+  "dialogTitleWindowsReservedFilename": "اسم ملف محجوز في Windows",
+  "dialogContentStageAllFiles": "تجهيز جميع {count} ملف غير مُجهز{plural}؟",
+  "menuItemCreateBranch": "إنشاء فرع",
+  "menuItemViewDiff": "عرض الفروق",
+  "snackbarOutputCopied": "تم نسخ المخرجات إلى الحافظة",
+  "gitCommandSuccessful": "نجح أمر Git",
+  "gitCommandFailed": "فشل أمر Git",
+  "closingInSeconds": "إغلاق خلال {seconds}",
+  "checkboxKeepDialogOpen": "إبقاء مربع الحوار مفتوحًا",
+  "checkboxAmendLastCommit": "تعديل آخر التزام",
+  "checkboxAmendLastCommitSubtitle": "استبدال آخر التزام بهذا",
+  "labelCopyPath": "نسخ المسار",
+  "labelRevealInExplorer": "إظهار في المستكشف",
+  "labelChangedFiles": "الملفات المتغيرة",
+  "labelBinaryFile": "ملف ثنائي",
+  "labelCannotPreviewFile": "لا يمكن معاينة الملف",
+  "labelThisFileCannotBePreviewed": "لا يمكن معاينة هذا الملف",
+  "labelDownloadFile": "تنزيل الملف",
+  "labelDownloadAndOpenFolder": "تنزيل وفتح المجلد",
+  "labelDiffViewer": "عارض الفروقات",
+  "labelStaged": "مُجهز",
+  "labelCopyAll": "نسخ الكل",
+  "labelOpenInExternalTool": "فتح في أداة خارجية",
+  "labelCommitMessage": "رسالة الالتزام",
+  "labelAmendCommit": "تعديل الالتزام",
+  "labelLines": "سطور",
+  "labelFile": "ملف",
+  "labelFiles": "ملفات",
+  "messageFileNotFound": "الملف غير موجود",
+  "messageNoFileCopied": "لم يتم نسخ أي ملف",
+  "messageSourceFileNotFound": "الملف المصدر غير موجود",
+  "messageErrorLoadingDiff": "خطأ في تحميل الفروقات: {error}",
+  "messageLineCopiedToClipboard": "تم نسخ السطر إلى الحافظة",
+  "messageCommitMessageRequired": "رسالة الالتزام مطلوبة",
+  "messageErrorLoadingHistory": "خطأ في تحميل السجل",
+  "messageNoFilesChanged": "لا توجد ملفات متغيرة",
+  "messageFileTooLargeToPreview": "الملف كبير جداً للمعاينة ({size})",
+  "messageFailedToDownloadFile": "فشل تنزيل الملف: {error}",
+  "messageNoTextEditorConfigured": "لم يتم تكوين محرر نصوص. يرجى تعيين واحد في الإعدادات.",
+  "messageFailedToOpenEditor": "فشل فتح المحرر: {error}",
+  "messageFailedToOpenFileInEditor": "فشل فتح الملف في المحرر: {error}",
+  "messageRepositoryPathNotAvailable": "مسار المستودع غير متاح",
+  "messageFileDownloadedAndFolderOpened": "تم تنزيل الملف إلى المستودع وفتح المجلد",
+  "messageFailedToDownloadAndOpenFolder": "فشل التنزيل وفتح المجلد: {error}",
+  "messageFileSavedTo": "تم حفظ الملف في {path}",
+  "messageViewDiffForCommit": "عرض الفروقات لـ {hash} (قريباً)",
+  "messageFilesStaged": "{count} {plural} مُجهز",
+  "messageFileInfo": "{lineCount} سطور • {fileSize}",
+  "tipCommitMessage": "نصيحة: استخدم زمن المضارع (\"إضافة ميزة\" وليس \"أضيفت ميزة\")",
+  "editUrl": "تحرير URL",
+  "fetchUrl": "جلب URL",
+  "pushUrl": "دفع URL",
+  "mergeIntoCurrent": "دمج في الحالي",
+  "moreActions": "المزيد من الإجراءات",
+  "switchBranch": "تبديل الفرع",
+  "createPullRequest": "إنشاء طلب سحب",
+  "removeFromWorkspace": "إزالة من مساحة العمل",
+  "repositoriesCount": "{count} مستودعات",
+  "unassignedRepositories": "مستودعات غير معينة",
+  "editProject": "تحرير المشروع",
+  "deleteProject": "حذف المشروع",
+  "blame": "إلقاء اللوم",
+  "couldNotLoadBlame": "تعذر تحميل معلومات اللوم",
+  "emptyFile": "ملف فارغ",
+  "noContent": "هذا الملف لا يحتوي على محتوى",
+  "errorLoadingBlame": "خطأ في تحميل اللوم",
+  "commitShortHash": "الالتزام {hash}",
+  "linesCount": "{count} أسطر",
+  "outputCopiedToClipboard": "تم نسخ المخرجات إلى الحافظة",
+  "copyOutput": "نسخ المخرجات",
+  "exitCode": "رمز الخروج",
+  "time": "الوقت",
+  "noOutput": "لا يوجد مخرجات",
+  "commitDiff": "فرق الالتزام",
+  "errorLoadingDiff": "خطأ في تحميل الفرق",
+  "noChanges": "لا توجد تغييرات",
+  "lineCopiedToClipboard": "تم نسخ السطر إلى الحافظة",
+  "copyAll": "نسخ الكل",
+  "local": "محلي",
+  "annotatedCount": "مُعلّق ({count})",
+  "lightweightCount": "خفيف ({count})",
+  "allCount": "الكل ({count})",
+  "dropFoldersHere": "أسقط المجلدات هنا لإضافة المستودعات",
+  "webBrowserLimitation": "قيود متصفح الويب",
+  "cloneRepository": "استنساخ المستودع",
+  "initializeRepository": "تهيئة المستودع",
+  "validateAll": "التحقق من صحة الكل",
+  "clearAll": "مسح الكل",
+  "onBranchAt": "على {branch} • {timestamp}",
+  "quickFilters": "الفلاتر السريعة:",
+  "thisWeek": "هذا الأسبوع",
+  "thisMonth": "هذا الشهر",
+  "last30Days": "آخر 30 يومًا",
+  "commitsCount": "{count} commits",
+  "accessed": "تم الوصول:",
+  "edit": "تعديل",
+  "pullFromRemote": "السحب من البعيد",
+  "pullFromRemoteWithCount": "السحب من البعيد ({count} commits متأخرة)",
+  "pushToRemote": "الدفع إلى البعيد",
+  "pushToRemoteWithCount": "الدفع إلى البعيد ({count} commits متقدمة)",
+  "squashCommits": "دمج Commits",
+  "cherryPick": "اختيار انتقائي",
+  "revert": "التراجع",
+  "resetToHere": "إعادة التعيين هنا",
+  "forcePushingToRemote": "الدفع القسري إلى البعيد...",
+  "pushingToRemote": "الدفع إلى البعيد...",
+  "pushAll": "دفع الكل",
+  "fetchAll": "جلب الكل",
+  "openRepository": "فتح المستودع",
+  "remove": "إزالة",
+  "emptyCsvFile": "ملف CSV فارغ",
+  "errorLoadingDiff": "خطأ في تحميل الاختلافات:",
+  "switchedToBranch": "تم التبديل إلى الفرع: {branch}",
+  "selectedCount": "{count} محدد",
+  "errorLoadingCommits": "خطأ في تحميل الـ commits",
+  "errorLoadingBranches": "خطأ في تحميل الفروع: {error}",
+  "error": "خطأ: {error}",
+  "configAndLogs": "الإعدادات والسجلات",
+  "openAppLog": "فتح app.log",
+  "openGitLog": "فتح git.log",
+  "openConfigFolder": "فتح مجلد الإعدادات",
+  "deleteAppLog": "حذف app.log",
+  "deleteGitLog": "حذف git.log",
+  "allWorkspaces": "جميع مساحات العمل",
+  "animationSpeed": "سرعة الرسوم المتحركة",
+  "animationSpeedFast": "سريع",
+  "animationSpeedInfo": "يتحكم في سرعة الرسوم المتحركة للواجهة مثل القوائم والحوارات والانتقالات. حدد 'بدون' لتعطيل الرسوم المتحركة لتحسين إمكانية الوصول أو الاستجابة الأسرع.",
+  "animationSpeedNone": "بدون (فوري)",
+  "animationSpeedNormal": "عادي",
+  "animationSpeedSlow": "بطيء",
+  "animationSpeedUpdated": "تم تحديث سرعة الرسوم المتحركة",
+  "animations": "الرسوم المتحركة",
+  "branchNameRequired": "اسم الفرع مطلوب",
+  "checkoutBranchAfterCreation": "التبديل إلى الفرع بعد الإنشاء",
+  "checkoutBranchAfterCreationHint": "التبديل إلى الفرع الجديد فورًا",
+  "createBranchFromTag": "إنشاء فرع من وسم",
+  "deleteAll": "حذف الكل",
+  "deleteAllUnprotectedBranches": "حذف جميع الفروع غير المحمية",
+  "deleteAllUnprotectedBranchesConfirm": "سيؤدي هذا إلى حذف {count} فرع(فروع):",
+  "deleteBranch": "حذف الفرع",
+  "failedToRebaseBranch": "فشل إعادة بناء الفرع: {error}",
+  "fontSizeTiny": "صغير جدًا",
+  "forcePushFailed": "فشل الدفع القسري: {error}",
+  "forcePushSuccessful": "تم الدفع القسري إلى البعيد بنجاح",
+  "includeRemoteBranchesInList": "تضمين الفروع البعيدة في قائمة الاختيار",
+  "interactiveRebaseDescription": "تحرير الـ commits أثناء إعادة البناء (متقدم)",
+  "mergeBranches": "دمج الفروع",
+  "mergeSourceIntoTarget": "دمج {source} في {target}",
+  "mergingBranches": "دمج الفروع...",
+  "preserveMerges": "الحفاظ على عمليات الدمج",
+  "preserveMergesDescription": "الحفاظ على commits الدمج في سجل إعادة البناء",
+  "previewFontFamily": "خط الكود",
+  "previewFontSize": "حجم خط الكود",
+  "protectedBranchesNotDeleted": "لن يتم حذف الفروع المحمية والفرع الحالي.",
+  "rebase": "إعادة البناء",
+  "rebaseHasConflicts": "إعادة البناء بها تعارضات: {count} ملف(ملفات) يحتاج لحل",
+  "rebaseOptions": "خيارات إعادة البناء",
+  "rebaseSourceOntoTarget": "إعادة بناء {source} على {target}",
+  "rebasingBranches": "إعادة بناء الفروع...",
+  "repositoryCount": "{count} مستودعات",
+  "selectBothBranchesToMerge": "حدد كلا الفرعين للدمج/إعادة البناء",
+  "selectSourceAndTargetBranches": "حدد الفروع المصدر والهدف للدمج أو إعادة البناء",
+  "selectSourceBranch": "حدد الفرع المصدر",
+  "snackbarBranchCreatedSuccess": "تم إنشاء الفرع \"{branchName}\"",
+  "sourceBranch": "الفرع المصدر",
+  "sourceTag": "الوسم المصدر",
+  "strategy": "الاستراتيجية",
+  "successfullyRebasedBranch": "تم إعادة بناء {targetBranch} على {sourceBranch} بنجاح",
+  "targetBranch": "الفرع الهدف",
+  "viewCommitInHistory": "عرض الـ commit في السجل",
+  "language": "اللغة",
+  "languageDescription": "اختر لغتك المفضلة"
+}

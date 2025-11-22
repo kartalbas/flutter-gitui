@@ -1,0 +1,2481 @@
+{
+  "@@locale": "zh",
+  "appTitle": "Flutter GitUI",
+  "workspaces": "工作区",
+  "repositories": "仓库",
+  "changes": "变更",
+  "history": "历史",
+  "browse": "浏览",
+  "branches": "分支",
+  "remotes": "远程",
+  "stashes": "储藏",
+  "tags": "标签",
+  "settings": "设置",
+  "cancel": "取消",
+  "ok": "确定",
+  "save": "保存",
+  "delete": "删除",
+  "create": "创建",
+  "close": "关闭",
+  "done": "完成",
+  "refresh": "刷新",
+  "search": "搜索",
+  "browse_": "浏览",
+  "apply": "应用",
+  "checkout": "检出",
+  "push": "推送",
+  "pull": "拉取",
+  "repositoriesSelected": "已选择 {count} 个",
+  "@repositoriesSelected": {
+    "description": "Count of selected repositories",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "checkoutToMain": "切换到主分支",
+  "checkoutAllReposTooltip": "将所有选定的仓库切换到它们的主分支",
+  "allReposMustHaveCleanStatus": "所有选定的仓库必须具有干净状态",
+  "pullAllReposTooltip": "为所有选定的仓库拉取更改",
+  "createBranchTooltip": "在选定的仓库中创建新分支",
+  "selectOnlyOneRepoForBranch": "只选择一个仓库来创建分支",
+  "createPr": "创建 PR",
+  "createPrTooltip": "为选定的仓库创建拉取请求",
+  "selectOnlyOneRepoForPr": "只选择一个仓库来创建 PR",
+  "fetch": "获取",
+  "merge": "合并",
+  "commit": "提交",
+  "stash": "储藏",
+  "diff": "差异",
+  "pop": "弹出",
+  "drop": "丢弃",
+  "branch": "分支",
+  "noRepositoryOpen": "未打开仓库",
+  "openRepositoryToContinue": "打开仓库以继续",
+  "errorLoadingData": "加载 {dataType} 时出错",
+  "@errorLoadingData": {
+    "description": "Generic error loading message",
+    "placeholders": {
+      "dataType": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "error": "错误",
+  "retry": "重试",
+  "selectedCount": "已选择 {count} 项",
+  "@selectedCount": {
+    "description": "Count of selected items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "exitSelection": "退出选择",
+  "selectAll": "全选",
+  "clearSelection": "清除选择",
+  "clearAll": "全部清除",
+  "resetAll": "全部重置",
+  "deselectAll": "全部取消选择",
+  "searchPlaceholder": "搜索 {itemType}...",
+  "@searchPlaceholder": {
+    "description": "Search field placeholder",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      }
+    }
+  },
+  "regexSearchPlaceholder": "正则表达式搜索...",
+  "itemCount": "{count, plural, =1{{count} 个 {itemType}} other{{count} 个 {itemTypePlural}}}",
+  "@itemCount": {
+    "description": "Count of items with proper pluralization",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "itemType": {
+        "type": "String",
+        "example": "Tag"
+      },
+      "itemTypePlural": {
+        "type": "String",
+        "example": "Tags"
+      }
+    }
+  },
+  "ofTotal": "共 {total} 个",
+  "@ofTotal": {
+    "description": "Showing count of total",
+    "placeholders": {
+      "total": {
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
+  "noMatchesFound": "没有匹配 \"{query}\" 的 {itemType}",
+  "@noMatchesFound": {
+    "description": "Empty search results message",
+    "placeholders": {
+      "itemType": {
+        "type": "String",
+        "example": "tags"
+      },
+      "query": {
+        "type": "String",
+        "example": "search term"
+      }
+    }
+  },
+  "createTag": "创建标签",
+  "selectTags": "选择标签",
+  "fetchTags": "获取标签",
+  "advancedFilters": "高级筛选",
+  "sortTags": "标签排序",
+  "sortNameAZ": "名称 (A-Z)",
+  "sortNameZA": "名称 (Z-A)",
+  "sortDateNewest": "日期 (最新)",
+  "sortDateOldest": "日期 (最旧)",
+  "sortVersionLowHigh": "版本 (从低到高)",
+  "sortVersionHighLow": "版本 (从高到低)",
+  "groupTags": "标签分组",
+  "noGrouping": "不分组",
+  "byPrefix": "按前缀",
+  "byVersion": "按版本",
+  "byAuthor": "按作者",
+  "byDate": "按日期",
+  "allWithCount": "全部 ({count})",
+  "@allWithCount": {
+    "description": "All items filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "42"
+      }
+    }
+  },
+  "annotatedWithCount": "附注 ({count})",
+  "@annotatedWithCount": {
+    "description": "Annotated tags filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "15"
+      }
+    }
+  },
+  "lightweightWithCount": "轻量 ({count})",
+  "@lightweightWithCount": {
+    "description": "Lightweight tags filter with count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "27"
+      }
+    }
+  },
+  "pushCount": "推送 {count} 个",
+  "@pushCount": {
+    "description": "Push count of items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "syncStatus": "同步状态",
+  "tagsNotPushed": "{count, plural, =1{{count} 个标签未推送} other{{count} 个标签未推送}}",
+  "@tagsNotPushed": {
+    "description": "Count of local-only tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsAvailableToFetch": "{count, plural, =1{{count} 个标签可获取} other{{count} 个标签可获取}}",
+  "@tagsAvailableToFetch": {
+    "description": "Count of remote-only tags",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pushAll": "全部推送",
+  "fetchAll": "全部获取",
+  "noTags": "无标签",
+  "createTagToMarkHistory": "创建标签以标记历史中的重要节点",
+  "authorFilter": "作者: {author}",
+  "@authorFilter": {
+    "description": "Active author filter chip",
+    "placeholders": {
+      "author": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  "regex": "正则",
+  "pushTagsCount": "{count, plural, =1{推送 {count} 个标签} other{推送 {count} 个标签}}",
+  "@pushTagsCount": {
+    "description": "Push tags button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTagsCount": "{count, plural, =1{删除 {count} 个标签} other{删除 {count} 个标签}}",
+  "@deleteTagsCount": {
+    "description": "Delete tags button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dateRange": "日期范围",
+  "authorTagger": "作者 / 标签者",
+  "allAuthors": "所有作者",
+  "noAuthorsFound": "标签中未找到作者",
+  "useRegularExpressions": "使用正则表达式",
+  "enableRegexMatching": "在搜索中启用正则表达式模式匹配",
+  "today": "今天",
+  "lastWeek": "上周",
+  "lastMonth": "上月",
+  "lastYear": "去年",
+  "customRange": "自定义范围",
+  "allTime": "全部时间",
+  "createTagDialogTitle": "创建标签",
+  "createTagDescription": "在当前 HEAD 创建新标签",
+  "tagName": "标签名称",
+  "tagNameHint": "v1.0.0",
+  "annotatedTag": "附注标签",
+  "includeMessageWithTag": "在标签中包含消息",
+  "message": "消息",
+  "releaseNotesPlaceholder": "发布说明或描述...",
+  "tagCreatedSuccess": "标签 \"{tagName}\" 创建成功",
+  "@tagCreatedSuccess": {
+    "description": "Tag creation success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String",
+        "example": "v1.0.0"
+      }
+    }
+  },
+  "tagCreatedError": "创建标签失败: {error}",
+  "@tagCreatedError": {
+    "description": "Tag creation error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsFetchedSuccess": "标签获取成功",
+  "tagsFetchedError": "获取标签失败: {error}",
+  "@tagsFetchedError": {
+    "description": "Tags fetch error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noRemotesConfigured": "未配置远程仓库",
+  "selectRemote": "选择远程仓库",
+  "allTagsPushedSuccess": "所有标签已推送到 {remoteName}",
+  "@allTagsPushedSuccess": {
+    "description": "All tags pushed success message",
+    "placeholders": {
+      "remoteName": {
+        "type": "String",
+        "example": "origin"
+      }
+    }
+  },
+  "pushTagsError": "推送标签失败: {error}",
+  "@pushTagsError": {
+    "description": "Push tags error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushingTags": "正在推送标签",
+  "pushedTagToRemote": "{tagName} 已推送到 {remoteName}",
+  "@pushedTagToRemote": {
+    "description": "Tag pushed progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsPushedSuccess": "{count, plural, =1{{count} 个标签已推送到 {remoteName}} other{{count} 个标签已推送到 {remoteName}}}",
+  "@tagsPushedSuccess": {
+    "description": "Multiple tags pushed success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagsDialogTitle": "删除标签?",
+  "deleteTagsConfirmation": "删除 {count, plural, =1{{count} 个标签} other{{count} 个标签}}?\n\n此操作无法撤销。",
+  "@deleteTagsConfirmation": {
+    "description": "Delete tags confirmation message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tagsToDelete": "要删除的标签:",
+  "alsoDeleteFromRemote": "同时从远程删除",
+  "deleteFromRemoteDescription": "从远程仓库删除标签以防止获取时返回",
+  "deletingTagsLocalAndRemote": "正在删除标签 (本地和远程)",
+  "deletingTagsLocal": "正在删除标签",
+  "deletedTagLocally": "{tagName} 已在本地删除",
+  "@deletedTagLocally": {
+    "description": "Tag deleted locally progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deletedTagFromRemote": "{tagName} 已从 {remoteName} 删除",
+  "@deletedTagFromRemote": {
+    "description": "Tag deleted from remote progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "tagsDeletedSuccess": "{count, plural, =1{{count} 个标签已删除} other{{count} 个标签已删除}}",
+  "@tagsDeletedSuccess": {
+    "description": "Tags deleted success message",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteTagsError": "删除标签失败: {error}",
+  "@deleteTagsError": {
+    "description": "Delete tags error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "localBadge": "本地",
+  "viewDiff": "查看差异",
+  "type": "类型",
+  "annotated": "附注",
+  "lightweight": "轻量",
+  "tagger": "标签者",
+  "date": "日期",
+  "checkoutTagDialogTitle": "检出标签?",
+  "checkoutTagConfirmation": "检出标签 \"{tagName}\"?\n\n这将使您进入分离 HEAD 状态。",
+  "@checkoutTagConfirmation": {
+    "description": "Checkout tag confirmation message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkedOutTagSuccess": "已检出标签 \"{tagName}\"",
+  "@checkedOutTagSuccess": {
+    "description": "Checkout tag success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "checkoutTagError": "检出标签失败: {error}",
+  "@checkoutTagError": {
+    "description": "Checkout tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tagPushedSuccess": "标签 \"{tagName}\" 已推送到 {remoteName}",
+  "@tagPushedSuccess": {
+    "description": "Tag pushed success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pushTagError": "推送标签失败: {error}",
+  "@pushTagError": {
+    "description": "Push tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagDialogTitle": "删除标签?",
+  "deletingTagLocalAndRemote": "正在删除标签 (本地和远程)",
+  "deletingTag": "正在删除标签",
+  "deletingTagLocally": "正在本地删除 \"{tagName}\"...",
+  "@deletingTagLocally": {
+    "description": "Deleting tag locally progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deletingTagFromRemote": "正在从 {remoteName} 删除 \"{tagName}\"...",
+  "@deletingTagFromRemote": {
+    "description": "Deleting tag from remote progress message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "updatingList": "正在更新列表...",
+  "tagDeletedSuccess": "标签 \"{tagName}\" 已删除",
+  "@tagDeletedSuccess": {
+    "description": "Tag deleted success message",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagError": "删除标签失败: {error}",
+  "@deleteTagError": {
+    "description": "Delete tag error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "thisWeek": "本周",
+  "thisMonth": "本月",
+  "thisYear": "今年",
+  "yearsAgo": "{count, plural, =1{1 年前} other{{count} 年前}}",
+  "@yearsAgo": {
+    "description": "Years ago date group",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nonVersioned": "无版本",
+  "groupTagCount": "{count, plural, =1{{count} 个标签} other{{count} 个标签}}",
+  "@groupTagCount": {
+    "description": "Tag count in group header",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noStashes": "无储藏",
+  "createStashToSaveWork": "创建储藏以保存您的工作进度",
+  "createStash": "创建储藏",
+  "openRepositoryToManageStashes": "打开仓库以管理储藏",
+  "stashCount": "{count, plural, =1{{count} 个储藏} other{{count} 个储藏}}",
+  "@stashCount": {
+    "description": "Stash count label",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createStashDialogTitle": "创建储藏",
+  "saveChangesToStash": "将当前更改保存到储藏",
+  "messageOptional": "消息 (可选)",
+  "describeWorkPlaceholder": "描述您正在进行的工作...",
+  "stashAllFiles": "储藏所有文件",
+  "toggleSelectSpecificFiles": "切换以选择特定文件",
+  "selectFilesToStash": "选择要储藏的文件 ({selected}/{total})",
+  "@selectFilesToStash": {
+    "description": "Label for file selection section with counts",
+    "placeholders": {
+      "selected": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noFilesToStash": "没有要储藏的文件",
+  "includeUntrackedFiles": "包含未跟踪的文件",
+  "keepStagedChanges": "保留暂存的更改",
+  "keepChangesInIndex": "储藏后在索引中保留更改",
+  "stashCreatedSuccess": "储藏创建成功",
+  "createStashError": "创建储藏失败: {error}",
+  "@createStashError": {
+    "description": "Create stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "clearAllStashesDialogTitle": "清除所有储藏?",
+  "clearAllStashesConfirmation": "这将永久删除所有储藏。\n\n此操作无法撤销。",
+  "allStashesClearedSuccess": "所有储藏已清除",
+  "clearStashesError": "清除储藏失败: {error}",
+  "@clearStashesError": {
+    "description": "Clear stashes error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranch": "创建分支",
+  "appliedStashSuccess": "已应用 {stashRef}",
+  "@appliedStashSuccess": {
+    "description": "Applied stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "applyStashError": "应用储藏失败: {error}",
+  "@applyStashError": {
+    "description": "Apply stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "poppedStashSuccess": "已弹出 {stashRef}",
+  "@poppedStashSuccess": {
+    "description": "Popped stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "popStashError": "弹出储藏失败: {error}",
+  "@popStashError": {
+    "description": "Pop stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "loadDiffError": "加载差异失败: {error}",
+  "@loadDiffError": {
+    "description": "Load diff error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranchFromStash": "从储藏创建分支",
+  "createBranchFromStashDescription": "从 {stashRef} 创建新分支",
+  "@createBranchFromStashDescription": {
+    "description": "Description for create branch from stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "branchName": "分支名称",
+  "createdBranchFromStashSuccess": "分支 \"{branchName}\" 已从 {stashRef} 创建",
+  "@createdBranchFromStashSuccess": {
+    "description": "Created branch from stash success message",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "createBranchError": "创建分支失败: {error}",
+  "@createBranchError": {
+    "description": "Create branch error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashDialogTitle": "丢弃储藏?",
+  "dropStashConfirmation": "丢弃 {stashRef}?\n\n此操作无法撤销。",
+  "@dropStashConfirmation": {
+    "description": "Drop stash confirmation message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "droppedStashSuccess": "已丢弃 {stashRef}",
+  "@droppedStashSuccess": {
+    "description": "Dropped stash success message",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "dropStashError": "丢弃储藏失败: {error}",
+  "@dropStashError": {
+    "description": "Drop stash error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "stashDiffDialogTitle": "储藏差异 - {stashRef}",
+  "@stashDiffDialogTitle": {
+    "description": "Stash diff dialog title",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "noChanges": "无更改",
+  "cloneRepository": "克隆仓库",
+  "cloneRepositoryDescription": "从 URL 克隆 Git 仓库",
+  "repositoryUrl": "仓库 URL",
+  "repositoryUrlHint": "https://github.com/user/repo.git",
+  "destinationPath": "目标路径",
+  "destinationPathHint": "C:\\Users\\...\\repo",
+  "branchOptional": "分支 (可选)",
+  "mainBranchHint": "main",
+  "shallowClone": "浅克隆",
+  "shallowCloneDescription": "仅克隆最近的历史记录以节省空间",
+  "depth": "深度:",
+  "cloningRepositoryProgress": "正在克隆仓库... 这可能需要一些时间。",
+  "clone": "克隆",
+  "directorySelectionNotAvailableInBrowser": "Web 浏览器中不支持目录选择",
+  "selectDestinationForClone": "选择克隆目标",
+  "pleaseEnterRepositoryUrl": "请输入仓库 URL",
+  "pleaseEnterDestinationPath": "请输入目标路径",
+  "repositoryClonedSuccess": "仓库已成功克隆到 {path}",
+  "@repositoryClonedSuccess": {
+    "description": "Success message after cloning repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryClonedButFailedToOpen": "仓库已克隆但打开失败",
+  "cloneRepositoryError": "克隆仓库失败: {error}",
+  "@cloneRepositoryError": {
+    "description": "Clone repository error message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reference": "引用",
+  "created": "创建于",
+  "openRepositoryToManageTags": "打开仓库以管理标签",
+  "workingDirectoryClean": "工作目录清理",
+  "noChangesToCommit": "无更改可提交",
+  "errorLoadingStatus": "加载状态时出错",
+  "errorLoadingStashes": "加载储藏时出错",
+  "createStashToSaveWorkInProgress": "创建储藏以保存正在进行的工作",
+  "errorLoadingTags": "加载标签时出错",
+  "openRepositoryToBrowseFiles": "打开仓库以浏览文件",
+  "noFileSelected": "未选择文件",
+  "selectFileToViewHistoryOrPreview": "从树中选择文件以查看其历史或预览",
+  "noLocalBranches": "无本地分支",
+  "noRemoteBranches": "无远程分支",
+  "errorLoadingBranches": "加载分支时出错: {error}",
+  "@errorLoadingBranches": {
+    "description": "Error message when loading branches fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noRemotes": "无远程",
+  "addRemoteToCollaborate": "添加远程仓库以进行协作",
+  "addRemote": "添加远程",
+  "noResults": "无结果",
+  "noRemotesMatchQuery": "没有远程匹配 \"{query}\"",
+  "@noRemotesMatchQuery": {
+    "description": "Message when no remotes match search query",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "clearSearch": "清除搜索",
+  "errorLoadingRemotes": "加载远程时出错",
+  "noWorkspacesYet": "尚无工作区",
+  "createWorkspaceToOrganize": "创建工作区以组织您的仓库",
+  "noRepositoriesYet": "尚无仓库",
+  "addRepositoryToGetStarted": "添加仓库以开始",
+  "openRepository": "打开仓库",
+  "browseExistingRepository": "浏览现有仓库",
+  "cloneFromRemoteUrl": "从远程 URL 克隆",
+  "initializeRepository": "初始化仓库",
+  "createNewGitRepository": "创建新的 Git 仓库",
+  "addedRemoteSuccess": "已添加远程 \"{remoteName}\"",
+  "@addedRemoteSuccess": {
+    "description": "Success message when remote is added",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "addRemoteError": "添加远程失败: {error}",
+  "@addRemoteError": {
+    "description": "Error message when adding remote fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "fetchedAllRemotesSuccess": "已成功从所有远程获取",
+  "fetchRemotesError": "从远程获取时出错: {error}",
+  "@fetchRemotesError": {
+    "description": "Error message when fetching from remotes fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "blame": "归因",
+  "preview": "预览",
+  "viewOptions": "查看选项",
+  "showHiddenFiles": "显示隐藏文件",
+  "showIgnoredFiles": "显示被忽略的文件",
+  "expandAll": "全部展开",
+  "collapseAll": "全部折叠",
+  "advancedSearch": "高级搜索",
+  "clearFilters": "清除筛选 ({count})",
+  "@clearFilters": {
+    "description": "Clear filters button with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commitsSquashedSuccess": "{count, plural, =1{{count} 个提交已压缩} other{{count} 个提交已压缩}}",
+  "cherryPickingCommits": "正在拣选 {count, plural, =1{{count} 个提交} other{{count} 个提交}}...",
+  "@cherryPickingCommits": {
+    "description": "Progress message when cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickedSuccess": "已成功拣选 {count, plural, =1{{count} 个提交} other{{count} 个提交}}",
+  "@cherryPickedSuccess": {
+    "description": "Success message after cherry-picking commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cherryPickFailed": "拣选失败: {error}",
+  "@cherryPickFailed": {
+    "description": "Error message when cherry-pick fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "revertingCommit": "正在还原提交",
+  "@revertingCommit": {
+    "description": "Progress message when reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertedSuccess": "已成功还原提交 {hash}",
+  "@revertedSuccess": {
+    "description": "Success message after reverting a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "revertFailed": "还原失败: {error}",
+  "@revertFailed": {
+    "description": "Error message when revert fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "resettingToCommit": "正在重置到提交",
+  "@resettingToCommit": {
+    "description": "Progress message when resetting to a commit",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetSuccess": "已成功重置到 {hash}",
+  "@resetSuccess": {
+    "description": "Success message after resetting",
+    "placeholders": {
+      "hash": {
+        "type": "String"
+      }
+    }
+  },
+  "resetFailed": "重置失败: {error}",
+  "@resetFailed": {
+    "description": "Error message when reset fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pullingFromRemote": "正在从 {remoteName} 拉取",
+  "pullSuccess": "已从 {remoteName} 拉取",
+  "pullFailed": "拉取失败",
+  "@pullFailed": {
+    "description": "Error message when pull fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "pushSuccess": "已推送到 {remoteName}",
+  "pushFailed": "推送失败",
+  "@pushFailed": {
+    "description": "Error message when push fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "directoryPath": "目录路径",
+  "directoryPathHint": "选择或输入路径",
+  "initialBranchName": "初始分支名称",
+  "bareRepository": "裸仓库",
+  "bareRepositoryDescription": "创建不含工作目录的仓库 (用于服务器)",
+  "initializeRepositoryInfo": "在选定的目录创建新的 Git 仓库",
+  "@initializeRepositoryInfo": {
+    "description": "Info message for initialize repository dialog",
+    "placeholders": {
+      "bareText": {
+        "type": "String"
+      }
+    }
+  },
+  "initializeRepositoryInfoBare": "创建不含工作目录的裸仓库 (用于服务器)",
+  "initialize": "初始化",
+  "directorySelectionNotAvailable": "Web 浏览器中不支持目录选择",
+  "selectDirectoryToInitialize": "选择要初始化的目录",
+  "enterDirectoryPath": "输入目录路径",
+  "initializingRepository": "正在初始化仓库",
+  "repositoryInitializedSuccess": "仓库已在 {path} 成功初始化",
+  "@repositoryInitializedSuccess": {
+    "description": "Success message after initializing repository",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryInitializedButFailedToOpen": "仓库已初始化但打开失败",
+  "failedToInitializeRepository": "初始化仓库失败: {error}",
+  "@failedToInitializeRepository": {
+    "description": "Error message when initialization fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "cloneGitRepositoryFromUrl": "从 URL 克隆 Git 仓库",
+  "enterRepositoryUrl": "输入仓库 URL",
+  "enterDestinationPath": "输入目标路径",
+  "cloningRepository": "正在克隆仓库... 这可能需要一些时间。",
+  "failedToCloneRepository": "克隆仓库失败",
+  "@failedToCloneRepository": {
+    "description": "Error message when cloning fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "switchRepository": "切换仓库",
+  "searchRepositories": "搜索仓库",
+  "noRepositoriesFound": "未找到仓库",
+  "invalidRepository": "无效的仓库",
+  "closeRepository": "关闭仓库",
+  "repositoryInvalidOrMissing": "仓库路径无效或缺失",
+  "switchedToRepository": "已切换到仓库: {path}",
+  "@switchedToRepository": {
+    "description": "SnackBar message after switching repository",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "repositoryClosed": "仓库已关闭",
+  "switchBranch": "切换分支",
+  "searchBranches": "搜索分支",
+  "showRemoteBranches": "显示远程分支",
+  "noBranchesFound": "未找到分支",
+  "switchedToBranch": "已切换到分支 \"{branchName}\"",
+  "@switchedToBranch": {
+    "description": "SnackBar message after switching branch",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSwitchBranch": "切换分支失败: {error}",
+  "@failedToSwitchBranch": {
+    "description": "Error message when switching branch fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "gitReflog": "Git 引用日志",
+  "noReflogEntries": "无引用日志条目",
+  "referenceLogEmpty": "此仓库的引用日志为空",
+  "errorLoadingReflog": "加载引用日志时出错",
+  "reflogEntriesInfo": "显示最近 {count} 个引用日志条目",
+  "@reflogEntriesInfo": {
+    "description": "Info message showing number of reflog entries",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchBranchesDialog": "搜索分支",
+  "clear": "清除",
+  "renameBranch": "重命名分支",
+  "newBranchName": "新分支名称",
+  "enterBranchName": "输入分支名称",
+  "rename": "重命名",
+  "mergeBranchDialog": "合并分支",
+  "mergeBranchConfirm": "将 \"{sourceBranch}\" 合并到 \"{targetBranch}\"?",
+  "@mergeBranchConfirm": {
+    "description": "Confirmation message for merging branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBranchDialog": "删除分支?",
+  "deleteBranchConfirm": "删除分支 \"{branchName}\"?\n\n此操作无法撤销。",
+  "@deleteBranchConfirm": {
+    "description": "Confirmation message for deleting branch",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      }
+    }
+  },
+  "searchRemotesDialog": "搜索远程",
+  "searchQuery": "搜索查询",
+  "remoteNameOrUrl": "远程名称或 URL",
+  "addRemoteDialog": "添加远程",
+  "remoteName": "远程名称",
+  "remoteNameHint": "例如: origin",
+  "enterRemoteName": "输入远程名称",
+  "remoteNameNoSpaces": "远程名称不能包含空格",
+  "remoteUrlLabel": "远程 URL",
+  "remoteUrlHintDialog": "https://github.com/user/repo.git",
+  "enterRemoteUrl": "输入远程 URL",
+  "add": "添加",
+  "editRemoteUrl": "编辑远程 URL",
+  "@editRemoteUrl": {
+    "description": "Title for edit remote URL dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "enterUrl": "输入 URL",
+  "renameRemote": "重命名远程",
+  "@renameRemote": {
+    "description": "Title for rename remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "newName": "新名称",
+  "enterName": "输入名称",
+  "nameCannotContainSpaces": "名称不能包含空格",
+  "pruneRemote": "修剪远程",
+  "@pruneRemote": {
+    "description": "Title for prune remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "pruneRemoteConfirm": "修剪远程 \"{remoteName}\" 的过时引用?",
+  "prune": "修剪",
+  "deleteRemote": "删除远程",
+  "@deleteRemote": {
+    "description": "Title for delete remote dialog",
+    "placeholders": {
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteRemoteConfirm": "删除远程 \"{remoteName}\"?\n\n这将仅删除远程引用,而不会删除远程服务器上的数据。",
+  "clearAllStashesDialog": "清除所有储藏?",
+  "clearAllStashesConfirm": "这将永久删除所有储藏。\n\n此操作无法撤销。",
+  "branchNameLabel": "分支名称",
+  "dropStashDialog": "丢弃储藏",
+  "dropStashConfirm": "丢弃 {stashRef}?\n\n此操作无法撤销。",
+  "@dropStashConfirm": {
+    "description": "Confirmation message for dropping stash",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "stashDiffTitle": "储藏差异 - {stashRef}",
+  "@stashDiffTitle": {
+    "description": "Title for stash diff dialog",
+    "placeholders": {
+      "stashRef": {
+        "type": "String"
+      }
+    }
+  },
+  "createStashDialog": "创建储藏",
+  "describeWork": "描述您正在进行的工作...",
+  "stashAllFilesToggle": "储藏所有文件",
+  "keepStagedChangesSubtitle": "储藏后在索引中保留暂存的更改",
+  "createTagDialog": "创建标签",
+  "createNewTagAtHead": "在当前 HEAD 创建新标签",
+  "releaseNotesHint": "发布说明或描述...",
+  "deleteTagsDialog": "删除标签",
+  "deleteTagsConfirm": "删除 {count, plural, =1{{count} 个标签} other{{count} 个标签}}?",
+  "@deleteTagsConfirm": {
+    "description": "Confirmation message for deleting tags with list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "tagList": {
+        "type": "String"
+      },
+      "ellipsis": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFromRemoteSubtitle": "从远程仓库删除标签以防止获取时返回",
+  "checkoutTagDialog": "检出标签?",
+  "checkoutTagConfirm": "检出标签 \"{tagName}\"?\n\n这将使您进入分离 HEAD 状态。",
+  "@checkoutTagConfirm": {
+    "description": "Confirmation message for checking out tag",
+    "placeholders": {
+      "tagName": {
+        "type": "String"
+      }
+    }
+  },
+  "selectRemoteDialog": "选择远程",
+  "advancedFiltersDialog": "高级筛选",
+  "enableRegexPatternMatching": "在搜索中启用正则表达式模式匹配",
+  "startDate": "开始日期",
+  "endDate": "结束日期",
+  "squashCommitsDialog": "压缩提交",
+  "squashingCommitsCount": "正在压缩 {count} 个提交",
+  "@squashingCommitsCount": {
+    "description": "Message showing number of commits being squashed",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "newCommitMessage": "新提交消息",
+  "enterCommitMessageForSquashed": "输入压缩提交的消息",
+  "squashCommitsInfo": "这将把选定的提交合并为单个提交",
+  "selectedCommitsMustBeConsecutive": "选定的提交必须是连续的",
+  "cannotSquashRootCommit": "无法压缩: 最早选择的提交是根提交 (不存在父提交)",
+  "commitMessageCannotBeEmpty": "提交消息不能为空",
+  "failedToSquashCommits": "压缩提交失败: {error}",
+  "@failedToSquashCommits": {
+    "description": "Error message when squashing commits fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "squashCommits": "压缩提交",
+  "resetToCommit": "重置到提交",
+  "resetCurrentBranchTo": "将当前分支重置到",
+  "chooseResetMode": "选择重置模式:",
+  "branchPointerWillMove": "这将移动分支指针到此提交。",
+  "soft": "软",
+  "keepChangesStagedSoft": "保留更改已暂存 (软)",
+  "mixed": "混合",
+  "keepChangesUnstagedMixed": "保留更改未暂存 (混合)",
+  "hard": "硬",
+  "discardAllChangesHard": "丢弃所有更改 (硬)",
+  "pushRejected": "推送被拒绝",
+  "pushRejectedHistoryRewritten": "推送被拒绝 - 远程历史已重写",
+  "needToForcePushChanges": "您需要强制推送更改",
+  "forcePushWarningOverwriteRemote": "警告: 强制推送将覆盖远程更改!",
+  "forcePushOnlyIfAlone": "仅当您是此分支的唯一开发者时才强制推送",
+  "forcePushOthersNeedReset": "强制推送后,其他开发者将需要重置其本地分支",
+  "forcePushCannotBeEasilyUndone": "强制推送无法轻松撤销",
+  "forcePush": "强制推送",
+  "uncommittedChanges": "未提交的更改",
+  "youHaveUncommittedChanges": "您有未提交的更改",
+  "@youHaveUncommittedChanges": {
+    "description": "Message about uncommitted changes before branch switch",
+    "placeholders": {
+      "changeCount": {
+        "type": "int",
+        "example": "3"
+      },
+      "plural": {
+        "type": "String"
+      }
+    }
+  },
+  "switchAnyway": "仍然切换",
+  "branchSwitchFailed": "分支切换失败",
+  "failedToSwitchToBranch": "切换到分支失败",
+  "@failedToSwitchToBranch": {
+    "description": "Error message when switching to a branch fails",
+    "placeholders": {
+      "branchName": {
+        "type": "String",
+        "example": "feature/new-feature"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "generalSearch": "常规搜索",
+  "searchInCommitOrAuthorOrHash": "在提交消息、作者或哈希中搜索",
+  "caseSensitive": "区分大小写",
+  "regularExpression": "正则表达式",
+  "fuzzyMatch": "模糊匹配",
+  "specificFilters": "特定筛选",
+  "authorLabel": "作者",
+  "filterByAuthorNameOrEmail": "按作者名称或邮箱筛选",
+  "committerLabel": "提交者",
+  "filterByCommitterNameOrEmail": "按提交者名称或邮箱筛选",
+  "filePathLabel": "文件路径",
+  "filterByFilePathExample": "按文件路径筛选 (例如: src/main.dart)",
+  "commitHashLabel": "提交哈希",
+  "filterByCommitHashPrefix": "按提交哈希前缀筛选",
+  "commitDetails": "提交详情",
+  "commitMessage": "提交信息",
+  "additionalDetails": "附加详情",
+  "show": "显示",
+  "hide": "隐藏",
+  "name": "名称",
+  "hash": "哈希",
+  "parent": "父提交",
+  "parents": "父提交",
+  "references": "引用",
+  "localTab": "本地",
+  "remoteTab": "远程",
+  "dateRangeSection": "日期范围",
+  "fromDate": "从日期",
+  "toDate": "到日期",
+  "last30Days": "最近 30 天",
+  "searchSyntax": "搜索语法",
+  "syntaxAuthorFilter": "author:name - 按作者筛选",
+  "syntaxFileFilter": "file:path - 按文件筛选",
+  "syntaxHashFilter": "hash:abc - 按哈希筛选",
+  "syntaxFromDateFilter": "from:YYYY-MM-DD - 从日期筛选",
+  "syntaxToDateFilter": "to:YYYY-MM-DD - 到日期筛选",
+  "syntaxExactPhrase": "\"exact phrase\" - 精确短语",
+  "selectDate": "选择日期",
+  "clearFiltersButton": "清除过滤器",
+  "advancedSearchButton": "搜索",
+  "batchOperationProgressDialogTitle": "{title}",
+  "@batchOperationProgressDialogTitle": {
+    "description": "Title for batch operation progress dialog",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "operationInProgress": "操作进行中",
+  "operationsCompleted": "操作已完成",
+  "operationsCompletedWithErrors": "操作完成但有错误",
+  "successCount": "成功: {count}",
+  "@successCount": {
+    "description": "Summary of operation results",
+    "placeholders": {
+      "successCount": {
+        "type": "int"
+      },
+      "failureCount": {
+        "type": "int"
+      }
+    }
+  },
+  "completed": "已完成",
+  "failed": "失败",
+  "createBranchDialogTitle": "创建分支",
+  "branchPrefixLabel": "分支前缀:",
+  "noPrefix": "无前缀",
+  "featurePrefix": "功能",
+  "releasePrefix": "发布",
+  "hotfixPrefix": "热修复",
+  "bugfixPrefix": "错误修复",
+  "customPrefix": "自定义",
+  "customPrefixLabel": "自定义前缀",
+  "customPrefixHint": "例如: feature/",
+  "customPrefixHelper": "输入自定义分支前缀 (必须以 / 结尾)",
+  "branchNameHint": "例如: user-authentication",
+  "fullBranchNameLabel": "完整分支名称",
+  "enterBranchNameLabel": "输入分支名称",
+  "branchNameCannotBeEmpty": "分支名称不能为空",
+  "branchNameInvalidCharacters": "分支名称包含无效字符",
+  "customPrefixMustEndWithSlash": "自定义前缀必须以 / 结尾",
+  "willCreateInRepositories": "将在 {count} 个仓库中创建",
+  "@willCreateInRepositories": {
+    "description": "Label showing how many repositories will get the branch",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "repositoryLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "repository": "仓库",
+  "setUpstreamLabel": "设置上游",
+  "setUpstreamDescription": "设置此分支跟踪的远程分支",
+  "checkoutAfterCreationLabel": "创建后检出",
+  "checkoutAfterCreationDescription": "立即切换到新分支",
+  "createBranchButton": "创建分支",
+  "createPullRequestDialogTitle": "创建拉取请求",
+  "sourceBranchLabel": "源分支",
+  "targetBranchLabel": "目标分支",
+  "searchOrSelectBranch": "搜索或选择分支",
+  "selectTargetBranch": "选择目标分支",
+  "pullRequestTitleLabel": "拉取请求标题",
+  "enterPRTitle": "输入拉取请求标题",
+  "enterPRTitleValidation": "请输入拉取请求标题",
+  "descriptionLabel": "描述",
+  "enterPRDescription": "描述此拉取请求的目的和更改...",
+  "createAsDraftLabel": "创建为草稿",
+  "draftPRDescription": "草稿拉取请求不能合并直到标记为准备审查",
+  "prInfoMessage": "这将在远程仓库创建拉取请求",
+  "createPRButton": "创建拉取请求",
+  "projectDialogCreateTitle": "创建项目",
+  "projectDialogEditTitle": "编辑项目",
+  "projectNameLabel": "项目名称",
+  "enterProjectName": "输入项目名称",
+  "enterProjectNameValidation": "请输入项目名称",
+  "projectDescriptionLabel": "项目描述",
+  "enterProjectDescription": "输入项目描述 (可选)",
+  "projectColorLabel": "项目颜色",
+  "previewLabel": "预览",
+  "projectNamePreviewPlaceholder": "项目名称预览",
+  "saveProjectButton": "保存项目",
+  "createProjectButton": "创建项目",
+  "createTagDialogDescription": "在当前 HEAD 创建新标签",
+  "targetCommit": "目标提交",
+  "headCurrentCommit": "HEAD (当前提交)",
+  "enterTagName": "输入标签名称",
+  "tagNameNoSpaces": "标签名称不能包含空格",
+  "enterTagMessage": "输入标签消息",
+  "mergeABranchInto": "将分支合并到",
+  "@mergeABranchInto": {
+    "description": "Description text in merge branch dialog",
+    "placeholders": {
+      "currentBranch": {
+        "type": "String",
+        "example": "main"
+      }
+    }
+  },
+  "noOtherBranchesAvailable": "无其他可用分支",
+  "branchToMerge": "要合并的分支",
+  "selectABranch": "选择分支",
+  "remote": "远程",
+  "mergeOptions": "合并选项",
+  "fastForwardOnly": "仅快进",
+  "abortIfFastForwardNotPossible": "无法快进时中止",
+  "noFastForward": "不快进",
+  "alwaysCreateMergeCommit": "始终创建合并提交",
+  "combineAllCommitsIntoSingleCommit": "将所有提交合并为单个提交",
+  "customMergeMessage": "自定义合并消息",
+  "enterCustomMergeCommitMessage": "输入自定义合并提交消息 (可选)",
+  "mergeMessage": "合并消息",
+  "squashMergeWillCombineAllCommits": "压缩合并将把所有提交合并为一个",
+  "thisWillMergeSelectedBranch": "这将把选定的分支合并到当前分支",
+  "mergingBranch": "正在合并分支",
+  "mergeHasConflicts": "合并有冲突",
+  "@mergeHasConflicts": {
+    "description": "Error message when merge has conflicts",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "resolve": "解决",
+  "successfullyMergedBranch": "已成功合并分支",
+  "@successfullyMergedBranch": {
+    "description": "Success message after merge",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "currentBranch": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToMergeBranch": "合并分支失败: {error}",
+  "@failedToMergeBranch": {
+    "description": "Error message when merge fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseBranch": "变基分支",
+  "rebaseWillReplayCommits": "变基将在另一个分支之上重放提交",
+  "currentBranch": "当前分支",
+  "rebaseOntoBranch": "变基到分支",
+  "interactiveRebase": "交互式变基",
+  "editCommitsDuringRebase": "在变基期间编辑提交",
+  "rebaseWarning": "变基会重写历史 - 仅在您是分支的唯一开发者时使用",
+  "rebaseConflicts": "变基冲突",
+  "rebaseInProgress": "变基进行中",
+  "step": "步骤",
+  "@step": {
+    "description": "Progress indicator for rebase steps",
+    "placeholders": {
+      "progressText": {
+        "type": "String"
+      }
+    }
+  },
+  "rebasingOnto": "正在变基到 {target}",
+  "currentCommit": "当前提交",
+  "conflictsDetected": "检测到冲突",
+  "resolveConflictsInChangesScreen": "在变更屏幕中解决冲突",
+  "goToChanges": "转到变更",
+  "rebaseIsInProgress": "变基正在进行中",
+  "abortToCancelAndReturnToOriginalState": "中止以取消并返回到原始状态",
+  "waitForRebaseToCompleteAutomatically": "等待变基自动完成",
+  "startRebase": "开始变基",
+  "startBisect": "开始二分查找",
+  "abort": "中止",
+  "skip": "跳过",
+  "continueOperation": "继续操作",
+  "rebaseStartedSuccessfully": "变基已成功开始",
+  "rebaseStartedConflictNeedsResolution": "变基已开始但遇到冲突需要解决",
+  "failedToStartRebase": "启动变基失败: {error}",
+  "@failedToStartRebase": {
+    "description": "Error message when starting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseContinued": "变基已继续",
+  "failedToContinueRebase": "继续变基失败: {error}",
+  "@failedToContinueRebase": {
+    "description": "Error message when continuing rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "commitSkipped": "提交已跳过",
+  "failedToSkip": "跳过失败: {error}",
+  "@failedToSkip": {
+    "description": "Error message when skipping commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rebaseAborted": "变基已中止",
+  "failedToAbortRebase": "中止变基失败: {error}",
+  "@failedToAbortRebase": {
+    "description": "Error message when aborting rebase fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noNodesAvailable": "无可用节点",
+  "gitBisect": "Git 二分查找",
+  "bisectHelpsFindCommitThatIntroducedBug": "二分查找通过二分搜索帮助找到引入错误的提交。",
+  "goodCommitWhereBugWasNotPresent": "好提交 (不存在错误)",
+  "selectAGoodCommit": "选择一个好提交",
+  "badCommitWhereBugIsPresent": "坏提交 (存在错误)",
+  "selectABadCommitDefaultsToHead": "选择一个坏提交 (默认为 HEAD)",
+  "noCommitsAvailable": "无可用提交",
+  "bisectInProgress": "二分查找进行中",
+  "approximatelyStepsRemaining": "大约还需 {stepsRemaining} 步",
+  "@approximatelyStepsRemaining": {
+    "description": "Progress message for bisect",
+    "placeholders": {
+      "stepsRemaining": {
+        "type": "String"
+      }
+    }
+  },
+  "testThisCommitAndMark": "测试此提交并标记为:",
+  "good": "好",
+  "bad": "坏",
+  "bisectHistory": "二分查找历史",
+  "goodCommits": "好提交: {count}",
+  "@goodCommits": {
+    "description": "Label for good commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "badCommits": "坏提交: {count}",
+  "@badCommits": {
+    "description": "Label for bad commits list in bisect history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bisectComplete": "二分查找完成!",
+  "foundFirstBadCommit": "找到第一个坏提交!",
+  "bisectStarted": "二分查找已开始 - 测试当前提交",
+  "failedToStartBisect": "启动二分查找失败: {error}",
+  "@failedToStartBisect": {
+    "description": "Error message when starting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "markedAs": "已标记为",
+  "@markedAs": {
+    "description": "Success message when commit marked in bisect",
+    "placeholders": {
+      "status": {
+        "type": "String",
+        "example": "good"
+      }
+    }
+  },
+  "failedToMarkCommit": "标记提交失败: {error}",
+  "@failedToMarkCommit": {
+    "description": "Error message when marking commit fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bisectReset": "二分查找已重置",
+  "failedToResetBisect": "重置二分查找失败: {error}",
+  "@failedToResetBisect": {
+    "description": "Error message when resetting bisect fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "reset": "重置",
+  "configureDiffMergeTools": "配置差异/合并工具",
+  "noDiffToolsFound": "未找到差异工具",
+  "noExternalDiffMergeToolsDetected": "未检测到外部差异/合并工具",
+  "installToolsSuchAs": "安装工具如:",
+  "errorDetectingTools": "检测工具时出错",
+  "configureYourPreferredTools": "配置您首选的工具",
+  "@configureYourPreferredTools": {
+    "description": "Info banner in diff tools config dialog",
+    "placeholders": {
+      "toolCount": {
+        "type": "int"
+      }
+    }
+  },
+  "diffTool": "差异工具",
+  "usedForComparingFileChanges": "用于比较文件更改",
+  "mergeTool": "合并工具",
+  "usedForResolvingMergeConflicts": "用于解决合并冲突",
+  "available": "可用",
+  "diffMergeToolSettingsSaved": "差异/合并工具设置已保存",
+  "amend": "修正",
+  "discardAll": "全部丢弃",
+  "clean": "清理",
+  "commandCategoryRepository": "仓库",
+  "commandCategoryChanges": "更改和提交",
+  "commandCategoryHistory": "历史和差异",
+  "commandCategoryBranches": "分支",
+  "commandCategoryRemotes": "远程",
+  "commandCategoryStashes": "储藏",
+  "commandCategoryTags": "标签",
+  "commandCategorySubmodules": "子模块",
+  "commandCategoryAdvanced": "高级",
+  "commandCategorySettings": "设置",
+  "commandCloneRepository": "克隆仓库",
+  "commandCloneRepositoryDesc": "从远程 URL 克隆仓库",
+  "commandOpenRepository": "打开仓库",
+  "commandOpenRepositoryDesc": "打开现有 Git 仓库",
+  "commandInitializeRepository": "初始化仓库",
+  "commandInitializeRepositoryDesc": "在目录中创建新的 Git 仓库",
+  "commandCommitChanges": "提交更改",
+  "commandCommitChangesDesc": "提交暂存的更改",
+  "commandAmendLastCommit": "修正最后一次提交",
+  "commandAmendLastCommitDesc": "用新更改修正最后一次提交",
+  "commandStageAllFiles": "暂存所有文件",
+  "commandStageAllFilesDesc": "暂存所有已修改的文件",
+  "commandUnstageAllFiles": "取消暂存所有文件",
+  "commandUnstageAllFilesDesc": "取消暂存所有文件",
+  "commandDiscardAllChanges": "丢弃所有更改",
+  "commandDiscardAllChangesDesc": "丢弃所有未提交的更改",
+  "commandViewCommitHistory": "查看提交历史",
+  "commandViewCommitHistoryDesc": "显示仓库的完整提交历史",
+  "commandViewFileHistory": "查看文件历史",
+  "commandViewFileHistoryDesc": "显示特定文件的历史",
+  "commandCompareBranches": "比较分支",
+  "commandCompareBranchesDesc": "比较两个分支的差异",
+  "commandCreateBranch": "创建分支",
+  "commandCreateBranchDesc": "创建新分支",
+  "commandCheckoutBranch": "检出分支",
+  "commandCheckoutBranchDesc": "切换到不同的分支",
+  "commandRenameBranch": "重命名分支",
+  "commandRenameBranchDesc": "更改分支名称",
+  "commandDeleteBranch": "删除分支",
+  "commandDeleteBranchDesc": "删除本地或远程分支",
+  "commandMergeBranch": "合并分支",
+  "commandMergeBranchDesc": "将另一个分支合并到当前分支",
+  "commandRebaseBranch": "变基分支",
+  "commandRebaseBranchDesc": "在另一个分支之上重放提交",
+  "commandFetchFromRemote": "从远程获取",
+  "commandFetchFromRemoteDesc": "从远程仓库获取更改",
+  "commandPullChanges": "拉取更改",
+  "commandPullChangesDesc": "从远程拉取并合并更改",
+  "commandPullWithRebase": "使用变基拉取",
+  "commandPullWithRebaseDesc": "拉取并变基而不是合并",
+  "commandPushChanges": "推送更改",
+  "commandPushChangesDesc": "将本地提交推送到远程",
+  "commandManageRemotes": "管理远程",
+  "commandManageRemotesDesc": "添加、编辑或删除远程仓库",
+  "commandStashChanges": "储藏更改",
+  "commandStashChangesDesc": "保存更改以供日后使用",
+  "commandPopStash": "弹出储藏",
+  "commandPopStashDesc": "应用储藏并删除",
+  "commandApplyStash": "应用储藏",
+  "commandApplyStashDesc": "应用储藏但不删除",
+  "commandViewAllStashes": "查看所有储藏",
+  "commandViewAllStashesDesc": "列出所有储藏的更改",
+  "commandCreateTag": "创建标签",
+  "commandCreateTagDesc": "在提交处创建标签",
+  "commandDeleteTag": "删除标签",
+  "commandDeleteTagDesc": "删除本地或远程标签",
+  "commandPushTag": "推送标签",
+  "commandPushTagDesc": "将标签推送到远程仓库",
+  "commandStartBisect": "启动二分查找",
+  "commandStartBisectDesc": "查找引入错误的提交",
+  "commandViewReflog": "查看引用日志",
+  "commandViewReflogDesc": "显示 Git 引用日志",
+  "commandCherryPickCommit": "拣选提交",
+  "commandCherryPickCommitDesc": "应用来自另一个分支的提交",
+  "commandRevertCommit": "还原提交",
+  "commandRevertCommitDesc": "通过创建新提交来撤销提交",
+  "commandResetToCommit": "重置到提交",
+  "commandResetToCommitDesc": "将当前分支重置到特定提交",
+  "commandCleanWorkingDirectory": "清理工作目录",
+  "commandCleanWorkingDirectoryDesc": "删除未跟踪的文件",
+  "commandOpenSettings": "打开设置",
+  "commandOpenSettingsDesc": "打开应用程序设置",
+  "commandConfigureDiffTools": "配置差异工具",
+  "commandConfigureDiffToolsDesc": "设置外部差异和合并工具",
+  "folderSelectionNotAvailableWeb": "Web 浏览器中不支持文件夹选择",
+  "openedRepository": "已打开仓库: {path}",
+  "@openedRepository": {
+    "description": "Success message when repository opened",
+    "placeholders": {
+      "repositoryName": {
+        "type": "String",
+        "example": "my-repo"
+      }
+    }
+  },
+  "notValidGitRepository": "不是有效的 Git 仓库",
+  "selectGitRepository": "选择 Git 仓库",
+  "amendLastCommitDialog": "修正最后一次提交",
+  "amendLastCommitConfirm": "这将使用当前暂存的更改修正最后一次提交。提交消息将保持不变。是否继续?",
+  "lastCommitAmendedSuccess": "最后一次提交已成功修正",
+  "failedToAmendCommit": "修正提交失败: {error}",
+  "@failedToAmendCommit": {
+    "description": "Error message when amend fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "no changes staged for commit"
+      }
+    }
+  },
+  "discardAllChangesDialog": "丢弃所有更改",
+  "discardAllChangesConfirm": "丢弃所有未提交的更改?\n\n此操作无法撤销。",
+  "cherryPickCommitDialog": "拣选提交",
+  "cherryPickCommitInstructions": "要拣选提交:\n\n1. 导航到历史标签\n2. 右键单击要拣选的提交\n3. 选择 \"拣选此提交\"\n\n这将把该提交的更改应用到当前分支。",
+  "revertCommitDialog": "还原提交",
+  "revertCommitInstructions": "要还原提交:\n\n1. 导航到历史标签\n2. 右键单击要还原的提交\n3. 选择 \"还原此提交\"\n\n这将创建一个撤销更改的新提交。",
+  "resetToCommitDialog": "重置到提交",
+  "resetToCommitInstructions": "要重置到提交:\n\n1. 导航到历史标签\n2. 右键单击要重置到的提交\n3. 选择 \"重置分支到此处\"\n\n警告: 这将丢弃所有后续提交。",
+  "cleanWorkingDirectoryDialog": "清理工作目录",
+  "cleanWorkingDirectoryConfirm": "这将永久删除工作目录中的所有未跟踪文件和目录。\n\n警告: 此操作无法撤销!\n\n是否继续?",
+  "workingDirectoryCleanedSuccess": "工作目录已成功清理",
+  "failedToCleanWorkingDirectory": "清理工作目录失败: {error}",
+  "@failedToCleanWorkingDirectory": {
+    "description": "Error message when clean fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "permission denied"
+      }
+    }
+  },
+  "navigatedToTagsScreenDeleteYourTagThere": "已导航到标签屏幕 - 在那里删除您的标签",
+  "navigatedToTagsScreenPushYourTagsThere": "已导航到标签屏幕 - 在那里推送您的标签",
+  "collapse": "折叠",
+  "expand": "展开",
+  "commandPaletteTooltip": "命令面板 (Ctrl+Shift+P)",
+  "toggleCommandLogTooltip": "切换命令日志",
+  "goToSettings": "转到设置",
+  "resetToDefaults": "重置为默认值",
+  "selectGitExecutable": "选择 Git 可执行文件",
+  "gitVersionDetected": "检测到 Git 版本: {version}",
+  "@gitVersionDetected": {
+    "description": "Success message when git executable is validated",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "2.43.0"
+      }
+    }
+  },
+  "invalidGitExecutable": "无效的 Git 可执行文件",
+  "invalidGitExecutableMessage": "选定的文件不是有效的 Git 可执行文件",
+  "@invalidGitExecutableMessage": {
+    "description": "Error message when selected file is not git",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "executionFailed": "执行失败",
+  "executionFailedMessage": "无法执行选定的文件",
+  "@executionFailedMessage": {
+    "description": "Error message when file execution fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "validationError": "验证错误",
+  "validationErrorMessage": "验证文件时发生错误。\n\n已选择：{path}\n\n错误：{error}",
+  "@validationErrorMessage": {
+    "description": "Error message when validation fails",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "selectTextEditor": "选择文本编辑器",
+  "selectDiffTool": "选择差异工具",
+  "selectMergeTool": "选择合并工具",
+  "selectedFileDoesNotExist": "选定的文件不存在",
+  "unknownTextEditor": "未知的文本编辑器",
+  "unknownTextEditorMessage": "无法确定选定的文本编辑器",
+  "@unknownTextEditorMessage": {
+    "description": "Warning message for unknown text editor",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "useAnyway": "仍然使用",
+  "textEditorSetSuccessfully": "文本编辑器设置成功",
+  "defaultUserName": "默认用户名",
+  "userName": "用户名",
+  "userNameHint": "Your Name",
+  "defaultUserEmail": "默认用户邮箱",
+  "email": "邮箱",
+  "emailHint": "your.email@example.com",
+  "autoFetchInterval": "自动获取间隔",
+  "minutes": "分钟",
+  "minutesHint": "例如: 5, 15, 30",
+  "defaultCommitLimit": "默认提交限制",
+  "commits": "提交",
+  "commitsHint": "例如: 100, 500, 1000",
+  "resetSettings": "重置设置",
+  "resetSettingsMessage": "这将重置所有设置为默认值。是否继续?",
+  "settingsResetToDefaults": "设置已重置为默认值",
+  "selectDiffToolExecutable": "选择差异工具可执行文件",
+  "unknownDiffTool": "未知的差异工具",
+  "unknownDiffToolMessage": "无法确定选定的差异工具",
+  "@unknownDiffToolMessage": {
+    "description": "Warning message for unknown diff tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "diffToolSetSuccessfully": "差异工具设置成功",
+  "selectMergeToolExecutable": "选择合并工具可执行文件",
+  "unknownMergeTool": "未知的合并工具",
+  "unknownMergeToolMessage": "无法确定选定的合并工具",
+  "@unknownMergeToolMessage": {
+    "description": "Warning message for unknown merge tool",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "mergeToolSetSuccessfully": "合并工具设置成功",
+  "colorSchemeDeepPurple": "深紫色",
+  "colorSchemeIndigo": "靛蓝色",
+  "colorSchemeBlue": "蓝色",
+  "colorSchemeTeal": "青色",
+  "colorSchemeGreen": "绿色",
+  "colorSchemeRed": "红色",
+  "colorSchemePink": "粉色",
+  "colorSchemePurple": "紫色",
+  "colorSchemeDeepOrange": "深橙色",
+  "colorSchemeBlueGrey": "蓝灰色",
+  "fontSizeSmall": "小",
+  "fontSizeMedium": "中",
+  "fontSizeLarge": "大",
+  "gitConfiguration": "Git 配置",
+  "gitExecutablePath": "Git 可执行文件路径",
+  "gitExecutableNotSet": "Git 可执行文件未设置",
+  "gitVersion": "Git 版本",
+  "@gitVersion": {
+    "description": "Display text for git version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "gitExecutableCleared": "Git 可执行文件已清除",
+  "preferredTextEditor": "首选文本编辑器",
+  "textEditorNotSet": "文本编辑器未设置",
+  "version": "版本",
+  "@version": {
+    "description": "Display text for tool version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "textEditorCleared": "文本编辑器已清除",
+  "searchToolsAutoDetect": "搜索工具（自动检测）",
+  "diffToolTitle": "差异工具",
+  "diffToolNotSet": "未设置",
+  "diffToolCleared": "差异工具已清除",
+  "mergeToolTitle": "合并工具",
+  "mergeToolNotSet": "未设置",
+  "mergeToolCleared": "合并工具已清除",
+  "configure": "配置",
+  "edit": "编辑",
+  "userNameNotSet": "用户名未设置",
+  "userEmailNotSet": "用户邮箱未设置",
+  "appearance": "外观",
+  "colorScheme": "配色方案",
+  "fontFamily": "字体系列",
+  "colorSchemeUpdated": "配色方案已更新",
+  "fontChangedTo": "字体已更改为 {fontFamily}",
+  "@fontChangedTo": {
+    "description": "Success message when font is changed",
+    "placeholders": {
+      "fontName": {
+        "type": "String"
+      }
+    }
+  },
+  "fontSize": "字体大小",
+  "fontSizeUpdated": "字体大小已更新",
+  "diffAndMergeTools": "差异和合并工具",
+  "preferredDiffTool": "首选差异工具",
+  "diffToolNotSet": "差异工具未设置",
+  "diffToolCleared": "差异工具已清除",
+  "browseForDiffTool": "浏览差异工具",
+  "preferredMergeTool": "首选合并工具",
+  "mergeToolNotSet": "合并工具未设置",
+  "mergeToolCleared": "合并工具已清除",
+  "browseForMergeTool": "浏览合并工具",
+  "loadingAvailableTools": "正在加载可用工具...",
+  "failedToLoadTools": "加载工具失败",
+  "behavior": "行为",
+  "autoFetch": "自动获取",
+  "autoFetchDescription": "定期自动从远程获取",
+  "autoFetchIntervalMinutes": "{minutes} 分钟",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmPush": "推送前确认",
+  "confirmPushDescription": "推送更改到远程前显示确认对话框",
+  "confirmForcePush": "强制推送前确认",
+  "confirmForcePushDescription": "强制推送前显示警告对话框",
+  "confirmDelete": "确认删除",
+  "confirmDeleteDescription": "删除前确认",
+  "defaultCommitLimitDescription": "默认加载 {count} 个提交",
+  "@defaultCommitLimitDescription": {
+    "description": "Subtitle for default commit limit setting",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "showCommitGraph": "显示提交图",
+  "showCommitGraphDescription": "在历史中显示可视化提交图",
+  "showPassword": "显示密码",
+  "hidePassword": "隐藏密码",
+  "clearLog": "清除日志",
+  "commandCopiedToClipboard": "命令已复制到剪贴板",
+  "confirm": "确认",
+  "operationCompletedSuccessfully": "操作成功完成",
+  "textEditor": "文本编辑器",
+  "userEmail": "用户邮箱",
+  "windowsReservedNameError": "文件 \"{filePath}\" 包含 Windows 保留名称 \"{reservedName}\"。\n\nWindows 不允许使用以下文件名: {reservedNames}。\n\n此文件可能是在 Linux/Unix 上创建的,无法在 Windows 上暂存。\n\n解决方案:\n• 使用 WSL 或 Linux 删除/重命名文件\n• 使用 Git Bash 中的 git: git rm \"{filePath}\"\n• 跳过此文件并单独暂存其他文件",
+  "@windowsReservedNameError": {
+    "description": "Error message for Windows reserved filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      },
+      "reservedName": {
+        "type": "String"
+      },
+      "reservedNames": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidWindowsFilename": "无效的 Windows 文件名: {filePath}",
+  "@invalidWindowsFilename": {
+    "description": "Generic error message for invalid Windows filename",
+    "placeholders": {
+      "filePath": {
+        "type": "String"
+      }
+    }
+  },
+  "secondsAgo": "{count, plural, =1{1 秒前} other{{count} 秒前}}",
+  "@secondsAgo": {
+    "description": "Relative time: seconds ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "minuteAgo": "1 分钟前",
+  "minutesAgo": "{count} 分钟前",
+  "@minutesAgo": {
+    "description": "Relative time: minutes ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hourAgo": "1 小时前",
+  "hoursAgo": "{count} 小时前",
+  "@hoursAgo": {
+    "description": "Relative time: hours ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dayAgo": "1 天前",
+  "daysAgo": "{count} 天前",
+  "@daysAgo": {
+    "description": "Relative time: days ago",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monthJan": "1月",
+  "monthFeb": "2月",
+  "monthMar": "3月",
+  "monthApr": "4月",
+  "monthMay": "5月",
+  "monthJun": "6月",
+  "monthJul": "7月",
+  "monthAug": "8月",
+  "monthSep": "9月",
+  "monthOct": "10月",
+  "monthNov": "11月",
+  "monthDec": "12月",
+  "am": "上午",
+  "pm": "下午",
+  "systemDefault": "系统默认",
+  "english": "英语",
+  "arabic": "阿拉伯语",
+  "german": "德语",
+  "spanish": "西班牙语",
+  "french": "法语",
+  "italian": "意大利语",
+  "russian": "俄语",
+  "turkish": "土耳其语",
+  "chinese": "中文（简体）",
+  "languageUpdated": "语言已更新",
+  "tooltipLanguage": "语言",
+  "tooltipQuickSettings": "快速设置",
+  "tooltipCopyCommand": "复制命令",
+  "tooltipCopyToClipboard": "复制到剪贴板",
+  "tooltipNewWorkspace": "新建工作区",
+  "tooltipBlameStatistics": "追溯统计",
+  "tooltipOpenEnhancedViewer": "在增强查看器中打开",
+  "tooltipPreviousPage": "上一页",
+  "tooltipNextPage": "下一页",
+  "tooltipDiscardAllChanges": "丢弃所有更改",
+  "tooltipViewDiff": "查看差异",
+  "tooltipUnstage": "取消暂存",
+  "tooltipStage": "暂存",
+  "tooltipDiscardChanges": "丢弃更改",
+  "tooltipFileActions": "文件操作",
+  "tooltipAbortMerge": "中止合并",
+  "tooltipCopy": "复制",
+  "tooltipAddRepository": "添加仓库",
+  "tooltipMoreActions": "更多操作",
+  "tooltipRemoveFromWorkspace": "从工作区移除",
+  "tooltipRemoveFromFavorites": "从收藏夹移除",
+  "tooltipAddToFavorites": "添加到收藏夹",
+  "tooltipSwitchBranch": "切换分支 (Ctrl+B)",
+  "tooltipSwitchRepository": "切换仓库 (Ctrl+R)",
+  "tooltipSwitchWorkspace": "切换工作区",
+  "current": "当前",
+  "openInEditor": "在编辑器中打开",
+  "copyFile": "复制文件",
+  "paste": "粘贴",
+  "keepBoth": "保留两者",
+  "replace": "替换",
+  "deleteFile": "删除文件",
+  "renameFile": "重命名文件",
+  "stageAllAndCommit": "暂存全部并提交",
+  "discardChangesQuestion": "放弃更改？",
+  "discardAllChangesQuestion": "放弃所有更改？",
+  "stageAllChangesQuestion": "暂存所有更改？",
+  "unstageAllChangesQuestion": "取消暂存所有更改？",
+  "webBrowserLimitation": "网页浏览器限制",
+  "windowsReservedFilename": "Windows 保留文件名",
+  "mergeConflicts": "合并冲突",
+  "selectConflictToResolve": "选择要解决的冲突",
+  "resolved": "已解决",
+  "continueMerge": "继续合并",
+  "abortMerge": "中止合并",
+  "commitChanges": "提交更改",
+  "amendLastCommit": "修改最后一次提交",
+  "viewFiles": "查看文件",
+  "cleanOnly": "仅干净",
+  "withRemote": "带远程",
+  "removeRepository": "移除仓库",
+  "clearAllRepositories": "清除所有仓库",
+  "editProject": "编辑项目",
+  "deleteWorkspace": "删除工作区",
+  "blameStatistics": "归因统计",
+  "fileHistory": "文件历史",
+  "filePreview": "文件预览",
+  "totalLines": "总行数",
+  "authors": "作者",
+  "commitsLabel": "提交",
+  "contributors": "贡献者：",
+  "emptyCsvFile": "空CSV文件",
+  "stageAll": "暂存全部",
+  "unstageAll": "取消暂存全部",
+  "acceptOurs": "接受我们的",
+  "acceptTheirs": "接受他们的",
+  "acceptBoth": "接受两者",
+  "manualResolution": "手动解决",
+  "resolvingConflict": "正在解决冲突...",
+  "allConflictsResolved": "所有冲突已解决！",
+  "readyToContinueMerge": "准备继续合并",
+  "conflictsToResolve": "有 {count} 个冲突需要解决",
+  "useVersionFromCurrentBranch": "使用当前分支的版本",
+  "useVersionFromMergingBranch": "使用合并分支的版本",
+  "keepBothVersionsConcatenated": "保留两个版本（串联）",
+  "noMergeInProgress": "没有正在进行的合并",
+  "allMergeConflictsResolved": "所有合并冲突已解决。",
+  "mergeCompletedSuccessfully": "合并成功完成",
+  "mergeAborted": "合并已中止",
+  "resolvedUsing": "已使用 {choice} 解决 {fileName}",
+  "thisMayTakeAWhile": "这可能需要一些时间。",
+  "noUnstagedChanges": "无未暂存的更改",
+  "noStagedChanges": "无已暂存的更改",
+  "stageFilesFromUnstagedTab": "从未暂存选项卡暂存文件",
+  "changesCommittedSuccessfully": "更改已成功提交",
+  "commitFailed": "提交失败：{error}",
+  "defaultLabel": "默认",
+  "emptyStateNoHistory": "无历史记录",
+  "emptyStateNoHistoryMessage": "此文件没有提交历史",
+  "emptyStateNoCommits": "无提交",
+  "emptyStateNoCommitsMessage": "此仓库没有提交历史",
+  "emptyStateNoCommitSelected": "未选择提交",
+  "emptyStateNoCommitSelectedMessage": "选择一个提交以查看详情",
+  "emptyStateNoFilesChanged": "无文件更改",
+  "emptyStateNoCommandsYet": "暂无命令",
+  "emptyStateNoCommandsYetMessage": "Git命令将显示在这里",
+  "emptyStateNoData": "无数据",
+  "emptyStateNoItemsFound": "未找到项目",
+  "emptyStateNoResultsFound": "未找到结果",
+  "emptyStateTryAdjustingSearchCriteria": "尝试调整搜索条件",
+  "emptyStateNoRepository": "无仓库",
+  "emptyStateNoSearchResults": "没有{itemType}匹配\"{query}\"",
+  "emptyStateNoValidRepositories": "未找到有效的Git仓库",
+  "messageNoFileCopied": "未复制文件",
+  "messageNoRepositoryOpen": "未打开仓库",
+  "messageNoRemotesConfigured": "未配置远程仓库",
+  "messageGitServiceNotAvailable": "Git服务不可用",
+  "messageCommitNotFound": "未找到提交",
+  "messageNoTextEditorConfigured": "未配置文本编辑器。请在设置中设置一个。",
+  "messageNoMergeInProgress": "无正在进行的合并",
+  "messageCopiedToClipboard": "已复制到剪贴板",
+  "messageNoRemoteConfigured": "未配置远程仓库",
+  "messageNoDateGroup": "无日期",
+  "snackbarFetchedFrom": "已从\"{remoteName}\"获取",
+  "snackbarFailedToFetch": "获取失败：{error}",
+  "snackbarPulledFrom": "已从\"{remoteName}\"拉取",
+  "snackbarFailedToPull": "拉取失败：{error}",
+  "snackbarPushedTo": "已推送到\"{remoteName}\"",
+  "snackbarFailedToPush": "推送失败：{error}",
+  "snackbarUpdatedRemoteUrl": "已更新\"{remoteName}\"的URL",
+  "snackbarFailedToUpdateUrl": "更新URL失败：{error}",
+  "snackbarFailedToRename": "重命名失败：{error}",
+  "snackbarPruned": "已修剪\"{remoteName}\"",
+  "snackbarFailedToPrune": "修剪失败：{error}",
+  "snackbarDeleted": "已删除\"{remoteName}\"",
+  "snackbarFailedToDelete": "删除失败：{error}",
+  "snackbarAppliedStash": "已应用{stashRef}",
+  "snackbarPoppedStash": "已恢复{stashRef}",
+  "snackbarCreatedBranchFrom": "已从{stashRef}创建分支\"{branchName}\"",
+  "snackbarDroppedStash": "已丢弃{stashRef}",
+  "snackbarTagCreated": "已成功创建标签\"{tagName}\"",
+  "snackbarTagsFetched": "已成功获取标签",
+  "snackbarErrorLoadingCommit": "加载提交时出错：{error}",
+  "snackbarFailedToCreateTag": "创建标签失败：{error}",
+  "snackbarFailedToFetchTags": "获取标签失败：{error}",
+  "snackbarNoRemotesConfigured": "未配置远程仓库",
+  "snackbarAllTagsPushed": "所有标签已推送到 {remoteName}",
+  "snackbarTagPushed": "标签 \"{tagName}\" 已推送到 {remoteName}",
+  "snackbarFailedToPushTag": "推送标签失败：{error}",
+  "snackbarTagsPushed": "{count, plural, =1{已推送 1 个标签} other{已推送 {count} 个标签}}到 {remoteName}",
+  "snackbarFailedToPushTags": "推送标签失败：{error}",
+  "snackbarCheckedOutTag": "已切换到标签 \"{tagName}\"",
+  "snackbarFailedToCheckoutTag": "切换标签失败：{error}",
+  "snackbarTagDeleted": "标签 \"{tagName}\" 已删除",
+  "snackbarTagsDeleted": "{count, plural, =1{已删除 1 个标签} other{已删除 {count} 个标签}}",
+  "snackbarFailedToDeleteTag": "删除标签失败：{error}",
+  "snackbarFailedToDeleteTags": "删除标签失败：{error}",
+  "snackbarDiffCopied": "差异已复制到剪贴板",
+  "snackbarCopiedToClipboard": "已复制到剪贴板",
+  "snackbarLineCopied": "行已复制到剪贴板",
+  "snackbarPathCopied": "路径已复制：{filePath}",
+  "snackbarFileCopied": "已复制：{fileName}",
+  "snackbarOutputCopied": "输出已复制到剪贴板",
+  "snackbarGitServiceNotAvailable": "Git 服务不可用",
+  "snackbarCommitNotFound": "未找到提交",
+  "snackbarNoRepositoryOpen": "未打开仓库",
+  "snackbarRepositoryPathNotAvailable": "仓库路径不可用",
+  "snackbarFailedToOpenExternalTool": "打开外部工具失败：{error}",
+  "snackbarFailedToLoadDiff": "加载差异失败：{error}",
+  "snackbarFileNotFound": "未找到文件",
+  "snackbarSourceFileNotFound": "未找到源文件",
+  "snackbarNoFileCopied": "未复制任何文件",
+  "snackbarFileRenamed": "已重命名为 {newName}",
+  "snackbarFailedToRenameFile": "重命名文件失败：{error}",
+  "snackbarFileDeleted": "已删除：{fileName}",
+  "snackbarFailedToDeleteFile": "删除文件失败：{error}",
+  "snackbarFilePasted": "已粘贴：{newFileName}",
+  "snackbarFailedToPasteFile": "粘贴文件失败：{error}",
+  "snackbarFileSaved": "文件已保存到 {outputPath}",
+  "snackbarFileDownloaded": "文件已下载到仓库并打开文件夹",
+  "snackbarFailedToDownloadFile": "下载文件失败：{error}",
+  "snackbarFailedToDownloadAndOpenFolder": "下载并打开文件夹失败：{error}",
+  "snackbarFailedToOpenFileManager": "打开文件管理器失败：{error}",
+  "snackbarFailedToOpenEditor": "打开编辑器失败：{error}",
+  "snackbarFailedToOpenFileInEditor": "在编辑器中打开文件失败：{error}",
+  "snackbarMergeCompleted": "合并成功完成",
+  "snackbarMergeAborted": "合并已中止",
+  "snackbarConflictResolved": "已使用 {choice} 解决 {fileName}",
+  "snackbarFailedToApplyStash": "应用储藏失败：{error}",
+  "snackbarFailedToPopStash": "恢复储藏失败：{error}",
+  "snackbarFailedToCreateBranch": "创建分支失败：{error}",
+  "snackbarFailedToDropStash": "删除储藏失败：{error}",
+  "snackbarRemoteRenamed": "\"{remoteName}\" 已重命名为 \"{newName}\"",
+  "snackbarViewDiffComingSoon": "查看 {commitHash} 的差异（即将推出）",
+  "clearFiltersAction": "清除过滤器",
+  "noBranchAvailable": "无分支",
+  "hintTextCommandPalette": "你想做什么？",
+  "hintTextSearchFiles": "搜索文件...",
+  "hintTextCommitMessage": "输入提交消息...",
+  "hintTextSearchCommits": "搜索提交（尝试：author:john, hash:abc123, date:today）",
+  "hintTextSearchStashes": "搜索储藏...",
+  "hintTextDefaultBranch": "main",
+  "dialogTitleNoMergeInProgress": "没有正在进行的合并",
+  "dialogTitleResolveConflicts": "解决冲突：{branchName}",
+  "dialogContentSelectConflict": "选择要解决的冲突",
+  "dialogContentChooseResolutionStrategy": "选择解决策略：",
+  "dialogContentManualResolutionInfo": "您也可以在首选编辑器中手动编辑文件来解决冲突，然后使用更改屏幕暂存文件。",
+  "dialogContentAllMergeConflictsResolved": "所有合并冲突已解决。",
+  "dialogContentFailedToResolveConflict": "解决冲突失败：{error}",
+  "dialogContentFailedToContinueMerge": "继续合并失败：{error}",
+  "dialogContentFailedToAbortMerge": "中止合并失败：{error}",
+  "dialogTitleContinueMerge": "继续合并",
+  "dialogContentContinueMerge": "这将完成合并并创建合并提交。继续？",
+  "dialogActionContinue": "继续",
+  "dialogTitleAbortMerge": "中止合并",
+  "dialogContentAbortMerge": "这将中止合并并返回到合并前的状态。所有冲突解决将丢失。继续？",
+  "dialogContentResolvedConflict": "使用 {choice} 解决了 {fileName}",
+  "snackbarMergeCompleted": "合并成功完成",
+  "snackbarMergeAborted": "合并已中止",
+  "dialogContentDeleteWorkspace": "您确定要删除\"{workspaceName}\"吗？存储库不会被删除。",
+  "dialogTitleRenameFile": "重命名文件",
+  "dialogLabelNewName": "新名称",
+  "dialogActionRename": "重命名",
+  "dialogTitleDeleteFile": "删除文件",
+  "dialogContentDeleteFile": "您确定要删除\"{fileName}\"吗？\n\n此操作无法撤消。",
+  "dialogTitleCopyFile": "复制文件",
+  "dialogTitleFileExists": "文件已存在",
+  "dialogContentCopyFileExists": "此位置已存在名为\"{fileName}\"的文件。\n\n您要做什么？",
+  "dialogContentFileExistsDestination": "{fileName} 已存在于目标位置。\n\n您要做什么？",
+  "dialogActionKeepBoth": "保留两者",
+  "contextMenuRename": "重命名",
+  "contextMenuCopyPath": "复制路径",
+  "contextMenuRevealInExplorer": "在资源管理器中显示",
+  "snackbarPathCopied": "路径已复制：{path}",
+  "snackbarFileNotFound": "文件未找到",
+  "snackbarFailedToOpenFileManager": "打开文件管理器失败：{error}",
+  "snackbarRenamedTo": "已重命名为 {newName}",
+  "snackbarFailedToRenameFile": "重命名文件失败：{error}",
+  "snackbarCopiedFile": "已复制：{fileName}",
+  "snackbarNoFileCopied": "未复制文件",
+  "snackbarSourceFileNotFound": "源文件未找到",
+  "snackbarPastedFile": "已粘贴：{fileName}",
+  "snackbarFailedToPasteFile": "粘贴文件失败：{error}",
+  "snackbarDeletedFile": "已删除：{fileName}",
+  "snackbarFailedToDeleteFile": "删除文件失败：{error}",
+  "dialogTitleDeleteTag": "删除标签？",
+  "dialogContentDeleteTagLocal": "删除标签\"{tagName}\"？\n\n此标签仅在本地，将从您的存储库中删除。\n\n此操作无法撤消。",
+  "dialogContentDeleteTagRemote": "删除标签\"{tagName}\"？\n\n此标签存在于远程，将从本地和远程存储库中删除。\n\n此操作无法撤消。",
+  "progressDeletingTagLocalRemote": "删除标签（本地和远程）",
+  "progressDeletingTag": "删除标签",
+  "progressDeletingTagLocally": "正在本地删除\"{tagName}\"...",
+  "progressDeletingTagFromRemote": "正在从 {remoteName} 删除\"{tagName}\"...",
+  "progressUpdatingList": "正在更新列表...",
+  "snackbarTagDeletedLocalAndRemote": "标签\"{tagName}\"已从本地和远程删除",
+  "snackbarTagDeleted": "标签\"{tagName}\"已删除",
+  "tagDetailsType": "类型",
+  "tagDetailsCommit": "提交",
+  "tagDetailsTagger": "标签者",
+  "tagDetailsDate": "日期",
+  "tagDetailsMessage": "消息：",
+  "tagTypeAnnotated": "带注释",
+  "tagTypeLightweight": "轻量级",
+  "dialogTitleWebBrowserLimitation": "Web 浏览器限制",
+  "dialogContentWebBrowserLimitationChanges": "文件夹选择在 Web 浏览器中不可用。\n\n要使用 Flutter GitUI 的完整功能，请作为桌面应用程序运行：\n\nflutter run -d windows\n\n这需要安装了\"Desktop development with C++\"的 Visual Studio 2022。",
+  "dialogContentWebBrowserLimitationRepositories": "文件夹选择在 Web 浏览器中不可用。\n\n要使用 Flutter GitUI 的完整功能，请作为桌面应用程序运行。",
+  "dialogContentStageAllAndCommit": "您有 {count} 个未暂存文件{plural}。\n\n所有未暂存的更改将在创建提交之前被暂存。\n\n您要继续吗？",
+  "dialogContentDiscardChangesFile": "放弃 {filePath} 中的更改？\n\n这无法撤消。",
+  "dialogTitleWindowsReservedFilename": "Windows 保留文件名",
+  "dialogContentStageAllFiles": "暂存所有 {count} 个未暂存文件{plural}？",
+  "menuItemCreateBranch": "创建分支",
+  "menuItemViewDiff": "查看差异",
+  "snackbarOutputCopied": "输出已复制到剪贴板",
+  "gitCommandSuccessful": "Git 命令成功",
+  "gitCommandFailed": "Git 命令失败",
+  "closingInSeconds": "{seconds} 秒后关闭",
+  "checkboxKeepDialogOpen": "保持此对话框打开",
+  "checkboxAmendLastCommit": "修改最后一次提交",
+  "checkboxAmendLastCommitSubtitle": "用此替换最后一次提交",
+  "labelCopyPath": "复制路径",
+  "labelRevealInExplorer": "在资源管理器中显示",
+  "labelChangedFiles": "已更改的文件",
+  "labelBinaryFile": "二进制文件",
+  "labelCannotPreviewFile": "无法预览文件",
+  "labelThisFileCannotBePreviewed": "此文件无法预览",
+  "labelDownloadFile": "下载文件",
+  "labelDownloadAndOpenFolder": "下载并打开文件夹",
+  "labelDiffViewer": "差异查看器",
+  "labelStaged": "已暂存",
+  "labelCopyAll": "全部复制",
+  "labelOpenInExternalTool": "在外部工具中打开",
+  "labelCommitMessage": "提交消息",
+  "labelAmendCommit": "修改提交",
+  "labelLines": "行",
+  "labelFile": "文件",
+  "labelFiles": "文件",
+  "messageFileNotFound": "文件未找到",
+  "messageNoFileCopied": "未复制文件",
+  "messageSourceFileNotFound": "源文件未找到",
+  "messageErrorLoadingDiff": "加载差异时出错：{error}",
+  "messageLineCopiedToClipboard": "行已复制到剪贴板",
+  "messageCommitMessageRequired": "需要提交消息",
+  "messageErrorLoadingHistory": "加载历史记录时出错",
+  "messageNoFilesChanged": "没有文件被更改",
+  "messageFileTooLargeToPreview": "文件太大无法预览 ({size})",
+  "messageFailedToDownloadFile": "下载文件失败：{error}",
+  "messageNoTextEditorConfigured": "未配置文本编辑器。请在设置中设置一个。",
+  "messageFailedToOpenEditor": "打开编辑器失败：{error}",
+  "messageFailedToOpenFileInEditor": "在编辑器中打开文件失败：{error}",
+  "messageRepositoryPathNotAvailable": "仓库路径不可用",
+  "messageFileDownloadedAndFolderOpened": "文件已下载到仓库并打开文件夹",
+  "messageFailedToDownloadAndOpenFolder": "下载并打开文件夹失败：{error}",
+  "messageFileSavedTo": "文件已保存到 {path}",
+  "messageViewDiffForCommit": "查看 {hash} 的差异（即将推出）",
+  "messageFilesStaged": "{count} 个{plural}已暂存",
+  "messageFileInfo": "{lineCount} 行 • {fileSize}",
+  "tipCommitMessage": "提示：使用现在时（\"添加功能\"而不是\"已添加功能\"）",
+  "editUrl": "编辑 URL",
+  "fetchUrl": "获取 URL",
+  "pushUrl": "推送 URL",
+  "mergeIntoCurrent": "合并到当前",
+  "moreActions": "更多操作",
+  "switchBranch": "切换分支",
+  "createPullRequest": "创建拉取请求",
+  "removeFromWorkspace": "从工作区删除",
+  "repositoriesCount": "{count} 个仓库",
+  "unassignedRepositories": "未分配的仓库",
+  "editProject": "编辑项目",
+  "deleteProject": "删除项目",
+  "blame": "追溯",
+  "couldNotLoadBlame": "无法加载追溯信息",
+  "emptyFile": "空文件",
+  "noContent": "此文件没有内容",
+  "errorLoadingBlame": "加载追溯时出错",
+  "commitShortHash": "提交 {hash}",
+  "linesCount": "{count} 行",
+  "outputCopiedToClipboard": "输出已复制到剪贴板",
+  "copyOutput": "复制输出",
+  "exitCode": "退出代码",
+  "time": "时间",
+  "noOutput": "无输出",
+  "commitDiff": "提交差异",
+  "errorLoadingDiff": "加载差异时出错",
+  "noChanges": "无变更",
+  "lineCopiedToClipboard": "行已复制到剪贴板",
+  "copyAll": "全部复制",
+  "local": "本地",
+  "annotatedCount": "注释标签 ({count})",
+  "lightweightCount": "轻量级标签 ({count})",
+  "allCount": "全部 ({count})",
+  "dropFoldersHere": "将文件夹拖到此处以添加仓库",
+  "webBrowserLimitation": "网页浏览器限制",
+  "cloneRepository": "克隆仓库",
+  "initializeRepository": "初始化仓库",
+  "validateAll": "验证全部",
+  "clearAll": "清除全部",
+  "onBranchAt": "在 {branch} • {timestamp}",
+  "quickFilters": "快速过滤器：",
+  "thisWeek": "本周",
+  "thisMonth": "本月",
+  "last30Days": "最近 30 天",
+  "commitsCount": "{count} 次提交",
+  "accessed": "访问时间：",
+  "edit": "编辑",
+  "pullFromRemote": "从远程拉取",
+  "pullFromRemoteWithCount": "从远程拉取（落后 {count} 次提交）",
+  "pushToRemote": "推送到远程",
+  "pushToRemoteWithCount": "推送到远程（领先 {count} 次提交）",
+  "squashCommits": "压缩提交",
+  "cherryPick": "挑选提交",
+  "revert": "撤销",
+  "resetToHere": "重置到此处",
+  "forcePushingToRemote": "强制推送到远程...",
+  "pushingToRemote": "推送到远程...",
+  "pushAll": "全部推送",
+  "fetchAll": "全部获取",
+  "openRepository": "打开仓库",
+  "remove": "移除",
+  "emptyCsvFile": "空 CSV 文件",
+  "errorLoadingDiff": "加载差异时出错：",
+  "switchedToBranch": "已切换到分支：{branch}",
+  "selectedCount": "{count} 已选择",
+  "errorLoadingCommits": "加载提交时出错",
+  "errorLoadingBranches": "加载分支时出错：{error}",
+  "error": "错误：{error}",
+  "configAndLogs": "配置和日志",
+  "openAppLog": "打开 app.log",
+  "openGitLog": "打开 git.log",
+  "openConfigFolder": "打开配置文件夹",
+  "deleteAppLog": "删除 app.log",
+  "deleteGitLog": "删除 git.log",
+  "allWorkspaces": "所有工作区",
+  "animationSpeed": "动画速度",
+  "animationSpeedFast": "快速",
+  "animationSpeedInfo": "控制菜单、对话框和过渡等界面动画的速度。选择'无'可禁用动画以获得更好的可访问性或更快的响应。",
+  "animationSpeedNone": "无（即时）",
+  "animationSpeedNormal": "正常",
+  "animationSpeedSlow": "慢速",
+  "animationSpeedUpdated": "动画速度已更新",
+  "animations": "动画",
+  "branchNameRequired": "需要分支名称",
+  "checkoutBranchAfterCreation": "创建后切换分支",
+  "checkoutBranchAfterCreationHint": "立即切换到新分支",
+  "createBranchFromTag": "从标签创建分支",
+  "deleteAll": "全部删除",
+  "deleteAllUnprotectedBranches": "删除所有未受保护的分支",
+  "deleteAllUnprotectedBranchesConfirm": "这将删除 {count} 个分支：",
+  "deleteBranch": "删除分支",
+  "failedToRebaseBranch": "变基分支失败：{error}",
+  "fontSizeTiny": "极小",
+  "forcePushFailed": "强制推送失败：{error}",
+  "forcePushSuccessful": "成功强制推送到远程",
+  "includeRemoteBranchesInList": "在选择列表中包含远程分支",
+  "interactiveRebaseDescription": "在变基期间编辑提交（高级）",
+  "mergeBranches": "合并分支",
+  "mergeSourceIntoTarget": "将 {source} 合并到 {target}",
+  "mergingBranches": "正在合并分支...",
+  "preserveMerges": "保留合并",
+  "preserveMergesDescription": "在变基历史记录中保留合并提交",
+  "previewFontFamily": "代码字体",
+  "previewFontSize": "代码字体大小",
+  "protectedBranchesNotDeleted": "受保护的分支和当前分支不会被删除。",
+  "rebase": "变基",
+  "rebaseHasConflicts": "变基有冲突：{count} 个文件需要解决",
+  "rebaseOptions": "变基选项",
+  "rebaseSourceOntoTarget": "将 {source} 变基到 {target}",
+  "rebasingBranches": "正在变基分支...",
+  "repositoryCount": "{count} 个仓库",
+  "selectBothBranchesToMerge": "选择两个要合并/变基的分支",
+  "selectSourceAndTargetBranches": "选择要合并或变基的源分支和目标分支",
+  "selectSourceBranch": "选择源分支",
+  "snackbarBranchCreatedSuccess": "已创建分支 \"{branchName}\"",
+  "sourceBranch": "源分支",
+  "sourceTag": "源标签",
+  "strategy": "策略",
+  "successfullyRebasedBranch": "成功将 {targetBranch} 变基到 {sourceBranch}",
+  "targetBranch": "目标分支",
+  "viewCommitInHistory": "在历史记录中查看提交",
+  "language": "语言",
+  "languageDescription": "选择您的首选语言"
+}

@@ -301,6 +301,10 @@
   "abortIfFastForwardNotPossible": "Прервать, если быстрая перемотка невозможна",
   "abortToCancelAndReturnToOriginalState": "Прервать, чтобы отменить и вернуться к исходному состоянию",
   "add": "Добавить",
+  "openFolderInEditor": "Открыть папку в редакторе",
+  "@openFolderInEditor": {
+    "description": "Menu item to open repository folder in configured text editor"
+  },
   "addRemote": "Добавить удалённый репозиторий",
   "addRemoteDialog": "Добавить удалённый репозиторий",
   "addRemoteError": "Не удалось добавить удалённый репозиторий: {error}",

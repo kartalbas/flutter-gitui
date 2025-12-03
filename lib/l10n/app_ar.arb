@@ -1059,6 +1059,10 @@
   "remoteUrlHintDialog": "https://github.com/user/repo.git",
   "enterRemoteUrl": "أدخل عنوان URL للمستودع البعيد",
   "add": "إضافة",
+  "openFolderInEditor": "فتح المجلد في المحرر",
+  "@openFolderInEditor": {
+    "description": "Menu item to open repository folder in configured text editor"
+  },
   "editRemoteUrl": "تعديل عنوان URL للمستودع البعيد",
   "@editRemoteUrl": {
     "description": "Title for edit remote URL dialog",

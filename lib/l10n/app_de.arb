@@ -1058,6 +1058,10 @@
   "remoteUrlHintDialog": "https://github.com/benutzer/repo.git",
   "enterRemoteUrl": "Remote-URL eingeben",
   "add": "Hinzufügen",
+  "openFolderInEditor": "Ordner im Editor öffnen",
+  "@openFolderInEditor": {
+    "description": "Menu item to open repository folder in configured text editor"
+  },
   "editRemoteUrl": "Remote-URL bearbeiten",
   "@editRemoteUrl": {
     "description": "Title for edit remote URL dialog",

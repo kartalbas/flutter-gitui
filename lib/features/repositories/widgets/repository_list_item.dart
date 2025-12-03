@@ -22,9 +22,8 @@ class RepositoryListItem extends ConsumerWidget {
   final VoidCallback onRemove;
   final VoidCallback onToggleFavorite;
   final VoidCallback? onToggleSelection;
+  final VoidCallback? onOpenInEditor;
   final VoidCallback? onEditRemoteUrl;
-  final VoidCallback? onRenameRemote;
-  final VoidCallback? onPruneRemote;
   final bool isSelected;
   final bool isMultiSelected;
   final bool showCheckbox;
@@ -36,9 +35,8 @@ class RepositoryListItem extends ConsumerWidget {
     required this.onRemove,
     required this.onToggleFavorite,
     this.onToggleSelection,
+    this.onOpenInEditor,
     this.onEditRemoteUrl,
-    this.onRenameRemote,
-    this.onPruneRemote,
     this.isSelected = false,
     this.isMultiSelected = false,
     this.showCheckbox = false,
@@ -274,8 +272,8 @@ class RepositoryListItem extends ConsumerWidget {
             onPressed: onRemove,
             tooltip: AppLocalizations.of(context)!.tooltipRemoveFromWorkspace,
           ),
-          // Remote management menu - only shown if there's a remote (on far right)
-          if (status.hasRemote && (onEditRemoteUrl != null || onRenameRemote != null || onPruneRemote != null))
+          // Repository menu - only shown if there are menu items available (on far right)
+          if (onOpenInEditor != null || (status.hasRemote && onEditRemoteUrl != null))
             BasePopupMenuButton<String>(
               icon: Icon(
                 PhosphorIconsRegular.dotsThreeVertical,
@@ -286,7 +284,16 @@ class RepositoryListItem extends ConsumerWidget {
               ),
               tooltip: AppLocalizations.of(context)!.moreActions,
               itemBuilder: (context) => [
-                if (onEditRemoteUrl != null)
+                if (onOpenInEditor != null)
+                  PopupMenuItem<String>(
+                    value: 'open_in_editor',
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.code,
+                      label: AppLocalizations.of(context)!.openFolderInEditor,
+                      iconSize: AppTheme.iconM,
+                    ),
+                  ),
+                if (status.hasRemote && onEditRemoteUrl != null)
                   PopupMenuItem<String>(
                     value: 'edit_remote_url',
                     child: MenuItemContent(
@@ -295,35 +302,14 @@ class RepositoryListItem extends ConsumerWidget {
                       iconSize: AppTheme.iconM,
                     ),
                   ),
-                if (onRenameRemote != null)
-                  PopupMenuItem<String>(
-                    value: 'rename_remote',
-                    child: MenuItemContent(
-                      icon: PhosphorIconsRegular.pencil,
-                      label: AppLocalizations.of(context)!.renameRemote('origin'),
-                      iconSize: AppTheme.iconM,
-                    ),
-                  ),
-                if (onPruneRemote != null)
-                  PopupMenuItem<String>(
-                    value: 'prune_remote',
-                    child: MenuItemContent(
-                      icon: PhosphorIconsRegular.broom,
-                      label: AppLocalizations.of(context)!.pruneRemote('origin'),
-                      iconSize: AppTheme.iconM,
-                    ),
-                  ),
               ],
               onSelected: (value) {
                 switch (value) {
+                  case 'open_in_editor':
+                    onOpenInEditor?.call();
+                    break;
                   case 'edit_remote_url':
                     onEditRemoteUrl?.call();
-                    break;
-                  case 'rename_remote':
-                    onRenameRemote?.call();
-                    break;
-                  case 'prune_remote':
-                    onPruneRemote?.call();
                     break;
                 }
               },

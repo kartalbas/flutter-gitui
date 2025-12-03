@@ -359,6 +359,10 @@
   "addRemoteDialog": "Uzak Ekle",
   "remoteName": "Uzak Adı",
   "add": "Ekle",
+  "openFolderInEditor": "Klasörü editörde aç",
+  "@openFolderInEditor": {
+    "description": "Menu item to open repository folder in configured text editor"
+  },
   "editRemoteUrl": "Uzak URL'yi Düzenle",
   "newName": "Yeni Ad",
   "prune": "Buda",

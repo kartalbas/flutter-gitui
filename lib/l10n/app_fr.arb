@@ -1058,6 +1058,10 @@
   "remoteUrlHintDialog": "https://github.com/utilisateur/depot.git",
   "enterRemoteUrl": "Entrez l'URL du distant",
   "add": "Ajouter",
+  "openFolderInEditor": "Ouvrir le dossier dans l'éditeur",
+  "@openFolderInEditor": {
+    "description": "Menu item to open repository folder in configured text editor"
+  },
   "editRemoteUrl": "Modifier l'URL de \"{remoteName}\"",
   "@editRemoteUrl": {
     "description": "Title for edit remote URL dialog",

@@ -1,5 +1,5 @@
 # Project-level configuration.
-cmake_minimum_required(VERSION 3.15...3.30)
+cmake_minimum_required(VERSION 3.19...3.30)
 project(flutter_gitui LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change

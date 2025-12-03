@@ -1,7 +1,31 @@
 {
   "releases": [
     {
-      "date": "2025-11-22T17:39:43Z",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "version": "0.1.0",
+      "commit": "6b2ec95",
+      "date": "2025-12-03T13:56:02Z"
+    },
+    {
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "version": "0.1.0",
+      "commit": "6b2ec95",
+      "date": "2025-12-03T13:28:55Z"
+    },
+    {
+      "commit": "6b2ec95",
+      "changelog": "## Changes\n\nNo changes since last build.",
+      "date": "2025-12-03T10:14:46Z",
+      "version": "0.1.0"
+    },
+    {
+      "commit": "6b2ec95",
+      "changelog": "# Changelog\n\n## Version 0.1.0\n\n### ✨ Features\n- Add snap package build and upload to Snap Store for Linux distribution\n- Add comprehensive file logging to release scripts\n- Add winget manifest generation for Windows package management\n- Add SNAPCRAFT_STORE_CREDENTIALS support for automated snap publishing\n- Add manifest templates for winget and snap packaging\n- Add modern Git branch icon and icon conversion script\n\n### 🐛 Bug Fixes\n- Correct snap build paths, bundle locations, and snapcraft.yaml structure\n- Use gnome-3-34 extension for snap compatibility\n- Clean temp directory before snap build and add Docker workdir configuration\n- Move build logs to artifacts folder for better organization\n- Upload latest-{platform}.json manifest for auto-update functionality\n- Use tag version directly without build numbers\n\n### 📝 Documentation\n- Add SNAPCRAFT_STORE_CREDENTIALS to .env.example\n\n### 🧹 Chores\n- Remove Android and iOS platforms (desktop-only application)\n- Remove unused Platform parameter from winget call\n- Remove winget step from Linux build (Windows-only feature)",
+      "date": "2025-12-03T09:54:37Z",
+      "version": "0.1.0"
+    },
+    {
+      "date": "2025-11-21T19:46:21Z",
       "version": "0.1.0",
       "changelog": "## Changes\n\nNo changes since last build.",
       "commit": "3564d2b"

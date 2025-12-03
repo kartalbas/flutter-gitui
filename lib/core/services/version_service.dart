@@ -93,16 +93,29 @@ class VersionService {
   /// Disable the "What's New" dialog permanently
   Future<void> disableWhatsNewDialog() async {
     try {
-      final config = await ConfigService.load();
+      final currentConfig = await ConfigService.load();
       final currentVersion = await getCurrentVersion();
-      final updatedConfig = config.copyWith(
+
+      Logger.info('[VersionService] Disabling What\'s New dialog');
+      Logger.info('[VersionService] Current version: $currentVersion');
+      Logger.info('[VersionService] Current config.disableWhatsNewDialog: ${currentConfig.disableWhatsNewDialog}');
+      Logger.info('[VersionService] Current config.lastSeenVersion: ${currentConfig.lastSeenVersion}');
+
+      final updatedConfig = currentConfig.copyWith(
         disableWhatsNewDialog: true,
         lastSeenVersion: currentVersion, // Mark current version as seen
       );
+
       await ConfigService.save(updatedConfig);
-      Logger.info('[VersionService] Disabled What\'s New dialog (version marked as seen: $currentVersion)');
+
+      // Verify it was saved
+      final verifyConfig = await ConfigService.load();
+      Logger.info('[VersionService] Verified saved config.disableWhatsNewDialog: ${verifyConfig.disableWhatsNewDialog}');
+      Logger.info('[VersionService] Verified saved config.lastSeenVersion: ${verifyConfig.lastSeenVersion}');
+      Logger.info('[VersionService] Disabled What\'s New dialog successfully');
     } catch (e, stack) {
       Logger.error('[VersionService] Failed to disable What\'s New dialog', e, stack);
+      rethrow;
     }
   }
 

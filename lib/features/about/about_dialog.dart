@@ -6,6 +6,7 @@ import '../../shared/components/base_dialog.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../core/services/version_service.dart';
+import '../../core/services/build_info.dart';
 
 class AppAboutDialog extends HookConsumerWidget {
   const AppAboutDialog({super.key});
@@ -50,6 +51,18 @@ class AppAboutDialog extends HookConsumerWidget {
                   HeadlineSmallLabel('Flutter GitUI'),
                   const SizedBox(height: AppTheme.paddingXS),
                   TitleSmallLabel('Version ${version.value}'),
+                  const SizedBox(height: AppTheme.paddingXS),
+                  BodySmallLabel(
+                    'Build: ${BuildInfo.displayCommit}',
+                    textAlign: TextAlign.center,
+                  ),
+                  if (BuildInfo.displayDate.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    BodySmallLabel(
+                      BuildInfo.displayDate,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ],
               ),
             ),

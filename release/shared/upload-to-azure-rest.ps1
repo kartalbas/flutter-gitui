@@ -134,7 +134,7 @@ function Upload-ToAzureBlob {
     $date = [DateTime]::UtcNow.ToString('R')
     $version = '2021-06-08'
 
-    $canonicalizedHeaders = "x-ms-blob-type:BlockBlob`nx-ms-date:$date`nx-ms-version:$version"
+    $canonicalizedHeaders = "x-ms-blob-cache-control:no-cache, no-store, must-revalidate`nx-ms-blob-type:BlockBlob`nx-ms-date:$date`nx-ms-version:$version"
     $canonicalizedResource = "/$StorageAccount/$Container/$BlobName"
     $stringToSign = "PUT`n`n`n$contentLength`n`n`n`n`n`n`n`n`n$canonicalizedHeaders`n$canonicalizedResource"
 
@@ -148,6 +148,8 @@ function Upload-ToAzureBlob {
         'x-ms-blob-type' = 'BlockBlob'
         'Authorization' = "SharedKey $($StorageAccount):$signature"
         'Content-Length' = $contentLength.ToString()
+        'Cache-Control' = 'no-cache, no-store, must-revalidate'
+        'x-ms-blob-cache-control' = 'no-cache, no-store, must-revalidate'
     }
 
     Invoke-RestMethod -Uri $blobUrl -Method Put -Headers $headers -Body $fileBytes -ErrorAction Stop

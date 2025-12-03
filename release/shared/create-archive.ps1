@@ -18,19 +18,28 @@ param(
 
     [Parameter(Mandatory=$false)]
     [ValidateSet('windows', 'linux', 'macos')]
-    [string]$Platform = 'windows'
+    [string]$Platform = 'windows',
+
+    [Parameter(Mandatory=$false)]
+    [string]$CommitShort = ''
 )
 
 function New-Archive {
     param(
         [string]$ReleaseDir,
         [string]$Version,
-        [string]$Platform
+        [string]$Platform,
+        [string]$CommitShort
     )
 
     Write-Host "  Creating $Platform archive..." -ForegroundColor Gray
 
-    $archiveName = "flutter-gitui-v$Version-$Platform.zip"
+    # Include commit hash in filename for development builds (same version, different commits)
+    if ($CommitShort) {
+        $archiveName = "flutter-gitui-v$Version+$CommitShort-$Platform.zip"
+    } else {
+        $archiveName = "flutter-gitui-v$Version-$Platform.zip"
+    }
 
     # Get parent directory for archive output
     $artifactsParent = Split-Path -Parent $ReleaseDir
@@ -98,7 +107,7 @@ function New-UpdateManifest {
 Write-Host "Creating archive and manifest..." -ForegroundColor Yellow
 
 try {
-    $archiveInfo = New-Archive -ReleaseDir $ReleaseDir -Version $Version -Platform $Platform
+    $archiveInfo = New-Archive -ReleaseDir $ReleaseDir -Version $Version -Platform $Platform -CommitShort $CommitShort
 
     # Validate archive was created
     if (-not (Test-Path $archiveInfo.FilePath)) {

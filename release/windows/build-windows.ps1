@@ -20,13 +20,21 @@ param(
     [string]$Version,
 
     [Parameter(Mandatory=$false)]
-    [string]$LogFile
+    [string]$LogFile,
+
+    [Parameter(Mandatory=$false)]
+    [string]$CommitShort = '',
+
+    [Parameter(Mandatory=$false)]
+    [string]$BuildDate = ''
 )
 
 function Invoke-WindowsBuild {
     param(
         [string]$ProjectRoot,
-        [string]$LogFile
+        [string]$LogFile,
+        [string]$CommitShort,
+        [string]$BuildDate
     )
 
     Write-Host "  [Windows] Building..." -ForegroundColor Cyan
@@ -36,6 +44,8 @@ function Invoke-WindowsBuild {
         "=== Flutter build windows --release ===" | Add-Content $LogFile -Encoding ASCII
         "Build started: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Add-Content $LogFile -Encoding ASCII
         "Working directory: $ProjectRoot" | Add-Content $LogFile -Encoding ASCII
+        "Commit: $CommitShort" | Add-Content $LogFile -Encoding ASCII
+        "Build Date: $BuildDate" | Add-Content $LogFile -Encoding ASCII
         "Flutter version:" | Add-Content $LogFile -Encoding ASCII
         flutter --version 2>&1 | Add-Content $LogFile -Encoding ASCII
         "" | Add-Content $LogFile -Encoding ASCII
@@ -48,9 +58,18 @@ function Invoke-WindowsBuild {
     $startTime = Get-Date
     Push-Location $ProjectRoot
 
+    # Build Flutter app with build info
+    $buildArgs = @('build', 'windows', '--release', '--verbose')
+    if ($CommitShort) {
+        $buildArgs += "--dart-define=BUILD_COMMIT=$CommitShort"
+    }
+    if ($BuildDate) {
+        $buildArgs += "--dart-define=BUILD_DATE=$BuildDate"
+    }
+
     # Run Windows build with VERBOSE logging
     $lineCount = 0
-    flutter build windows --release --verbose 2>&1 | ForEach-Object {
+    & flutter $buildArgs 2>&1 | ForEach-Object {
         $line = $_.ToString()
         $lineCount++
 
@@ -162,7 +181,7 @@ Write-Host "Building Windows binaries..." -ForegroundColor Yellow
 
 try {
     # Build Windows
-    $buildResult = Invoke-WindowsBuild -ProjectRoot $ProjectRoot -LogFile $LogFile
+    $buildResult = Invoke-WindowsBuild -ProjectRoot $ProjectRoot -LogFile $LogFile -CommitShort $CommitShort -BuildDate $BuildDate
 
     if (-not $buildResult.Success) {
         Write-Host ""

@@ -174,11 +174,14 @@ Write-Log "[Step $currentStep/$totalSteps] Building Windows binaries..." "Yellow
 
 try {
     $buildLogPath = Join-Path $artifactsParent "flutter-gitui-v$version-windows-build.log"
+    $buildDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
     $windowsBuildResult = & "$scriptDir/build-windows.ps1" `
         -ProjectRoot $projectRoot `
         -ReleaseDir $artifactsDir `
         -UpdaterDir $updaterDir `
+        -CommitShort $commit `
+        -BuildDate $buildDate `
         -Version $version `
         -LogFile $buildLogPath
 
@@ -272,7 +275,8 @@ try {
         -ReleaseDir $artifactsDir `
         -Version $version `
         -ChangelogContent $changelogContent `
-        -Platform "windows"
+        -Platform "windows" `
+        -CommitShort $commit
 
     if (-not $archiveResult -or -not $archiveResult.Success) {
         throw "Archive creation module failed"

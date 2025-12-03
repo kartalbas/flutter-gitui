@@ -23,12 +23,11 @@ import '../../core/workspace/models/workspace_repository.dart';
 import '../../core/workspace/models/repository_status.dart';
 import '../../core/workspace/repository_status_provider.dart';
 import '../../core/services/logger_service.dart';
+import '../../core/services/editor_launcher_service.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../shared/dialogs/clone_repository_dialog.dart';
 import '../../shared/dialogs/initialize_repository_dialog.dart';
 import '../../shared/dialogs/edit_remote_url_dialog.dart';
-import '../../shared/dialogs/rename_remote_dialog.dart';
-import '../../shared/dialogs/prune_remote_dialog.dart';
 import '../../core/services/notification_service.dart';
 import 'widgets/repository_card.dart';
 import 'widgets/repository_list_item.dart';
@@ -448,9 +447,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           },
           onRemove: () => _confirmRemoveRepository(context, ref, repo),
           onToggleFavorite: () => _toggleFavorite(ref, repo),
+          onOpenInEditor: () => _openInEditor(context, ref, repo),
           onEditRemoteUrl: () => _editRemoteUrl(context, ref, repo),
-          onRenameRemote: () => _renameRemote(context, ref, repo),
-          onPruneRemote: () => _pruneRemote(context, ref, repo),
         );
       },
     );
@@ -489,9 +487,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           },
           onRemove: () => _confirmRemoveRepository(context, ref, repo),
           onToggleFavorite: () => _toggleFavorite(ref, repo),
+          onOpenInEditor: () => _openInEditor(context, ref, repo),
           onEditRemoteUrl: () => _editRemoteUrl(context, ref, repo),
-          onRenameRemote: () => _renameRemote(context, ref, repo),
-          onPruneRemote: () => _pruneRemote(context, ref, repo),
         );
       },
     );
@@ -761,99 +758,36 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     }
   }
 
-  /// Rename remote for a repository
-  Future<void> _renameRemote(
+  /// Open repository folder in text editor
+  Future<void> _openInEditor(
     BuildContext context,
     WidgetRef ref,
     WorkspaceRepository repository,
   ) async {
-    // Get git service
-    final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final gitService = GitService(repository.path, gitExecutablePath: gitExecutablePath);
-
-    try {
-      // Fetch origin remote
-      final remotes = await gitService.getRemotes();
-      final originRemote = remotes.firstWhere(
-        (remote) => remote.name == 'origin',
-        orElse: () => throw Exception('No origin remote found'),
-      );
-
-      if (!context.mounted) return;
-
-      // Show rename dialog
-      final newName = await showDialog<String>(
-        context: context,
-        builder: (context) => RenameRemoteDialog(remote: originRemote),
-      );
-
-      if (newName == null || !context.mounted) return;
-
-      // Rename remote
-      await gitService.renameRemote('origin', newName);
-
+    final editor = ref.read(preferredTextEditorProvider);
+    if (editor == null || editor.isEmpty) {
+      Logger.warning('No text editor configured in settings');
       if (context.mounted) {
-        NotificationService.showSuccess(
+        NotificationService.showWarning(
           context,
-          'Remote renamed successfully',
-        );
-        // Refresh repository status
-        ref.read(workspaceRepositoryStatusProvider.notifier).refreshAll();
-      }
-    } catch (e) {
-      if (context.mounted) {
-        NotificationService.showError(
-          context,
-          'Failed to rename remote: $e',
+          'No text editor configured. Please set a text editor in Settings.',
         );
       }
+      return;
     }
-  }
-
-  /// Prune remote for a repository
-  Future<void> _pruneRemote(
-    BuildContext context,
-    WidgetRef ref,
-    WorkspaceRepository repository,
-  ) async {
-    // Get git service
-    final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final gitService = GitService(repository.path, gitExecutablePath: gitExecutablePath);
 
     try {
-      // Fetch origin remote
-      final remotes = await gitService.getRemotes();
-      final originRemote = remotes.firstWhere(
-        (remote) => remote.name == 'origin',
-        orElse: () => throw Exception('No origin remote found'),
+      Logger.info('Opening folder in editor: ${repository.path} with editor: $editor');
+      await EditorLauncherService.launch(
+        editorPath: editor,
+        targetPath: repository.path,
       );
-
-      if (!context.mounted) return;
-
-      // Show confirmation dialog
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => PruneRemoteDialog(remote: originRemote),
-      );
-
-      if (confirmed != true || !context.mounted) return;
-
-      // Prune remote
-      await gitService.fetch(remote: 'origin', prune: true);
-
-      if (context.mounted) {
-        NotificationService.showSuccess(
-          context,
-          'Remote pruned successfully',
-        );
-        // Refresh repository status
-        ref.read(workspaceRepositoryStatusProvider.notifier).refreshAll();
-      }
     } catch (e) {
+      Logger.error('Error opening editor: $editor with folder: ${repository.path}', e);
       if (context.mounted) {
         NotificationService.showError(
           context,
-          'Failed to prune remote: $e',
+          'Failed to open editor: $editor\nFolder: ${repository.path}\nError: $e',
         );
       }
     }

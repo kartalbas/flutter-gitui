@@ -17,6 +17,7 @@ import '../../../core/git/git_providers.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/git/widgets/commit_file_diff_dialog.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/services/editor_launcher_service.dart';
 import '../../../core/services/notification_service.dart';
 
 /// Tree node representing a file or directory
@@ -545,17 +546,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
 
       // Open in editor
       Logger.info('Launching editor: $editorPath with file: $tempFilePath');
-      final result = await Process.run(editorPath, [tempFilePath]);
-
-      if (result.exitCode != 0) {
-        Logger.error('Editor process exited with code ${result.exitCode}: ${result.stderr}');
-        if (context.mounted) {
-          NotificationService.showError(
-            context,
-            'Failed to open editor\nEditor: $editorPath\nFile: $filePath\nExit code: ${result.exitCode}\nError: ${result.stderr}',
-          );
-        }
-      }
+      await EditorLauncherService.launch(
+        editorPath: editorPath,
+        targetPath: tempFilePath,
+      );
     } catch (e) {
       Logger.error('Failed to open file in editor: $filePath from commit ${widget.commitHash}', e);
       if (context.mounted) {

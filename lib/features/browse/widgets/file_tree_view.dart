@@ -24,6 +24,7 @@ import '../../../core/config/config_providers.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../browse_screen.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/services/editor_launcher_service.dart';
 import '../../../core/services/notification_service.dart';
 
 /// File tree node with TreeNodeMixin for keyboard navigation support
@@ -707,7 +708,10 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
     try {
       Logger.info('Opening file in editor: $filePath with editor: $editor');
-      await Process.start(editor, [filePath]);
+      await EditorLauncherService.launch(
+        editorPath: editor,
+        targetPath: filePath,
+      );
     } catch (e) {
       Logger.error('Error opening editor: $editor with file: $filePath', e);
       if (mounted) {

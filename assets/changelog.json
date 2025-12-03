@@ -1,6 +1,12 @@
 {
   "releases": [
     {
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add open folder in editor action for repositories\n\n### 🐛 Bug Fixes\n- Replace pdfx with external PDF viewer\n- Resolve editor launcher error on Windows\n\n### 📝 Documentation\n- Add PDF generation installation instructions\n\n### 🧹 Chores\n- Bump version to 0.1.0\n- Remove updater.exe from git tracking\n- Ignore updater build artifacts\n- Update dependencies and plugin registration",
+      "version": "0.1.0",
+      "commit": "433a6a4",
+      "date": "2025-12-03T15:15:22Z"
+    },
+    {
       "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.1.0",
       "version": "0.1.0",
       "commit": "855e065",

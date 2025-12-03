@@ -1,6 +1,12 @@
 {
   "releases": [
     {
+      "changelog": "# Changelog\n\n### 🧹 Chores\n- Bump version to 0.1.0",
+      "version": "0.1.0",
+      "commit": "e2421af",
+      "date": "2025-12-03T14:10:08Z"
+    },
+    {
       "changelog": "## Changes\n\nNo changes since last build.",
       "version": "0.1.0",
       "commit": "6b2ec95",

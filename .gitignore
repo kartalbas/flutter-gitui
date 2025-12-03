@@ -49,6 +49,7 @@ app.*.map.json
 
 # Windows build artifacts
 windows/flutter/ephemeral/
+release/updater/*.exe
 
 # macOS build artifacts
 macos/Flutter/ephemeral/
@@ -71,6 +72,7 @@ universal-build/release/
 # Release build system - commit source, ignore artifacts
 release/artifacts/**/*
 !release/artifacts/.gitignore
+
 build_windows.log
 build_linux.log
 I-copy-paste-the-console-output-to-here.txt

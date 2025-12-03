@@ -83,6 +83,11 @@ All shared modules are designed to work cross-platform:
 
    # Install Xcode Command Line Tools
    xcode-select --install
+
+   # Optional: PDF generation tools (for README.pdf in releases)
+   brew install pandoc
+   brew install basictex  # Lightweight LaTeX
+   # OR: brew install --cask mactex-no-gui  # Full LaTeX distribution
    ```
 
 2. **Test Flutter Build**

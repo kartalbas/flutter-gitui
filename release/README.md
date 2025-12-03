@@ -276,6 +276,11 @@ Example:
 - PowerShell 5.1 or PowerShell Core 7+
 - Git
 
+**Optional (for PDF generation in releases):**
+- Pandoc: `scoop install pandoc` or download from https://pandoc.org/
+- LaTeX (MiKTeX): `scoop install latex` or download from https://miktex.org/
+  - Alternative: `winget install -e --id MiKTeX.MiKTeX`
+
 ### Linux Build Requirements
 - Windows 10/11 (with WSL2) or Linux
 - Docker Desktop (Windows) or Docker (Linux)
@@ -283,12 +288,19 @@ Example:
 - Git
 - Flutter SDK (for development, not required for Docker build)
 
+**Note:** PDF generation tools (pandoc, LaTeX) are pre-installed in the Docker build image.
+
 ### macOS Build Requirements (Future)
 - macOS 10.15 or later
 - Xcode Command Line Tools
 - Flutter SDK (configured for macOS desktop)
 - PowerShell Core 7+
 - Git
+
+**Optional (for PDF generation in releases):**
+- Pandoc: `brew install pandoc`
+- LaTeX (MacTeX): `brew install --cask mactex-no-gui`
+  - Lightweight alternative: `brew install basictex`
 
 ## Troubleshooting
 
@@ -342,6 +354,88 @@ Example:
 - Check connection string in `.env` file
 - Verify network connectivity
 - Check Azure storage account permissions
+
+### PDF Generation Issues
+
+**"PDF generation skipped - pandoc not installed"**
+
+*Windows:*
+```powershell
+# Using Scoop (recommended)
+scoop install pandoc
+
+# Or using Winget
+winget install -e --id JohnMacFarlane.Pandoc
+```
+
+*Linux:*
+```bash
+# Ubuntu/Debian
+sudo apt-get install pandoc
+
+# Fedora/RHEL
+sudo dnf install pandoc
+
+# Arch
+sudo pacman -S pandoc
+```
+
+*macOS:*
+```bash
+brew install pandoc
+```
+
+**"PDF generation skipped - no PDF engine available"**
+
+This means pandoc is installed but LaTeX is missing.
+
+*Windows:*
+```powershell
+# Using Scoop (recommended - lightweight MiKTeX)
+scoop install latex
+
+# Or using Winget (full MiKTeX)
+winget install -e --id MiKTeX.MiKTeX
+
+# After installation, restart your terminal or refresh PATH
+```
+
+*Linux:*
+```bash
+# Ubuntu/Debian
+sudo apt-get install texlive-latex-base texlive-xetex texlive-fonts-recommended
+
+# Fedora/RHEL
+sudo dnf install texlive-scheme-basic texlive-xetex
+
+# Arch
+sudo pacman -S texlive-core texlive-latexextra
+```
+
+*macOS:*
+```bash
+# Lightweight (recommended)
+brew install basictex
+
+# Full distribution
+brew install --cask mactex-no-gui
+```
+
+**"xelatex not found" (Windows)**
+
+LaTeX tools may not be in your PATH yet. Solutions:
+1. Restart your terminal/PowerShell
+2. The build script will auto-detect common installation paths
+3. Or add to PATH manually:
+   ```powershell
+   # For Scoop installation
+   $env:PATH += ";D:\bin\scoop\apps\latex\current\texmfs\install\miktex\bin\x64"
+
+   # For standard MiKTeX installation
+   $env:PATH += ";$env:LOCALAPPDATA\Programs\MiKTeX\miktex\bin\x64"
+   ```
+
+**Note:** PDF generation is optional. Builds will succeed without it, but the release ZIP will not include README.pdf.
 
 ## Migration from universal-build
 

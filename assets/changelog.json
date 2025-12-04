@@ -1,6 +1,12 @@
 {
   "releases": [
     {
+      "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Centralize editor launcher and respect \"Don't show on startup\" setting\n\n### 🧹 Chores\n- Bump version to 0.1.0",
+      "version": "0.1.0",
+      "commit": "32871f5",
+      "date": "2025-12-04T08:59:31Z"
+    },
+    {
       "changelog": "### ✨ Features\n\n- Add commit hash to app build info and About dialog",
       "version": "0.1.0",
       "commit": "2673598",

@@ -74,8 +74,12 @@ class VersionService {
     }
 
     // Case 2: Version changed (update/upgrade) - always show
-    if (lastSeenVersion != currentVersion) {
-      Logger.info('[VersionService] Version changed - showing What\'s New dialog');
+    // Compare only the version part, ignore build number (e.g., "0.1.0+1" vs "0.1.0+2" are same version)
+    final currentVersionOnly = _extractVersion(currentVersion);
+    final lastSeenVersionOnly = _extractVersion(lastSeenVersion);
+
+    if (lastSeenVersionOnly != currentVersionOnly) {
+      Logger.info('[VersionService] Version changed - showing What\'s New dialog ($lastSeenVersionOnly -> $currentVersionOnly)');
       return true;
     }
 
@@ -88,6 +92,12 @@ class VersionService {
 
     Logger.info('[VersionService] Normal run - dialog enabled, showing What\'s New');
     return true;
+  }
+
+  /// Extract version without build number (e.g., "0.1.0+5" -> "0.1.0")
+  String _extractVersion(String fullVersion) {
+    final parts = fullVersion.split('+');
+    return parts.isNotEmpty ? parts[0] : fullVersion;
   }
 
   /// Disable the "What's New" dialog permanently

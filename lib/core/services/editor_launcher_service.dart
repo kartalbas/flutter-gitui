@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'logger_service.dart';
+import '../config/config_service.dart';
 
 /// Service for launching external text editors
 ///
@@ -81,5 +82,41 @@ class EditorLauncherService {
     Logger.warning('[Windows] Tried: ${extensions.map((e) => '$path$e').join(', ')}');
 
     return path; // Return original, will fail with clear error in launch()
+  }
+
+  /// Launch editor using the text editor from config
+  /// Convenience method that automatically gets editor from settings
+  static Future<void> launchWithConfigEditor(String targetPath) async {
+    try {
+      final config = await ConfigService.load();
+      final editorPath = config.tools.textEditor;
+
+      if (editorPath == null || editorPath.isEmpty) {
+        throw Exception('No text editor configured in settings');
+      }
+
+      await launch(editorPath: editorPath, targetPath: targetPath);
+    } catch (e, stack) {
+      Logger.error('Failed to launch editor', e, stack);
+      rethrow;
+    }
+  }
+
+  /// Open app log file with configured editor
+  static Future<void> openAppLog() async {
+    final logPath = Logger.logFilePath;
+    if (logPath == null) {
+      throw Exception('Log file path not available');
+    }
+    await launchWithConfigEditor(logPath);
+  }
+
+  /// Open git log file with configured editor
+  static Future<void> openGitLog() async {
+    final gitLogPath = Logger.gitLogFilePath;
+    if (gitLogPath == null) {
+      throw Exception('Git log file path not available');
+    }
+    await launchWithConfigEditor(gitLogPath);
   }
 }

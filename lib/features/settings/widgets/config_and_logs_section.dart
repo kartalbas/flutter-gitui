@@ -10,6 +10,7 @@ import '../../../shared/components/base_button.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../core/services/editor_launcher_service.dart';
 import 'settings_section.dart';
 
 /// Config and Logs section - Open log files and config folder
@@ -77,7 +78,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
     try {
       final logPath = Logger.logFilePath;
       if (logPath != null) {
-        await Process.start(textEditor, [logPath], mode: ProcessStartMode.detached);
+        await EditorLauncherService.launch(
+          editorPath: textEditor,
+          targetPath: logPath,
+        );
       } else {
         if (context.mounted) {
           NotificationService.showWarning(context, 'Log file path not available');
@@ -95,7 +99,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
     try {
       final gitLogPath = Logger.gitLogFilePath;
       if (gitLogPath != null) {
-        await Process.start(textEditor, [gitLogPath], mode: ProcessStartMode.detached);
+        await EditorLauncherService.launch(
+          editorPath: textEditor,
+          targetPath: gitLogPath,
+        );
       } else {
         if (context.mounted) {
           NotificationService.showWarning(context, 'Git log file path not available');

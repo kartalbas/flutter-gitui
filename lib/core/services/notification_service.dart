@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_button.dart';
 import 'logger_service.dart';
+import 'editor_launcher_service.dart';
 
 /// Centralized notification service for showing consistent snackbars across the app
 class NotificationService {
@@ -69,17 +68,14 @@ class NotificationService {
                 size: ButtonSize.small,
                 onPressed: () async {
                   try {
-                    final logPath = Logger.logFilePath;
-                    final gitLogPath = Logger.gitLogFilePath;
-
                     // Open app.log
-                    if (logPath != null) {
-                      await Process.start(textEditor, [logPath], mode: ProcessStartMode.detached);
+                    if (Logger.logFilePath != null) {
+                      await EditorLauncherService.openAppLog();
                     }
 
                     // Open git.log
-                    if (gitLogPath != null) {
-                      await Process.start(textEditor, [gitLogPath], mode: ProcessStartMode.detached);
+                    if (Logger.gitLogFilePath != null) {
+                      await EditorLauncherService.openGitLog();
                     }
                   } catch (e) {
                     Logger.error('Failed to open log files', e);
@@ -162,17 +158,14 @@ class NotificationService {
                 size: ButtonSize.small,
                 onPressed: () async {
                   try {
-                    final logPath = Logger.logFilePath;
-                    final gitLogPath = Logger.gitLogFilePath;
-
                     // Open app.log
-                    if (logPath != null) {
-                      await Process.start(textEditor, [logPath], mode: ProcessStartMode.detached);
+                    if (Logger.logFilePath != null) {
+                      await EditorLauncherService.openAppLog();
                     }
 
                     // Open git.log
-                    if (gitLogPath != null) {
-                      await Process.start(textEditor, [gitLogPath], mode: ProcessStartMode.detached);
+                    if (Logger.gitLogFilePath != null) {
+                      await EditorLauncherService.openGitLog();
                     }
                   } catch (e) {
                     Logger.error('Failed to open log files', e);

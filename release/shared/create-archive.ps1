@@ -65,14 +65,19 @@ function New-UpdateManifest {
         [string]$Version,
         [string]$ChangelogContent,
         [hashtable]$ArchiveInfo,
-        [string]$Platform
+        [string]$Platform,
+        [string]$CommitShort = ''
     )
 
     Write-Host "  Creating update manifest..." -ForegroundColor Gray
 
+    # Construct full version string including commit hash if provided
+    # This ensures update detection works correctly when using commit-based builds
+    $fullVersion = if ($CommitShort) { "$Version+$CommitShort" } else { $Version }
+
     # Create latest.json manifest for auto-update feature
     $manifestData = @{
-        version = $Version
+        version = $fullVersion
         releaseDate = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
         changelog = $ChangelogContent
         platform = $Platform
@@ -123,7 +128,8 @@ try {
         -Version $Version `
         -ChangelogContent $ChangelogContent `
         -ArchiveInfo $archiveInfo `
-        -Platform $Platform
+        -Platform $Platform `
+        -CommitShort $CommitShort
 
     # Validate manifest was created
     if (-not (Test-Path $manifestInfo.Path)) {

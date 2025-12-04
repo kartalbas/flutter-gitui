@@ -23,7 +23,18 @@ class ChangelogDialog extends HookConsumerWidget {
     final changelogAsync = ref.watch(changelogDataProvider);
     final currentIndex = useState(initialIndex);
     final dontShowAgain = useState(false);
+    final initialDontShowAgain = useState<bool?>(null); // Track initial state
     final screenSize = MediaQuery.of(context).size;
+    final versionService = ref.watch(versionServiceProvider);
+
+    // Load the current value of disable_whats_new_dialog from config
+    useEffect(() {
+      versionService.isWhatsNewDialogDisabled().then((isDisabled) {
+        dontShowAgain.value = isDisabled;
+        initialDontShowAgain.value = isDisabled; // Save initial state
+      });
+      return null;
+    }, []);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -313,10 +324,15 @@ class ChangelogDialog extends HookConsumerWidget {
                             label: 'Close',
                             variant: ButtonVariant.primary,
                             onPressed: () async {
-                              // Save preference if "Don't show again" is checked
-                              if (dontShowAgain.value) {
+                              // Save preference if it changed
+                              if (initialDontShowAgain.value != null &&
+                                  dontShowAgain.value != initialDontShowAgain.value) {
                                 final versionService = ref.read(versionServiceProvider);
-                                await versionService.disableWhatsNewDialog();
+                                if (dontShowAgain.value) {
+                                  await versionService.disableWhatsNewDialog();
+                                } else {
+                                  await versionService.enableWhatsNewDialog();
+                                }
                               }
                               if (context.mounted) {
                                 Navigator.of(context).pop();

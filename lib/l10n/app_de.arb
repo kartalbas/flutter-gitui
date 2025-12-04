@@ -15,6 +15,8 @@
   "ok": "OK",
   "save": "Speichern",
   "delete": "Löschen",
+  "forceDelete": "Löschen erzwingen",
+  "forceDeleteWarning": "Dieser Branch ist nicht vollständig gemerged. Erzwungenes Löschen führt zum permanenten Verlust nicht gemergter Änderungen.",
   "create": "Erstellen",
   "close": "Schließen",
   "done": "Fertig",

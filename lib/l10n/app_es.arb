@@ -15,6 +15,8 @@
   "ok": "OK",
   "save": "Guardar",
   "delete": "Eliminar",
+  "forceDelete": "Forzar eliminación",
+  "forceDeleteWarning": "Esta rama no está completamente fusionada. La eliminación forzada perderá permanentemente los cambios no fusionados.",
   "create": "Crear",
   "close": "Cerrar",
   "done": "Hecho",

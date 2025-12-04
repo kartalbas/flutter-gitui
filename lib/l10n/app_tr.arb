@@ -15,6 +15,8 @@
   "ok": "Tamam",
   "save": "Kaydet",
   "delete": "Sil",
+  "forceDelete": "Zorla Sil",
+  "forceDeleteWarning": "Bu dal tamamen birleştirilmemiş. Zorla silme, birleştirilmemiş değişikliklerin kalıcı olarak kaybolmasına neden olur.",
   "create": "Oluştur",
   "close": "Kapat",
   "done": "Tamam",

@@ -15,6 +15,8 @@
   "ok": "OK",
   "save": "Enregistrer",
   "delete": "Supprimer",
+  "forceDelete": "Forcer la suppression",
+  "forceDeleteWarning": "Cette branche n'est pas entièrement fusionnée. La suppression forcée entraînera la perte permanente des modifications non fusionnées.",
   "create": "Créer",
   "close": "Fermer",
   "done": "Terminé",

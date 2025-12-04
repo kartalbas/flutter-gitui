@@ -229,15 +229,17 @@ class BranchListTile extends ConsumerWidget {
   }
 
   Future<void> _deleteBranch(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
+    final result = await showDialog<DeleteBranchResult>(
       context: context,
       builder: (context) => DeleteBranchDialog(branch: branch),
     );
 
-    if (confirmed == true && context.mounted) {
+    if (result != null && result != DeleteBranchResult.cancel && context.mounted) {
       try {
+        final force = result == DeleteBranchResult.forceDelete;
+
         if (isLocal) {
-          await ref.read(gitActionsProvider).deleteBranch(branch.shortName);
+          await ref.read(gitActionsProvider).deleteBranch(branch.shortName, force: force);
         } else {
           final remoteName = branch.remoteName;
           if (remoteName != null) {

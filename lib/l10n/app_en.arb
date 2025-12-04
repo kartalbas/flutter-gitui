@@ -1065,6 +1065,8 @@
       }
     }
   },
+  "forceDelete": "Force Delete",
+  "forceDeleteWarning": "This branch is not fully merged. Force delete will permanently lose unmerged changes.",
   "deleteAllUnprotectedBranches": "Delete all unprotected branches",
   "deleteAllUnprotectedBranchesConfirm": "This will delete {count} branch(es):",
   "@deleteAllUnprotectedBranchesConfirm": {

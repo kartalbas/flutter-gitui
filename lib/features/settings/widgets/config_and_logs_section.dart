@@ -7,6 +7,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_label.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/services/notification_service.dart';
@@ -48,7 +50,7 @@ class ConfigAndLogsSection extends ConsumerWidget {
               ),
               // Open user flutter-gitui folder
               BaseButton(
-                onPressed: () => _openConfigFolder(context),
+                onPressed: () => _openConfigFolder(context, textEditor),
                 label: l10n.openConfigFolder,
                 leadingIcon: PhosphorIconsRegular.folderOpen,
                 variant: ButtonVariant.secondary,
@@ -116,7 +118,7 @@ class ConfigAndLogsSection extends ConsumerWidget {
     }
   }
 
-  Future<void> _openConfigFolder(BuildContext context) async {
+  Future<void> _openConfigFolder(BuildContext context, String? textEditor) async {
     try {
       // Get the user's home directory
       final homeDir = Platform.isWindows
@@ -131,35 +133,44 @@ class ConfigAndLogsSection extends ConsumerWidget {
       }
 
       // Construct path to .flutter-gitui folder
-      final configFolder = Directory('$homeDir${Platform.pathSeparator}.flutter-gitui');
+      final configFolderPath = '$homeDir${Platform.pathSeparator}.flutter-gitui';
+      final configFolder = Directory(configFolderPath);
 
       if (!await configFolder.exists()) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Config folder does not exist: ${configFolder.path}');
+          NotificationService.showError(context, 'Config folder does not exist: $configFolderPath');
         }
         return;
       }
 
-      // Open folder in file explorer
-      if (Platform.isWindows) {
-        await Process.start('explorer', [configFolder.path], mode: ProcessStartMode.detached);
-      } else if (Platform.isMacOS) {
-        await Process.start('open', [configFolder.path], mode: ProcessStartMode.detached);
-      } else if (Platform.isLinux) {
-        // Try xdg-open first, fall back to common file managers
-        try {
-          await Process.start('xdg-open', [configFolder.path], mode: ProcessStartMode.detached);
-        } catch (e) {
-          // Try nautilus (GNOME)
+      // Open folder in text editor if configured, otherwise use file explorer
+      if (textEditor != null && textEditor.isNotEmpty) {
+        await EditorLauncherService.launch(
+          editorPath: textEditor,
+          targetPath: configFolderPath,
+        );
+      } else {
+        // Fall back to file explorer
+        if (Platform.isWindows) {
+          await Process.start('explorer', [configFolderPath], mode: ProcessStartMode.detached);
+        } else if (Platform.isMacOS) {
+          await Process.start('open', [configFolderPath], mode: ProcessStartMode.detached);
+        } else if (Platform.isLinux) {
+          // Try xdg-open first, fall back to common file managers
           try {
-            await Process.start('nautilus', [configFolder.path], mode: ProcessStartMode.detached);
+            await Process.start('xdg-open', [configFolderPath], mode: ProcessStartMode.detached);
           } catch (e) {
-            // Try dolphin (KDE)
+            // Try nautilus (GNOME)
             try {
-              await Process.start('dolphin', [configFolder.path], mode: ProcessStartMode.detached);
+              await Process.start('nautilus', [configFolderPath], mode: ProcessStartMode.detached);
             } catch (e) {
-              if (context.mounted) {
-                NotificationService.showError(context, 'Could not open file manager. Please install xdg-utils.');
+              // Try dolphin (KDE)
+              try {
+                await Process.start('dolphin', [configFolderPath], mode: ProcessStartMode.detached);
+              } catch (e) {
+                if (context.mounted) {
+                  NotificationService.showError(context, 'Could not open file manager. Please install xdg-utils.');
+                }
               }
             }
           }
@@ -175,7 +186,9 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
   Future<void> _deleteAppLog(BuildContext context) async {
     try {
+      final l10n = AppLocalizations.of(context)!;
       final logPath = Logger.logFilePath;
+
       if (logPath == null) {
         if (context.mounted) {
           NotificationService.showWarning(context, 'Log file path not available');
@@ -191,11 +204,35 @@ class ConfigAndLogsSection extends ConsumerWidget {
         return;
       }
 
-      // Delete the log file
-      await logFile.delete();
+      if (!context.mounted) return;
 
-      if (context.mounted) {
-        NotificationService.showSuccess(context, 'app.log deleted successfully');
+      // Show confirmation dialog
+      final confirmed = await BaseDialog.show<bool>(
+        context: context,
+        dialog: BaseDialog(
+          icon: PhosphorIconsRegular.trash,
+          title: l10n.deleteAppLog,
+          variant: DialogVariant.destructive,
+          content: const BodyMediumLabel(
+            'Are you sure you want to delete app.log? This action cannot be undone.',
+          ),
+          actions: [
+            BaseButton(
+              label: l10n.cancel,
+              variant: ButtonVariant.tertiary,
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            BaseButton(
+              label: l10n.delete,
+              variant: ButtonVariant.danger,
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        await logFile.delete();
       }
     } catch (e) {
       Logger.error('Failed to delete app.log', e);
@@ -207,7 +244,9 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
   Future<void> _deleteGitLog(BuildContext context) async {
     try {
+      final l10n = AppLocalizations.of(context)!;
       final gitLogPath = Logger.gitLogFilePath;
+
       if (gitLogPath == null) {
         if (context.mounted) {
           NotificationService.showWarning(context, 'Git log file path not available');
@@ -223,11 +262,35 @@ class ConfigAndLogsSection extends ConsumerWidget {
         return;
       }
 
-      // Delete the git log file
-      await gitLogFile.delete();
+      if (!context.mounted) return;
 
-      if (context.mounted) {
-        NotificationService.showSuccess(context, 'git.log deleted successfully');
+      // Show confirmation dialog
+      final confirmed = await BaseDialog.show<bool>(
+        context: context,
+        dialog: BaseDialog(
+          icon: PhosphorIconsRegular.trash,
+          title: l10n.deleteGitLog,
+          variant: DialogVariant.destructive,
+          content: const BodyMediumLabel(
+            'Are you sure you want to delete git.log? This action cannot be undone.',
+          ),
+          actions: [
+            BaseButton(
+              label: l10n.cancel,
+              variant: ButtonVariant.tertiary,
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            BaseButton(
+              label: l10n.delete,
+              variant: ButtonVariant.danger,
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        await gitLogFile.delete();
       }
     } catch (e) {
       Logger.error('Failed to delete git.log', e);

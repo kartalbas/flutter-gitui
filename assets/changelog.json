@@ -1,6 +1,12 @@
 {
   "releases": [
     {
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add Force Delete button for unmerged branches\n- Improve config folder structure and handling\n\n### 🧹 Chores\n- Bump version to 0.1.0",
+      "version": "0.1.0",
+      "commit": "74a4dd9",
+      "date": "2025-12-04T11:16:07Z"
+    },
+    {
       "changelog": "# Changelog\n\n### 🐛 Bug Fixes\n- Centralize editor launcher and respect \"Don't show on startup\" setting\n\n### 🧹 Chores\n- Bump version to 0.1.0",
       "version": "0.1.0",
       "commit": "32871f5",

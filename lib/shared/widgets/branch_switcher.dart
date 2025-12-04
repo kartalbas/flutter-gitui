@@ -232,74 +232,34 @@ class BranchSwitcher extends ConsumerWidget {
   }
 
   Future<void> _showDeleteAllUnprotectedDialog(BuildContext context, WidgetRef ref, List<GitBranch> branches) async {
-    final l10n = AppLocalizations.of(context)!;
-
     // Get list of deletable branches
     final deletableBranches = branches.where((b) => !b.isCurrent && !b.isProtected).toList();
 
     if (deletableBranches.isEmpty) return;
 
-    final confirmed = await showDialog<bool>(
+    final result = await showDialog<_BulkDeleteResult>(
       context: context,
-      builder: (context) => BaseDialog(
-        title: l10n.deleteAllUnprotectedBranches,
-        icon: PhosphorIconsRegular.trash,
-        variant: DialogVariant.destructive,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BodyMediumLabel(l10n.deleteAllUnprotectedBranchesConfirm(deletableBranches.length)),
-            const SizedBox(height: AppTheme.paddingS),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: deletableBranches.map((b) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: BodySmallLabel('  • ${b.name}'),
-                  )).toList(),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppTheme.paddingM),
-            DefaultTextStyle(
-              style: const TextStyle(fontStyle: FontStyle.italic),
-              child: BodySmallLabel(
-                l10n.protectedBranchesNotDeleted,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          BaseButton(
-            label: l10n.cancel,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          BaseButton(
-            label: l10n.deleteAll,
-            variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+      builder: (context) => _BulkDeleteBranchesDialog(branches: deletableBranches),
     );
 
-    if (confirmed == true && context.mounted) {
-      await _deleteAllUnprotectedBranches(context, ref, deletableBranches);
+    if (result != null && result.selectedBranches.isNotEmpty && context.mounted) {
+      await _deleteAllUnprotectedBranches(context, ref, result.selectedBranches, force: result.force);
     }
   }
 
-  Future<void> _deleteAllUnprotectedBranches(BuildContext context, WidgetRef ref, List<GitBranch> branches) async {
+  Future<void> _deleteAllUnprotectedBranches(
+    BuildContext context,
+    WidgetRef ref,
+    List<GitBranch> branches, {
+    bool force = false,
+  }) async {
     int successCount = 0;
     int failCount = 0;
     final errors = <String>[];
 
     for (final branch in branches) {
       try {
-        await ref.read(gitActionsProvider).deleteBranch(branch.name);
+        await ref.read(gitActionsProvider).deleteBranch(branch.name, force: force);
         successCount++;
       } catch (e) {
         failCount++;
@@ -343,5 +303,153 @@ class BranchSwitcher extends ConsumerWidget {
       Offset.zero & overlay.size,
     );
     return position;
+  }
+}
+
+/// Result from bulk delete dialog
+class _BulkDeleteResult {
+  final List<GitBranch> selectedBranches;
+  final bool force;
+
+  _BulkDeleteResult({
+    required this.selectedBranches,
+    required this.force,
+  });
+}
+
+/// Dialog for bulk deleting branches with checkboxes
+class _BulkDeleteBranchesDialog extends StatefulWidget {
+  final List<GitBranch> branches;
+
+  const _BulkDeleteBranchesDialog({required this.branches});
+
+  @override
+  State<_BulkDeleteBranchesDialog> createState() => _BulkDeleteBranchesDialogState();
+}
+
+class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
+  late Map<String, bool> _selectedBranches;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize all branches as checked
+    _selectedBranches = {
+      for (var branch in widget.branches) branch.name: true,
+    };
+  }
+
+  int get _selectedCount => _selectedBranches.values.where((selected) => selected).length;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return BaseDialog(
+      title: l10n.deleteAllUnprotectedBranches,
+      icon: PhosphorIconsRegular.trash,
+      variant: DialogVariant.destructive,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BodyMediumLabel(
+            'Select branches to delete ($_selectedCount selected)',
+          ),
+          const SizedBox(height: AppTheme.paddingS),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 300),
+            child: SingleChildScrollView(
+              child: Column(
+                children: widget.branches.map((branch) {
+                  final isMerged = _isBranchMerged(branch);
+                  return CheckboxListTile(
+                    value: _selectedBranches[branch.name] ?? false,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedBranches[branch.name] = value ?? false;
+                      });
+                    },
+                    title: Row(
+                      children: [
+                        Expanded(
+                          child: BodyMediumLabel(branch.name),
+                        ),
+                        if (isMerged)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingXS,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.gitAdded.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: BodySmallLabel(
+                              'merged',
+                              color: AppTheme.gitAdded,
+                            ),
+                          )
+                        else
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingXS,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.error.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: BodySmallLabel(
+                              'unmerged',
+                              color: colorScheme.error,
+                            ),
+                          ),
+                      ],
+                    ),
+                    dense: true,
+                    controlAffinity: ListTileControlAffinity.leading,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        BaseButton(
+          label: 'Delete Selected',
+          variant: ButtonVariant.danger,
+          onPressed: _selectedCount > 0 ? () => _deleteSelected(force: false) : null,
+        ),
+        BaseButton(
+          label: 'Force Delete Selected',
+          variant: ButtonVariant.danger,
+          onPressed: _selectedCount > 0 ? () => _deleteSelected(force: true) : null,
+        ),
+      ],
+    );
+  }
+
+  bool _isBranchMerged(GitBranch branch) {
+    // Simple heuristic: if branch has upstream and is not behind, it's likely merged
+    // This is a visual indicator only, not a git merge check
+    if (branch.hasUpstream && branch.behindBy != null) {
+      return branch.behindBy == 0 && (branch.aheadBy == null || branch.aheadBy == 0);
+    }
+    // If no tracking info, assume not merged
+    return false;
+  }
+
+  void _deleteSelected({required bool force}) {
+    final selectedBranches = widget.branches
+        .where((branch) => _selectedBranches[branch.name] == true)
+        .toList();
+
+    Navigator.of(context).pop(_BulkDeleteResult(
+      selectedBranches: selectedBranches,
+      force: force,
+    ));
   }
 }

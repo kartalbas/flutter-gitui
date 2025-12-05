@@ -328,23 +328,31 @@ class GitService {
   // ============================================
 
   /// Stage a file
-  Future<void> stageFile(String filePath) async {
-    await _execute('add "$filePath"');
+  Future<Result<void>> stageFile(String filePath) async {
+    return runCatchingAsync(() async {
+      await _execute('add "$filePath"');
+    });
   }
 
   /// Stage all files
-  Future<void> stageAll() async {
-    await _execute('add --all');
+  Future<Result<void>> stageAll() async {
+    return runCatchingAsync(() async {
+      await _execute('add --all');
+    });
   }
 
   /// Unstage a file
-  Future<void> unstageFile(String filePath) async {
-    await _execute('reset HEAD "$filePath"', throwOnError: false);
+  Future<Result<void>> unstageFile(String filePath) async {
+    return runCatchingAsync(() async {
+      await _execute('reset HEAD "$filePath"', throwOnError: false);
+    });
   }
 
   /// Unstage all files
-  Future<void> unstageAll() async {
-    await _execute('reset HEAD', throwOnError: false);
+  Future<Result<void>> unstageAll() async {
+    return runCatchingAsync(() async {
+      await _execute('reset HEAD', throwOnError: false);
+    });
   }
 
   // ============================================
@@ -867,8 +875,10 @@ class GitService {
   }
 
   /// Delete a remote branch
-  Future<void> deleteRemoteBranch(String remoteName, String branchName) async {
-    await _execute('push "$remoteName" --delete "$branchName"');
+  Future<Result<void>> deleteRemoteBranch(String remoteName, String branchName) async {
+    return runCatchingAsync(() async {
+      await _execute('push "$remoteName" --delete "$branchName"');
+    });
   }
 
   /// Checkout (switch to) a branch
@@ -986,47 +996,59 @@ class GitService {
   // ============================================
 
   /// Get all remotes with their URLs
-  Future<List<GitRemote>> getRemotes() async {
-    final result = await _execute('remote -v');
-    final output = result.stdout.toString();
-    return RemoteParser.parseRemotes(output);
+  Future<Result<List<GitRemote>>> getRemotes() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('remote -v');
+      final output = result.stdout.toString();
+      return RemoteParser.parseRemotes(output);
+    });
   }
 
   /// Get list of remote names only
-  Future<List<String>> getRemoteNames() async {
-    final result = await _execute('remote');
-    final output = result.stdout.toString();
-    return RemoteParser.parseRemoteNames(output);
+  Future<Result<List<String>>> getRemoteNames() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('remote');
+      final output = result.stdout.toString();
+      return RemoteParser.parseRemoteNames(output);
+    });
   }
 
   /// Add a new remote
-  Future<void> addRemote(String name, String url) async {
-    await _execute('remote add "$name" "$url"');
+  Future<Result<void>> addRemote(String name, String url) async {
+    return runCatchingAsync(() async {
+      await _execute('remote add "$name" "$url"');
+    });
   }
 
   /// Remove a remote
-  Future<void> removeRemote(String name) async {
-    await _execute('remote remove "$name"');
+  Future<Result<void>> removeRemote(String name) async {
+    return runCatchingAsync(() async {
+      await _execute('remote remove "$name"');
+    });
   }
 
   /// Rename a remote
-  Future<void> renameRemote(String oldName, String newName) async {
-    await _execute('remote rename "$oldName" "$newName"');
+  Future<Result<void>> renameRemote(String oldName, String newName) async {
+    return runCatchingAsync(() async {
+      await _execute('remote rename "$oldName" "$newName"');
+    });
   }
 
   /// Set remote URL
-  Future<void> setRemoteUrl(
+  Future<Result<void>> setRemoteUrl(
     String name,
     String url, {
     bool push = false,
   }) async {
-    final pushArg = push ? '--push ' : '';
-    await _execute('remote set-url $pushArg"$name" "$url"');
+    return runCatchingAsync(() async {
+      final pushArg = push ? '--push ' : '';
+      await _execute('remote set-url $pushArg"$name" "$url"');
+    });
   }
 
   /// Get URL for a specific remote
-  Future<String?> getRemoteUrl(String name, {bool push = false}) async {
-    try {
+  Future<Result<String?>> getRemoteUrl(String name, {bool push = false}) async {
+    return runCatchingAsync(() async {
       final type = push ? '--push' : '';
       final result = await _execute(
         'remote get-url $type "$name"',
@@ -1036,59 +1058,61 @@ class GitService {
         return result.stdout.toString().trim();
       }
       return null;
-    } catch (e) {
-      return null;
-    }
+    });
   }
 
   /// Fetch from remote
-  Future<String> fetch({
+  Future<Result<String>> fetch({
     String? remote,
     String? branch,
     bool prune = false,
     bool all = false,
   }) async {
-    final parts = ['fetch'];
+    return runCatchingAsync(() async {
+      final parts = ['fetch'];
 
-    if (prune) parts.add('--prune');
-    if (all) parts.add('--all');
+      if (prune) parts.add('--prune');
+      if (all) parts.add('--all');
 
-    if (remote != null) {
-      parts.add('"$remote"');
-      if (branch != null) parts.add('"$branch"');
-    }
+      if (remote != null) {
+        parts.add('"$remote"');
+        if (branch != null) parts.add('"$branch"');
+      }
 
-    final result = await _execute(parts.join(' '));
-    // Git fetch outputs to stderr, not stdout
-    final output = result.stderr.toString().trim();
-    return output.isNotEmpty ? output : 'Fetch completed';
+      final result = await _execute(parts.join(' '));
+      // Git fetch outputs to stderr, not stdout
+      final output = result.stderr.toString().trim();
+      return output.isNotEmpty ? output : 'Fetch completed';
+    });
   }
 
   /// Pull from remote
-  Future<String> pull({
+  Future<Result<String>> pull({
     String? remote,
     String? branch,
     bool rebase = false,
     bool ffOnly = false,
   }) async {
-    final parts = ['pull'];
+    return runCatchingAsync(() async {
+      final parts = ['pull'];
 
-    if (rebase) parts.add('--rebase');
-    if (ffOnly) parts.add('--ff-only');
+      if (rebase) parts.add('--rebase');
+      if (ffOnly) parts.add('--ff-only');
 
-    if (remote != null) {
-      parts.add('"$remote"');
-      if (branch != null) parts.add('"$branch"');
-    }
+      if (remote != null) {
+        parts.add('"$remote"');
+        if (branch != null) parts.add('"$branch"');
+      }
 
-    final result = await _execute(parts.join(' '));
-    // Git pull outputs to stderr, not stdout
-    final output = result.stderr.toString().trim();
-    return output.isNotEmpty ? output : 'Pull completed';
+      final result = await _execute(parts.join(' '));
+      // Git pull outputs to stderr, not stdout
+      final output = result.stderr.toString().trim();
+      return output.isNotEmpty ? output : 'Pull completed';
+    });
   }
 
   /// Push to remote
-  Future<String> push({
+  Future<Result<String>> push({
     String? remote,
     String? branch,
     bool force = false,
@@ -1096,35 +1120,41 @@ class GitService {
     bool all = false,
     bool tags = false,
   }) async {
-    final parts = ['push'];
+    return runCatchingAsync(() async {
+      final parts = ['push'];
 
-    // Use --force-with-lease instead of --force for safer force pushing
-    // This prevents overwriting work if someone else has pushed changes you don't have
-    if (force) parts.add('--force-with-lease');
-    if (setUpstream) parts.add('--set-upstream');
-    if (all) parts.add('--all');
-    if (tags) parts.add('--tags');
+      // Use --force-with-lease instead of --force for safer force pushing
+      // This prevents overwriting work if someone else has pushed changes you don't have
+      if (force) parts.add('--force-with-lease');
+      if (setUpstream) parts.add('--set-upstream');
+      if (all) parts.add('--all');
+      if (tags) parts.add('--tags');
 
-    if (remote != null) {
-      parts.add('"$remote"');
-      if (branch != null) parts.add('"$branch"');
-    }
+      if (remote != null) {
+        parts.add('"$remote"');
+        if (branch != null) parts.add('"$branch"');
+      }
 
-    final result = await _execute(parts.join(' '));
-    // Git push outputs to stderr, not stdout
-    final output = result.stderr.toString().trim();
-    return output.isNotEmpty ? output : 'Push completed';
+      final result = await _execute(parts.join(' '));
+      // Git push outputs to stderr, not stdout
+      final output = result.stderr.toString().trim();
+      return output.isNotEmpty ? output : 'Push completed';
+    });
   }
 
   /// Prune remote tracking branches
-  Future<void> pruneRemote(String remote) async {
-    await _execute('remote prune "$remote"');
+  Future<Result<void>> pruneRemote(String remote) async {
+    return runCatchingAsync(() async {
+      await _execute('remote prune "$remote"');
+    });
   }
 
   /// Show information about a remote
-  Future<String> showRemote(String name) async {
-    final result = await _execute('remote show "$name"');
-    return result.stdout.toString();
+  Future<Result<String>> showRemote(String name) async {
+    return runCatchingAsync(() async {
+      final result = await _execute('remote show "$name"');
+      return result.stdout.toString();
+    });
   }
 
   // ============================================
@@ -1132,17 +1162,15 @@ class GitService {
   // ============================================
 
   /// List all stashes
-  Future<List<GitStash>> getStashes() async {
-    try {
+  Future<Result<List<GitStash>>> getStashes() async {
+    return runCatchingAsync(() async {
       // Use custom format: ref|hash|timestamp|message
       final result = await _execute(
         'stash list --format=%gD|%H|%at|%gs',
         throwOnError: false,
       );
       return StashParser.parseStashList(result.stdout.toString());
-    } catch (e) {
-      return [];
-    }
+    });
   }
 
   /// Create a new stash
@@ -1151,112 +1179,124 @@ class GitService {
   /// [includeUntracked] - Include untracked files
   /// [keepIndex] - Keep staged changes in the index
   /// [files] - Optional list of specific files to stash (if null, stashes all files)
-  Future<void> createStash({
+  Future<Result<void>> createStash({
     String? message,
     bool includeUntracked = false,
     bool keepIndex = false,
     List<String>? files,
   }) async {
-    final parts = ['stash', 'push'];
+    return runCatchingAsync(() async {
+      final parts = ['stash', 'push'];
 
-    if (includeUntracked) {
-      parts.add('--include-untracked');
-    }
+      if (includeUntracked) {
+        parts.add('--include-untracked');
+      }
 
-    if (keepIndex) {
-      parts.add('--keep-index');
-    }
+      if (keepIndex) {
+        parts.add('--keep-index');
+      }
 
-    if (message != null && message.isNotEmpty) {
-      parts.add('-m');
-      parts.add('"${message.replaceAll('"', '\\"')}"');
-    }
+      if (message != null && message.isNotEmpty) {
+        parts.add('-m');
+        parts.add('"${message.replaceAll('"', '\\"')}"');
+      }
 
-    // Add specific files if provided
-    if (files != null && files.isNotEmpty) {
-      parts.add('--');
-      for (final file in files) {
-        // Quote file paths that contain spaces
-        if (file.contains(' ')) {
-          parts.add('"$file"');
-        } else {
-          parts.add(file);
+      // Add specific files if provided
+      if (files != null && files.isNotEmpty) {
+        parts.add('--');
+        for (final file in files) {
+          // Quote file paths that contain spaces
+          if (file.contains(' ')) {
+            parts.add('"$file"');
+          } else {
+            parts.add(file);
+          }
         }
       }
-    }
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Apply a stash
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
   /// [index] - Also restore staged changes
-  Future<void> applyStash(String stashRef, {bool index = false}) async {
-    final parts = ['stash', 'apply', '"$stashRef"'];
+  Future<Result<void>> applyStash(String stashRef, {bool index = false}) async {
+    return runCatchingAsync(() async {
+      final parts = ['stash', 'apply', '"$stashRef"'];
 
-    if (index) {
-      parts.add('--index');
-    }
+      if (index) {
+        parts.add('--index');
+      }
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Pop a stash (apply and remove)
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
   /// [index] - Also restore staged changes
-  Future<void> popStash(String stashRef, {bool index = false}) async {
-    final parts = ['stash', 'pop', '"$stashRef"'];
+  Future<Result<void>> popStash(String stashRef, {bool index = false}) async {
+    return runCatchingAsync(() async {
+      final parts = ['stash', 'pop', '"$stashRef"'];
 
-    if (index) {
-      parts.add('--index');
-    }
+      if (index) {
+        parts.add('--index');
+      }
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Drop a stash (remove without applying)
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
-  Future<void> dropStash(String stashRef) async {
-    await _execute('stash drop "$stashRef"');
+  Future<Result<void>> dropStash(String stashRef) async {
+    return runCatchingAsync(() async {
+      await _execute('stash drop "$stashRef"');
+    });
   }
 
   /// Clear all stashes
-  Future<void> clearStashes() async {
-    await _execute('stash clear');
+  Future<Result<void>> clearStashes() async {
+    return runCatchingAsync(() async {
+      await _execute('stash clear');
+    });
   }
 
   /// Show stash changes (file list)
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
-  Future<Map<String, dynamic>> showStash(String stashRef) async {
-    try {
+  Future<Result<Map<String, dynamic>>> showStash(String stashRef) async {
+    return runCatchingAsync(() async {
       final result = await _execute(
         'stash show --stat "$stashRef"',
         throwOnError: false,
       );
       return StashParser.parseStashShow(result.stdout.toString());
-    } catch (e) {
-      return {'files': [], 'stats': {}};
-    }
+    });
   }
 
   /// Get diff for a stash
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
-  Future<String> getStashDiff(String stashRef) async {
-    final result = await _execute('stash show -p "$stashRef"');
-    return result.stdout.toString();
+  Future<Result<String>> getStashDiff(String stashRef) async {
+    return runCatchingAsync(() async {
+      final result = await _execute('stash show -p "$stashRef"');
+      return result.stdout.toString();
+    });
   }
 
   /// Create a branch from a stash
   ///
   /// [branchName] - Name for the new branch
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
-  Future<void> branchFromStash(String branchName, String stashRef) async {
-    await _execute('stash branch "$branchName" "$stashRef"');
+  Future<Result<void>> branchFromStash(String branchName, String stashRef) async {
+    return runCatchingAsync(() async {
+      await _execute('stash branch "$branchName" "$stashRef"');
+    });
   }
 
   // ============================================
@@ -1264,8 +1304,8 @@ class GitService {
   // ============================================
 
   /// List all tags
-  Future<List<GitTag>> getTags() async {
-    try {
+  Future<Result<List<GitTag>>> getTags() async {
+    return runCatchingAsync(() async {
       // Use for-each-ref with custom format for detailed info
       // Format: name|@|commitHash|@|objectType|@|taggerName|@|taggerEmail|@|taggerDate|@|subject|@|commitMessage
       // Using |@| as separator to avoid conflicts with message content
@@ -1277,16 +1317,14 @@ class GitService {
         throwOnError: false,
       );
       return TagParser.parseTagList(result.stdout.toString());
-    } catch (e) {
-      return [];
-    }
+    });
   }
 
   /// Get remote tags for a specific remote
   ///
   /// Returns a set of tag names that exist on the remote
-  Future<Set<String>> getRemoteTags(String remoteName) async {
-    try {
+  Future<Result<Set<String>>> getRemoteTags(String remoteName) async {
+    return runCatchingAsync(() async {
       final result = await _execute(
         'ls-remote --tags "$remoteName"',
         throwOnError: false,
@@ -1315,18 +1353,16 @@ class GitService {
       }
 
       return tags;
-    } catch (e) {
-      return {};
-    }
+    });
   }
 
   /// Get local-only tags (tags that exist locally but not on remote)
   ///
   /// Returns a set of tag names that are only local
-  Future<Set<String>> getLocalOnlyTags(String remoteName) async {
-    try {
-      final localTags = await getTags();
-      final remoteTags = await getRemoteTags(remoteName);
+  Future<Result<Set<String>>> getLocalOnlyTags(String remoteName) async {
+    return runCatchingAsync(() async {
+      final localTags = (await getTags()).unwrap();
+      final remoteTags = (await getRemoteTags(remoteName)).unwrap();
 
       final localOnlyTags = <String>{};
       for (final tag in localTags) {
@@ -1336,18 +1372,16 @@ class GitService {
       }
 
       return localOnlyTags;
-    } catch (e) {
-      return {};
-    }
+    });
   }
 
   /// Get remote-only tags (tags that exist on remote but not locally)
   ///
   /// Returns a set of tag names that are only on remote
-  Future<Set<String>> getRemoteOnlyTags(String remoteName) async {
-    try {
-      final localTags = await getTags();
-      final remoteTags = await getRemoteTags(remoteName);
+  Future<Result<Set<String>>> getRemoteOnlyTags(String remoteName) async {
+    return runCatchingAsync(() async {
+      final localTags = (await getTags()).unwrap();
+      final remoteTags = (await getRemoteTags(remoteName)).unwrap();
 
       final localTagNames = localTags.map((tag) => tag.name).toSet();
       final remoteOnlyTags = <String>{};
@@ -1359,21 +1393,21 @@ class GitService {
       }
 
       return remoteOnlyTags;
-    } catch (e) {
-      return {};
-    }
+    });
   }
 
   /// Create a lightweight tag
   ///
   /// [tagName] - Name of the tag
   /// [commitHash] - Optional commit hash (defaults to HEAD)
-  Future<void> createLightweightTag(String tagName, {String? commitHash}) async {
-    final parts = ['tag', '"$tagName"'];
-    if (commitHash != null) {
-      parts.add('"$commitHash"');
-    }
-    await _execute(parts.join(' '));
+  Future<Result<void>> createLightweightTag(String tagName, {String? commitHash}) async {
+    return runCatchingAsync(() async {
+      final parts = ['tag', '"$tagName"'];
+      if (commitHash != null) {
+        parts.add('"$commitHash"');
+      }
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Create an annotated tag
@@ -1381,102 +1415,110 @@ class GitService {
   /// [tagName] - Name of the tag
   /// [message] - Tag message
   /// [commitHash] - Optional commit hash (defaults to HEAD)
-  Future<void> createAnnotatedTag(
+  Future<Result<void>> createAnnotatedTag(
     String tagName, {
     required String message,
     String? commitHash,
   }) async {
-    final parts = ['tag', '-a', '"$tagName"'];
-    parts.add('-m');
-    parts.add('"${message.replaceAll('"', '\\"')}"');
-    if (commitHash != null) {
-      parts.add('"$commitHash"');
-    }
-    await _execute(parts.join(' '));
+    return runCatchingAsync(() async {
+      final parts = ['tag', '-a', '"$tagName"'];
+      parts.add('-m');
+      parts.add('"${message.replaceAll('"', '\\"')}"');
+      if (commitHash != null) {
+        parts.add('"$commitHash"');
+      }
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Delete a tag (local)
   ///
   /// [tagName] - Name of the tag to delete
-  Future<void> deleteTag(String tagName) async {
-    await _execute('tag -d "$tagName"');
+  Future<Result<void>> deleteTag(String tagName) async {
+    return runCatchingAsync(() async {
+      await _execute('tag -d "$tagName"');
+    });
   }
 
   /// Delete a remote tag
   ///
   /// [remoteName] - Name of the remote (e.g., "origin")
   /// [tagName] - Name of the tag to delete
-  Future<void> deleteRemoteTag(String remoteName, String tagName) async {
-    await _execute('push "$remoteName" --delete "refs/tags/$tagName"');
+  Future<Result<void>> deleteRemoteTag(String remoteName, String tagName) async {
+    return runCatchingAsync(() async {
+      await _execute('push "$remoteName" --delete "refs/tags/$tagName"');
+    });
   }
 
   /// Push a tag to remote
   ///
   /// [remoteName] - Name of the remote (e.g., "origin")
   /// [tagName] - Name of the tag to push
-  Future<void> pushTag(String remoteName, String tagName) async {
-    await _execute('push "$remoteName" "$tagName"');
+  Future<Result<void>> pushTag(String remoteName, String tagName) async {
+    return runCatchingAsync(() async {
+      await _execute('push "$remoteName" "$tagName"');
+    });
   }
 
   /// Push all tags to remote
   ///
   /// [remoteName] - Name of the remote (e.g., "origin")
-  Future<void> pushAllTags(String remoteName) async {
-    await _execute('push "$remoteName" --tags');
+  Future<Result<void>> pushAllTags(String remoteName) async {
+    return runCatchingAsync(() async {
+      await _execute('push "$remoteName" --tags');
+    });
   }
 
   /// Fetch tags from remote
   ///
   /// [remoteName] - Optional remote name (defaults to all remotes)
-  Future<void> fetchTags({String? remoteName}) async {
-    if (remoteName != null) {
-      await _execute('fetch "$remoteName" --tags');
-    } else {
-      await _execute('fetch --tags');
-    }
+  Future<Result<void>> fetchTags({String? remoteName}) async {
+    return runCatchingAsync(() async {
+      if (remoteName != null) {
+        await _execute('fetch "$remoteName" --tags');
+      } else {
+        await _execute('fetch --tags');
+      }
+    });
   }
 
   /// Checkout a tag (creates detached HEAD)
   ///
   /// [tagName] - Name of the tag to checkout
-  Future<void> checkoutTag(String tagName) async {
-    await _execute('checkout "$tagName"');
+  Future<Result<void>> checkoutTag(String tagName) async {
+    return runCatchingAsync(() async {
+      await _execute('checkout "$tagName"');
+    });
   }
 
   /// Get detailed information about a tag
   ///
   /// [tagName] - Name of the tag
-  Future<Map<String, dynamic>> getTagDetails(String tagName) async {
-    try {
+  Future<Result<Map<String, dynamic>>> getTagDetails(String tagName) async {
+    return runCatchingAsync(() async {
       final result = await _execute('show "$tagName" --no-patch');
       return TagParser.parseTagDetails(result.stdout.toString());
-    } catch (e) {
-      return {};
-    }
+    });
   }
 
   /// Check if a tag exists
   ///
   /// [tagName] - Name of the tag
-  Future<bool> tagExists(String tagName) async {
-    try {
+  Future<Result<bool>> tagExists(String tagName) async {
+    return runCatchingAsync(() async {
       final result = await _execute('tag -l "$tagName"', throwOnError: false);
       return result.stdout.toString().trim() == tagName;
-    } catch (e) {
-      return false;
-    }
+    });
   }
 
   /// Get commit hash for a tag
   ///
   /// [tagName] - Name of the tag
-  Future<String?> getTagCommitHash(String tagName) async {
-    try {
+  Future<Result<String?>> getTagCommitHash(String tagName) async {
+    return runCatchingAsync(() async {
       final result = await _execute('rev-list -n 1 "$tagName"');
       return result.stdout.toString().trim();
-    } catch (e) {
-      return null;
-    }
+    });
   }
 
   // ============================================

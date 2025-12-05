@@ -162,7 +162,8 @@ class BatchOperationsService {
 
       try {
         final gitService = GitService(repo.path, gitExecutablePath: gitExecutablePath);
-        final output = await gitService.fetch();
+        final outputResult = await gitService.fetch();
+        final output = outputResult.unwrap();
 
         results.add(BatchOperationResult(
           repository: repo,
@@ -212,7 +213,8 @@ class BatchOperationsService {
 
       try {
         final gitService = GitService(repo.path, gitExecutablePath: gitExecutablePath);
-        final output = await gitService.pull();
+        final outputResult = await gitService.pull();
+        final output = outputResult.unwrap();
 
         results.add(BatchOperationResult(
           repository: repo,
@@ -262,7 +264,8 @@ class BatchOperationsService {
 
       try {
         final gitService = GitService(repo.path, gitExecutablePath: gitExecutablePath);
-        final output = await gitService.push();
+        final outputResult = await gitService.push();
+        final output = outputResult.unwrap();
 
         results.add(BatchOperationResult(
           repository: repo,

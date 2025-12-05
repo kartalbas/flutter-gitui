@@ -284,7 +284,8 @@ final remotesProvider = FutureProvider<List<GitRemote>>((ref) async {
   if (gitService == null) return [];
 
   try {
-    return await gitService.getRemotes();
+    final result = await gitService.getRemotes();
+    return result.unwrapOr([]);
   } catch (e) {
     return [];
   }
@@ -296,7 +297,8 @@ final remoteNamesProvider = FutureProvider<List<String>>((ref) async {
   if (gitService == null) return [];
 
   try {
-    return await gitService.getRemoteNames();
+    final result = await gitService.getRemoteNames();
+    return result.unwrapOr([]);
   } catch (e) {
     return [];
   }
@@ -308,7 +310,8 @@ final stashesProvider = FutureProvider<List<GitStash>>((ref) async {
   if (gitService == null) return [];
 
   try {
-    return await gitService.getStashes();
+    final result = await gitService.getStashes();
+    return result.unwrapOr([]);
   } catch (e) {
     return [];
   }
@@ -326,7 +329,8 @@ final tagsProvider = FutureProvider<List<GitTag>>((ref) async {
   if (gitService == null) return [];
 
   try {
-    return await gitService.getTags();
+    final result = await gitService.getTags();
+    return result.unwrapOr([]);
   } catch (e) {
     return [];
   }
@@ -362,7 +366,8 @@ final localOnlyTagsProvider = FutureProvider<Set<String>>((ref) async {
   final remoteName = remotes.contains('origin') ? 'origin' : remotes.first;
 
   try {
-    return await gitService.getLocalOnlyTags(remoteName);
+    final result = await gitService.getLocalOnlyTags(remoteName);
+    return result.unwrapOr({});
   } catch (e) {
     return {};
   }
@@ -386,7 +391,8 @@ final remoteOnlyTagsProvider = FutureProvider<Set<String>>((ref) async {
   final remoteName = remotes.contains('origin') ? 'origin' : remotes.first;
 
   try {
-    return await gitService.getRemoteOnlyTags(remoteName);
+    final result = await gitService.getRemoteOnlyTags(remoteName);
+    return result.unwrapOr({});
   } catch (e) {
     return {};
   }

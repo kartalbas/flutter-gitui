@@ -248,7 +248,8 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
 
     // Load diff based on type
     if (widget.stash != null) {
-      return await gitService.getStashDiff(widget.stash!.ref);
+      final result = await gitService.getStashDiff(widget.stash!.ref);
+      return result.unwrap();
     } else if (widget.commitHash != null) {
       return await gitService.getDiffForCommit(widget.commitHash!, widget.commitFilePath!);
     } else {

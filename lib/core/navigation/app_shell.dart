@@ -987,7 +987,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
       try {
         // Get remote URL for platform detection
-        final remoteUrl = await gitService.getRemoteUrl('origin');
+        final remoteUrlResult = await gitService.getRemoteUrl('origin');
+        final remoteUrl = remoteUrlResult.unwrapOr(null);
         if (remoteUrl == null || remoteUrl.isEmpty) {
           if (!context.mounted) return;
           NotificationService.showError(

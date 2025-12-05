@@ -721,7 +721,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
     try {
       // Fetch origin remote
-      final remotes = await gitService.getRemotes();
+      final remotesResult = await gitService.getRemotes();
+      final remotes = remotesResult.unwrap();
       final originRemote = remotes.firstWhere(
         (remote) => remote.name == 'origin',
         orElse: () => throw Exception('No origin remote found'),

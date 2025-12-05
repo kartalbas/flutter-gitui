@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'app_config.dart';
 import '../services/logger_service.dart';
+import '../utils/result.dart';
 
 /// Configuration service for loading and saving YAML config
 class ConfigService {
@@ -54,19 +55,21 @@ class ConfigService {
   }
 
   /// Ensure config directory exists
-  static Future<void> ensureConfigDirExists() async {
-    final configDir = await getConfigDirPath();
-    final dir = Directory(configDir);
+  static Future<Result<void>> ensureConfigDirExists() async {
+    return runCatchingAsync(() async {
+      final configDir = await getConfigDirPath();
+      final dir = Directory(configDir);
 
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-      Logger.config('Created config directory: $configDir');
-    }
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+        Logger.config('Created config directory: $configDir');
+      }
+    });
   }
 
   /// Load configuration from YAML file
-  static Future<AppConfig> load() async {
-    try {
+  static Future<Result<AppConfig>> load() async {
+    return runCatchingAsync(() async {
       final configPath = await getConfigFilePath();
       final file = File(configPath);
 
@@ -81,18 +84,16 @@ class ConfigService {
       final config = AppConfig.fromYaml(yamlMap);
       Logger.config('Loaded config from: $configPath');
       return config;
-    } catch (e, stack) {
-      Logger.error('Error loading config', e, stack);
-      return AppConfig.defaults;
-    }
+    });
   }
 
   /// Save configuration to YAML file
   /// Uses a lock to prevent concurrent writes that could cause data loss
-  static Future<void> save(AppConfig config) async {
-    return _saveLock.synchronized(() async {
-      try {
-        await ensureConfigDirExists();
+  static Future<Result<void>> save(AppConfig config) async {
+    return runCatchingAsync(() async {
+      await _saveLock.synchronized(() async {
+        final ensureResult = await ensureConfigDirExists();
+        ensureResult.unwrap(); // Throw on error
 
         final configPath = await getConfigFilePath();
         final tempPath = '$configPath.tmp';
@@ -110,10 +111,7 @@ class ConfigService {
         await tempFile.rename(configPath);
 
         Logger.config('Saved config to: $configPath');
-      } catch (e, stack) {
-        Logger.error('Error saving config', e, stack);
-        rethrow;
-      }
+      });
     });
   }
 

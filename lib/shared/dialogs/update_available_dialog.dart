@@ -281,9 +281,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
             _downloadProgress = progress;
           });
         },
-      );
+      ).then((result) => result.unwrapOr(''));
 
-      if (filePath == null) {
+      if (filePath.isEmpty) {
         setState(() {
           _errorMessage = 'Failed to download update. Please try again later.';
           _isDownloading = false;
@@ -296,7 +296,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         Logger.info('Starting update installation...', forceConsole: true);
         Logger.info('Update file: $filePath', forceConsole: true);
 
-        final success = await UpdateService.installUpdate(filePath);
+        final success = await UpdateService.installUpdate(filePath).then((result) => result.unwrapOr(false));
 
         Logger.info('Update installation result: $success', forceConsole: true);
 

@@ -22,7 +22,7 @@ class VersionService {
   /// Get the last version the user saw the changelog for
   Future<String?> getLastSeenVersion() async {
     try {
-      final config = await ConfigService.load();
+      final config = await ConfigService.load().then((result) => result.unwrap());
       return config.lastSeenVersion;
     } catch (e) {
       Logger.warning('Failed to load last seen version from config', e);
@@ -33,9 +33,9 @@ class VersionService {
   /// Mark the current version as seen
   Future<void> markVersionAsSeen(String version) async {
     try {
-      final config = await ConfigService.load();
+      final config = await ConfigService.load().then((result) => result.unwrap());
       final updatedConfig = config.copyWith(lastSeenVersion: version);
-      await ConfigService.save(updatedConfig);
+      await ConfigService.save(updatedConfig).then((result) => result.unwrap());
       Logger.info('[VersionService] Marked version as seen: $version');
     } catch (e, stack) {
       Logger.error('[VersionService] Failed to mark version as seen', e, stack);
@@ -45,7 +45,7 @@ class VersionService {
   /// Check if dialog is disabled
   Future<bool> isWhatsNewDialogDisabled() async {
     try {
-      final config = await ConfigService.load();
+      final config = await ConfigService.load().then((result) => result.unwrap());
       return config.disableWhatsNewDialog ?? false;
     } catch (e) {
       Logger.warning('Failed to check dialog disabled state', e);
@@ -103,7 +103,7 @@ class VersionService {
   /// Disable the "What's New" dialog permanently
   Future<void> disableWhatsNewDialog() async {
     try {
-      final currentConfig = await ConfigService.load();
+      final currentConfig = await ConfigService.load().then((result) => result.unwrap());
       final currentVersion = await getCurrentVersion();
 
       Logger.info('[VersionService] Disabling What\'s New dialog');
@@ -116,10 +116,10 @@ class VersionService {
         lastSeenVersion: currentVersion, // Mark current version as seen
       );
 
-      await ConfigService.save(updatedConfig);
+      await ConfigService.save(updatedConfig).then((result) => result.unwrap());
 
       // Verify it was saved
-      final verifyConfig = await ConfigService.load();
+      final verifyConfig = await ConfigService.load().then((result) => result.unwrap());
       Logger.info('[VersionService] Verified saved config.disableWhatsNewDialog: ${verifyConfig.disableWhatsNewDialog}');
       Logger.info('[VersionService] Verified saved config.lastSeenVersion: ${verifyConfig.lastSeenVersion}');
       Logger.info('[VersionService] Disabled What\'s New dialog successfully');
@@ -132,9 +132,9 @@ class VersionService {
   /// Re-enable the "What's New" dialog
   Future<void> enableWhatsNewDialog() async {
     try {
-      final config = await ConfigService.load();
+      final config = await ConfigService.load().then((result) => result.unwrap());
       final updatedConfig = config.copyWith(disableWhatsNewDialog: false);
-      await ConfigService.save(updatedConfig);
+      await ConfigService.save(updatedConfig).then((result) => result.unwrap());
       Logger.debug('Enabled What\'s New dialog');
     } catch (e, stack) {
       Logger.error('Failed to enable What\'s New dialog', e, stack);
@@ -144,9 +144,9 @@ class VersionService {
   /// Reset the last seen version to force the changelog dialog to show on next start
   Future<void> resetLastSeenVersion() async {
     try {
-      final config = await ConfigService.load();
+      final config = await ConfigService.load().then((result) => result.unwrap());
       final updatedConfig = config.copyWith(lastSeenVersion: null);
-      await ConfigService.save(updatedConfig);
+      await ConfigService.save(updatedConfig).then((result) => result.unwrap());
       Logger.debug('Reset last seen version - changelog will show on next start');
     } catch (e, stack) {
       Logger.error('Failed to reset last seen version', e, stack);

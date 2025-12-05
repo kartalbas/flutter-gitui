@@ -6,6 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'logger_service.dart';
+import '../utils/result.dart';
 
 /// Update information model
 class UpdateInfo {
@@ -71,9 +72,9 @@ class UpdateService {
   static String get _manifestUrl => '$_baseUrl/$_manifestFileName';
 
   /// Check for updates
-  /// Returns UpdateInfo if a newer version is available, null otherwise
-  static Future<UpdateInfo?> checkForUpdates() async {
-    try {
+  /// Returns Result\<UpdateInfo?\> - Success(UpdateInfo) if update available, Success(null) if up-to-date, Failure on error
+  static Future<Result<UpdateInfo?>> checkForUpdates() async {
+    return runCatchingAsync(() async {
       Logger.info('Checking for updates...');
       Logger.info('Manifest URL: $_manifestUrl');
 
@@ -95,7 +96,7 @@ class UpdateService {
       if (response.statusCode != 200) {
         Logger.warning('Failed to fetch update manifest: ${response.statusCode}');
         Logger.warning('Response body: ${response.body}');
-        return null;
+        throw Exception('Failed to fetch update manifest: HTTP ${response.statusCode}');
       }
 
       Logger.info('Manifest fetched successfully, parsing...');
@@ -131,7 +132,7 @@ class UpdateService {
           downloadFileName = platformData?['fileName'] as String? ?? 'flutter-gitui-v$latestVersion-macos.zip';
         } else {
           Logger.warning('Unsupported platform for updates');
-          return null;
+          throw Exception('Unsupported platform for updates');
         }
 
         final downloadUrl = '$_baseUrl/$downloadFileName';
@@ -160,10 +161,7 @@ class UpdateService {
         Logger.info('✓ App is up to date ($fullVersion >= $latestVersion)');
         return null;
       }
-    } catch (e, stackTrace) {
-      Logger.error('Error checking for updates', e, stackTrace);
-      return null;
-    }
+    });
   }
 
   /// Compare two semantic version strings
@@ -191,12 +189,12 @@ class UpdateService {
   }
 
   /// Download update file
-  /// Returns path to downloaded file, or null on error
-  static Future<String?> downloadUpdate(
+  /// Returns Result\<String\> with path to downloaded file
+  static Future<Result<String>> downloadUpdate(
     UpdateInfo updateInfo, {
     void Function(double progress)? onProgress,
   }) async {
-    try {
+    return runCatchingAsync(() async {
       Logger.info('Downloading update from: ${updateInfo.downloadUrl}');
 
       // Get temporary directory
@@ -210,7 +208,7 @@ class UpdateService {
 
       if (streamedResponse.statusCode != 200) {
         Logger.error('Failed to download update: ${streamedResponse.statusCode}');
-        return null;
+        throw Exception('Failed to download update: HTTP ${streamedResponse.statusCode}');
       }
 
       final file = File(filePath);
@@ -232,16 +230,14 @@ class UpdateService {
 
       Logger.info('Update downloaded to: $filePath');
       return filePath;
-    } catch (e, stackTrace) {
-      Logger.error('Error downloading update', e, stackTrace);
-      return null;
-    }
+    });
   }
 
   /// Install downloaded update
   /// This will close the current app and start the installation
-  static Future<bool> installUpdate(String updateFilePath) async {
-    try {
+  /// Returns Result\<bool\> - true if installation started successfully
+  static Future<Result<bool>> installUpdate(String updateFilePath) async {
+    return runCatchingAsync(() async {
       if (Platform.isWindows) {
         return await _installWindowsUpdate(updateFilePath);
       } else if (Platform.isLinux) {
@@ -250,12 +246,9 @@ class UpdateService {
         return await _installMacOSUpdate(updateFilePath);
       } else {
         Logger.warning('Update installation not supported on this platform');
-        return false;
+        throw Exception('Update installation not supported on this platform');
       }
-    } catch (e, stackTrace) {
-      Logger.error('Error installing update', e, stackTrace);
-      return false;
-    }
+    });
   }
 
   /// Launch a process in detached mode

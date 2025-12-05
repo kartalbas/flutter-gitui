@@ -45,7 +45,8 @@ class DiffToolService {
   static Future<void> _addGitConfiguredTools(List<DiffTool> tools) async {
     try {
       // Check git's configured diff tool
-      final diffToolResult = await ShellService.run('git config --get diff.tool');
+      final diffToolResultWrapped = await ShellService.run('git config --get diff.tool');
+      final diffToolResult = diffToolResultWrapped.unwrap();
       if (diffToolResult.first.exitCode == 0) {
         final diffToolName = diffToolResult.first.stdout.toString().trim();
         Logger.info('Git diff.tool configured as: $diffToolName');
@@ -66,7 +67,8 @@ class DiffToolService {
       }
 
       // Check git's configured merge tool
-      final mergeToolResult = await ShellService.run('git config --get merge.tool');
+      final mergeToolResultWrapped = await ShellService.run('git config --get merge.tool');
+      final mergeToolResult = mergeToolResultWrapped.unwrap();
       if (mergeToolResult.first.exitCode == 0) {
         final mergeToolName = mergeToolResult.first.stdout.toString().trim();
         Logger.info('Git merge.tool configured as: $mergeToolName');
@@ -137,7 +139,8 @@ class DiffToolService {
 
       for (final executable in executables) {
         try {
-          final result = await ShellService.run('$command $executable');
+          final resultWrapped = await ShellService.run('$command $executable');
+          final result = resultWrapped.unwrap();
           if (result.first.exitCode == 0) {
             var path = result.first.stdout.toString().trim().split('\n').first;
 

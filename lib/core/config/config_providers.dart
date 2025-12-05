@@ -49,7 +49,8 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     Logger.info('[CONFIG] Loading configuration started (_isLoading=true)');
     try {
       // Load from YAML
-      var config = await ConfigService.load();
+      final configResult = await ConfigService.load();
+      var config = configResult.unwrapOr(AppConfig.defaults);
       Logger.debug('After ConfigService.load() - repositories count: ${config.workspace.repositories.length}');
       Logger.debug('After ConfigService.load() - workspaces count: ${config.workspace.workspaces.length}');
       Logger.debug('[CONFIG] Git executable path from config: ${config.git.executablePath ?? "null"}');
@@ -66,7 +67,8 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       Logger.debug('After _validateWorkspace() - workspaces count: ${config.workspace.workspaces.length}');
       if (workspaceValidation.needsSave) {
         Logger.config('Saving workspace validation changes to config');
-        await ConfigService.save(config);
+        final saveResult = await ConfigService.save(config);
+        saveResult.unwrap(); // Throw on error
       }
 
       state = config;
@@ -220,7 +222,8 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     // Save updated config if any versions changed
     if (needsSave) {
       Logger.config('Saving updated tool versions to config');
-      await ConfigService.save(updatedConfig);
+      final saveResult = await ConfigService.save(updatedConfig);
+      saveResult.unwrap(); // Throw on error
     }
 
     return updatedConfig;
@@ -240,7 +243,8 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       Logger.debug('Current state.git.defaultUserName = ${state.git.defaultUserName}');
       Logger.debug('Current state.git.defaultUserEmail = ${state.git.defaultUserEmail}');
       Logger.debug('Calling ConfigService.save...');
-      await ConfigService.save(state);
+      final saveResult = await ConfigService.save(state);
+      saveResult.unwrap(); // Throw on error
       Logger.debug('ConfigService.save completed successfully');
     } catch (e, stack) {
       Logger.error('Error saving config - reverting to previous state', e, stack);

@@ -103,7 +103,7 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
   Future<void> _detectGit() async {
     try {
       final command = 'which git';
-      final result = await ShellService.run(command);
+      final result = await ShellService.run(command).then((r) => r.unwrap());
       if (result.first.exitCode == 0) {
         _gitPath = result.first.stdout.toString().trim();
         _selectedGit = _gitPath; // Auto-select if found
@@ -131,7 +131,7 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
     for (final editorInfo in commonEditors) {
       try {
-        final result = await ShellService.run('which ${editorInfo.command}');
+        final result = await ShellService.run('which ${editorInfo.command}').then((r) => r.unwrap());
         if (result.first.exitCode == 0) {
           final path = result.first.stdout.toString().trim();
           _textEditors.add(_DetectedEditor(

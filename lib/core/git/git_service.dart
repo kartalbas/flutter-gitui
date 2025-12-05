@@ -70,7 +70,7 @@ class GitService {
   static Future<bool> isGitInstalled() async {
     try {
       final result = await ShellService.run('git --version');
-      return result.first.exitCode == 0;
+      return result.unwrap().first.exitCode == 0;
     } catch (e) {
       return false;
     }

@@ -44,7 +44,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
     try {
       Logger.info('Manual update check initiated');
-      final updateInfo = await UpdateService.checkForUpdates();
+      final updateInfo = await UpdateService.checkForUpdates().then((result) => result.unwrapOr(null));
 
       if (!mounted) return;
 

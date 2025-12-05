@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'logger_service.dart';
 import '../config/config_service.dart';
+import '../utils/result.dart';
 
 /// Service for launching external text editors
 ///
@@ -11,35 +12,37 @@ class EditorLauncherService {
   /// Launch an editor with a file or folder path
   ///
   /// Resolves platform-specific executable paths before launching.
-  /// Throws an exception if the editor fails to launch.
-  static Future<void> launch({
+  /// Returns Result\<void\> - use unwrap() to propagate errors.
+  static Future<Result<void>> launch({
     required String editorPath,
     required String targetPath,
   }) async {
-    // Resolve to platform-specific executable
-    final resolvedPath = _resolveExecutablePath(editorPath);
+    return runCatchingAsync(() async {
+      // Resolve to platform-specific executable
+      final resolvedPath = _resolveExecutablePath(editorPath);
 
-    // Verify the resolved path exists
-    if (!File(resolvedPath).existsSync()) {
-      final message = Platform.isWindows
-          ? 'Editor executable not found: $editorPath\n'
-              'Tried: $editorPath.cmd, $editorPath.exe, $editorPath.bat\n'
-              'On Windows, editor paths must end with .exe, .cmd, or .bat\n'
-              'Please update your editor path in Settings'
-          : 'Editor not found: $editorPath\n'
-              'Please update your editor path in Settings';
+      // Verify the resolved path exists
+      if (!File(resolvedPath).existsSync()) {
+        final message = Platform.isWindows
+            ? 'Editor executable not found: $editorPath\n'
+                'Tried: $editorPath.cmd, $editorPath.exe, $editorPath.bat\n'
+                'On Windows, editor paths must end with .exe, .cmd, or .bat\n'
+                'Please update your editor path in Settings'
+            : 'Editor not found: $editorPath\n'
+                'Please update your editor path in Settings';
 
-      Logger.error('Editor executable not found: $resolvedPath', null);
-      throw ProcessException(resolvedPath, [], message);
-    }
+        Logger.error('Editor executable not found: $resolvedPath', null);
+        throw ProcessException(resolvedPath, [], message);
+      }
 
-    // Launch the editor
-    Logger.info('Launching editor: $resolvedPath with target: $targetPath');
-    await Process.start(
-      resolvedPath,
-      [targetPath],
-      mode: ProcessStartMode.detached,
-    );
+      // Launch the editor
+      Logger.info('Launching editor: $resolvedPath with target: $targetPath');
+      await Process.start(
+        resolvedPath,
+        [targetPath],
+        mode: ProcessStartMode.detached,
+      );
+    });
   }
 
   /// Resolve editor paths to valid executables (platform-specific)
@@ -86,37 +89,42 @@ class EditorLauncherService {
 
   /// Launch editor using the text editor from config
   /// Convenience method that automatically gets editor from settings
-  static Future<void> launchWithConfigEditor(String targetPath) async {
-    try {
-      final config = await ConfigService.load();
+  static Future<Result<void>> launchWithConfigEditor(String targetPath) async {
+    return runCatchingAsync(() async {
+      final configResult = await ConfigService.load();
+      final config = configResult.unwrap();
       final editorPath = config.tools.textEditor;
 
       if (editorPath == null || editorPath.isEmpty) {
         throw Exception('No text editor configured in settings');
       }
 
-      await launch(editorPath: editorPath, targetPath: targetPath);
-    } catch (e, stack) {
-      Logger.error('Failed to launch editor', e, stack);
-      rethrow;
-    }
+      final launchResult = await launch(editorPath: editorPath, targetPath: targetPath);
+      launchResult.unwrap();
+    });
   }
 
   /// Open app log file with configured editor
-  static Future<void> openAppLog() async {
-    final logPath = Logger.logFilePath;
-    if (logPath == null) {
-      throw Exception('Log file path not available');
-    }
-    await launchWithConfigEditor(logPath);
+  static Future<Result<void>> openAppLog() async {
+    return runCatchingAsync(() async {
+      final logPath = Logger.logFilePath;
+      if (logPath == null) {
+        throw Exception('Log file path not available');
+      }
+      final result = await launchWithConfigEditor(logPath);
+      result.unwrap();
+    });
   }
 
   /// Open git log file with configured editor
-  static Future<void> openGitLog() async {
-    final gitLogPath = Logger.gitLogFilePath;
-    if (gitLogPath == null) {
-      throw Exception('Git log file path not available');
-    }
-    await launchWithConfigEditor(gitLogPath);
+  static Future<Result<void>> openGitLog() async {
+    return runCatchingAsync(() async {
+      final gitLogPath = Logger.gitLogFilePath;
+      if (gitLogPath == null) {
+        throw Exception('Git log file path not available');
+      }
+      final result = await launchWithConfigEditor(gitLogPath);
+      result.unwrap();
+    });
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:process_run/shell.dart';
 
+import '../utils/result.dart';
+
 /// Service for running shell commands in a GUI-safe manner
 ///
 /// Windows GUI apps don't have a console, so stdout/stderr handles are invalid.
@@ -47,11 +49,13 @@ class ShellService {
   /// Run a command and return the result
   ///
   /// This is a convenience method that creates a silent shell and runs the command.
-  static Future<List<ProcessResult>> run(
+  static Future<Result<List<ProcessResult>>> run(
     String script, {
     String? workingDirectory,
   }) async {
-    final shell = createShell(workingDirectory: workingDirectory);
-    return shell.run(script);
+    return runCatchingAsync(() async {
+      final shell = createShell(workingDirectory: workingDirectory);
+      return shell.run(script);
+    });
   }
 }

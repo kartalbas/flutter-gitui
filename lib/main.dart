@@ -64,7 +64,7 @@ void main() async {
   // Load config synchronously BEFORE building any UI
   // This ensures splash screen displays with correct colors from first frame
   Logger.info('[MAIN] Loading configuration before UI initialization');
-  final initialConfig = await ConfigService.load();
+  final initialConfig = await ConfigService.load().then((result) => result.unwrap());
   Logger.info(
     '[MAIN] Configuration loaded: colorScheme=${initialConfig.ui.colorScheme}, fontFamily=${initialConfig.ui.fontFamily}',
   );

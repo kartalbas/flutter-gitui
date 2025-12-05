@@ -44,7 +44,7 @@ final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
       limitOverride = 1;
     }
 
-    return await gitService.getLog(
+    final result = await gitService.getLog(
       grepMessage: filter.query,
       author: filter.author,
       since: filter.fromDate?.toIso8601String(),
@@ -53,6 +53,8 @@ final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
       branch: branchOrTag,
       limit: limitOverride ?? 1000, // Use 1 for tags, 1000 for regular search
     );
+
+    return result.unwrapOr([]); // Return empty list on error
   } catch (e) {
     return [];
   }

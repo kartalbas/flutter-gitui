@@ -111,7 +111,8 @@ class BatchOperationsService {
 
         // Checkout to main branch - git will handle uncommitted changes
         final gitService = GitService(repo.path, gitExecutablePath: gitExecutablePath);
-        await gitService.checkoutBranch(mainBranch);
+        final result = await gitService.checkoutBranch(mainBranch);
+        result.unwrap(); // Throw on error to trigger catch block
 
         results.add(BatchOperationResult(
           repository: repo,
@@ -326,7 +327,8 @@ class BatchOperationsService {
         }
 
         // Checkout to the branch
-        await gitService.checkoutBranch(branchName);
+        final checkoutResult = await gitService.checkoutBranch(branchName);
+        checkoutResult.unwrap(); // Throw on error to trigger catch block
 
         results.add(BatchOperationResult(
           repository: repo,
@@ -384,7 +386,8 @@ class BatchOperationsService {
         }
 
         // Create branch
-        await gitService.createBranch(fullBranchName, checkout: checkout);
+        final createResult = await gitService.createBranch(fullBranchName, checkout: checkout);
+        createResult.unwrap(); // Throw on error to trigger catch block
 
         // Set upstream if requested
         if (setUpstream) {

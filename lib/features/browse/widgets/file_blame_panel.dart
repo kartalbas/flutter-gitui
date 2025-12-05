@@ -372,10 +372,12 @@ ${line.summary}
     try {
       // Get the full commit object by specifying the commit hash directly
       // Don't use range syntax (^..) as it fails for boundary commits
-      final commits = await gitService.getLog(
+      final result = await gitService.getLog(
         limit: 1,
         branch: line.commitHash,
       );
+
+      final commits = result.unwrapOr([]);
 
       if (commits.isEmpty) {
         if (context.mounted) {

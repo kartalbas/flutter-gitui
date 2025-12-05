@@ -42,7 +42,8 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
       final gitService = ref.read(gitServiceProvider);
       if (gitService != null) {
         try {
-          final lastMessage = await gitService.getLastCommitMessage();
+          final result = await gitService.getLastCommitMessage();
+          final lastMessage = result.unwrap();
           _messageController.text = lastMessage;
         } catch (e) {
           // Ignore errors loading last commit

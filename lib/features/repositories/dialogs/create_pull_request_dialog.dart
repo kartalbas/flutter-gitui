@@ -16,12 +16,14 @@ import '../../../core/git/models/branch.dart';
 class CreatePullRequestResult {
   final String title;
   final String description;
+  final String sourceBranch;
   final String baseBranch;
   final bool draft;
 
   const CreatePullRequestResult({
     required this.title,
     required this.description,
+    required this.sourceBranch,
     required this.baseBranch,
     this.draft = false,
   });
@@ -46,15 +48,31 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
+  late GitBranch _selectedSourceBranch;
   late GitBranch _selectedBaseBranch;
   bool _isDraft = false;
+  bool _showRemoteBranchesForSource = false;
   bool _showRemoteBranchesForTarget = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Try to detect main branch from available branches
+    // Set source branch to current branch
+    _selectedSourceBranch = widget.availableBranches.firstWhere(
+      (branch) => branch.name == widget.currentBranch,
+      orElse: () => widget.availableBranches.isNotEmpty
+          ? widget.availableBranches.first
+          : const GitBranch(
+              name: 'HEAD',
+              fullName: 'HEAD',
+              isLocal: true,
+              isRemote: false,
+              isCurrent: true,
+            ),
+    );
+
+    // Try to detect main branch from available branches for target
     final mainBranches = ['main', 'master', 'develop', 'development'];
     _selectedBaseBranch = widget.availableBranches.firstWhere(
       (branch) => mainBranches.contains(branch.name) && branch.name != widget.currentBranch,
@@ -84,25 +102,34 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    // Filter branches based on remote flag for target/base branch
-    // For PRs, both local and remote branches make sense as targets
-    var filteredBranches = _showRemoteBranchesForTarget
+    // Filter branches for source dropdown
+    var sourceBranches = _showRemoteBranchesForSource
+        ? widget.availableBranches.toList()
+        : widget.availableBranches.where((b) => !b.isRemote).toList();
+
+    // Filter branches for target/base dropdown
+    var targetBranches = _showRemoteBranchesForTarget
         ? widget.availableBranches.toList()
         : widget.availableBranches.where((b) => !b.isRemote).toList();
 
     // Sort by last commit date (newest first), with null dates at the end
-    filteredBranches.sort((a, b) {
-      if (a.lastCommitDate == null && b.lastCommitDate == null) {
-        return a.name.compareTo(b.name);
-      }
-      if (a.lastCommitDate == null) return 1;
-      if (b.lastCommitDate == null) return -1;
-      return b.lastCommitDate!.compareTo(a.lastCommitDate!);
-    });
+    void sortBranches(List<GitBranch> branches) {
+      branches.sort((a, b) {
+        if (a.lastCommitDate == null && b.lastCommitDate == null) {
+          return a.name.compareTo(b.name);
+        }
+        if (a.lastCommitDate == null) return 1;
+        if (b.lastCommitDate == null) return -1;
+        return b.lastCommitDate!.compareTo(a.lastCommitDate!);
+      });
+    }
 
-    // Filter out current branch
-    filteredBranches = filteredBranches
-        .where((branch) => branch.name != widget.currentBranch)
+    sortBranches(sourceBranches);
+    sortBranches(targetBranches);
+
+    // Filter out selected source branch from target branches to avoid same branch PR
+    targetBranches = targetBranches
+        .where((branch) => branch.name != _selectedSourceBranch.name)
         .toList();
 
     return BaseDialog(
@@ -114,42 +141,88 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Current branch info
-            Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+            // Source branch selection with search
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SearchableBaseDropdown<GitBranch>(
+                    value: _selectedSourceBranch,
+                    labelText: l10n.sourceBranchLabel,
+                    hintText: l10n.selectSourceBranch,
+                    searchHintText: l10n.searchBranches,
+                    prefixIcon: PhosphorIconsRegular.gitBranch,
+                    displayStringForItem: (branch) => branch.name,
+                    items: sourceBranches.map((branch) {
+                      final lastCommitText = branch.lastCommitDate != null
+                          ? timeago.format(branch.lastCommitDate!, locale: 'en_short')
+                          : null;
+                      return SearchableDropdownItem<GitBranch>.simple(
+                        value: branch,
+                        label: branch.name,
+                        subtitle: lastCommitText,
+                        icon: branch.isRemote
+                            ? PhosphorIconsRegular.cloud
+                            : PhosphorIconsRegular.gitBranch,
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          _selectedSourceBranch = value;
+                        });
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return l10n.selectSourceBranch;
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsBold.gitBranch,
-                    size: AppTheme.iconM,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: AppTheme.paddingM),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BodySmallLabel(
-                          l10n.sourceBranchLabel,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(height: 2),
-                        TitleSmallLabel(
-                          widget.currentBranch,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ],
+                const SizedBox(width: AppTheme.paddingM),
+                // Toggle switch for source branch
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const SizedBox(height: AppTheme.paddingL + AppTheme.paddingS),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildToggleButton(
+                            context,
+                            label: l10n.localTab,
+                            isSelected: !_showRemoteBranchesForSource,
+                            onTap: () {
+                              setState(() {
+                                _showRemoteBranchesForSource = false;
+                                _resetSourceBranchSelection();
+                              });
+                            },
+                          ),
+                          _buildToggleButton(
+                            context,
+                            label: l10n.remoteTab,
+                            isSelected: _showRemoteBranchesForSource,
+                            onTap: () {
+                              setState(() {
+                                _showRemoteBranchesForSource = true;
+                                _resetSourceBranchSelection();
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
 
             const SizedBox(height: AppTheme.paddingL),
@@ -166,7 +239,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     searchHintText: l10n.searchBranches,
                     prefixIcon: PhosphorIconsRegular.gitBranch,
                     displayStringForItem: (branch) => branch.name,
-                    items: filteredBranches.map((branch) {
+                    items: targetBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
                           ? timeago.format(branch.lastCommitDate!, locale: 'en_short')
                           : null;
@@ -338,11 +411,30 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
       final result = CreatePullRequestResult(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
+        sourceBranch: _selectedSourceBranch.name,
         baseBranch: _selectedBaseBranch.name,
         draft: _isDraft,
       );
       Navigator.of(context).pop(result);
     }
+  }
+
+  void _resetSourceBranchSelection() {
+    final newFilteredBranches = _showRemoteBranchesForSource
+        ? widget.availableBranches
+        : widget.availableBranches.where((b) => !b.isRemote).toList();
+    _selectedSourceBranch = newFilteredBranches.firstWhere(
+      (branch) => branch.name == widget.currentBranch,
+      orElse: () => newFilteredBranches.isNotEmpty
+          ? newFilteredBranches.first
+          : const GitBranch(
+              name: 'HEAD',
+              fullName: 'HEAD',
+              isLocal: true,
+              isRemote: false,
+              isCurrent: true,
+            ),
+    );
   }
 
   void _resetBranchSelection() {

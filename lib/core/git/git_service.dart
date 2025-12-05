@@ -3,6 +3,7 @@ import 'package:path/path.dart' as p;
 import 'package:process_run/shell.dart';
 
 import '../services/shell_service.dart';
+import '../utils/result.dart';
 import 'git_exception.dart';
 import 'models/file_status.dart';
 import 'models/commit.dart';
@@ -245,14 +246,24 @@ class GitService {
   // ============================================
 
   /// Get current branch name
-  Future<String?> getCurrentBranch() async {
-    try {
+  ///
+  /// Returns 'HEAD' if in detached HEAD state.
+  ///
+  /// Returns [Result.Success] with branch name on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<String>> getCurrentBranch() async {
+    return runCatchingAsync(() async {
       final result = await _execute('branch --show-current');
       final branch = result.stdout.toString().trim();
-      return branch.isEmpty ? null : branch;
-    } catch (e) {
-      return null;
-    }
+
+      // Detached HEAD state: git branch --show-current returns empty string
+      // This is a valid state, not an error
+      if (branch.isEmpty) {
+        return 'HEAD';
+      }
+
+      return branch;
+    });
   }
 
   /// Get repository root path
@@ -266,13 +277,14 @@ class GitService {
   }
 
   /// Check if working directory is clean
-  Future<bool> isClean() async {
-    try {
+  ///
+  /// Returns [Result.Success] with true if clean, false if dirty.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<bool>> isClean() async {
+    return runCatchingAsync(() async {
       final result = await _execute('status --porcelain');
       return result.stdout.toString().trim().isEmpty;
-    } catch (e) {
-      return false;
-    }
+    });
   }
 
   // ============================================
@@ -280,22 +292,35 @@ class GitService {
   // ============================================
 
   /// Get repository status
-  Future<List<FileStatus>> getStatus() async {
-    final result = await _execute('status --porcelain');
-    final output = result.stdout.toString();
-    return StatusParser.parse(output);
+  ///
+  /// Returns empty list if no changes exist.
+  ///
+  /// Returns [Result.Success] with list of file statuses on success.
+  /// Returns [Result.Failure] if git command fails or parsing fails.
+  Future<Result<List<FileStatus>>> getStatus() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('status --porcelain');
+      final output = result.stdout.toString();
+      return StatusParser.parse(output);
+    });
   }
 
   /// Get detailed status information
-  Future<Map<String, dynamic>> getStatusInfo() async {
-    final statuses = await getStatus();
+  ///
+  /// Returns [Result.Success] with status info map on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<Map<String, dynamic>>> getStatusInfo() async {
+    return runCatchingAsync(() async {
+      // Internal call - unwrap the Result since we're in the same service
+      final statuses = await getStatus().then((result) => result.unwrap());
 
-    return {
-      'total': statuses.length,
-      'staged': statuses.where((s) => s.isStaged).length,
-      'unstaged': statuses.where((s) => s.hasUnstagedChanges).length,
-      'untracked': statuses.where((s) => s.isUntracked).length,
-    };
+      return {
+        'total': statuses.length,
+        'staged': statuses.where((s) => s.isStaged).length,
+        'unstaged': statuses.where((s) => s.hasUnstagedChanges).length,
+        'untracked': statuses.where((s) => s.isUntracked).length,
+      };
+    });
   }
 
   // ============================================
@@ -327,22 +352,30 @@ class GitService {
   // ============================================
 
   /// Commit staged changes
-  Future<String> commit(String message, {bool amend = false}) async {
-    final amendFlag = amend ? '--amend' : '';
-    final escapedMessage = message.replaceAll('"', '\\"').replaceAll('\n', '\\n');
+  ///
+  /// Returns [Result.Success] with commit output on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<String>> commit(String message, {bool amend = false}) async {
+    return runCatchingAsync(() async {
+      final amendFlag = amend ? '--amend' : '';
+      final escapedMessage = message.replaceAll('"', '\\"').replaceAll('\n', '\\n');
 
-    final result = await _execute('commit $amendFlag -m "$escapedMessage"');
-    return result.stdout.toString();
+      final result = await _execute('commit $amendFlag -m "$escapedMessage"');
+      return result.stdout.toString();
+    });
   }
 
   /// Get last commit message
-  Future<String> getLastCommitMessage() async {
-    try {
+  ///
+  /// Returns empty string if no commits exist (new repository).
+  ///
+  /// Returns [Result.Success] with commit message on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<String>> getLastCommitMessage() async {
+    return runCatchingAsync(() async {
       final result = await _execute('log -1 --pretty=%B');
       return result.stdout.toString().trim();
-    } catch (e) {
-      return '';
-    }
+    });
   }
 
   // ============================================
@@ -413,7 +446,12 @@ class GitService {
   // ============================================
 
   /// Get commit history
-  Future<List<GitCommit>> getLog({
+  ///
+  /// Returns empty list if no commits exist (new repository).
+  ///
+  /// Returns [Result.Success] with list of commits on success.
+  /// Returns [Result.Failure] if git command fails or parsing fails.
+  Future<Result<List<GitCommit>>> getLog({
     int? limit,
     String? branch,
     String? filePath,
@@ -423,61 +461,71 @@ class GitService {
     String? until,
     bool allMatch = false,
   }) async {
-    final args = StringBuffer('log');
+    return runCatchingAsync(() async {
+      final args = StringBuffer('log');
 
-    // Add format
-    args.write(' --format="${LogParser.gitLogFormat}${LogParser.commitSeparator}"');
+      // Add format
+      args.write(' --format="${LogParser.gitLogFormat}${LogParser.commitSeparator}"');
 
-    // Add limit
-    if (limit != null) {
-      args.write(' -n $limit');
-    }
+      // Add limit
+      if (limit != null) {
+        args.write(' -n $limit');
+      }
 
-    // Add search filters
-    if (grepMessage != null && grepMessage.isNotEmpty) {
-      args.write(' --grep="$grepMessage"');
-    }
+      // Add search filters
+      if (grepMessage != null && grepMessage.isNotEmpty) {
+        args.write(' --grep="$grepMessage"');
+      }
 
-    if (author != null && author.isNotEmpty) {
-      args.write(' --author="$author"');
-    }
+      if (author != null && author.isNotEmpty) {
+        args.write(' --author="$author"');
+      }
 
-    if (since != null && since.isNotEmpty) {
-      args.write(' --since="$since"');
-    }
+      if (since != null && since.isNotEmpty) {
+        args.write(' --since="$since"');
+      }
 
-    if (until != null && until.isNotEmpty) {
-      args.write(' --until="$until"');
-    }
+      if (until != null && until.isNotEmpty) {
+        args.write(' --until="$until"');
+      }
 
-    if (allMatch) {
-      args.write(' --all-match');
-    }
+      if (allMatch) {
+        args.write(' --all-match');
+      }
 
-    // Add branch
-    if (branch != null) {
-      args.write(' "$branch"');
-    }
+      // Add branch
+      if (branch != null) {
+        args.write(' "$branch"');
+      }
 
-    // Add file path
-    if (filePath != null) {
-      args.write(' -- "$filePath"');
-    }
+      // Add file path
+      if (filePath != null) {
+        args.write(' -- "$filePath"');
+      }
 
-    final result = await _execute(args.toString(), throwOnError: false);
-    final output = result.stdout.toString();
+      final result = await _execute(args.toString(), throwOnError: false);
+      final output = result.stdout.toString();
 
-    return LogParser.parse(output);
+      return LogParser.parse(output);
+    });
   }
 
   /// Get a single commit by hash
-  Future<GitCommit?> getCommit(String hash) async {
-    final commits = await getLog(limit: 1);
-    return commits.isNotEmpty ? commits.first : null;
+  ///
+  /// Returns null if commit doesn't exist.
+  ///
+  /// Returns [Result.Success] with commit or null on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<GitCommit?>> getCommit(String hash) async {
+    return runCatchingAsync(() async {
+      // Internal call - unwrap the Result since we're in the same service
+      final commits = await getLog(limit: 1).then((result) => result.unwrap());
+      return commits.isNotEmpty ? commits.first : null;
+    });
   }
 
   /// Get commits for a specific file
-  Future<List<GitCommit>> getFileHistory(String filePath) async {
+  Future<Result<List<GitCommit>>> getFileHistory(String filePath) async {
     return await getLog(filePath: filePath);
   }
 
@@ -732,21 +780,42 @@ class GitService {
   // ============================================
 
   /// Get all branches (local and remote) with detailed information
-  Future<List<GitBranch>> getAllBranches() async {
-    final result = await _execute('branch -a -vv');
-    return BranchParser.parseAll(result.stdout.toString(), protectedBranches: protectedBranches);
+  ///
+  /// Returns empty list if there are no branches (e.g., new repository).
+  ///
+  /// Returns [Result.Success] with list of branches on success.
+  /// Returns [Result.Failure] if git command fails or parsing fails.
+  Future<Result<List<GitBranch>>> getAllBranches() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('branch -a -vv');
+      return BranchParser.parseAll(result.stdout.toString(), protectedBranches: protectedBranches);
+    });
   }
 
   /// Get local branches only with detailed information
-  Future<List<GitBranch>> getLocalBranches() async {
-    final result = await _execute('branch -vv');
-    return BranchParser.parseVerbose(result.stdout.toString(), protectedBranches: protectedBranches);
+  ///
+  /// Returns empty list if there are no branches (e.g., new repository).
+  ///
+  /// Returns [Result.Success] with list of branches on success.
+  /// Returns [Result.Failure] if git command fails or parsing fails.
+  Future<Result<List<GitBranch>>> getLocalBranches() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('branch -vv');
+      return BranchParser.parseVerbose(result.stdout.toString(), protectedBranches: protectedBranches);
+    });
   }
 
   /// Get remote branches only
-  Future<List<GitBranch>> getRemoteBranches() async {
-    final result = await _execute('branch -r');
-    return BranchParser.parseRemote(result.stdout.toString(), protectedBranches: protectedBranches);
+  ///
+  /// Returns empty list if there are no remote branches.
+  ///
+  /// Returns [Result.Success] with list of branches on success.
+  /// Returns [Result.Failure] if git command fails or parsing fails.
+  Future<Result<List<GitBranch>>> getRemoteBranches() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('branch -r');
+      return BranchParser.parseRemote(result.stdout.toString(), protectedBranches: protectedBranches);
+    });
   }
 
   /// Get list of local branch names (simple version for backward compatibility)
@@ -760,30 +829,41 @@ class GitService {
   /// [branchName] - Name of the new branch
   /// [startPoint] - Optional commit/branch to start from (defaults to HEAD)
   /// [checkout] - Whether to checkout the new branch immediately
-  Future<void> createBranch(
+  ///
+  /// Returns [Result.Success] on successful branch creation.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<void>> createBranch(
     String branchName, {
     String? startPoint,
     bool checkout = false,
   }) async {
-    final args = StringBuffer('branch');
-    args.write(' "$branchName"');
-    if (startPoint != null) {
-      args.write(' "$startPoint"');
-    }
+    return runCatchingAsync(() async {
+      final args = StringBuffer('branch');
+      args.write(' "$branchName"');
+      if (startPoint != null) {
+        args.write(' "$startPoint"');
+      }
 
-    await _execute(args.toString());
+      await _execute(args.toString());
 
-    if (checkout) {
-      await checkoutBranch(branchName);
-    }
+      if (checkout) {
+        // Internal call - unwrap the Result since we're in the same service
+        await checkoutBranch(branchName).then((result) => result.unwrap());
+      }
+    });
   }
 
   /// Delete a branch
   /// [branchName] - Name of the branch to delete
   /// [force] - Force delete even if not fully merged
-  Future<void> deleteBranch(String branchName, {bool force = false}) async {
-    final flag = force ? '-D' : '-d';
-    await _execute('branch $flag "$branchName"');
+  ///
+  /// Returns [Result.Success] on successful branch deletion.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<void>> deleteBranch(String branchName, {bool force = false}) async {
+    return runCatchingAsync(() async {
+      final flag = force ? '-D' : '-d';
+      await _execute('branch $flag "$branchName"');
+    });
   }
 
   /// Delete a remote branch
@@ -794,60 +874,75 @@ class GitService {
   /// Checkout (switch to) a branch
   /// [branchName] - Name of the branch to checkout
   /// [createIfMissing] - Create the branch if it doesn't exist
-  Future<void> checkoutBranch(
+  ///
+  /// Returns [Result.Success] on successful checkout.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<void>> checkoutBranch(
     String branchName, {
     bool createIfMissing = false,
   }) async {
-    if (createIfMissing) {
-      await _execute('checkout -b "$branchName"');
-    } else {
-      await _execute('checkout "$branchName"');
-    }
+    return runCatchingAsync(() async {
+      if (createIfMissing) {
+        await _execute('checkout -b "$branchName"');
+      } else {
+        await _execute('checkout "$branchName"');
+      }
+    });
   }
 
   /// Rename a branch
   /// [oldName] - Current branch name (null for current branch)
   /// [newName] - New branch name
   /// [force] - Force rename even if new name already exists
-  Future<void> renameBranch(String newName, {String? oldName, bool force = false}) async {
-    final flag = force ? '-M' : '-m';
-    if (oldName != null) {
-      await _execute('branch $flag "$oldName" "$newName"');
-    } else {
-      await _execute('branch $flag "$newName"');
-    }
+  ///
+  /// Returns [Result.Success] on successful rename.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<void>> renameBranch(String newName, {String? oldName, bool force = false}) async {
+    return runCatchingAsync(() async {
+      final flag = force ? '-M' : '-m';
+      if (oldName != null) {
+        await _execute('branch $flag "$oldName" "$newName"');
+      } else {
+        await _execute('branch $flag "$newName"');
+      }
+    });
   }
 
   /// Merge a branch into the current branch
   /// [branchName] - Name of the branch to merge
   /// [noFastForward] - Disable fast-forward merging
   /// [squash] - Squash commits when merging
-  Future<void> mergeBranch(
+  ///
+  /// Returns [Result.Success] on successful merge.
+  /// Returns [Result.Failure] if git command fails or merge conflicts occur.
+  Future<Result<void>> mergeBranch(
     String branchName, {
     bool fastForwardOnly = false,
     bool noFastForward = false,
     bool squash = false,
     String? message,
   }) async {
-    final args = StringBuffer('merge');
+    return runCatchingAsync(() async {
+      final args = StringBuffer('merge');
 
-    if (fastForwardOnly) {
-      args.write(' --ff-only');
-    } else if (noFastForward) {
-      args.write(' --no-ff');
-    }
+      if (fastForwardOnly) {
+        args.write(' --ff-only');
+      } else if (noFastForward) {
+        args.write(' --no-ff');
+      }
 
-    if (squash) {
-      args.write(' --squash');
-    }
+      if (squash) {
+        args.write(' --squash');
+      }
 
-    if (message != null && message.isNotEmpty) {
-      args.write(' -m "${message.replaceAll('"', '\\"')}"');
-    }
+      if (message != null && message.isNotEmpty) {
+        args.write(' -m "${message.replaceAll('"', '\\"')}"');
+      }
 
-    args.write(' "$branchName"');
+      args.write(' "$branchName"');
 
-    await _execute(args.toString());
+      await _execute(args.toString());
+    });
   }
 
   /// Set upstream tracking branch
@@ -1516,7 +1611,8 @@ class GitService {
     }
 
     // Get conflicts from status
-    final status = await getStatus();
+    final statusResult = await getStatus();
+    final status = statusResult.unwrapOr([]);
     final conflicts = <MergeConflict>[];
 
     for (final file in status) {
@@ -1550,7 +1646,11 @@ class GitService {
       }
     }
 
-    final currentBranch = await getCurrentBranch();
+    final currentBranchResult = await getCurrentBranch();
+    final String? currentBranch = currentBranchResult.when(
+      success: (branch) => branch,
+      failure: (msg, error, stackTrace) => null,
+    );
 
     return MergeState(
       isInProgress: true,
@@ -1985,7 +2085,8 @@ class GitService {
 
   /// Get HEAD commit
   Future<GitCommit?> getHeadCommit() async {
-    final commits = await getLog(limit: 1);
+    final result = await getLog(limit: 1);
+    final commits = result.unwrapOr([]);
     return commits.isNotEmpty ? commits.first : null;
   }
 
@@ -2085,7 +2186,8 @@ class GitService {
     // Check for conflicts - if rebase is paused, there are likely conflicts
     // We can detect this by checking if there are unstaged changes
     try {
-      final status = await getStatus();
+      final statusResult = await getStatus();
+      final status = statusResult.unwrapOr([]);
       hasConflicts = status.isNotEmpty;
     } catch (e) {
       // If we can't get status, assume no conflicts

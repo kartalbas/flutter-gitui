@@ -104,11 +104,14 @@ final currentBranchProvider = FutureProvider<String?>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return null;
 
-  try {
-    return await gitService.getCurrentBranch();
-  } catch (e) {
-    return null;
-  }
+  final result = await gitService.getCurrentBranch();
+  return result.when(
+    success: (branch) => branch,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get current branch: $msg', error);
+      return null; // Provider yields null to indicate error state
+    },
+  );
 });
 
 /// Repository status provider (file changes)
@@ -116,11 +119,14 @@ final repositoryStatusProvider = FutureProvider<List<FileStatus>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    return await gitService.getStatus();
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getStatus();
+  return result.when(
+    success: (statuses) => statuses,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get status: $msg', error);
+      return []; // Provider yields empty list to indicate error state
+    },
+  );
 });
 
 /// Staged files provider
@@ -153,11 +159,14 @@ final commitHistoryProvider = FutureProvider<List<GitCommit>>((ref) async {
 
   final limit = ref.watch(defaultCommitLimitProvider);
 
-  try {
-    return await gitService.getLog(limit: limit);
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getLog(limit: limit);
+  return result.when(
+    success: (commits) => commits,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get commit history: $msg', error);
+      return []; // Provider yields empty list to indicate error state
+    },
+  );
 });
 
 /// Commit history with limit provider
@@ -165,11 +174,14 @@ final commitHistoryLimitProvider = FutureProvider.family<List<GitCommit>, int>((
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    return await gitService.getLog(limit: limit);
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getLog(limit: limit);
+  return result.when(
+    success: (commits) => commits,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get commit history: $msg', error);
+      return []; // Provider yields empty list to indicate error state
+    },
+  );
 });
 
 /// File history provider
@@ -178,7 +190,8 @@ final fileHistoryProvider = FutureProvider.family<List<GitCommit>, String>((ref,
   if (gitService == null) return [];
 
   try {
-    return await gitService.getFileHistory(filePath);
+    final result = await gitService.getFileHistory(filePath);
+    return result.unwrapOr([]);
   } catch (e) {
     return [];
   }
@@ -211,11 +224,14 @@ final allBranchesProvider = FutureProvider<List<GitBranch>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    return await gitService.getAllBranches();
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getAllBranches();
+  return result.when(
+    success: (branches) => branches,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get all branches: $msg', error);
+      return []; // Provider yields empty list to indicate error state
+    },
+  );
 });
 
 /// Local branches provider
@@ -223,11 +239,14 @@ final localBranchesProvider = FutureProvider<List<GitBranch>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    return await gitService.getLocalBranches();
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getLocalBranches();
+  return result.when(
+    success: (branches) => branches,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get local branches: $msg', error);
+      return []; // Provider yields empty list to indicate error state
+    },
+  );
 });
 
 /// Remote branches provider
@@ -235,11 +254,14 @@ final remoteBranchesProvider = FutureProvider<List<GitBranch>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    return await gitService.getRemoteBranches();
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getRemoteBranches();
+  return result.when(
+    success: (branches) => branches,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get remote branches: $msg', error);
+      return []; // Provider yields empty list to indicate error state
+    },
+  );
 });
 
 /// Current branch object provider (detailed info)
@@ -553,7 +575,11 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.commit(message, amend: amend);
+    final result = await gitService.commit(message, amend: amend);
+
+    // Handle commit result - unwrap will throw if it failed
+    result.unwrap();
+
     await refreshStatus();
 
     // Also refresh workspace repository status for navigation badge
@@ -701,7 +727,9 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.deleteBranch(branchName, force: force);
+    final result = await gitService.deleteBranch(branchName, force: force);
+    result.unwrap(); // Throw on error to propagate to caller
+
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.branches, refreshBranches);
     }
@@ -721,7 +749,8 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.checkoutBranch(branchName, createIfMissing: createIfMissing);
+    final result = await gitService.checkoutBranch(branchName, createIfMissing: createIfMissing);
+    result.unwrap(); // Throw on error to propagate to caller
 
     if (!skipRefresh) {
       // Invalidate all relevant providers to ensure UI updates
@@ -750,7 +779,9 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.renameBranch(newName, oldName: oldName, force: force);
+    final result = await gitService.renameBranch(newName, oldName: oldName, force: force);
+    result.unwrap(); // Throw on error to propagate to caller
+
     await refreshBranches();
   }
 
@@ -766,13 +797,14 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.mergeBranch(
+    final result = await gitService.mergeBranch(
       branchName,
       fastForwardOnly: fastForwardOnly,
       noFastForward: noFastForward,
       squash: squash,
       message: message,
     );
+    result.unwrap(); // Throw on error to propagate to caller
 
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.branches, refreshBranches);

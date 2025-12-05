@@ -37,6 +37,7 @@ import '../../features/repositories/dialogs/create_pull_request_dialog.dart';
 import '../../shared/dialogs/merge_branches_dialog.dart';
 import '../git/git_service.dart';
 import '../git/git_platform_service.dart';
+import '../git/models/branch.dart';
 import 'command_palette.dart';
 import '../../features/workspaces/workspaces_screen.dart';
 import '../../features/repositories/repositories_screen.dart';
@@ -935,26 +936,51 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     try {
       // Get current branch
-      final currentBranch = await gitService.getCurrentBranch();
-      if (currentBranch == null) {
-        if (context.mounted) {
-          NotificationService.showError(
-            context, // ignore: use_build_context_synchronously
-            'Cannot create PR: No current branch detected',
-          );
-        }
-        return;
-      }
+      final branchResult = await gitService.getCurrentBranch();
+
+      // Handle result
+      String? currentBranch;
+      branchResult.when(
+        success: (branch) => currentBranch = branch,
+        failure: (msg, error, stackTrace) {
+          if (context.mounted) {
+            NotificationService.showError(
+              context,
+              'Cannot create PR: $msg',
+            );
+          }
+        },
+      );
+
+      // If branch retrieval failed, return early
+      if (currentBranch == null) return;
 
       // Get available branches (including remote)
-      final branches = await gitService.getAllBranches();
+      final branchesResult = await gitService.getAllBranches();
+
+      // Handle result
+      List<GitBranch>? branches;
+      branchesResult.when(
+        success: (List<GitBranch> branchList) => branches = branchList,
+        failure: (msg, error, stackTrace) {
+          if (context.mounted) {
+            NotificationService.showError(
+              context,
+              'Cannot load branches: $msg',
+            );
+          }
+        },
+      );
+
+      // If branch loading failed, return early
+      if (branches == null) return;
 
       // Show create PR dialog
       if (!context.mounted) return;
       final result = await showCreatePullRequestDialog(
         context, // ignore: use_build_context_synchronously
-        currentBranch: currentBranch,
-        availableBranches: branches,
+        currentBranch: currentBranch!,
+        availableBranches: branches!,
       );
 
       if (result == null || !context.mounted) return;
@@ -974,7 +1000,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         // Open PR creation in browser
         final success = await GitPlatformService.openPRCreation(
           remoteUrl: remoteUrl,
-          sourceBranch: currentBranch,
+          sourceBranch: currentBranch!,
           targetBranch: result.baseBranch,
           title: result.title,
           description: result.description,

@@ -391,26 +391,32 @@ class GitService {
   // ============================================
 
   /// Get diff for a file
-  Future<String> getDiff(String filePath, {bool staged = false}) async {
-    final stagedFlag = staged ? '--cached' : '';
-    final result = await _execute('diff $stagedFlag "$filePath"', throwOnError: false);
-    return result.stdout.toString();
+  Future<Result<String>> getDiff(String filePath, {bool staged = false}) async {
+    return runCatchingAsync(() async {
+      final stagedFlag = staged ? '--cached' : '';
+      final result = await _execute('diff $stagedFlag "$filePath"', throwOnError: false);
+      return result.stdout.toString();
+    });
   }
 
   /// Get diff for all changes
-  Future<String> getDiffAll({bool staged = false}) async {
-    final stagedFlag = staged ? '--cached' : '';
-    final result = await _execute('diff $stagedFlag', throwOnError: false);
-    return result.stdout.toString();
+  Future<Result<String>> getDiffAll({bool staged = false}) async {
+    return runCatchingAsync(() async {
+      final stagedFlag = staged ? '--cached' : '';
+      final result = await _execute('diff $stagedFlag', throwOnError: false);
+      return result.stdout.toString();
+    });
   }
 
   /// Get diff for a file in a specific commit
-  Future<String> getDiffForCommit(String commitHash, String filePath) async {
-    final result = await _execute(
-      'show "$commitHash" -- "$filePath"',
-      throwOnError: false,
-    );
-    return result.stdout.toString();
+  Future<Result<String>> getDiffForCommit(String commitHash, String filePath) async {
+    return runCatchingAsync(() async {
+      final result = await _execute(
+        'show "$commitHash" -- "$filePath"',
+        throwOnError: false,
+      );
+      return result.stdout.toString();
+    });
   }
 
   /// Get file content from working directory
@@ -651,9 +657,10 @@ class GitService {
   ///
   /// Returns [FileBlame] with all line information
   ///
-  /// Throws [GitException] if the file doesn't exist or git blame fails
-  Future<FileBlame> getBlame(String filePath, {String? commitHash}) async {
-    try {
+  /// Returns [Result.Success] with FileBlame on success.
+  /// Returns [Result.Failure] if the file doesn't exist or git blame fails.
+  Future<Result<FileBlame>> getBlame(String filePath, {String? commitHash}) async {
+    return runCatchingAsync(() async {
       final commit = commitHash ?? 'HEAD';
       final result = await _execute(
         'blame --line-porcelain "$commit" -- "$filePath"',
@@ -676,12 +683,7 @@ class GitService {
 
       final output = result.stdout.toString();
       return BlameParser.parse(output, filePath);
-    } catch (e) {
-      if (e is GitException) rethrow;
-      throw GitException(
-        'Failed to get blame for file $filePath: $e',
-      );
-    }
+    });
   }
 
   /// Get repository status including ahead/behind and uncommitted changes
@@ -1815,27 +1817,32 @@ class GitService {
   }
 
   /// Abort merge
-  Future<void> abortMerge() async {
-    await _execute('merge --abort');
+  Future<Result<void>> abortMerge() async {
+    return runCatchingAsync(() async {
+      await _execute('merge --abort');
+    });
   }
 
   /// Continue merge after resolving conflicts
-  Future<void> continueMerge({String? message}) async {
-    // Check if all conflicts are resolved
-    final mergeState = await getMergeState();
-    if (mergeState.unresolvedCount > 0) {
-      throw GitException(
-        'Cannot continue merge: ${mergeState.unresolvedCount} conflicts remain unresolved',
-      );
-    }
+  Future<Result<void>> continueMerge({String? message}) async {
+    return runCatchingAsync(() async {
+      // Check if all conflicts are resolved
+      final mergeState = await getMergeState();
+      if (mergeState.unresolvedCount > 0) {
+        throw GitException(
+          'Cannot continue merge: ${mergeState.unresolvedCount} conflicts remain unresolved',
+        );
+      }
 
-    // Commit the merge
-    if (message != null && message.isNotEmpty) {
-      await commit(message);
-    } else {
-      // Use default merge message from MERGE_MSG
-      await _execute('commit --no-edit');
-    }
+      // Commit the merge
+      if (message != null && message.isNotEmpty) {
+        final result = await commit(message);
+        result.unwrap(); // Propagate error if commit fails
+      } else {
+        // Use default merge message from MERGE_MSG
+        await _execute('commit --no-edit');
+      }
+    });
   }
 
   // ============================================
@@ -1860,96 +1867,108 @@ class GitService {
   }
 
   /// Cherry-pick a commit
-  Future<void> cherryPickCommit(
+  Future<Result<void>> cherryPickCommit(
     String commitHash, {
     bool noCommit = false,
   }) async {
-    final parts = ['cherry-pick'];
+    return runCatchingAsync(() async {
+      final parts = ['cherry-pick'];
 
-    if (noCommit) {
-      parts.add('--no-commit');
-    }
+      if (noCommit) {
+        parts.add('--no-commit');
+      }
 
-    parts.add(commitHash);
+      parts.add(commitHash);
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Abort an ongoing cherry-pick
-  Future<void> abortCherryPick() async {
-    await _execute('cherry-pick --abort');
+  Future<Result<void>> abortCherryPick() async {
+    return runCatchingAsync(() async {
+      await _execute('cherry-pick --abort');
+    });
   }
 
   /// Continue cherry-pick after resolving conflicts
-  Future<void> continueCherryPick() async {
-    await _execute('cherry-pick --continue');
+  Future<Result<void>> continueCherryPick() async {
+    return runCatchingAsync(() async {
+      await _execute('cherry-pick --continue');
+    });
   }
 
   /// Revert a commit (creates a new commit that undoes the changes)
-  Future<void> revertCommit(
+  Future<Result<void>> revertCommit(
     String commitHash, {
     bool noCommit = false,
     String? message,
   }) async {
-    final parts = ['revert'];
+    return runCatchingAsync(() async {
+      final parts = ['revert'];
 
-    if (noCommit) {
-      parts.add('--no-commit');
-    }
+      if (noCommit) {
+        parts.add('--no-commit');
+      }
 
-    if (message != null && message.isNotEmpty) {
-      parts.add('-m');
-      parts.add('"${message.replaceAll('"', '\\"')}"');
-    }
+      if (message != null && message.isNotEmpty) {
+        parts.add('-m');
+        parts.add('"${message.replaceAll('"', '\\"')}"');
+      }
 
-    parts.add(commitHash);
+      parts.add(commitHash);
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Reset branch to a specific commit
-  Future<void> resetToCommit(
+  Future<Result<void>> resetToCommit(
     String commitHash, {
     ResetMode mode = ResetMode.mixed,
   }) async {
-    final parts = ['reset'];
+    return runCatchingAsync(() async {
+      final parts = ['reset'];
 
-    switch (mode) {
-      case ResetMode.soft:
-        parts.add('--soft');
-        break;
-      case ResetMode.mixed:
-        parts.add('--mixed');
-        break;
-      case ResetMode.hard:
-        parts.add('--hard');
-        break;
-    }
+      switch (mode) {
+        case ResetMode.soft:
+          parts.add('--soft');
+          break;
+        case ResetMode.mixed:
+          parts.add('--mixed');
+          break;
+        case ResetMode.hard:
+          parts.add('--hard');
+          break;
+      }
 
-    parts.add(commitHash);
+      parts.add(commitHash);
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Clean working directory (remove untracked files)
-  Future<void> cleanWorkingDirectory({
+  Future<Result<void>> cleanWorkingDirectory({
     bool directories = false,
     bool force = false,
     bool dryRun = false,
   }) async {
-    final parts = ['clean'];
+    return runCatchingAsync(() async {
+      final parts = ['clean'];
 
-    if (dryRun) {
-      parts.add('-n'); // Dry run
-    } else if (force) {
-      parts.add('-f'); // Force
-    }
+      if (dryRun) {
+        parts.add('-n'); // Dry run
+      } else if (force) {
+        parts.add('-f'); // Force
+      }
 
-    if (directories) {
-      parts.add('-d'); // Include directories
-    }
+      if (directories) {
+        parts.add('-d'); // Include directories
+      }
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   // ============================================
@@ -1960,46 +1979,52 @@ class GitService {
   ///
   /// [maxCount] - Maximum number of entries to return (default 50)
   /// [ref] - Specific ref to show reflog for (default HEAD)
-  Future<List<ReflogEntry>> getReflog({int maxCount = 50, String ref = 'HEAD'}) async {
-    final parts = ['reflog', 'show', ref, '-n', maxCount.toString()];
-    final result = await _execute(parts.join(' '));
+  Future<Result<List<ReflogEntry>>> getReflog({int maxCount = 50, String ref = 'HEAD'}) async {
+    return runCatchingAsync(() async {
+      final parts = ['reflog', 'show', ref, '-n', maxCount.toString()];
+      final result = await _execute(parts.join(' '));
 
-    if (result.stdout == null) return [];
+      if (result.stdout == null) return [];
 
-    return ReflogParser.parse(result.stdout.toString());
+      return ReflogParser.parse(result.stdout.toString());
+    });
   }
 
   /// Get all reflog entries (no limit)
-  Future<List<ReflogEntry>> getAllReflog({String ref = 'HEAD'}) async {
-    final result = await _execute('reflog show $ref');
+  Future<Result<List<ReflogEntry>>> getAllReflog({String ref = 'HEAD'}) async {
+    return runCatchingAsync(() async {
+      final result = await _execute('reflog show $ref');
 
-    if (result.stdout == null) return [];
+      if (result.stdout == null) return [];
 
-    return ReflogParser.parse(result.stdout.toString());
+      return ReflogParser.parse(result.stdout.toString());
+    });
   }
 
   /// Reset HEAD to a specific reflog entry
   ///
   /// [selector] - The reflog selector (e.g., HEAD@{2})
   /// [mode] - Reset mode (soft, mixed, or hard)
-  Future<void> resetToReflog(String selector, {ResetMode mode = ResetMode.mixed}) async {
-    final parts = ['reset'];
+  Future<Result<void>> resetToReflog(String selector, {ResetMode mode = ResetMode.mixed}) async {
+    return runCatchingAsync(() async {
+      final parts = ['reset'];
 
-    switch (mode) {
-      case ResetMode.soft:
-        parts.add('--soft');
-        break;
-      case ResetMode.mixed:
-        parts.add('--mixed');
-        break;
-      case ResetMode.hard:
-        parts.add('--hard');
-        break;
-    }
+      switch (mode) {
+        case ResetMode.soft:
+          parts.add('--soft');
+          break;
+        case ResetMode.mixed:
+          parts.add('--mixed');
+          break;
+        case ResetMode.hard:
+          parts.add('--hard');
+          break;
+      }
 
-    parts.add(selector);
+      parts.add(selector);
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   // ============================================
@@ -2040,8 +2065,10 @@ class GitService {
   }
 
   /// Reset/stop bisect and return to original HEAD
-  Future<void> resetBisect() async {
-    await _execute('bisect reset');
+  Future<Result<void>> resetBisect() async {
+    return runCatchingAsync(() async {
+      await _execute('bisect reset');
+    });
   }
 
   /// Get current bisect state
@@ -2141,39 +2168,47 @@ class GitService {
   /// [ontoBranch] - The branch to rebase onto
   /// [interactive] - Whether to do an interactive rebase
   /// [preserveMerges] - Whether to preserve merge commits during rebase
-  Future<void> rebaseBranch({
+  Future<Result<void>> rebaseBranch({
     required String ontoBranch,
     bool interactive = false,
     bool preserveMerges = false,
   }) async {
-    final parts = ['rebase'];
+    return runCatchingAsync(() async {
+      final parts = ['rebase'];
 
-    if (interactive) {
-      parts.add('-i');
-    }
+      if (interactive) {
+        parts.add('-i');
+      }
 
-    if (preserveMerges) {
-      parts.add('--rebase-merges');
-    }
+      if (preserveMerges) {
+        parts.add('--rebase-merges');
+      }
 
-    parts.add(ontoBranch);
+      parts.add(ontoBranch);
 
-    await _execute(parts.join(' '));
+      await _execute(parts.join(' '));
+    });
   }
 
   /// Continue rebase after resolving conflicts
-  Future<void> continueRebase() async {
-    await _execute('rebase --continue');
+  Future<Result<void>> continueRebase() async {
+    return runCatchingAsync(() async {
+      await _execute('rebase --continue');
+    });
   }
 
   /// Skip current commit during rebase
-  Future<void> skipRebase() async {
-    await _execute('rebase --skip');
+  Future<Result<void>> skipRebase() async {
+    return runCatchingAsync(() async {
+      await _execute('rebase --skip');
+    });
   }
 
   /// Abort rebase and return to original state
-  Future<void> abortRebase() async {
-    await _execute('rebase --abort');
+  Future<Result<void>> abortRebase() async {
+    return runCatchingAsync(() async {
+      await _execute('rebase --abort');
+    });
   }
 
   /// Get current rebase state

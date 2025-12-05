@@ -251,9 +251,11 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
       final result = await gitService.getStashDiff(widget.stash!.ref);
       return result.unwrap();
     } else if (widget.commitHash != null) {
-      return await gitService.getDiffForCommit(widget.commitHash!, widget.commitFilePath!);
+      final result = await gitService.getDiffForCommit(widget.commitHash!, widget.commitFilePath!);
+      return result.unwrap();
     } else {
-      return await gitService.getDiff(widget.filePath!, staged: widget.staged);
+      final result = await gitService.getDiff(widget.filePath!, staged: widget.staged);
+      return result.unwrap();
     }
   }
 }

@@ -212,7 +212,11 @@ final fileBlameProvider = FutureProvider.family<FileBlame?, String>((ref, filePa
   if (gitService == null) return null;
 
   try {
-    return await gitService.getBlame(filePath);
+    final result = await gitService.getBlame(filePath);
+    return result.when(
+      success: (blame) => blame,
+      failure: (msg, error, stackTrace) => null,
+    );
   } catch (e) {
     // Return null on error (file doesn't exist, etc.)
     return null;
@@ -444,7 +448,8 @@ final reflogProvider = FutureProvider<List<ReflogEntry>>((ref) async {
   if (gitService == null) return [];
 
   try {
-    return await gitService.getReflog();
+    final result = await gitService.getReflog();
+    return result.unwrapOr([]);
   } catch (e) {
     return [];
   }

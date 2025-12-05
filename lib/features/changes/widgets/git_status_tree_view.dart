@@ -605,7 +605,8 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
       throw Exception('No repository open');
     }
 
-    String diff = await gitService.getDiff(widget.filePath, staged: widget.staged);
+    final diffResult = await gitService.getDiff(widget.filePath, staged: widget.staged);
+    String diff = diffResult.unwrap();
     String? fullContent;
 
     // Try to load full file content

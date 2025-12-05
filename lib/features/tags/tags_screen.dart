@@ -14,6 +14,7 @@ import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/tag.dart';
 import '../../core/navigation/navigation_item.dart';
+import '../../core/utils/result_extensions.dart';
 import 'dialogs/advanced_filters_dialog.dart' show AdvancedFiltersDialog, DateRangeFilter;
 import 'dialogs/delete_tags_dialog.dart';
 import 'dialogs/select_remote_dialog.dart';
@@ -693,24 +694,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
   }
 
   Future<void> _fetchTags(BuildContext context) async {
-    try {
-      await ref.read(gitActionsProvider).fetchTags();
-      if (context.mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.snackbarTagsFetched)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarFailedToFetchTags(e.toString())),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+    await ref.read(gitActionsProvider).fetchTags();
+    if (context.mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      context.showSuccessIfMounted(l10n.snackbarTagsFetched);
     }
   }
 
@@ -720,9 +707,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     if (remotes.isEmpty) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.snackbarNoRemotesConfigured)),
-        );
+        context.showErrorIfMounted(l10n.snackbarNoRemotesConfigured);
       }
       return;
     }
@@ -736,24 +721,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             );
 
       if (remoteName != null && context.mounted) {
-        try {
-          await ref.read(gitActionsProvider).pushAllTags(remoteName);
-          if (context.mounted) {
-            final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.snackbarAllTagsPushed(remoteName))),
-            );
-          }
-        } catch (e) {
-          if (context.mounted) {
-            final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.snackbarFailedToPushTags(e.toString())),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
+        await ref.read(gitActionsProvider).pushAllTags(remoteName);
+        if (context.mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          context.showSuccessIfMounted(l10n.snackbarAllTagsPushed(remoteName));
         }
       }
     }
@@ -767,9 +738,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     if (remotes.isEmpty) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.snackbarNoRemotesConfigured)),
-        );
+        context.showErrorIfMounted(l10n.snackbarNoRemotesConfigured);
       }
       return;
     }
@@ -783,35 +752,21 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             );
 
       if (remoteName != null && context.mounted) {
-        try {
-          // Use batch operation to push all selected tags at once
-          await ref.read(gitActionsProvider).pushTags(
-            remoteName,
-            _selectedTags.toList(),
-          );
+        // Use batch operation to push all selected tags at once
+        await ref.read(gitActionsProvider).pushTags(
+          remoteName,
+          _selectedTags.toList(),
+        );
 
-          if (context.mounted) {
-            final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.snackbarTagsPushed(_selectedTags.length, remoteName)),
-              ),
-            );
-            setState(() {
-              _selectionMode = false;
-              _selectedTags.clear();
-            });
-          }
-        } catch (e) {
-          if (context.mounted) {
-            final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.snackbarFailedToPushTags(e.toString())),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
+        if (context.mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          context.showSuccessIfMounted(
+            l10n.snackbarTagsPushed(_selectedTags.length, remoteName),
+          );
+          setState(() {
+            _selectionMode = false;
+            _selectedTags.clear();
+          });
         }
       }
     }
@@ -836,42 +791,28 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     if (result != null && result['confirmed'] == true && context.mounted) {
       final deleteFromRemote = result['deleteFromRemote'] == true;
 
-      try {
-        // Get remote name if deleting from remote
-        String? remoteName;
-        if (deleteFromRemote && hasRemotes) {
-          remoteName = remotes.contains('origin') ? 'origin' : remotes.first;
-        }
+      // Get remote name if deleting from remote
+      String? remoteName;
+      if (deleteFromRemote && hasRemotes) {
+        remoteName = remotes.contains('origin') ? 'origin' : remotes.first;
+      }
 
-        // Use batch operation to delete all selected tags at once
-        await ref.read(gitActionsProvider).deleteTags(
-          _selectedTags.toList(),
-          deleteFromRemote: deleteFromRemote,
-          remoteName: remoteName,
+      // Use batch operation to delete all selected tags at once
+      await ref.read(gitActionsProvider).deleteTags(
+        _selectedTags.toList(),
+        deleteFromRemote: deleteFromRemote,
+        remoteName: remoteName,
+      );
+
+      if (context.mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        context.showSuccessIfMounted(
+          l10n.snackbarTagsDeleted(_selectedTags.length),
         );
-
-        if (context.mounted) {
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.snackbarTagsDeleted(_selectedTags.length)),
-            ),
-          );
-          setState(() {
-            _selectionMode = false;
-            _selectedTags.clear();
-          });
-        }
-      } catch (e) {
-        if (context.mounted) {
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.snackbarFailedToDeleteTags(e.toString())),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+        setState(() {
+          _selectionMode = false;
+          _selectedTags.clear();
+        });
       }
     }
   }

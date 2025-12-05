@@ -25,6 +25,7 @@ import '../../core/workspace/repository_status_provider.dart';
 import '../../core/services/logger_service.dart';
 import '../../core/services/editor_launcher_service.dart';
 import '../../core/navigation/navigation_item.dart';
+import '../../core/utils/result_extensions.dart';
 import '../../shared/dialogs/clone_repository_dialog.dart';
 import '../../shared/dialogs/initialize_repository_dialog.dart';
 import '../../shared/dialogs/edit_remote_url_dialog.dart';
@@ -549,9 +550,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     WorkspaceRepository repo,
   ) async {
     if (!repo.isValidGitRepo) {
-      if (context.mounted) {
-        NotificationService.showError(context, 'Repository is invalid or missing');
-      }
+      context.showErrorIfMounted('Repository is invalid or missing');
       return;
     }
 
@@ -719,44 +718,40 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final gitService = GitService(repository.path, gitExecutablePath: gitExecutablePath);
 
-    try {
-      // Fetch origin remote
-      final remotesResult = await gitService.getRemotes();
-      final remotes = remotesResult.unwrap();
-      final originRemote = remotes.firstWhere(
-        (remote) => remote.name == 'origin',
-        orElse: () => throw Exception('No origin remote found'),
-      );
+    // Fetch origin remote
+    final remotesResult = await gitService.getRemotes();
+    if (!context.mounted) return;
+    final remotes = remotesResult.unwrapOrNotify(
+      context,
+      errorPrefix: 'Failed to fetch remotes',
+    );
+    final originRemote = remotes.firstWhere(
+      (remote) => remote.name == 'origin',
+      orElse: () => throw Exception('No origin remote found'),
+    );
 
-      if (!context.mounted) return;
+    if (!context.mounted) return;
 
-      // Show edit dialog
-      final newUrl = await showDialog<String>(
-        context: context,
-        builder: (context) => EditRemoteUrlDialog(remote: originRemote),
-      );
+    // Show edit dialog
+    final newUrl = await showDialog<String>(
+      context: context,
+      builder: (context) => EditRemoteUrlDialog(remote: originRemote),
+    );
 
-      if (newUrl == null || !context.mounted) return;
+    if (newUrl == null || !context.mounted) return;
 
-      // Update remote URL
-      await gitService.setRemoteUrl('origin', newUrl);
-
-      if (context.mounted) {
-        NotificationService.showSuccess(
-          context,
-          'Remote URL updated successfully',
-        );
+    // Update remote URL
+    final result = await gitService.setRemoteUrl('origin', newUrl);
+    if (!context.mounted) return;
+    result.executeWithNotification(
+      context,
+      successMessage: 'Remote URL updated successfully',
+      errorPrefix: 'Failed to edit remote URL',
+      onSuccess: () {
         // Refresh repository status
         ref.read(workspaceRepositoryStatusProvider.notifier).refreshAll();
-      }
-    } catch (e) {
-      if (context.mounted) {
-        NotificationService.showError(
-          context,
-          'Failed to edit remote URL: $e',
-        );
-      }
-    }
+      },
+    );
   }
 
   /// Open repository folder in text editor
@@ -768,12 +763,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final editor = ref.read(preferredTextEditorProvider);
     if (editor == null || editor.isEmpty) {
       Logger.warning('No text editor configured in settings');
-      if (context.mounted) {
-        NotificationService.showWarning(
-          context,
-          'No text editor configured. Please set a text editor in Settings.',
-        );
-      }
+      context.showErrorIfMounted(
+        'No text editor configured. Please set a text editor in Settings.',
+      );
       return;
     }
 
@@ -785,9 +777,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       );
     } catch (e) {
       Logger.error('Error opening editor: $editor with folder: ${repository.path}', e);
-      if (context.mounted) {
-        NotificationService.showError(
-          context,
+      if (mounted) {
+        context.showErrorIfMounted(
           'Failed to open editor: $editor\nFolder: ${repository.path}\nError: $e',
         );
       }

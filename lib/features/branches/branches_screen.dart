@@ -10,7 +10,6 @@ import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/branch.dart';
 import '../../shared/widgets/widgets.dart';
-import '../../core/services/services.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/workspace/models/workspace_repository.dart';
 import '../repositories/dialogs/create_branch_dialog.dart';
@@ -199,20 +198,11 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
     );
 
     if (result != null && context.mounted) {
-      try {
-        // Create the branch using the full branch name (includes prefix)
-        await ref.read(gitActionsProvider).createBranch(
-              result.fullBranchName,
-              checkout: result.checkout,
-            );
-      } catch (e) {
-        if (context.mounted) {
-          NotificationService.showError(
-            context,
-            'Failed to create branch: $e',
+      // Create the branch using the full branch name (includes prefix)
+      await ref.read(gitActionsProvider).createBranch(
+            result.fullBranchName,
+            checkout: result.checkout,
           );
-        }
-      }
     }
   }
 }

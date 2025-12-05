@@ -16,6 +16,7 @@ import '../../core/git/models/file_status.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../core/services/services.dart';
 import '../../core/utils/windows_filename_validator.dart';
+import '../../core/utils/result_extensions.dart';
 import 'widgets/commit_dialog.dart';
 import 'widgets/changes_clean_state.dart';
 import 'widgets/changes_error_state.dart';
@@ -257,14 +258,11 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       dialogTitle: 'Select Git Repository',
     );
 
-    if (result != null && context.mounted) {
+    if (result != null) {
       final success = await ref.read(gitActionsProvider).openRepository(result);
 
-      if (!success && context.mounted) {
-        NotificationService.showError(
-          context,
-          'Not a valid Git repository',
-        );
+      if (!success && mounted) {
+        context.showErrorIfMounted('Not a valid Git repository');
       }
     }
   }

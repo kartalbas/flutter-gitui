@@ -12,6 +12,7 @@ import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/stash.dart';
 import '../../core/navigation/navigation_item.dart';
+import '../../core/utils/result_extensions.dart';
 import 'dialogs/create_stash_dialog.dart';
 import 'dialogs/clear_all_stashes_dialog.dart';
 import 'widgets/stash_list_tile.dart';
@@ -149,34 +150,23 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
     );
 
     if (result != null && context.mounted) {
-      try {
-        final message = result['message'] as String;
-        final includeUntracked = result['includeUntracked'] as bool;
-        final keepIndex = result['keepIndex'] as bool;
-        final stashAllFiles = result['stashAllFiles'] as bool;
-        final selectedFiles = result['selectedFiles'] as List<String>;
+      final message = result['message'] as String;
+      final includeUntracked = result['includeUntracked'] as bool;
+      final keepIndex = result['keepIndex'] as bool;
+      final stashAllFiles = result['stashAllFiles'] as bool;
+      final selectedFiles = result['selectedFiles'] as List<String>;
 
-        await ref.read(gitActionsProvider).createStash(
-          message: message.isEmpty ? null : message,
-          includeUntracked: includeUntracked,
-          keepIndex: keepIndex,
-          files: stashAllFiles ? null : selectedFiles,
+      await ref.read(gitActionsProvider).createStash(
+        message: message.isEmpty ? null : message,
+        includeUntracked: includeUntracked,
+        keepIndex: keepIndex,
+        files: stashAllFiles ? null : selectedFiles,
+      );
+
+      if (mounted) {
+        context.showSuccessIfMounted(
+          AppLocalizations.of(context)!.stashCreatedSuccess,
         );
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.stashCreatedSuccess)),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.createStashError(e.toString())),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
       }
     }
   }
@@ -188,22 +178,11 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
     );
 
     if (confirmed == true && context.mounted) {
-      try {
-        await ref.read(gitActionsProvider).clearStashes();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(AppLocalizations.of(context)!.allStashesClearedSuccess)),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.clearStashesError(e.toString())),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+      await ref.read(gitActionsProvider).clearStashes();
+      if (mounted) {
+        context.showSuccessIfMounted(
+          AppLocalizations.of(context)!.allStashesClearedSuccess,
+        );
       }
     }
   }

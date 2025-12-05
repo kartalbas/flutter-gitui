@@ -17,10 +17,10 @@ import '../../core/git/models/commit.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../shared/widgets/multi_select_mixin.dart';
 import '../../core/navigation/navigation_item.dart';
+import '../../core/utils/result_extensions.dart';
 import 'widgets/commit_list_item.dart';
 import 'widgets/commit_details_panel.dart';
 import '../tags/dialogs/create_tag_dialog.dart';
-import '../../core/services/notification_service.dart';
 import 'widgets/file_tree_panel.dart';
 import 'widgets/history_empty_states.dart';
 import 'providers/history_search_provider.dart';
@@ -643,30 +643,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       final tagName = result['name'] as String;
       if (tagName.isEmpty) return;
 
-      try {
-        if (result['annotated'] == true) {
-          await ref.read(gitActionsProvider).createAnnotatedTag(
-            tagName,
-            message: result['message'] as String,
-            commitHash: commit.hash,
-          );
-        } else {
-          await ref.read(gitActionsProvider).createLightweightTag(
-            tagName,
-            commitHash: commit.hash,
-          );
-        }
-
-        // Refresh tags provider
-        ref.invalidate(tagsProvider);
-      } catch (e) {
-        if (!mounted || !context.mounted) return;
-        final l10n = AppLocalizations.of(context)!;
-        NotificationService.showError(
-          context,
-          l10n.snackbarFailedToCreateTag(e.toString()),
+      if (result['annotated'] == true) {
+        await ref.read(gitActionsProvider).createAnnotatedTag(
+          tagName,
+          message: result['message'] as String,
+          commitHash: commit.hash,
+        );
+      } else {
+        await ref.read(gitActionsProvider).createLightweightTag(
+          tagName,
+          commitHash: commit.hash,
         );
       }
+
+      // Refresh tags provider
+      ref.invalidate(tagsProvider);
     }
   }
 
@@ -678,31 +669,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     if (selectedHashes.isEmpty) return;
 
-    try {
-      // Cherry-pick each commit in order
-      for (final hash in selectedHashes) {
-        await ref.read(gitActionsProvider).cherryPickCommit(hash);
-      }
-
-      // Refresh providers to update UI
-      ref.invalidate(commitHistoryProvider);
-      ref.invalidate(localBranchesProvider);
-      ref.invalidate(currentBranchProvider);
-
-      // Clear selection
-      _selectionManager.clearSelection(() => setState(() {}));
-    } catch (e) {
-      if (!mounted) return;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.cherryPickFailed(e.toString()),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+    // Cherry-pick each commit in order
+    for (final hash in selectedHashes) {
+      await ref.read(gitActionsProvider).cherryPickCommit(hash);
     }
+
+    // Refresh providers to update UI
+    ref.invalidate(commitHistoryProvider);
+    ref.invalidate(localBranchesProvider);
+    ref.invalidate(currentBranchProvider);
+
+    // Clear selection
+    _selectionManager.clearSelection(() => setState(() {}));
   }
 
   Future<void> _performRevert(
@@ -713,28 +691,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     final hash = _selectionManager.selectedItems.first;
 
-    try {
-      await ref.read(gitActionsProvider).revertCommit(hash);
+    await ref.read(gitActionsProvider).revertCommit(hash);
 
-      // Refresh providers to update UI
-      ref.invalidate(commitHistoryProvider);
-      ref.invalidate(localBranchesProvider);
-      ref.invalidate(currentBranchProvider);
+    // Refresh providers to update UI
+    ref.invalidate(commitHistoryProvider);
+    ref.invalidate(localBranchesProvider);
+    ref.invalidate(currentBranchProvider);
 
-      // Clear selection
-      _selectionManager.clearSelection(() => setState(() {}));
-    } catch (e) {
-      if (!mounted) return;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.revertFailed(e.toString()),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-    }
+    // Clear selection
+    _selectionManager.clearSelection(() => setState(() {}));
   }
 
   Future<void> _performReset(
@@ -750,69 +715,40 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final mode = await _showResetModeDialog(context, commit);
     if (mode == null) return;
 
-    try {
-      await ref.read(gitActionsProvider).resetToCommit(hash, mode: mode);
+    await ref.read(gitActionsProvider).resetToCommit(hash, mode: mode);
 
-      // Refresh providers to update UI
-      ref.invalidate(commitHistoryProvider);
-      ref.invalidate(localBranchesProvider);
-      ref.invalidate(currentBranchProvider);
+    // Refresh providers to update UI
+    ref.invalidate(commitHistoryProvider);
+    ref.invalidate(localBranchesProvider);
+    ref.invalidate(currentBranchProvider);
 
-      // Clear selection
-      _selectionManager.clearSelection(() => setState(() {}));
+    // Clear selection
+    _selectionManager.clearSelection(() => setState(() {}));
 
-      // After reset, ask if user wants to force push to remote
-      if (!mounted || !context.mounted) return;
+    // After reset, ask if user wants to force push to remote
+    if (!mounted || !context.mounted) return;
 
-      final shouldForcePush = await showDialog<bool>(
-        context: context,
-        builder: (context) => const ForcePushDialog(),
+    final shouldForcePush = await showDialog<bool>(
+      context: context,
+      builder: (context) => const ForcePushDialog(),
+    );
+
+    if (shouldForcePush == true) {
+      // Force push to remote
+      final currentBranch = ref.read(currentBranchProvider).value;
+      if (currentBranch == null) return;
+
+      await ref.read(gitActionsProvider).pushRemote(
+        force: true,
+        remote: 'origin',
+        branch: currentBranch,
       );
 
-      if (shouldForcePush == true) {
-        // Force push to remote
-        final currentBranch = ref.read(currentBranchProvider).value;
-        if (currentBranch == null) return;
-
-        try {
-          await ref.read(gitActionsProvider).pushRemote(
-            force: true,
-            remote: 'origin',
-            branch: currentBranch,
-          );
-
-          if (!mounted || !context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context)!.forcePushSuccessful,
-              ),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
-        } catch (e) {
-          if (!mounted || !context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context)!.forcePushFailed(e.toString()),
-              ),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+      if (mounted) {
+        context.showSuccessIfMounted(
+          AppLocalizations.of(context)!.forcePushSuccessful,
+        );
       }
-    } catch (e) {
-      if (!mounted) return;
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.resetFailed(e.toString()),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
     }
   }
 

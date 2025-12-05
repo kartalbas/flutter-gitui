@@ -137,6 +137,16 @@ class BranchListTile extends ConsumerWidget {
             ),
             onTap: () => _mergeBranch(context, ref),
           ),
+        // Checkout option for remote branches
+        if (!isLocal)
+          PopupMenuItem(
+            value: 'checkout',
+            child: MenuItemContent(
+              icon: PhosphorIconsRegular.arrowRight,
+              label: AppLocalizations.of(context)!.checkout,
+            ),
+            onTap: () => _checkoutBranch(context, ref),
+          ),
         if (!branch.isCurrent && !branch.isProtected)
           PopupMenuItem(
             value: 'delete',

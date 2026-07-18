@@ -1,0 +1,15 @@
+name: flutter_gitui_lint
+description: Custom lint rules for Flutter GitUI to enforce Base* component usage and design system consistency
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  analyzer: ^8.0.0
+  custom_lint_builder: ^0.8.0
+
+dev_dependencies:
+  custom_lint: ^0.8.1
+  lints: ^5.0.0

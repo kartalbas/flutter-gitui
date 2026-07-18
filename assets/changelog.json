@@ -1,0 +1,10 @@
+{
+  "releases": [
+    {
+      "version": "0.1.0",
+      "date": "2025-12-05T14:06:05Z",
+      "commit": "2a9ecb7",
+      "changelog": "# Changelog\n\n### ✨ Features\n- Add checkout menu item for remote branches\n- Add force delete button for unmerged branches with checkboxes in bulk delete dialog\n- Add commit hash to app build info and About dialog\n- Add \"open folder in editor\" action for repositories\n\n### 🐛 Bug Fixes\n- Convert variable fonts to static fonts for offline compatibility\n- Include commit hash in update manifest version field\n- Load and save \"Don't show on startup\" checkbox state from config\n- Centralize editor launcher and respect \"Don't show on startup\" setting\n- Replace pdfx with external PDF viewer\n- Resolve editor launcher error on Windows\n\n### 🔧 Improvements\n- Migrate git service operations to Result<T> pattern for standardized error handling\n- Add Result<T> UI extensions\n- Improve config folder structure\n\n### 📝 Documentation\n- Add PDF generation installation instructions"
+    }
+  ]
+}

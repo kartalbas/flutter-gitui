@@ -1,0 +1,55 @@
+name: flutter-gitui
+version: '${VERSION}'
+summary: Modern Git GUI built with Flutter
+description: |
+  A modern, cross-platform Git GUI that features:
+  - Material Design 3 for a beautiful, consistent UI
+  - Command palette for quick access to all Git operations
+  - External diff/merge tool integration (VS Code, Beyond Compare, etc.)
+  - Complete Git support (commit, pull, push, merge, rebase, bisect, etc.)
+
+  Flutter GitUI provides an intuitive and efficient interface for managing Git
+  repositories with support for all major Git operations including staging,
+  committing, branching, merging, rebasing, and more.
+
+base: core22
+confinement: classic
+grade: stable
+icon: assets/icons/app_icon.svg
+license: Proprietary
+website: https://github.com/simetrix/flutter-gitui
+source-code: https://github.com/simetrix/flutter-gitui
+issues: https://github.com/simetrix/flutter-gitui/issues
+contact: kartalbas@gmail.com
+
+architectures:
+  - build-on: amd64
+    build-for: amd64
+
+apps:
+  flutter-gitui:
+    command: bin/flutter-gitui
+    desktop: meta/gui/flutter-gitui.desktop
+    common-id: io.github.simetrix.flutter-gitui
+    environment:
+      # Flutter/GTK environment
+      GDK_BACKEND: x11,wayland
+      # Git configuration
+      GIT_TERMINAL_PROMPT: '0'
+
+parts:
+  flutter-gitui:
+    plugin: dump
+    source: bundle
+    organize:
+      flutter-gitui: bin/flutter-gitui
+      linux/lib: lib
+      linux/data: data
+    override-build: |
+      # Run default dump plugin behavior
+      snapcraftctl build
+
+      # Copy desktop file and icon from project root
+      mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui
+      cp /project/flutter-gitui.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
+      cp /project/assets/icons/app_icon.svg $SNAPCRAFT_PART_INSTALL/meta/gui/

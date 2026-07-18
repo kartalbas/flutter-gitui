@@ -1,0 +1,5 @@
+FROM ghcr.io/canonical/snapcraft:8_core24
+
+WORKDIR /project
+
+# The base image already has snapcraft as entrypoint

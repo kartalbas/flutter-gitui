@@ -1,0 +1,11 @@
+name: flutter_gitui_updater
+description: Standalone updater for Flutter GitUI
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  archive: ^3.6.1
+  path: ^1.9.0

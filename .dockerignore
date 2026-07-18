@@ -1,0 +1,24 @@
+# Exclude all build artifacts and caches
+build/
+.dart_tool/
+.packages
+
+# Exclude Windows-specific files
+windows/flutter/ephemeral/
+
+# Exclude release artifacts (but keep source like updater)
+release/artifacts/
+
+# Exclude Git
+.git/
+.gitignore
+
+# Exclude IDE
+.vscode/
+.idea/
+*.iml
+
+# Exclude temp files
+*.log
+*.tmp
+.env

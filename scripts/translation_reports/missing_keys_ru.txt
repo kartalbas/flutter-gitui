@@ -1,0 +1,13 @@
+Missing translations for RU
+Coverage: 99.8%
+Missing: 2 keys
+================================================================================
+
+Key: language
+EN:  Language
+RU:  [MISSING - NEEDS TRANSLATION]
+
+Key: languageDescription
+EN:  Select your preferred language
+RU:  [MISSING - NEEDS TRANSLATION]
+

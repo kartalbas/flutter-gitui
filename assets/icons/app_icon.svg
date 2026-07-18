@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7C3AED"/>
+      <stop offset="100%" style="stop-color:#3B82F6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded square -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#grad)"/>
+  <!-- Git branch lines -->
+  <g stroke="#fff" stroke-width="28" stroke-linecap="round" fill="none">
+    <!-- Main vertical line -->
+    <line x1="256" y1="128" x2="256" y2="384"/>
+    <!-- Branch line going right -->
+    <path d="M256 220 Q320 220 340 160"/>
+    <!-- Merge line from left -->
+    <path d="M172 352 Q200 292 256 292"/>
+  </g>
+  <!-- Commit nodes -->
+  <g fill="#fff">
+    <circle cx="256" cy="128" r="32"/>
+    <circle cx="256" cy="256" r="32"/>
+    <circle cx="256" cy="384" r="32"/>
+    <circle cx="340" cy="160" r="28"/>
+    <circle cx="172" cy="352" r="28"/>
+  </g>
+</svg>

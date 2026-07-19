@@ -5,6 +5,10 @@ build/
 
 # Exclude Windows-specific files
 windows/flutter/ephemeral/
+# Host-generated plugin symlinks resolve to absolute Pub cache paths that do not
+# exist inside the container; copying them in breaks CMake's add_subdirectory.
+linux/flutter/ephemeral/
+macos/Flutter/ephemeral/
 
 # Exclude release artifacts (but keep source like updater)
 release/artifacts/

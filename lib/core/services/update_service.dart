@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:path/path.dart' as path;
 import 'logger_service.dart';
 import '../utils/result.dart';
@@ -17,6 +18,12 @@ class UpdateInfo {
   final int fileSize;
   final String platform;
 
+  /// SHA-256 of the published archive, lower-case hex.
+  ///
+  /// Null when the manifest predates digest publishing. The updater refuses to
+  /// install in that case rather than trusting an unverified download.
+  final String? sha256;
+
   const UpdateInfo({
     required this.version,
     required this.downloadUrl,
@@ -24,6 +31,7 @@ class UpdateInfo {
     required this.releaseDate,
     required this.fileSize,
     required this.platform,
+    this.sha256,
   });
 
   factory UpdateInfo.fromJson(Map<String, dynamic> json) {
@@ -34,6 +42,7 @@ class UpdateInfo {
       releaseDate: DateTime.parse(json['releaseDate'] as String),
       fileSize: json['fileSize'] as int? ?? 0,
       platform: json['platform'] as String? ?? 'unknown',
+      sha256: json['sha256'] as String?,
     );
   }
 
@@ -137,6 +146,7 @@ class UpdateService {
 
         final downloadUrl = '$_baseUrl/$downloadFileName';
         final fileSize = platformData?['fileSize'] as int? ?? 0;
+        final sha256Digest = platformData?['sha256'] as String?;
 
         // Get changelog
         final String changelog;
@@ -156,6 +166,7 @@ class UpdateService {
           releaseDate: DateTime.parse(manifestData['releaseDate'] as String),
           fileSize: fileSize,
           platform: platform,
+          sha256: sha256Digest,
         );
       } else {
         Logger.info('✓ App is up to date ($fullVersion >= $latestVersion)');
@@ -198,7 +209,19 @@ class UpdateService {
       Logger.info('Downloading update from: ${updateInfo.downloadUrl}');
 
       // Get temporary directory
+      // Refuse to download at all when the manifest publishes no digest: the
+      // archive would be installed unverified, so whoever can write to the
+      // release storage would get code execution on every client.
+      final expected = updateInfo.sha256?.trim().toLowerCase();
+      if (expected == null || expected.length != 64) {
+        throw Exception(
+          'Update rejected: the release manifest publishes no SHA-256 digest, '
+          'so the download cannot be verified.',
+        );
+      }
+
       final tempDir = await getTemporaryDirectory();
+      // basename() so a crafted manifest cannot walk out of the temp directory.
       final fileName = path.basename(Uri.parse(updateInfo.downloadUrl).path);
       final filePath = path.join(tempDir.path, fileName);
 
@@ -228,7 +251,26 @@ class UpdateService {
 
       await sink.close();
 
-      Logger.info('Update downloaded to: $filePath');
+      // Verify before the archive is ever handed to the installer.
+      final actual = (await crypto.sha256.bind(file.openRead()).first)
+          .toString()
+          .toLowerCase();
+      if (actual != expected) {
+        Logger.error(
+          'Update digest mismatch: expected $expected, got $actual',
+        );
+        try {
+          await file.delete();
+        } catch (_) {
+          // Best effort; the mismatch is what matters.
+        }
+        throw Exception(
+          'Update rejected: the downloaded archive does not match the '
+          'published SHA-256 digest.',
+        );
+      }
+
+      Logger.info('Update downloaded and verified: $filePath');
       return filePath;
     });
   }

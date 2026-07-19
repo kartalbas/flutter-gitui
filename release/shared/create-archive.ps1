@@ -117,10 +117,16 @@ function New-UpdateManifest {
         platform = $Platform
     }
 
+    # Publish a digest of the archive. Without it the updater installs whatever
+    # the download yields, so anyone able to write to the release storage gets
+    # code execution on every client.
+    $sha256 = (Get-FileHash -Path $ArchiveInfo.FilePath -Algorithm SHA256).Hash.ToLowerInvariant()
+
     # Add platform-specific download info
     $manifestData.$Platform = @{
         fileName = $ArchiveInfo.FileName
         fileSize = $ArchiveInfo.SizeBytes
+        sha256   = $sha256
         platform = $Platform
     }
 

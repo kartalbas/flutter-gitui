@@ -791,10 +791,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     if (!mounted || !context.mounted) return;
 
-    final shouldForcePush = await showDialog<bool>(
-      context: context,
-      builder: (context) => const ForcePushDialog(),
-    );
+    // The dialog is the only barrier before remote history is overwritten, so
+    // it is skipped only when the user explicitly turned the setting off.
+    final shouldForcePush = ref.read(confirmForcePushProvider)
+        ? await showDialog<bool>(
+            context: context,
+            builder: (context) => const ForcePushDialog(),
+          )
+        : true;
 
     if (shouldForcePush == true) {
       // The tracked remote need not be named "origin", and the upstream branch

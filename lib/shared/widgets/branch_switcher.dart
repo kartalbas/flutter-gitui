@@ -15,6 +15,7 @@ import '../../core/services/notification_service.dart';
 import '../../features/branches/dialogs/delete_branch_dialog.dart';
 import '../../features/branches/dialogs/rename_branch_dialog.dart';
 import '../../core/config/app_config.dart';
+import '../../core/config/config_providers.dart';
 
 /// Branch switcher widget - displays current branch and allows switching
 class BranchSwitcher extends ConsumerWidget {
@@ -267,6 +268,19 @@ class BranchSwitcher extends ConsumerWidget {
     );
 
     if (result != null && result.selectedBranches.isNotEmpty && context.mounted) {
+      // Force deleting discards unmerged commits the user has no obvious way to
+      // recover, so the confirm-delete setting gates the whole batch.
+      if (ref.read(confirmDeleteProvider)) {
+        final l10n = AppLocalizations.of(context)!;
+        final message = l10n.deleteAllUnprotectedBranchesConfirm(result.selectedBranches.length);
+        final confirmed = await showConfirmationDialog(
+          context: context,
+          title: l10n.deleteAllUnprotectedBranches,
+          message: result.force ? '$message\n\n${l10n.forceDeleteWarning}' : message,
+          confirmText: l10n.deleteAll,
+        );
+        if (!confirmed || !context.mounted) return;
+      }
       await _deleteAllUnprotectedBranches(context, ref, result.selectedBranches, force: result.force);
     }
   }

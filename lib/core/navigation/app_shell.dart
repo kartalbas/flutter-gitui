@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,6 +19,7 @@ import '../../shared/widgets/progress_overlay.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_badge.dart';
+import '../../shared/components/base_dialog.dart';
 import '../git/git_command_log_provider.dart';
 import '../git/git_providers.dart';
 import '../config/config_providers.dart' hide commandLogPanelVisibleProvider;
@@ -89,6 +92,40 @@ class _AppShellState extends ConsumerState<AppShell> {
   bool _hasShownConfigLoadWarning = false;
   bool _hasShownGitPathWarning = false;
   bool _whatsNewScheduled = false;
+  Timer? _autoFetchTimer;
+  Duration? _autoFetchPeriod;
+
+  @override
+  void dispose() {
+    _autoFetchTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Keeps the background fetch timer in sync with the behavior settings.
+  ///
+  /// The active period is remembered because the shell rebuilds constantly and
+  /// restarting the timer on every rebuild would keep pushing the next fetch
+  /// out of reach, so auto-fetch would never actually fire.
+  void _syncAutoFetchTimer(bool enabled, int intervalMinutes) {
+    final period = enabled && intervalMinutes > 0
+        ? Duration(minutes: intervalMinutes)
+        : null;
+    if (period == _autoFetchPeriod) return;
+    _autoFetchPeriod = period;
+    _autoFetchTimer?.cancel();
+    _autoFetchTimer =
+        period == null ? null : Timer.periodic(period, (_) => _autoFetch());
+  }
+
+  Future<void> _autoFetch() async {
+    if (ref.read(currentRepositoryPathProvider) == null) return;
+    try {
+      await ref.read(gitActionsProvider).fetchRemote();
+    } catch (_) {
+      // A fetch the user did not ask for must stay invisible: an unreachable
+      // remote would otherwise raise the same error every single interval.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +152,13 @@ class _AppShellState extends ConsumerState<AppShell> {
       // Initialize workspace repository watchers for ALL repositories
       // This watches all repositories in the workspace and triggers validation on file changes
       ref.watch(workspaceRepositoryWatchersProvider);
+
+      // Auto-fetch is a background behavior of the whole app, so it is driven
+      // from the shell instead of a screen that may not be open.
+      _syncAutoFetchTimer(
+        ref.watch(autoFetchProvider),
+        ref.watch(autoFetchIntervalProvider),
+      );
     }
 
     // Auto-navigate to settings if required settings are missing
@@ -800,6 +844,19 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
 
     if (!context.mounted) return;
+
+    // The toolbar button pushes every selected repository at once, which is the
+    // operation the confirm-push setting is meant to guard.
+    if (ref.read(confirmPushProvider)) {
+      final l10n = AppLocalizations.of(context)!;
+      final confirmed = await showConfirmationDialog(
+        context: context,
+        title: l10n.confirmPush,
+        message: l10n.pushToRemote,
+        confirmText: l10n.push,
+      );
+      if (!confirmed || !mounted) return;
+    }
 
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final service = BatchOperationsService(gitExecutablePath: gitExecutablePath);

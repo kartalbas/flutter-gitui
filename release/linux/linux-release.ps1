@@ -211,6 +211,17 @@ $currentStep++
 Write-Log "[Step $currentStep/$totalSteps] Building Linux binaries (Docker)..." "Yellow"
 
 try {
+    # The Flutter build bakes assets/changelog.json into the bundle, so the
+    # entry generated for THIS release has to be in place before the build
+    # runs. Copying it afterwards shipped every release with the previous
+    # release's notes.
+    $platformChangelog = Join-Path $projectRoot "assets/changelog-linux.json"
+    $mainChangelog = Join-Path $projectRoot "assets/changelog.json"
+    if (Test-Path $platformChangelog) {
+        Copy-Item $platformChangelog $mainChangelog -Force
+        Write-Log "  [OK] Changelog staged for the build" "Green"
+    }
+
     $buildLogPath = Join-Path $artifactsParent "flutter-gitui-v$version-linux-build.log"
 
     $linuxBuildResult = & (Join-Path $scriptDir "build-linux.ps1") `
@@ -276,10 +287,9 @@ try {
     $platformChangelogFile = Join-Path $projectRoot "assets/changelog-linux.json"
     $mainChangelogFile = Join-Path $projectRoot "assets/changelog.json"
 
-    # Copy platform-specific changelog to main changelog.json
-    if (Test-Path $platformChangelogFile) {
-        Copy-Item $platformChangelogFile $mainChangelogFile -Force
-        Write-Log "  [OK] Copied changelog-linux.json to changelog.json" "Green"
+    # The copy already happened before the build; see the build step.
+    if (-not (Test-Path $mainChangelogFile)) {
+        Write-Log "  [WARN] changelog.json missing after build" "Yellow"
     }
 
     # Remove other platform changelogs

@@ -69,7 +69,14 @@ jobs:
         run: flutter pub get
 
       - name: Build ${{ matrix.platform }}
-        run: flutter build ${{ matrix.platform }} --release
+        # Bash on every runner (Windows included) so the ${GITHUB_SHA::7} substring
+        # expansion is portable; without these defines BuildInfo falls back to
+        # 'unknown' and the shipped archive reports itself as "Build: dev".
+        shell: bash
+        run: |
+          flutter build ${{ matrix.platform }} --release \
+            --dart-define=BUILD_COMMIT="${GITHUB_SHA::7}" \
+            --dart-define=BUILD_DATE="$(date -u +%Y-%m-%d)"
 
       # Fails loudly if a future runner-image bump lifts the required glibc above
       # the core22 floor, instead of shipping a binary that refuses to start on

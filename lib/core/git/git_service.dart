@@ -405,14 +405,14 @@ class GitService {
   /// Unstage a file
   Future<Result<void>> unstageFile(String filePath) async {
     return runCatchingAsync(() async {
-      await _execute('reset HEAD "$filePath"', throwOnError: false);
+      await _execute('reset HEAD "$filePath"');
     });
   }
 
   /// Unstage all files
   Future<Result<void>> unstageAll() async {
     return runCatchingAsync(() async {
-      await _execute('reset HEAD', throwOnError: false);
+      await _execute('reset HEAD');
     });
   }
 

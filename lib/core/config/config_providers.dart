@@ -50,7 +50,19 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     try {
       // Load from YAML
       final configResult = await ConfigService.load();
-      var config = configResult.unwrapOr(AppConfig.defaults);
+      // unwrapOr() hid the difference between "no config yet" and "the config
+      // is damaged". Both yielded defaults and left _loadFailed false, so the
+      // next save wrote those defaults over the user's repositories and
+      // workspaces. Track the failure explicitly instead.
+      var loadFailed = false;
+      var config = configResult.when(
+        success: (loaded) => loaded,
+        failure: (message, error, stackTrace) {
+          Logger.error('[CONFIG] Configuration could not be read: $message');
+          loadFailed = true;
+          return AppConfig.defaults;
+        },
+      );
       Logger.debug('After ConfigService.load() - repositories count: ${config.workspace.repositories.length}');
       Logger.debug('After ConfigService.load() - workspaces count: ${config.workspace.workspaces.length}');
       Logger.debug('[CONFIG] Git executable path from config: ${config.git.executablePath ?? "null"}');
@@ -65,14 +77,16 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       config = workspaceValidation.config;
       Logger.debug('After _validateWorkspace() - repositories count: ${config.workspace.repositories.length}');
       Logger.debug('After _validateWorkspace() - workspaces count: ${config.workspace.workspaces.length}');
-      if (workspaceValidation.needsSave) {
+      // Never write back while the file could not be read: that would replace
+      // a damaged but recoverable config with empty defaults.
+      if (workspaceValidation.needsSave && !loadFailed) {
         Logger.config('Saving workspace validation changes to config');
         final saveResult = await ConfigService.save(config);
         saveResult.unwrap(); // Throw on error
       }
 
       state = config;
-      _loadFailed = false;
+      _loadFailed = loadFailed;
       Logger.info('[CONFIG] Configuration loaded successfully (gitPath=${config.git.executablePath ?? "null"})');
     } catch (e, stack) {
       Logger.error('Error loading config', e, stack);

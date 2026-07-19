@@ -517,25 +517,25 @@ class TagListTile extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       // Capture localization strings before async operations
       final l10n = AppLocalizations.of(context)!;
+      // Deleting the tag refreshes the list and unmounts this very tile, after
+      // which WidgetRef throws. The notifier outlives the tile, so hold it
+      // directly to guarantee the progress overlay is always cleared.
+      final progress = ref.read(progressProvider.notifier);
 
       try {
         // Start progress tracking
-        ref
-            .read(progressProvider.notifier)
-            .startOperation(
-              willDeleteFromRemote
-                  ? l10n.progressDeletingTagLocalRemote
-                  : l10n.progressDeletingTag,
-              willDeleteFromRemote ? 3 : 2,
-            );
+        progress.startOperation(
+          willDeleteFromRemote
+              ? l10n.progressDeletingTagLocalRemote
+              : l10n.progressDeletingTag,
+          willDeleteFromRemote ? 3 : 2,
+        );
 
         // Delete local tag (this will auto-refresh)
-        ref
-            .read(progressProvider.notifier)
-            .updateProgress(
-              1,
-              statusMessage: l10n.progressDeletingTagLocally(tag.name),
-            );
+        progress.updateProgress(
+          1,
+          statusMessage: l10n.progressDeletingTagLocally(tag.name),
+        );
         await ref.read(gitActionsProvider).deleteTag(tag.name);
 
         // Delete from remote if tag was synced (this will also auto-refresh)
@@ -545,41 +545,42 @@ class TagListTile extends ConsumerWidget {
           final remoteName = remotes.contains('origin')
               ? 'origin'
               : remotes.first;
-          ref
-              .read(progressProvider.notifier)
-              .updateProgress(
-                2,
-                statusMessage: l10n.progressDeletingTagFromRemote(
-                  tag.name,
-                  remoteName,
-                ),
-              );
+          progress.updateProgress(
+            2,
+            statusMessage: l10n.progressDeletingTagFromRemote(
+              tag.name,
+              remoteName,
+            ),
+          );
           await ref
               .read(gitActionsProvider)
               .deleteRemoteTag(remoteName, tag.name);
         }
 
         // Force a final refresh to ensure UI updates
-        ref
-            .read(progressProvider.notifier)
-            .updateProgress(
-              willDeleteFromRemote ? 3 : 2,
-              statusMessage: l10n.progressUpdatingList,
-            );
+        progress.updateProgress(
+          willDeleteFromRemote ? 3 : 2,
+          statusMessage: l10n.progressUpdatingList,
+        );
 
         // Wait a bit for git operations to complete
         await Future.delayed(const Duration(milliseconds: 100));
 
-        // Manually invalidate all related providers
-        ref.invalidate(tagsProvider);
-        ref.invalidate(localOnlyTagsProvider);
-        ref.invalidate(remoteOnlyTagsProvider);
+        // The delete already refreshed the list, which unmounts this tile once
+        // its tag is gone; the invalidation is then redundant and ref would
+        // throw, taking the progress completion below down with it.
+        if (context.mounted) {
+          // Manually invalidate all related providers
+          ref.invalidate(tagsProvider);
+          ref.invalidate(localOnlyTagsProvider);
+          ref.invalidate(remoteOnlyTagsProvider);
+        }
 
         // Complete progress
-        ref.read(progressProvider.notifier).completeOperation();
+        progress.completeOperation();
       } catch (e) {
         // Complete progress on error
-        ref.read(progressProvider.notifier).completeOperation();
+        progress.completeOperation();
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

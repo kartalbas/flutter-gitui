@@ -38,7 +38,7 @@ release/
 ├── shared/                         # Cross-platform modules
 │   ├── version-manager.ps1         # Version detection and bumping
 │   ├── sync-icons.ps1              # Icon synchronization
-│   ├── changelog-generator.ps1     # AI-powered changelog
+│   ├── changelog-generator.ps1     # Changelog generation
 │   ├── build-prep.ps1              # Build environment preparation
 │   ├── generate-docs.ps1           # README/PDF generation
 │   ├── create-archive.ps1          # ZIP and manifest creation
@@ -65,7 +65,7 @@ release/
 
 1. **Version Management** - Gets version from git tags
 2. **Icon Sync** - Syncs app icons from central location
-3. **Changelog Generation** - Generates AI-powered changelog using Claude API
+3. **Changelog Generation** - Generates the changelog from git commits
 4. **Build Preparation** - Cleans previous builds, creates artifact folders
 5. **Windows Build** - Builds Windows binaries with Flutter
 6. **Documentation** - Generates README.md (and optional PDF)
@@ -109,7 +109,7 @@ Synchronizes application icons from the central location to all required platfor
 **No parameters**
 
 ### changelog-generator.ps1
-Generates changelog by analyzing git commits. Can use Claude API for AI-powered changelog generation or fall back to simple bullet list.
+Generates changelog by analyzing git commits. Can use an optional LLM API for richer output, or fall back to a simple bullet list.
 
 **Parameters:**
 - `ProjectRoot` - Project root directory
@@ -118,7 +118,7 @@ Generates changelog by analyzing git commits. Can use Claude API for AI-powered 
 - ChangelogMarkdown, Success
 
 **Configuration:**
-- Set `ANTHROPIC_API_KEY` environment variable or in `.env` file for AI-powered changelogs
+- Configure the changelog API key in `.env` (see `.env.example`) to enable LLM-assisted changelogs
 
 ### build-prep.ps1
 Prepares the build environment by cleaning previous builds, creating platform-specific artifact folders, and resolving Flutter dependencies.

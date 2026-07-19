@@ -610,4 +610,4 @@ Track your migration progress:
 - [ ] Status operations (getStatus, isClean)
 - [ ] Commit operations (commit, getLog)
 
-**Phase 3-8**: See main migration plan in `C:\Users\mkadm\.claude\plans\stateful-napping-scroll.md`
+**Phase 3-8**: Tracked as issues on the project board.

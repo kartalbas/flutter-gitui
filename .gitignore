@@ -56,7 +56,6 @@ macos/Flutter/ephemeral/
 
 # Linux build artifacts
 linux/flutter/ephemeral/
-.claude/settings.local.json
 
 # Generated localization files
 lib/generated/
@@ -83,6 +82,3 @@ lint_results.txt
 text_violations_current.txt
 text_with_style_violations.txt
 docs/UI-CONCEPT.md.backup
-
-# Agent instructions (local only)
-CLAUDE.md

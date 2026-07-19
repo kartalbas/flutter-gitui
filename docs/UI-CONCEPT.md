@@ -1006,7 +1006,7 @@ Please use theme colors instead of hardcoded values:
 
 **Solution:** THIS document is comprehensive and self-contained. Everything you need is here.
 
-### For AI Assistants (Claude, etc.)
+### For contributors and tooling
 
 **When asked to work on UI:**
 1. Read ONLY UI-CONCEPT.md

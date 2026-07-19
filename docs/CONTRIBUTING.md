@@ -272,12 +272,15 @@ if (line.startsWith('* (HEAD detached')) {
 
 ## Commit Guidelines
 
-### **CRITICAL**: No Claude Attribution
+### **CRITICAL**: No Tool Attribution
 
-**NEVER add Claude-related references in commits:**
-- ❌ NO "Generated with Claude"
-- ❌ NO "Co-Authored-By: Claude"
-- ❌ NO Claude attribution footers
+**NEVER credit an editor, generator or assistant in commits:**
+- ❌ NO "Generated with ..." footers
+- ❌ NO `Co-Authored-By:` trailers for tooling
+- ❌ NO attribution footers of any kind
+
+Commits are authored by the contributor who makes them. Wire each commit to its
+issue instead, with a trailing `Fixes #<n>` line.
 
 ### Commit Message Format
 
@@ -409,7 +412,7 @@ void main() {
 
 3. **Check Commit Messages**
    - Follow conventional commit format
-   - No Claude attribution
+   - No tool attribution
    - Clear, descriptive messages
 
 ### PR Description Template
@@ -434,7 +437,7 @@ Describe how you tested the changes
 - [ ] Follows error handling standards (Result<T>)
 - [ ] No null returns for errors
 - [ ] Conventional commit messages
-- [ ] No Claude attribution
+- [ ] No tool attribution
 ```
 
 ### Review Process

@@ -397,11 +397,13 @@ class BatchOperationsService {
           onProgress?.call(repo, current, total, 'Setting upstream...');
 
           try {
-            final pushOutput = await gitService.push(
+            // unwrap() so a failed push reaches the catch below; interpolating
+            // the Result reported a failure as a success containing the error.
+            final pushOutput = (await gitService.push(
               remote: 'origin',
               branch: fullBranchName,
               setUpstream: true,
-            );
+            )).unwrap();
 
             results.add(BatchOperationResult(
               repository: repo,

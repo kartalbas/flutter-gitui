@@ -26,8 +26,11 @@ class BranchParser {
     final lines = output.split('\n').where((line) => line.trim().isNotEmpty);
 
     for (final line in lines) {
-      // Skip HEAD pointer lines like "origin/HEAD -> origin/main"
-      if (line.contains('->')) continue;
+      // 'origin/HEAD -> origin/main' is a symref, not a branch, and '->' only
+      // appears as its second token; matching it anywhere in the line also
+      // dropped real branches whose name contains '->'.
+      final tokens = line.trim().split(RegExp(r'\s+'));
+      if (tokens.length > 1 && tokens[1] == '->') continue;
 
       final branch = _parseBranchLine(line, isRemote: true, protectedBranches: protectedBranches);
       if (branch != null) {
@@ -44,8 +47,11 @@ class BranchParser {
     final lines = output.split('\n').where((line) => line.trim().isNotEmpty);
 
     for (final line in lines) {
-      // Skip HEAD pointer lines
-      if (line.contains('->')) continue;
+      // 'origin/HEAD -> origin/main' is a symref, not a branch, and '->' only
+      // appears as its second token; matching it anywhere in the line also
+      // dropped real branches whose last commit subject contains '->'.
+      final tokens = line.trim().split(RegExp(r'\s+'));
+      if (tokens.length > 1 && tokens[1] == '->') continue;
 
       final isRemote = line.trimLeft().startsWith('remotes/');
       final branch = _parseBranchLine(line, isRemote: isRemote, protectedBranches: protectedBranches);

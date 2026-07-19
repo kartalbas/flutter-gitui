@@ -445,14 +445,20 @@ class UpdateService {
         Logger.info('Using fallback batch script method', forceConsole: true);
 
         final updateScriptPath = path.join(appDir, '_update.bat');
+        // cmd expands %VAR% even inside double quotes and drops stray percent
+        // signs, so every path reaching the batch file has to double them --
+        // including the PowerShell arguments, which cmd parses first.
+        String cmdEscape(String value) => value.replaceAll('%', '%%');
         // Apostrophes are legal in Windows paths and would terminate the
         // single-quoted PowerShell strings early; doubling them keeps each
         // path one literal.
-        final psZipFilePath = zipFilePath.replaceAll("'", "''");
+        final psZipFilePath = cmdEscape(zipFilePath.replaceAll("'", "''"));
         // The archive is laid out relative to the root, so a universal build
         // must extract into rootDir; extracting into windows/ would nest a
         // second windows/ inside it and leave the real files untouched.
-        final psRootDir = rootDir.replaceAll("'", "''");
+        final psRootDir = cmdEscape(rootDir.replaceAll("'", "''"));
+        final cmdZipFilePath = cmdEscape(zipFilePath);
+        final cmdExePath = cmdEscape(exePath);
         final updateScript = '''
 @echo off
 echo =========================================
@@ -482,10 +488,10 @@ if errorlevel 1 (
 )
 
 echo Cleaning up...
-del "$zipFilePath" 2>nul
+del "$cmdZipFilePath" 2>nul
 
 echo Update complete! Restarting Flutter GitUI...
-start "" "$exePath"
+start "" "$cmdExePath"
 
 echo.
 echo Deleting update script...

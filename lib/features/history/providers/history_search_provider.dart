@@ -24,12 +24,9 @@ final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
 
   // If no search filter, return default history
   if (filter.isEmpty) {
-    final commitsAsync = ref.watch(commitHistoryProvider);
-    return commitsAsync.when(
-      data: (commits) => commits,
-      loading: () => [],
-      error: (_, _) => [],
-    );
+    // Awaiting the future propagates the loading and error states; mapping them
+    // to an empty list showed 'No commits yet' until the git log returned.
+    return await ref.watch(commitHistoryProvider.future);
   }
 
   // Use git log with search parameters to search ALL commits

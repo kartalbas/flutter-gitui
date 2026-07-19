@@ -134,7 +134,9 @@ final repositoryStatusProvider = FutureProvider<List<FileStatus>>((ref) async {
     success: (statuses) => statuses,
     failure: (msg, error, stackTrace) {
       Logger.error('Failed to get status: $msg', error);
-      return []; // Provider yields empty list to indicate error state
+      // Surface the failure so the AsyncValue enters its error state; an empty
+      // list renders as a clean working directory while every git call fails.
+      throw Exception(msg);
     },
   );
 });
@@ -174,7 +176,9 @@ final commitHistoryProvider = FutureProvider<List<GitCommit>>((ref) async {
     success: (commits) => commits,
     failure: (msg, error, stackTrace) {
       Logger.error('Failed to get commit history: $msg', error);
-      return []; // Provider yields empty list to indicate error state
+      // Surface the failure so the AsyncValue enters its error state; an empty
+      // list renders as 'No commits yet' while every git call fails.
+      throw Exception(msg);
     },
   );
 });

@@ -65,7 +65,18 @@ universal-build/.last-build-commit
 universal-build/release/
 .last-build-commit
 .last-build-commit-*
+# Secrets. Broad on purpose: a single missed pattern publishes a live
+# credential, and .env.example below is the only file that must stay tracked.
 .env
+.env.*
+!.env.example
+*creds*
+*credentials*
+*secret*
+*.pem
+*.key
+*.p12
+*.pfx
 *.obj
 
 # Release build system - commit source, ignore artifacts

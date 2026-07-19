@@ -144,6 +144,16 @@ class UpdateService {
           throw Exception('Unsupported platform for updates');
         }
 
+        // The manifest is remote input; anything but a plain basename could
+        // escape the temp directory or the generated update script.
+        if (!RegExp(r'^[A-Za-z0-9._-]+$').hasMatch(downloadFileName)) {
+          Logger.warning('Rejected manifest fileName: $downloadFileName');
+          throw Exception(
+            'Update rejected: the release manifest fileName is not a valid '
+            'archive name.',
+          );
+        }
+
         final downloadUrl = '$_baseUrl/$downloadFileName';
         final fileSize = platformData?['fileSize'] as int? ?? 0;
         final sha256Digest = platformData?['sha256'] as String?;
@@ -415,6 +425,11 @@ class UpdateService {
         Logger.info('Using fallback batch script method', forceConsole: true);
 
         final updateScriptPath = path.join(appDir, '_update.bat');
+        // Apostrophes are legal in Windows paths and would terminate the
+        // single-quoted PowerShell strings early; doubling them keeps each
+        // path one literal.
+        final psZipFilePath = zipFilePath.replaceAll("'", "''");
+        final psAppDir = appDir.replaceAll("'", "''");
         final updateScript = '''
 @echo off
 echo =========================================
@@ -425,7 +440,7 @@ echo Waiting for application to close...
 timeout /t 3 /nobreak >nul
 
 echo Extracting update...
-powershell -Command "Expand-Archive -Path '$zipFilePath' -DestinationPath '$appDir' -Force"
+powershell -Command "Expand-Archive -Path '$psZipFilePath' -DestinationPath '$psAppDir' -Force"
 if errorlevel 1 (
   echo ERROR: Failed to extract update!
   pause

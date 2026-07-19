@@ -78,15 +78,12 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
       _selectedGit = _gitPath;
     }
 
-    // Pre-select current diff tool if detected
+    // Pre-select current diff tool if detected. firstOrNull instead of a
+    // firstWhere fallback: fabricating a tool with an empty executablePath
+    // let "Apply Selected" overwrite a working diff/merge configuration
+    // when detection found nothing.
     if (widget.currentDiffTool != null) {
-      _selectedDiffTool = _diffTools.firstWhere(
-        (tool) => tool.type == widget.currentDiffTool,
-        orElse: () => _diffTools.isEmpty ? const DiffTool(type: DiffToolType.vscode, executablePath: '', diffArgs: '', mergeArgs: '') : _diffTools.first,
-      );
-      if (_selectedDiffTool?.type != widget.currentDiffTool) {
-        _selectedDiffTool = null; // Current tool not detected
-      }
+      _selectedDiffTool = _diffTools.where((tool) => tool.type == widget.currentDiffTool).firstOrNull;
     }
 
     // Pre-select current text editor if detected

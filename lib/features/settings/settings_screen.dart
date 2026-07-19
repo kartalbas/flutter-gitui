@@ -183,7 +183,9 @@ class SettingsScreen extends ConsumerWidget {
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: l10n.selectTextEditor,
       type: Platform.isWindows ? FileType.custom : FileType.any,
-      allowedExtensions: Platform.isWindows ? ['exe'] : null,
+      // .cmd/.bat wrappers are the only entry point for CLI-installed editors
+      // (e.g. Scoop's code.cmd), which EditorLauncherService prefers.
+      allowedExtensions: Platform.isWindows ? ['exe', 'cmd', 'bat'] : null,
     );
 
     if (result != null && result.files.single.path != null) {
@@ -262,7 +264,9 @@ class SettingsScreen extends ConsumerWidget {
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: l10n.selectDiffTool,
       type: Platform.isWindows ? FileType.custom : FileType.any,
-      allowedExtensions: Platform.isWindows ? ['exe'] : null,
+      // .cmd/.bat wrappers are the only entry point for CLI-installed tools
+      // (e.g. Scoop's code.cmd), which DiffToolService already resolves.
+      allowedExtensions: Platform.isWindows ? ['exe', 'cmd', 'bat'] : null,
     );
 
     if (result != null && result.files.single.path != null) {
@@ -316,7 +320,9 @@ class SettingsScreen extends ConsumerWidget {
     final result = await FilePicker.platform.pickFiles(
       dialogTitle: l10n.selectMergeTool,
       type: Platform.isWindows ? FileType.custom : FileType.any,
-      allowedExtensions: Platform.isWindows ? ['exe'] : null,
+      // .cmd/.bat wrappers are the only entry point for CLI-installed tools
+      // (e.g. Scoop's code.cmd), which DiffToolService already resolves.
+      allowedExtensions: Platform.isWindows ? ['exe', 'cmd', 'bat'] : null,
     );
 
     if (result != null && result.files.single.path != null) {

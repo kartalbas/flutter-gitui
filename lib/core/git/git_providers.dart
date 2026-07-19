@@ -69,12 +69,13 @@ final gitServiceProvider = Provider<GitService?>((ref) {
         // an unguarded read would surface as an unhandled zone error.
         if (!ref.mounted) return;
         if (isComplete) {
-          ref.read(progressProvider.notifier).completeOperation();
+          ref.read(progressProvider.notifier).completeOperation(isAutomatic: true);
         } else {
           ref.read(progressProvider.notifier).startOperation(
                 operationName,
                 0,
                 isIndeterminate: true,
+                isAutomatic: true,
               );
         }
       });

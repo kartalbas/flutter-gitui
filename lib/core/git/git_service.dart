@@ -1893,8 +1893,9 @@ class GitService {
         break;
     }
 
-    // Stage the resolved file
-    await stageFile(filePath);
+    // Stage the resolved file; unwrap so a failed stage propagates to the
+    // caller instead of silently reporting the conflict as resolved.
+    (await stageFile(filePath)).unwrap();
   }
 
   /// Abort merge

@@ -247,15 +247,10 @@ try {
         Write-Log "  [OK] Copied changelog-windows.json to changelog.json" "Green"
     }
 
-    # Remove other platform changelogs
-    $otherPlatforms = @("linux", "macos")
-    foreach ($platform in $otherPlatforms) {
-        $otherChangelogFile = Join-Path $projectRoot "assets/changelog-$platform.json"
-        if (Test-Path $otherChangelogFile) {
-            Remove-Item $otherChangelogFile -Force
-            Write-Log "  [OK] Removed changelog-$platform.json" "Gray"
-        }
-    }
+    # Other platforms' changelog files must stay in the source tree: only
+    # assets/changelog.json is bundled into the app, and deleting the tracked
+    # changelog-linux.json would erase the Linux release history that the next
+    # Linux build reads to rebuild its changelog.
 
     Write-Log ""
 } catch {

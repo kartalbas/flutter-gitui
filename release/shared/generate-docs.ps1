@@ -76,11 +76,10 @@ $ChangelogContent
 
 ``````
 flutter-gitui/
-├── windows/                 # Windows binaries
-│   ├── flutter_gitui.exe    # Main application
-│   ├── *.dll                # Required libraries
-│   └── data/                # Application data files
-├── Updater.exe              # Auto-updater
+├── flutter_gitui.exe        # Main application
+├── *.dll                    # Required libraries
+├── data/                    # Application data files
+├── updater.exe              # Auto-updater
 └── README.md                # This file
 ``````
 
@@ -89,8 +88,7 @@ flutter-gitui/
 ## How to Run
 
 1. Extract the archive to your preferred location
-2. Navigate to the ``windows`` folder
-3. Double-click ``flutter_gitui.exe``
+2. Double-click ``flutter_gitui.exe``
 
 ---
 

@@ -70,12 +70,12 @@ class NotificationService {
                   try {
                     // Open app.log
                     if (Logger.logFilePath != null) {
-                      await EditorLauncherService.openAppLog();
+                      (await EditorLauncherService.openAppLog()).unwrap();
                     }
 
                     // Open git.log
                     if (Logger.gitLogFilePath != null) {
-                      await EditorLauncherService.openGitLog();
+                      (await EditorLauncherService.openGitLog()).unwrap();
                     }
                   } catch (e) {
                     Logger.error('Failed to open log files', e);
@@ -158,12 +158,12 @@ class NotificationService {
                   try {
                     // Open app.log
                     if (Logger.logFilePath != null) {
-                      await EditorLauncherService.openAppLog();
+                      (await EditorLauncherService.openAppLog()).unwrap();
                     }
 
                     // Open git.log
                     if (Logger.gitLogFilePath != null) {
-                      await EditorLauncherService.openGitLog();
+                      (await EditorLauncherService.openGitLog()).unwrap();
                     }
                   } catch (e) {
                     Logger.error('Failed to open log files', e);

@@ -340,12 +340,8 @@ final stashesProvider = FutureProvider<List<GitStash>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    final result = await gitService.getStashes();
-    return result.unwrapOr([]);
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getStashes();
+  return result.unwrap();
 });
 
 /// Stash count provider

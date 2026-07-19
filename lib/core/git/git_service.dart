@@ -1408,7 +1408,6 @@ class GitService {
       // Use custom format: ref|hash|timestamp|message
       final result = await _execute(
         'stash list --format=%gD|%H|%at|%gs',
-        throwOnError: false,
       );
       return StashParser.parseStashList(result.stdout.toString());
     });

@@ -57,11 +57,13 @@ class GitCommit {
 
   /// Author date with both ISO format and relative time (e.g., "2024-01-15T14:30:45 (2 hours ago)")
   /// Pass locale code (e.g., 'en', 'ar', 'de') for localized relative time
-  String authorDateDisplay([String? locale]) => authorDate.toDisplayString(locale);
+  String authorDateDisplay([String? locale]) =>
+      authorDate.toDisplayString(locale);
 
   /// Committer date with both ISO format and relative time (e.g., "2024-01-15T14:30:45 (2 hours ago)")
   /// Pass locale code (e.g., 'en', 'ar', 'de') for localized relative time
-  String committerDateDisplay([String? locale]) => committerDate.toDisplayString(locale);
+  String committerDateDisplay([String? locale]) =>
+      committerDate.toDisplayString(locale);
 
   /// Branch and tag names for this commit
   String get refsString {

@@ -8,7 +8,8 @@ class Workspace {
   final Color color;
   final String? icon;
   final List<String> repositoryPaths;
-  final String? lastSelectedRepository; // Remember last selected repository for this workspace
+  final String?
+  lastSelectedRepository; // Remember last selected repository for this workspace
   final DateTime createdAt;
   final DateTime? updatedAt;
 
@@ -41,7 +42,8 @@ class Workspace {
       color: color ?? this.color,
       icon: icon ?? this.icon,
       repositoryPaths: repositoryPaths ?? this.repositoryPaths,
-      lastSelectedRepository: lastSelectedRepository ?? this.lastSelectedRepository,
+      lastSelectedRepository:
+          lastSelectedRepository ?? this.lastSelectedRepository,
       createdAt: createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
     );
@@ -70,7 +72,8 @@ class Workspace {
       description: json['description'] as String?,
       color: Color(json['color'] as int),
       icon: json['icon'] as String?,
-      repositoryPaths: (json['repositoryPaths'] as List<dynamic>).cast<String>(),
+      repositoryPaths: (json['repositoryPaths'] as List<dynamic>)
+          .cast<String>(),
       lastSelectedRepository: json['lastSelectedRepository'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] != null
@@ -113,7 +116,8 @@ class Workspace {
   int get hashCode => id.hashCode;
 
   @override
-  String toString() => 'Workspace(id: $id, name: $name, repos: ${repositoryPaths.length})';
+  String toString() =>
+      'Workspace(id: $id, name: $name, repos: ${repositoryPaths.length})';
 }
 
 /// Predefined workspace colors

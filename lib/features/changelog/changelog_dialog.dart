@@ -13,10 +13,7 @@ import '../../core/services/logger_service.dart';
 class ChangelogDialog extends HookConsumerWidget {
   final int initialIndex;
 
-  const ChangelogDialog({
-    super.key,
-    this.initialIndex = 0,
-  });
+  const ChangelogDialog({super.key, this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,10 +76,7 @@ class ChangelogDialog extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.paddingM),
                 TitleLargeLabel('Failed to load changelog'),
                 const SizedBox(height: AppTheme.paddingS),
-                BodyMediumLabel(
-                  error.toString(),
-                  textAlign: TextAlign.center,
-                ),
+                BodyMediumLabel(error.toString(), textAlign: TextAlign.center),
                 const SizedBox(height: AppTheme.paddingL),
                 BaseButton(
                   label: 'Close',
@@ -121,7 +115,8 @@ class ChangelogDialog extends HookConsumerWidget {
             }
 
             final release = changelogData.releases[currentIndex.value];
-            final hasPrevious = currentIndex.value < changelogData.releases.length - 1;
+            final hasPrevious =
+                currentIndex.value < changelogData.releases.length - 1;
             final hasNext = currentIndex.value > 0;
 
             return Column(
@@ -130,7 +125,9 @@ class ChangelogDialog extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(AppTheme.paddingM),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     border: Border(
                       bottom: BorderSide(
                         color: Theme.of(context).dividerColor,
@@ -161,7 +158,9 @@ class ChangelogDialog extends HookConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppTheme.paddingM),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -205,23 +204,31 @@ class ChangelogDialog extends HookConsumerWidget {
                           Icon(
                             Icons.calendar_today,
                             size: 14,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: AppTheme.paddingXS),
                           BodySmallLabel(
                             _formatDate(release.date),
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: AppTheme.paddingM),
                           Icon(
                             Icons.commit,
                             size: 14,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: AppTheme.paddingXS),
                           BodySmallLabel(
                             release.commit,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ],
                       ),
@@ -240,15 +247,16 @@ class ChangelogDialog extends HookConsumerWidget {
                         selectable: true,
                         styleSheet: MarkdownStyleSheet(
                           h3: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                height: 2,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
+                            fontWeight: FontWeight.bold,
+                            height: 2,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                           p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                height: 1.6,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                          listBullet: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            height: 1.6,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          listBullet: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 height: 1.8,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
@@ -262,7 +270,9 @@ class ChangelogDialog extends HookConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(AppTheme.paddingM),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     border: Border(
                       top: BorderSide(
                         color: Theme.of(context).dividerColor,
@@ -278,13 +288,16 @@ class ChangelogDialog extends HookConsumerWidget {
                           children: [
                             Checkbox(
                               value: dontShowAgain.value,
-                              onChanged: (value) => dontShowAgain.value = value ?? false,
+                              onChanged: (value) =>
+                                  dontShowAgain.value = value ?? false,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Flexible(
                               child: BodySmallLabel(
                                 "Don't show on startup",
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -297,7 +310,10 @@ class ChangelogDialog extends HookConsumerWidget {
                         children: [
                           // Jump to oldest button (leftmost)
                           BaseIconButton(
-                            onPressed: hasPrevious ? () => currentIndex.value = changelogData.releases.length - 1 : null,
+                            onPressed: hasPrevious
+                                ? () => currentIndex.value =
+                                      changelogData.releases.length - 1
+                                : null,
                             icon: Icons.first_page,
                             tooltip: 'Oldest version',
                             variant: ButtonVariant.primary,
@@ -305,7 +321,9 @@ class ChangelogDialog extends HookConsumerWidget {
                           const SizedBox(width: AppTheme.paddingS),
                           // Older button (left arrow)
                           BaseIconButton(
-                            onPressed: hasPrevious ? () => currentIndex.value++ : null,
+                            onPressed: hasPrevious
+                                ? () => currentIndex.value++
+                                : null,
                             icon: Icons.chevron_left,
                             tooltip: 'Older version',
                             variant: ButtonVariant.primary,
@@ -313,20 +331,31 @@ class ChangelogDialog extends HookConsumerWidget {
                           const SizedBox(width: AppTheme.paddingM),
                           // Counter
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingM, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingM,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(AppTheme.paddingM),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.paddingM,
+                              ),
                             ),
                             child: BodyMediumLabel(
                               '${currentIndex.value + 1} of ${changelogData.releases.length}',
-                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
                             ),
                           ),
                           const SizedBox(width: AppTheme.paddingM),
                           // Newer button (right arrow)
                           BaseIconButton(
-                            onPressed: hasNext ? () => currentIndex.value-- : null,
+                            onPressed: hasNext
+                                ? () => currentIndex.value--
+                                : null,
                             icon: Icons.chevron_right,
                             tooltip: 'Newer version',
                             variant: ButtonVariant.primary,
@@ -334,7 +363,9 @@ class ChangelogDialog extends HookConsumerWidget {
                           const SizedBox(width: AppTheme.paddingS),
                           // Jump to latest button (rightmost)
                           BaseIconButton(
-                            onPressed: hasNext ? () => currentIndex.value = 0 : null,
+                            onPressed: hasNext
+                                ? () => currentIndex.value = 0
+                                : null,
                             icon: Icons.last_page,
                             tooltip: 'Latest version',
                             variant: ButtonVariant.primary,
@@ -395,7 +426,9 @@ class ChangelogDialog extends HookConsumerWidget {
     Logger.info('[ChangelogDialog] shouldShowWhatsNew result: $shouldShow');
 
     if (!shouldShow || !context.mounted) {
-      Logger.info('[ChangelogDialog] Not showing - shouldShow: $shouldShow, mounted: ${context.mounted}');
+      Logger.info(
+        '[ChangelogDialog] Not showing - shouldShow: $shouldShow, mounted: ${context.mounted}',
+      );
       return;
     }
 
@@ -412,7 +445,8 @@ class ChangelogDialog extends HookConsumerWidget {
     // Compare without the build number so this matches shouldShowWhatsNew, which
     // treats "0.1.0+1" and "0.1.0+2" as the same version.
     final isVersionUpgrade =
-        lastSeenVersion == null || lastSeenVersion.split('+').first != currentVersion.split('+').first;
+        lastSeenVersion == null ||
+        lastSeenVersion.split('+').first != currentVersion.split('+').first;
     Logger.info('[ChangelogDialog] Is version upgrade: $isVersionUpgrade');
 
     // Show dialog with latest release
@@ -427,7 +461,9 @@ class ChangelogDialog extends HookConsumerWidget {
     // For normal runs, we DON'T mark it as seen so it shows every time
     // (unless user disables it via "Don't show again")
     if (isVersionUpgrade) {
-      Logger.info('[ChangelogDialog] Version upgrade detected - marking version as seen');
+      Logger.info(
+        '[ChangelogDialog] Version upgrade detected - marking version as seen',
+      );
       // Record the app's own version, not the changelog entry's: the bundled
       // changelog can lag behind the app, and disableWhatsNewDialog() stores
       // currentVersion - writing anything else here would revert that preference.

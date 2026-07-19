@@ -32,58 +32,50 @@ class HistorySearchFilter extends Equatable {
 
   /// Empty filter (no filtering)
   const HistorySearchFilter.empty()
-      : query = null,
-        author = null,
-        committer = null,
-        filePath = null,
-        fromDate = null,
-        toDate = null,
-        hashPrefixes = null,
-        caseSensitive = false,
-        useRegex = false,
-        fuzzyMatch = true,
-        branch = null,
-        tags = null;
+    : query = null,
+      author = null,
+      committer = null,
+      filePath = null,
+      fromDate = null,
+      toDate = null,
+      hashPrefixes = null,
+      caseSensitive = false,
+      useRegex = false,
+      fuzzyMatch = true,
+      branch = null,
+      tags = null;
 
   /// Quick filter: commits from today
   factory HistorySearchFilter.today() {
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
-    return HistorySearchFilter(
-      fromDate: startOfDay,
-      toDate: now,
-    );
+    return HistorySearchFilter(fromDate: startOfDay, toDate: now);
   }
 
   /// Quick filter: commits from this week
   factory HistorySearchFilter.thisWeek() {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final startOfDay = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
-    return HistorySearchFilter(
-      fromDate: startOfDay,
-      toDate: now,
+    final startOfDay = DateTime(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
     );
+    return HistorySearchFilter(fromDate: startOfDay, toDate: now);
   }
 
   /// Quick filter: commits from this month
   factory HistorySearchFilter.thisMonth() {
     final now = DateTime.now();
     final startOfMonth = DateTime(now.year, now.month, 1);
-    return HistorySearchFilter(
-      fromDate: startOfMonth,
-      toDate: now,
-    );
+    return HistorySearchFilter(fromDate: startOfMonth, toDate: now);
   }
 
   /// Quick filter: commits from last 30 days
   factory HistorySearchFilter.last30Days() {
     final now = DateTime.now();
     final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-    return HistorySearchFilter(
-      fromDate: thirtyDaysAgo,
-      toDate: now,
-    );
+    return HistorySearchFilter(fromDate: thirtyDaysAgo, toDate: now);
   }
 
   /// Check if filter is empty (no filtering applied)
@@ -148,17 +140,17 @@ class HistorySearchFilter extends Equatable {
 
   @override
   List<Object?> get props => [
-        query,
-        author,
-        committer,
-        filePath,
-        fromDate,
-        toDate,
-        hashPrefixes,
-        caseSensitive,
-        useRegex,
-        fuzzyMatch,
-        branch,
-        tags,
-      ];
+    query,
+    author,
+    committer,
+    filePath,
+    fromDate,
+    toDate,
+    hashPrefixes,
+    caseSensitive,
+    useRegex,
+    fuzzyMatch,
+    branch,
+    tags,
+  ];
 }

@@ -37,14 +37,18 @@ class BlameParser {
       if (line.isEmpty) continue;
 
       // First line of each block: <commit-hash> <original-line> <final-line> <group-size>
-      if (!line.startsWith('\t') && !line.startsWith(' ') && !line.contains(' ')) {
+      if (!line.startsWith('\t') &&
+          !line.startsWith(' ') &&
+          !line.contains(' ')) {
         // This is a continuation of previous data, skip
         continue;
       }
 
       if (line.startsWith('\t')) {
         // This is the actual line content
-        final lineContent = line.substring(1).replaceAll('\r', ''); // Remove leading tab and carriage returns
+        final lineContent = line
+            .substring(1)
+            .replaceAll('\r', ''); // Remove leading tab and carriage returns
 
         if (commitHash != null &&
             author != null &&
@@ -94,7 +98,9 @@ class BlameParser {
           case 'author-time':
             final timestamp = int.tryParse(value);
             if (timestamp != null) {
-              authorTime = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+              authorTime = DateTime.fromMillisecondsSinceEpoch(
+                timestamp * 1000,
+              );
             }
             break;
           case 'summary':
@@ -119,10 +125,7 @@ class BlameParser {
       }
     }
 
-    return FileBlame(
-      filePath: filePath,
-      lines: lines,
-    );
+    return FileBlame(filePath: filePath, lines: lines);
   }
 
   /// Parse the output of `git blame <file>` (non-porcelain format)
@@ -154,7 +157,10 @@ class BlameParser {
         final time = match.group(4)!;
         final timezone = match.group(5)!;
         final lineNumber = int.parse(match.group(6)!);
-        final lineContent = (match.group(7) ?? '').replaceAll('\r', ''); // Remove carriage returns
+        final lineContent = (match.group(7) ?? '').replaceAll(
+          '\r',
+          '',
+        ); // Remove carriage returns
 
         // git prints the timestamp in the commit's own timezone, so the offset
         // has to be applied before converting to the viewer's local time.
@@ -174,9 +180,6 @@ class BlameParser {
       }
     }
 
-    return FileBlame(
-      filePath: filePath,
-      lines: lines,
-    );
+    return FileBlame(filePath: filePath, lines: lines);
   }
 }

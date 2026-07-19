@@ -9,10 +9,7 @@ import '../../../shared/components/base_label.dart';
 class ChangesErrorState extends StatelessWidget {
   final Object error;
 
-  const ChangesErrorState({
-    super.key,
-    required this.error,
-  });
+  const ChangesErrorState({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +23,9 @@ class ChangesErrorState extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            AppLocalizations.of(context)!.errorLoadingStatus,
-          ),
+          TitleLargeLabel(AppLocalizations.of(context)!.errorLoadingStatus),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
-            error.toString(),
-            textAlign: TextAlign.center,
-          ),
+          BodySmallLabel(error.toString(), textAlign: TextAlign.center),
         ],
       ),
     );

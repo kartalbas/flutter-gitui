@@ -8,7 +8,8 @@ import 'repository_status_provider.dart';
 import 'models/workspace_repository.dart';
 
 /// Manages file watchers for all repositories in the workspace
-class WorkspaceRepositoryWatchersNotifier extends StateNotifier<Map<String, GitRepositoryWatcher>> {
+class WorkspaceRepositoryWatchersNotifier
+    extends StateNotifier<Map<String, GitRepositoryWatcher>> {
   final Ref ref;
 
   WorkspaceRepositoryWatchersNotifier(this.ref) : super({});
@@ -31,7 +32,9 @@ class WorkspaceRepositoryWatchersNotifier extends StateNotifier<Map<String, GitR
         onRepositoryChanged: () async {
           Logger.debug('[WATCHER] Repository changed: ${repo.displayName}');
           // Refresh status only for this specific repository
-          await ref.read(workspaceRepositoryStatusProvider.notifier).refreshStatus(repo);
+          await ref
+              .read(workspaceRepositoryStatusProvider.notifier)
+              .refreshStatus(repo);
         },
       );
 
@@ -41,7 +44,9 @@ class WorkspaceRepositoryWatchersNotifier extends StateNotifier<Map<String, GitR
     }
 
     state = newWatchers;
-    Logger.info('[WATCHER] Initialized ${newWatchers.length} repository watchers');
+    Logger.info(
+      '[WATCHER] Initialized ${newWatchers.length} repository watchers',
+    );
   }
 
   /// Add a watcher for a new repository
@@ -55,7 +60,9 @@ class WorkspaceRepositoryWatchersNotifier extends StateNotifier<Map<String, GitR
       repositoryPath: repository.path,
       onRepositoryChanged: () async {
         Logger.debug('[WATCHER] Repository changed: ${repository.displayName}');
-        await ref.read(workspaceRepositoryStatusProvider.notifier).refreshStatus(repository);
+        await ref
+            .read(workspaceRepositoryStatusProvider.notifier)
+            .refreshStatus(repository);
       },
     );
 
@@ -88,47 +95,52 @@ class WorkspaceRepositoryWatchersNotifier extends StateNotifier<Map<String, GitR
 
 /// Provider for workspace repository watchers
 final workspaceRepositoryWatchersProvider =
-    StateNotifierProvider<WorkspaceRepositoryWatchersNotifier, Map<String, GitRepositoryWatcher>>((ref) {
-  final notifier = WorkspaceRepositoryWatchersNotifier(ref);
+    StateNotifierProvider<
+      WorkspaceRepositoryWatchersNotifier,
+      Map<String, GitRepositoryWatcher>
+    >((ref) {
+      final notifier = WorkspaceRepositoryWatchersNotifier(ref);
 
-  // Initialize watchers after status provider has done its initial refresh
-  // Use addPostFrameCallback to ensure it runs after the build phase
-  Future.microtask(() async {
-    // Wait a bit for the status provider to finish its initial refresh
-    await Future.delayed(const Duration(milliseconds: 500));
-    await notifier.initializeWatchers();
-  });
+      // Initialize watchers after status provider has done its initial refresh
+      // Use addPostFrameCallback to ensure it runs after the build phase
+      Future.microtask(() async {
+        // Wait a bit for the status provider to finish its initial refresh
+        await Future.delayed(const Duration(milliseconds: 500));
+        await notifier.initializeWatchers();
+      });
 
-  // Listen for workspace changes and update watchers accordingly
-  ref.listen(workspaceProvider, (previous, next) async {
-    // An empty `next` is the "last repository removed" transition and must still
-    // be processed, otherwise every running watcher leaks for the session.
-    if (previous == null) return;
+      // Listen for workspace changes and update watchers accordingly
+      ref.listen(workspaceProvider, (previous, next) async {
+        // An empty `next` is the "last repository removed" transition and must still
+        // be processed, otherwise every running watcher leaks for the session.
+        if (previous == null) return;
 
-    final previousPaths = previous.map((r) => r.path).toSet();
-    final nextPaths = next.map((r) => r.path).toSet();
+        final previousPaths = previous.map((r) => r.path).toSet();
+        final nextPaths = next.map((r) => r.path).toSet();
 
-    // Find added and removed repositories
-    final added = nextPaths.difference(previousPaths);
-    final removed = previousPaths.difference(nextPaths);
+        // Find added and removed repositories
+        final added = nextPaths.difference(previousPaths);
+        final removed = previousPaths.difference(nextPaths);
 
-    // Add watchers for new repositories
-    for (final path in added) {
-      final repo = next.firstWhere((r) => r.path == path);
-      await notifier.addWatcher(repo);
-    }
+        // Add watchers for new repositories
+        for (final path in added) {
+          final repo = next.firstWhere((r) => r.path == path);
+          await notifier.addWatcher(repo);
+        }
 
-    // Remove watchers for deleted repositories
-    for (final path in removed) {
-      await notifier.removeWatcher(path);
-      ref.read(workspaceRepositoryStatusProvider.notifier).removeStatus(path);
-    }
-  });
+        // Remove watchers for deleted repositories
+        for (final path in removed) {
+          await notifier.removeWatcher(path);
+          ref
+              .read(workspaceRepositoryStatusProvider.notifier)
+              .removeStatus(path);
+        }
+      });
 
-  // Cleanup on dispose
-  ref.onDispose(() async {
-    await notifier.disposeAll();
-  });
+      // Cleanup on dispose
+      ref.onDispose(() async {
+        await notifier.disposeAll();
+      });
 
-  return notifier;
-});
+      return notifier;
+    });

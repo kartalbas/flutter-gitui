@@ -22,13 +22,19 @@ import '../models/tree_node.dart';
 ///   },
 /// )
 /// ```
-class KeyboardNavigableTreeView<T extends TreeNodeMixin> extends StatelessWidget {
+class KeyboardNavigableTreeView<T extends TreeNodeMixin>
+    extends StatelessWidget {
   /// The tree view controller
   final TreeViewController<T> controller;
 
   /// Builder for each tree item
-  final Widget Function(BuildContext context, T node, int depth, bool isSelected)
-      itemBuilder;
+  final Widget Function(
+    BuildContext context,
+    T node,
+    int depth,
+    bool isSelected,
+  )
+  itemBuilder;
 
   /// Whether to autofocus when built
   final bool autofocus;

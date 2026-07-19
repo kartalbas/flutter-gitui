@@ -9,10 +9,7 @@ import '../../../shared/components/base_menu_item.dart';
 class SelectRemoteDialog extends StatelessWidget {
   final List<String> remotes;
 
-  const SelectRemoteDialog({
-    super.key,
-    required this.remotes,
-  });
+  const SelectRemoteDialog({super.key, required this.remotes});
 
   @override
   Widget build(BuildContext context) {

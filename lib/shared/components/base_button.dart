@@ -255,7 +255,9 @@ class BaseButton extends StatelessWidget {
               vertical: verticalPadding,
             ),
             decoration: BoxDecoration(
-              border: borderColor != null ? Border.all(color: borderColor, width: 2) : null,
+              border: borderColor != null
+                  ? Border.all(color: borderColor, width: 2)
+                  : null,
               borderRadius: BorderRadius.circular(AppTheme.radiusS),
             ),
             child: buttonChild,
@@ -411,7 +413,9 @@ class BaseIconButton extends StatelessWidget {
           width: buttonSize,
           height: buttonSize,
           decoration: BoxDecoration(
-            border: borderColor != null ? Border.all(color: borderColor, width: 2) : null,
+            border: borderColor != null
+                ? Border.all(color: borderColor, width: 2)
+                : null,
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
           ),
           child: Icon(icon, size: iconSize, color: foregroundColor),
@@ -420,10 +424,7 @@ class BaseIconButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      return Tooltip(
-        message: tooltip!,
-        child: button,
-      );
+      return Tooltip(message: tooltip!, child: button);
     }
 
     return button;

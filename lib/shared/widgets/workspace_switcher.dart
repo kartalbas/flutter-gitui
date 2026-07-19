@@ -43,7 +43,11 @@ class WorkspaceSwitcher extends ConsumerWidget {
     );
   }
 
-  void _showWorkspaceMenu(BuildContext context, WidgetRef ref, List<Workspace> projects) {
+  void _showWorkspaceMenu(
+    BuildContext context,
+    WidgetRef ref,
+    List<Workspace> projects,
+  ) {
     final selectedProject = ref.read(selectedProjectProvider);
     final l10n = AppLocalizations.of(context)!;
 
@@ -59,7 +63,9 @@ class WorkspaceSwitcher extends ConsumerWidget {
                 ? PhosphorIconsBold.house
                 : PhosphorIconsBold.folder,
             primaryLabel: project.name,
-            secondaryLabel: l10n.repositoryCount(project.repositoryPaths.length),
+            secondaryLabel: l10n.repositoryCount(
+              project.repositoryPaths.length,
+            ),
             iconColor: project.color,
             isSelected: isSelected,
             showCheck: true,
@@ -70,15 +76,21 @@ class WorkspaceSwitcher extends ConsumerWidget {
       }).toList(),
     ).then((selectedProjectFromMenu) {
       if (!context.mounted || selectedProjectFromMenu == null) return;
-      ref.read(selectedProjectProvider.notifier).selectProject(selectedProjectFromMenu);
+      ref
+          .read(selectedProjectProvider.notifier)
+          .selectProject(selectedProjectFromMenu);
     });
   }
 
   RelativeRect _getMenuPosition(BuildContext context) {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay);
+    final Offset bottomRight = button.localToGlobal(
+      button.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
 
     // Position menu below the button by using bottomLeft instead of topLeft
     final RelativeRect position = RelativeRect.fromRect(

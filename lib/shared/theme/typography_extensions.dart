@@ -54,26 +54,23 @@ extension TextStyleModifiers on TextStyle {
 
   /// Apply muted/disabled color
   TextStyle muted(BuildContext context) => copyWith(
-        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-      );
+    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+  );
 
   /// Apply custom color
   TextStyle colored(Color color) => copyWith(color: color);
 
   /// Apply custom opacity
-  TextStyle withOpacity(double opacity) => copyWith(
-        color: color?.withValues(alpha: opacity),
-      );
+  TextStyle withOpacity(double opacity) =>
+      copyWith(color: color?.withValues(alpha: opacity));
 
   /// Increase font size by percentage
-  TextStyle larger(double factor) => copyWith(
-        fontSize: fontSize != null ? fontSize! * factor : null,
-      );
+  TextStyle larger(double factor) =>
+      copyWith(fontSize: fontSize != null ? fontSize! * factor : null);
 
   /// Decrease font size by percentage
-  TextStyle smaller(double factor) => copyWith(
-        fontSize: fontSize != null ? fontSize! / factor : null,
-      );
+  TextStyle smaller(double factor) =>
+      copyWith(fontSize: fontSize != null ? fontSize! / factor : null);
 
   /// Apply letter spacing
   TextStyle spaced(double spacing) => copyWith(letterSpacing: spacing);
@@ -82,8 +79,7 @@ extension TextStyleModifiers on TextStyle {
   TextStyle withHeight(double height) => copyWith(height: height);
 
   /// Apply underline decoration
-  TextStyle get underlined =>
-      copyWith(decoration: TextDecoration.underline);
+  TextStyle get underlined => copyWith(decoration: TextDecoration.underline);
 
   /// Apply line-through decoration
   TextStyle get strikethrough =>
@@ -123,23 +119,21 @@ extension SemanticTextStyles on BuildContext {
 
   /// Specialized styles
   TextStyle get caption => textTheme.bodySmall!.muted(this);
-  TextStyle get overline =>
-      textTheme.labelSmall!.copyWith(letterSpacing: 1.5);
+  TextStyle get overline => textTheme.labelSmall!.copyWith(letterSpacing: 1.5);
   TextStyle get button => textTheme.labelLarge!.medium;
 
   /// Code/monospace style
   TextStyle get code => textTheme.bodyMedium!.copyWith(
-        fontFamily: 'JetBrains Mono',
-        fontFeatures: [
-          const FontFeature.enable('liga'),
-          const FontFeature.enable('zero'),
-        ],
-      );
+    fontFamily: 'JetBrains Mono',
+    fontFeatures: [
+      const FontFeature.enable('liga'),
+      const FontFeature.enable('zero'),
+    ],
+  );
 
   /// Git-specific styles
-  TextStyle get commitHash => code.copyWith(
-        color: colorScheme.primary.withValues(alpha: 0.8),
-      );
+  TextStyle get commitHash =>
+      code.copyWith(color: colorScheme.primary.withValues(alpha: 0.8));
 
   TextStyle get branchName => body.semiBold.primary(this);
   TextStyle get fileName => body.regular;

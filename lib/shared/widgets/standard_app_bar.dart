@@ -101,7 +101,10 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
         // More menu (always present) - uses BasePopupMenuButton for centralized animation control
         BasePopupMenuButton(
-          icon: const Icon(PhosphorIconsRegular.dotsThreeVertical, size: AppTheme.iconM),
+          icon: const Icon(
+            PhosphorIconsRegular.dotsThreeVertical,
+            size: AppTheme.iconM,
+          ),
           iconSize: AppTheme.iconM,
           tooltip: l10n.moreActions,
           itemBuilder: (context) => moreMenuItems,

@@ -15,7 +15,8 @@ class GlobalBranchInfo {
   final int repositoryCount; // How many repos have this branch
   final int totalRepositories; // Total repos in workspace
   final List<String> repositoryPaths; // Paths of repos that have this branch
-  final List<String> repositoryNames; // Display names of repos that have this branch
+  final List<String>
+  repositoryNames; // Display names of repos that have this branch
 
   const GlobalBranchInfo({
     required this.branchName,
@@ -26,7 +27,8 @@ class GlobalBranchInfo {
   });
 
   /// Get display text showing branch name with count
-  String get displayText => '$branchName ($repositoryCount/$totalRepositories repos)';
+  String get displayText =>
+      '$branchName ($repositoryCount/$totalRepositories repos)';
 
   /// Check if this branch exists in all repositories
   bool get existsInAll => repositoryCount == totalRepositories;
@@ -37,7 +39,9 @@ class GlobalBranchInfo {
 /// 1. Selected project changes
 /// 2. Any repository's current branch changes (branch checkout)
 /// Does NOT rebuild when selecting a repository (only metadata change)
-final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) async {
+final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((
+  ref,
+) async {
   Logger.debug('[GlobalBranch] Provider rebuilding...');
 
   // Watch only repository paths as a string key to avoid rebuilds on metadata changes (e.g., lastAccessed)
@@ -49,7 +53,9 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
       return paths.join('|');
     }),
   );
-  Logger.debug('[GlobalBranch] repositoryPathsKey hash: ${repositoryPathsKey.hashCode}');
+  Logger.debug(
+    '[GlobalBranch] repositoryPathsKey hash: ${repositoryPathsKey.hashCode}',
+  );
 
   // Read full repo objects for processing (don't watch to avoid metadata rebuilds)
   final allRepositories = ref.read(workspaceProvider);
@@ -58,11 +64,15 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
   Logger.debug('[GlobalBranch] gitExecutablePath: $gitExecutablePath');
 
   // Watch protected branches config - only show protected branches for cross-repo checkout
-  final protectedBranches = ref.watch(configProvider.select((c) => c.git.protectedBranches));
+  final protectedBranches = ref.watch(
+    configProvider.select((c) => c.git.protectedBranches),
+  );
   Logger.debug('[GlobalBranch] protectedBranches: $protectedBranches');
 
   // Watch selected project ID - rebuild when project changes
-  final selectedProjectId = ref.watch(selectedProjectProvider.select((p) => p?.id));
+  final selectedProjectId = ref.watch(
+    selectedProjectProvider.select((p) => p?.id),
+  );
   Logger.debug('[GlobalBranch] selectedProjectId: $selectedProjectId');
 
   final selectedProject = ref.read(selectedProjectProvider);
@@ -71,14 +81,17 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
   // Create a sorted string representation for equality comparison
   final currentBranchesKey = ref.watch(
     workspaceRepositoryStatusProvider.select((statuses) {
-      final entries = statuses.entries
-          .map((e) => '${e.key}:${e.value.currentBranch ?? ""}')
-          .toList()
-        ..sort();
+      final entries =
+          statuses.entries
+              .map((e) => '${e.key}:${e.value.currentBranch ?? ""}')
+              .toList()
+            ..sort();
       return entries.join('|');
     }),
   );
-  Logger.debug('[GlobalBranch] currentBranchesKey hash: ${currentBranchesKey.hashCode}');
+  Logger.debug(
+    '[GlobalBranch] currentBranchesKey hash: ${currentBranchesKey.hashCode}',
+  );
 
   // Read full statuses for processing (don't watch to avoid rebuilds on metadata changes)
   final statuses = ref.read(workspaceRepositoryStatusProvider);
@@ -87,15 +100,18 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
 
   // Filter repositories to only those in the selected project
   final repositories = selectedProject != null
-      ? allRepositories.where((repo) => selectedProject.containsRepository(repo.path)).toList()
+      ? allRepositories
+            .where((repo) => selectedProject.containsRepository(repo.path))
+            .toList()
       : allRepositories;
 
   if (repositories.isEmpty) return [];
 
   // Maps to track branches and repository states
-  final allBranches = <String>{};  // All unique branch names across all repos
-  final repoCurrentBranches = <String, String>{};  // repo path -> current branch
-  final repoAvailableBranches = <String, Set<String>>{};  // repo path -> available branches
+  final allBranches = <String>{}; // All unique branch names across all repos
+  final repoCurrentBranches = <String, String>{}; // repo path -> current branch
+  final repoAvailableBranches =
+      <String, Set<String>>{}; // repo path -> available branches
 
   // Query each repository for its branches
   for (final repo in repositories) {
@@ -112,7 +128,10 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
 
     // Query all available branches for this repo
     try {
-      final gitService = GitService(repo.path, gitExecutablePath: gitExecutablePath);
+      final gitService = GitService(
+        repo.path,
+        gitExecutablePath: gitExecutablePath,
+      );
       final branches = await gitService.getBranches();
       repoAvailableBranches[repo.path] = branches.toSet();
       allBranches.addAll(branches);
@@ -138,7 +157,8 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
       if (currentBranch == null) continue;
 
       // Only include if repo is NOT on this branch AND has this branch available
-      if (currentBranch != branchName && availableBranches.contains(branchName)) {
+      if (currentBranch != branchName &&
+          availableBranches.contains(branchName)) {
         reposNotOnBranch.add(repo.path);
         repoNamesNotOnBranch.add(repo.displayName);
       }
@@ -154,9 +174,9 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
   final branches = branchesToSwitch.entries.map((entry) {
     return GlobalBranchInfo(
       branchName: entry.key,
-      repositoryCount: entry.value.length,  // Count of repos that can switch
+      repositoryCount: entry.value.length, // Count of repos that can switch
       totalRepositories: repositories.length,
-      repositoryPaths: entry.value,  // Repos that are NOT on this branch
+      repositoryPaths: entry.value, // Repos that are NOT on this branch
       repositoryNames: branchNamesMap[entry.key] ?? [],
     );
   }).toList();
@@ -174,7 +194,9 @@ final globalBranchesProvider = FutureProvider<List<GlobalBranchInfo>>((ref) asyn
     return a.branchName.compareTo(b.branchName);
   });
 
-  Logger.debug('[GlobalBranch] Found ${protectedBranchesOnly.length} protected branches for cross-repo checkout');
+  Logger.debug(
+    '[GlobalBranch] Found ${protectedBranchesOnly.length} protected branches for cross-repo checkout',
+  );
 
   return protectedBranchesOnly;
 });

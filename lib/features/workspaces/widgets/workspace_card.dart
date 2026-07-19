@@ -132,7 +132,9 @@ class WorkspaceCard extends StatelessWidget {
               ),
               const SizedBox(width: AppTheme.paddingS),
               BodySmallLabel(
-                AppLocalizations.of(context)!.repositoriesCount(project.repositoryPaths.length),
+                AppLocalizations.of(
+                  context,
+                )!.repositoriesCount(project.repositoryPaths.length),
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ],

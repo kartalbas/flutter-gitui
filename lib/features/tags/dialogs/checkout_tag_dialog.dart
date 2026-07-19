@@ -10,10 +10,7 @@ import '../../../shared/components/base_label.dart';
 class CheckoutTagDialog extends StatelessWidget {
   final String tagName;
 
-  const CheckoutTagDialog({
-    super.key,
-    required this.tagName,
-  });
+  const CheckoutTagDialog({super.key, required this.tagName});
 
   @override
   Widget build(BuildContext context) {

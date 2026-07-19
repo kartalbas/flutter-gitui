@@ -39,14 +39,18 @@ class TagParser {
         if (name.isEmpty || commitHash.isEmpty) continue;
 
         // Determine tag type based on object type
-        final type = objectType == 'tag' ? GitTagType.annotated : GitTagType.lightweight;
+        final type = objectType == 'tag'
+            ? GitTagType.annotated
+            : GitTagType.lightweight;
 
         // Parse tagger date
         DateTime? taggerDate;
         if (taggerDateStr.isNotEmpty) {
           try {
             final unixTimestamp = int.parse(taggerDateStr);
-            taggerDate = DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000);
+            taggerDate = DateTime.fromMillisecondsSinceEpoch(
+              unixTimestamp * 1000,
+            );
           } catch (_) {
             // If timestamp parsing fails, continue without it
           }
@@ -60,16 +64,20 @@ class TagParser {
           message = commitMessage;
         }
 
-        tags.add(GitTag(
-          name: name,
-          commitHash: commitHash,
-          type: type,
-          message: message,
-          taggerName: taggerName.isNotEmpty ? taggerName : null,
-          taggerEmail: taggerEmail.isNotEmpty ? _cleanEmail(taggerEmail) : null,
-          date: taggerDate,
-          commitMessage: commitMessage.isNotEmpty ? commitMessage : null,
-        ));
+        tags.add(
+          GitTag(
+            name: name,
+            commitHash: commitHash,
+            type: type,
+            message: message,
+            taggerName: taggerName.isNotEmpty ? taggerName : null,
+            taggerEmail: taggerEmail.isNotEmpty
+                ? _cleanEmail(taggerEmail)
+                : null,
+            date: taggerDate,
+            commitMessage: commitMessage.isNotEmpty ? commitMessage : null,
+          ),
+        );
       } catch (e) {
         // Skip malformed lines
         continue;
@@ -117,7 +125,9 @@ class TagParser {
         if (!passedHeader) {
           inMessage = false;
         }
-      } else if (line.trim().isEmpty && result['type'] == 'annotated' && !passedHeader) {
+      } else if (line.trim().isEmpty &&
+          result['type'] == 'annotated' &&
+          !passedHeader) {
         // Empty line after header starts message
         inMessage = true;
         passedHeader = true;

@@ -41,7 +41,8 @@ class CreatePullRequestDialog extends StatefulWidget {
   });
 
   @override
-  State<CreatePullRequestDialog> createState() => _CreatePullRequestDialogState();
+  State<CreatePullRequestDialog> createState() =>
+      _CreatePullRequestDialogState();
 }
 
 class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
@@ -75,7 +76,9 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
     // Try to detect main branch from available branches for target
     final mainBranches = ['main', 'master', 'develop', 'development'];
     _selectedBaseBranch = widget.availableBranches.firstWhere(
-      (branch) => mainBranches.contains(branch.name) && branch.name != widget.currentBranch,
+      (branch) =>
+          mainBranches.contains(branch.name) &&
+          branch.name != widget.currentBranch,
       orElse: () => widget.availableBranches.firstWhere(
         (branch) => branch.name != widget.currentBranch,
         orElse: () => widget.availableBranches.isNotEmpty
@@ -155,7 +158,10 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     displayStringForItem: (branch) => branch.name,
                     items: sourceBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
-                          ? timeago.format(branch.lastCommitDate!, locale: 'en_short')
+                          ? timeago.format(
+                              branch.lastCommitDate!,
+                              locale: 'en_short',
+                            )
                           : null;
                       return SearchableDropdownItem<GitBranch>.simple(
                         value: branch,
@@ -173,7 +179,8 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                           // The target dropdown hides the source branch, so a base that
                           // just became the source is no longer selectable and would
                           // otherwise survive as a same-branch pull request.
-                          if (_selectedBaseBranch.name == _selectedSourceBranch.name) {
+                          if (_selectedBaseBranch.name ==
+                              _selectedSourceBranch.name) {
                             _resetBranchSelection();
                           }
                         });
@@ -192,10 +199,14 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const SizedBox(height: AppTheme.paddingL + AppTheme.paddingS),
+                    const SizedBox(
+                      height: AppTheme.paddingL + AppTheme.paddingS,
+                    ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(AppTheme.radiusM),
                       ),
                       child: Row(
@@ -247,7 +258,10 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     displayStringForItem: (branch) => branch.name,
                     items: targetBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
-                          ? timeago.format(branch.lastCommitDate!, locale: 'en_short')
+                          ? timeago.format(
+                              branch.lastCommitDate!,
+                              locale: 'en_short',
+                            )
                           : null;
                       return SearchableDropdownItem<GitBranch>.simple(
                         value: branch,
@@ -278,10 +292,14 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const SizedBox(height: AppTheme.paddingL + AppTheme.paddingS),
+                    const SizedBox(
+                      height: AppTheme.paddingL + AppTheme.paddingS,
+                    ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(AppTheme.radiusM),
                       ),
                       child: Row(
@@ -320,9 +338,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // PR Title
-            LabelLargeLabel(
-              l10n.pullRequestTitleLabel,
-            ),
+            LabelLargeLabel(l10n.pullRequestTitleLabel),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _titleController,
@@ -340,9 +356,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // PR Description
-            LabelLargeLabel(
-              l10n.descriptionLabel,
-            ),
+            LabelLargeLabel(l10n.descriptionLabel),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _descriptionController,
@@ -373,7 +387,9 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
@@ -453,7 +469,9 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
         ? widget.availableBranches
         : widget.availableBranches.where((b) => !b.isRemote).toList();
     _selectedBaseBranch = newFilteredBranches.firstWhere(
-      (branch) => mainBranches.contains(branch.name) && branch.name != _selectedSourceBranch.name,
+      (branch) =>
+          mainBranches.contains(branch.name) &&
+          branch.name != _selectedSourceBranch.name,
       orElse: () => newFilteredBranches.firstWhere(
         (branch) => branch.name != _selectedSourceBranch.name,
         orElse: () => newFilteredBranches.isNotEmpty
@@ -480,9 +498,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : null,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
         child: MenuItemLabel(

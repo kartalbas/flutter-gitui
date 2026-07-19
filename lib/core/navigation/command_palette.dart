@@ -60,11 +60,24 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     // Fuzzy search
     final results = <GitCommand>[];
     for (final command in GitCommands.all) {
-      final titleScore = ratio(query.toLowerCase(), command.getTitle(l10n).toLowerCase());
-      final descScore = ratio(query.toLowerCase(), command.getDescription(l10n).toLowerCase());
-      final categoryScore = ratio(query.toLowerCase(), command.category.getLocalizedName(l10n).toLowerCase());
+      final titleScore = ratio(
+        query.toLowerCase(),
+        command.getTitle(l10n).toLowerCase(),
+      );
+      final descScore = ratio(
+        query.toLowerCase(),
+        command.getDescription(l10n).toLowerCase(),
+      );
+      final categoryScore = ratio(
+        query.toLowerCase(),
+        command.category.getLocalizedName(l10n).toLowerCase(),
+      );
 
-      final maxScore = [titleScore, descScore, categoryScore].reduce((a, b) => a > b ? a : b);
+      final maxScore = [
+        titleScore,
+        descScore,
+        categoryScore,
+      ].reduce((a, b) => a > b ? a : b);
 
       if (maxScore > 40) {
         // Threshold for fuzzy match
@@ -97,7 +110,10 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     if (_filteredCommands.isEmpty) return;
 
     setState(() {
-      _selectedIndex = (_selectedIndex + delta).clamp(0, _filteredCommands.length - 1);
+      _selectedIndex = (_selectedIndex + delta).clamp(
+        0,
+        _filteredCommands.length - 1,
+      );
     });
   }
 
@@ -132,129 +148,133 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
               ),
             ),
             child: Column(
-            children: [
-              // Handle bar
-              Container(
-                margin: const EdgeInsets.only(top: AppTheme.paddingS),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha:0.4),
-                  borderRadius: BorderRadius.circular(2),
+              children: [
+                // Handle bar
+                Container(
+                  margin: const EdgeInsets.only(top: AppTheme.paddingS),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
 
-              // Search field
-              Padding(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
-                child: BaseTextField(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  hintText: AppLocalizations.of(context)!.hintTextCommandPalette,
-                  prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-                  variant: TextFieldVariant.filled,
-                  onSubmitted: (_) {
-                    if (_filteredCommands.isNotEmpty) {
-                      _executeCommand(_filteredCommands[_selectedIndex]);
-                    }
-                  },
-                ),
-              ),
-
-              // Results count
-              if (_controller.text.isNotEmpty)
+                // Search field
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingM),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: BodySmallLabel(
-                      '${_filteredCommands.length} results',
-                    ),
+                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                  child: BaseTextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    hintText: AppLocalizations.of(
+                      context,
+                    )!.hintTextCommandPalette,
+                    prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                    variant: TextFieldVariant.filled,
+                    onSubmitted: (_) {
+                      if (_filteredCommands.isNotEmpty) {
+                        _executeCommand(_filteredCommands[_selectedIndex]);
+                      }
+                    },
                   ),
                 ),
 
-              const SizedBox(height: AppTheme.paddingS),
-
-              // Command list
-              Expanded(
-                child: _filteredCommands.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              PhosphorIconsRegular.magnifyingGlass,
-                              size: 48,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(height: AppTheme.paddingM),
-                            TitleMediumLabel(
-                              'No commands found',
-                            ),
-                            const SizedBox(height: AppTheme.paddingS),
-                            BodySmallLabel(
-                              'Try a different search term',
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: scrollController,
-                        itemCount: _filteredCommands.length,
-                        itemBuilder: (context, index) {
-                          final command = _filteredCommands[index];
-                          final isSelected = index == _selectedIndex;
-
-                          final l10n = AppLocalizations.of(context)!;
-                          return BaseListItem(
-                            isSelected: isSelected,
-                            leading: Icon(command.icon),
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                BodyMediumLabel(command.getTitle(l10n)),
-                                BodySmallLabel(command.getDescription(l10n)),
-                              ],
-                            ),
-                            trailing: command.shortcut != null
-                                ? BaseBadge(
-                                    label: command.shortcut!,
-                                    size: BadgeSize.small,
-                                    variant: BadgeVariant.neutral,
-                                  )
-                                : null,
-                            onTap: () => _executeCommand(command),
-                          );
-                        },
+                // Results count
+                if (_controller.text.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.paddingM,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: BodySmallLabel(
+                        '${_filteredCommands.length} results',
                       ),
-              ),
-
-              // Footer with tips
-              Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
+
+                const SizedBox(height: AppTheme.paddingS),
+
+                // Command list
+                Expanded(
+                  child: _filteredCommands.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                PhosphorIconsRegular.magnifyingGlass,
+                                size: 48,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(height: AppTheme.paddingM),
+                              TitleMediumLabel('No commands found'),
+                              const SizedBox(height: AppTheme.paddingS),
+                              BodySmallLabel('Try a different search term'),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: scrollController,
+                          itemCount: _filteredCommands.length,
+                          itemBuilder: (context, index) {
+                            final command = _filteredCommands[index];
+                            final isSelected = index == _selectedIndex;
+
+                            final l10n = AppLocalizations.of(context)!;
+                            return BaseListItem(
+                              isSelected: isSelected,
+                              leading: Icon(command.icon),
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  BodyMediumLabel(command.getTitle(l10n)),
+                                  BodySmallLabel(command.getDescription(l10n)),
+                                ],
+                              ),
+                              trailing: command.shortcut != null
+                                  ? BaseBadge(
+                                      label: command.shortcut!,
+                                      size: BadgeSize.small,
+                                      variant: BadgeVariant.neutral,
+                                    )
+                                  : null,
+                              onTap: () => _executeCommand(command),
+                            );
+                          },
+                        ),
                 ),
-                child: Row(
-                  children: [
-                    _buildKeyHint(context, '↑↓', 'Navigate'),
-                    const SizedBox(width: AppTheme.paddingM),
-                    _buildKeyHint(context, '↵', 'Execute'),
-                    const SizedBox(width: AppTheme.paddingM),
-                    _buildKeyHint(context, 'Esc', 'Close'),
-                    const Spacer(),
-                    BodySmallLabel(
-                      '${GitCommands.all.length} commands available',
+
+                // Footer with tips
+                Container(
+                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
                     ),
-                  ],
+                  ),
+                  child: Row(
+                    children: [
+                      _buildKeyHint(context, '↑↓', 'Navigate'),
+                      const SizedBox(width: AppTheme.paddingM),
+                      _buildKeyHint(context, '↵', 'Execute'),
+                      const SizedBox(width: AppTheme.paddingM),
+                      _buildKeyHint(context, 'Esc', 'Close'),
+                      const Spacer(),
+                      BodySmallLabel(
+                        '${GitCommands.all.length} commands available',
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
           ),
         );
       },
@@ -273,18 +293,12 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outline,
-            ),
+            border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
-          child: LabelSmallLabel(
-            key,
-          ),
+          child: LabelSmallLabel(key),
         ),
         const SizedBox(width: AppTheme.paddingXS),
-        BodySmallLabel(
-          label,
-        ),
+        BodySmallLabel(label),
       ],
     );
   }

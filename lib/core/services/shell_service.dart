@@ -41,10 +41,16 @@ class ShellService {
   static Map<String, String> get environment {
     if (!Platform.isMacOS) return Platform.environment;
 
-    const extraPaths = ['/opt/homebrew/bin', '/usr/local/bin', '/opt/local/bin'];
+    const extraPaths = [
+      '/opt/homebrew/bin',
+      '/usr/local/bin',
+      '/opt/local/bin',
+    ];
     final currentPath = Platform.environment['PATH'] ?? '';
     final entries = currentPath.split(':');
-    final missing = extraPaths.where((path) => !entries.contains(path)).toList();
+    final missing = extraPaths
+        .where((path) => !entries.contains(path))
+        .toList();
     if (missing.isEmpty) return Platform.environment;
 
     return {

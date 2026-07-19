@@ -10,8 +10,9 @@ import '../services/history_search_service.dart';
 final historySearchServiceProvider = Provider((ref) => HistorySearchService());
 
 /// Provider for current search filter
-final historySearchFilterProvider =
-    StateProvider<HistorySearchFilter>((ref) => const HistorySearchFilter.empty());
+final historySearchFilterProvider = StateProvider<HistorySearchFilter>(
+  (ref) => const HistorySearchFilter.empty(),
+);
 
 /// Provider for filtered commits based on search criteria
 /// Now searches across ALL commits using git log, not just loaded ones

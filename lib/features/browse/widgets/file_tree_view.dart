@@ -225,7 +225,8 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
     // Check if branch has changed
     final currentBranch = ref.read(currentBranchProvider).value;
-    final branchChanged = _previousBranch != null && _previousBranch != currentBranch;
+    final branchChanged =
+        _previousBranch != null && _previousBranch != currentBranch;
 
     // Clear cache if repository changed
     if (oldWidget.repositoryPath != widget.repositoryPath) {
@@ -395,11 +396,16 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     }
 
     try {
-      final paths = await gitService.getIgnoredPaths().then((result) => result.unwrap());
+      final paths = await gitService.getIgnoredPaths().then(
+        (result) => result.unwrap(),
+      );
       // Directory entries arrive with a trailing slash; strip it so they compare
       // equal to the relative path built from a FileSystemEntity.
       _ignoredPaths = paths
-          .map((path) => path.endsWith('/') ? path.substring(0, path.length - 1) : path)
+          .map(
+            (path) =>
+                path.endsWith('/') ? path.substring(0, path.length - 1) : path,
+          )
           .toSet();
     } catch (e) {
       // Listing an ignored file is a far smaller failure than an empty tree.
@@ -416,11 +422,16 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   bool _isIgnored(String fullPath) {
     if (_ignoredPaths.isEmpty) return false;
     // git uses forward slashes, Windows uses backslashes
-    final relativePath = p.relative(fullPath, from: widget.repositoryPath).replaceAll('\\', '/');
+    final relativePath = p
+        .relative(fullPath, from: widget.repositoryPath)
+        .replaceAll('\\', '/');
     return _ignoredPaths.contains(relativePath);
   }
 
-  Future<List<FileTreeNode>> _buildTreeNodes(String dirPath, {bool isRoot = false}) async {
+  Future<List<FileTreeNode>> _buildTreeNodes(
+    String dirPath, {
+    bool isRoot = false,
+  }) async {
     final dir = Directory(dirPath);
     final nodes = <FileTreeNode>[];
 
@@ -433,9 +444,10 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
         final bIsDir = b is Directory;
         if (aIsDir && !bIsDir) return -1;
         if (!aIsDir && bIsDir) return 1;
-        return p.basename(a.path).toLowerCase().compareTo(
-          p.basename(b.path).toLowerCase(),
-        );
+        return p
+            .basename(a.path)
+            .toLowerCase()
+            .compareTo(p.basename(b.path).toLowerCase());
       });
 
       for (final entity in entities) {
@@ -452,12 +464,14 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
         final isDirectory = entity is Directory;
 
-        nodes.add(FileTreeNode(
-          name: name,
-          fullPath: entity.path,
-          isDirectory: isDirectory,
-          children: [], // Load children on expand
-        ));
+        nodes.add(
+          FileTreeNode(
+            name: name,
+            fullPath: entity.path,
+            isDirectory: isDirectory,
+            children: [], // Load children on expand
+          ),
+        );
       }
     } catch (e) {
       Logger.error('Error reading directory $dirPath', e);
@@ -470,7 +484,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     for (final node in nodes) {
       // Find matching status
       // Normalize path separators: git uses forward slashes, Windows uses backslashes
-      final relativePath = p.relative(node.fullPath, from: widget.repositoryPath).replaceAll('\\', '/');
+      final relativePath = p
+          .relative(node.fullPath, from: widget.repositoryPath)
+          .replaceAll('\\', '/');
       final status = statuses.firstWhere(
         (s) => s.path == relativePath,
         orElse: () => const FileStatus(
@@ -500,55 +516,69 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
     if (_selectedNode != null && !_selectedNode!.isDirectory) {
       // Open in Editor (only for files)
-      actions.add(DiffViewerAction(
-        icon: PhosphorIconsRegular.pencil,
-        label: l10n.openInEditor,
-        onPressed: () => _openInEditor(_selectedNode!.fullPath),
-      ));
+      actions.add(
+        DiffViewerAction(
+          icon: PhosphorIconsRegular.pencil,
+          label: l10n.openInEditor,
+          onPressed: () => _openInEditor(_selectedNode!.fullPath),
+        ),
+      );
 
       // Rename (F2)
-      actions.add(DiffViewerAction(
-        icon: PhosphorIconsRegular.textbox,
-        label: l10n.rename,
-        onPressed: () => _renameFile(context, _selectedNode!.fullPath),
-      ));
+      actions.add(
+        DiffViewerAction(
+          icon: PhosphorIconsRegular.textbox,
+          label: l10n.rename,
+          onPressed: () => _renameFile(context, _selectedNode!.fullPath),
+        ),
+      );
 
       // Copy (Ctrl+C)
-      actions.add(DiffViewerAction(
-        icon: PhosphorIconsRegular.copy,
-        label: l10n.copyFile,
-        onPressed: () => _copyFile(context, _selectedNode!.fullPath),
-      ));
+      actions.add(
+        DiffViewerAction(
+          icon: PhosphorIconsRegular.copy,
+          label: l10n.copyFile,
+          onPressed: () => _copyFile(context, _selectedNode!.fullPath),
+        ),
+      );
 
       // Paste (Ctrl+V) - only show if we have something copied
       if (_copiedFilePath != null) {
-        actions.add(DiffViewerAction(
-          icon: PhosphorIconsRegular.clipboard,
-          label: l10n.paste,
-          onPressed: () => _pasteFile(context, _selectedNode!.fullPath),
-        ));
+        actions.add(
+          DiffViewerAction(
+            icon: PhosphorIconsRegular.clipboard,
+            label: l10n.paste,
+            onPressed: () => _pasteFile(context, _selectedNode!.fullPath),
+          ),
+        );
       }
 
       // Delete (Del)
-      actions.add(DiffViewerAction(
-        icon: PhosphorIconsRegular.trash,
-        label: l10n.delete,
-        onPressed: () => _deleteFile(context, _selectedNode!.fullPath),
-      ));
+      actions.add(
+        DiffViewerAction(
+          icon: PhosphorIconsRegular.trash,
+          label: l10n.delete,
+          onPressed: () => _deleteFile(context, _selectedNode!.fullPath),
+        ),
+      );
 
       // Copy Path
-      actions.add(DiffViewerAction(
-        icon: PhosphorIconsRegular.path,
-        label: l10n.labelCopyPath,
-        onPressed: () => _copyPath(_selectedNode!.fullPath),
-      ));
+      actions.add(
+        DiffViewerAction(
+          icon: PhosphorIconsRegular.path,
+          label: l10n.labelCopyPath,
+          onPressed: () => _copyPath(_selectedNode!.fullPath),
+        ),
+      );
 
       // Reveal in Explorer
-      actions.add(DiffViewerAction(
-        icon: PhosphorIconsRegular.folderOpen,
-        label: l10n.labelRevealInExplorer,
-        onPressed: () => _revealInExplorer(_selectedNode!.fullPath),
-      ));
+      actions.add(
+        DiffViewerAction(
+          icon: PhosphorIconsRegular.folderOpen,
+          label: l10n.labelRevealInExplorer,
+          onPressed: () => _revealInExplorer(_selectedNode!.fullPath),
+        ),
+      );
     }
 
     return actions;
@@ -627,10 +657,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     return GestureDetector(
       onTap: () => _treeController.requestFocus(),
       child: CallbackShortcuts(
-        bindings: {
-          ..._treeController.keyBindings,
-          ...additionalBindings,
-        },
+        bindings: {..._treeController.keyBindings, ...additionalBindings},
         child: Focus(
           focusNode: _treeController.focusNode,
           autofocus: true,
@@ -639,17 +666,18 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
             builder: (context, _) {
               final nodes = _treeController.flattenedNodes;
               if (nodes.isEmpty) {
-                return const Center(
-                  child: BodyMediumLabel('No files'),
-                );
+                return const Center(child: BodyMediumLabel('No files'));
               }
               return ListView.builder(
                 controller: _treeController.scrollController,
                 itemCount: nodes.length,
                 itemBuilder: (context, index) {
                   final node = nodes[index];
-                  final depth = node.fullPath.split(Platform.pathSeparator).length -
-                      widget.repositoryPath.split(Platform.pathSeparator).length;
+                  final depth =
+                      node.fullPath.split(Platform.pathSeparator).length -
+                      widget.repositoryPath
+                          .split(Platform.pathSeparator)
+                          .length;
                   final isSelected = _treeController.isSelected(index);
 
                   return _buildTreeItem(node, depth, isSelected, index);
@@ -664,7 +692,10 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
   /// Search through all files and folders, loading children as needed
   /// Returns true if any matches were found in this subtree
-  Future<bool> _searchAndExpandNodes(List<FileTreeNode> nodes, String query) async {
+  Future<bool> _searchAndExpandNodes(
+    List<FileTreeNode> nodes,
+    String query,
+  ) async {
     final parser = SearchParser(query: query, mode: widget.searchMode);
     bool foundAny = false;
 
@@ -717,7 +748,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
             name: node.name,
             fullPath: node.fullPath,
             isDirectory: true,
-            children: matchingChildren.isNotEmpty ? matchingChildren : node.children,
+            children: matchingChildren.isNotEmpty
+                ? matchingChildren
+                : node.children,
             isExpanded: true, // Auto-expand folders with matches
             status: node.status,
           );
@@ -731,7 +764,12 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     return filtered;
   }
 
-  Widget _buildTreeItem(FileTreeNode node, int depth, bool isSelected, int index) {
+  Widget _buildTreeItem(
+    FileTreeNode node,
+    int depth,
+    bool isSelected,
+    int index,
+  ) {
     return BaseTreeItem(
       node: node,
       depth: depth,
@@ -808,10 +846,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
         final normalizedPath = filePath.replaceAll('/', '\\');
 
         // Use Process.start to avoid shell interpretation issues
-        await Process.start(
-          'explorer.exe',
-          ['/select,', normalizedPath],
-        );
+        await Process.start('explorer.exe', ['/select,', normalizedPath]);
       } else if (Platform.isMacOS) {
         // macOS: Use open -R to reveal in Finder
         await Process.run('open', ['-R', filePath]);
@@ -951,7 +986,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       final sourceFile = File(_copiedFilePath!);
 
       if (!await sourceFile.exists()) {
-        Logger.warning('Paste operation: source file not found: $_copiedFilePath');
+        Logger.warning(
+          'Paste operation: source file not found: $_copiedFilePath',
+        );
         if (context.mounted) {
           NotificationService.showWarning(
             context,
@@ -980,7 +1017,8 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       final extension = p.extension(fileName);
 
       // Check if pasting in the same directory
-      final isSameDirectory = p.normalize(sourceDir) == p.normalize(destinationDirPath);
+      final isSameDirectory =
+          p.normalize(sourceDir) == p.normalize(destinationDirPath);
 
       String destinationPath = p.join(destinationDirPath, fileName);
 
@@ -990,10 +1028,20 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
           final action = await showDialog<String>(
             context: context,
             builder: (context) => BaseDialog(
-              title: isSameDirectory ? AppLocalizations.of(context)!.dialogTitleCopyFile : AppLocalizations.of(context)!.dialogTitleFileExists,
+              title: isSameDirectory
+                  ? AppLocalizations.of(context)!.dialogTitleCopyFile
+                  : AppLocalizations.of(context)!.dialogTitleFileExists,
               icon: PhosphorIconsRegular.copySimple,
               variant: DialogVariant.confirmation,
-              content: BodyMediumLabel(isSameDirectory ? AppLocalizations.of(context)!.dialogContentCopyFileExists(fileName) : AppLocalizations.of(context)!.dialogContentFileExistsDestination(fileName)),
+              content: BodyMediumLabel(
+                isSameDirectory
+                    ? AppLocalizations.of(
+                        context,
+                      )!.dialogContentCopyFileExists(fileName)
+                    : AppLocalizations.of(
+                        context,
+                      )!.dialogContentFileExistsDestination(fileName),
+              ),
               actions: [
                 BaseButton(
                   label: AppLocalizations.of(context)!.cancel,
@@ -1018,12 +1066,20 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
           if (action == 'keep_both') {
             // Generate a unique name for the copy
-            destinationPath = _generateCopyName(destinationDirPath, nameWithoutExt, extension);
+            destinationPath = _generateCopyName(
+              destinationDirPath,
+              nameWithoutExt,
+              extension,
+            );
           } else if (action == 'replace') {
             // If replacing in same directory, delete original first
             if (isSameDirectory) {
               // Can't replace itself, create a copy instead
-              destinationPath = _generateCopyName(destinationDirPath, nameWithoutExt, extension);
+              destinationPath = _generateCopyName(
+                destinationDirPath,
+                nameWithoutExt,
+                extension,
+              );
             }
             // Otherwise destinationPath stays the same for overwrite
           }
@@ -1049,7 +1105,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
   /// Generate a unique copy name like Windows Explorer
   /// Examples: "file - Copy.txt", "file (2).txt", "file (3).txt"
-  String _generateCopyName(String dirPath, String nameWithoutExt, String extension) {
+  String _generateCopyName(
+    String dirPath,
+    String nameWithoutExt,
+    String extension,
+  ) {
     // Try "filename - Copy.ext" first
     String tryPath = p.join(dirPath, '$nameWithoutExt - Copy$extension');
     if (!File(tryPath).existsSync()) {
@@ -1098,7 +1158,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
             icon: PhosphorIconsRegular.warning,
             title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
             variant: DialogVariant.destructive,
-            content: BodyMediumLabel(AppLocalizations.of(context)!.dialogContentDeleteFile(fileName)),
+            content: BodyMediumLabel(
+              AppLocalizations.of(context)!.dialogContentDeleteFile(fileName),
+            ),
             actions: [
               BaseButton(
                 label: AppLocalizations.of(context)!.cancel,

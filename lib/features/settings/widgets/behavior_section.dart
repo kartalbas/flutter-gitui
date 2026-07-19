@@ -13,10 +13,7 @@ import 'settings_section.dart';
 class BehaviorSection extends ConsumerWidget {
   final VoidCallback onEditAutoFetchInterval;
 
-  const BehaviorSection({
-    super.key,
-    required this.onEditAutoFetchInterval,
-  });
+  const BehaviorSection({super.key, required this.onEditAutoFetchInterval});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,7 +40,9 @@ class BehaviorSection extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 BodyMediumLabel(l10n.autoFetchInterval),
-                BodySmallLabel(l10n.autoFetchIntervalMinutes(behavior.autoFetchInterval)),
+                BodySmallLabel(
+                  l10n.autoFetchIntervalMinutes(behavior.autoFetchInterval),
+                ),
               ],
             ),
             trailing: BaseIconButton(

@@ -112,8 +112,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (period == _autoFetchPeriod) return;
     _autoFetchPeriod = period;
     _autoFetchTimer?.cancel();
-    _autoFetchTimer =
-        period == null ? null : Timer.periodic(period, (_) => _autoFetch());
+    _autoFetchTimer = period == null
+        ? null
+        : Timer.periodic(period, (_) => _autoFetch());
   }
 
   Future<void> _autoFetch() async {
@@ -132,7 +133,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     final configLoading = ref.watch(configLoadingProvider);
     final configLoadFailed = ref.watch(configLoadFailureProvider);
     final gitPathInvalid = ref.watch(gitPathInvalidProvider);
-    final allSettingsConfigured = ref.watch(allRequiredSettingsConfiguredProvider);
+    final allSettingsConfigured = ref.watch(
+      allRequiredSettingsConfiguredProvider,
+    );
     final missingSettings = ref.watch(missingRequiredSettingsProvider);
     final isRailExtended = ref.watch(navigationRailExtendedProvider);
     final whatsNewChecked = ref.watch(whatsNewDialogCheckedProvider);
@@ -166,7 +169,8 @@ class _AppShellState extends ConsumerState<AppShell> {
       _hasCheckedSettings = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (destination != AppDestination.settings) {
-          ref.read(navigationDestinationProvider.notifier).state = AppDestination.settings;
+          ref.read(navigationDestinationProvider.notifier).state =
+              AppDestination.settings;
         }
       });
     }
@@ -227,12 +231,14 @@ class _AppShellState extends ConsumerState<AppShell> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
           // Mark this version as shown for this session
-          ref.read(updateDialogShownProvider.notifier).state = updateAvailable.version;
+          ref.read(updateDialogShownProvider.notifier).state =
+              updateAvailable.version;
 
           showDialog(
             context: context,
             barrierDismissible: false, // Prevent dismissing by clicking outside
-            builder: (context) => UpdateAvailableDialog(updateInfo: updateAvailable),
+            builder: (context) =>
+                UpdateAvailableDialog(updateInfo: updateAvailable),
           );
         }
       });
@@ -257,254 +263,296 @@ class _AppShellState extends ConsumerState<AppShell> {
                 children: [
                   // Navigation Rail
                   NavigationRail(
-                extended: isRailExtended,
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                selectedIndex: destination.index,
-                onDestinationSelected: (index) {
-                  ref.read(navigationDestinationProvider.notifier).state =
-                      AppDestination.values[index];
-                },
-                leading: Column(
-                  children: [
-                    const SizedBox(height: AppTheme.paddingM),
-                    // App logo/title - double-tap to show About dialog
-                    GestureDetector(
-                      onDoubleTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => const AppAboutDialog(),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Icon(
-                            PhosphorIconsBold.gitBranch,
-                            size: AppTheme.iconXL,
-                            color: Theme.of(context).colorScheme.primary,
+                    extended: isRailExtended,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerLow,
+                    selectedIndex: destination.index,
+                    onDestinationSelected: (index) {
+                      ref.read(navigationDestinationProvider.notifier).state =
+                          AppDestination.values[index];
+                    },
+                    leading: Column(
+                      children: [
+                        const SizedBox(height: AppTheme.paddingM),
+                        // App logo/title - double-tap to show About dialog
+                        GestureDetector(
+                          onDoubleTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const AppAboutDialog(),
+                            );
+                          },
+                          child: Column(
+                            children: [
+                              Icon(
+                                PhosphorIconsBold.gitBranch,
+                                size: AppTheme.iconXL,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              if (isRailExtended) ...[
+                                const SizedBox(height: AppTheme.paddingS),
+                                TitleMediumLabel(
+                                  AppLocalizations.of(context)!.appTitle,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
+                            ],
                           ),
-                          if (isRailExtended) ...[
-                            const SizedBox(height: AppTheme.paddingS),
-                            TitleMediumLabel(
-                              AppLocalizations.of(context)!.appTitle,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ],
-                        ],
+                        ),
+                        const SizedBox(height: AppTheme.paddingL),
+                      ],
+                    ),
+                    trailing: Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: AppTheme.paddingM,
+                          ),
+                          child: BaseIconButton(
+                            icon: isRailExtended
+                                ? PhosphorIconsRegular.caretLeft
+                                : PhosphorIconsRegular.caretRight,
+                            onPressed: () {
+                              ref
+                                  .read(configProvider.notifier)
+                                  .setNavigationRailExtended(!isRailExtended);
+                            },
+                            tooltip: isRailExtended
+                                ? AppLocalizations.of(context)!.collapse
+                                : AppLocalizations.of(context)!.expand,
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: AppTheme.paddingL),
-                  ],
-                ),
-                trailing: Expanded(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: AppTheme.paddingM),
-                      child: BaseIconButton(
-                        icon: isRailExtended
-                            ? PhosphorIconsRegular.caretLeft
-                            : PhosphorIconsRegular.caretRight,
-                        onPressed: () {
-                          ref.read(configProvider.notifier).setNavigationRailExtended(!isRailExtended);
-                        },
-                        tooltip: isRailExtended
-                            ? AppLocalizations.of(context)!.collapse
-                            : AppLocalizations.of(context)!.expand,
-                      ),
+                    destinations: AppDestination.values.map((dest) {
+                      // Show badges ONLY for selected repository
+                      int? badgeCount;
+                      if (selectedRepoStatus != null &&
+                          !selectedRepoStatus.isLoading) {
+                        // Only show badges when a repository is selected
+                        if (dest == AppDestination.changes &&
+                            selectedRepoStatus.hasUncommittedChanges) {
+                          // Show actual count of changed files (staged + unstaged)
+                          final allStatuses =
+                              ref.watch(repositoryStatusProvider).value ?? [];
+                          badgeCount = allStatuses.length;
+                          // Don't show badge if count is 0
+                          if (badgeCount == 0) badgeCount = null;
+                        } else if (dest == AppDestination.stashes) {
+                          // Show stash count badge
+                          badgeCount = ref.watch(stashCountProvider);
+                          // Don't show badge if count is 0
+                          if (badgeCount == 0) badgeCount = null;
+                        }
+                      }
+
+                      return NavigationRailDestination(
+                        icon: _buildIconWithBadge(
+                          context,
+                          Icon(dest.icon),
+                          badgeCount,
+                        ),
+                        selectedIcon: _buildIconWithBadge(
+                          context,
+                          Icon(dest.iconSelected),
+                          badgeCount,
+                        ),
+                        label: BodyMediumLabel(dest.label(context)),
+                      );
+                    }).toList(),
+                  ),
+
+                  // Vertical divider
+                  const VerticalDivider(thickness: 1, width: 1),
+
+                  // Main content area
+                  Expanded(
+                    child: Column(
+                      children: [
+                        // Top bar with command log toggle
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.paddingM,
+                            vertical: AppTheme.paddingS,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerLow,
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outlineVariant,
+                              ),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              // Workspace switcher
+                              const WorkspaceSwitcher(),
+                              const SizedBox(width: AppTheme.paddingM),
+                              // Repository switcher
+                              const RepositorySwitcher(),
+                              const SizedBox(width: AppTheme.paddingM),
+                              // Branch switcher
+                              const BranchSwitcher(),
+                              const SizedBox(width: AppTheme.paddingM),
+                              // Global branch switcher
+                              const GlobalBranchSwitcher(),
+                              const SizedBox(width: AppTheme.paddingM),
+                              // Create Branch and Create PR buttons
+                              if (currentRepoPath != null) ...[
+                                _buildGitOperationButton(
+                                  context,
+                                  ref,
+                                  PhosphorIconsRegular.gitBranch,
+                                  AppLocalizations.of(context)!.createBranch,
+                                  () => _performCreateBranch(ref),
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
+                                _buildGitOperationButton(
+                                  context,
+                                  ref,
+                                  PhosphorIconsRegular.gitPullRequest,
+                                  AppLocalizations.of(context)!.createPr,
+                                  () => _performCreatePR(ref),
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
+                                _buildGitOperationButton(
+                                  context,
+                                  ref,
+                                  PhosphorIconsRegular.gitMerge,
+                                  AppLocalizations.of(context)!.mergeBranches,
+                                  () => _performMergeBranches(context),
+                                ),
+                                const SizedBox(width: AppTheme.paddingM),
+                              ],
+                              // Git operations (Fetch, Pull, Push)
+                              if (currentRepoPath != null) ...[
+                                _buildGitOperationButton(
+                                  context,
+                                  ref,
+                                  PhosphorIconsRegular.arrowClockwise,
+                                  AppLocalizations.of(context)!.fetch,
+                                  () => _performFetch(ref),
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
+                                _buildGitOperationButton(
+                                  context,
+                                  ref,
+                                  PhosphorIconsRegular.arrowDown,
+                                  AppLocalizations.of(context)!.pull,
+                                  () => _performPull(ref),
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
+                                _buildGitOperationButton(
+                                  context,
+                                  ref,
+                                  PhosphorIconsRegular.arrowUp,
+                                  AppLocalizations.of(context)!.push,
+                                  () => _performPush(ref),
+                                ),
+                              ],
+                              const Spacer(),
+                              BaseIconButton(
+                                icon: PhosphorIconsRegular.magnifyingGlass,
+                                tooltip: AppLocalizations.of(
+                                  context,
+                                )!.commandPaletteTooltip,
+                                onPressed: () => _showCommandPalette(context),
+                                size: ButtonSize.small,
+                              ),
+                              const SizedBox(width: AppTheme.paddingS),
+                              BaseIconButton(
+                                icon: PhosphorIconsRegular.terminal,
+                                tooltip: AppLocalizations.of(
+                                  context,
+                                )!.toggleCommandLogTooltip,
+                                onPressed: () {
+                                  ref
+                                      .read(configProvider.notifier)
+                                      .setCommandLogPanelVisible(
+                                        !ref.read(
+                                          commandLogPanelVisibleProvider,
+                                        ),
+                                      );
+                                },
+                                size: ButtonSize.small,
+                              ),
+                              const SizedBox(width: AppTheme.paddingS),
+                              // Quick settings menu
+                              const QuickSettingsMenu(),
+                              const SizedBox(width: AppTheme.paddingS),
+                              // Language selector
+                              const LanguageSelector(),
+                            ],
+                          ),
+                        ),
+                        // Warning banner for missing settings
+                        if (!allSettingsConfigured)
+                          Container(
+                            padding: const EdgeInsets.all(AppTheme.paddingM),
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  PhosphorIconsBold.warning,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                                const SizedBox(width: AppTheme.paddingM),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TitleMediumLabel(
+                                        'Required settings missing',
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onErrorContainer,
+                                      ),
+                                      const SizedBox(
+                                        height: AppTheme.paddingXS,
+                                      ),
+                                      BodySmallLabel(
+                                        'Please configure: ${missingSettings.map((s) => _requiredSettingLabel(AppLocalizations.of(context)!, s)).join(', ')}',
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onErrorContainer,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (destination != AppDestination.settings)
+                                  BaseButton(
+                                    label: AppLocalizations.of(
+                                      context,
+                                    )!.goToSettings,
+                                    variant: ButtonVariant.danger,
+                                    onPressed: () {
+                                      ref
+                                              .read(
+                                                navigationDestinationProvider
+                                                    .notifier,
+                                              )
+                                              .state =
+                                          AppDestination.settings;
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ),
+                        // Content
+                        Expanded(child: _buildContent(destination)),
+                      ],
                     ),
                   ),
-                ),
-                destinations: AppDestination.values.map((dest) {
-                  // Show badges ONLY for selected repository
-                  int? badgeCount;
-                  if (selectedRepoStatus != null && !selectedRepoStatus.isLoading) {
-                    // Only show badges when a repository is selected
-                    if (dest == AppDestination.changes && selectedRepoStatus.hasUncommittedChanges) {
-                      // Show actual count of changed files (staged + unstaged)
-                      final allStatuses = ref.watch(repositoryStatusProvider).value ?? [];
-                      badgeCount = allStatuses.length;
-                      // Don't show badge if count is 0
-                      if (badgeCount == 0) badgeCount = null;
-                    } else if (dest == AppDestination.stashes) {
-                      // Show stash count badge
-                      badgeCount = ref.watch(stashCountProvider);
-                      // Don't show badge if count is 0
-                      if (badgeCount == 0) badgeCount = null;
-                    }
-                  }
 
-                  return NavigationRailDestination(
-                    icon: _buildIconWithBadge(context, Icon(dest.icon), badgeCount),
-                    selectedIcon: _buildIconWithBadge(context, Icon(dest.iconSelected), badgeCount),
-                    label: BodyMediumLabel(dest.label(context)),
-                  );
-                }).toList(),
-              ),
-
-              // Vertical divider
-              const VerticalDivider(thickness: 1, width: 1),
-
-              // Main content area
-              Expanded(
-                child: Column(
-                  children: [
-                    // Top bar with command log toggle
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.paddingM,
-                        vertical: AppTheme.paddingS,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerLow,
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          // Workspace switcher
-                          const WorkspaceSwitcher(),
-                          const SizedBox(width: AppTheme.paddingM),
-                          // Repository switcher
-                          const RepositorySwitcher(),
-                          const SizedBox(width: AppTheme.paddingM),
-                          // Branch switcher
-                          const BranchSwitcher(),
-                          const SizedBox(width: AppTheme.paddingM),
-                          // Global branch switcher
-                          const GlobalBranchSwitcher(),
-                          const SizedBox(width: AppTheme.paddingM),
-                          // Create Branch and Create PR buttons
-                          if (currentRepoPath != null) ...[
-                            _buildGitOperationButton(
-                              context,
-                              ref,
-                              PhosphorIconsRegular.gitBranch,
-                              AppLocalizations.of(context)!.createBranch,
-                              () => _performCreateBranch(ref),
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            _buildGitOperationButton(
-                              context,
-                              ref,
-                              PhosphorIconsRegular.gitPullRequest,
-                              AppLocalizations.of(context)!.createPr,
-                              () => _performCreatePR(ref),
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            _buildGitOperationButton(
-                              context,
-                              ref,
-                              PhosphorIconsRegular.gitMerge,
-                              AppLocalizations.of(context)!.mergeBranches,
-                              () => _performMergeBranches(context),
-                            ),
-                            const SizedBox(width: AppTheme.paddingM),
-                          ],
-                          // Git operations (Fetch, Pull, Push)
-                          if (currentRepoPath != null) ...[
-                            _buildGitOperationButton(
-                              context,
-                              ref,
-                              PhosphorIconsRegular.arrowClockwise,
-                              AppLocalizations.of(context)!.fetch,
-                              () => _performFetch(ref),
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            _buildGitOperationButton(
-                              context,
-                              ref,
-                              PhosphorIconsRegular.arrowDown,
-                              AppLocalizations.of(context)!.pull,
-                              () => _performPull(ref),
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            _buildGitOperationButton(
-                              context,
-                              ref,
-                              PhosphorIconsRegular.arrowUp,
-                              AppLocalizations.of(context)!.push,
-                              () => _performPush(ref),
-                            ),
-                          ],
-                          const Spacer(),
-                          BaseIconButton(
-                            icon: PhosphorIconsRegular.magnifyingGlass,
-                            tooltip: AppLocalizations.of(context)!.commandPaletteTooltip,
-                            onPressed: () => _showCommandPalette(context),
-                            size: ButtonSize.small,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          BaseIconButton(
-                            icon: PhosphorIconsRegular.terminal,
-                            tooltip: AppLocalizations.of(context)!.toggleCommandLogTooltip,
-                            onPressed: () {
-                              ref.read(configProvider.notifier).setCommandLogPanelVisible(
-                                  !ref.read(commandLogPanelVisibleProvider));
-                            },
-                            size: ButtonSize.small,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          // Quick settings menu
-                          const QuickSettingsMenu(),
-                          const SizedBox(width: AppTheme.paddingS),
-                          // Language selector
-                          const LanguageSelector(),
-                        ],
-                      ),
-                    ),
-                    // Warning banner for missing settings
-                    if (!allSettingsConfigured)
-                      Container(
-                        padding: const EdgeInsets.all(AppTheme.paddingM),
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        child: Row(
-                          children: [
-                            Icon(
-                              PhosphorIconsBold.warning,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            const SizedBox(width: AppTheme.paddingM),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TitleMediumLabel(
-                                    'Required settings missing',
-                                    color: Theme.of(context).colorScheme.onErrorContainer,
-                                  ),
-                                  const SizedBox(height: AppTheme.paddingXS),
-                                  BodySmallLabel(
-                                    'Please configure: ${missingSettings.map((s) => _requiredSettingLabel(AppLocalizations.of(context)!, s)).join(', ')}',
-                                    color: Theme.of(context).colorScheme.onErrorContainer,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (destination != AppDestination.settings)
-                              BaseButton(
-                                label: AppLocalizations.of(context)!.goToSettings,
-                                variant: ButtonVariant.danger,
-                                onPressed: () {
-                                  ref.read(navigationDestinationProvider.notifier).state =
-                                      AppDestination.settings;
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
-                    // Content
-                    Expanded(
-                      child: _buildContent(destination),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Command Log Panel
-              const CommandLogPanel(),
+                  // Command Log Panel
+                  const CommandLogPanel(),
                 ],
               ),
 
@@ -536,8 +584,9 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     // Toggle Command Log
     bind(LogicalKeyboardKey.keyL, () {
-      ref.read(configProvider.notifier).setCommandLogPanelVisible(
-          !ref.read(commandLogPanelVisibleProvider));
+      ref
+          .read(configProvider.notifier)
+          .setCommandLogPanelVisible(!ref.read(commandLogPanelVisibleProvider));
     });
 
     // Repository Switcher
@@ -589,7 +638,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     final command = await showModalBottomSheet<GitCommand>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surface.withValues(alpha: 0),
       builder: (context) => const CommandPalette(),
     );
     if (command == null || !mounted) return;
@@ -697,11 +748,14 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (!context.mounted) return;
 
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final service = BatchOperationsService(gitExecutablePath: gitExecutablePath);
+    final service = BatchOperationsService(
+      gitExecutablePath: gitExecutablePath,
+    );
 
     final results = await showBatchOperationProgressDialog(
       context,
-      title: 'Fetch ${repositoriesToFetch.length == 1 ? 'Repository' : 'Repositories'}',
+      title:
+          'Fetch ${repositoriesToFetch.length == 1 ? 'Repository' : 'Repositories'}',
       repositories: repositoriesToFetch,
       operation: (onProgress) => service.fetchAll(
         repositoriesToFetch,
@@ -776,17 +830,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (!context.mounted) return;
 
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final service = BatchOperationsService(gitExecutablePath: gitExecutablePath);
+    final service = BatchOperationsService(
+      gitExecutablePath: gitExecutablePath,
+    );
 
     final results = await showBatchOperationProgressDialog(
       context,
-      title: 'Pull ${repositoriesToPull.length == 1 ? 'Repository' : 'Repositories'}',
+      title:
+          'Pull ${repositoriesToPull.length == 1 ? 'Repository' : 'Repositories'}',
       repositories: repositoriesToPull,
-      operation: (onProgress) => service.pullAll(
-        repositoriesToPull,
-        statuses,
-        onProgress: onProgress,
-      ),
+      operation: (onProgress) =>
+          service.pullAll(repositoriesToPull, statuses, onProgress: onProgress),
     );
 
     if (results != null && context.mounted) {
@@ -868,17 +922,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     }
 
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final service = BatchOperationsService(gitExecutablePath: gitExecutablePath);
+    final service = BatchOperationsService(
+      gitExecutablePath: gitExecutablePath,
+    );
 
     final results = await showBatchOperationProgressDialog(
       context,
-      title: 'Push ${repositoriesToPush.length == 1 ? 'Repository' : 'Repositories'}',
+      title:
+          'Push ${repositoriesToPush.length == 1 ? 'Repository' : 'Repositories'}',
       repositories: repositoriesToPush,
-      operation: (onProgress) => service.pushAll(
-        repositoriesToPush,
-        statuses,
-        onProgress: onProgress,
-      ),
+      operation: (onProgress) =>
+          service.pushAll(repositoriesToPush, statuses, onProgress: onProgress),
     );
 
     if (results != null && context.mounted) {
@@ -944,7 +998,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (result == null || !context.mounted) return;
 
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final service = BatchOperationsService(gitExecutablePath: gitExecutablePath);
+    final service = BatchOperationsService(
+      gitExecutablePath: gitExecutablePath,
+    );
 
     final results = await showBatchOperationProgressDialog(
       context, // ignore: use_build_context_synchronously
@@ -1026,7 +1082,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (!context.mounted) return;
 
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final gitService = GitService(repository.path, gitExecutablePath: gitExecutablePath);
+    final gitService = GitService(
+      repository.path,
+      gitExecutablePath: gitExecutablePath,
+    );
 
     try {
       // Get current branch
@@ -1038,10 +1097,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         success: (branch) => currentBranch = branch,
         failure: (msg, error, stackTrace) {
           if (context.mounted) {
-            NotificationService.showError(
-              context,
-              'Cannot create PR: $msg',
-            );
+            NotificationService.showError(context, 'Cannot create PR: $msg');
           }
         },
       );

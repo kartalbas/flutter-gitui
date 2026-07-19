@@ -12,8 +12,12 @@ import 'empty_state.dart';
 class AsyncValueBuilder<T> extends StatelessWidget {
   final AsyncValue<T> asyncValue;
   final Widget Function(BuildContext context, T data) dataBuilder;
-  final Widget Function(BuildContext context, Object error, StackTrace stackTrace)?
-      errorBuilder;
+  final Widget Function(
+    BuildContext context,
+    Object error,
+    StackTrace stackTrace,
+  )?
+  errorBuilder;
   final Widget Function(BuildContext context)? loadingBuilder;
   final Widget Function(BuildContext context)? emptyBuilder;
   final bool Function(T data)? isEmpty;
@@ -66,8 +70,12 @@ class AsyncValueBuilder<T> extends StatelessWidget {
 class AsyncListBuilder<T> extends StatelessWidget {
   final AsyncValue<List<T>> asyncValue;
   final Widget Function(BuildContext context, List<T> items) listBuilder;
-  final Widget Function(BuildContext context, Object error, StackTrace stackTrace)?
-      errorBuilder;
+  final Widget Function(
+    BuildContext context,
+    Object error,
+    StackTrace stackTrace,
+  )?
+  errorBuilder;
   final Widget Function(BuildContext context)? loadingBuilder;
   final EmptyStateWidget? emptyState;
 

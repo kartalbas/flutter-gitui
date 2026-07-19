@@ -26,9 +26,7 @@ class BranchSwitchErrorDialog extends StatelessWidget {
       icon: PhosphorIconsRegular.xCircle,
       variant: DialogVariant.destructive,
       maxWidth: 400,
-      content: BodyMediumLabel(
-        l10n.failedToSwitchToBranch(branchName, error),
-      ),
+      content: BodyMediumLabel(l10n.failedToSwitchToBranch(branchName, error)),
       actions: [
         BaseButton(
           label: l10n.ok,

@@ -36,7 +36,7 @@ class CommandLogPanel extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.scrim.withValues(alpha:0.1),
+            color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(-2, 0),
           ),
@@ -92,7 +92,9 @@ class CommandLogPanel extends ConsumerWidget {
             icon: PhosphorIconsRegular.x,
             tooltip: l10n.close,
             onPressed: () {
-              ref.read(configProvider.notifier).setCommandLogPanelVisible(false);
+              ref
+                  .read(configProvider.notifier)
+                  .setCommandLogPanelVisible(false);
             },
           ),
         ],
@@ -161,106 +163,117 @@ class _LogEntryCardState extends State<_LogEntryCard> {
       child: BaseCard(
         padding: EdgeInsets.zero,
         content: InkWell(
-        onTap: hasOutput ? () => setState(() => _isExpanded = !_isExpanded) : null,
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Status icon
-                  Icon(
-                    log.isSuccess
-                        ? PhosphorIconsRegular.checkCircle
-                        : PhosphorIconsRegular.xCircle,
-                    size: 16,
-                    color: log.isSuccess ? AppTheme.gitAdded : AppTheme.gitDeleted,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  // Timestamp
-                  Flexible(
-                    child: BodySmallLabel(
-                      log.timestampDisplay(Localizations.localeOf(context).languageCode),
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  // Duration
-                  if (log.duration != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.paddingXS,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: LabelSmallLabel('${log.duration!.inMilliseconds}ms'),
-                    ),
-                  const Spacer(),
-                  // Copy button
-                  BaseIconButton(
-                    icon: PhosphorIconsRegular.copy,
-                    size: ButtonSize.small,
-                    tooltip: l10n.tooltipCopyCommand,
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: log.command));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.commandCopiedToClipboard),
-                          duration: Duration(seconds: 1),
-                        ),
-                      );
-                    },
-                  ),
-                  if (hasOutput) ...[
-                    const SizedBox(width: AppTheme.paddingS),
+          onTap: hasOutput
+              ? () => setState(() => _isExpanded = !_isExpanded)
+              : null,
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.paddingM),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Status icon
                     Icon(
-                      _isExpanded
-                          ? PhosphorIconsRegular.caretUp
-                          : PhosphorIconsRegular.caretDown,
+                      log.isSuccess
+                          ? PhosphorIconsRegular.checkCircle
+                          : PhosphorIconsRegular.xCircle,
                       size: 16,
+                      color: log.isSuccess
+                          ? AppTheme.gitAdded
+                          : AppTheme.gitDeleted,
                     ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: AppTheme.paddingS),
-              // Command
-              SelectableText(
-                log.command,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              // Output (expandable)
-              if (_isExpanded && hasOutput) ...[
-                const SizedBox(height: AppTheme.paddingS),
-                const Divider(),
-                const SizedBox(height: AppTheme.paddingS),
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                  ),
-                  child: SelectableText(
-                    log.fullOutput,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: log.isFailure
-                              ? AppTheme.gitDeleted
-                              : Theme.of(context).colorScheme.onSurface,
+                    const SizedBox(width: AppTheme.paddingS),
+                    // Timestamp
+                    Flexible(
+                      child: BodySmallLabel(
+                        log.timestampDisplay(
+                          Localizations.localeOf(context).languageCode,
                         ),
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: AppTheme.paddingS),
+                    // Duration
+                    if (log.duration != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.paddingXS,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: LabelSmallLabel(
+                          '${log.duration!.inMilliseconds}ms',
+                        ),
+                      ),
+                    const Spacer(),
+                    // Copy button
+                    BaseIconButton(
+                      icon: PhosphorIconsRegular.copy,
+                      size: ButtonSize.small,
+                      tooltip: l10n.tooltipCopyCommand,
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: log.command));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n.commandCopiedToClipboard),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                    ),
+                    if (hasOutput) ...[
+                      const SizedBox(width: AppTheme.paddingS),
+                      Icon(
+                        _isExpanded
+                            ? PhosphorIconsRegular.caretUp
+                            : PhosphorIconsRegular.caretDown,
+                        size: 16,
+                      ),
+                    ],
+                  ],
                 ),
+                const SizedBox(height: AppTheme.paddingS),
+                // Command
+                SelectableText(
+                  log.command,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                // Output (expandable)
+                if (_isExpanded && hasOutput) ...[
+                  const SizedBox(height: AppTheme.paddingS),
+                  const Divider(),
+                  const SizedBox(height: AppTheme.paddingS),
+                  Container(
+                    padding: const EdgeInsets.all(AppTheme.paddingM),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                    ),
+                    child: SelectableText(
+                      log.fullOutput,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: log.isFailure
+                            ? AppTheme.gitDeleted
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
 }
-

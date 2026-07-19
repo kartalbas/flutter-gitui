@@ -66,14 +66,16 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.paddingXL),
           ThemeSection(
-            getColorSchemeName: (scheme) => _getColorSchemeName(context, scheme),
+            getColorSchemeName: (scheme) =>
+                _getColorSchemeName(context, scheme),
             getFontSizeName: (size) => _getFontSizeName(context, size),
           ),
           const SizedBox(height: AppTheme.paddingXL),
           const AnimationSection(),
           const SizedBox(height: AppTheme.paddingXL),
           HistorySection(
-            onEditCommitHistoryLimit: () => _editCommitHistoryLimit(context, ref),
+            onEditCommitHistoryLimit: () =>
+                _editCommitHistoryLimit(context, ref),
           ),
           const SizedBox(height: AppTheme.paddingXL),
           const UpdatesSection(),
@@ -108,15 +110,22 @@ class SettingsScreen extends ConsumerWidget {
           // Check if output contains "git version"
           if (output.toLowerCase().contains('git version')) {
             // Extract version number (e.g., "git version 2.43.0.windows.1")
-            final versionMatch = RegExp(r'git version ([\d.]+(?:\.\w+)?(?:\.\d+)?)').firstMatch(output);
+            final versionMatch = RegExp(
+              r'git version ([\d.]+(?:\.\w+)?(?:\.\d+)?)',
+            ).firstMatch(output);
             final version = versionMatch?.group(1) ?? output;
 
             // Save git path with version
             try {
-              await ref.read(configProvider.notifier).setGitExecutablePath(selectedPath, version: version);
+              await ref
+                  .read(configProvider.notifier)
+                  .setGitExecutablePath(selectedPath, version: version);
             } catch (e) {
               if (!context.mounted) return;
-              NotificationService.showError(context, 'Failed to save git executable path: $e');
+              NotificationService.showError(
+                context,
+                'Failed to save git executable path: $e',
+              );
               return;
             }
           } else {
@@ -126,7 +135,13 @@ class SettingsScreen extends ConsumerWidget {
               context: context,
               builder: (dialogContext) => BaseDialog(
                 title: l10n.invalidGitExecutable,
-                content: BodyMediumLabel(l10n.invalidGitExecutableMessage(selectedPath, output, output)),
+                content: BodyMediumLabel(
+                  l10n.invalidGitExecutableMessage(
+                    selectedPath,
+                    output,
+                    output,
+                  ),
+                ),
                 actions: [
                   BaseButton(
                     onPressed: () => Navigator.of(dialogContext).pop(),
@@ -144,7 +159,12 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             builder: (dialogContext) => BaseDialog(
               title: l10n.executionFailed,
-              content: BodyMediumLabel(l10n.executionFailedMessage(selectedPath, processResult.stderr.toString())),
+              content: BodyMediumLabel(
+                l10n.executionFailedMessage(
+                  selectedPath,
+                  processResult.stderr.toString(),
+                ),
+              ),
               actions: [
                 BaseButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
@@ -162,7 +182,9 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             builder: (dialogContext) => BaseDialog(
               title: l10n.validationError,
-              content: BodyMediumLabel(l10n.validationErrorMessage(selectedPath, e.toString())),
+              content: BodyMediumLabel(
+                l10n.validationErrorMessage(selectedPath, e.toString()),
+              ),
               actions: [
                 BaseButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
@@ -193,7 +215,8 @@ class SettingsScreen extends ConsumerWidget {
 
       // Verify the selection exists. macOS GUI editors are `.app` bundle
       // directories, which File.exists() never reports as present.
-      final exists = await File(selectedPath).exists() ||
+      final exists =
+          await File(selectedPath).exists() ||
           (Platform.isMacOS && await Directory(selectedPath).exists());
       if (!exists) {
         if (context.mounted) {
@@ -202,7 +225,10 @@ class SettingsScreen extends ConsumerWidget {
         return;
       }
 
-      final fileName = selectedPath.split(Platform.pathSeparator).last.toLowerCase();
+      final fileName = selectedPath
+          .split(Platform.pathSeparator)
+          .last
+          .toLowerCase();
 
       // Known text editors
       final knownEditors = [
@@ -223,7 +249,10 @@ class SettingsScreen extends ConsumerWidget {
       final version = await VersionDetector.detectVersion(selectedPath);
 
       // Check if it's a known editor
-      final isKnownEditor = knownEditors.any((editor) => fileName == editor || fileName.contains(editor.split('.')[0]));
+      final isKnownEditor = knownEditors.any(
+        (editor) =>
+            fileName == editor || fileName.contains(editor.split('.')[0]),
+      );
 
       if (!isKnownEditor) {
         if (context.mounted) {
@@ -241,7 +270,9 @@ class SettingsScreen extends ConsumerWidget {
                 BaseButton(
                   onPressed: () async {
                     Navigator.of(dialogContext).pop();
-                    await ref.read(configProvider.notifier).setTextEditor(selectedPath, version: version);
+                    await ref
+                        .read(configProvider.notifier)
+                        .setTextEditor(selectedPath, version: version);
                   },
                   label: l10n.useAnyway,
                   variant: ButtonVariant.primary,
@@ -254,7 +285,9 @@ class SettingsScreen extends ConsumerWidget {
       }
 
       // File passed validation - set it
-      await ref.read(configProvider.notifier).setTextEditor(selectedPath, version: version);
+      await ref
+          .read(configProvider.notifier)
+          .setTextEditor(selectedPath, version: version);
     }
   }
 
@@ -276,7 +309,10 @@ class SettingsScreen extends ConsumerWidget {
       final file = File(selectedPath);
       if (!await file.exists()) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Selected file does not exist');
+          NotificationService.showError(
+            context,
+            'Selected file does not exist',
+          );
         }
         return;
       }
@@ -285,13 +321,19 @@ class SettingsScreen extends ConsumerWidget {
       final version = await VersionDetector.detectVersion(selectedPath);
 
       // Try to match with known diff tool types
-      final fileName = selectedPath.split(Platform.pathSeparator).last.toLowerCase();
+      final fileName = selectedPath
+          .split(Platform.pathSeparator)
+          .last
+          .toLowerCase();
       DiffToolType? detectedType;
 
       for (final type in DiffToolType.values) {
         if (type == DiffToolType.custom) continue;
         final name = type.name.toLowerCase();
-        if (fileName.contains(name) || fileName.contains(type.displayName.toLowerCase().replaceAll(' ', ''))) {
+        if (fileName.contains(name) ||
+            fileName.contains(
+              type.displayName.toLowerCase().replaceAll(' ', ''),
+            )) {
           detectedType = type;
           break;
         }
@@ -301,14 +343,15 @@ class SettingsScreen extends ConsumerWidget {
       detectedType ??= DiffToolType.custom;
 
       try {
-        await ref.read(configProvider.notifier).setDiffTool(
-          detectedType,
-          path: selectedPath,
-          version: version,
-        );
+        await ref
+            .read(configProvider.notifier)
+            .setDiffTool(detectedType, path: selectedPath, version: version);
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Failed to save diff tool: $e');
+          NotificationService.showError(
+            context,
+            'Failed to save diff tool: $e',
+          );
         }
       }
     }
@@ -332,7 +375,10 @@ class SettingsScreen extends ConsumerWidget {
       final file = File(selectedPath);
       if (!await file.exists()) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Selected file does not exist');
+          NotificationService.showError(
+            context,
+            'Selected file does not exist',
+          );
         }
         return;
       }
@@ -341,13 +387,19 @@ class SettingsScreen extends ConsumerWidget {
       final version = await VersionDetector.detectVersion(selectedPath);
 
       // Try to match with known merge tool types
-      final fileName = selectedPath.split(Platform.pathSeparator).last.toLowerCase();
+      final fileName = selectedPath
+          .split(Platform.pathSeparator)
+          .last
+          .toLowerCase();
       DiffToolType? detectedType;
 
       for (final type in DiffToolType.values) {
         if (type == DiffToolType.custom) continue;
         final name = type.name.toLowerCase();
-        if (fileName.contains(name) || fileName.contains(type.displayName.toLowerCase().replaceAll(' ', ''))) {
+        if (fileName.contains(name) ||
+            fileName.contains(
+              type.displayName.toLowerCase().replaceAll(' ', ''),
+            )) {
           detectedType = type;
           break;
         }
@@ -357,14 +409,15 @@ class SettingsScreen extends ConsumerWidget {
       detectedType ??= DiffToolType.custom;
 
       try {
-        await ref.read(configProvider.notifier).setMergeTool(
-          detectedType,
-          path: selectedPath,
-          version: version,
-        );
+        await ref
+            .read(configProvider.notifier)
+            .setMergeTool(detectedType, path: selectedPath, version: version);
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Failed to save merge tool: $e');
+          NotificationService.showError(
+            context,
+            'Failed to save merge tool: $e',
+          );
         }
       }
     }
@@ -400,10 +453,15 @@ class SettingsScreen extends ConsumerWidget {
       }
 
       try {
-        await ref.read(configProvider.notifier).setGitExecutablePath(gitPath, version: version);
+        await ref
+            .read(configProvider.notifier)
+            .setGitExecutablePath(gitPath, version: version);
       } catch (e) {
         if (!context.mounted) return;
-        NotificationService.showError(context, 'Failed to save git executable path: $e');
+        NotificationService.showError(
+          context,
+          'Failed to save git executable path: $e',
+        );
         return;
       }
     }
@@ -418,11 +476,26 @@ class SettingsScreen extends ConsumerWidget {
       }
 
       try {
-        await ref.read(configProvider.notifier).setDiffTool(diffTool.type, path: diffTool.executablePath, version: version);
-        await ref.read(configProvider.notifier).setMergeTool(diffTool.type, path: diffTool.executablePath, version: version);
+        await ref
+            .read(configProvider.notifier)
+            .setDiffTool(
+              diffTool.type,
+              path: diffTool.executablePath,
+              version: version,
+            );
+        await ref
+            .read(configProvider.notifier)
+            .setMergeTool(
+              diffTool.type,
+              path: diffTool.executablePath,
+              version: version,
+            );
       } catch (e) {
         if (!context.mounted) return;
-        NotificationService.showError(context, 'Failed to save diff/merge tool settings: $e');
+        NotificationService.showError(
+          context,
+          'Failed to save diff/merge tool settings: $e',
+        );
         return;
       }
     }
@@ -439,10 +512,15 @@ class SettingsScreen extends ConsumerWidget {
       }
 
       try {
-        await ref.read(configProvider.notifier).setTextEditor(editorPath, version: version);
+        await ref
+            .read(configProvider.notifier)
+            .setTextEditor(editorPath, version: version);
       } catch (e) {
         if (!context.mounted) return;
-        NotificationService.showError(context, 'Failed to save text editor settings: $e');
+        NotificationService.showError(
+          context,
+          'Failed to save text editor settings: $e',
+        );
         return;
       }
     }
@@ -480,7 +558,8 @@ class SettingsScreen extends ConsumerWidget {
             variant: ButtonVariant.tertiary,
           ),
           BaseButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
             label: l10n.save,
             variant: ButtonVariant.primary,
           ),
@@ -527,7 +606,8 @@ class SettingsScreen extends ConsumerWidget {
             variant: ButtonVariant.tertiary,
           ),
           BaseButton(
-            onPressed: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text.trim()),
             label: l10n.save,
             variant: ButtonVariant.primary,
           ),
@@ -542,10 +622,15 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _editCommitHistoryLimit(BuildContext context, WidgetRef ref) async {
+  Future<void> _editCommitHistoryLimit(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final l10n = AppLocalizations.of(context)!;
     final history = ref.read(historyConfigProvider);
-    final controller = TextEditingController(text: history.defaultCommitLimit.toString());
+    final controller = TextEditingController(
+      text: history.defaultCommitLimit.toString(),
+    );
 
     final result = await showDialog<int>(
       context: context,
@@ -662,5 +747,4 @@ class SettingsScreen extends ConsumerWidget {
   void _showError(BuildContext context, String message) {
     NotificationService.showError(context, message);
   }
-
 }

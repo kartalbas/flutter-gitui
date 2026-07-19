@@ -50,222 +50,246 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-              BodyMediumLabel(AppLocalizations.of(context)!.mergeABranchInto(currentBranch ?? 'unknown', currentBranch ?? 'unknown')),
-              const SizedBox(height: AppTheme.paddingL),
+            BodyMediumLabel(
+              AppLocalizations.of(context)!.mergeABranchInto(
+                currentBranch ?? 'unknown',
+                currentBranch ?? 'unknown',
+              ),
+            ),
+            const SizedBox(height: AppTheme.paddingL),
 
-              // Branch selection
-              branchesAsync.when(
-                data: (branches) {
-                  // Filter out current branch
-                  final availableBranches = branches
-                      .where((b) => b.name != currentBranch)
-                      .toList();
+            // Branch selection
+            branchesAsync.when(
+              data: (branches) {
+                // Filter out current branch
+                final availableBranches = branches
+                    .where((b) => b.name != currentBranch)
+                    .toList();
 
-                  if (availableBranches.isEmpty) {
-                    return Container(
-                      padding: const EdgeInsets.all(AppTheme.paddingM),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: BodyMediumLabel(AppLocalizations.of(context)!.noOtherBranchesAvailable),
-                    );
-                  }
-
-                  return BaseDropdown<GitBranch>(
-                    initialValue: _selectedBranch,
-                    labelText: AppLocalizations.of(context)!.branchToMerge,
-                    hintText: AppLocalizations.of(context)!.selectABranch,
-                    prefixIcon: PhosphorIconsRegular.gitBranch,
-                    items: availableBranches.map((branch) {
-                      return BaseDropdownItem<GitBranch>(
-                        value: branch,
-                        builder: (context) => Row(
-                          children: [
-                            Icon(
-                              branch.isRemote
-                                  ? PhosphorIconsRegular.cloud
-                                  : PhosphorIconsRegular.gitBranch,
-                              size: 16,
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            Text(branch.name),
-                            if (branch.isRemote) ...[
-                              const SizedBox(width: AppTheme.paddingS),
-                              BodySmallLabel(AppLocalizations.of(context)!.remote),
-                            ],
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: _isMerging
-                        ? null
-                        : (value) {
-                            setState(() {
-                              _selectedBranch = value;
-                            });
-                          },
+                if (availableBranches.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(AppTheme.paddingM),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: BodyMediumLabel(
+                      AppLocalizations.of(context)!.noOtherBranchesAvailable,
+                    ),
                   );
-                },
-                loading: () => const LinearProgressIndicator(),
-                error: (error, _) => BodyMediumLabel(
-                  AppLocalizations.of(context)!.errorLoadingBranches(error.toString()),
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-              const SizedBox(height: AppTheme.paddingM),
+                }
 
-              // Merge options
-              TitleSmallLabel(AppLocalizations.of(context)!.mergeOptions),
+                return BaseDropdown<GitBranch>(
+                  initialValue: _selectedBranch,
+                  labelText: AppLocalizations.of(context)!.branchToMerge,
+                  hintText: AppLocalizations.of(context)!.selectABranch,
+                  prefixIcon: PhosphorIconsRegular.gitBranch,
+                  items: availableBranches.map((branch) {
+                    return BaseDropdownItem<GitBranch>(
+                      value: branch,
+                      builder: (context) => Row(
+                        children: [
+                          Icon(
+                            branch.isRemote
+                                ? PhosphorIconsRegular.cloud
+                                : PhosphorIconsRegular.gitBranch,
+                            size: 16,
+                          ),
+                          const SizedBox(width: AppTheme.paddingS),
+                          Text(branch.name),
+                          if (branch.isRemote) ...[
+                            const SizedBox(width: AppTheme.paddingS),
+                            BodySmallLabel(
+                              AppLocalizations.of(context)!.remote,
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: _isMerging
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _selectedBranch = value;
+                          });
+                        },
+                );
+              },
+              loading: () => const LinearProgressIndicator(),
+              error: (error, _) => BodyMediumLabel(
+                AppLocalizations.of(
+                  context,
+                )!.errorLoadingBranches(error.toString()),
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: AppTheme.paddingM),
+
+            // Merge options
+            TitleSmallLabel(AppLocalizations.of(context)!.mergeOptions),
+            const SizedBox(height: AppTheme.paddingS),
+
+            // Fast-forward only
+            CheckboxListTile(
+              value: _fastForwardOnly,
+              onChanged: _isMerging
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _fastForwardOnly = value ?? false;
+                        if (_fastForwardOnly) {
+                          _noFastForward = false;
+                        }
+                      });
+                    },
+              title: Text(AppLocalizations.of(context)!.fastForwardOnly),
+              subtitle: Text(
+                AppLocalizations.of(context)!.abortIfFastForwardNotPossible,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
+
+            // No fast-forward
+            CheckboxListTile(
+              value: _noFastForward,
+              onChanged: _isMerging
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _noFastForward = value ?? false;
+                        if (_noFastForward) {
+                          _fastForwardOnly = false;
+                        }
+                      });
+                    },
+              title: Text(AppLocalizations.of(context)!.noFastForward),
+              subtitle: Text(
+                AppLocalizations.of(context)!.alwaysCreateMergeCommit,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
+
+            // Squash
+            CheckboxListTile(
+              value: _squash,
+              onChanged: _isMerging
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _squash = value ?? false;
+                      });
+                    },
+              title: Text(AppLocalizations.of(context)!.squashCommits),
+              subtitle: Text(
+                AppLocalizations.of(context)!.combineAllCommitsIntoSingleCommit,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
+
+            const SizedBox(height: AppTheme.paddingM),
+
+            // Custom message option
+            CheckboxListTile(
+              value: _customMessage,
+              onChanged: _isMerging
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _customMessage = value ?? false;
+                      });
+                    },
+              title: Text(AppLocalizations.of(context)!.customMergeMessage),
+              contentPadding: EdgeInsets.zero,
+            ),
+
+            if (_customMessage) ...[
               const SizedBox(height: AppTheme.paddingS),
-
-              // Fast-forward only
-              CheckboxListTile(
-                value: _fastForwardOnly,
-                onChanged: _isMerging
-                    ? null
-                    : (value) {
-                        setState(() {
-                          _fastForwardOnly = value ?? false;
-                          if (_fastForwardOnly) {
-                            _noFastForward = false;
-                          }
-                        });
-                      },
-                title: Text(AppLocalizations.of(context)!.fastForwardOnly),
-                subtitle: Text(
-                  AppLocalizations.of(context)!.abortIfFastForwardNotPossible,
-                ),
-                contentPadding: EdgeInsets.zero,
+              BaseTextField(
+                controller: _messageController,
+                label: AppLocalizations.of(context)!.mergeMessage,
+                hintText: AppLocalizations.of(
+                  context,
+                )!.enterCustomMergeCommitMessage,
+                maxLines: 3,
+                enabled: !_isMerging,
               ),
+            ],
 
-              // No fast-forward
-              CheckboxListTile(
-                value: _noFastForward,
-                onChanged: _isMerging
-                    ? null
-                    : (value) {
-                        setState(() {
-                          _noFastForward = value ?? false;
-                          if (_noFastForward) {
-                            _fastForwardOnly = false;
-                          }
-                        });
-                      },
-                title: Text(AppLocalizations.of(context)!.noFastForward),
-                subtitle: Text(
-                  AppLocalizations.of(context)!.alwaysCreateMergeCommit,
-                ),
-                contentPadding: EdgeInsets.zero,
+            // Info card
+            const SizedBox(height: AppTheme.paddingM),
+            Container(
+              padding: const EdgeInsets.all(AppTheme.paddingM),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
               ),
-
-              // Squash
-              CheckboxListTile(
-                value: _squash,
-                onChanged: _isMerging ? null : (value) {
-                  setState(() {
-                    _squash = value ?? false;
-                  });
-                },
-                title: Text(AppLocalizations.of(context)!.squashCommits),
-                subtitle: Text(
-                  AppLocalizations.of(context)!.combineAllCommitsIntoSingleCommit,
-                ),
-                contentPadding: EdgeInsets.zero,
+              child: Row(
+                children: [
+                  const Icon(PhosphorIconsRegular.info, size: 20),
+                  const SizedBox(width: AppTheme.paddingS),
+                  Expanded(
+                    child: BodyMediumLabel(
+                      _squash
+                          ? AppLocalizations.of(
+                              context,
+                            )!.squashMergeWillCombineAllCommits
+                          : AppLocalizations.of(
+                              context,
+                            )!.thisWillMergeSelectedBranch,
+                    ),
+                  ),
+                ],
               ),
+            ),
 
-              const SizedBox(height: AppTheme.paddingM),
-
-              // Custom message option
-              CheckboxListTile(
-                value: _customMessage,
-                onChanged: _isMerging ? null : (value) {
-                  setState(() {
-                    _customMessage = value ?? false;
-                  });
-                },
-                title: Text(AppLocalizations.of(context)!.customMergeMessage),
-                contentPadding: EdgeInsets.zero,
-              ),
-
-              if (_customMessage) ...[
-                const SizedBox(height: AppTheme.paddingS),
-                BaseTextField(
-                  controller: _messageController,
-                  label: AppLocalizations.of(context)!.mergeMessage,
-                  hintText: AppLocalizations.of(context)!.enterCustomMergeCommitMessage,
-                  maxLines: 3,
-                  enabled: !_isMerging,
-                ),
-              ],
-
-              // Info card
+            // Error message
+            if (_errorMessage != null) ...[
               const SizedBox(height: AppTheme.paddingM),
               Container(
                 padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
-                      PhosphorIconsRegular.info,
-                      size: 20,
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
                       child: BodyMediumLabel(
-                        _squash
-                            ? AppLocalizations.of(context)!.squashMergeWillCombineAllCommits
-                            : AppLocalizations.of(context)!.thisWillMergeSelectedBranch,
+                        _errorMessage!,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // Error message
-              if (_errorMessage != null) ...[
-                const SizedBox(height: AppTheme.paddingM),
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(width: AppTheme.paddingS),
-                      Expanded(
-                        child: BodyMediumLabel(
-                          _errorMessage!,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              // Progress indicator
-              if (_isMerging) ...[
-                const SizedBox(height: AppTheme.paddingL),
-                const LinearProgressIndicator(),
-                const SizedBox(height: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(context)!.mergingBranch(_selectedBranch ?? 'branch'),
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                  textAlign: TextAlign.center,
-                ),
-              ],
             ],
-          ),
+
+            // Progress indicator
+            if (_isMerging) ...[
+              const SizedBox(height: AppTheme.paddingL),
+              const LinearProgressIndicator(),
+              const SizedBox(height: AppTheme.paddingS),
+              BaseLabel(
+                AppLocalizations.of(
+                  context,
+                )!.mergingBranch(_selectedBranch ?? 'branch'),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
         ),
+      ),
       actions: [
         BaseButton(
           label: AppLocalizations.of(context)!.cancel,
@@ -276,7 +300,9 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
           label: AppLocalizations.of(context)!.merge,
           variant: ButtonVariant.primary,
           leadingIcon: PhosphorIconsRegular.gitMerge,
-          onPressed: _isMerging || _selectedBranch == null ? null : _mergeBranch,
+          onPressed: _isMerging || _selectedBranch == null
+              ? null
+              : _mergeBranch,
         ),
       ],
     );
@@ -291,7 +317,9 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
     });
 
     try {
-      await ref.read(gitActionsProvider).mergeBranch(
+      await ref
+          .read(gitActionsProvider)
+          .mergeBranch(
             _selectedBranch!.name,
             fastForwardOnly: _fastForwardOnly,
             noFastForward: _noFastForward,
@@ -308,12 +336,16 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
         if (mergeState.isInProgress && mergeState.conflictCount > 0) {
           // Conflicts detected - close dialog and let conflict resolution screen take over
           if (mounted) {
-            Navigator.of(context).pop(true); // Return true to indicate conflicts
+            Navigator.of(
+              context,
+            ).pop(true); // Return true to indicate conflicts
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  AppLocalizations.of(context)!.mergeHasConflicts(mergeState.conflictCount),
+                  AppLocalizations.of(
+                    context,
+                  )!.mergeHasConflicts(mergeState.conflictCount),
                 ),
                 backgroundColor: Theme.of(context).colorScheme.error,
                 action: SnackBarAction(
@@ -348,7 +380,9 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = AppLocalizations.of(context)!.failedToMergeBranch(e.toString());
+          _errorMessage = AppLocalizations.of(
+            context,
+          )!.failedToMergeBranch(e.toString());
           _isMerging = false;
         });
       }
@@ -364,4 +398,3 @@ Future<bool?> showMergeBranchDialog(BuildContext context) {
     builder: (context) => const MergeBranchDialog(),
   );
 }
-

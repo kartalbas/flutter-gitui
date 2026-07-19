@@ -56,7 +56,7 @@ extension DateTimeExtensions on DateTime {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return '${months[month - 1]} $day, $year';
   }

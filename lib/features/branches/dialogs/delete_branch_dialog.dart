@@ -9,20 +9,13 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/models/branch.dart';
 
 /// Result from delete branch dialog
-enum DeleteBranchResult {
-  cancel,
-  delete,
-  forceDelete,
-}
+enum DeleteBranchResult { cancel, delete, forceDelete }
 
 /// Dialog to confirm deleting a branch
 class DeleteBranchDialog extends StatefulWidget {
   final GitBranch branch;
 
-  const DeleteBranchDialog({
-    super.key,
-    required this.branch,
-  });
+  const DeleteBranchDialog({super.key, required this.branch});
 
   @override
   State<DeleteBranchDialog> createState() => _DeleteBranchDialogState();
@@ -67,12 +60,14 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
           BaseButton(
             label: l10n.cancel,
             variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(DeleteBranchResult.cancel),
+            onPressed: () =>
+                Navigator.of(context).pop(DeleteBranchResult.cancel),
           ),
           BaseButton(
             label: l10n.delete,
             variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(DeleteBranchResult.delete),
+            onPressed: () =>
+                Navigator.of(context).pop(DeleteBranchResult.delete),
           ),
         ],
       );
@@ -86,9 +81,7 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(
-            l10n.deleteBranchConfirm(branch.shortName),
-          ),
+          BodyMediumLabel(l10n.deleteBranchConfirm(branch.shortName)),
           const SizedBox(height: AppTheme.paddingS),
           CheckboxListTile(
             value: _force,

@@ -32,12 +32,16 @@ class DiffToolService {
         // Detect version
         final version = await _detectToolVersion(tool);
         final toolWithVersion = tool.copyWith(version: version);
-        Logger.info('Found available tool: ${tool.type.name} ${version ?? '(unknown version)'} at ${tool.executablePath}');
+        Logger.info(
+          'Found available tool: ${tool.type.name} ${version ?? '(unknown version)'} at ${tool.executablePath}',
+        );
         tools.add(toolWithVersion);
       }
     }
 
-    Logger.info('Detection complete: ${tools.length} diff/merge tools available');
+    Logger.info(
+      'Detection complete: ${tools.length} diff/merge tools available',
+    );
     return tools;
   }
 
@@ -45,7 +49,9 @@ class DiffToolService {
   static Future<void> _addGitConfiguredTools(List<DiffTool> tools) async {
     try {
       // Check git's configured diff tool
-      final diffToolResultWrapped = await ShellService.run('git config --get diff.tool');
+      final diffToolResultWrapped = await ShellService.run(
+        'git config --get diff.tool',
+      );
       final diffToolResult = diffToolResultWrapped.unwrap();
       if (diffToolResult.first.exitCode == 0) {
         final diffToolName = diffToolResult.first.stdout.toString().trim();
@@ -56,10 +62,14 @@ class DiffToolService {
           if (availableTool.isAvailable) {
             final version = await _detectToolVersion(availableTool);
             final toolWithVersion = availableTool.copyWith(version: version);
-            Logger.info('Found git-configured diff tool: ${tool.type.name} ${version ?? '(unknown version)'} at ${availableTool.executablePath}');
+            Logger.info(
+              'Found git-configured diff tool: ${tool.type.name} ${version ?? '(unknown version)'} at ${availableTool.executablePath}',
+            );
             tools.add(toolWithVersion);
           } else {
-            Logger.warning('Git diff.tool "$diffToolName" configured but not found on system');
+            Logger.warning(
+              'Git diff.tool "$diffToolName" configured but not found on system',
+            );
           }
         } else {
           Logger.warning('Git diff.tool "$diffToolName" not recognized');
@@ -67,7 +77,9 @@ class DiffToolService {
       }
 
       // Check git's configured merge tool
-      final mergeToolResultWrapped = await ShellService.run('git config --get merge.tool');
+      final mergeToolResultWrapped = await ShellService.run(
+        'git config --get merge.tool',
+      );
       final mergeToolResult = mergeToolResultWrapped.unwrap();
       if (mergeToolResult.first.exitCode == 0) {
         final mergeToolName = mergeToolResult.first.stdout.toString().trim();
@@ -78,10 +90,14 @@ class DiffToolService {
           if (availableTool.isAvailable) {
             final version = await _detectToolVersion(availableTool);
             final toolWithVersion = availableTool.copyWith(version: version);
-            Logger.info('Found git-configured merge tool: ${tool.type.name} ${version ?? '(unknown version)'} at ${availableTool.executablePath}');
+            Logger.info(
+              'Found git-configured merge tool: ${tool.type.name} ${version ?? '(unknown version)'} at ${availableTool.executablePath}',
+            );
             tools.add(toolWithVersion);
           } else {
-            Logger.warning('Git merge.tool "$mergeToolName" configured but not found on system');
+            Logger.warning(
+              'Git merge.tool "$mergeToolName" configured but not found on system',
+            );
           }
         }
       }
@@ -98,7 +114,9 @@ class DiffToolService {
       return _knownTools.firstWhere((t) => t.type == DiffToolType.vscode);
     }
     if (normalized.contains('bcomp') || normalized.contains('beyond')) {
-      return _knownTools.firstWhere((t) => t.type == DiffToolType.beyondCompare);
+      return _knownTools.firstWhere(
+        (t) => t.type == DiffToolType.beyondCompare,
+      );
     }
     if (normalized.contains('kdiff')) {
       return _knownTools.firstWhere((t) => t.type == DiffToolType.kdiff3);
@@ -125,10 +143,7 @@ class DiffToolService {
 
     for (final path in paths) {
       if (await File(path).exists()) {
-        return tool.copyWith(
-          executablePath: path,
-          isAvailable: true,
-        );
+        return tool.copyWith(executablePath: path, isAvailable: true);
       }
     }
 
@@ -147,16 +162,16 @@ class DiffToolService {
             // On Windows, if we found a .cmd wrapper (like Scoop's code.cmd),
             // try to resolve it to the actual .exe
             if (Platform.isWindows && path.toLowerCase().endsWith('.cmd')) {
-              final resolvedPath = await _resolveWindowsWrapper(path, executable);
+              final resolvedPath = await _resolveWindowsWrapper(
+                path,
+                executable,
+              );
               if (resolvedPath != null) {
                 path = resolvedPath;
               }
             }
 
-            return tool.copyWith(
-              executablePath: path,
-              isAvailable: true,
-            );
+            return tool.copyWith(executablePath: path, isAvailable: true);
           }
         } catch (e) {
           // Try next executable variant
@@ -215,7 +230,9 @@ class DiffToolService {
   static List<String> _getMacOSSearchPaths(DiffToolType type) {
     switch (type) {
       case DiffToolType.vscode:
-        return ['/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code'];
+        return [
+          '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code',
+        ];
       case DiffToolType.intellijIdea:
         return [
           '/Applications/IntelliJ IDEA.app/Contents/MacOS/idea',
@@ -246,12 +263,16 @@ class DiffToolService {
     switch (type) {
       case DiffToolType.vscode:
         if (Platform.isWindows) {
-          return ['code.cmd', 'code.exe', 'Code.exe'];  // Scoop uses code.cmd, installers use code.exe
+          return [
+            'code.cmd',
+            'code.exe',
+            'Code.exe',
+          ]; // Scoop uses code.cmd, installers use code.exe
         }
         return ['code'];
 
       case DiffToolType.intellijIdea:
-        return ['idea'];  // Linux only
+        return ['idea']; // Linux only
 
       case DiffToolType.beyondCompare:
         return Platform.isWindows ? ['BComp.exe', 'bcomp.exe'] : ['bcomp'];
@@ -287,7 +308,10 @@ class DiffToolService {
 
   /// Resolve Windows .cmd wrapper to actual .exe location
   /// For package managers like Scoop that use .cmd wrappers
-  static Future<String?> _resolveWindowsWrapper(String cmdPath, String executableName) async {
+  static Future<String?> _resolveWindowsWrapper(
+    String cmdPath,
+    String executableName,
+  ) async {
     try {
       // For Scoop's code.cmd, the actual Code.exe is usually in the same directory's parent
       final cmdFile = File(cmdPath);
@@ -327,7 +351,11 @@ class DiffToolService {
     String? label,
   }) async {
     final command = tool.diffCommand(leftFile, rightFile, label: label);
-    await Process.start(command.first, command.sublist(1), mode: ProcessStartMode.detached);
+    await Process.start(
+      command.first,
+      command.sublist(1),
+      mode: ProcessStartMode.detached,
+    );
   }
 
   /// Launch merge tool for 3-way merge
@@ -339,7 +367,11 @@ class DiffToolService {
     String merged,
   ) async {
     final command = tool.mergeCommand(base, local, remote, merged);
-    await Process.start(command.first, command.sublist(1), mode: ProcessStartMode.detached);
+    await Process.start(
+      command.first,
+      command.sublist(1),
+      mode: ProcessStartMode.detached,
+    );
   }
 
   /// Known diff tools with their default configurations

@@ -32,9 +32,8 @@ class GitBatchContext {
   int get completedOperations => _completedOperations;
 
   /// Progress percentage (0.0 to 1.0)
-  double get progress => _operationCount > 0
-      ? _completedOperations / _operationCount
-      : 0.0;
+  double get progress =>
+      _operationCount > 0 ? _completedOperations / _operationCount : 0.0;
 
   /// Name of the current batch operation
   String? get batchName => _batchName;

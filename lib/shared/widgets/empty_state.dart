@@ -89,10 +89,7 @@ class EmptyStateWidget extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(
-              title,
-              textAlign: TextAlign.center,
-            ),
+            TitleLargeLabel(title, textAlign: TextAlign.center),
             const SizedBox(height: AppTheme.paddingS),
             BodyMediumLabel(
               message,
@@ -115,11 +112,7 @@ class NoRepositoryEmptyState extends StatelessWidget {
   final String? contextMessage;
   final Widget? action;
 
-  const NoRepositoryEmptyState({
-    super.key,
-    this.contextMessage,
-    this.action,
-  });
+  const NoRepositoryEmptyState({super.key, this.contextMessage, this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -164,11 +157,7 @@ class ErrorState extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
-  const ErrorState({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
+  const ErrorState({super.key, required this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {

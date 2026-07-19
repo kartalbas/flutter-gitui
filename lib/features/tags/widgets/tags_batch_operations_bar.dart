@@ -24,9 +24,7 @@ class TagsBatchOperationsBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
+          top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
       ),
       padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -35,7 +33,9 @@ class TagsBatchOperationsBar extends StatelessWidget {
           children: [
             Expanded(
               child: BaseButton(
-                label: AppLocalizations.of(context)!.pushTagsCount(selectedCount),
+                label: AppLocalizations.of(
+                  context,
+                )!.pushTagsCount(selectedCount),
                 leadingIcon: PhosphorIconsRegular.upload,
                 onPressed: onPush,
                 variant: ButtonVariant.secondary,
@@ -46,7 +46,9 @@ class TagsBatchOperationsBar extends StatelessWidget {
             const SizedBox(width: AppTheme.paddingM),
             Expanded(
               child: BaseButton(
-                label: AppLocalizations.of(context)!.deleteTagsCount(selectedCount),
+                label: AppLocalizations.of(
+                  context,
+                )!.deleteTagsCount(selectedCount),
                 leadingIcon: PhosphorIconsRegular.trash,
                 onPressed: onDelete,
                 variant: ButtonVariant.danger,

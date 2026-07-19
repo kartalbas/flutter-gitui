@@ -63,10 +63,7 @@ class BatchOperationsBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         border: Border(
-          top: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: 1,
-          ),
+          top: BorderSide(color: colorScheme.outlineVariant, width: 1),
         ),
       ),
       child: SafeArea(

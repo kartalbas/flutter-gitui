@@ -21,9 +21,7 @@ class WorkspacesEmptyState extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          HeadlineMediumLabel(
-            AppLocalizations.of(context)!.noWorkspacesYet,
-          ),
+          HeadlineMediumLabel(AppLocalizations.of(context)!.noWorkspacesYet),
           const SizedBox(height: AppTheme.paddingS),
           BodyLargeLabel(
             AppLocalizations.of(context)!.createWorkspaceToOrganize,

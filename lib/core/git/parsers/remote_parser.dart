@@ -47,11 +47,9 @@ class RemoteParser {
       final pushUrl = urls['push'] ?? fetchUrl;
 
       if (fetchUrl.isNotEmpty) {
-        remotes.add(GitRemote(
-          name: name,
-          fetchUrl: fetchUrl,
-          pushUrl: pushUrl,
-        ));
+        remotes.add(
+          GitRemote(name: name, fetchUrl: fetchUrl, pushUrl: pushUrl),
+        );
       }
     }
 

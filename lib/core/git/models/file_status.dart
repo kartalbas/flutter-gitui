@@ -10,6 +10,7 @@ enum FileStatusType {
   copied,
   untracked,
   ignored,
+
   /// Unmerged: the file has conflicts from a merge, rebase or cherry-pick.
   unmerged,
   unchanged;
@@ -150,5 +151,6 @@ class FileStatus {
           workTreeStatus == other.workTreeStatus;
 
   @override
-  int get hashCode => path.hashCode ^ indexStatus.hashCode ^ workTreeStatus.hashCode;
+  int get hashCode =>
+      path.hashCode ^ indexStatus.hashCode ^ workTreeStatus.hashCode;
 }

@@ -167,7 +167,7 @@ class GlobalBranchSwitcher extends ConsumerWidget {
       final status = statuses[repo.path];
       // Only checkout if repo is not already on this branch AND is in the list of repos that have this branch
       return status?.currentBranch != branchInfo.branchName &&
-             branchInfo.repositoryPaths.contains(repo.path);
+          branchInfo.repositoryPaths.contains(repo.path);
     }).toList();
 
     if (reposToCheckout.isEmpty) {

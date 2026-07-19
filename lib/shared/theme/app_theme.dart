@@ -45,9 +45,7 @@ class AppTheme {
 
     // Apply animation speed overrides and consistent text styling
     return theme.copyWith(
-      extensions: [
-        AnimationSpeedExtension(speed: animationSpeed),
-      ],
+      extensions: [AnimationSpeedExtension(speed: animationSpeed)],
       popupMenuTheme: PopupMenuThemeData(
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
@@ -63,19 +61,13 @@ class AppTheme {
         iconColor: theme.colorScheme.primary,
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.bodyLarge,
-        ),
+        style: TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          textStyle: theme.textTheme.bodyLarge,
-        ),
+        style: ElevatedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          textStyle: theme.textTheme.bodyLarge,
-        ),
+        style: OutlinedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
       ),
       inputDecorationTheme: InputDecorationTheme(
         labelStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -140,9 +132,7 @@ class AppTheme {
 
     // Apply animation speed overrides and consistent text styling
     return theme.copyWith(
-      extensions: [
-        AnimationSpeedExtension(speed: animationSpeed),
-      ],
+      extensions: [AnimationSpeedExtension(speed: animationSpeed)],
       popupMenuTheme: PopupMenuThemeData(
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
@@ -158,19 +148,13 @@ class AppTheme {
         iconColor: theme.colorScheme.primary,
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          textStyle: theme.textTheme.bodyLarge,
-        ),
+        style: TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          textStyle: theme.textTheme.bodyLarge,
-        ),
+        style: ElevatedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          textStyle: theme.textTheme.bodyLarge,
-        ),
+        style: OutlinedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
       ),
       inputDecorationTheme: InputDecorationTheme(
         labelStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -232,35 +216,35 @@ class AppTheme {
     switch (fontSize) {
       case AppFontSize.tiny:
         return {
-          'display': 48.0,      // -9px from standard 57
-          'headline': 28.0,     // -4px from standard 32
-          'title': 18.0,        // -4px from standard 22
-          'body': 13.0,         // -3px from standard 16
-          'label': 10.0,        // -1px from standard 11
+          'display': 48.0, // -9px from standard 57
+          'headline': 28.0, // -4px from standard 32
+          'title': 18.0, // -4px from standard 22
+          'body': 13.0, // -3px from standard 16
+          'label': 10.0, // -1px from standard 11
         };
       case AppFontSize.small:
         return {
-          'display': 52.0,      // -5px from standard 57
-          'headline': 30.0,     // -2px from standard 32
-          'title': 20.0,        // -2px from standard 22
-          'body': 14.0,         // -2px from standard 16
-          'label': 11.0,        // standard
+          'display': 52.0, // -5px from standard 57
+          'headline': 30.0, // -2px from standard 32
+          'title': 20.0, // -2px from standard 22
+          'body': 14.0, // -2px from standard 16
+          'label': 11.0, // standard
         };
       case AppFontSize.medium:
         return {
-          'display': 57.0,      // Material Design 3 standard
-          'headline': 32.0,     // Material Design 3 standard
-          'title': 22.0,        // Material Design 3 standard
-          'body': 16.0,         // Material Design 3 standard
-          'label': 11.0,        // Material Design 3 standard
+          'display': 57.0, // Material Design 3 standard
+          'headline': 32.0, // Material Design 3 standard
+          'title': 22.0, // Material Design 3 standard
+          'body': 16.0, // Material Design 3 standard
+          'label': 11.0, // Material Design 3 standard
         };
       case AppFontSize.large:
         return {
-          'display': 64.0,      // +7px from standard 57
-          'headline': 36.0,     // +4px from standard 32
-          'title': 24.0,        // +2px from standard 22
-          'body': 18.0,         // +2px from standard 16
-          'label': 12.0,        // +1px from standard 11
+          'display': 64.0, // +7px from standard 57
+          'headline': 36.0, // +4px from standard 32
+          'title': 24.0, // +2px from standard 22
+          'body': 18.0, // +2px from standard 16
+          'label': 12.0, // +1px from standard 11
         };
     }
   }
@@ -286,7 +270,11 @@ class AppTheme {
     }
 
     // Helper to apply discrete font sizes and enhanced rendering
-    TextStyle? applyEnhancements(TextStyle? style, String category, double defaultSize) {
+    TextStyle? applyEnhancements(
+      TextStyle? style,
+      String category,
+      double defaultSize,
+    ) {
       if (style == null) return null;
 
       return style.copyWith(
@@ -302,7 +290,11 @@ class AppTheme {
       displayMedium: applyEnhancements(baseTheme.displayMedium, 'display', 45),
       displaySmall: applyEnhancements(baseTheme.displaySmall, 'display', 36),
       headlineLarge: applyEnhancements(baseTheme.headlineLarge, 'headline', 32),
-      headlineMedium: applyEnhancements(baseTheme.headlineMedium, 'headline', 28),
+      headlineMedium: applyEnhancements(
+        baseTheme.headlineMedium,
+        'headline',
+        28,
+      ),
       headlineSmall: applyEnhancements(baseTheme.headlineSmall, 'headline', 24),
       titleLarge: applyEnhancements(baseTheme.titleLarge, 'title', 22),
       titleMedium: applyEnhancements(baseTheme.titleMedium, 'title', 16),
@@ -365,7 +357,11 @@ class AppTheme {
     final sizeMap = _getFontSizeAdjustments(fontSize);
 
     // Helper to apply discrete font sizes and enhanced rendering
-    TextStyle? applyEnhancements(TextStyle? style, String category, double defaultSize) {
+    TextStyle? applyEnhancements(
+      TextStyle? style,
+      String category,
+      double defaultSize,
+    ) {
       if (style == null) return null;
 
       return style.copyWith(
@@ -381,7 +377,11 @@ class AppTheme {
       displayMedium: applyEnhancements(baseTheme.displayMedium, 'display', 45),
       displaySmall: applyEnhancements(baseTheme.displaySmall, 'display', 36),
       headlineLarge: applyEnhancements(baseTheme.headlineLarge, 'headline', 32),
-      headlineMedium: applyEnhancements(baseTheme.headlineMedium, 'headline', 28),
+      headlineMedium: applyEnhancements(
+        baseTheme.headlineMedium,
+        'headline',
+        28,
+      ),
       headlineSmall: applyEnhancements(baseTheme.headlineSmall, 'headline', 24),
       titleLarge: applyEnhancements(baseTheme.titleLarge, 'title', 22),
       titleMedium: applyEnhancements(baseTheme.titleMedium, 'title', 16),
@@ -453,11 +453,12 @@ class AppTheme {
 
   /// Standardized icon sizes for UX consistency
   /// Use these for new components to ensure visual hierarchy
-  static const double iconSizeSmall = 16.0;     // Tab icons, inline indicators
-  static const double iconSizeDefault = 24.0;   // Buttons (use default, don't specify)
-  static const double iconSizeLarge = 32.0;     // Headers, emphasis
-  static const double iconSizeXL = 48.0;        // Empty states
-  static const double iconSizeXXL = 64.0;       // Drag overlays, splash screens
+  static const double iconSizeSmall = 16.0; // Tab icons, inline indicators
+  static const double iconSizeDefault =
+      24.0; // Buttons (use default, don't specify)
+  static const double iconSizeLarge = 32.0; // Headers, emphasis
+  static const double iconSizeXL = 48.0; // Empty states
+  static const double iconSizeXXL = 64.0; // Drag overlays, splash screens
 
   /// Navigation rail width
   static const double navigationRailWidth = 72.0;
@@ -578,14 +579,16 @@ class NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
 extension AnimationSpeedContext on BuildContext {
   /// Get the current animation speed from theme
   AppAnimationSpeed get animationSpeed {
-    return Theme.of(this).extension<AnimationSpeedExtension>()?.speed ?? AppAnimationSpeed.normal;
+    return Theme.of(this).extension<AnimationSpeedExtension>()?.speed ??
+        AppAnimationSpeed.normal;
   }
 
   /// Get quick animation duration (e.g., for hover effects, ripples)
   Duration get quickAnimation => AppTheme.getQuickAnimation(animationSpeed);
 
   /// Get standard animation duration (e.g., for dialogs, menus, modals, tabs)
-  Duration get standardAnimation => AppTheme.getStandardAnimation(animationSpeed);
+  Duration get standardAnimation =>
+      AppTheme.getStandardAnimation(animationSpeed);
 
   /// Get slow animation duration (e.g., for page transitions, major state changes)
   Duration get slowAnimation => AppTheme.getSlowAnimation(animationSpeed);

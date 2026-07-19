@@ -36,10 +36,7 @@ class FileStatusBadge extends StatelessWidget {
             : color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppTheme.paddingXS),
       ),
-      child: LabelSmallLabel(
-        code,
-        color: color,
-      ),
+      child: LabelSmallLabel(code, color: color),
     );
   }
 }

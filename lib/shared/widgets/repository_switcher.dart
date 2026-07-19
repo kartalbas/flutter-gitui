@@ -25,7 +25,9 @@ class RepositorySwitcher extends ConsumerWidget {
 
     // Filter repositories by selected project
     final repositories = selectedProject != null
-        ? allRepositories.where((repo) => selectedProject.containsRepository(repo.path)).toList()
+        ? allRepositories
+              .where((repo) => selectedProject.containsRepository(repo.path))
+              .toList()
         : allRepositories;
 
     // Get display name - either from workspace repo or from path
@@ -59,7 +61,11 @@ class RepositorySwitcher extends ConsumerWidget {
     );
   }
 
-  void _showRepositoryMenu(BuildContext context, WidgetRef ref, List<WorkspaceRepository> repositories) {
+  void _showRepositoryMenu(
+    BuildContext context,
+    WidgetRef ref,
+    List<WorkspaceRepository> repositories,
+  ) {
     final currentPath = ref.read(currentRepositoryPathProvider);
 
     showMenu<WorkspaceRepository>(
@@ -89,9 +95,13 @@ class RepositorySwitcher extends ConsumerWidget {
 
   RelativeRect _getMenuPosition(BuildContext context) {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay);
+    final Offset bottomRight = button.localToGlobal(
+      button.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
 
     // Position menu below the button by using bottomLeft instead of topLeft
     final RelativeRect position = RelativeRect.fromRect(

@@ -83,7 +83,9 @@ class CommitListItem extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.secondary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -94,12 +96,16 @@ class CommitListItem extends ConsumerWidget {
                             ? PhosphorIconsRegular.tag
                             : PhosphorIconsRegular.gitBranch,
                         size: 10,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                       const SizedBox(width: 2),
                       LabelSmallLabel(
                         ref,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
                     ],
                   ),
@@ -140,7 +146,9 @@ class CommitListItem extends ConsumerWidget {
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
                 child: BodySmallLabel(
-                  commit.authorDateDisplay(Localizations.localeOf(context).languageCode),
+                  commit.authorDateDisplay(
+                    Localizations.localeOf(context).languageCode,
+                  ),
                   color: isSelected
                       ? Theme.of(context).colorScheme.onSecondaryContainer
                       : Theme.of(context).colorScheme.onSurfaceVariant,

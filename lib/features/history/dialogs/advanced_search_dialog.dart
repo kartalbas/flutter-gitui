@@ -19,13 +19,11 @@ import '../../../core/git/git_providers.dart';
 class AdvancedSearchDialog extends ConsumerStatefulWidget {
   final HistorySearchFilter? initialFilter;
 
-  const AdvancedSearchDialog({
-    super.key,
-    this.initialFilter,
-  });
+  const AdvancedSearchDialog({super.key, this.initialFilter});
 
   @override
-  ConsumerState<AdvancedSearchDialog> createState() => _AdvancedSearchDialogState();
+  ConsumerState<AdvancedSearchDialog> createState() =>
+      _AdvancedSearchDialogState();
 }
 
 class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
@@ -83,7 +81,9 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
             BaseTextField(
               controller: _queryController,
               label: AppLocalizations.of(context)!.searchQuery,
-              hintText: AppLocalizations.of(context)!.searchInCommitOrAuthorOrHash,
+              hintText: AppLocalizations.of(
+                context,
+              )!.searchInCommitOrAuthorOrHash,
               prefixIcon: PhosphorIconsRegular.magnifyingGlass,
               autofocus: true,
             ),
@@ -97,19 +97,25 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                   label: AppLocalizations.of(context)!.caseSensitive,
                   selected: _caseSensitive,
                   onSelected: (value) => setState(() => _caseSensitive = value),
-                  icon: _caseSensitive ? PhosphorIconsBold.textAa : PhosphorIconsRegular.textAa,
+                  icon: _caseSensitive
+                      ? PhosphorIconsBold.textAa
+                      : PhosphorIconsRegular.textAa,
                 ),
                 BaseFilterChip(
                   label: AppLocalizations.of(context)!.regularExpression,
                   selected: _useRegex,
                   onSelected: (value) => setState(() => _useRegex = value),
-                  icon: _useRegex ? PhosphorIconsBold.asterisk : PhosphorIconsRegular.asterisk,
+                  icon: _useRegex
+                      ? PhosphorIconsBold.asterisk
+                      : PhosphorIconsRegular.asterisk,
                 ),
                 BaseFilterChip(
                   label: AppLocalizations.of(context)!.fuzzyMatch,
                   selected: _fuzzyMatch,
                   onSelected: (value) => setState(() => _fuzzyMatch = value),
-                  icon: _fuzzyMatch ? PhosphorIconsBold.target : PhosphorIconsRegular.target,
+                  icon: _fuzzyMatch
+                      ? PhosphorIconsBold.target
+                      : PhosphorIconsRegular.target,
                 ),
               ],
             ),
@@ -169,25 +175,29 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                   label: AppLocalizations.of(context)!.today,
                   variant: ButtonVariant.tertiary,
                   leadingIcon: PhosphorIconsRegular.calendar,
-                  onPressed: () => _applyQuickFilter(HistorySearchFilter.today()),
+                  onPressed: () =>
+                      _applyQuickFilter(HistorySearchFilter.today()),
                 ),
                 BaseButton(
                   label: AppLocalizations.of(context)!.thisWeek,
                   variant: ButtonVariant.tertiary,
                   leadingIcon: PhosphorIconsRegular.calendar,
-                  onPressed: () => _applyQuickFilter(HistorySearchFilter.thisWeek()),
+                  onPressed: () =>
+                      _applyQuickFilter(HistorySearchFilter.thisWeek()),
                 ),
                 BaseButton(
                   label: AppLocalizations.of(context)!.thisMonth,
                   variant: ButtonVariant.tertiary,
                   leadingIcon: PhosphorIconsRegular.calendar,
-                  onPressed: () => _applyQuickFilter(HistorySearchFilter.thisMonth()),
+                  onPressed: () =>
+                      _applyQuickFilter(HistorySearchFilter.thisMonth()),
                 ),
                 BaseButton(
                   label: AppLocalizations.of(context)!.last30Days,
                   variant: ButtonVariant.tertiary,
                   leadingIcon: PhosphorIconsRegular.calendar,
-                  onPressed: () => _applyQuickFilter(HistorySearchFilter.last30Days()),
+                  onPressed: () =>
+                      _applyQuickFilter(HistorySearchFilter.last30Days()),
                 ),
               ],
             ),
@@ -258,7 +268,9 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
       query: _queryController.text.isEmpty ? null : _queryController.text,
       author: _selectedAuthor,
       committer: null,
-      filePath: _filePathController.text.isEmpty ? null : _filePathController.text,
+      filePath: _filePathController.text.isEmpty
+          ? null
+          : _filePathController.text,
       fromDate: _fromDate,
       toDate: _toDate,
       hashPrefixes: hashPrefixes.isEmpty ? null : hashPrefixes,
@@ -286,7 +298,8 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
         // Extract unique author-email combinations
         final authorMap = <String, String>{};
         for (final commit in commits) {
-          if (commit.author.isNotEmpty && !authorMap.containsKey(commit.author)) {
+          if (commit.author.isNotEmpty &&
+              !authorMap.containsKey(commit.author)) {
             authorMap[commit.author] = commit.authorEmail;
           }
         }
@@ -306,7 +319,9 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
             ),
             ...sortedAuthors.map((author) {
               final email = authorMap[author]!;
-              final displayText = email.isNotEmpty ? '$author ($email)' : author;
+              final displayText = email.isNotEmpty
+                  ? '$author ($email)'
+                  : author;
               return BaseDropdownItem<String?>.simple(
                 value: author,
                 label: displayText,

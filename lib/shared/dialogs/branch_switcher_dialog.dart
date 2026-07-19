@@ -242,9 +242,7 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           vertical: AppTheme.paddingXS,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : null,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
         child: MenuItemLabel(

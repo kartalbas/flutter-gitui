@@ -36,21 +36,21 @@ class UnifiedDiffDialog extends ConsumerStatefulWidget {
     this.commitFilePath,
     this.stash,
   }) : assert(
-          (filePath != null && commitHash == null && stash == null) ||
-          (filePath == null && commitHash != null && commitFilePath != null && stash == null) ||
-          (filePath == null && commitHash == null && stash != null),
-          'Must provide either filePath, (commitHash + commitFilePath), or stash',
-        );
+         (filePath != null && commitHash == null && stash == null) ||
+             (filePath == null &&
+                 commitHash != null &&
+                 commitFilePath != null &&
+                 stash == null) ||
+             (filePath == null && commitHash == null && stash != null),
+         'Must provide either filePath, (commitHash + commitFilePath), or stash',
+       );
 
   /// Factory constructor for file diffs (working directory)
   factory UnifiedDiffDialog.file({
     required String filePath,
     bool staged = false,
   }) {
-    return UnifiedDiffDialog(
-      filePath: filePath,
-      staged: staged,
-    );
+    return UnifiedDiffDialog(filePath: filePath, staged: staged);
   }
 
   /// Factory constructor for commit file diffs
@@ -58,19 +58,12 @@ class UnifiedDiffDialog extends ConsumerStatefulWidget {
     required String commitHash,
     required String filePath,
   }) {
-    return UnifiedDiffDialog(
-      commitHash: commitHash,
-      commitFilePath: filePath,
-    );
+    return UnifiedDiffDialog(commitHash: commitHash, commitFilePath: filePath);
   }
 
   /// Factory constructor for stash diffs
-  factory UnifiedDiffDialog.stash({
-    required GitStash stash,
-  }) {
-    return UnifiedDiffDialog(
-      stash: stash,
-    );
+  factory UnifiedDiffDialog.stash({required GitStash stash}) {
+    return UnifiedDiffDialog(stash: stash);
   }
 
   @override
@@ -134,7 +127,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
                 _compactMode = !_compactMode;
               });
               // Save to config
-              await ref.read(configProvider.notifier).setDiffCompactMode(_compactMode);
+              await ref
+                  .read(configProvider.notifier)
+                  .setDiffCompactMode(_compactMode);
             },
           ),
       ],
@@ -215,9 +210,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             final diffOutput = await _diffFuture;
             await Clipboard.setData(ClipboardData(text: diffOutput));
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.snackbarDiffCopied)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.snackbarDiffCopied)));
             }
           } catch (e) {
             // The button stays enabled while the content area shows the load
@@ -225,7 +220,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             // failure has to be reported instead of escaping unhandled.
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.messageErrorLoadingDiff(e.toString()))),
+                SnackBar(
+                  content: Text(l10n.messageErrorLoadingDiff(e.toString())),
+                ),
               );
             }
           }
@@ -246,13 +243,21 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             // Open in external tool
             try {
               if (widget.staged) {
-                await ref.read(diffActionsProvider).diffStagedFile(widget.filePath!);
+                await ref
+                    .read(diffActionsProvider)
+                    .diffStagedFile(widget.filePath!);
               } else {
-                await ref.read(diffActionsProvider).diffUnstagedFile(widget.filePath!);
+                await ref
+                    .read(diffActionsProvider)
+                    .diffUnstagedFile(widget.filePath!);
               }
             } catch (e) {
               messenger.showSnackBar(
-                SnackBar(content: Text(l10n.snackbarFailedToOpenExternalTool(e.toString()))),
+                SnackBar(
+                  content: Text(
+                    l10n.snackbarFailedToOpenExternalTool(e.toString()),
+                  ),
+                ),
               );
             }
           },
@@ -271,10 +276,16 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
       final result = await gitService.getStashDiff(widget.stash!.ref);
       return result.unwrap();
     } else if (widget.commitHash != null) {
-      final result = await gitService.getDiffForCommit(widget.commitHash!, widget.commitFilePath!);
+      final result = await gitService.getDiffForCommit(
+        widget.commitHash!,
+        widget.commitFilePath!,
+      );
       return result.unwrap();
     } else {
-      final result = await gitService.getDiff(widget.filePath!, staged: widget.staged);
+      final result = await gitService.getDiff(
+        widget.filePath!,
+        staged: widget.staged,
+      );
       return result.unwrap();
     }
   }
@@ -288,10 +299,8 @@ Future<void> showUnifiedDiffDialog(
 }) {
   return showDialog(
     context: context,
-    builder: (context) => UnifiedDiffDialog.file(
-      filePath: filePath,
-      staged: staged,
-    ),
+    builder: (context) =>
+        UnifiedDiffDialog.file(filePath: filePath, staged: staged),
   );
 }
 
@@ -303,10 +312,8 @@ Future<void> showCommitFileDiffDialog(
 }) {
   return showDialog(
     context: context,
-    builder: (context) => UnifiedDiffDialog.commit(
-      commitHash: commitHash,
-      filePath: filePath,
-    ),
+    builder: (context) =>
+        UnifiedDiffDialog.commit(commitHash: commitHash, filePath: filePath),
   );
 }
 
@@ -317,8 +324,6 @@ Future<void> showStashDiffDialog(
 }) {
   return showDialog(
     context: context,
-    builder: (context) => UnifiedDiffDialog.stash(
-      stash: stash,
-    ),
+    builder: (context) => UnifiedDiffDialog.stash(stash: stash),
   );
 }

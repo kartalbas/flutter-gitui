@@ -84,7 +84,10 @@ class GitBranch {
   /// Check if a branch name matches any protected branch patterns
   /// @param branchName The branch name to check (can be local or remote like "origin/main")
   /// @param protectedBranches List of protected branch names from config
-  static bool isProtectedBranch(String branchName, List<String> protectedBranches) {
+  static bool isProtectedBranch(
+    String branchName,
+    List<String> protectedBranches,
+  ) {
     final normalized = branchName.toLowerCase().trim();
 
     // Check each protected branch name
@@ -106,7 +109,8 @@ class GitBranch {
   }
 
   @override
-  String toString() => 'GitBranch(name: $name, isCurrent: $isCurrent, isLocal: $isLocal, isRemote: $isRemote)';
+  String toString() =>
+      'GitBranch(name: $name, isCurrent: $isCurrent, isLocal: $isLocal, isRemote: $isRemote)';
 
   @override
   bool operator ==(Object other) =>

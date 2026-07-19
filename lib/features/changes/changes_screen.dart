@@ -80,12 +80,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           return Column(
             children: [
               Expanded(
-                child: _buildFileList(
-                  context,
-                  ref,
-                  stagedFiles,
-                  unstagedFiles,
-                ),
+                child: _buildFileList(context, ref, stagedFiles, unstagedFiles),
               ),
               // Fixed commit button bar
               if (stagedFiles.isNotEmpty)
@@ -102,7 +97,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                   child: SafeArea(
                     child: unstagedFiles.isEmpty
                         ? // Only staged files - show single "Commit" button
-                        BaseButton(
+                          BaseButton(
                             label: AppLocalizations.of(context)!.commit,
                             leadingIcon: PhosphorIconsRegular.check,
                             onPressed: () => _commitStagedOnly(context, ref),
@@ -111,13 +106,14 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                             fullWidth: true,
                           )
                         : // Both staged and unstaged files - show two buttons
-                        Row(
+                          Row(
                             children: [
                               Expanded(
                                 child: BaseButton(
                                   label: AppLocalizations.of(context)!.commit,
                                   leadingIcon: PhosphorIconsRegular.check,
-                                  onPressed: () => _commitStagedOnly(context, ref),
+                                  onPressed: () =>
+                                      _commitStagedOnly(context, ref),
                                   variant: ButtonVariant.secondary,
                                   size: ButtonSize.medium,
                                 ),
@@ -125,9 +121,16 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                               const SizedBox(width: AppTheme.paddingM),
                               Expanded(
                                 child: BaseButton(
-                                  label: AppLocalizations.of(context)!.stageAllAndCommit,
+                                  label: AppLocalizations.of(
+                                    context,
+                                  )!.stageAllAndCommit,
                                   leadingIcon: PhosphorIconsRegular.checkCircle,
-                                  onPressed: () => _handleCommit(context, ref, unstagedFiles, stagedFiles),
+                                  onPressed: () => _handleCommit(
+                                    context,
+                                    ref,
+                                    unstagedFiles,
+                                    stagedFiles,
+                                  ),
                                   variant: ButtonVariant.primary,
                                   size: ButtonSize.medium,
                                 ),
@@ -139,9 +142,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
             ],
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => ChangesErrorState(error: error),
       ),
     );
@@ -231,7 +232,6 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     );
   }
 
-
   Future<void> _openRepository(BuildContext context, WidgetRef ref) async {
     // Check if running on web
     if (kIsWeb) {
@@ -239,10 +239,14 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         await BaseDialog.show(
           context: context,
           dialog: BaseDialog(
-            title: AppLocalizations.of(context)!.dialogTitleWebBrowserLimitation,
+            title: AppLocalizations.of(
+              context,
+            )!.dialogTitleWebBrowserLimitation,
             icon: PhosphorIconsRegular.globe,
             content: BodyMediumLabel(
-              AppLocalizations.of(context)!.dialogContentWebBrowserLimitationChanges,
+              AppLocalizations.of(
+                context,
+              )!.dialogContentWebBrowserLimitationChanges,
             ),
             actions: [
               BaseButton(
@@ -286,7 +290,10 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           icon: PhosphorIconsRegular.warningCircle,
           variant: DialogVariant.confirmation,
           content: BodyMediumLabel(
-            AppLocalizations.of(context)!.dialogContentStageAllAndCommit(unstagedFiles.length, unstagedFiles.length == 1 ? '' : 's'),
+            AppLocalizations.of(context)!.dialogContentStageAllAndCommit(
+              unstagedFiles.length,
+              unstagedFiles.length == 1 ? '' : 's',
+            ),
           ),
           actions: [
             BaseButton(
@@ -344,7 +351,9 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         title: AppLocalizations.of(context)!.discardChangesQuestion,
         variant: DialogVariant.destructive,
         content: BodyMediumLabel(
-          AppLocalizations.of(context)!.dialogContentDiscardChangesFile(file.path),
+          AppLocalizations.of(
+            context,
+          )!.dialogContentDiscardChangesFile(file.path),
         ),
         actions: [
           BaseButton(
@@ -400,18 +409,31 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     }
   }
 
-  Future<void> _handleStagingError(BuildContext context, String filePath, String errorMessage) async {
+  Future<void> _handleStagingError(
+    BuildContext context,
+    String filePath,
+    String errorMessage,
+  ) async {
     // Check if this is a Windows reserved filename error
     if (WindowsFilenameValidator.isReservedNameError(errorMessage)) {
-      final problematicFile = WindowsFilenameValidator.extractFilenameFromError(errorMessage) ?? filePath;
+      final problematicFile =
+          WindowsFilenameValidator.extractFilenameFromError(errorMessage) ??
+          filePath;
 
       await showDialog(
         context: context,
         builder: (dialogContext) => BaseDialog(
           icon: PhosphorIconsRegular.warningCircle,
-          title: AppLocalizations.of(context)!.dialogTitleWindowsReservedFilename,
+          title: AppLocalizations.of(
+            context,
+          )!.dialogTitleWindowsReservedFilename,
           content: SingleChildScrollView(
-            child: Text(WindowsFilenameValidator.getErrorMessage(problematicFile, dialogContext)),
+            child: Text(
+              WindowsFilenameValidator.getErrorMessage(
+                problematicFile,
+                dialogContext,
+              ),
+            ),
           ),
           variant: DialogVariant.destructive,
           actions: [
@@ -425,7 +447,10 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       );
     } else {
       // Show regular error message
-      NotificationService.showError(context, 'Failed to stage file: $errorMessage');
+      NotificationService.showError(
+        context,
+        'Failed to stage file: $errorMessage',
+      );
     }
   }
 
@@ -438,7 +463,12 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         icon: PhosphorIconsRegular.plus,
         title: AppLocalizations.of(context)!.stageAllChangesQuestion,
         variant: DialogVariant.confirmation,
-        content: BodyMediumLabel(AppLocalizations.of(context)!.dialogContentStageAllFiles(unstagedFiles.length, unstagedFiles.length == 1 ? '' : 's')),
+        content: BodyMediumLabel(
+          AppLocalizations.of(context)!.dialogContentStageAllFiles(
+            unstagedFiles.length,
+            unstagedFiles.length == 1 ? '' : 's',
+          ),
+        ),
         actions: [
           BaseButton(
             label: AppLocalizations.of(context)!.cancel,
@@ -474,7 +504,8 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         title: AppLocalizations.of(context)!.unstageAllChangesQuestion,
         variant: DialogVariant.confirmation,
         content: BodyMediumLabel(
-            'Unstage all ${stagedFiles.length} staged file${stagedFiles.length == 1 ? '' : 's'}?'),
+          'Unstage all ${stagedFiles.length} staged file${stagedFiles.length == 1 ? '' : 's'}?',
+        ),
         actions: [
           BaseButton(
             label: AppLocalizations.of(context)!.cancel,
@@ -502,7 +533,9 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         icon: PhosphorIconsRegular.trash,
         title: AppLocalizations.of(context)!.discardAllChangesQuestion,
         variant: DialogVariant.destructive,
-        content: BodyMediumLabel(AppLocalizations.of(context)!.discardAllChangesConfirm),
+        content: BodyMediumLabel(
+          AppLocalizations.of(context)!.discardAllChangesConfirm,
+        ),
         actions: [
           BaseButton(
             label: AppLocalizations.of(context)!.cancel,
@@ -522,5 +555,4 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       await ref.read(gitActionsProvider).discardAll();
     }
   }
-
 }

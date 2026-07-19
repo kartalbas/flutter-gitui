@@ -85,4 +85,3 @@ class BatchOperationsToolbar extends StatelessWidget {
     );
   }
 }
-

@@ -5,10 +5,15 @@ import 'workspace_list_provider.dart';
 import 'workspace_provider.dart';
 
 /// Provider for getting project for a specific repository
-final projectForRepositoryProvider = Provider.family<Workspace?, String>((ref, repositoryPath) {
+final projectForRepositoryProvider = Provider.family<Workspace?, String>((
+  ref,
+  repositoryPath,
+) {
   final projects = ref.watch(projectProvider);
   try {
-    return projects.firstWhere((project) => project.containsRepository(repositoryPath));
+    return projects.firstWhere(
+      (project) => project.containsRepository(repositoryPath),
+    );
   } catch (e) {
     return null;
   }

@@ -6,9 +6,10 @@ import 'models/workspace.dart';
 import '../config/config_providers.dart';
 
 /// Provider for the currently selected project (stored in YAML)
-final selectedProjectProvider = StateNotifierProvider<SelectedProjectNotifier, Workspace?>((ref) {
-  return SelectedProjectNotifier(ref);
-});
+final selectedProjectProvider =
+    StateNotifierProvider<SelectedProjectNotifier, Workspace?>((ref) {
+      return SelectedProjectNotifier(ref);
+    });
 
 /// Notifier for managing the selected project
 class SelectedProjectNotifier extends StateNotifier<Workspace?> {
@@ -29,7 +30,9 @@ class SelectedProjectNotifier extends StateNotifier<Workspace?> {
     if (state != null) {
       // Defer the update to avoid modifying providers during build phase
       Future.microtask(() {
-        ref.read(projectProvider.notifier).updateLastSelectedRepository(state!.id, repositoryPath);
+        ref
+            .read(projectProvider.notifier)
+            .updateLastSelectedRepository(state!.id, repositoryPath);
       });
     }
   }
@@ -55,7 +58,9 @@ class SelectedProjectNotifier extends StateNotifier<Workspace?> {
     }
 
     // Otherwise select default project or first project
-    final defaultWorkspace = projects.where((p) => p.id == 'default').firstOrNull;
+    final defaultWorkspace = projects
+        .where((p) => p.id == 'default')
+        .firstOrNull;
     state = defaultWorkspace ?? projects.first;
 
     // Don't save during initialization - only save when user makes explicit selection
@@ -65,30 +70,42 @@ class SelectedProjectNotifier extends StateNotifier<Workspace?> {
   /// Save selected project ID to YAML config
   Future<void> _saveSelectedProject() async {
     if (state == null) return;
-    await ref.read(configProvider.notifier).updateSelectedWorkspaceId(state!.id);
+    await ref
+        .read(configProvider.notifier)
+        .updateSelectedWorkspaceId(state!.id);
   }
 
   /// Select a project
   Future<void> selectProject(Workspace project) async {
     // Save the current repository to the current project before switching
     final currentRepoPath = ref.read(currentRepositoryPathProvider);
-    if (state != null && currentRepoPath != null && state!.containsRepository(currentRepoPath)) {
-      await ref.read(projectProvider.notifier).updateLastSelectedRepository(state!.id, currentRepoPath);
+    if (state != null &&
+        currentRepoPath != null &&
+        state!.containsRepository(currentRepoPath)) {
+      await ref
+          .read(projectProvider.notifier)
+          .updateLastSelectedRepository(state!.id, currentRepoPath);
     }
 
     state = project;
     await _saveSelectedProject();
 
     // Restore the last selected repository for this project
-    if (project.lastSelectedRepository != null && project.containsRepository(project.lastSelectedRepository!)) {
+    if (project.lastSelectedRepository != null &&
+        project.containsRepository(project.lastSelectedRepository!)) {
       // Restore the last selected repository if it still exists in the project
-      await ref.read(configProvider.notifier).setCurrentRepository(project.lastSelectedRepository);
+      await ref
+          .read(configProvider.notifier)
+          .setCurrentRepository(project.lastSelectedRepository);
     } else if (project.repositoryPaths.length == 1) {
       // If project has only one repository, automatically select it
-      await ref.read(configProvider.notifier).setCurrentRepository(project.repositoryPaths.first);
+      await ref
+          .read(configProvider.notifier)
+          .setCurrentRepository(project.repositoryPaths.first);
     } else {
       // Check if current repository belongs to this project
-      if (currentRepoPath != null && !project.containsRepository(currentRepoPath)) {
+      if (currentRepoPath != null &&
+          !project.containsRepository(currentRepoPath)) {
         // Close the current repository if it doesn't belong to the selected project
         await ref.read(configProvider.notifier).setCurrentRepository(null);
       }

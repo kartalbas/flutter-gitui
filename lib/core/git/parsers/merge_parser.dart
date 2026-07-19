@@ -54,10 +54,7 @@ class MergeParser {
           continue; // Not a conflict
       }
 
-      conflicts.add(MergeConflict(
-        filePath: filePath,
-        type: type,
-      ));
+      conflicts.add(MergeConflict(filePath: filePath, type: type));
     }
 
     return conflicts;
@@ -67,11 +64,7 @@ class MergeParser {
   ///
   /// Returns a map with 'ours', 'theirs', and 'base' sections
   static Map<String, String> parseConflictMarkers(String fileContent) {
-    final result = <String, String>{
-      'ours': '',
-      'theirs': '',
-      'base': '',
-    };
+    final result = <String, String>{'ours': '', 'theirs': '', 'base': ''};
 
     final lines = fileContent.split('\n');
     String? currentSection;
@@ -151,17 +144,15 @@ class MergeParser {
       branch = branchMatch.group(1);
     } else {
       // Try alternative format: "Merge remote-tracking branch 'origin/branch'"
-      final remoteBranchMatch =
-          RegExp(r"Merge remote-tracking branch '([^']+)'").firstMatch(message);
+      final remoteBranchMatch = RegExp(
+        r"Merge remote-tracking branch '([^']+)'",
+      ).firstMatch(message);
       if (remoteBranchMatch != null) {
         branch = remoteBranchMatch.group(1);
       }
     }
 
-    return {
-      'message': message,
-      'branch': branch,
-    };
+    return {'message': message, 'branch': branch};
   }
 
   /// Get clean content without conflict markers
@@ -208,7 +199,9 @@ class MergeParser {
   /// Extract conflict sections for display
   ///
   /// Returns a list of conflict sections with line numbers
-  static List<Map<String, dynamic>> extractConflictSections(String fileContent) {
+  static List<Map<String, dynamic>> extractConflictSections(
+    String fileContent,
+  ) {
     final sections = <Map<String, dynamic>>[];
     final lines = fileContent.split('\n');
 

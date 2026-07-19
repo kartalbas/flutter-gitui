@@ -13,10 +13,7 @@ import 'settings_section.dart';
 class HistorySection extends ConsumerWidget {
   final VoidCallback onEditCommitHistoryLimit;
 
-  const HistorySection({
-    super.key,
-    required this.onEditCommitHistoryLimit,
-  });
+  const HistorySection({super.key, required this.onEditCommitHistoryLimit});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

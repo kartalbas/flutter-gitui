@@ -4,14 +4,14 @@ import '../../../shared/theme/app_theme.dart';
 
 /// Type of file change in a commit
 enum FileChangeType {
-  added,    // A - Added
+  added, // A - Added
   modified, // M - Modified
-  deleted,  // D - Deleted
-  renamed,  // R - Renamed
-  copied,   // C - Copied
+  deleted, // D - Deleted
+  renamed, // R - Renamed
+  copied, // C - Copied
   typeChanged, // T - Type changed
   unmerged, // U - Unmerged
-  unknown;  // X - Unknown
+  unknown; // X - Unknown
 
   /// Color for this change type
   Color get color {
@@ -142,10 +142,14 @@ class FileChangeStats {
   const FileChangeStats(this.files);
 
   int get totalFiles => files.length;
-  int get addedFiles => files.where((f) => f.type == FileChangeType.added).length;
-  int get modifiedFiles => files.where((f) => f.type == FileChangeType.modified).length;
-  int get deletedFiles => files.where((f) => f.type == FileChangeType.deleted).length;
-  int get renamedFiles => files.where((f) => f.type == FileChangeType.renamed).length;
+  int get addedFiles =>
+      files.where((f) => f.type == FileChangeType.added).length;
+  int get modifiedFiles =>
+      files.where((f) => f.type == FileChangeType.modified).length;
+  int get deletedFiles =>
+      files.where((f) => f.type == FileChangeType.deleted).length;
+  int get renamedFiles =>
+      files.where((f) => f.type == FileChangeType.renamed).length;
 
   int get totalAdditions => files.fold(0, (sum, f) => sum + f.additions);
   int get totalDeletions => files.fold(0, (sum, f) => sum + f.deletions);

@@ -9,10 +9,7 @@ import '../../../shared/theme/app_theme.dart';
 class BranchesEmptyState extends StatelessWidget {
   final bool isLocal;
 
-  const BranchesEmptyState({
-    super.key,
-    required this.isLocal,
-  });
+  const BranchesEmptyState({super.key, required this.isLocal});
 
   @override
   Widget build(BuildContext context) {

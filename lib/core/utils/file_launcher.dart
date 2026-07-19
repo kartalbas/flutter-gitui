@@ -36,36 +36,29 @@ class FileLauncher {
         // Launch through explorer.exe rather than `cmd /c start`. cmd re-parses
         // its whole command line, so a file name containing &, ^, | or %VAR%
         // would be interpreted as shell syntax instead of a path.
-        await Process.start(
-          'explorer.exe',
-          [filePath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start('explorer.exe', [
+          filePath,
+        ], mode: ProcessStartMode.detached);
         Logger.info('Opened file with Windows explorer: $filePath');
         return true;
       } else if (Platform.isMacOS) {
         // macOS: Use open command
-        await Process.start(
-          'open',
-          [filePath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start('open', [
+          filePath,
+        ], mode: ProcessStartMode.detached);
         Logger.info('Opened file with macOS open command: $filePath');
         return true;
       } else if (Platform.isLinux) {
         // Linux: Try xdg-open
-        await Process.start(
-          'xdg-open',
-          [filePath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start('xdg-open', [
+          filePath,
+        ], mode: ProcessStartMode.detached);
         Logger.info('Opened file with xdg-open: $filePath');
         return true;
       }
 
       Logger.warning('No method available to open file: $filePath');
       return false;
-
     } catch (e, stackTrace) {
       Logger.error('Error opening file externally: $filePath', e, stackTrace);
       return false;

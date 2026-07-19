@@ -78,7 +78,9 @@ class BasePopupMenuButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final animationSpeed = Theme.of(context).extension<AnimationSpeedExtension>()?.speed ?? AppAnimationSpeed.normal;
+    final animationSpeed =
+        Theme.of(context).extension<AnimationSpeedExtension>()?.speed ??
+        AppAnimationSpeed.normal;
 
     return PopupMenuButton<T>(
       icon: icon,
@@ -124,8 +126,12 @@ class BaseSwitch extends StatelessWidget {
     return Switch(
       value: value,
       onChanged: onChanged,
-      thumbColor: activeThumbColor != null ? WidgetStateProperty.all(activeThumbColor) : null,
-      trackColor: activeTrackColor != null ? WidgetStateProperty.all(activeTrackColor) : null,
+      thumbColor: activeThumbColor != null
+          ? WidgetStateProperty.all(activeThumbColor)
+          : null,
+      trackColor: activeTrackColor != null
+          ? WidgetStateProperty.all(activeTrackColor)
+          : null,
     );
   }
 }

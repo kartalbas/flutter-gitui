@@ -149,25 +149,39 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
 
     // Listen for filter changes from external sources (like tags view)
-    ref.listen<HistorySearchFilter>(historySearchFilterProvider, (previous, next) {
+    ref.listen<HistorySearchFilter>(historySearchFilterProvider, (
+      previous,
+      next,
+    ) {
       Logger.debug('[HistoryScreen] Filter changed - tags: ${next.tags}');
       // Update search controller if tag filter is set
       if (next.tags != null && next.tags!.isNotEmpty) {
         final expectedText = 'tag:${next.tags!.first}';
         if (_searchController.text != expectedText) {
-          Logger.debug('[HistoryScreen] Listener updating search text to: $expectedText');
+          Logger.debug(
+            '[HistoryScreen] Listener updating search text to: $expectedText',
+          );
           _searchController.text = expectedText;
         }
       }
     });
 
     // Listen for filtered commits to auto-select when tag filter is active
-    ref.listen<AsyncValue<List<GitCommit>>>(filteredCommitsProvider, (previous, next) {
+    ref.listen<AsyncValue<List<GitCommit>>>(filteredCommitsProvider, (
+      previous,
+      next,
+    ) {
       next.whenData((commits) {
-        Logger.debug('[HistoryScreen] Filtered commits loaded: ${commits.length} commits');
+        Logger.debug(
+          '[HistoryScreen] Filtered commits loaded: ${commits.length} commits',
+        );
         // If we have a tag filter and exactly 1 commit, auto-select it
-        if (searchFilter.tags != null && searchFilter.tags!.isNotEmpty && commits.length == 1) {
-          Logger.debug('[HistoryScreen] Auto-selecting commit: ${commits.first.shortHash}');
+        if (searchFilter.tags != null &&
+            searchFilter.tags!.isNotEmpty &&
+            commits.length == 1) {
+          Logger.debug(
+            '[HistoryScreen] Auto-selecting commit: ${commits.first.shortHash}',
+          );
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref.read(selectedCommitIndexProvider.notifier).state = 0;
             ref.read(selectedCommitProvider.notifier).state = commits.first;
@@ -285,9 +299,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             ),
                             if (searchFilter.isNotEmpty)
                               BaseActionChip(
-                                label: AppLocalizations.of(context)!.clearFilters(
-                                  searchFilter.activeFilterCount,
-                                ),
+                                label: AppLocalizations.of(
+                                  context,
+                                )!.clearFilters(searchFilter.activeFilterCount),
                                 icon: PhosphorIconsRegular.x,
                                 onPressed: () {
                                   _searchController.clear();
@@ -667,16 +681,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       if (tagName.isEmpty) return;
 
       if (result['annotated'] == true) {
-        await ref.read(gitActionsProvider).createAnnotatedTag(
-          tagName,
-          message: result['message'] as String,
-          commitHash: commit.hash,
-        );
+        await ref
+            .read(gitActionsProvider)
+            .createAnnotatedTag(
+              tagName,
+              message: result['message'] as String,
+              commitHash: commit.hash,
+            );
       } else {
-        await ref.read(gitActionsProvider).createLightweightTag(
-          tagName,
-          commitHash: commit.hash,
-        );
+        await ref
+            .read(gitActionsProvider)
+            .createLightweightTag(tagName, commitHash: commit.hash);
       }
 
       // Refresh tags provider
@@ -814,11 +829,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (shouldForcePush == true) {
       // The tracked remote need not be named "origin", and the upstream branch
       // need not share the local branch's name, so push an explicit refspec.
-      await ref.read(gitActionsProvider).pushRemote(
-        force: true,
-        remote: upstream.substring(0, remoteSeparator),
-        branch: '${branch.name}:${upstream.substring(remoteSeparator + 1)}',
-      );
+      await ref
+          .read(gitActionsProvider)
+          .pushRemote(
+            force: true,
+            remote: upstream.substring(0, remoteSeparator),
+            branch: '${branch.name}:${upstream.substring(remoteSeparator + 1)}',
+          );
 
       if (context.mounted) {
         context.showSuccessIfMounted(
@@ -842,9 +859,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 /// Draggable Speed Dial FAB for history actions
 class _DraggableSpeedDial extends StatefulWidget {
   final List<DiffViewerAction> actions;
-  final bool isExpanded;  // Controlled by parent
-  final VoidCallback onToggle;  // Callback to toggle expansion
-  final VoidCallback onCollapse;  // Callback to collapse (for actions)
+  final bool isExpanded; // Controlled by parent
+  final VoidCallback onToggle; // Callback to toggle expansion
+  final VoidCallback onCollapse; // Callback to collapse (for actions)
 
   const _DraggableSpeedDial({
     required this.actions,
@@ -858,7 +875,10 @@ class _DraggableSpeedDial extends StatefulWidget {
 }
 
 class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
-  Offset _position = const Offset(AppTheme.paddingM, AppTheme.paddingM); // Default position (from bottom-right)
+  Offset _position = const Offset(
+    AppTheme.paddingM,
+    AppTheme.paddingM,
+  ); // Default position (from bottom-right)
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -889,8 +909,14 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
             setState(() {
               // Update position by subtracting delta (since we're using right/bottom positioning)
               _position = Offset(
-                (_position.dx - details.delta.dx).clamp(AppTheme.paddingM, MediaQuery.of(context).size.width - 80),
-                (_position.dy - details.delta.dy).clamp(AppTheme.paddingM, MediaQuery.of(context).size.height - 80),
+                (_position.dx - details.delta.dx).clamp(
+                  AppTheme.paddingM,
+                  MediaQuery.of(context).size.width - 80,
+                ),
+                (_position.dy - details.delta.dy).clamp(
+                  AppTheme.paddingM,
+                  MediaQuery.of(context).size.height - 80,
+                ),
               );
             });
           },
@@ -904,8 +930,11 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
             children: [
               // Expanded action buttons
               if (widget.isExpanded)
-                ...widget.actions.map((action) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppTheme.paddingS + AppTheme.paddingXS),
+                ...widget.actions.map(
+                  (action) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: AppTheme.paddingS + AppTheme.paddingXS,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -913,16 +942,21 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                         Material(
                           color: Theme.of(context).colorScheme.surface,
                           elevation: 4,
-                          borderRadius: BorderRadius.circular(AppTheme.paddingXS),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.paddingXS,
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingS + AppTheme.paddingXS,
+                              horizontal:
+                                  AppTheme.paddingS + AppTheme.paddingXS,
                               vertical: AppTheme.paddingS,
                             ),
                             child: BodySmallLabel(action.label),
                           ),
                         ),
-                        const SizedBox(width: AppTheme.paddingS + AppTheme.paddingXS),
+                        const SizedBox(
+                          width: AppTheme.paddingS + AppTheme.paddingXS,
+                        ),
                         // Action button
                         FloatingActionButton.small(
                           heroTag: action.label,
@@ -935,7 +969,8 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                         ),
                       ],
                     ),
-                  )),
+                  ),
+                ),
               // Main FAB
               FloatingActionButton(
                 heroTag: 'main_fab',
@@ -945,7 +980,9 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                   _focusNode.requestFocus();
                 },
                 child: AnimatedRotation(
-                  turns: widget.isExpanded ? 0.125 : 0, // 45 degrees when expanded
+                  turns: widget.isExpanded
+                      ? 0.125
+                      : 0, // 45 degrees when expanded
                   duration: const Duration(milliseconds: 200),
                   child: Icon(
                     widget.isExpanded

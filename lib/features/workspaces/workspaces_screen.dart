@@ -47,12 +47,17 @@ class WorkspacesScreen extends ConsumerWidget {
                         ),
                         ButtonSegment(
                           value: ProjectsViewMode.list,
-                          icon: Icon(PhosphorIconsRegular.listBullets, size: 18),
+                          icon: Icon(
+                            PhosphorIconsRegular.listBullets,
+                            size: 18,
+                          ),
                         ),
                       ],
                       selected: {viewMode},
                       onSelectionChanged: (Set<ProjectsViewMode> newSelection) {
-                        ref.read(configProvider.notifier).setProjectsViewMode(newSelection.first);
+                        ref
+                            .read(configProvider.notifier)
+                            .setProjectsViewMode(newSelection.first);
                       },
                     );
                   },
@@ -74,15 +79,25 @@ class WorkspacesScreen extends ConsumerWidget {
       body: Padding(
         padding: const EdgeInsets.all(AppTheme.paddingL),
         child: hasProjects
-                ? Consumer(
-                    builder: (context, ref, child) {
-                      final viewMode = ref.watch(projectsViewModeProvider);
-                      return viewMode == ProjectsViewMode.grid
-                          ? _buildProjectGrid(context, ref, projects, selectedProject)
-                          : _buildProjectList(context, ref, projects, selectedProject);
-                    },
-                  )
-                : const WorkspacesEmptyState(),
+            ? Consumer(
+                builder: (context, ref, child) {
+                  final viewMode = ref.watch(projectsViewModeProvider);
+                  return viewMode == ProjectsViewMode.grid
+                      ? _buildProjectGrid(
+                          context,
+                          ref,
+                          projects,
+                          selectedProject,
+                        )
+                      : _buildProjectList(
+                          context,
+                          ref,
+                          projects,
+                          selectedProject,
+                        );
+                },
+              )
+            : const WorkspacesEmptyState(),
       ),
     );
   }
@@ -152,25 +167,36 @@ class WorkspacesScreen extends ConsumerWidget {
 
     if (result != null && context.mounted) {
       try {
-        await ref.read(projectProvider.notifier).createWorkspace(
+        await ref
+            .read(projectProvider.notifier)
+            .createWorkspace(
               name: result.name,
               description: result.description,
               color: result.color,
             );
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Failed to create workspace: $e');
+          NotificationService.showError(
+            context,
+            'Failed to create workspace: $e',
+          );
         }
       }
     }
   }
 
-  Future<void> _editProject(BuildContext context, WidgetRef ref, Workspace project) async {
+  Future<void> _editProject(
+    BuildContext context,
+    WidgetRef ref,
+    Workspace project,
+  ) async {
     final result = await showProjectDialog(context, project: project);
 
     if (result != null && context.mounted) {
       try {
-        await ref.read(projectProvider.notifier).updateWorkspace(
+        await ref
+            .read(projectProvider.notifier)
+            .updateWorkspace(
               project.id,
               name: result.name,
               description: result.description,
@@ -178,18 +204,29 @@ class WorkspacesScreen extends ConsumerWidget {
             );
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Failed to update workspace: $e');
+          NotificationService.showError(
+            context,
+            'Failed to update workspace: $e',
+          );
         }
       }
     }
   }
 
-  Future<void> _deleteProject(BuildContext context, WidgetRef ref, Workspace project) async {
+  Future<void> _deleteProject(
+    BuildContext context,
+    WidgetRef ref,
+    Workspace project,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => BaseDialog(
         title: AppLocalizations.of(context)!.deleteWorkspace,
-        content: Text(AppLocalizations.of(context)!.dialogContentDeleteWorkspace(project.name)),
+        content: Text(
+          AppLocalizations.of(
+            context,
+          )!.dialogContentDeleteWorkspace(project.name),
+        ),
         variant: DialogVariant.destructive,
         actions: [
           BaseButton(
@@ -211,7 +248,10 @@ class WorkspacesScreen extends ConsumerWidget {
         await ref.read(projectProvider.notifier).deleteWorkspace(project.id);
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Failed to delete workspace: $e');
+          NotificationService.showError(
+            context,
+            'Failed to delete workspace: $e',
+          );
         }
       }
     }

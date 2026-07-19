@@ -108,17 +108,9 @@ class WorkspaceNotifier extends Notifier<List<WorkspaceRepository>> {
       // Create repository
       final repo = WorkspaceRepository.fromPath(normalizedPath);
 
-      return BatchAddResult(
-        path: path,
-        success: true,
-        repository: repo,
-      );
+      return BatchAddResult(path: path, success: true, repository: repo);
     } catch (e) {
-      return BatchAddResult(
-        path: path,
-        success: false,
-        error: e.toString(),
-      );
+      return BatchAddResult(path: path, success: false, error: e.toString());
     }
   }
 
@@ -143,12 +135,14 @@ class WorkspaceNotifier extends Notifier<List<WorkspaceRepository>> {
     bool? isFavorite,
     String? description,
   }) async {
-    await ref.read(configProvider.notifier).updateRepository(
-      path,
-      customAlias: customAlias,
-      isFavorite: isFavorite,
-      description: description,
-    );
+    await ref
+        .read(configProvider.notifier)
+        .updateRepository(
+          path,
+          customAlias: customAlias,
+          isFavorite: isFavorite,
+          description: description,
+        );
   }
 
   /// Update last accessed time for a repository
@@ -174,7 +168,9 @@ class WorkspaceNotifier extends Notifier<List<WorkspaceRepository>> {
     await ref.read(configProvider.notifier).setCurrentRepository(null);
 
     // Then clear all repositories from config
-    final reposToRemove = [...state]; // Create a copy to avoid modification during iteration
+    final reposToRemove = [
+      ...state,
+    ]; // Create a copy to avoid modification during iteration
     for (final repo in reposToRemove) {
       await ref.read(configProvider.notifier).removeRepository(repo.path);
     }
@@ -188,7 +184,9 @@ class WorkspaceNotifier extends Notifier<List<WorkspaceRepository>> {
     final invalidRepos = <WorkspaceRepository>[];
     for (final repo in state) {
       final isValid = repo.isValidGitRepo;
-      Logger.debug('${repo.name}: ${isValid ? "valid" : "invalid (path: ${repo.path})"}');
+      Logger.debug(
+        '${repo.name}: ${isValid ? "valid" : "invalid (path: ${repo.path})"}',
+      );
       if (!isValid) {
         invalidRepos.add(repo);
       }
@@ -203,7 +201,9 @@ class WorkspaceNotifier extends Notifier<List<WorkspaceRepository>> {
 
     // Check if current repository is invalid
     final currentRepoPath = ref.read(currentRepositoryPathProvider);
-    final isCurrentRepoInvalid = invalidRepos.any((repo) => repo.path == currentRepoPath);
+    final isCurrentRepoInvalid = invalidRepos.any(
+      (repo) => repo.path == currentRepoPath,
+    );
 
     // Clear current repository first if it's invalid
     if (isCurrentRepoInvalid) {
@@ -222,9 +222,10 @@ class WorkspaceNotifier extends Notifier<List<WorkspaceRepository>> {
 }
 
 /// Provider for workspace repositories (reads from config)
-final workspaceProvider = NotifierProvider<WorkspaceNotifier, List<WorkspaceRepository>>(
-  WorkspaceNotifier.new,
-);
+final workspaceProvider =
+    NotifierProvider<WorkspaceNotifier, List<WorkspaceRepository>>(
+      WorkspaceNotifier.new,
+    );
 
 /// Provider to get recent repositories
 final recentRepositoriesProvider = Provider<List<WorkspaceRepository>>((ref) {
@@ -243,7 +244,9 @@ final favoriteRepositoriesProvider = Provider<List<WorkspaceRepository>>((ref) {
 });
 
 /// Provider to get current repository
-final currentWorkspaceRepositoryProvider = Provider<WorkspaceRepository?>((ref) {
+final currentWorkspaceRepositoryProvider = Provider<WorkspaceRepository?>((
+  ref,
+) {
   final currentPath = ref.watch(currentRepositoryPathProvider);
   if (currentPath == null) return null;
 

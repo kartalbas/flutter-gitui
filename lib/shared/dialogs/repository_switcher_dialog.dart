@@ -42,13 +42,17 @@ class _RepositorySwitcherDialogState
 
     // Filter repositories by selected project
     final repositories = selectedProject != null
-        ? allRepositories.where((repo) => selectedProject.containsRepository(repo.path)).toList()
+        ? allRepositories
+              .where((repo) => selectedProject.containsRepository(repo.path))
+              .toList()
         : allRepositories;
 
     // Filter repositories by search query
     final filteredRepos = repositories.where((repo) {
       if (_searchQuery.isEmpty) return true;
-      return repo.displayName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      return repo.displayName.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
           repo.path.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
@@ -80,7 +84,10 @@ class _RepositorySwitcherDialogState
           Expanded(
             child: filteredRepos.isEmpty
                 ? Center(
-                    child: BodyLargeLabel(AppLocalizations.of(context)!.noRepositoriesFound, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    child: BodyLargeLabel(
+                      AppLocalizations.of(context)!.noRepositoriesFound,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   )
                 : ListView.builder(
                     itemCount: filteredRepos.length,
@@ -100,7 +107,9 @@ class _RepositorySwitcherDialogState
                                   ? Icon(
                                       PhosphorIconsBold.check,
                                       size: AppTheme.iconM,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     )
                                   : null,
                             ),
@@ -117,12 +126,8 @@ class _RepositorySwitcherDialogState
                         content: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            BodyMediumLabel(
-                              repo.displayName,
-                            ),
-                            LabelMediumLabel(
-                              repo.path,
-                            ),
+                            BodyMediumLabel(repo.displayName),
+                            LabelMediumLabel(repo.path),
                             if (!repo.isValidGitRepo)
                               Row(
                                 children: [
@@ -133,7 +138,9 @@ class _RepositorySwitcherDialogState
                                   ),
                                   const SizedBox(width: AppTheme.paddingXS),
                                   LabelMediumLabel(
-                                    AppLocalizations.of(context)!.invalidRepository,
+                                    AppLocalizations.of(
+                                      context,
+                                    )!.invalidRepository,
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                                 ],
@@ -147,7 +154,9 @@ class _RepositorySwitcherDialogState
                               : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         isSelectable: repo.isValidGitRepo,
-                        onTap: repo.isValidGitRepo ? () => _switchRepository(repo) : null,
+                        onTap: repo.isValidGitRepo
+                            ? () => _switchRepository(repo)
+                            : null,
                       );
                     },
                   ),
@@ -175,7 +184,9 @@ class _RepositorySwitcherDialogState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.repositoryInvalidOrMissing),
+            content: Text(
+              AppLocalizations.of(context)!.repositoryInvalidOrMissing,
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -192,12 +203,20 @@ class _RepositorySwitcherDialogState
     await ref.read(workspaceProvider.notifier).markAccessed(repo.path);
 
     // Open in git service (also sets as current repository)
-    final success = await ref.read(gitActionsProvider).openRepository(repo.path);
+    final success = await ref
+        .read(gitActionsProvider)
+        .openRepository(repo.path);
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.switchedToRepository(repo.displayName, repo.path, repo.displayName)),
+          content: Text(
+            AppLocalizations.of(context)!.switchedToRepository(
+              repo.displayName,
+              repo.path,
+              repo.displayName,
+            ),
+          ),
           backgroundColor: AppTheme.gitAdded,
           duration: const Duration(seconds: 1),
         ),

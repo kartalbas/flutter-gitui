@@ -31,9 +31,9 @@ extension StringExtensions on String {
   /// Convert to title case
   String toTitleCase() {
     if (isEmpty) return this;
-    return split(' ')
-        .map((word) => word.isEmpty ? word : word.capitalize())
-        .join(' ');
+    return split(
+      ' ',
+    ).map((word) => word.isEmpty ? word : word.capitalize()).join(' ');
   }
 
   /// Remove extra whitespace
@@ -46,8 +46,8 @@ extension StringExtensions on String {
 
   /// Check if string is a valid email (basic check)
   bool get isValidEmail => RegExp(
-        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-      ).hasMatch(this);
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+  ).hasMatch(this);
 
   /// Indent each line with spaces
   String indent(int spaces) {

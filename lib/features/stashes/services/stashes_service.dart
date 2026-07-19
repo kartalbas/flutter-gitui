@@ -18,8 +18,8 @@ class StashesService {
     final query = searchQuery.toLowerCase();
     return stashes.where((stash) {
       return stash.message.toLowerCase().contains(query) ||
-             stash.branch.toLowerCase().contains(query) ||
-             stash.ref.toLowerCase().contains(query);
+          stash.branch.toLowerCase().contains(query) ||
+          stash.ref.toLowerCase().contains(query);
     }).toList();
   }
 }

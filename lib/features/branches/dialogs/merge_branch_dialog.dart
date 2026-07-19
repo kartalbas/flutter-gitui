@@ -13,10 +13,7 @@ import '../../../core/git/git_providers.dart';
 class MergeBranchDialog extends ConsumerWidget {
   final GitBranch branch;
 
-  const MergeBranchDialog({
-    super.key,
-    required this.branch,
-  });
+  const MergeBranchDialog({super.key, required this.branch});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

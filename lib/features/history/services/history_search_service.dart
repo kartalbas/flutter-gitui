@@ -17,7 +17,8 @@ class HistorySearchService {
 
     return commits.where((commit) {
       // Date range filtering
-      if (filter.fromDate != null && commit.authorDate.isBefore(filter.fromDate!)) {
+      if (filter.fromDate != null &&
+          commit.authorDate.isBefore(filter.fromDate!)) {
         return false;
       }
       if (filter.toDate != null && commit.authorDate.isAfter(filter.toDate!)) {
@@ -52,8 +53,10 @@ class HistorySearchService {
 
       // Hash prefix filtering
       if (filter.hashPrefixes != null && filter.hashPrefixes!.isNotEmpty) {
-        final matches = filter.hashPrefixes!.any((prefix) =>
-            commit.hash.toLowerCase().startsWith(prefix.toLowerCase()));
+        final matches = filter.hashPrefixes!.any(
+          (prefix) =>
+              commit.hash.toLowerCase().startsWith(prefix.toLowerCase()),
+        );
         if (!matches) {
           return false;
         }
@@ -76,7 +79,9 @@ class HistorySearchService {
           filter.useRegex,
           filter.fuzzyMatch,
         );
-        final matchesHash = commit.hash.toLowerCase().contains(query.toLowerCase());
+        final matchesHash = commit.hash.toLowerCase().contains(
+          query.toLowerCase(),
+        );
 
         if (!matchesMessage && !matchesAuthor && !matchesHash) {
           return false;
@@ -97,10 +102,7 @@ class HistorySearchService {
   ) {
     if (useRegex) {
       try {
-        final regex = RegExp(
-          search,
-          caseSensitive: caseSensitive,
-        );
+        final regex = RegExp(search, caseSensitive: caseSensitive);
         return regex.hasMatch(text);
       } catch (e) {
         // Invalid regex, fall back to simple matching
@@ -354,8 +356,5 @@ class SearchResult {
   final GitCommit commit;
   final int score; // 0-100+ relevance score
 
-  const SearchResult({
-    required this.commit,
-    required this.score,
-  });
+  const SearchResult({required this.commit, required this.score});
 }

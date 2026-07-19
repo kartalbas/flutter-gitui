@@ -15,12 +15,12 @@ class DiffLine {
 
 /// Type of diff line
 enum DiffLineType {
-  addition,    // + line
-  deletion,    // - line
-  context,     // unchanged line
-  header,      // @@ line
-  fileHeader,  // diff --git, ---, +++
-  info,        // index, mode, etc.
+  addition, // + line
+  deletion, // - line
+  context, // unchanged line
+  header, // @@ line
+  fileHeader, // diff --git, ---, +++
+  info, // index, mode, etc.
 }
 
 /// Parser for unified diff format
@@ -49,40 +49,48 @@ class DiffParser {
       if (line.startsWith('diff --git')) {
         lines.add(DiffLine(content: line, type: DiffLineType.fileHeader));
       } else if (line.startsWith('index ') ||
-                 line.startsWith('new file') ||
-                 line.startsWith('deleted file') ||
-                 line.startsWith('old mode') ||
-                 line.startsWith('new mode')) {
+          line.startsWith('new file') ||
+          line.startsWith('deleted file') ||
+          line.startsWith('old mode') ||
+          line.startsWith('new mode')) {
         lines.add(DiffLine(content: line, type: DiffLineType.info));
       } else if (line.startsWith('---') || line.startsWith('+++')) {
         lines.add(DiffLine(content: line, type: DiffLineType.fileHeader));
       } else if (line.startsWith('@@')) {
         // Parse hunk header: @@ -10,7 +10,8 @@
-        final match = RegExp(r'@@ -(\d+),?\d* \+(\d+),?\d* @@').firstMatch(line);
+        final match = RegExp(
+          r'@@ -(\d+),?\d* \+(\d+),?\d* @@',
+        ).firstMatch(line);
         if (match != null) {
           oldLineNum = int.parse(match.group(1)!);
           newLineNum = int.parse(match.group(2)!);
         }
         lines.add(DiffLine(content: line, type: DiffLineType.header));
       } else if (line.startsWith('+')) {
-        lines.add(DiffLine(
-          newLineNumber: newLineNum++,
-          content: line,
-          type: DiffLineType.addition,
-        ));
+        lines.add(
+          DiffLine(
+            newLineNumber: newLineNum++,
+            content: line,
+            type: DiffLineType.addition,
+          ),
+        );
       } else if (line.startsWith('-')) {
-        lines.add(DiffLine(
-          oldLineNumber: oldLineNum++,
-          content: line,
-          type: DiffLineType.deletion,
-        ));
+        lines.add(
+          DiffLine(
+            oldLineNumber: oldLineNum++,
+            content: line,
+            type: DiffLineType.deletion,
+          ),
+        );
       } else if (line.startsWith(' ') || line.isEmpty) {
-        lines.add(DiffLine(
-          oldLineNumber: oldLineNum++,
-          newLineNumber: newLineNum++,
-          content: line,
-          type: DiffLineType.context,
-        ));
+        lines.add(
+          DiffLine(
+            oldLineNumber: oldLineNum++,
+            newLineNumber: newLineNum++,
+            content: line,
+            type: DiffLineType.context,
+          ),
+        );
       } else {
         // Other lines (shouldn't happen in well-formed diff)
         lines.add(DiffLine(content: line, type: DiffLineType.info));

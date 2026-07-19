@@ -12,10 +12,7 @@ import '../../../../shared/theme/app_theme.dart';
 class MarkdownViewerDialog extends StatefulWidget {
   final String filePath;
 
-  const MarkdownViewerDialog({
-    super.key,
-    required this.filePath,
-  });
+  const MarkdownViewerDialog({super.key, required this.filePath});
 
   @override
   State<MarkdownViewerDialog> createState() => _MarkdownViewerDialogState();
@@ -45,7 +42,10 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
 
       // Lenient decode so non-UTF-8 markdown still renders instead of
       // failing a strict UTF-8 decode.
-      final content = utf8.decode(await file.readAsBytes(), allowMalformed: true);
+      final content = utf8.decode(
+        await file.readAsBytes(),
+        allowMalformed: true,
+      );
       setState(() {
         _content = content;
         _isLoading = false;
@@ -71,67 +71,65 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
       content: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        size: 48,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(height: AppTheme.paddingM),
-                      Text(_error!),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.warningCircle,
+                    size: 48,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                )
-              : Markdown(
-                  data: _content,
-                  selectable: true,
-                  styleSheet: MarkdownStyleSheet(
-                    p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    h1: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    h2: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    h3: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    h4: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    h5: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    h6: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    listBullet: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    blockquote: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontStyle: FontStyle.italic,
-                        ),
-                    code: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                          color: Theme.of(context).colorScheme.onSurface,
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                        ),
-                    codeblockDecoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppTheme.paddingS),
-                    ),
-                  ),
+                  const SizedBox(height: AppTheme.paddingM),
+                  Text(_error!),
+                ],
+              ),
+            )
+          : Markdown(
+              data: _content,
+              selectable: true,
+              styleSheet: MarkdownStyleSheet(
+                p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
+                h1: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                h2: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                h3: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                h4: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                h5: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                h6: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                listBullet: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                blockquote: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontStyle: FontStyle.italic,
+                ),
+                code: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontFamily: 'monospace',
+                  color: Theme.of(context).colorScheme.onSurface,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
+                ),
+                codeblockDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(AppTheme.paddingS),
+                ),
+              ),
+            ),
     );
   }
 }

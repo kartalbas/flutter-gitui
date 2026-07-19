@@ -47,10 +47,7 @@ class FileListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // File path
-          BodyMediumLabel(
-            file.path,
-            overflow: TextOverflow.ellipsis,
-          ),
+          BodyMediumLabel(file.path, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 2),
 
           // Status and old path for renames
@@ -58,18 +55,12 @@ class FileListItem extends StatelessWidget {
             children: [
               // Status badge
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: status.color.withValues(alpha:0.2),
+                  color: status.color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppTheme.paddingXS),
                 ),
-                child: LabelSmallLabel(
-                  status.displayName,
-                  color: status.color,
-                ),
+                child: LabelSmallLabel(status.displayName, color: status.color),
               ),
 
               // Old path for renames
@@ -120,14 +111,10 @@ class FileListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha:0.2),
+        color: status.color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Icon(
-        icon,
-        size: AppTheme.iconS,
-        color: status.color,
-      ),
+      child: Icon(icon, size: AppTheme.iconS, color: status.color),
     );
   }
 

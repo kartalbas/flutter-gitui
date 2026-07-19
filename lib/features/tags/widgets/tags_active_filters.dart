@@ -52,7 +52,9 @@ class TagsActiveFilters extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: AppTheme.paddingS),
               child: BaseBadge(
-                label: AppLocalizations.of(context)!.authorFilter(authorFilter!),
+                label: AppLocalizations.of(
+                  context,
+                )!.authorFilter(authorFilter!),
                 icon: PhosphorIconsRegular.user,
                 variant: BadgeVariant.neutral,
                 size: BadgeSize.medium,

@@ -98,10 +98,12 @@ class _BaseCardState extends State<BaseCard> {
     Color? backgroundColor;
     if (widget.isSelected) {
       // Selected state: use secondaryContainer for emphasis
-      backgroundColor = widget.customBackgroundColor ?? colorScheme.secondaryContainer;
+      backgroundColor =
+          widget.customBackgroundColor ?? colorScheme.secondaryContainer;
     } else if (widget.isMultiSelected) {
       // Multi-selected state: use tertiaryContainer
-      backgroundColor = widget.customBackgroundColor ?? colorScheme.tertiaryContainer;
+      backgroundColor =
+          widget.customBackgroundColor ?? colorScheme.tertiaryContainer;
     } else if (_isHovered && widget.isSelectable) {
       // Hover state: use surfaceContainerHighest
       backgroundColor = colorScheme.surfaceContainerHighest;
@@ -120,21 +122,19 @@ class _BaseCardState extends State<BaseCard> {
       );
     } else if (widget.isMultiSelected) {
       // Multi-selected: use onTertiaryContainer for border
-      border = Border.all(
-        color: colorScheme.onTertiaryContainer,
-        width: 2,
-      );
+      border = Border.all(color: colorScheme.onTertiaryContainer, width: 2);
     } else {
       // Normal state: use outline variant
-      border = Border.all(
-        color: colorScheme.outlineVariant,
-        width: 1,
-      );
+      border = Border.all(color: colorScheme.outlineVariant, width: 1);
     }
 
     return MouseRegion(
-      onEnter: widget.isSelectable ? (_) => setState(() => _isHovered = true) : null,
-      onExit: widget.isSelectable ? (_) => setState(() => _isHovered = false) : null,
+      onEnter: widget.isSelectable
+          ? (_) => setState(() => _isHovered = true)
+          : null,
+      onExit: widget.isSelectable
+          ? (_) => setState(() => _isHovered = false)
+          : null,
       cursor: widget.isSelectable && widget.onTap != null
           ? SystemMouseCursors.click
           : SystemMouseCursors.basic,

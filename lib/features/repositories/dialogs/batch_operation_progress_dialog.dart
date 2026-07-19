@@ -47,8 +47,9 @@ class BatchOperationProgressDialog extends StatefulWidget {
   final String title;
   final List<WorkspaceRepository> repositories;
   final Future<List<BatchOperationResult>> Function(
-    void Function(WorkspaceRepository, int, int, String)?
-  ) operation;
+    void Function(WorkspaceRepository, int, int, String)?,
+  )
+  operation;
 
   const BatchOperationProgressDialog({
     super.key,
@@ -58,10 +59,12 @@ class BatchOperationProgressDialog extends StatefulWidget {
   });
 
   @override
-  State<BatchOperationProgressDialog> createState() => _BatchOperationProgressDialogState();
+  State<BatchOperationProgressDialog> createState() =>
+      _BatchOperationProgressDialogState();
 }
 
-class _BatchOperationProgressDialogState extends State<BatchOperationProgressDialog> {
+class _BatchOperationProgressDialogState
+    extends State<BatchOperationProgressDialog> {
   late Map<String, RepositoryProgress> _progress;
   bool _isRunning = true;
   List<BatchOperationResult>? _results;
@@ -172,130 +175,137 @@ class _BatchOperationProgressDialogState extends State<BatchOperationProgressDia
       icon: _isRunning
           ? PhosphorIconsRegular.spinner
           : _failureCount == 0
-              ? PhosphorIconsRegular.checkCircle
-              : PhosphorIconsRegular.warningCircle,
+          ? PhosphorIconsRegular.checkCircle
+          : PhosphorIconsRegular.warningCircle,
       variant: DialogVariant.normal,
       barrierDismissible: !_isRunning,
       maxWidth: 600,
       content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Overall progress
-            Row(
-              children: [
-                Expanded(
-                  child: LinearProgressIndicator(
-                    value: _isRunning ? null : progress,
-                    minHeight: AppTheme.paddingS,
-                    borderRadius: BorderRadius.circular(AppTheme.paddingXS),
-                  ),
-                ),
-                const SizedBox(width: AppTheme.paddingM),
-                TitleMediumLabel(
-                  '$completedCount / $totalCount',
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppTheme.paddingL),
-
-            // Summary (shown when completed)
-            if (!_isRunning) ...[
-              Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
-                decoration: BoxDecoration(
-                  color: _failureCount == 0
-                      ? AppTheme.gitAdded.withValues(alpha: 0.1)
-                      : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                  border: Border.all(
-                    color: _failureCount == 0 ? AppTheme.gitAdded : Theme.of(context).colorScheme.secondary,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _failureCount == 0
-                          ? PhosphorIconsBold.checkCircle
-                          : PhosphorIconsBold.warningCircle,
-                      color: _failureCount == 0 ? AppTheme.gitAdded : Theme.of(context).colorScheme.secondary,
-                    ),
-                    const SizedBox(width: AppTheme.paddingM),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TitleSmallLabel(
-                            _failureCount == 0
-                                ? l10n.operationsCompleted(_successCount, _successCount + _failureCount)
-                                : l10n.operationsCompletedWithErrors(_successCount, _failureCount, _successCount + _failureCount),
-                          ),
-                          const SizedBox(height: AppTheme.paddingXS),
-                          BodySmallLabel(
-                            l10n.successCount(_successCount, _failureCount),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Overall progress
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: _isRunning ? null : progress,
+                  minHeight: AppTheme.paddingS,
+                  borderRadius: BorderRadius.circular(AppTheme.paddingXS),
                 ),
               ),
-              const SizedBox(height: AppTheme.paddingM),
+              const SizedBox(width: AppTheme.paddingM),
+              TitleMediumLabel('$completedCount / $totalCount'),
             ],
+          ),
 
-            // Repository list with status
-            TitleSmallLabel(
-              l10n.repositories,
-            ),
-            const SizedBox(height: AppTheme.paddingS),
+          const SizedBox(height: AppTheme.paddingL),
 
+          // Summary (shown when completed)
+          if (!_isRunning) ...[
             Container(
-              constraints: const BoxConstraints(maxHeight: 300),
+              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
+                color: _failureCount == 0
+                    ? AppTheme.gitAdded.withValues(alpha: 0.1)
+                    : Theme.of(
+                        context,
+                      ).colorScheme.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                border: Border.all(
+                  color: _failureCount == 0
+                      ? AppTheme.gitAdded
+                      : Theme.of(context).colorScheme.secondary,
+                ),
               ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.repositories.length,
-                itemBuilder: (context, index) {
-                  final repo = widget.repositories[index];
-                  final progress = _progress[repo.path]!;
-
-                  return BaseListItem(
-                    leading: _buildStatusIcon(progress),
-                    content: Column(
+              child: Row(
+                children: [
+                  Icon(
+                    _failureCount == 0
+                        ? PhosphorIconsBold.checkCircle
+                        : PhosphorIconsBold.warningCircle,
+                    color: _failureCount == 0
+                        ? AppTheme.gitAdded
+                        : Theme.of(context).colorScheme.secondary,
+                  ),
+                  const SizedBox(width: AppTheme.paddingM),
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BodyMediumLabel(
-                          repo.displayName,
+                        TitleSmallLabel(
+                          _failureCount == 0
+                              ? l10n.operationsCompleted(
+                                  _successCount,
+                                  _successCount + _failureCount,
+                                )
+                              : l10n.operationsCompletedWithErrors(
+                                  _successCount,
+                                  _failureCount,
+                                  _successCount + _failureCount,
+                                ),
                         ),
-                        LabelMediumLabel(
-                          progress.status,
-                          color: progress.error != null
-                              ? Theme.of(context).colorScheme.error
-                              : null,
+                        const SizedBox(height: AppTheme.paddingXS),
+                        BodySmallLabel(
+                          l10n.successCount(_successCount, _failureCount),
                         ),
                       ],
                     ),
-                    trailing: progress.completed
-                        ? Icon(
-                            progress.success
-                                ? PhosphorIconsBold.checkCircle
-                                : PhosphorIconsBold.xCircle,
-                            size: AppTheme.paddingM,
-                            color: progress.success ? AppTheme.gitAdded : Theme.of(context).colorScheme.error,
-                          )
-                        : null,
-                  );
-                },
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: AppTheme.paddingM),
           ],
-        ),
+
+          // Repository list with status
+          TitleSmallLabel(l10n.repositories),
+          const SizedBox(height: AppTheme.paddingS),
+
+          Container(
+            constraints: const BoxConstraints(maxHeight: 300),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: widget.repositories.length,
+              itemBuilder: (context, index) {
+                final repo = widget.repositories[index];
+                final progress = _progress[repo.path]!;
+
+                return BaseListItem(
+                  leading: _buildStatusIcon(progress),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BodyMediumLabel(repo.displayName),
+                      LabelMediumLabel(
+                        progress.status,
+                        color: progress.error != null
+                            ? Theme.of(context).colorScheme.error
+                            : null,
+                      ),
+                    ],
+                  ),
+                  trailing: progress.completed
+                      ? Icon(
+                          progress.success
+                              ? PhosphorIconsBold.checkCircle
+                              : PhosphorIconsBold.xCircle,
+                          size: AppTheme.paddingM,
+                          color: progress.success
+                              ? AppTheme.gitAdded
+                              : Theme.of(context).colorScheme.error,
+                        )
+                      : null,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
       actions: !_isRunning
           ? [
               BaseButton(
@@ -325,7 +335,9 @@ class _BatchOperationProgressDialogState extends State<BatchOperationProgressDia
           ? PhosphorIconsRegular.checkCircle
           : PhosphorIconsRegular.xCircle,
       size: AppTheme.paddingM,
-      color: progress.success ? AppTheme.gitAdded : Theme.of(context).colorScheme.error,
+      color: progress.success
+          ? AppTheme.gitAdded
+          : Theme.of(context).colorScheme.error,
     );
   }
 }
@@ -336,8 +348,9 @@ Future<List<BatchOperationResult>?> showBatchOperationProgressDialog(
   required String title,
   required List<WorkspaceRepository> repositories,
   required Future<List<BatchOperationResult>> Function(
-    void Function(WorkspaceRepository, int, int, String)?
-  ) operation,
+    void Function(WorkspaceRepository, int, int, String)?,
+  )
+  operation,
 }) {
   return showDialog<List<BatchOperationResult>>(
     context: context,
@@ -349,4 +362,3 @@ Future<List<BatchOperationResult>?> showBatchOperationProgressDialog(
     ),
   );
 }
-

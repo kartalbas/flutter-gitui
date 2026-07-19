@@ -21,9 +21,7 @@ class BrowseNoFileSelectedState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            AppLocalizations.of(context)!.noFileSelected,
-          ),
+          TitleLargeLabel(AppLocalizations.of(context)!.noFileSelected),
           const SizedBox(height: AppTheme.paddingS),
           BodyMediumLabel(
             AppLocalizations.of(context)!.selectFileToViewHistoryOrPreview,

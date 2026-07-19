@@ -135,7 +135,8 @@ class BaseDialog extends StatelessWidget {
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
-        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.escape) {
           if (barrierDismissible) {
             Navigator.of(context).pop();
             return KeyEventResult.handled;
@@ -158,69 +159,61 @@ class BaseDialog extends StatelessWidget {
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: dialogWidth.clamp(AppConstants.minDialogWidth, double.infinity),
+                maxWidth: dialogWidth.clamp(
+                  AppConstants.minDialogWidth,
+                  double.infinity,
+                ),
                 maxHeight: dialogHeight,
               ),
               child: Padding(
-            padding: EdgeInsets.all(AppTheme.paddingXL),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Title section with optional icon and X close button
-                Row(
+                padding: EdgeInsets.all(AppTheme.paddingXL),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (variantIcon != null) ...{
-                      Icon(
-                        variantIcon,
-                        size: 28,
-                        color: iconColor,
-                      ),
-                      SizedBox(width: AppTheme.paddingM),
-                    },
-                    Expanded(
-                      child: HeadlineSmallLabel(
-                        title,
-                        color: titleColor,
-                      ),
+                    // Title section with optional icon and X close button
+                    Row(
+                      children: [
+                        if (variantIcon != null) ...{
+                          Icon(variantIcon, size: 28, color: iconColor),
+                          SizedBox(width: AppTheme.paddingM),
+                        },
+                        Expanded(
+                          child: HeadlineSmallLabel(title, color: titleColor),
+                        ),
+                        if (barrierDismissible) ...{
+                          SizedBox(width: AppTheme.paddingM),
+                          BaseIconButton(
+                            icon: PhosphorIconsRegular.x,
+                            tooltip: l10n.close,
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                        },
+                      ],
                     ),
-                    if (barrierDismissible) ...{
-                      SizedBox(width: AppTheme.paddingM),
-                      BaseIconButton(
-                        icon: PhosphorIconsRegular.x,
-                        tooltip: l10n.close,
-                        onPressed: () => Navigator.of(context).pop(),
+
+                    SizedBox(height: AppTheme.paddingL),
+
+                    // Content section (scrollable if long)
+                    Flexible(child: SingleChildScrollView(child: content)),
+
+                    // Actions section
+                    if (actions != null && actions!.isNotEmpty) ...{
+                      SizedBox(height: AppTheme.paddingXL),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          for (int i = 0; i < actions!.length; i++) ...{
+                            if (i > 0) SizedBox(width: AppTheme.paddingM),
+                            actions![i],
+                          },
+                        ],
                       ),
                     },
                   ],
                 ),
-
-                SizedBox(height: AppTheme.paddingL),
-
-                // Content section (scrollable if long)
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: content,
-                  ),
-                ),
-
-                // Actions section
-                if (actions != null && actions!.isNotEmpty) ...{
-                  SizedBox(height: AppTheme.paddingXL),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      for (int i = 0; i < actions!.length; i++) ...{
-                        if (i > 0) SizedBox(width: AppTheme.paddingM),
-                        actions![i],
-                      },
-                    ],
-                  ),
-                },
-              ],
+              ),
             ),
-          ),
-        ),
           );
         },
       ),

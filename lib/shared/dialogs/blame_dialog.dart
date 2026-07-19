@@ -141,9 +141,7 @@ class BlameDialog extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppTheme.paddingXS),
                   // Author
-                  TitleSmallLabel(
-                    firstLine.author,
-                  ),
+                  TitleSmallLabel(firstLine.author),
                   const SizedBox(height: 2),
                   // Date
                   BodySmallLabel(

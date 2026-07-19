@@ -11,10 +11,7 @@ import '../components/base_label.dart';
 class PruneRemoteDialog extends StatelessWidget {
   final GitRemote remote;
 
-  const PruneRemoteDialog({
-    super.key,
-    required this.remote,
-  });
+  const PruneRemoteDialog({super.key, required this.remote});
 
   @override
   Widget build(BuildContext context) {

@@ -82,7 +82,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                 ),
                 const SizedBox(width: AppTheme.paddingS),
                 Expanded(
-                  child: MenuItemLabel(AppLocalizations.of(context)!.commitFailed(e.toString())),
+                  child: MenuItemLabel(
+                    AppLocalizations.of(context)!.commitFailed(e.toString()),
+                  ),
                 ),
               ],
             ),
@@ -102,164 +104,173 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
       title: AppLocalizations.of(context)!.commitChanges,
       icon: PhosphorIconsRegular.gitCommit,
       content: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Staged files summary
-              Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.checkSquare,
-                      size: AppTheme.iconS,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BodyMediumLabel(
-                      AppLocalizations.of(context)!.messageFilesStaged(stagedFiles.length, stagedFiles.length == 1 ? '' : 's'),
-                    ),
-                    const Spacer(),
-                    BaseButton(
-                      label: AppLocalizations.of(context)!.viewFiles,
-                      variant: ButtonVariant.tertiary,
-                      leadingIcon: _showStagedFiles
-                          ? PhosphorIconsRegular.caretUp
-                          : PhosphorIconsRegular.caretDown,
-                      onPressed: stagedFiles.isEmpty
-                          ? null
-                          : () {
-                              setState(() {
-                                _showStagedFiles = !_showStagedFiles;
-                              });
-                            },
-                    ),
-                  ],
-                ),
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Staged files summary
+            Container(
+              padding: const EdgeInsets.all(AppTheme.paddingM),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
               ),
-
-              // Kept collapsed by default so the message field stays the focus;
-              // the height cap prevents a large stage from pushing the commit
-              // button out of the dialog.
-              if (_showStagedFiles && stagedFiles.isNotEmpty) ...[
-                const SizedBox(height: AppTheme.paddingS),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 160),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: stagedFiles.length,
-                    itemBuilder: (context, index) {
-                      final file = stagedFiles[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Row(
-                          children: [
-                            FileStatusBadge(
-                              code: file.indexStatus.code,
-                              color: file.indexStatus.color,
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            Expanded(
-                              child: BodySmallLabel(
-                                file.path,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+              child: Row(
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.checkSquare,
+                    size: AppTheme.iconS,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                ),
-              ],
-
-              const SizedBox(height: AppTheme.paddingL),
-
-              // Commit message field
-              TitleSmallLabel(
-                AppLocalizations.of(context)!.labelCommitMessage,
-              ),
-              const SizedBox(height: AppTheme.paddingS),
-              BaseTextField(
-                controller: _messageController,
-                hintText: AppLocalizations.of(context)!.hintTextCommitMessage,
-                maxLines: 6,
-                autofocus: true,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return AppLocalizations.of(context)!.messageCommitMessageRequired;
-                  }
-                  return null;
-                },
-                onSubmitted: (_) {
-                  if (_formKey.currentState!.validate()) {
-                    _commit();
-                  }
-                },
-              ),
-
-              const SizedBox(height: AppTheme.paddingM),
-
-              // Amend checkbox
-              CheckboxListTile(
-                value: _isAmend,
-                onChanged: (value) {
-                  setState(() {
-                    _isAmend = value ?? false;
-                  });
-                  if (_isAmend) {
-                    _loadLastCommitIfAmend();
-                  } else {
-                    _messageController.clear();
-                  }
-                },
-                title: Text(AppLocalizations.of(context)!.checkboxAmendLastCommit),
-                subtitle: BodySmallLabel(
-                  AppLocalizations.of(context)!.checkboxAmendLastCommitSubtitle,
-                ),
-                contentPadding: EdgeInsets.zero,
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-
-              // Commit tips
-              const SizedBox(height: AppTheme.paddingS),
-              Container(
-                padding: const EdgeInsets.all(AppTheme.paddingS),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha:0.3),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha:0.3),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.lightbulb,
-                      size: AppTheme.iconS,
-                      color: Theme.of(context).colorScheme.primary,
+                  const SizedBox(width: AppTheme.paddingS),
+                  BodyMediumLabel(
+                    AppLocalizations.of(context)!.messageFilesStaged(
+                      stagedFiles.length,
+                      stagedFiles.length == 1 ? '' : 's',
                     ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    Expanded(
-                      child: BodySmallLabel(
-                        AppLocalizations.of(context)!.tipCommitMessage,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const Spacer(),
+                  BaseButton(
+                    label: AppLocalizations.of(context)!.viewFiles,
+                    variant: ButtonVariant.tertiary,
+                    leadingIcon: _showStagedFiles
+                        ? PhosphorIconsRegular.caretUp
+                        : PhosphorIconsRegular.caretDown,
+                    onPressed: stagedFiles.isEmpty
+                        ? null
+                        : () {
+                            setState(() {
+                              _showStagedFiles = !_showStagedFiles;
+                            });
+                          },
+                  ),
+                ],
+              ),
+            ),
+
+            // Kept collapsed by default so the message field stays the focus;
+            // the height cap prevents a large stage from pushing the commit
+            // button out of the dialog.
+            if (_showStagedFiles && stagedFiles.isNotEmpty) ...[
+              const SizedBox(height: AppTheme.paddingS),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 160),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: stagedFiles.length,
+                  itemBuilder: (context, index) {
+                    final file = stagedFiles[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          FileStatusBadge(
+                            code: file.indexStatus.code,
+                            color: file.indexStatus.color,
+                          ),
+                          const SizedBox(width: AppTheme.paddingS),
+                          Expanded(
+                            child: BodySmallLabel(
+                              file.path,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ],
-          ),
+
+            const SizedBox(height: AppTheme.paddingL),
+
+            // Commit message field
+            TitleSmallLabel(AppLocalizations.of(context)!.labelCommitMessage),
+            const SizedBox(height: AppTheme.paddingS),
+            BaseTextField(
+              controller: _messageController,
+              hintText: AppLocalizations.of(context)!.hintTextCommitMessage,
+              maxLines: 6,
+              autofocus: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return AppLocalizations.of(
+                    context,
+                  )!.messageCommitMessageRequired;
+                }
+                return null;
+              },
+              onSubmitted: (_) {
+                if (_formKey.currentState!.validate()) {
+                  _commit();
+                }
+              },
+            ),
+
+            const SizedBox(height: AppTheme.paddingM),
+
+            // Amend checkbox
+            CheckboxListTile(
+              value: _isAmend,
+              onChanged: (value) {
+                setState(() {
+                  _isAmend = value ?? false;
+                });
+                if (_isAmend) {
+                  _loadLastCommitIfAmend();
+                } else {
+                  _messageController.clear();
+                }
+              },
+              title: Text(
+                AppLocalizations.of(context)!.checkboxAmendLastCommit,
+              ),
+              subtitle: BodySmallLabel(
+                AppLocalizations.of(context)!.checkboxAmendLastCommitSubtitle,
+              ),
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+
+            // Commit tips
+            const SizedBox(height: AppTheme.paddingS),
+            Container(
+              padding: const EdgeInsets.all(AppTheme.paddingS),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.lightbulb,
+                    size: AppTheme.iconS,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppTheme.paddingS),
+                  Expanded(
+                    child: BodySmallLabel(
+                      AppLocalizations.of(context)!.tipCommitMessage,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+      ),
       actions: [
         // Cancel button
         BaseButton(
@@ -270,7 +281,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
 
         // Commit button
         BaseButton(
-          label: _isAmend ? AppLocalizations.of(context)!.labelAmendCommit : AppLocalizations.of(context)!.commit,
+          label: _isAmend
+              ? AppLocalizations.of(context)!.labelAmendCommit
+              : AppLocalizations.of(context)!.commit,
           variant: ButtonVariant.primary,
           leadingIcon: PhosphorIconsRegular.check,
           isLoading: _isCommitting,
@@ -280,4 +293,3 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
     );
   }
 }
-

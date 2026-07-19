@@ -11,14 +11,7 @@ import '../../../shared/components/base_date_field.dart';
 import '../../../shared/components/base_dropdown.dart';
 
 /// Date range filter options
-enum DateRangeFilter {
-  all,
-  today,
-  lastWeek,
-  lastMonth,
-  lastYear,
-  custom,
-}
+enum DateRangeFilter { all, today, lastWeek, lastMonth, lastYear, custom }
 
 /// Advanced filters dialog for tags
 class AdvancedFiltersDialog extends StatefulWidget {
@@ -64,12 +57,13 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     // Get unique authors from tags
-    final authors = widget.allTags
-        .where((tag) => tag.taggerName != null)
-        .map((tag) => tag.taggerName!)
-        .toSet()
-        .toList()
-      ..sort();
+    final authors =
+        widget.allTags
+            .where((tag) => tag.taggerName != null)
+            .map((tag) => tag.taggerName!)
+            .toSet()
+            .toList()
+          ..sort();
 
     return BaseDialog(
       title: loc.advancedFiltersDialog,
@@ -109,7 +103,8 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
                     child: BaseDateField(
                       label: loc.startDate,
                       value: _customDateStart,
-                      onChanged: (date) => setState(() => _customDateStart = date),
+                      onChanged: (date) =>
+                          setState(() => _customDateStart = date),
                       firstDate: DateTime(2000),
                       lastDate: DateTime.now(),
                     ),
@@ -119,7 +114,8 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
                     child: BaseDateField(
                       label: loc.endDate,
                       value: _customDateEnd,
-                      onChanged: (date) => setState(() => _customDateEnd = date),
+                      onChanged: (date) =>
+                          setState(() => _customDateEnd = date),
                       firstDate: DateTime(2000),
                       lastDate: DateTime.now(),
                     ),
@@ -180,9 +176,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
           label: loc.resetAll,
           variant: ButtonVariant.tertiary,
           onPressed: () {
-            Navigator.of(context).pop({
-              'reset': true,
-            });
+            Navigator.of(context).pop({'reset': true});
           },
         ),
         BaseButton(

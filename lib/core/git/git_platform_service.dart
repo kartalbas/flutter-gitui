@@ -1,14 +1,7 @@
 import 'package:url_launcher/url_launcher.dart';
 
 /// Git hosting platform types
-enum GitPlatform {
-  github,
-  gitlab,
-  bitbucket,
-  azureDevOps,
-  gitea,
-  unknown,
-}
+enum GitPlatform { github, gitlab, bitbucket, azureDevOps, gitea, unknown }
 
 /// Service for detecting git platforms and generating platform-specific URLs
 class GitPlatformService {
@@ -22,7 +15,8 @@ class GitPlatformService {
       return GitPlatform.gitlab;
     } else if (url.contains('bitbucket.org') || url.contains('bitbucket')) {
       return GitPlatform.bitbucket;
-    } else if (url.contains('dev.azure.com') || url.contains('visualstudio.com')) {
+    } else if (url.contains('dev.azure.com') ||
+        url.contains('visualstudio.com')) {
       return GitPlatform.azureDevOps;
     } else if (url.contains('gitea')) {
       return GitPlatform.gitea;
@@ -39,8 +33,9 @@ class GitPlatformService {
     // Special handling for Azure DevOps SSH URLs
     // Format: git@ssh.dev.azure.com:v3/org/project/repo
     if (cleanUrl.contains('ssh.dev.azure.com')) {
-      final match = RegExp(r'git@ssh\.dev\.azure\.com:v3/([^/]+)/([^/]+)/(.+?)(?:\.git)?$')
-          .firstMatch(cleanUrl);
+      final match = RegExp(
+        r'git@ssh\.dev\.azure\.com:v3/([^/]+)/([^/]+)/(.+?)(?:\.git)?$',
+      ).firstMatch(cleanUrl);
       if (match != null) {
         final org = match.group(1)!;
         final project = match.group(2)!;

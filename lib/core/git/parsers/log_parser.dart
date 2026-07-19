@@ -67,9 +67,10 @@ class LogParser {
 
     // %b emits the body's first line on the header line after the last
     // separator, so it must be stitched back onto the remaining lines
-    final body = [fields.sublist(11).join('\x1f'), ...lines.sublist(1)]
-        .join('\n')
-        .trim();
+    final body = [
+      fields.sublist(11).join('\x1f'),
+      ...lines.sublist(1),
+    ].join('\n').trim();
 
     // Parse dates
     DateTime? authorDate;
@@ -96,10 +97,10 @@ class LogParser {
     final refs = refsStr.isEmpty
         ? <String>[]
         : refsStr
-            .split(',')
-            .map((r) => r.trim())
-            .where((r) => r.isNotEmpty)
-            .toList();
+              .split(',')
+              .map((r) => r.trim())
+              .where((r) => r.isNotEmpty)
+              .toList();
 
     return GitCommit(
       hash: hash,
@@ -134,10 +135,7 @@ class LogParser {
       final parts = trimmed.split(' ');
       if (parts.length < 2) continue;
 
-      commits.add({
-        'hash': parts[0],
-        'subject': parts.sublist(1).join(' '),
-      });
+      commits.add({'hash': parts[0], 'subject': parts.sublist(1).join(' ')});
     }
 
     return commits;

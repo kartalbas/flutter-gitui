@@ -128,9 +128,7 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
         Expanded(
           child: filteredStashes.isEmpty
               ? Center(
-                  child: BodyLargeLabel(
-                    'No stashes match "$_searchQuery"',
-                  ),
+                  child: BodyLargeLabel('No stashes match "$_searchQuery"'),
                 )
               : ListView.builder(
                   itemCount: filteredStashes.length,
@@ -157,12 +155,14 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
       final selectedFiles = result['selectedFiles'] as List<String>;
 
       try {
-        await ref.read(gitActionsProvider).createStash(
-          message: message.isEmpty ? null : message,
-          includeUntracked: includeUntracked,
-          keepIndex: keepIndex,
-          files: stashAllFiles ? null : selectedFiles,
-        );
+        await ref
+            .read(gitActionsProvider)
+            .createStash(
+              message: message.isEmpty ? null : message,
+              includeUntracked: includeUntracked,
+              keepIndex: keepIndex,
+              files: stashAllFiles ? null : selectedFiles,
+            );
 
         if (context.mounted) {
           context.showSuccessIfMounted(

@@ -21,10 +21,8 @@ Future<bool?> showSquashCommitsDialog(
 }) {
   return showDialog<bool>(
     context: context,
-    builder: (context) => _SquashCommitsDialog(
-      commits: commits,
-      selectedHashes: selectedHashes,
-    ),
+    builder: (context) =>
+        _SquashCommitsDialog(commits: commits, selectedHashes: selectedHashes),
   );
 }
 
@@ -38,7 +36,8 @@ class _SquashCommitsDialog extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_SquashCommitsDialog> createState() => _SquashCommitsDialogState();
+  ConsumerState<_SquashCommitsDialog> createState() =>
+      _SquashCommitsDialogState();
 }
 
 class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
@@ -62,7 +61,9 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
 
     // Initialize message with the first (newest) commit's message
     if (_selectedCommits.isNotEmpty) {
-      _messageController = TextEditingController(text: _selectedCommits.first.message);
+      _messageController = TextEditingController(
+        text: _selectedCommits.first.message,
+      );
     } else {
       _messageController = TextEditingController();
     }
@@ -107,7 +108,9 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
     final newMessage = _messageController.text.trim();
     if (newMessage.isEmpty) {
       setState(() {
-        _errorMessage = AppLocalizations.of(context)!.commitMessageCannotBeEmpty;
+        _errorMessage = AppLocalizations.of(
+          context,
+        )!.commitMessageCannotBeEmpty;
       });
       return;
     }
@@ -126,18 +129,22 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
       final newestCommit = sortedCommits.last;
 
       // Call squash method
-      await ref.read(gitActionsProvider).squashCommits(
-        fromCommit: oldestCommit.hash,
-        toCommit: newestCommit.hash,
-        newMessage: newMessage,
-      );
+      await ref
+          .read(gitActionsProvider)
+          .squashCommits(
+            fromCommit: oldestCommit.hash,
+            toCommit: newestCommit.hash,
+            newMessage: newMessage,
+          );
 
       if (mounted) {
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       setState(() {
-        _errorMessage = AppLocalizations.of(context)!.failedToSquashCommits(e.toString());
+        _errorMessage = AppLocalizations.of(
+          context,
+        )!.failedToSquashCommits(e.toString());
       });
     }
   }
@@ -149,10 +156,13 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
     // Localization lookups register an inherited-widget dependency, which is
     // forbidden while initState runs, so the checks done there only record
     // flags and the message is resolved here.
-    final errorMessage = _errorMessage ??
+    final errorMessage =
+        _errorMessage ??
         (_isRootCommit
             ? l10n.cannotSquashRootCommit
-            : (!_areConsecutive ? l10n.selectedCommitsMustBeConsecutive : null));
+            : (!_areConsecutive
+                  ? l10n.selectedCommitsMustBeConsecutive
+                  : null));
 
     return BaseDialog(
       title: l10n.squashCommitsDialog,
@@ -188,18 +198,14 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
             ),
           const SizedBox(height: AppTheme.paddingM),
 
-          TitleSmallLabel(
-            l10n.squashingCommitsCount(_selectedCommits.length),
-          ),
+          TitleSmallLabel(l10n.squashingCommitsCount(_selectedCommits.length)),
           const SizedBox(height: AppTheme.paddingS),
 
           // List of commits being squashed
           Container(
             constraints: const BoxConstraints(maxHeight: 200),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline,
-              ),
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: ListView.builder(
@@ -233,9 +239,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
 
           const SizedBox(height: AppTheme.paddingL),
 
-          TitleSmallLabel(
-            l10n.newCommitMessage,
-          ),
+          TitleSmallLabel(l10n.newCommitMessage),
           const SizedBox(height: AppTheme.paddingS),
 
           BaseTextField(
@@ -261,11 +265,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: AppTheme.paddingS),
-                Expanded(
-                  child: BodySmallLabel(
-                    l10n.squashCommitsInfo,
-                  ),
-                ),
+                Expanded(child: BodySmallLabel(l10n.squashCommitsInfo)),
               ],
             ),
           ),

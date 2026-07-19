@@ -151,11 +151,15 @@ class _CopyableTextState extends State<CopyableText> {
                 child: widget.isMonospace
                     ? BaseLabel(
                         widget.text,
-                        style: widget.style ?? TextStyle(
-                          fontFamily: 'monospace',
-                          fontFeatures: [const FontFeature.tabularFigures()],
-                          fontSize: theme.textTheme.bodyMedium?.fontSize,
-                        ),
+                        style:
+                            widget.style ??
+                            TextStyle(
+                              fontFamily: 'monospace',
+                              fontFeatures: [
+                                const FontFeature.tabularFigures(),
+                              ],
+                              fontSize: theme.textTheme.bodyMedium?.fontSize,
+                            ),
                         maxLines: widget.maxLines,
                         overflow: widget.overflow,
                       )

@@ -24,8 +24,8 @@ class DiffViewerAction {
 }
 
 enum DiffViewMode {
-  diff,      // Show only changes (default)
-  fullFile,  // Show entire file content
+  diff, // Show only changes (default)
+  fullFile, // Show entire file content
 }
 
 /// Base diff viewer component for rendering diff content with syntax highlighting
@@ -34,13 +34,14 @@ class BaseDiffViewer extends StatefulWidget {
   final bool compactMode;
   final bool showLineNumbers;
   final VoidCallback? onLineCopied;
-  final String? fullFileContent;  // Full file content for untracked/new files
-  final String? filePath;  // File path for display
-  final DiffViewMode viewMode;  // View mode controlled by parent
-  final VoidCallback? onToggleViewMode;  // Callback to toggle view mode
-  final List<DiffViewerAction> additionalActions;  // Additional actions for the FAB
-  final String fontFamily;  // Font family for code display
-  final AppFontSize fontSize;  // Font size for code display
+  final String? fullFileContent; // Full file content for untracked/new files
+  final String? filePath; // File path for display
+  final DiffViewMode viewMode; // View mode controlled by parent
+  final VoidCallback? onToggleViewMode; // Callback to toggle view mode
+  final List<DiffViewerAction>
+  additionalActions; // Additional actions for the FAB
+  final String fontFamily; // Font family for code display
+  final AppFontSize fontSize; // Font size for code display
 
   const BaseDiffViewer({
     super.key,
@@ -95,17 +96,20 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
   @override
   Widget build(BuildContext context) {
     // Check if we can show full file content
-    final canShowFullFile = widget.fullFileContent != null && widget.fullFileContent!.isNotEmpty;
+    final canShowFullFile =
+        widget.fullFileContent != null && widget.fullFileContent!.isNotEmpty;
 
     // If no diff and no full content, show empty state
     if ((widget.diffLines.isEmpty ||
-        (widget.diffLines.length == 1 && widget.diffLines[0].type == DiffLineType.info)) &&
+            (widget.diffLines.length == 1 &&
+                widget.diffLines[0].type == DiffLineType.info)) &&
         !canShowFullFile) {
       return _buildEmptyState(context);
     }
 
     // Main content widget
-    final contentWidget = widget.viewMode == DiffViewMode.fullFile && canShowFullFile
+    final contentWidget =
+        widget.viewMode == DiffViewMode.fullFile && canShowFullFile
         ? _buildFullFileView(context)
         : _buildDiffView(context);
 
@@ -120,7 +124,8 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
           label: widget.viewMode == DiffViewMode.diff
               ? 'Show Full File'
               : 'Show Changes Only',
-          onPressed: widget.onToggleViewMode!, // Safe to use ! because we checked != null above
+          onPressed: widget
+              .onToggleViewMode!, // Safe to use ! because we checked != null above
         ),
       // Additional actions
       ...widget.additionalActions,
@@ -160,7 +165,9 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
   }
 
   Widget _buildDiffView(BuildContext context) {
-    final displayLines = widget.compactMode ? _filterCompactView(widget.diffLines) : widget.diffLines;
+    final displayLines = widget.compactMode
+        ? _filterCompactView(widget.diffLines)
+        : widget.diffLines;
 
     if (displayLines.isEmpty) {
       return _buildEmptyState(context);
@@ -200,14 +207,9 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.description_outlined,
-            size: AppTheme.iconXL * 2,
-          ),
+          const Icon(Icons.description_outlined, size: AppTheme.iconXL * 2),
           const SizedBox(height: AppTheme.paddingM),
-          TitleMediumLabel(
-            AppLocalizations.of(context)!.noChanges,
-          ),
+          TitleMediumLabel(AppLocalizations.of(context)!.noChanges),
         ],
       ),
     );
@@ -216,7 +218,8 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
   /// Filter diff lines for compact view - show changes with surrounding context
   List<DiffLine> _filterCompactView(List<DiffLine> allLines) {
     final result = <DiffLine>[];
-    const contextLines = 2; // Number of context lines to show before/after changes
+    const contextLines =
+        2; // Number of context lines to show before/after changes
 
     for (var i = 0; i < allLines.length; i++) {
       final line = allLines[i];
@@ -230,7 +233,8 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
       }
 
       // Include changes (additions/deletions)
-      if (line.type == DiffLineType.addition || line.type == DiffLineType.deletion) {
+      if (line.type == DiffLineType.addition ||
+          line.type == DiffLineType.deletion) {
         // Add context lines before the change
         for (var j = contextLines; j > 0; j--) {
           final contextIndex = i - j;
@@ -295,7 +299,8 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
 
     // Extract line content (remove +/- prefix if present)
     String displayContent = line.content;
-    if (line.type == DiffLineType.addition || line.type == DiffLineType.deletion) {
+    if (line.type == DiffLineType.addition ||
+        line.type == DiffLineType.deletion) {
       if (displayContent.isNotEmpty) {
         displayContent = displayContent.substring(1);
       }
@@ -309,7 +314,10 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
       },
       child: Container(
         color: backgroundColor,
-        padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingS, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.paddingS,
+          vertical: 2,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -338,11 +346,7 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
               const SizedBox(width: AppTheme.paddingS),
             ],
             // Prefix indicator
-            if (prefix.isNotEmpty)
-              BodyMediumLabel(
-                prefix,
-                color: textColor,
-              ),
+            if (prefix.isNotEmpty) BodyMediumLabel(prefix, color: textColor),
             const SizedBox(width: AppTheme.paddingXS),
             // Line content
             Expanded(
@@ -351,10 +355,13 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
                 style: GoogleFonts.getFont(
                   widget.fontFamily,
                   textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: textColor,
-                        height: 1.2,
-                        fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * _getFontSizeScale(),
-                      ),
+                    color: textColor,
+                    height: 1.2,
+                    fontSize:
+                        (Theme.of(context).textTheme.bodyMedium?.fontSize ??
+                            14) *
+                        _getFontSizeScale(),
+                  ),
                 ),
               ),
             ),
@@ -365,7 +372,11 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
   }
 
   /// Build a line for full file view
-  Widget _buildFullFileLine(BuildContext context, String content, int lineNumber) {
+  Widget _buildFullFileLine(
+    BuildContext context,
+    String content,
+    int lineNumber,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return InkWell(
@@ -375,7 +386,10 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
         widget.onLineCopied?.call();
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingS, vertical: 2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.paddingS,
+          vertical: 2,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -398,10 +412,13 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
                 style: GoogleFonts.getFont(
                   widget.fontFamily,
                   textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        height: 1.2,
-                        fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * _getFontSizeScale(),
-                      ),
+                    color: colorScheme.onSurface,
+                    height: 1.2,
+                    fontSize:
+                        (Theme.of(context).textTheme.bodyMedium?.fontSize ??
+                            14) *
+                        _getFontSizeScale(),
+                  ),
                 ),
               ),
             ),
@@ -415,9 +432,9 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
 /// Draggable Speed Dial FAB for diff viewer actions
 class _DraggableSpeedDial extends StatefulWidget {
   final List<DiffViewerAction> actions;
-  final bool isExpanded;  // Controlled by parent
-  final VoidCallback onToggle;  // Callback to toggle expansion
-  final VoidCallback onCollapse;  // Callback to collapse (for actions)
+  final bool isExpanded; // Controlled by parent
+  final VoidCallback onToggle; // Callback to toggle expansion
+  final VoidCallback onCollapse; // Callback to collapse (for actions)
 
   const _DraggableSpeedDial({
     required this.actions,
@@ -431,7 +448,10 @@ class _DraggableSpeedDial extends StatefulWidget {
 }
 
 class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
-  Offset _position = const Offset(AppTheme.paddingM, AppTheme.paddingM); // Default position (from bottom-right)
+  Offset _position = const Offset(
+    AppTheme.paddingM,
+    AppTheme.paddingM,
+  ); // Default position (from bottom-right)
   final FocusNode _focusNode = FocusNode();
 
   @override
@@ -462,8 +482,14 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
             setState(() {
               // Update position by subtracting delta (since we're using right/bottom positioning)
               _position = Offset(
-                (_position.dx - details.delta.dx).clamp(AppTheme.paddingM, MediaQuery.of(context).size.width - 80),
-                (_position.dy - details.delta.dy).clamp(AppTheme.paddingM, MediaQuery.of(context).size.height - 80),
+                (_position.dx - details.delta.dx).clamp(
+                  AppTheme.paddingM,
+                  MediaQuery.of(context).size.width - 80,
+                ),
+                (_position.dy - details.delta.dy).clamp(
+                  AppTheme.paddingM,
+                  MediaQuery.of(context).size.height - 80,
+                ),
               );
             });
           },
@@ -472,13 +498,16 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
             _focusNode.requestFocus();
           },
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            // Expanded action buttons
-            if (widget.isExpanded)
-              ...widget.actions.map((action) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppTheme.paddingS + AppTheme.paddingXS),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Expanded action buttons
+              if (widget.isExpanded)
+                ...widget.actions.map(
+                  (action) => Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: AppTheme.paddingS + AppTheme.paddingXS,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -486,16 +515,21 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                         Material(
                           color: Theme.of(context).colorScheme.surface,
                           elevation: 4,
-                          borderRadius: BorderRadius.circular(AppTheme.paddingXS),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.paddingXS,
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingS + AppTheme.paddingXS,
+                              horizontal:
+                                  AppTheme.paddingS + AppTheme.paddingXS,
                               vertical: AppTheme.paddingS,
                             ),
                             child: BodySmallLabel(action.label),
                           ),
                         ),
-                        const SizedBox(width: AppTheme.paddingS + AppTheme.paddingXS),
+                        const SizedBox(
+                          width: AppTheme.paddingS + AppTheme.paddingXS,
+                        ),
                         // Action button
                         FloatingActionButton.small(
                           heroTag: action.label,
@@ -508,28 +542,31 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                         ),
                       ],
                     ),
-                  )),
-            // Main FAB
-            FloatingActionButton(
-              heroTag: 'main_fab',
-              onPressed: () {
-                widget.onToggle();
-                // Request focus so ESC key works
-                _focusNode.requestFocus();
-              },
-              child: AnimatedRotation(
-                turns: widget.isExpanded ? 0.125 : 0, // 45 degrees when expanded
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  widget.isExpanded
-                      ? PhosphorIconsRegular.x
-                      : PhosphorIconsRegular.list,
+                  ),
+                ),
+              // Main FAB
+              FloatingActionButton(
+                heroTag: 'main_fab',
+                onPressed: () {
+                  widget.onToggle();
+                  // Request focus so ESC key works
+                  _focusNode.requestFocus();
+                },
+                child: AnimatedRotation(
+                  turns: widget.isExpanded
+                      ? 0.125
+                      : 0, // 45 degrees when expanded
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    widget.isExpanded
+                        ? PhosphorIconsRegular.x
+                        : PhosphorIconsRegular.list,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

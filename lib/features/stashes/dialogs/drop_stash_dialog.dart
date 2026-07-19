@@ -11,10 +11,7 @@ import '../../../shared/components/base_label.dart';
 class DropStashDialog extends StatelessWidget {
   final GitStash stash;
 
-  const DropStashDialog({
-    super.key,
-    required this.stash,
-  });
+  const DropStashDialog({super.key, required this.stash});
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +21,7 @@ class DropStashDialog extends StatelessWidget {
       title: l10n.dropStashDialog,
       icon: PhosphorIconsRegular.warningCircle,
       variant: DialogVariant.destructive,
-      content: BodyMediumLabel(
-        l10n.dropStashConfirm(stash.ref),
-      ),
+      content: BodyMediumLabel(l10n.dropStashConfirm(stash.ref)),
       actions: [
         BaseButton(
           label: l10n.cancel,

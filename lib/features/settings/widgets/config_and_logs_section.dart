@@ -37,14 +37,18 @@ class ConfigAndLogsSection extends ConsumerWidget {
             children: [
               // Open app.log
               BaseButton(
-                onPressed: textEditor != null ? () => _openAppLog(context, textEditor) : null,
+                onPressed: textEditor != null
+                    ? () => _openAppLog(context, textEditor)
+                    : null,
                 label: l10n.openAppLog,
                 leadingIcon: PhosphorIconsRegular.fileText,
                 variant: ButtonVariant.secondary,
               ),
               // Open git.log
               BaseButton(
-                onPressed: textEditor != null ? () => _openGitLog(context, textEditor) : null,
+                onPressed: textEditor != null
+                    ? () => _openGitLog(context, textEditor)
+                    : null,
                 label: l10n.openGitLog,
                 leadingIcon: PhosphorIconsRegular.gitBranch,
                 variant: ButtonVariant.secondary,
@@ -87,7 +91,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
         );
       } else {
         if (context.mounted) {
-          NotificationService.showWarning(context, 'Log file path not available');
+          NotificationService.showWarning(
+            context,
+            'Log file path not available',
+          );
         }
       }
     } catch (e) {
@@ -108,7 +115,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
         );
       } else {
         if (context.mounted) {
-          NotificationService.showWarning(context, 'Git log file path not available');
+          NotificationService.showWarning(
+            context,
+            'Git log file path not available',
+          );
         }
       }
     } catch (e) {
@@ -119,7 +129,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
     }
   }
 
-  Future<void> _openConfigFolder(BuildContext context, String? textEditor) async {
+  Future<void> _openConfigFolder(
+    BuildContext context,
+    String? textEditor,
+  ) async {
     try {
       // Single source of truth for the config location, so this stays in sync
       // with the documents-directory fallback used when HOME/USERPROFILE is unset.
@@ -128,7 +141,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
       if (!await configFolder.exists()) {
         if (context.mounted) {
-          NotificationService.showError(context, 'Config folder does not exist: $configFolderPath');
+          NotificationService.showError(
+            context,
+            'Config folder does not exist: $configFolderPath',
+          );
         }
         return;
       }
@@ -142,24 +158,37 @@ class ConfigAndLogsSection extends ConsumerWidget {
       } else {
         // Fall back to file explorer
         if (Platform.isWindows) {
-          await Process.start('explorer', [configFolderPath], mode: ProcessStartMode.detached);
+          await Process.start('explorer', [
+            configFolderPath,
+          ], mode: ProcessStartMode.detached);
         } else if (Platform.isMacOS) {
-          await Process.start('open', [configFolderPath], mode: ProcessStartMode.detached);
+          await Process.start('open', [
+            configFolderPath,
+          ], mode: ProcessStartMode.detached);
         } else if (Platform.isLinux) {
           // Try xdg-open first, fall back to common file managers
           try {
-            await Process.start('xdg-open', [configFolderPath], mode: ProcessStartMode.detached);
+            await Process.start('xdg-open', [
+              configFolderPath,
+            ], mode: ProcessStartMode.detached);
           } catch (e) {
             // Try nautilus (GNOME)
             try {
-              await Process.start('nautilus', [configFolderPath], mode: ProcessStartMode.detached);
+              await Process.start('nautilus', [
+                configFolderPath,
+              ], mode: ProcessStartMode.detached);
             } catch (e) {
               // Try dolphin (KDE)
               try {
-                await Process.start('dolphin', [configFolderPath], mode: ProcessStartMode.detached);
+                await Process.start('dolphin', [
+                  configFolderPath,
+                ], mode: ProcessStartMode.detached);
               } catch (e) {
                 if (context.mounted) {
-                  NotificationService.showError(context, 'Could not open file manager. Please install xdg-utils.');
+                  NotificationService.showError(
+                    context,
+                    'Could not open file manager. Please install xdg-utils.',
+                  );
                 }
               }
             }
@@ -169,7 +198,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
     } catch (e) {
       Logger.error('Failed to open config folder', e);
       if (context.mounted) {
-        NotificationService.showError(context, 'Failed to open config folder: $e');
+        NotificationService.showError(
+          context,
+          'Failed to open config folder: $e',
+        );
       }
     }
   }
@@ -181,7 +213,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
       if (logPath == null) {
         if (context.mounted) {
-          NotificationService.showWarning(context, 'Log file path not available');
+          NotificationService.showWarning(
+            context,
+            'Log file path not available',
+          );
         }
         return;
       }
@@ -239,7 +274,10 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
       if (gitLogPath == null) {
         if (context.mounted) {
-          NotificationService.showWarning(context, 'Git log file path not available');
+          NotificationService.showWarning(
+            context,
+            'Git log file path not available',
+          );
         }
         return;
       }

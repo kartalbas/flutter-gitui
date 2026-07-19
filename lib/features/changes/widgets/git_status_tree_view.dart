@@ -152,7 +152,10 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
     }
 
     // Second pass: convert the tree structure to GitStatusTreeNode objects
-    List<GitStatusTreeNode> convertToNodes(Map<String, dynamic> map, String parentPath) {
+    List<GitStatusTreeNode> convertToNodes(
+      Map<String, dynamic> map,
+      String parentPath,
+    ) {
       final nodes = <GitStatusTreeNode>[];
 
       for (final entry in map.entries) {
@@ -162,23 +165,27 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
 
         if (value is FileStatus) {
           // This is a file
-          nodes.add(GitStatusTreeNode(
-            name: name,
-            fullPath: fullPath,
-            isDirectory: false,
-            children: const [],
-            fileStatus: value,
-          ));
+          nodes.add(
+            GitStatusTreeNode(
+              name: name,
+              fullPath: fullPath,
+              isDirectory: false,
+              children: const [],
+              fileStatus: value,
+            ),
+          );
         } else if (value is Map<String, dynamic>) {
           // This is a directory
           final children = convertToNodes(value, fullPath);
-          nodes.add(GitStatusTreeNode(
-            name: name,
-            fullPath: fullPath,
-            isDirectory: true,
-            children: children,
-            fileStatus: null,
-          ));
+          nodes.add(
+            GitStatusTreeNode(
+              name: name,
+              fullPath: fullPath,
+              isDirectory: true,
+              children: children,
+              fileStatus: null,
+            ),
+          );
         }
       }
 
@@ -203,14 +210,16 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       if (node.isDirectory && node.children.isNotEmpty) {
         // Recursively sort children for directories
         final sortedChildren = _sortNodes(node.children);
-        sorted.add(GitStatusTreeNode(
-          name: node.name,
-          fullPath: node.fullPath,
-          isDirectory: node.isDirectory,
-          children: sortedChildren,
-          fileStatus: node.fileStatus,
-          isExpanded: node.isExpanded,
-        ));
+        sorted.add(
+          GitStatusTreeNode(
+            name: node.name,
+            fullPath: node.fullPath,
+            isDirectory: node.isDirectory,
+            children: sortedChildren,
+            fileStatus: node.fileStatus,
+            isExpanded: node.isExpanded,
+          ),
+        );
       } else {
         // Files or empty directories - no sorting needed for children
         sorted.add(node);
@@ -314,82 +323,95 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                 ),
               ),
 
-            // Right panel: Diff viewer
-            if (_selectedFile != null)
-              Expanded(
-                flex: 2,
-                child: BasePanel(
-                  title: Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.gitDiff,
-                        size: AppTheme.iconS,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: AppTheme.paddingS),
-                      Expanded(
-                        child: TitleSmallLabel(
-                          _selectedFile!.path,
-                          overflow: TextOverflow.ellipsis,
+              // Right panel: Diff viewer
+              if (_selectedFile != null)
+                Expanded(
+                  flex: 2,
+                  child: BasePanel(
+                    title: Row(
+                      children: [
+                        Icon(
+                          PhosphorIconsRegular.gitDiff,
+                          size: AppTheme.iconS,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
+                        const SizedBox(width: AppTheme.paddingS),
+                        Expanded(
+                          child: TitleSmallLabel(
+                            _selectedFile!.path,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Icon(
+                          _selectedFile!.isPartiallyStaged
+                              ? PhosphorIconsBold.minusSquare
+                              : _selectedFile!.isStaged
+                              ? PhosphorIconsBold.checkSquare
+                              : PhosphorIconsRegular.square,
+                          size: AppTheme.iconS,
+                          color: _selectedFile!.isStaged
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: AppTheme.paddingXS),
+                        BodySmallLabel(
+                          _selectedFile!.isPartiallyStaged
+                              ? 'Partially staged'
+                              : _selectedFile!.isStaged
+                              ? 'Staged'
+                              : 'Unstaged',
+                        ),
+                      ],
+                    ),
+                    padding: EdgeInsets.zero,
+                    content: _DiffViewerPanel(
+                      key: ValueKey(
+                        '${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode',
                       ),
-                      Icon(
-                        _selectedFile!.isPartiallyStaged
-                            ? PhosphorIconsBold.minusSquare
-                            : _selectedFile!.isStaged
-                                ? PhosphorIconsBold.checkSquare
-                                : PhosphorIconsRegular.square,
-                        size: AppTheme.iconS,
-                        color: _selectedFile!.isStaged
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: AppTheme.paddingXS),
-                      BodySmallLabel(
-                        _selectedFile!.isPartiallyStaged
-                            ? 'Partially staged'
-                            : _selectedFile!.isStaged
-                                ? 'Staged'
-                                : 'Unstaged',
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.zero,
-                  content: _DiffViewerPanel(
-                    key: ValueKey('${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode'),
-                    filePath: _selectedFile!.path,
-                    // A partially staged file shows its work tree half, because that
-                    // is the part the user can otherwise neither see nor stage here.
-                    staged: _selectedFile!.isFullyStaged,
-                    viewMode: _diffViewMode,
-                    fileStatus: _selectedFile!,
-                    onToggleViewMode: () {
-                      setState(() {
-                        _diffViewMode = _diffViewMode == DiffViewMode.diff
-                            ? DiffViewMode.fullFile
-                            : DiffViewMode.diff;
-                      });
-                    },
-                    onDiscardFile: widget.onDiscardFile != null
-                        ? () => widget.onDiscardFile!(_selectedFile!)
-                        : null,
-                    onToggleStage: widget.onToggleStage != null
-                        ? () => widget.onToggleStage!(_selectedFile!, _selectedFile!.isFullyStaged)
-                        : null,
-                    onDeleteFile: _selectedFile!.primaryStatus == FileStatusType.untracked && widget.onDeleteFile != null
-                        ? () => widget.onDeleteFile!(_selectedFile!)
-                        : null,
+                      filePath: _selectedFile!.path,
+                      // A partially staged file shows its work tree half, because that
+                      // is the part the user can otherwise neither see nor stage here.
+                      staged: _selectedFile!.isFullyStaged,
+                      viewMode: _diffViewMode,
+                      fileStatus: _selectedFile!,
+                      onToggleViewMode: () {
+                        setState(() {
+                          _diffViewMode = _diffViewMode == DiffViewMode.diff
+                              ? DiffViewMode.fullFile
+                              : DiffViewMode.diff;
+                        });
+                      },
+                      onDiscardFile: widget.onDiscardFile != null
+                          ? () => widget.onDiscardFile!(_selectedFile!)
+                          : null,
+                      onToggleStage: widget.onToggleStage != null
+                          ? () => widget.onToggleStage!(
+                              _selectedFile!,
+                              _selectedFile!.isFullyStaged,
+                            )
+                          : null,
+                      onDeleteFile:
+                          _selectedFile!.primaryStatus ==
+                                  FileStatusType.untracked &&
+                              widget.onDeleteFile != null
+                          ? () => widget.onDeleteFile!(_selectedFile!)
+                          : null,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
-  Widget _buildTreeItem(GitStatusTreeNode node, int depth, bool isSelected, int index) {
+  Widget _buildTreeItem(
+    GitStatusTreeNode node,
+    int depth,
+    bool isSelected,
+    int index,
+  ) {
     // Get color based on file status
     Color? fileColor;
     if (node.fileStatus != null) {
@@ -420,8 +442,8 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
               node.isPartiallyStaged
                   ? PhosphorIconsBold.minusSquare
                   : node.isStaged
-                      ? PhosphorIconsBold.checkSquare
-                      : PhosphorIconsRegular.square,
+                  ? PhosphorIconsBold.checkSquare
+                  : PhosphorIconsRegular.square,
               size: AppTheme.iconS,
               color: node.isStaged
                   ? Theme.of(context).colorScheme.primary
@@ -511,7 +533,8 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
         final diffOutput = data['diff'] ?? '';
         final fullFileContent = data['fullContent'];
 
-        if (diffOutput.isEmpty && snapshot.connectionState == ConnectionState.waiting) {
+        if (diffOutput.isEmpty &&
+            snapshot.connectionState == ConnectionState.waiting) {
           // Still loading, show minimal placeholder
           return const Center(
             child: SizedBox(
@@ -560,7 +583,10 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: diffOutput));
               if (context.mounted) {
-                NotificationService.showSuccess(context, l10n.snackbarDiffCopied);
+                NotificationService.showSuccess(
+                  context,
+                  l10n.snackbarDiffCopied,
+                );
               }
             },
           ),
@@ -571,14 +597,23 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
               label: l10n.labelOpenInExternalTool,
               onPressed: () async {
                 try {
-                  Logger.info('Opening external diff tool for file: ${widget.filePath}, staged: ${widget.staged}');
+                  Logger.info(
+                    'Opening external diff tool for file: ${widget.filePath}, staged: ${widget.staged}',
+                  );
                   if (widget.staged) {
-                    await ref.read(diffActionsProvider).diffStagedFile(widget.filePath);
+                    await ref
+                        .read(diffActionsProvider)
+                        .diffStagedFile(widget.filePath);
                   } else {
-                    await ref.read(diffActionsProvider).diffUnstagedFile(widget.filePath);
+                    await ref
+                        .read(diffActionsProvider)
+                        .diffUnstagedFile(widget.filePath);
                   }
                 } catch (e) {
-                  Logger.error('Failed to open external diff tool for file: ${widget.filePath}', e);
+                  Logger.error(
+                    'Failed to open external diff tool for file: ${widget.filePath}',
+                    e,
+                  );
                   if (context.mounted) {
                     NotificationService.showError(
                       context,
@@ -593,10 +628,7 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
             icon: PhosphorIconsRegular.userList,
             label: l10n.blame,
             onPressed: () {
-              showBlameDialog(
-                context,
-                filePath: widget.filePath,
-              );
+              showBlameDialog(context, filePath: widget.filePath);
             },
           ),
         ];
@@ -623,34 +655,48 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
       throw Exception('No repository open');
     }
 
-    final diffResult = await gitService.getDiff(widget.filePath, staged: widget.staged);
+    final diffResult = await gitService.getDiff(
+      widget.filePath,
+      staged: widget.staged,
+    );
     String diff = diffResult.unwrap();
     String? fullContent;
 
     // Try to load full file content
     try {
       fullContent = await gitService.getFileContent(widget.filePath);
-      Logger.debug('[TreeView] getFileContent(${widget.filePath}) returned: ${fullContent?.length ?? 0} chars');
-      Logger.debug('[TreeView] diff.isEmpty=${diff.isEmpty}, diff.trim().isEmpty=${diff.trim().isEmpty}');
-      Logger.debug('[TreeView] fullContent != null: ${fullContent != null}, fullContent.isNotEmpty: ${fullContent?.isNotEmpty ?? false}');
+      Logger.debug(
+        '[TreeView] getFileContent(${widget.filePath}) returned: ${fullContent?.length ?? 0} chars',
+      );
+      Logger.debug(
+        '[TreeView] diff.isEmpty=${diff.isEmpty}, diff.trim().isEmpty=${diff.trim().isEmpty}',
+      );
+      Logger.debug(
+        '[TreeView] fullContent != null: ${fullContent != null}, fullContent.isNotEmpty: ${fullContent?.isNotEmpty ?? false}',
+      );
 
       // If diff is empty but we have file content, this is likely an untracked file
       // Generate a synthetic diff showing all content as additions
-      if ((diff.isEmpty || diff.trim().isEmpty) && fullContent != null && fullContent.isNotEmpty) {
-        Logger.debug('[TreeView] Generating synthetic diff for ${widget.filePath}');
+      if ((diff.isEmpty || diff.trim().isEmpty) &&
+          fullContent != null &&
+          fullContent.isNotEmpty) {
+        Logger.debug(
+          '[TreeView] Generating synthetic diff for ${widget.filePath}',
+        );
         diff = _generateSyntheticDiff(widget.filePath, fullContent);
-        Logger.debug('[TreeView] Generated synthetic diff length: ${diff.length}');
+        Logger.debug(
+          '[TreeView] Generated synthetic diff length: ${diff.length}',
+        );
       }
     } catch (e) {
       // If we can't get file content, it's okay - we'll just show the diff
-      Logger.debug('[TreeView] Error loading file content for ${widget.filePath}: $e');
+      Logger.debug(
+        '[TreeView] Error loading file content for ${widget.filePath}: $e',
+      );
       fullContent = null;
     }
 
-    return {
-      'diff': diff,
-      'fullContent': fullContent,
-    };
+    return {'diff': diff, 'fullContent': fullContent};
   }
 
   /// Generate a synthetic diff for untracked files showing all content as additions

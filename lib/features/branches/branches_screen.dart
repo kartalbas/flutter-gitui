@@ -27,7 +27,8 @@ class BranchesScreen extends ConsumerStatefulWidget {
   ConsumerState<BranchesScreen> createState() => _BranchesScreenState();
 }
 
-class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProviderStateMixin {
+class _BranchesScreenState extends ConsumerState<BranchesScreen>
+    with TickerProviderStateMixin {
   final _branchesService = const BranchesService();
   final _searchController = TextEditingController();
   late TabController _tabController;
@@ -39,7 +40,8 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
     _tabController = TabController(
       length: 2,
       vsync: this,
-      animationDuration: Duration.zero, // Will be updated in didChangeDependencies
+      animationDuration:
+          Duration.zero, // Will be updated in didChangeDependencies
     );
   }
 
@@ -117,8 +119,14 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
             TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: l10n.localTab, icon: const Icon(PhosphorIconsRegular.folder, size: 16)),
-                Tab(text: l10n.remoteTab, icon: const Icon(PhosphorIconsRegular.cloud, size: 16)),
+                Tab(
+                  text: l10n.localTab,
+                  icon: const Icon(PhosphorIconsRegular.folder, size: 16),
+                ),
+                Tab(
+                  text: l10n.remoteTab,
+                  icon: const Icon(PhosphorIconsRegular.cloud, size: 16),
+                ),
               ],
             ),
             Expanded(
@@ -126,11 +134,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
                 controller: _tabController,
                 children: [
                   // Local Branches
-                  _buildBranchList(
-                    context,
-                    localBranchesAsync,
-                    isLocal: true,
-                  ),
+                  _buildBranchList(context, localBranchesAsync, isLocal: true),
                   // Remote Branches
                   _buildBranchList(
                     context,
@@ -165,7 +169,11 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
 
         if (filteredBranches.isEmpty) {
           return Center(
-            child: Text(AppLocalizations.of(context)!.noMatchesFound('branches', _searchQuery)),
+            child: Text(
+              AppLocalizations.of(
+                context,
+              )!.noMatchesFound('branches', _searchQuery),
+            ),
           );
         }
 
@@ -173,10 +181,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
           itemCount: filteredBranches.length,
           itemBuilder: (context, index) {
             final branch = filteredBranches[index];
-            return BranchListTile(
-              branch: branch,
-              isLocal: isLocal,
-            );
+            return BranchListTile(branch: branch, isLocal: isLocal);
           },
         );
       },
@@ -185,7 +190,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
     );
   }
 
-  Future<void> _showCreateBranchDialog(BuildContext context) async{
+  Future<void> _showCreateBranchDialog(BuildContext context) async {
     final repositoryPath = ref.read(currentRepositoryPathProvider);
     if (repositoryPath == null) return;
 
@@ -200,10 +205,9 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
     if (result != null && context.mounted) {
       try {
         // Create the branch using the full branch name (includes prefix)
-        await ref.read(gitActionsProvider).createBranch(
-              result.fullBranchName,
-              checkout: result.checkout,
-            );
+        await ref
+            .read(gitActionsProvider)
+            .createBranch(result.fullBranchName, checkout: result.checkout);
       } catch (e) {
         if (context.mounted) {
           final l10n = AppLocalizations.of(context)!;

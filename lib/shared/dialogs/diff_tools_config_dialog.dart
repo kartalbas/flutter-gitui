@@ -17,7 +17,8 @@ class DiffToolsConfigDialog extends ConsumerStatefulWidget {
   const DiffToolsConfigDialog({super.key});
 
   @override
-  ConsumerState<DiffToolsConfigDialog> createState() => _DiffToolsConfigDialogState();
+  ConsumerState<DiffToolsConfigDialog> createState() =>
+      _DiffToolsConfigDialogState();
 }
 
 class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
@@ -47,15 +48,15 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
       icon: PhosphorIconsRegular.gear,
       title: AppLocalizations.of(context)!.configureDiffMergeTools,
       content: availableToolsAsync.when(
-          data: (tools) {
-            if (tools.isEmpty) {
-              return _buildNoToolsFound(context);
-            }
-            return _buildToolsConfig(context, tools);
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => _buildError(context, error),
-        ),
+        data: (tools) {
+          if (tools.isEmpty) {
+            return _buildNoToolsFound(context);
+          }
+          return _buildToolsConfig(context, tools);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildError(context, error),
+      ),
       actions: [
         BaseButton(
           label: AppLocalizations.of(context)!.cancel,
@@ -84,9 +85,15 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           const SizedBox(height: AppTheme.paddingL),
           TitleLargeLabel(AppLocalizations.of(context)!.noDiffToolsFound),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(AppLocalizations.of(context)!.noExternalDiffMergeToolsDetected, textAlign: TextAlign.center),
+          BodyMediumLabel(
+            AppLocalizations.of(context)!.noExternalDiffMergeToolsDetected,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: AppTheme.paddingM),
-          BodySmallLabel(AppLocalizations.of(context)!.installToolsSuchAs, textAlign: TextAlign.center),
+          BodySmallLabel(
+            AppLocalizations.of(context)!.installToolsSuchAs,
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -128,7 +135,11 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                 const Icon(PhosphorIconsRegular.info, size: 20),
                 const SizedBox(width: AppTheme.paddingS),
                 Expanded(
-                  child: BodySmallLabel(AppLocalizations.of(context)!.configureYourPreferredTools(tools.length)),
+                  child: BodySmallLabel(
+                    AppLocalizations.of(
+                      context,
+                    )!.configureYourPreferredTools(tools.length),
+                  ),
                 ),
               ],
             ),
@@ -138,7 +149,9 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           // Diff Tool Selection
           TitleMediumLabel(AppLocalizations.of(context)!.diffTool),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(AppLocalizations.of(context)!.usedForComparingFileChanges),
+          BodySmallLabel(
+            AppLocalizations.of(context)!.usedForComparingFileChanges,
+          ),
           const SizedBox(height: AppTheme.paddingM),
 
           RadioGroup<DiffToolType?>(
@@ -150,7 +163,9 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
               });
             },
             child: Column(
-              children: tools.map((tool) => _buildToolOption(context, tool)).toList(),
+              children: tools
+                  .map((tool) => _buildToolOption(context, tool))
+                  .toList(),
             ),
           ),
 
@@ -161,7 +176,9 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           // Merge Tool Selection
           TitleMediumLabel(AppLocalizations.of(context)!.mergeTool),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(AppLocalizations.of(context)!.usedForResolvingMergeConflicts),
+          BodySmallLabel(
+            AppLocalizations.of(context)!.usedForResolvingMergeConflicts,
+          ),
           const SizedBox(height: AppTheme.paddingM),
 
           RadioGroup<DiffToolType?>(
@@ -173,7 +190,9 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
               });
             },
             child: Column(
-              children: tools.map((tool) => _buildToolOption(context, tool)).toList(),
+              children: tools
+                  .map((tool) => _buildToolOption(context, tool))
+                  .toList(),
             ),
           ),
         ],
@@ -181,63 +200,59 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
     );
   }
 
-  Widget _buildToolOption(
-    BuildContext context,
-    DiffTool tool,
-  ) {
+  Widget _buildToolOption(BuildContext context, DiffTool tool) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
       child: BaseCard(
         padding: EdgeInsets.zero,
         content: RadioListTile<DiffToolType?>(
-        value: tool.type,
-        contentPadding: const EdgeInsets.all(AppTheme.paddingM),
-        secondary: Icon(
-          _getToolIcon(tool.type),
-          size: 32,
-        ),
-        title: TitleSmallLabel(tool.displayName),
-        subtitle: Row(
-          children: [
-            Expanded(
-              child: LabelMediumLabel(
-                tool.executablePath,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: AppTheme.paddingS),
-            // Available badge
-            if (tool.isAvailable)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.paddingS,
-                  vertical: AppTheme.paddingXS,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.check,
-                      size: 14,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const SizedBox(width: AppTheme.paddingXS),
-                    LabelMediumLabel(
-                      AppLocalizations.of(context)!.available,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ],
+          value: tool.type,
+          contentPadding: const EdgeInsets.all(AppTheme.paddingM),
+          secondary: Icon(_getToolIcon(tool.type), size: 32),
+          title: TitleSmallLabel(tool.displayName),
+          subtitle: Row(
+            children: [
+              Expanded(
+                child: LabelMediumLabel(
+                  tool.executablePath,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-          ],
+              const SizedBox(width: AppTheme.paddingS),
+              // Available badge
+              if (tool.isAvailable)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.paddingS,
+                    vertical: AppTheme.paddingXS,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.check,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: AppTheme.paddingXS),
+                      LabelMediumLabel(
+                        AppLocalizations.of(context)!.available,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
@@ -280,7 +295,11 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
     if (mounted) {
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.diffMergeToolSettingsSaved)),
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.diffMergeToolSettingsSaved,
+          ),
+        ),
       );
     }
   }
@@ -293,4 +312,3 @@ Future<void> showDiffToolsConfigDialog(BuildContext context) {
     builder: (context) => const DiffToolsConfigDialog(),
   );
 }
-

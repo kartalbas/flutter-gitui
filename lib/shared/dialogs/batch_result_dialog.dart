@@ -64,12 +64,11 @@ class BatchResultDialog extends StatelessWidget {
             decoration: BoxDecoration(
               color: isSuccess
                   ? color.withValues(alpha: 0.1)
-                  : Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.3),
+                  : Theme.of(
+                      context,
+                    ).colorScheme.errorContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppTheme.radiusS),
-              border: Border.all(
-                color: color.withValues(alpha: 0.3),
-                width: 1,
-              ),
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
             ),
             child: SelectableText(
               result.message,
@@ -90,7 +89,10 @@ class BatchResultDialog extends StatelessWidget {
           leadingIcon: PhosphorIconsRegular.copy,
           onPressed: () {
             Clipboard.setData(ClipboardData(text: result.message));
-            NotificationService.showSuccess(context, 'Message copied to clipboard');
+            NotificationService.showSuccess(
+              context,
+              'Message copied to clipboard',
+            );
           },
         ),
         // Dismiss button

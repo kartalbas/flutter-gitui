@@ -11,10 +11,7 @@ import '../../core/git/models/remote.dart';
 class RenameRemoteDialog extends StatefulWidget {
   final GitRemote remote;
 
-  const RenameRemoteDialog({
-    super.key,
-    required this.remote,
-  });
+  const RenameRemoteDialog({super.key, required this.remote});
 
   @override
   State<RenameRemoteDialog> createState() => _RenameRemoteDialogState();

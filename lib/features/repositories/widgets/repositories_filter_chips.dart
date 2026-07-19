@@ -43,7 +43,8 @@ class RepositoriesFilterChips extends ConsumerWidget {
     // Selection is tracked over the unfiltered repo list, so only containment of
     // every visible repo may flip the button to 'Deselect all'
     final selectedPaths = selectedRepositories.map((r) => r.path).toSet();
-    final isAllSelected = selectableRepositories.isNotEmpty &&
+    final isAllSelected =
+        selectableRepositories.isNotEmpty &&
         selectableRepositories.every((r) => selectedPaths.contains(r.path));
 
     return Row(
@@ -74,9 +75,13 @@ class RepositoriesFilterChips extends ConsumerWidget {
             isAllSelected: isAllSelected,
             onPressed: () {
               if (isAllSelected) {
-                ref.read(repositoryMultiSelectProvider.notifier).clearSelection();
+                ref
+                    .read(repositoryMultiSelectProvider.notifier)
+                    .clearSelection();
               } else {
-                ref.read(repositoryMultiSelectProvider.notifier).selectAll(selectableRepositories);
+                ref
+                    .read(repositoryMultiSelectProvider.notifier)
+                    .selectAll(selectableRepositories);
               }
             },
           ),

@@ -30,6 +30,12 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      # Same scope as the analysis below, so the gate matches what the repository
+      # was formatted with. Keeping it enforced stops future diffs from mixing
+      # real changes with reformatting noise.
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+
       # Scoped to the application sources on purpose: the lint_rules/ package
       # does not compile against analyzer 8.x and is analyzed by its own job.
       - name: Analyze application code

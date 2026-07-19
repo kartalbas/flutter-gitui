@@ -19,7 +19,8 @@ class CloneRepositoryDialog extends ConsumerStatefulWidget {
   const CloneRepositoryDialog({super.key});
 
   @override
-  ConsumerState<CloneRepositoryDialog> createState() => _CloneRepositoryDialogState();
+  ConsumerState<CloneRepositoryDialog> createState() =>
+      _CloneRepositoryDialogState();
 }
 
 class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
@@ -50,146 +51,154 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-              BodyMediumLabel(AppLocalizations.of(context)!.cloneGitRepositoryFromUrl),
-              const SizedBox(height: AppTheme.paddingL),
+            BodyMediumLabel(
+              AppLocalizations.of(context)!.cloneGitRepositoryFromUrl,
+            ),
+            const SizedBox(height: AppTheme.paddingL),
 
-              // Repository URL
-              BaseTextField(
-                controller: _urlController,
-                label: AppLocalizations.of(context)!.repositoryUrl,
-                hintText: AppLocalizations.of(context)!.repositoryUrlHint,
-                prefixIcon: PhosphorIconsRegular.globe,
-                enabled: !_isCloning,
-                autofocus: true,
-                onChanged: (_) => _autoFillPath(),
-              ),
-              const SizedBox(height: AppTheme.paddingM),
+            // Repository URL
+            BaseTextField(
+              controller: _urlController,
+              label: AppLocalizations.of(context)!.repositoryUrl,
+              hintText: AppLocalizations.of(context)!.repositoryUrlHint,
+              prefixIcon: PhosphorIconsRegular.globe,
+              enabled: !_isCloning,
+              autofocus: true,
+              onChanged: (_) => _autoFillPath(),
+            ),
+            const SizedBox(height: AppTheme.paddingM),
 
-              // Destination path
-              BaseTextField(
-                controller: _pathController,
-                label: AppLocalizations.of(context)!.destinationPath,
-                hintText: AppLocalizations.of(context)!.destinationPathHint,
-                prefixIcon: PhosphorIconsRegular.folder,
-                suffixIcon: kIsWeb ? null : PhosphorIconsRegular.folderOpen,
-                enabled: !_isCloning,
-              ),
-              if (!kIsWeb && !_isCloning)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: AppTheme.paddingS),
-                    child: BaseButton(
-                      label: AppLocalizations.of(context)!.browse,
-                      variant: ButtonVariant.tertiary,
-                      leadingIcon: PhosphorIconsRegular.folderOpen,
-                      onPressed: _browsePath,
-                    ),
+            // Destination path
+            BaseTextField(
+              controller: _pathController,
+              label: AppLocalizations.of(context)!.destinationPath,
+              hintText: AppLocalizations.of(context)!.destinationPathHint,
+              prefixIcon: PhosphorIconsRegular.folder,
+              suffixIcon: kIsWeb ? null : PhosphorIconsRegular.folderOpen,
+              enabled: !_isCloning,
+            ),
+            if (!kIsWeb && !_isCloning)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: AppTheme.paddingS),
+                  child: BaseButton(
+                    label: AppLocalizations.of(context)!.browse,
+                    variant: ButtonVariant.tertiary,
+                    leadingIcon: PhosphorIconsRegular.folderOpen,
+                    onPressed: _browsePath,
                   ),
                 ),
-              const SizedBox(height: AppTheme.paddingM),
-
-              // Branch name (optional)
-              BaseTextField(
-                controller: _branchController,
-                label: AppLocalizations.of(context)!.branchOptional,
-                hintText: AppLocalizations.of(context)!.hintTextDefaultBranch,
-                prefixIcon: PhosphorIconsRegular.gitBranch,
-                enabled: !_isCloning,
               ),
-              const SizedBox(height: AppTheme.paddingM),
+            const SizedBox(height: AppTheme.paddingM),
 
-              // Shallow clone option
-              SwitchListTile(
-                value: _shallowClone,
-                onChanged: _isCloning
-                    ? null
-                    : (value) {
-                        setState(() {
-                          _shallowClone = value;
-                        });
-                      },
-                title: BodyMediumLabel(AppLocalizations.of(context)!.shallowClone),
-                subtitle: BodySmallLabel(AppLocalizations.of(context)!.shallowCloneDescription),
-                contentPadding: EdgeInsets.zero,
+            // Branch name (optional)
+            BaseTextField(
+              controller: _branchController,
+              label: AppLocalizations.of(context)!.branchOptional,
+              hintText: AppLocalizations.of(context)!.hintTextDefaultBranch,
+              prefixIcon: PhosphorIconsRegular.gitBranch,
+              enabled: !_isCloning,
+            ),
+            const SizedBox(height: AppTheme.paddingM),
+
+            // Shallow clone option
+            SwitchListTile(
+              value: _shallowClone,
+              onChanged: _isCloning
+                  ? null
+                  : (value) {
+                      setState(() {
+                        _shallowClone = value;
+                      });
+                    },
+              title: BodyMediumLabel(
+                AppLocalizations.of(context)!.shallowClone,
               ),
+              subtitle: BodySmallLabel(
+                AppLocalizations.of(context)!.shallowCloneDescription,
+              ),
+              contentPadding: EdgeInsets.zero,
+            ),
 
-              if (_shallowClone) ...[
-                const SizedBox(height: AppTheme.paddingS),
-                Row(
-                  children: [
-                    const Icon(PhosphorIconsRegular.gitCommit, size: 20),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BodyMediumLabel(AppLocalizations.of(context)!.depth),
-                    const SizedBox(width: AppTheme.paddingM),
-                    Expanded(
-                      child: Slider(
-                        value: _depth.toDouble(),
-                        min: 1,
-                        max: 100,
-                        divisions: 99,
-                        label: _depth.toString(),
-                        onChanged: _isCloning
-                            ? null
-                            : (value) {
-                                setState(() {
-                                  _depth = value.toInt();
-                                });
-                              },
-                      ),
+            if (_shallowClone) ...[
+              const SizedBox(height: AppTheme.paddingS),
+              Row(
+                children: [
+                  const Icon(PhosphorIconsRegular.gitCommit, size: 20),
+                  const SizedBox(width: AppTheme.paddingS),
+                  BodyMediumLabel(AppLocalizations.of(context)!.depth),
+                  const SizedBox(width: AppTheme.paddingM),
+                  Expanded(
+                    child: Slider(
+                      value: _depth.toDouble(),
+                      min: 1,
+                      max: 100,
+                      divisions: 99,
+                      label: _depth.toString(),
+                      onChanged: _isCloning
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _depth = value.toInt();
+                              });
+                            },
                     ),
-                    SizedBox(
-                      width: 50,
+                  ),
+                  SizedBox(
+                    width: 50,
+                    child: BodyMediumLabel(
+                      _depth.toString(),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
+            // Error message
+            if (_errorMessage != null) ...[
+              const SizedBox(height: AppTheme.paddingM),
+              Container(
+                padding: const EdgeInsets.all(AppTheme.paddingM),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(width: AppTheme.paddingS),
+                    Expanded(
                       child: BodyMediumLabel(
-                        _depth.toString(),
-                        textAlign: TextAlign.center,
+                        _errorMessage!,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ],
                 ),
-              ],
-
-              // Error message
-              if (_errorMessage != null) ...[
-                const SizedBox(height: AppTheme.paddingM),
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(width: AppTheme.paddingS),
-                      Expanded(
-                        child: BodyMediumLabel(
-                          _errorMessage!,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              // Progress indicator
-              if (_isCloning) ...[
-                const SizedBox(height: AppTheme.paddingL),
-                const LinearProgressIndicator(),
-                const SizedBox(height: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(context)!.cloningRepository,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+              ),
             ],
-          ),
+
+            // Progress indicator
+            if (_isCloning) ...[
+              const SizedBox(height: AppTheme.paddingL),
+              const LinearProgressIndicator(),
+              const SizedBox(height: AppTheme.paddingS),
+              BaseLabel(
+                AppLocalizations.of(context)!.cloningRepository,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
         ),
+      ),
       actions: [
         BaseButton(
           label: AppLocalizations.of(context)!.cancel,
@@ -235,7 +244,9 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
   Future<void> _browsePath() async {
     if (kIsWeb) {
       setState(() {
-        _errorMessage = AppLocalizations.of(context)!.directorySelectionNotAvailable;
+        _errorMessage = AppLocalizations.of(
+          context,
+        )!.directorySelectionNotAvailable;
       });
       return;
     }
@@ -291,20 +302,28 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
 
       if (mounted) {
         // Open the cloned repository
-        final success = await ref.read(gitActionsProvider).openRepository(clonedPath);
+        final success = await ref
+            .read(gitActionsProvider)
+            .openRepository(clonedPath);
 
         if (success && mounted) {
           Navigator.of(context).pop(clonedPath);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.repositoryClonedSuccess(clonedPath)),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.repositoryClonedSuccess(clonedPath),
+              ),
               backgroundColor: AppTheme.gitAdded,
             ),
           );
         } else if (mounted) {
           setState(() {
-            _errorMessage = AppLocalizations.of(context)!.repositoryClonedButFailedToOpen;
+            _errorMessage = AppLocalizations.of(
+              context,
+            )!.repositoryClonedButFailedToOpen;
             _isCloning = false;
           });
         }
@@ -312,7 +331,9 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = AppLocalizations.of(context)!.failedToCloneRepository(e.toString());
+          _errorMessage = AppLocalizations.of(
+            context,
+          )!.failedToCloneRepository(e.toString());
           _isCloning = false;
         });
       }

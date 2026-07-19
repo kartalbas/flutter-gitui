@@ -201,8 +201,8 @@ class _BaseTextFieldState extends State<BaseTextField> {
       // Password toggle takes priority
       suffixIconWidget = BaseIconButton(
         icon: _obscureText
-              ? PhosphorIconsRegular.eye
-              : PhosphorIconsRegular.eyeSlash,
+            ? PhosphorIconsRegular.eye
+            : PhosphorIconsRegular.eyeSlash,
         onPressed: _togglePasswordVisibility,
         tooltip: _obscureText ? l10n.showPassword : l10n.hidePassword,
         size: ButtonSize.small,
@@ -217,10 +217,7 @@ class _BaseTextFieldState extends State<BaseTextField> {
       );
     } else if (widget.suffixIcon != null) {
       // Custom suffix icon
-      suffixIconWidget = Icon(
-        widget.suffixIcon,
-        size: 20,
-      );
+      suffixIconWidget = Icon(widget.suffixIcon, size: 20);
     }
 
     // Build InputDecoration based on variant
@@ -245,28 +242,16 @@ class _BaseTextFieldState extends State<BaseTextField> {
           suffixIcon: suffixIconWidget,
           border: const UnderlineInputBorder(),
           enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: colorScheme.outline,
-              width: 1,
-            ),
+            borderSide: BorderSide(color: colorScheme.outline, width: 1),
           ),
           focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: colorScheme.primary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
           ),
           errorBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: colorScheme.error,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           focusedErrorBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: colorScheme.error,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           disabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(
@@ -293,31 +278,19 @@ class _BaseTextFieldState extends State<BaseTextField> {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.outline,
-              width: 1,
-            ),
+            borderSide: BorderSide(color: colorScheme.outline, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.primary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.error,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.error,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
@@ -352,24 +325,15 @@ class _BaseTextFieldState extends State<BaseTextField> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.primary,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.error,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.error,
-              width: 2,
-            ),
+            borderSide: BorderSide(color: colorScheme.error, width: 2),
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppTheme.radiusS),

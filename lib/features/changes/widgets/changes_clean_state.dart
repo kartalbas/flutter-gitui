@@ -21,13 +21,9 @@ class ChangesCleanState extends StatelessWidget {
             color: AppTheme.gitAdded,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            AppLocalizations.of(context)!.workingDirectoryClean,
-          ),
+          TitleLargeLabel(AppLocalizations.of(context)!.workingDirectoryClean),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
-            AppLocalizations.of(context)!.noChangesToCommit,
-          ),
+          BodyMediumLabel(AppLocalizations.of(context)!.noChangesToCommit),
         ],
       ),
     );

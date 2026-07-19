@@ -57,23 +57,32 @@ class BranchSwitcher extends ConsumerWidget {
     );
   }
 
-  void _showBranchMenu(BuildContext context, WidgetRef ref, List<GitBranch> branches) {
+  void _showBranchMenu(
+    BuildContext context,
+    WidgetRef ref,
+    List<GitBranch> branches,
+  ) {
     final l10n = AppLocalizations.of(context)!;
 
     // Check animation speed setting
-    final animationSpeed = Theme.of(context).extension<AnimationSpeedExtension>()?.speed ?? AppAnimationSpeed.normal;
+    final animationSpeed =
+        Theme.of(context).extension<AnimationSpeedExtension>()?.speed ??
+        AppAnimationSpeed.normal;
 
     // Sort branches: protected branches first, then by name
-    final sortedBranches = List<GitBranch>.from(branches)..sort((a, b) {
-      // Protected branches come first
-      if (a.isProtected && !b.isProtected) return -1;
-      if (!a.isProtected && b.isProtected) return 1;
-      // Within same protection level, sort alphabetically
-      return a.name.compareTo(b.name);
-    });
+    final sortedBranches = List<GitBranch>.from(branches)
+      ..sort((a, b) {
+        // Protected branches come first
+        if (a.isProtected && !b.isProtected) return -1;
+        if (!a.isProtected && b.isProtected) return 1;
+        // Within same protection level, sort alphabetically
+        return a.name.compareTo(b.name);
+      });
 
     // Check if there are any deletable branches (non-current, non-protected)
-    final hasDeletableBranches = sortedBranches.any((b) => !b.isCurrent && !b.isProtected);
+    final hasDeletableBranches = sortedBranches.any(
+      (b) => !b.isCurrent && !b.isProtected,
+    );
 
     final menuItems = <PopupMenuEntry<dynamic>>[
       // Branch items
@@ -116,7 +125,9 @@ class BranchSwitcher extends ConsumerWidget {
                     _showRenameBranchDialog(context, ref, branch);
                   },
                 ),
-              if (!isSelected && !branch.isProtected) // Only show delete for non-current, non-protected branches
+              if (!isSelected &&
+                  !branch
+                      .isProtected) // Only show delete for non-current, non-protected branches
                 BaseIconButton(
                   icon: PhosphorIconsRegular.trash,
                   tooltip: l10n.deleteBranch,
@@ -166,22 +177,26 @@ class BranchSwitcher extends ConsumerWidget {
     });
   }
 
-  Future<void> _switchBranch(BuildContext context, WidgetRef ref, GitBranch branch) async {
+  Future<void> _switchBranch(
+    BuildContext context,
+    WidgetRef ref,
+    GitBranch branch,
+  ) async {
     try {
-      await ref.read(gitActionsProvider).switchBranch(
-            branch.name,
-            createIfMissing: false,
-          );
+      await ref
+          .read(gitActionsProvider)
+          .switchBranch(branch.name, createIfMissing: false);
     } catch (e) {
       if (!context.mounted) return;
-      NotificationService.showError(
-        context,
-        'Failed to switch branch: $e',
-      );
+      NotificationService.showError(context, 'Failed to switch branch: $e');
     }
   }
 
-  Future<void> _showDeleteBranchDialog(BuildContext context, WidgetRef ref, GitBranch branch) async {
+  Future<void> _showDeleteBranchDialog(
+    BuildContext context,
+    WidgetRef ref,
+    GitBranch branch,
+  ) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => DeleteBranchDialog(branch: branch),
@@ -197,15 +212,16 @@ class BranchSwitcher extends ConsumerWidget {
         );
       } catch (e) {
         if (!context.mounted) return;
-        NotificationService.showError(
-          context,
-          'Failed to delete branch: $e',
-        );
+        NotificationService.showError(context, 'Failed to delete branch: $e');
       }
     }
   }
 
-  Future<void> _showRenameBranchDialog(BuildContext context, WidgetRef ref, GitBranch branch) async {
+  Future<void> _showRenameBranchDialog(
+    BuildContext context,
+    WidgetRef ref,
+    GitBranch branch,
+  ) async {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => RenameBranchDialog(branch: branch),
@@ -213,10 +229,9 @@ class BranchSwitcher extends ConsumerWidget {
     // Dialog returns new branch name if rename was confirmed
     if (result != null && context.mounted) {
       try {
-        await ref.read(gitActionsProvider).renameBranch(
-              result,
-              oldName: branch.name,
-            );
+        await ref
+            .read(gitActionsProvider)
+            .renameBranch(result, oldName: branch.name);
         if (!context.mounted) return;
         NotificationService.showSuccess(
           context,
@@ -224,17 +239,20 @@ class BranchSwitcher extends ConsumerWidget {
         );
       } catch (e) {
         if (!context.mounted) return;
-        NotificationService.showError(
-          context,
-          'Failed to rename branch: $e',
-        );
+        NotificationService.showError(context, 'Failed to rename branch: $e');
       }
     }
   }
 
-  Future<void> _showDeleteAllUnprotectedDialog(BuildContext context, WidgetRef ref, List<GitBranch> branches) async {
+  Future<void> _showDeleteAllUnprotectedDialog(
+    BuildContext context,
+    WidgetRef ref,
+    List<GitBranch> branches,
+  ) async {
     // Get list of deletable branches
-    final deletableBranches = branches.where((b) => !b.isCurrent && !b.isProtected).toList();
+    final deletableBranches = branches
+        .where((b) => !b.isCurrent && !b.isProtected)
+        .toList();
 
     if (deletableBranches.isEmpty) return;
 
@@ -267,21 +285,32 @@ class BranchSwitcher extends ConsumerWidget {
       ),
     );
 
-    if (result != null && result.selectedBranches.isNotEmpty && context.mounted) {
+    if (result != null &&
+        result.selectedBranches.isNotEmpty &&
+        context.mounted) {
       // Force deleting discards unmerged commits the user has no obvious way to
       // recover, so the confirm-delete setting gates the whole batch.
       if (ref.read(confirmDeleteProvider)) {
         final l10n = AppLocalizations.of(context)!;
-        final message = l10n.deleteAllUnprotectedBranchesConfirm(result.selectedBranches.length);
+        final message = l10n.deleteAllUnprotectedBranchesConfirm(
+          result.selectedBranches.length,
+        );
         final confirmed = await showConfirmationDialog(
           context: context,
           title: l10n.deleteAllUnprotectedBranches,
-          message: result.force ? '$message\n\n${l10n.forceDeleteWarning}' : message,
+          message: result.force
+              ? '$message\n\n${l10n.forceDeleteWarning}'
+              : message,
           confirmText: l10n.deleteAll,
         );
         if (!confirmed || !context.mounted) return;
       }
-      await _deleteAllUnprotectedBranches(context, ref, result.selectedBranches, force: result.force);
+      await _deleteAllUnprotectedBranches(
+        context,
+        ref,
+        result.selectedBranches,
+        force: result.force,
+      );
     }
   }
 
@@ -297,7 +326,9 @@ class BranchSwitcher extends ConsumerWidget {
 
     for (final branch in branches) {
       try {
-        await ref.read(gitActionsProvider).deleteBranch(branch.name, force: force);
+        await ref
+            .read(gitActionsProvider)
+            .deleteBranch(branch.name, force: force);
         successCount++;
       } catch (e) {
         failCount++;
@@ -328,9 +359,13 @@ class BranchSwitcher extends ConsumerWidget {
 
   RelativeRect _getMenuPosition(BuildContext context) {
     final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
     final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay);
+    final Offset bottomRight = button.localToGlobal(
+      button.size.bottomRight(Offset.zero),
+      ancestor: overlay,
+    );
 
     // Position menu below the button by using bottomLeft instead of topLeft
     final RelativeRect position = RelativeRect.fromRect(
@@ -349,10 +384,7 @@ class _BulkDeleteResult {
   final List<GitBranch> selectedBranches;
   final bool force;
 
-  _BulkDeleteResult({
-    required this.selectedBranches,
-    required this.force,
-  });
+  _BulkDeleteResult({required this.selectedBranches, required this.force});
 }
 
 /// Dialog for bulk deleting branches with checkboxes
@@ -366,7 +398,8 @@ class _BulkDeleteBranchesDialog extends StatefulWidget {
   });
 
   @override
-  State<_BulkDeleteBranchesDialog> createState() => _BulkDeleteBranchesDialogState();
+  State<_BulkDeleteBranchesDialog> createState() =>
+      _BulkDeleteBranchesDialogState();
 }
 
 class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
@@ -376,12 +409,11 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
   void initState() {
     super.initState();
     // Initialize all branches as checked
-    _selectedBranches = {
-      for (var branch in widget.branches) branch.name: true,
-    };
+    _selectedBranches = {for (var branch in widget.branches) branch.name: true};
   }
 
-  int get _selectedCount => _selectedBranches.values.where((selected) => selected).length;
+  int get _selectedCount =>
+      _selectedBranches.values.where((selected) => selected).length;
 
   @override
   Widget build(BuildContext context) {
@@ -415,9 +447,7 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
                     },
                     title: Row(
                       children: [
-                        Expanded(
-                          child: BodyMediumLabel(branch.name),
-                        ),
+                        Expanded(child: BodyMediumLabel(branch.name)),
                         if (isMerged)
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -463,12 +493,16 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
         BaseButton(
           label: 'Delete Selected',
           variant: ButtonVariant.danger,
-          onPressed: _selectedCount > 0 ? () => _deleteSelected(force: false) : null,
+          onPressed: _selectedCount > 0
+              ? () => _deleteSelected(force: false)
+              : null,
         ),
         BaseButton(
           label: 'Force Delete Selected',
           variant: ButtonVariant.danger,
-          onPressed: _selectedCount > 0 ? () => _deleteSelected(force: true) : null,
+          onPressed: _selectedCount > 0
+              ? () => _deleteSelected(force: true)
+              : null,
         ),
       ],
     );
@@ -483,9 +517,8 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
         .where((branch) => _selectedBranches[branch.name] == true)
         .toList();
 
-    Navigator.of(context).pop(_BulkDeleteResult(
-      selectedBranches: selectedBranches,
-      force: force,
-    ));
+    Navigator.of(
+      context,
+    ).pop(_BulkDeleteResult(selectedBranches: selectedBranches, force: force));
   }
 }

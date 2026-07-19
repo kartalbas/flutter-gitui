@@ -90,11 +90,10 @@ class DiffActions {
 
     try {
       // Get HEAD version of file
-      final result = await Process.run(
-        _gitExecutable,
-        ['show', 'HEAD:$filePath'],
-        workingDirectory: repoPath,
-      );
+      final result = await Process.run(_gitExecutable, [
+        'show',
+        'HEAD:$filePath',
+      ], workingDirectory: repoPath);
 
       if (result.exitCode == 0) {
         await File(headFile).writeAsString(result.stdout.toString());
@@ -136,18 +135,16 @@ class DiffActions {
 
     try {
       // Get HEAD version
-      final headResult = await Process.run(
-        _gitExecutable,
-        ['show', 'HEAD:$filePath'],
-        workingDirectory: repoPath,
-      );
+      final headResult = await Process.run(_gitExecutable, [
+        'show',
+        'HEAD:$filePath',
+      ], workingDirectory: repoPath);
 
       // Get staged version
-      final stagedResult = await Process.run(
-        _gitExecutable,
-        ['show', ':$filePath'],
-        workingDirectory: repoPath,
-      );
+      final stagedResult = await Process.run(_gitExecutable, [
+        'show',
+        ':$filePath',
+      ], workingDirectory: repoPath);
 
       if (headResult.exitCode == 0 && stagedResult.exitCode == 0) {
         await File(headFile).writeAsString(headResult.stdout.toString());
@@ -162,9 +159,7 @@ class DiffActions {
         );
       } else {
         final failed = headResult.exitCode != 0 ? headResult : stagedResult;
-        throw Exception(
-          'Failed to read $filePath from git: ${failed.stderr}',
-        );
+        throw Exception('Failed to read $filePath from git: ${failed.stderr}');
       }
     } catch (e) {
       rethrow;
@@ -189,23 +184,27 @@ class DiffActions {
     // Flatten only the repo-relative name; replacing '/' in tempDir.path would
     // collapse the absolute POSIX path into a relative one written to the CWD.
     final safeName = filePath.replaceAll('/', '_');
-    final fromFile = p.join(tempDir.path, '${fromCommit.substring(0, 7)}_$safeName');
-    final toFile = p.join(tempDir.path, '${toCommit.substring(0, 7)}_$safeName');
+    final fromFile = p.join(
+      tempDir.path,
+      '${fromCommit.substring(0, 7)}_$safeName',
+    );
+    final toFile = p.join(
+      tempDir.path,
+      '${toCommit.substring(0, 7)}_$safeName',
+    );
 
     try {
       // Get from version
-      final fromResult = await Process.run(
-        _gitExecutable,
-        ['show', '$fromCommit:$filePath'],
-        workingDirectory: repoPath,
-      );
+      final fromResult = await Process.run(_gitExecutable, [
+        'show',
+        '$fromCommit:$filePath',
+      ], workingDirectory: repoPath);
 
       // Get to version
-      final toResult = await Process.run(
-        _gitExecutable,
-        ['show', '$toCommit:$filePath'],
-        workingDirectory: repoPath,
-      );
+      final toResult = await Process.run(_gitExecutable, [
+        'show',
+        '$toCommit:$filePath',
+      ], workingDirectory: repoPath);
 
       if (fromResult.exitCode == 0 && toResult.exitCode == 0) {
         await File(fromFile).writeAsString(fromResult.stdout.toString());
@@ -220,9 +219,7 @@ class DiffActions {
         );
       } else {
         final failed = fromResult.exitCode != 0 ? fromResult : toResult;
-        throw Exception(
-          'Failed to read $filePath from git: ${failed.stderr}',
-        );
+        throw Exception('Failed to read $filePath from git: ${failed.stderr}');
       }
     } catch (e) {
       rethrow;
@@ -231,7 +228,9 @@ class DiffActions {
 }
 
 /// Diff tool actions provider (for setting preferred tool)
-final diffToolActionsProvider = Provider<DiffToolActions>((ref) => DiffToolActions(ref));
+final diffToolActionsProvider = Provider<DiffToolActions>(
+  (ref) => DiffToolActions(ref),
+);
 
 /// Diff actions provider
 final diffActionsProvider = Provider<DiffActions>((ref) => DiffActions(ref));

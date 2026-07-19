@@ -5,9 +5,8 @@ part 'changelog_release.g.dart';
 
 @freezed
 class ChangelogData with _$ChangelogData {
-  const factory ChangelogData({
-    required List<ChangelogRelease> releases,
-  }) = _ChangelogData;
+  const factory ChangelogData({required List<ChangelogRelease> releases}) =
+      _ChangelogData;
 
   factory ChangelogData.fromJson(Map<String, dynamic> json) =>
       _$ChangelogDataFromJson(json);

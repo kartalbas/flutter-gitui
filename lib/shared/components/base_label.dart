@@ -67,7 +67,14 @@ class BaseLabel extends StatelessWidget {
 
 /// Large title label (22px) - used for dialog titles, main headings
 class TitleLargeLabel extends StatelessWidget {
-  const TitleLargeLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const TitleLargeLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -76,13 +83,27 @@ class TitleLargeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.titleLarge, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.titleLarge,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Medium title label (16px) - used for sub-sections
 class TitleMediumLabel extends StatelessWidget {
-  const TitleMediumLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const TitleMediumLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -91,13 +112,27 @@ class TitleMediumLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.titleMedium, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.titleMedium,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Small title label (14px) - used for panel headers, small section titles
 class TitleSmallLabel extends StatelessWidget {
-  const TitleSmallLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const TitleSmallLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -106,7 +141,14 @@ class TitleSmallLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.titleSmall, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.titleSmall,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
@@ -116,7 +158,14 @@ class TitleSmallLabel extends StatelessWidget {
 
 /// Large display label (57px)
 class DisplayLargeLabel extends StatelessWidget {
-  const DisplayLargeLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const DisplayLargeLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -125,13 +174,27 @@ class DisplayLargeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.displayLarge, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.displayLarge,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Medium display label (45px)
 class DisplayMediumLabel extends StatelessWidget {
-  const DisplayMediumLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const DisplayMediumLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -140,13 +203,27 @@ class DisplayMediumLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.displayMedium, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.displayMedium,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Small display label (36px)
 class DisplaySmallLabel extends StatelessWidget {
-  const DisplaySmallLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const DisplaySmallLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -155,7 +232,14 @@ class DisplaySmallLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.displaySmall, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.displaySmall,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
@@ -165,7 +249,14 @@ class DisplaySmallLabel extends StatelessWidget {
 
 /// Large headline label (32px)
 class HeadlineLargeLabel extends StatelessWidget {
-  const HeadlineLargeLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const HeadlineLargeLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -174,13 +265,27 @@ class HeadlineLargeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.headlineLarge, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.headlineLarge,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Medium headline label (28px)
 class HeadlineMediumLabel extends StatelessWidget {
-  const HeadlineMediumLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const HeadlineMediumLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -189,13 +294,27 @@ class HeadlineMediumLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.headlineMedium, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.headlineMedium,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Small headline label (24px)
 class HeadlineSmallLabel extends StatelessWidget {
-  const HeadlineSmallLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const HeadlineSmallLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -204,7 +323,14 @@ class HeadlineSmallLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.headlineSmall, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.headlineSmall,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
@@ -214,7 +340,14 @@ class HeadlineSmallLabel extends StatelessWidget {
 
 /// Large body label (16px) - used for emphasized body text
 class BodyLargeLabel extends StatelessWidget {
-  const BodyLargeLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const BodyLargeLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -223,13 +356,27 @@ class BodyLargeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.bodyLarge, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.bodyLarge,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Medium body label (14px) - used for normal body text (most common)
 class BodyMediumLabel extends StatelessWidget {
-  const BodyMediumLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const BodyMediumLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -238,13 +385,27 @@ class BodyMediumLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.bodyMedium, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.bodyMedium,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Small body label (12px) - used for secondary/muted text, captions
 class BodySmallLabel extends StatelessWidget {
-  const BodySmallLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const BodySmallLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -253,7 +414,14 @@ class BodySmallLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.bodySmall, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.bodySmall,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
@@ -263,7 +431,14 @@ class BodySmallLabel extends StatelessWidget {
 
 /// Large label (14px) - used for buttons
 class LabelLargeLabel extends StatelessWidget {
-  const LabelLargeLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const LabelLargeLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -272,13 +447,27 @@ class LabelLargeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.labelLarge, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.labelLarge,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Medium label (12px) - used for labels
 class LabelMediumLabel extends StatelessWidget {
-  const LabelMediumLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const LabelMediumLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -287,13 +476,27 @@ class LabelMediumLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.labelMedium, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.labelMedium,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }
 
 /// Small label (11px) - used for small labels, badges
 class LabelSmallLabel extends StatelessWidget {
-  const LabelSmallLabel(this.text, {super.key, this.color, this.textAlign, this.overflow, this.maxLines});
+  const LabelSmallLabel(
+    this.text, {
+    super.key,
+    this.color,
+    this.textAlign,
+    this.overflow,
+    this.maxLines,
+  });
   final String text;
   final Color? color;
   final TextAlign? textAlign;
@@ -302,6 +505,13 @@ class LabelSmallLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseLabel(text, style: Theme.of(context).textTheme.labelSmall, color: color, textAlign: textAlign, overflow: overflow, maxLines: maxLines);
+    return BaseLabel(
+      text,
+      style: Theme.of(context).textTheme.labelSmall,
+      color: color,
+      textAlign: textAlign,
+      overflow: overflow,
+      maxLines: maxLines,
+    );
   }
 }

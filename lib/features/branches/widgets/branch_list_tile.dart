@@ -33,7 +33,9 @@ class BranchListTile extends ConsumerWidget {
 
     return BaseListItem(
       leading: Icon(
-        branch.isCurrent ? PhosphorIconsBold.gitBranch : PhosphorIconsRegular.gitBranch,
+        branch.isCurrent
+            ? PhosphorIconsBold.gitBranch
+            : PhosphorIconsRegular.gitBranch,
         color: branch.isCurrent ? colorScheme.primary : null,
       ),
       content: Column(
@@ -48,9 +50,7 @@ class BranchListTile extends ConsumerWidget {
                         branch.shortName,
                         color: colorScheme.primary,
                       )
-                    : BodyMediumLabel(
-                        branch.shortName,
-                      ),
+                    : BodyMediumLabel(branch.shortName),
               ),
               if (branch.isCurrent) ...[
                 const SizedBox(width: AppTheme.paddingS),
@@ -94,8 +94,8 @@ class BranchListTile extends ConsumerWidget {
                   color: branch.isDiverged
                       ? colorScheme.error
                       : branch.isBehind
-                          ? colorScheme.secondary
-                          : AppTheme.gitAdded,
+                      ? colorScheme.secondary
+                      : AppTheme.gitAdded,
                 ),
               ],
             ),
@@ -167,13 +167,12 @@ class BranchListTile extends ConsumerWidget {
       // Remote branches must be checked out by their bare name; passing the
       // remote-qualified ref would detach HEAD instead of creating a local
       // tracking branch. For local branches this is identical to shortName.
-      await ref.read(gitActionsProvider).switchBranch(branch.branchNameWithoutRemote);
+      await ref
+          .read(gitActionsProvider)
+          .switchBranch(branch.branchNameWithoutRemote);
     } catch (e) {
       if (context.mounted) {
-        NotificationService.showError(
-          context,
-          'Failed to checkout: $e',
-        );
+        NotificationService.showError(context, 'Failed to checkout: $e');
       }
     }
   }
@@ -186,13 +185,12 @@ class BranchListTile extends ConsumerWidget {
 
     if (result != null && context.mounted) {
       try {
-        await ref.read(gitActionsProvider).renameBranch(result, oldName: branch.shortName);
+        await ref
+            .read(gitActionsProvider)
+            .renameBranch(result, oldName: branch.shortName);
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(
-            context,
-            'Failed to rename: $e',
-          );
+          NotificationService.showError(context, 'Failed to rename: $e');
         }
       }
     }
@@ -222,8 +220,8 @@ class BranchListTile extends ConsumerWidget {
           }
           // Detect uncommitted changes preventing merge
           else if (errorMessage.contains('uncommitted') ||
-                   errorMessage.contains('working tree') ||
-                   errorMessage.contains('dirty')) {
+              errorMessage.contains('working tree') ||
+              errorMessage.contains('dirty')) {
             NotificationService.showError(
               context,
               'Cannot merge: You have uncommitted changes. Commit or stash them first.',
@@ -231,10 +229,7 @@ class BranchListTile extends ConsumerWidget {
           }
           // Generic merge error
           else {
-            NotificationService.showError(
-              context,
-              'Merge failed: $e',
-            );
+            NotificationService.showError(context, 'Merge failed: $e');
           }
         }
       }
@@ -247,27 +242,27 @@ class BranchListTile extends ConsumerWidget {
       builder: (context) => DeleteBranchDialog(branch: branch),
     );
 
-    if (result != null && result != DeleteBranchResult.cancel && context.mounted) {
+    if (result != null &&
+        result != DeleteBranchResult.cancel &&
+        context.mounted) {
       try {
         final force = result == DeleteBranchResult.forceDelete;
 
         if (isLocal) {
-          await ref.read(gitActionsProvider).deleteBranch(branch.shortName, force: force);
+          await ref
+              .read(gitActionsProvider)
+              .deleteBranch(branch.shortName, force: force);
         } else {
           final remoteName = branch.remoteName;
           if (remoteName != null) {
-            await ref.read(gitActionsProvider).deleteRemoteBranch(
-                  remoteName,
-                  branch.branchNameWithoutRemote,
-                );
+            await ref
+                .read(gitActionsProvider)
+                .deleteRemoteBranch(remoteName, branch.branchNameWithoutRemote);
           }
         }
       } catch (e) {
         if (context.mounted) {
-          NotificationService.showError(
-            context,
-            'Failed to delete: $e',
-          );
+          NotificationService.showError(context, 'Failed to delete: $e');
         }
       }
     }

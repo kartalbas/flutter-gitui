@@ -12,10 +12,7 @@ import '../../../../shared/theme/app_theme.dart';
 class ImageViewerDialog extends StatelessWidget {
   final String filePath;
 
-  const ImageViewerDialog({
-    super.key,
-    required this.filePath,
-  });
+  const ImageViewerDialog({super.key, required this.filePath});
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +29,7 @@ class ImageViewerDialog extends StatelessWidget {
       footerBackgroundColor: theme.colorScheme.scrim.withValues(alpha: 0.7),
       content: PhotoView(
         imageProvider: FileImage(file),
-        backgroundDecoration: BoxDecoration(
-          color: theme.colorScheme.scrim,
-        ),
+        backgroundDecoration: BoxDecoration(color: theme.colorScheme.scrim),
         minScale: PhotoViewComputedScale.contained,
         maxScale: PhotoViewComputedScale.covered * 3,
         initialScale: PhotoViewComputedScale.contained,
@@ -45,7 +40,11 @@ class ImageViewerDialog extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(PhosphorIconsRegular.mouseSimple, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+            Icon(
+              PhosphorIconsRegular.mouseSimple,
+              size: 16,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
             const SizedBox(width: AppTheme.paddingS),
             BodySmallLabel(
               'Scroll to zoom • Drag to pan',
@@ -68,4 +67,3 @@ Future<void> showImageViewerDialog(
     builder: (context) => ImageViewerDialog(filePath: filePath),
   );
 }
-

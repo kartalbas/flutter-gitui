@@ -101,10 +101,14 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                   .any((p) => p.containsRepository(repo.path));
 
               // Show if not assigned to other projects OR explicitly assigned to default
-              final shouldShow = !isAssignedToOther || selectedProject.containsRepository(repo.path);
+              final shouldShow =
+                  !isAssignedToOther ||
+                  selectedProject.containsRepository(repo.path);
 
               if (kDebugMode) {
-                Logger.debug('[Default Project] Repo "${repo.path}" - assigned to other: $isAssignedToOther, in default: ${selectedProject.containsRepository(repo.path)}, showing: $shouldShow');
+                Logger.debug(
+                  '[Default Project] Repo "${repo.path}" - assigned to other: $isAssignedToOther, in default: ${selectedProject.containsRepository(repo.path)}, showing: $shouldShow',
+                );
               }
               return shouldShow;
             }
@@ -112,7 +116,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
             // For non-default projects, only show explicitly assigned repos
             final contains = selectedProject.containsRepository(repo.path);
             if (kDebugMode) {
-              Logger.debug('Filtering repo "${repo.path}" for project "${selectedProject.name}": $contains');
+              Logger.debug(
+                'Filtering repo "${repo.path}" for project "${selectedProject.name}": $contains',
+              );
             }
             return contains;
           }).toList()
@@ -122,17 +128,20 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
     // Apply filters
     final filteredRepositories = _applyFilters(repositories, statuses);
-    final selectedRepositories = repositories.where((r) => selectedPaths.contains(r.path)).toList();
+    final selectedRepositories = repositories
+        .where((r) => selectedPaths.contains(r.path))
+        .toList();
 
     // Assign unassigned repositories to default project on first load
-    if (!_hasAssignedRepos && allRepositories.isNotEmpty && selectedProject != null) {
+    if (!_hasAssignedRepos &&
+        allRepositories.isNotEmpty &&
+        selectedProject != null) {
       _hasAssignedRepos = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         final allRepoPaths = allRepositories.map((r) => r.path).toList();
-        await ref.read(projectProvider.notifier).assignUnassignedRepositories(
-          allRepoPaths,
-          selectedProject.id,
-        );
+        await ref
+            .read(projectProvider.notifier)
+            .assignUnassignedRepositories(allRepoPaths, selectedProject.id);
       });
     }
 
@@ -164,22 +173,35 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                       // View mode toggle
                       Consumer(
                         builder: (context, ref, child) {
-                          final viewMode = ref.watch(repositoriesViewModeProvider);
+                          final viewMode = ref.watch(
+                            repositoriesViewModeProvider,
+                          );
                           return SegmentedButton<RepositoriesViewMode>(
                             segments: const [
                               ButtonSegment(
                                 value: RepositoriesViewMode.grid,
-                                icon: Icon(PhosphorIconsRegular.gridFour, size: 18),
+                                icon: Icon(
+                                  PhosphorIconsRegular.gridFour,
+                                  size: 18,
+                                ),
                               ),
                               ButtonSegment(
                                 value: RepositoriesViewMode.list,
-                                icon: Icon(PhosphorIconsRegular.listBullets, size: 18),
+                                icon: Icon(
+                                  PhosphorIconsRegular.listBullets,
+                                  size: 18,
+                                ),
                               ),
                             ],
                             selected: {viewMode},
-                            onSelectionChanged: (Set<RepositoriesViewMode> newSelection) {
-                              ref.read(configProvider.notifier).setRepositoriesViewMode(newSelection.first);
-                            },
+                            onSelectionChanged:
+                                (Set<RepositoriesViewMode> newSelection) {
+                                  ref
+                                      .read(configProvider.notifier)
+                                      .setRepositoriesViewMode(
+                                        newSelection.first,
+                                      );
+                                },
                           );
                         },
                       ),
@@ -249,41 +271,51 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                // Filter chips and selection info
-                if (hasRepositories) ...[
-                  RepositoriesFilterChips(
-                    filterCleanOnly: _filterCleanOnly,
-                    filterWithRemote: _filterWithRemote,
-                    onFilterCleanOnlyChanged: (value) {
-                      setState(() {
-                        _filterCleanOnly = value;
-                      });
-                    },
-                    onFilterWithRemoteChanged: (value) {
-                      setState(() {
-                        _filterWithRemote = value;
-                      });
-                    },
-                    filteredRepositories: filteredRepositories,
-                    selectedRepositories: selectedRepositories,
-                  ),
-                  const SizedBox(height: AppTheme.paddingM),
-                ],
+                  // Filter chips and selection info
+                  if (hasRepositories) ...[
+                    RepositoriesFilterChips(
+                      filterCleanOnly: _filterCleanOnly,
+                      filterWithRemote: _filterWithRemote,
+                      onFilterCleanOnlyChanged: (value) {
+                        setState(() {
+                          _filterCleanOnly = value;
+                        });
+                      },
+                      onFilterWithRemoteChanged: (value) {
+                        setState(() {
+                          _filterWithRemote = value;
+                        });
+                      },
+                      filteredRepositories: filteredRepositories,
+                      selectedRepositories: selectedRepositories,
+                    ),
+                    const SizedBox(height: AppTheme.paddingM),
+                  ],
 
                   // Content
                   Expanded(
                     child: hasRepositories
                         ? Consumer(
                             builder: (context, ref, child) {
-                              final viewMode = ref.watch(repositoriesViewModeProvider);
+                              final viewMode = ref.watch(
+                                repositoriesViewModeProvider,
+                              );
                               return viewMode == RepositoriesViewMode.grid
-                                  ? _buildRepositoryGrid(context, ref, filteredRepositories)
-                                  : _buildRepositoryList(context, ref, filteredRepositories);
+                                  ? _buildRepositoryGrid(
+                                      context,
+                                      ref,
+                                      filteredRepositories,
+                                    )
+                                  : _buildRepositoryList(
+                                      context,
+                                      ref,
+                                      filteredRepositories,
+                                    );
                             },
                           )
                         : RepositoriesEmptyState(
-                            onOpenRepository: () => _openRepository(context, ref),
+                            onOpenRepository: () =>
+                                _openRepository(context, ref),
                             onCloneRepository: () => _showCloneDialog(context),
                             onInitRepository: () => _showInitDialog(context),
                           ),
@@ -296,7 +328,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           // Drag overlay
           if (_isDragging)
             Container(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha:0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.1),
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(AppTheme.paddingXL),
@@ -340,12 +374,16 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
     // Use batch operation for better performance and data safety
     // This validates all repos in parallel and writes to YAML only once
-    final results = await ref.read(workspaceProvider.notifier).addRepositoriesBatch(paths);
+    final results = await ref
+        .read(workspaceProvider.notifier)
+        .addRepositoriesBatch(paths);
     if (!mounted) return;
 
     // Count results
     int addedCount = results.where((r) => r.success).length;
-    int invalidCount = results.where((r) => !r.success && !r.isDuplicate).length;
+    int invalidCount = results
+        .where((r) => !r.success && !r.isDuplicate)
+        .length;
     int duplicateCount = results.where((r) => r.isDuplicate).length;
 
     // Add all successful repositories to the currently selected project in a single operation
@@ -358,10 +396,12 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
       if (successfulPaths.isNotEmpty) {
         try {
-          await ref.read(projectProvider.notifier).addRepositoriesToWorkspaceBatch(
-            selectedProject.id,
-            successfulPaths,
-          );
+          await ref
+              .read(projectProvider.notifier)
+              .addRepositoriesToWorkspaceBatch(
+                selectedProject.id,
+                successfulPaths,
+              );
         } catch (e) {
           // If project add fails, show error but repositories are still in workspace
           if (mounted) {
@@ -386,7 +426,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     // Show feedback with detailed error messages
     if (mounted) {
       if (addedCount > 0) {
-        String message = 'Added $addedCount ${addedCount == 1 ? 'repository' : 'repositories'}';
+        String message =
+            'Added $addedCount ${addedCount == 1 ? 'repository' : 'repositories'}';
         if (duplicateCount > 0) {
           message += ' ($duplicateCount already existed)';
         }
@@ -400,7 +441,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           '$duplicateCount ${duplicateCount == 1 ? 'repository' : 'repositories'} already in workspace',
         );
       } else {
-        NotificationService.showError(context, 'No valid Git repositories found');
+        NotificationService.showError(
+          context,
+          'No valid Git repositories found',
+        );
       }
     }
   }
@@ -423,7 +467,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       itemCount: repositories.length,
       itemBuilder: (context, index) {
         final repo = repositories[index];
-        final isSelected = currentRepoPath != null && repo.path == currentRepoPath;
+        final isSelected =
+            currentRepoPath != null && repo.path == currentRepoPath;
         final isMultiSelected = selectedPaths.contains(repo.path);
 
         return RepositoryCard(
@@ -432,12 +477,16 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           isMultiSelected: isMultiSelected,
           showCheckbox: true, // Always show checkbox for easy multi-select
           onToggleSelection: () {
-            ref.read(repositoryMultiSelectProvider.notifier).toggleSelection(repo);
+            ref
+                .read(repositoryMultiSelectProvider.notifier)
+                .toggleSelection(repo);
           },
           onTap: () {
             // If multi-select mode is active, toggle selection
             if (selectedPaths.isNotEmpty) {
-              ref.read(repositoryMultiSelectProvider.notifier).toggleSelection(repo);
+              ref
+                  .read(repositoryMultiSelectProvider.notifier)
+                  .toggleSelection(repo);
             } else {
               _switchToRepository(context, ref, repo);
             }
@@ -463,7 +512,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       itemCount: repositories.length,
       itemBuilder: (context, index) {
         final repo = repositories[index];
-        final isSelected = currentRepoPath != null && repo.path == currentRepoPath;
+        final isSelected =
+            currentRepoPath != null && repo.path == currentRepoPath;
         final isMultiSelected = selectedPaths.contains(repo.path);
 
         return RepositoryListItem(
@@ -472,12 +522,16 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           isMultiSelected: isMultiSelected,
           showCheckbox: true, // Always show checkbox for easy multi-select
           onToggleSelection: () {
-            ref.read(repositoryMultiSelectProvider.notifier).toggleSelection(repo);
+            ref
+                .read(repositoryMultiSelectProvider.notifier)
+                .toggleSelection(repo);
           },
           onTap: () {
             // If multi-select mode is active, toggle selection
             if (selectedPaths.isNotEmpty) {
-              ref.read(repositoryMultiSelectProvider.notifier).toggleSelection(repo);
+              ref
+                  .read(repositoryMultiSelectProvider.notifier)
+                  .toggleSelection(repo);
             } else {
               _switchToRepository(context, ref, repo);
             }
@@ -499,7 +553,11 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           dialog: BaseDialog(
             title: AppLocalizations.of(context)!.webBrowserLimitation,
             icon: PhosphorIconsRegular.globe,
-            content: BodyMediumLabel(AppLocalizations.of(context)!.dialogContentWebBrowserLimitationRepositories),
+            content: BodyMediumLabel(
+              AppLocalizations.of(
+                context,
+              )!.dialogContentWebBrowserLimitationRepositories,
+            ),
             actions: [
               BaseButton(
                 label: AppLocalizations.of(context)!.ok,
@@ -519,17 +577,21 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
     if (result != null && context.mounted) {
       // Add to workspace
-      final added = await ref.read(workspaceProvider.notifier).addRepository(result);
+      final added = await ref
+          .read(workspaceProvider.notifier)
+          .addRepository(result);
       if (!context.mounted) return;
 
       if (added) {
         // Add to currently selected project
         final selectedProject = ref.read(selectedProjectProvider);
         if (selectedProject != null) {
-          await ref.read(projectProvider.notifier).addRepositoryToWorkspace(
-            selectedProject.id,
-            result.replaceAll('\\', '/'),
-          );
+          await ref
+              .read(projectProvider.notifier)
+              .addRepositoryToWorkspace(
+                selectedProject.id,
+                result.replaceAll('\\', '/'),
+              );
           if (!context.mounted) return;
         }
 
@@ -537,7 +599,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
         ref.read(workspaceRepositoryStatusProvider.notifier).refreshAll();
       } else {
         if (!context.mounted) return;
-        NotificationService.showError(context, 'Not a valid Git repository or already exists');
+        NotificationService.showError(
+          context,
+          'Not a valid Git repository or already exists',
+        );
       }
     }
   }
@@ -602,27 +667,31 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       final projects = ref.read(projectProvider);
       for (final project in projects) {
         if (project.containsRepository(repo.path)) {
-          await ref.read(projectProvider.notifier).removeRepositoryFromWorkspace(project.id, repo.path);
+          await ref
+              .read(projectProvider.notifier)
+              .removeRepositoryFromWorkspace(project.id, repo.path);
           if (!context.mounted) return;
         }
       }
-
     }
   }
 
   Future<void> _toggleFavorite(WidgetRef ref, WorkspaceRepository repo) async {
-    await ref.read(workspaceProvider.notifier).updateRepository(
-          repo.path,
-          isFavorite: !repo.isFavorite,
-        );
+    await ref
+        .read(workspaceProvider.notifier)
+        .updateRepository(repo.path, isFavorite: !repo.isFavorite);
   }
 
   Future<void> _validateRepositories(WidgetRef ref) async {
-    Logger.info('Dashboard: Validate All clicked - running full repository analysis');
+    Logger.info(
+      'Dashboard: Validate All clicked - running full repository analysis',
+    );
 
     // Get count before validation
     final totalRepos = ref.read(workspaceProvider).length;
-    Logger.info('Dashboard: Starting full validation of $totalRepos repositories');
+    Logger.info(
+      'Dashboard: Starting full validation of $totalRepos repositories',
+    );
 
     // Run FULL repository analysis (like on startup)
     Logger.info('Running full repository status analysis...');
@@ -639,10 +708,14 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final removedCount = totalRepos - remainingRepos;
 
     // Repositories dropped by validation must not stay selected
-    ref.read(repositoryMultiSelectProvider.notifier).retainPaths(
+    ref
+        .read(repositoryMultiSelectProvider.notifier)
+        .retainPaths(
           ref.read(workspaceProvider).map((repo) => repo.path).toSet(),
         );
-    Logger.info('Dashboard: Validation complete. Removed: $removedCount, Remaining: $remainingRepos');
+    Logger.info(
+      'Dashboard: Validation complete. Removed: $removedCount, Remaining: $remainingRepos',
+    );
 
     // Show feedback to user with proper colors
     if (!mounted) return;
@@ -684,7 +757,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
     if (confirmed == true) {
       // Get all repository paths before clearing
-      final repoPaths = ref.read(workspaceProvider).map((repo) => repo.path).toList();
+      final repoPaths = ref
+          .read(workspaceProvider)
+          .map((repo) => repo.path)
+          .toList();
 
       // Clear all repositories from workspace
       await ref.read(workspaceProvider.notifier).clearAll();
@@ -698,7 +774,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       for (final project in projects) {
         for (final path in repoPaths) {
           if (project.containsRepository(path)) {
-            await ref.read(projectProvider.notifier).removeRepositoryFromWorkspace(project.id, path);
+            await ref
+                .read(projectProvider.notifier)
+                .removeRepositoryFromWorkspace(project.id, path);
             if (!context.mounted) return;
           }
         }
@@ -732,7 +810,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
   ) async {
     // Get git service
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
-    final gitService = GitService(repository.path, gitExecutablePath: gitExecutablePath);
+    final gitService = GitService(
+      repository.path,
+      gitExecutablePath: gitExecutablePath,
+    );
 
     // Fetch origin remote
     final remotesResult = await gitService.getRemotes();
@@ -744,7 +825,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     if (remotes == null) return;
     // The menu entry is offered for any remote, not just 'origin', so fall back
     // to the first remote instead of failing on the conventional name.
-    final origin = remotes.where((remote) => remote.name == 'origin').firstOrNull;
+    final origin = remotes
+        .where((remote) => remote.name == 'origin')
+        .firstOrNull;
     final originRemote = origin ?? remotes.firstOrNull;
     if (originRemote == null) {
       NotificationService.showError(context, 'No remote found');
@@ -791,13 +874,18 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     }
 
     try {
-      Logger.info('Opening folder in editor: ${repository.path} with editor: $editor');
+      Logger.info(
+        'Opening folder in editor: ${repository.path} with editor: $editor',
+      );
       await EditorLauncherService.launch(
         editorPath: editor,
         targetPath: repository.path,
       );
     } catch (e) {
-      Logger.error('Error opening editor: $editor with folder: ${repository.path}', e);
+      Logger.error(
+        'Error opening editor: $editor with folder: ${repository.path}',
+        e,
+      );
       if (context.mounted) {
         context.showErrorIfMounted(
           'Failed to open editor: $editor\nFolder: ${repository.path}\nError: $e',

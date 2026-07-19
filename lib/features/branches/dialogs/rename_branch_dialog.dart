@@ -11,10 +11,7 @@ import '../../../core/git/models/branch.dart';
 class RenameBranchDialog extends StatefulWidget {
   final GitBranch branch;
 
-  const RenameBranchDialog({
-    super.key,
-    required this.branch,
-  });
+  const RenameBranchDialog({super.key, required this.branch});
 
   @override
   State<RenameBranchDialog> createState() => _RenameBranchDialogState();

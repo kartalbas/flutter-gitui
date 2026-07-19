@@ -32,64 +32,62 @@ class ProgressOverlay extends ConsumerWidget {
             padding: const EdgeInsets.all(AppTheme.paddingL),
             child: BaseCard(
               content: Container(
-                constraints: const BoxConstraints(
-                  minWidth: 400,
-                  maxWidth: 500,
-                ),
+                constraints: const BoxConstraints(minWidth: 400, maxWidth: 500),
                 child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Operation name
-                  Row(
-                    children: [
-                      const Icon(
-                        PhosphorIconsRegular.circleNotch,
-                        size: 24,
-                      ),
-                      const SizedBox(width: AppTheme.paddingM),
-                      Expanded(
-                        child: TitleLargeLabel(progress.operationName),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppTheme.paddingL),
-
-                  // Progress bar
-                  if (!progress.isIndeterminate) ...[
-                    LinearProgressIndicator(
-                      value: progress.progress,
-                      minHeight: 8,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    const SizedBox(height: AppTheme.paddingM),
-                    // Progress text
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Operation name
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        BodyMediumLabel('${progress.currentStep} of ${progress.totalSteps}'),
-                        BodyMediumLabel('${(progress.progress * 100).toStringAsFixed(0)}%'),
+                        const Icon(PhosphorIconsRegular.circleNotch, size: 24),
+                        const SizedBox(width: AppTheme.paddingM),
+                        Expanded(
+                          child: TitleLargeLabel(progress.operationName),
+                        ),
                       ],
                     ),
-                  ] else ...[
-                    LinearProgressIndicator(
-                      minHeight: 8,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ],
+                    const SizedBox(height: AppTheme.paddingL),
 
-                  // Status message
-                  if (progress.statusMessage != null) ...[
-                    const SizedBox(height: AppTheme.paddingM),
-                    BodySmallLabel(
-                      progress.statusMessage!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    // Progress bar
+                    if (!progress.isIndeterminate) ...[
+                      LinearProgressIndicator(
+                        value: progress.progress,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      const SizedBox(height: AppTheme.paddingM),
+                      // Progress text
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          BodyMediumLabel(
+                            '${progress.currentStep} of ${progress.totalSteps}',
+                          ),
+                          BodyMediumLabel(
+                            '${(progress.progress * 100).toStringAsFixed(0)}%',
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      LinearProgressIndicator(
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+
+                    // Status message
+                    if (progress.statusMessage != null) ...[
+                      const SizedBox(height: AppTheme.paddingM),
+                      BodySmallLabel(
+                        progress.statusMessage!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
             ),
           ),
         ),
@@ -97,4 +95,3 @@ class ProgressOverlay extends ConsumerWidget {
     );
   }
 }
-

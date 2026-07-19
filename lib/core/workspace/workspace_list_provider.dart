@@ -10,9 +10,11 @@ import '../config/app_config.dart';
 import '../services/logger_service.dart';
 
 /// Provider for managing workspaces (stored in YAML config file)
-final projectProvider = StateNotifierProvider<ProjectNotifier, List<Workspace>>((ref) {
-  return ProjectNotifier(ref);
-});
+final projectProvider = StateNotifierProvider<ProjectNotifier, List<Workspace>>(
+  (ref) {
+    return ProjectNotifier(ref);
+  },
+);
 
 /// Notifier for managing workspaces
 class ProjectNotifier extends StateNotifier<List<Workspace>> {
@@ -27,17 +29,23 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
       // this listener. Reloading then would resurrect the pre-save snapshot and
       // discard the in-memory edit of a second operation started meanwhile.
       if (_pendingSaves > 0) {
-        Logger.debug('ProjectNotifier: Config changed due to our own save, ignoring');
+        Logger.debug(
+          'ProjectNotifier: Config changed due to our own save, ignoring',
+        );
         return;
       }
       // The notification may also arrive after the save completed (chained
       // provider updates), so compare content as well: when the config already
       // describes our state there is nothing external to load.
       if (_matchesState(next.workspace.workspaces)) {
-        Logger.debug('ProjectNotifier: Config already matches current workspaces, ignoring');
+        Logger.debug(
+          'ProjectNotifier: Config already matches current workspaces, ignoring',
+        );
         return;
       }
-      Logger.debug('ProjectNotifier: Config changed externally, reloading projects');
+      Logger.debug(
+        'ProjectNotifier: Config changed externally, reloading projects',
+      );
       _loadProjects();
     });
     _loadProjects();
@@ -46,9 +54,13 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
   /// Load workspaces from YAML config
   void _loadProjects() {
     final config = ref.read(configProvider);
-    Logger.debug('ProjectNotifier._loadProjects: Loading ${config.workspace.workspaces.length} workspaces from config');
+    Logger.debug(
+      'ProjectNotifier._loadProjects: Loading ${config.workspace.workspaces.length} workspaces from config',
+    );
     for (final p in config.workspace.workspaces) {
-      Logger.debug('- ${p.name} (${p.id}) with ${p.repositoryPaths.length} repos');
+      Logger.debug(
+        '- ${p.name} (${p.id}) with ${p.repositoryPaths.length} repos',
+      );
     }
 
     state = config.workspace.workspaces.map(_fromWorkspaceConfigEntry).toList();
@@ -122,7 +134,9 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
         return false;
       }
       for (var j = 0; j < entry.repositoryPaths.length; j++) {
-        if (entry.repositoryPaths[j] != current.repositoryPaths[j]) return false;
+        if (entry.repositoryPaths[j] != current.repositoryPaths[j]) {
+          return false;
+        }
       }
     }
     return true;
@@ -133,7 +147,9 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     _pendingSaves++;
     try {
       final workspaceEntries = state.map(_toWorkspaceConfigEntry).toList();
-      await ref.read(configProvider.notifier).updateWorkspaces(workspaceEntries);
+      await ref
+          .read(configProvider.notifier)
+          .updateWorkspaces(workspaceEntries);
     } finally {
       // Released synchronously and on the failure path too, so a save that
       // throws cannot leave the listener permanently deaf to external changes.
@@ -142,7 +158,10 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
   }
 
   /// Assign unassigned repositories to a project (usually default)
-  Future<void> assignUnassignedRepositories(List<String> allRepoPaths, String projectId) async {
+  Future<void> assignUnassignedRepositories(
+    List<String> allRepoPaths,
+    String projectId,
+  ) async {
     // Get repository paths that are already assigned to projects
     final assignedPaths = state
         .expand((project) => project.repositoryPaths)
@@ -171,7 +190,9 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
       final selectedWorkspace = ref.read(selectedProjectProvider);
       if (selectedWorkspace?.id == projectId) {
         final updatedWorkspace = state.firstWhere((p) => p.id == projectId);
-        ref.read(selectedProjectProvider.notifier).selectProject(updatedWorkspace);
+        ref
+            .read(selectedProjectProvider.notifier)
+            .selectProject(updatedWorkspace);
       }
     }
   }
@@ -199,7 +220,8 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
   }
 
   /// Update an existing project
-  Future<void> updateWorkspace(String projectId, {
+  Future<void> updateWorkspace(
+    String projectId, {
     String? name,
     String? description,
     Color? color,
@@ -224,7 +246,9 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     final selectedWorkspace = ref.read(selectedProjectProvider);
     if (selectedWorkspace?.id == projectId) {
       final updatedWorkspace = state.firstWhere((p) => p.id == projectId);
-      ref.read(selectedProjectProvider.notifier).selectProject(updatedWorkspace);
+      ref
+          .read(selectedProjectProvider.notifier)
+          .selectProject(updatedWorkspace);
     }
   }
 
@@ -242,12 +266,17 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     // consumers don't keep filtering against a workspace that no longer exists
     final selectedWorkspace = ref.read(selectedProjectProvider);
     if (selectedWorkspace?.id == projectId) {
-      await ref.read(selectedProjectProvider.notifier).selectProjectById('default');
+      await ref
+          .read(selectedProjectProvider.notifier)
+          .selectProjectById('default');
     }
   }
 
   /// Add a repository to a project
-  Future<void> addRepositoryToWorkspace(String projectId, String repositoryPath) async {
+  Future<void> addRepositoryToWorkspace(
+    String projectId,
+    String repositoryPath,
+  ) async {
     state = state.map((project) {
       if (project.id == projectId) {
         return project.addRepository(repositoryPath);
@@ -261,12 +290,17 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     final selectedWorkspace = ref.read(selectedProjectProvider);
     if (selectedWorkspace?.id == projectId) {
       final updatedWorkspace = state.firstWhere((p) => p.id == projectId);
-      ref.read(selectedProjectProvider.notifier).selectProject(updatedWorkspace);
+      ref
+          .read(selectedProjectProvider.notifier)
+          .selectProject(updatedWorkspace);
     }
   }
 
   /// Add multiple repositories to a project in a single batch operation
-  Future<void> addRepositoriesToWorkspaceBatch(String projectId, List<String> repositoryPaths) async {
+  Future<void> addRepositoriesToWorkspaceBatch(
+    String projectId,
+    List<String> repositoryPaths,
+  ) async {
     if (repositoryPaths.isEmpty) return;
 
     state = state.map((project) {
@@ -287,12 +321,17 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     final selectedWorkspace = ref.read(selectedProjectProvider);
     if (selectedWorkspace?.id == projectId) {
       final updatedWorkspace = state.firstWhere((p) => p.id == projectId);
-      ref.read(selectedProjectProvider.notifier).selectProject(updatedWorkspace);
+      ref
+          .read(selectedProjectProvider.notifier)
+          .selectProject(updatedWorkspace);
     }
   }
 
   /// Remove a repository from a project
-  Future<void> removeRepositoryFromWorkspace(String projectId, String repositoryPath) async {
+  Future<void> removeRepositoryFromWorkspace(
+    String projectId,
+    String repositoryPath,
+  ) async {
     state = state.map((project) {
       if (project.id == projectId) {
         return project.removeRepository(repositoryPath);
@@ -306,7 +345,9 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     final selectedWorkspace = ref.read(selectedProjectProvider);
     if (selectedWorkspace?.id == projectId) {
       final updatedWorkspace = state.firstWhere((p) => p.id == projectId);
-      ref.read(selectedProjectProvider.notifier).selectProject(updatedWorkspace);
+      ref
+          .read(selectedProjectProvider.notifier)
+          .selectProject(updatedWorkspace);
     }
   }
 
@@ -333,9 +374,14 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     // Refresh selected project if it's one of the projects being modified
     final selectedWorkspace = ref.read(selectedProjectProvider);
     if (selectedWorkspace != null &&
-        (selectedWorkspace.id == fromProjectId || selectedWorkspace.id == toProjectId)) {
-      final updatedWorkspace = state.firstWhere((p) => p.id == selectedWorkspace.id);
-      ref.read(selectedProjectProvider.notifier).selectProject(updatedWorkspace);
+        (selectedWorkspace.id == fromProjectId ||
+            selectedWorkspace.id == toProjectId)) {
+      final updatedWorkspace = state.firstWhere(
+        (p) => p.id == selectedWorkspace.id,
+      );
+      ref
+          .read(selectedProjectProvider.notifier)
+          .selectProject(updatedWorkspace);
     }
   }
 
@@ -351,14 +397,19 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
   /// Get project containing a repository
   Workspace? getProjectForRepository(String repositoryPath) {
     try {
-      return state.firstWhere((project) => project.containsRepository(repositoryPath));
+      return state.firstWhere(
+        (project) => project.containsRepository(repositoryPath),
+      );
     } catch (e) {
       return null;
     }
   }
 
   /// Update the last selected repository for a project
-  Future<void> updateLastSelectedRepository(String projectId, String? repositoryPath) async {
+  Future<void> updateLastSelectedRepository(
+    String projectId,
+    String? repositoryPath,
+  ) async {
     state = state.map((project) {
       if (project.id == projectId) {
         return project.copyWith(

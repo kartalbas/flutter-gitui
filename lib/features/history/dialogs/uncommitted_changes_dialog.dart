@@ -10,10 +10,7 @@ import '../../../generated/app_localizations.dart';
 class UncommittedChangesDialog extends StatelessWidget {
   final int changeCount;
 
-  const UncommittedChangesDialog({
-    super.key,
-    required this.changeCount,
-  });
+  const UncommittedChangesDialog({super.key, required this.changeCount});
 
   @override
   Widget build(BuildContext context) {

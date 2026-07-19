@@ -74,10 +74,9 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
         BaseButton(
           label: loc.delete,
           variant: ButtonVariant.danger,
-          onPressed: () => Navigator.of(context).pop({
-            'confirmed': true,
-            'deleteFromRemote': _deleteFromRemote,
-          }),
+          onPressed: () => Navigator.of(
+            context,
+          ).pop({'confirmed': true, 'deleteFromRemote': _deleteFromRemote}),
         ),
       ],
     );

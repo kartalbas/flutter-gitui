@@ -23,13 +23,9 @@ class NoCommitsState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            l10n.emptyStateNoCommits,
-          ),
+          TitleLargeLabel(l10n.emptyStateNoCommits),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
-            l10n.emptyStateNoCommitsMessage,
-          ),
+          BodyMediumLabel(l10n.emptyStateNoCommitsMessage),
         ],
       ),
     );
@@ -40,10 +36,7 @@ class NoCommitsState extends StatelessWidget {
 class HistoryErrorState extends StatelessWidget {
   final Object error;
 
-  const HistoryErrorState({
-    super.key,
-    required this.error,
-  });
+  const HistoryErrorState({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -57,14 +50,9 @@ class HistoryErrorState extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            'Error Loading History',
-          ),
+          TitleLargeLabel('Error Loading History'),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
-            error.toString(),
-            textAlign: TextAlign.center,
-          ),
+          BodySmallLabel(error.toString(), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -88,9 +76,7 @@ class NoCommitSelectedState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            l10n.emptyStateNoCommitSelected,
-          ),
+          TitleLargeLabel(l10n.emptyStateNoCommitSelected),
           const SizedBox(height: AppTheme.paddingS),
           BodyMediumLabel(
             l10n.emptyStateNoCommitSelectedMessage,
@@ -106,10 +92,7 @@ class NoCommitSelectedState extends StatelessWidget {
 class NoSearchResultsState extends StatelessWidget {
   final VoidCallback onClearFilters;
 
-  const NoSearchResultsState({
-    super.key,
-    required this.onClearFilters,
-  });
+  const NoSearchResultsState({super.key, required this.onClearFilters});
 
   @override
   Widget build(BuildContext context) {
@@ -124,9 +107,7 @@ class NoSearchResultsState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            l10n.emptyStateNoResultsFound,
-          ),
+          TitleLargeLabel(l10n.emptyStateNoResultsFound),
           const SizedBox(height: AppTheme.paddingS),
           BodyMediumLabel(
             l10n.emptyStateTryAdjustingSearchCriteria,

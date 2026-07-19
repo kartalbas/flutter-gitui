@@ -38,7 +38,9 @@ class Logger {
         // If USERPROFILE is not set, use Documents folder
         if (home.isEmpty) {
           final docsDir = await getApplicationDocumentsDirectory();
-          home = docsDir.parent.path; // Go up one level from Documents to user home
+          home = docsDir
+              .parent
+              .path; // Go up one level from Documents to user home
         }
       } else {
         // On Unix systems, use HOME
@@ -80,7 +82,9 @@ class Logger {
 
       _initialized = true;
       _writeToFile('[LOGGER] Logger initialized - log file: $logPath');
-      _writeToGitFile('[LOGGER] Git logger initialized - log file: $gitLogPath');
+      _writeToGitFile(
+        '[LOGGER] Git logger initialized - log file: $gitLogPath',
+      );
     } catch (e) {
       // If we can't initialize file logging, continue with console only
       debugPrint('$_prefix Failed to initialize file logging: $e');
@@ -211,7 +215,12 @@ class Logger {
   }
 
   /// Log error messages
-  static void error(String message, [Object? error, StackTrace? stackTrace, bool forceConsole = false]) {
+  static void error(
+    String message, [
+    Object? error,
+    StackTrace? stackTrace,
+    bool forceConsole = false,
+  ]) {
     final msg = '$_prefix [ERROR] $message';
     debugPrint(msg);
     _writeToFile(msg);
@@ -292,7 +301,8 @@ class Logger {
 
     // Also log to console in debug mode
     if (kDebugMode) {
-      final consoleMsg = '$_prefix [GIT] $command (${duration.inMilliseconds}ms, exit: ${exitCode ?? 'N/A'})';
+      final consoleMsg =
+          '$_prefix [GIT] $command (${duration.inMilliseconds}ms, exit: ${exitCode ?? 'N/A'})';
       debugPrint(consoleMsg);
     }
   }

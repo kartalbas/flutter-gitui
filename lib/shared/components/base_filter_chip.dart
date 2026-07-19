@@ -78,9 +78,7 @@ class BaseFilterChip extends StatelessWidget {
       selectedColor: colorScheme.secondaryContainer,
       checkmarkColor: colorScheme.onSecondaryContainer,
       side: BorderSide(
-        color: selected
-            ? colorScheme.secondary
-            : colorScheme.outlineVariant,
+        color: selected ? colorScheme.secondary : colorScheme.outlineVariant,
         width: selected ? 2 : 1,
       ),
       shape: RoundedRectangleBorder(
@@ -161,9 +159,7 @@ class BaseChoiceChip extends StatelessWidget {
       selectedColor: colorScheme.secondaryContainer,
       checkmarkColor: colorScheme.onSecondaryContainer,
       side: BorderSide(
-        color: selected
-            ? colorScheme.secondary
-            : colorScheme.outlineVariant,
+        color: selected ? colorScheme.secondary : colorScheme.outlineVariant,
         width: selected ? 2 : 1,
       ),
       shape: RoundedRectangleBorder(
@@ -217,10 +213,7 @@ class BaseActionChip extends StatelessWidget {
 
     return ActionChip(
       onPressed: onPressed,
-      label: MenuItemLabel(
-        label,
-        color: colorScheme.onSurfaceVariant,
-      ),
+      label: MenuItemLabel(label, color: colorScheme.onSurfaceVariant),
       avatar: icon != null
           ? Icon(
               icon,
@@ -229,10 +222,7 @@ class BaseActionChip extends StatelessWidget {
             )
           : null,
       backgroundColor: colorScheme.surface,
-      side: BorderSide(
-        color: colorScheme.outlineVariant,
-        width: 1,
-      ),
+      side: BorderSide(color: colorScheme.outlineVariant, width: 1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppTheme.radiusS),
       ),

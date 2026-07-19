@@ -11,10 +11,7 @@ import '../../core/git/models/remote.dart';
 class EditRemoteUrlDialog extends StatefulWidget {
   final GitRemote remote;
 
-  const EditRemoteUrlDialog({
-    super.key,
-    required this.remote,
-  });
+  const EditRemoteUrlDialog({super.key, required this.remote});
 
   @override
   State<EditRemoteUrlDialog> createState() => _EditRemoteUrlDialogState();

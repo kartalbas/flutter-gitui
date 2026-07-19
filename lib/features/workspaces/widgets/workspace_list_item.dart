@@ -31,19 +31,19 @@ class WorkspaceListItem extends StatelessWidget {
       isSelected: isSelected,
       onTap: onTap,
       leading: Container(
-            padding: const EdgeInsets.all(AppTheme.paddingS),
-            decoration: BoxDecoration(
-              color: project.color.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            child: Icon(
-              project.id == 'default'
-                  ? PhosphorIconsBold.house
-                  : PhosphorIconsBold.folder,
-              color: project.color,
-              size: AppTheme.iconL,
-            ),
-          ),
+        padding: const EdgeInsets.all(AppTheme.paddingS),
+        decoration: BoxDecoration(
+          color: project.color.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
+        ),
+        child: Icon(
+          project.id == 'default'
+              ? PhosphorIconsBold.house
+              : PhosphorIconsBold.folder,
+          color: project.color,
+          size: AppTheme.iconL,
+        ),
+      ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -76,7 +76,9 @@ class WorkspaceListItem extends StatelessWidget {
               ),
               const SizedBox(width: AppTheme.paddingXS),
               BodySmallLabel(
-                AppLocalizations.of(context)!.repositoriesCount(project.repositoryPaths.length),
+                AppLocalizations.of(
+                  context,
+                )!.repositoriesCount(project.repositoryPaths.length),
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ],

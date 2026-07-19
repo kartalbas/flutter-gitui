@@ -126,14 +126,14 @@ class BaseTreeItem extends StatelessWidget {
               Icon(
                 node.isDirectory
                     ? (node.isExpanded
-                        ? PhosphorIconsBold.folderOpen
-                        : PhosphorIconsBold.folder)
+                          ? PhosphorIconsBold.folderOpen
+                          : PhosphorIconsBold.folder)
                     : (fileIcon ?? PhosphorIconsBold.file),
                 size: 18,
                 color: node.isDirectory
                     ? colorScheme.primary
                     : (fileIconColor ??
-                        (isSelected ? colorScheme.onPrimaryContainer : null)),
+                          (isSelected ? colorScheme.onPrimaryContainer : null)),
               ),
 
               const SizedBox(width: AppTheme.paddingS),

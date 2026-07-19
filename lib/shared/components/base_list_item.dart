@@ -123,7 +123,8 @@ class _BaseListItemState extends State<BaseListItem> {
 
     // Build effective trailing widget (combine trailing + context menu if needed)
     Widget? effectiveTrailing = widget.trailing;
-    if (widget.contextMenuItems != null && widget.contextMenuItems!.isNotEmpty) {
+    if (widget.contextMenuItems != null &&
+        widget.contextMenuItems!.isNotEmpty) {
       final menuButton = BasePopupMenuButton(
         icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
         tooltip: l10n.moreActions,
@@ -162,21 +163,19 @@ class _BaseListItemState extends State<BaseListItem> {
     BoxBorder? border;
     if (widget.isSelected) {
       // Selected: use onSecondaryContainer for border
-      border = Border.all(
-        color: colorScheme.onSecondaryContainer,
-        width: 2,
-      );
+      border = Border.all(color: colorScheme.onSecondaryContainer, width: 2);
     } else if (widget.isMultiSelected) {
       // Multi-selected: use onTertiaryContainer for border
-      border = Border.all(
-        color: colorScheme.onTertiaryContainer,
-        width: 2,
-      );
+      border = Border.all(color: colorScheme.onTertiaryContainer, width: 2);
     }
 
     return MouseRegion(
-      onEnter: widget.isSelectable ? (_) => setState(() => _isHovered = true) : null,
-      onExit: widget.isSelectable ? (_) => setState(() => _isHovered = false) : null,
+      onEnter: widget.isSelectable
+          ? (_) => setState(() => _isHovered = true)
+          : null,
+      onExit: widget.isSelectable
+          ? (_) => setState(() => _isHovered = false)
+          : null,
       cursor: widget.isSelectable && widget.onTap != null
           ? SystemMouseCursors.click
           : SystemMouseCursors.basic,

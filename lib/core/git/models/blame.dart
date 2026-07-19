@@ -34,7 +34,9 @@ class BlameLine with _$BlameLine {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
     final name = parts.isEmpty ? '' : parts.first;
-    return name.length >= 2 ? name.substring(0, 2).toUpperCase() : name.toUpperCase();
+    return name.length >= 2
+        ? name.substring(0, 2).toUpperCase()
+        : name.toUpperCase();
   }
 }
 

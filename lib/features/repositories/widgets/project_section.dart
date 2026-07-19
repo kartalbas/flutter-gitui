@@ -11,7 +11,9 @@ import '../../../shared/components/base_menu_item.dart';
 import '../../../core/workspace/models/workspace.dart';
 
 /// Provider for tracking expanded state of projects
-final projectExpandedProvider = StateProvider.family<bool, String>((ref, projectId) => true);
+final projectExpandedProvider = StateProvider.family<bool, String>(
+  (ref, projectId) => true,
+);
 
 /// Section header for a project group
 class ProjectSection extends ConsumerWidget {
@@ -42,7 +44,8 @@ class ProjectSection extends ConsumerWidget {
         // Project header
         InkWell(
           onTap: () {
-            ref.read(projectExpandedProvider(projectId).notifier).state = !isExpanded;
+            ref.read(projectExpandedProvider(projectId).notifier).state =
+                !isExpanded;
           },
           borderRadius: BorderRadius.circular(AppTheme.radiusM),
           child: Container(
@@ -52,12 +55,16 @@ class ProjectSection extends ConsumerWidget {
             ),
             decoration: BoxDecoration(
               color: isUnassigned
-                  ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+                  ? Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
                   : project!.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
               border: Border.all(
                 color: isUnassigned
-                    ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.3)
                     : project!.color.withValues(alpha: 0.3),
               ),
             ),
@@ -90,7 +97,9 @@ class ProjectSection extends ConsumerWidget {
 
                 // Project icon
                 Icon(
-                  isUnassigned ? PhosphorIconsBold.package : PhosphorIconsBold.folder,
+                  isUnassigned
+                      ? PhosphorIconsBold.package
+                      : PhosphorIconsBold.folder,
                   size: AppTheme.iconM,
                   color: isUnassigned
                       ? Theme.of(context).colorScheme.onSurface
@@ -104,7 +113,11 @@ class ProjectSection extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TitleMediumLabel(
-                        isUnassigned ? AppLocalizations.of(context)!.unassignedRepositories : project!.name,
+                        isUnassigned
+                            ? AppLocalizations.of(
+                                context,
+                              )!.unassignedRepositories
+                            : project!.name,
                         color: isUnassigned
                             ? Theme.of(context).colorScheme.onSurface
                             : project!.color,
@@ -189,10 +202,7 @@ class ProjectSection extends ConsumerWidget {
         ),
 
         // Repositories (shown when expanded)
-        if (isExpanded) ...[
-          const SizedBox(height: AppTheme.paddingS),
-          child,
-        ],
+        if (isExpanded) ...[const SizedBox(height: AppTheme.paddingS), child],
         const SizedBox(height: AppTheme.paddingM),
       ],
     );

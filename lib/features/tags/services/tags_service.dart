@@ -44,7 +44,8 @@ class TagsService {
             if (now.difference(tag.date!).inDays > 365) return false;
             break;
           case DateRangeFilter.custom:
-            if (customDateStart != null && tag.date!.isBefore(customDateStart)) {
+            if (customDateStart != null &&
+                tag.date!.isBefore(customDateStart)) {
               return false;
             }
             // The date picker yields midnight of the selected day, so the end
@@ -71,7 +72,9 @@ class TagsService {
       // Apply author filter
       if (authorFilter != null && authorFilter.isNotEmpty) {
         if (tag.taggerName == null ||
-            !tag.taggerName!.toLowerCase().contains(authorFilter.toLowerCase())) {
+            !tag.taggerName!.toLowerCase().contains(
+              authorFilter.toLowerCase(),
+            )) {
           return false;
         }
       }
@@ -83,20 +86,20 @@ class TagsService {
         try {
           final regex = RegExp(searchQuery, caseSensitive: false);
           return regex.hasMatch(tag.name) ||
-                 regex.hasMatch(tag.displayMessage) ||
-                 regex.hasMatch(tag.commitHash);
+              regex.hasMatch(tag.displayMessage) ||
+              regex.hasMatch(tag.commitHash);
         } catch (e) {
           // If regex is invalid, fall back to normal search
           final query = searchQuery.toLowerCase();
           return tag.name.toLowerCase().contains(query) ||
-                 tag.displayMessage.toLowerCase().contains(query) ||
-                 tag.commitHash.toLowerCase().contains(query);
+              tag.displayMessage.toLowerCase().contains(query) ||
+              tag.commitHash.toLowerCase().contains(query);
         }
       } else {
         final query = searchQuery.toLowerCase();
         return tag.name.toLowerCase().contains(query) ||
-               tag.displayMessage.toLowerCase().contains(query) ||
-               tag.commitHash.toLowerCase().contains(query);
+            tag.displayMessage.toLowerCase().contains(query) ||
+            tag.commitHash.toLowerCase().contains(query);
       }
     }).toList();
   }
@@ -221,21 +224,13 @@ class TagsService {
     // Try to extract major.minor pattern
     final match2 = RegExp(r'^(\d+)\.(\d+)').firstMatch(cleaned);
     if (match2 != null) {
-      return [
-        int.parse(match2.group(1)!),
-        int.parse(match2.group(2)!),
-        0,
-      ];
+      return [int.parse(match2.group(1)!), int.parse(match2.group(2)!), 0];
     }
 
     // Try to extract single number
     final match3 = RegExp(r'^(\d+)').firstMatch(cleaned);
     if (match3 != null) {
-      return [
-        int.parse(match3.group(1)!),
-        0,
-        0,
-      ];
+      return [int.parse(match3.group(1)!), 0, 0];
     }
 
     return null;

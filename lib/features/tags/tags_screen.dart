@@ -15,7 +15,8 @@ import '../../core/config/config_providers.dart';
 import '../../core/git/models/tag.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/utils/result_extensions.dart';
-import 'dialogs/advanced_filters_dialog.dart' show AdvancedFiltersDialog, DateRangeFilter;
+import 'dialogs/advanced_filters_dialog.dart'
+    show AdvancedFiltersDialog, DateRangeFilter;
 import 'dialogs/delete_tags_dialog.dart';
 import 'dialogs/select_remote_dialog.dart';
 import 'widgets/tag_list_tile.dart';
@@ -78,79 +79,89 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
     return Scaffold(
       appBar: _selectionMode
-              ? AppBar(
-                  title: Text(AppLocalizations.of(context)!.selectedCount(_selectedTags.length)),
-                  leading: BaseIconButton(
-                    icon: PhosphorIconsRegular.x,
-                    tooltip: AppLocalizations.of(context)!.exitSelection,
-                    onPressed: () {
+          ? AppBar(
+              title: Text(
+                AppLocalizations.of(
+                  context,
+                )!.selectedCount(_selectedTags.length),
+              ),
+              leading: BaseIconButton(
+                icon: PhosphorIconsRegular.x,
+                tooltip: AppLocalizations.of(context)!.exitSelection,
+                onPressed: () {
+                  setState(() {
+                    _selectionMode = false;
+                    _selectedTags.clear();
+                  });
+                },
+              ),
+              actions: [
+                BaseIconButton(
+                  icon: PhosphorIconsRegular.checkSquareOffset,
+                  tooltip: AppLocalizations.of(context)!.selectAll,
+                  onPressed: () => _selectAllTags(tagsAsync.value ?? []),
+                ),
+                BaseIconButton(
+                  icon: PhosphorIconsRegular.square,
+                  tooltip: AppLocalizations.of(context)!.clearSelection,
+                  onPressed: () {
+                    setState(() {
+                      _selectedTags.clear();
+                    });
+                  },
+                ),
+              ],
+            )
+          : StandardAppBar(
+              title: AppDestination.tags.label(context),
+              onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
+              moreMenuItems: [
+                // Select Tags action (only show if tags exist)
+                if (tagsAsync.value?.isNotEmpty == true)
+                  PopupMenuItem(
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.checkSquare,
+                      label: AppLocalizations.of(context)!.selectTags,
+                    ),
+                    onTap: () {
                       setState(() {
-                        _selectionMode = false;
-                        _selectedTags.clear();
+                        _selectionMode = true;
                       });
                     },
                   ),
-                  actions: [
-                    BaseIconButton(
-                      icon: PhosphorIconsRegular.checkSquareOffset,
-                      tooltip: AppLocalizations.of(context)!.selectAll,
-                      onPressed: () => _selectAllTags(tagsAsync.value ?? []),
-                    ),
-                    BaseIconButton(
-                      icon: PhosphorIconsRegular.square,
-                      tooltip: AppLocalizations.of(context)!.clearSelection,
-                      onPressed: () {
-                        setState(() {
-                          _selectedTags.clear();
-                        });
-                      },
-                    ),
-                  ],
-                )
-              : StandardAppBar(
-                  title: AppDestination.tags.label(context),
-                  onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
-                  moreMenuItems: [
-                    // Select Tags action (only show if tags exist)
-                    if (tagsAsync.value?.isNotEmpty == true)
-                      PopupMenuItem(
-                        child: MenuItemContent(
-                          icon: PhosphorIconsRegular.checkSquare,
-                          label: AppLocalizations.of(context)!.selectTags,
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _selectionMode = true;
-                          });
-                        },
-                      ),
-                    // Fetch Tags action
-                    if (tagsAsync.value?.isNotEmpty == true)
-                      const PopupMenuDivider(),
-                    PopupMenuItem(
-                      child: MenuItemContent(
-                        icon: PhosphorIconsRegular.downloadSimple,
-                        label: AppLocalizations.of(context)!.fetchTags,
-                      ),
-                      onTap: () => _fetchTags(context),
-                    ),
-                  ],
-                ),
-          body: Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingL),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: tagsAsync.when(
-                    data: (tags) => _buildTagList(context, tags, localOnlyTags, remoteOnlyTags, remotes),
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => _buildError(context, error),
+                // Fetch Tags action
+                if (tagsAsync.value?.isNotEmpty == true)
+                  const PopupMenuDivider(),
+                PopupMenuItem(
+                  child: MenuItemContent(
+                    icon: PhosphorIconsRegular.downloadSimple,
+                    label: AppLocalizations.of(context)!.fetchTags,
                   ),
+                  onTap: () => _fetchTags(context),
                 ),
               ],
             ),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(AppTheme.paddingL),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: tagsAsync.when(
+                data: (tags) => _buildTagList(
+                  context,
+                  tags,
+                  localOnlyTags,
+                  remoteOnlyTags,
+                  remotes,
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => _buildError(context, error),
+              ),
+            ),
+          ],
+        ),
+      ),
       bottomNavigationBar: _selectionMode && _selectedTags.isNotEmpty
           ? _buildBatchOperationsBar(context)
           : null,
@@ -165,7 +176,13 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     return TagsErrorState(error: error);
   }
 
-  Widget _buildTagList(BuildContext context, List<GitTag> tags, Set<String> localOnlyTags, Set<String> remoteOnlyTags, List<String> remotes) {
+  Widget _buildTagList(
+    BuildContext context,
+    List<GitTag> tags,
+    Set<String> localOnlyTags,
+    Set<String> remoteOnlyTags,
+    List<String> remotes,
+  ) {
     if (tags.isEmpty) {
       return _buildEmptyState(context);
     }
@@ -219,7 +236,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   Expanded(
                     child: InlineSearchField(
                       controller: _searchController,
-                      hintText: _useRegex ? 'Regex search...' : 'Search tags...',
+                      hintText: _useRegex
+                          ? 'Regex search...'
+                          : 'Search tags...',
                       onChanged: (value) {
                         setState(() {
                           _searchQuery = value;
@@ -262,8 +281,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.sortNameAZ)),
-                            const Icon(PhosphorIconsRegular.sortAscending, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.sortNameAZ,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.sortAscending,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -278,8 +304,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.sortNameZA)),
-                            const Icon(PhosphorIconsRegular.sortDescending, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.sortNameZA,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.sortDescending,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -295,8 +328,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.sortDateNewest)),
-                            const Icon(PhosphorIconsRegular.sortDescending, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.sortDateNewest,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.sortDescending,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -311,8 +351,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.sortDateOldest)),
-                            const Icon(PhosphorIconsRegular.sortAscending, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.sortDateOldest,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.sortAscending,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -328,8 +375,17 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.sortVersionLowHigh)),
-                            const Icon(PhosphorIconsRegular.sortAscending, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(
+                                  context,
+                                )!.sortVersionLowHigh,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.sortAscending,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -344,8 +400,17 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.sortVersionHighLow)),
-                            const Icon(PhosphorIconsRegular.sortDescending, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(
+                                  context,
+                                )!.sortVersionHighLow,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.sortDescending,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -376,7 +441,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.noGrouping)),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.noGrouping,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -392,7 +461,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.byPrefix)),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.byPrefix,
+                              ),
+                            ),
                             const Icon(PhosphorIconsRegular.textAa, size: 16),
                           ],
                         ),
@@ -408,8 +481,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.byVersion)),
-                            const Icon(PhosphorIconsRegular.gitBranch, size: 16),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.byVersion,
+                              ),
+                            ),
+                            const Icon(
+                              PhosphorIconsRegular.gitBranch,
+                              size: 16,
+                            ),
                           ],
                         ),
                       ),
@@ -424,7 +504,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.byAuthor)),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.byAuthor,
+                              ),
+                            ),
                             const Icon(PhosphorIconsRegular.user, size: 16),
                           ],
                         ),
@@ -440,7 +524,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                               size: 16,
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            Expanded(child: BodyMediumLabel(AppLocalizations.of(context)!.byDate)),
+                            Expanded(
+                              child: BodyMediumLabel(
+                                AppLocalizations.of(context)!.byDate,
+                              ),
+                            ),
                             const Icon(PhosphorIconsRegular.calendar, size: 16),
                           ],
                         ),
@@ -489,7 +577,8 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
               TitleSmallLabel(
                 '${filteredAndSortedTags.length} ${filteredAndSortedTags.length == 1 ? 'Tag' : 'Tags'}',
               ),
-              if (_searchQuery.isNotEmpty || _filterType != TagFilterType.all) ...[
+              if (_searchQuery.isNotEmpty ||
+                  _filterType != TagFilterType.all) ...[
                 const SizedBox(width: AppTheme.paddingS),
                 BodySmallLabel(
                   AppLocalizations.of(context)!.ofTotal(tags.length),
@@ -498,7 +587,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
               const Spacer(),
               if (localOnlyTags.isNotEmpty)
                 BaseButton(
-                  label: AppLocalizations.of(context)!.pushCount(localOnlyTags.length),
+                  label: AppLocalizations.of(
+                    context,
+                  )!.pushCount(localOnlyTags.length),
                   variant: ButtonVariant.secondary,
                   leadingIcon: PhosphorIconsRegular.upload,
                   onPressed: () => _pushAllTags(context),
@@ -510,19 +601,23 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
         // Tag list
         Expanded(
           child: filteredAndSortedTags.isEmpty
-              ? Center(
-                  child: BodyLargeLabel(
-                    'No tags match your search',
-                  ),
-                )
-              : _buildGroupedTagList(filteredAndSortedTags, localOnlyTags, remotes),
+              ? Center(child: BodyLargeLabel('No tags match your search'))
+              : _buildGroupedTagList(
+                  filteredAndSortedTags,
+                  localOnlyTags,
+                  remotes,
+                ),
         ),
       ],
     );
   }
 
   /// Build grouped tag list with collapsible group headers
-  Widget _buildGroupedTagList(List<GitTag> tags, Set<String> localOnlyTags, List<String> remotes) {
+  Widget _buildGroupedTagList(
+    List<GitTag> tags,
+    Set<String> localOnlyTags,
+    List<String> remotes,
+  ) {
     final groupedTags = _tagsService.groupTags(tags: tags, groupBy: _groupBy);
 
     if (_groupBy == TagGroupBy.none) {
@@ -565,9 +660,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             PhosphorIconsBold.folder,
             color: Theme.of(context).colorScheme.primary,
           ),
-          title: TitleMediumLabel(
-            groupName,
-          ),
+          title: TitleMediumLabel(groupName),
           subtitle: BodySmallLabel(
             '${groupTags.length} ${groupTags.length == 1 ? 'tag' : 'tags'}',
           ),
@@ -593,7 +686,6 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       },
     );
   }
-
 
   Widget _buildEmptyState(BuildContext context) {
     return const TagsEmptyState();
@@ -622,8 +714,8 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
   bool _hasActiveFilters() {
     return _dateFilter != DateRangeFilter.all ||
-           (_authorFilter != null && _authorFilter!.isNotEmpty) ||
-           _useRegex;
+        (_authorFilter != null && _authorFilter!.isNotEmpty) ||
+        _useRegex;
   }
 
   Widget _buildActiveFiltersRow() {
@@ -669,7 +761,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     );
   }
 
-  Future<void> _showAdvancedFiltersDialog(BuildContext context, List<GitTag> allTags) async {
+  Future<void> _showAdvancedFiltersDialog(
+    BuildContext context,
+    List<GitTag> allTags,
+  ) async {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => AdvancedFiltersDialog(
@@ -763,10 +858,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
       if (remoteName != null && context.mounted) {
         // Use batch operation to push all selected tags at once
-        await ref.read(gitActionsProvider).pushTags(
-          remoteName,
-          _selectedTags.toList(),
-        );
+        await ref
+            .read(gitActionsProvider)
+            .pushTags(remoteName, _selectedTags.toList());
 
         if (context.mounted) {
           final l10n = AppLocalizations.of(context)!;
@@ -792,10 +886,8 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     if (!context.mounted) return;
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => DeleteTagsDialog(
-        tagNames: _selectedTags,
-        hasRemotes: hasRemotes,
-      ),
+      builder: (context) =>
+          DeleteTagsDialog(tagNames: _selectedTags, hasRemotes: hasRemotes),
     );
 
     if (result != null && result['confirmed'] == true && context.mounted) {
@@ -816,11 +908,13 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       }
 
       // Use batch operation to delete all selected tags at once
-      await ref.read(gitActionsProvider).deleteTags(
-        _selectedTags.toList(),
-        deleteFromRemote: deleteFromRemote,
-        remoteName: remoteName,
-      );
+      await ref
+          .read(gitActionsProvider)
+          .deleteTags(
+            _selectedTags.toList(),
+            deleteFromRemote: deleteFromRemote,
+            remoteName: remoteName,
+          );
 
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -834,15 +928,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       }
     }
   }
-
 }
 
 /// Tag filter type
-enum TagFilterType {
-  all,
-  annotated,
-  lightweight,
-}
+enum TagFilterType { all, annotated, lightweight }
 
 /// Tag sorting options
 enum TagSortBy {
@@ -855,11 +944,4 @@ enum TagSortBy {
 }
 
 /// Tag grouping options
-enum TagGroupBy {
-  none,
-  prefix,
-  version,
-  author,
-  date,
-}
-
+enum TagGroupBy { none, prefix, version, author, date }

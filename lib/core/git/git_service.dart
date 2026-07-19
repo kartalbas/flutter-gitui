@@ -55,7 +55,8 @@ class GitService {
     _shell = Shell(
       workingDirectory: repoPath,
       throwOnError: false, // We'll handle errors ourselves
-      verbose: false, // Disable console output to prevent FileSystemException on Windows GUI apps
+      verbose:
+          false, // Disable console output to prevent FileSystemException on Windows GUI apps
       stdout: null, // Don't pipe to stdout (invalid handle on Windows GUI apps)
       stderr: null, // Don't pipe to stderr (invalid handle on Windows GUI apps)
       // Git is forced to emit UTF-8 via LC_ALL/LANG below, so decode with
@@ -81,7 +82,8 @@ class GitService {
         'GIT_ASKPASS': '',
         'SSH_ASKPASS': '',
         // Same for SSH host-key and password prompts.
-        'GIT_SSH_COMMAND': 'ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new',
+        'GIT_SSH_COMMAND':
+            'ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new',
       },
     );
   }
@@ -95,7 +97,13 @@ class GitService {
   static const Duration _networkTimeout = Duration(minutes: 10);
 
   static const Set<String> _networkCommands = {
-    'clone', 'fetch', 'pull', 'push', 'remote', 'ls-remote', 'submodule',
+    'clone',
+    'fetch',
+    'pull',
+    'push',
+    'remote',
+    'ls-remote',
+    'submodule',
   };
 
   static Duration _timeoutFor(String command) {
@@ -112,8 +120,8 @@ class GitService {
   /// keeps the install check usable before the path has been configured.
   static String _staticGitExecutable(String? gitExecutablePath) =>
       (gitExecutablePath == null || gitExecutablePath.isEmpty)
-          ? 'git'
-          : '"$gitExecutablePath"';
+      ? 'git'
+      : '"$gitExecutablePath"';
 
   /// Check if Git is installed
   static Future<bool> isGitInstalled({String? gitExecutablePath}) async {
@@ -188,15 +196,17 @@ class GitService {
       }
 
       final timeout = _timeoutFor(command);
-      final results = await _shell.run(fullCommand).timeout(
-        timeout,
-        onTimeout: () => throw GitException(
-          'Git command timed out after ${timeout.inSeconds}s: $operationName',
-          stderr:
-              'The command did not finish in time. If this was a network '
-              'operation, check connectivity and your credentials.',
-        ),
-      );
+      final results = await _shell
+          .run(fullCommand)
+          .timeout(
+            timeout,
+            onTimeout: () => throw GitException(
+              'Git command timed out after ${timeout.inSeconds}s: $operationName',
+              stderr:
+                  'The command did not finish in time. If this was a network '
+                  'operation, check connectivity and your credentials.',
+            ),
+          );
       final result = results.first;
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
@@ -487,12 +497,14 @@ class GitService {
     if (value.contains('\n') || value.contains('\r')) {
       throw GitException(
         'Line breaks are not allowed in this field.',
-        stderr: 'A newline in a git argument would be executed as a separate command.',
+        stderr:
+            'A newline in a git argument would be executed as a separate command.',
       );
     }
     final escaped = value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
     return '"$escaped"';
   }
+
   /// Writes [message] to a temporary file and hands its path to [action].
   ///
   /// A commit message is arbitrary user text. Embedding it in a command string
@@ -543,7 +555,10 @@ class GitService {
   Future<Result<String>> getDiff(String filePath, {bool staged = false}) async {
     return runCatchingAsync(() async {
       final stagedFlag = staged ? '--cached' : '';
-      final result = await _execute('diff $stagedFlag "$filePath"', throwOnError: false);
+      final result = await _execute(
+        'diff $stagedFlag "$filePath"',
+        throwOnError: false,
+      );
       return result.stdout.toString();
     });
   }
@@ -558,7 +573,10 @@ class GitService {
   }
 
   /// Get diff for a file in a specific commit
-  Future<Result<String>> getDiffForCommit(String commitHash, String filePath) async {
+  Future<Result<String>> getDiffForCommit(
+    String commitHash,
+    String filePath,
+  ) async {
     return runCatchingAsync(() async {
       final result = await _execute(
         'show "$commitHash" -- "$filePath"',
@@ -644,7 +662,9 @@ class GitService {
       final args = StringBuffer('log');
 
       // Add format
-      args.write(' --format="${LogParser.gitLogFormat}${LogParser.commitSeparator}"');
+      args.write(
+        ' --format="${LogParser.gitLogFormat}${LogParser.commitSeparator}"',
+      );
 
       // Add limit
       if (limit != null) {
@@ -785,7 +805,9 @@ class GitService {
         if (parts.length < 2) continue;
 
         final statusChar = parts[0];
-        final path = parts.length > 2 ? parts[2] : parts[1]; // Renamed files have 3 parts
+        final path = parts.length > 2
+            ? parts[2]
+            : parts[1]; // Renamed files have 3 parts
         final oldPath = parts.length > 2 ? parts[1] : null;
 
         // Find matching stats line
@@ -807,13 +829,15 @@ class GitService {
           }
         }
 
-        fileChanges.add(FileChange(
-          path: path,
-          type: FileChange.parseType(statusChar),
-          oldPath: oldPath,
-          additions: additions,
-          deletions: deletions,
-        ));
+        fileChanges.add(
+          FileChange(
+            path: path,
+            type: FileChange.parseType(statusChar),
+            oldPath: oldPath,
+            additions: additions,
+            deletions: deletions,
+          ),
+        );
       }
 
       return fileChanges;
@@ -824,12 +848,16 @@ class GitService {
 
   /// Get file content at a specific commit
   /// Returns the raw file content as bytes
-  Future<List<int>> getFileContentAtCommit(String commitHash, String filePath) async {
+  Future<List<int>> getFileContentAtCommit(
+    String commitHash,
+    String filePath,
+  ) async {
     try {
       if (gitExecutablePath == null || gitExecutablePath!.isEmpty) {
         throw GitException(
           'Git executable path not configured. Please configure it in Settings.',
-          stderr: 'Git executable path is required but not set in configuration.',
+          stderr:
+              'Git executable path is required but not set in configuration.',
         );
       }
 
@@ -837,17 +865,18 @@ class GitService {
       // never come back as bytes through _execute -- and decoding would corrupt
       // binary files anyway. Run the process directly with a null encoding to
       // receive the file content exactly as git emits it.
-      final result = await Process.run(
-        gitExecutablePath!,
-        ['show', '$commitHash:$filePath'],
-        workingDirectory: repoPath,
-        stdoutEncoding: null,
-      ).timeout(
-        _localTimeout,
-        onTimeout: () => throw GitException(
-          'Git command timed out after ${_localTimeout.inSeconds}s: show',
-        ),
-      );
+      final result =
+          await Process.run(
+            gitExecutablePath!,
+            ['show', '$commitHash:$filePath'],
+            workingDirectory: repoPath,
+            stdoutEncoding: null,
+          ).timeout(
+            _localTimeout,
+            onTimeout: () => throw GitException(
+              'Git command timed out after ${_localTimeout.inSeconds}s: show',
+            ),
+          );
 
       if (result.exitCode != 0) {
         throw GitException(
@@ -881,7 +910,10 @@ class GitService {
   ///
   /// Returns [Result.Success] with FileBlame on success.
   /// Returns [Result.Failure] if the file doesn't exist or git blame fails.
-  Future<Result<FileBlame>> getBlame(String filePath, {String? commitHash}) async {
+  Future<Result<FileBlame>> getBlame(
+    String filePath, {
+    String? commitHash,
+  }) async {
     return runCatchingAsync(() async {
       final commit = commitHash ?? 'HEAD';
       final result = await _execute(
@@ -892,15 +924,9 @@ class GitService {
       if (result.exitCode != 0) {
         final stderr = result.stderr.toString();
         if (stderr.contains('no such path')) {
-          throw GitException(
-            'File not found: $filePath',
-            stderr: stderr,
-          );
+          throw GitException('File not found: $filePath', stderr: stderr);
         }
-        throw GitException(
-          'Failed to get blame information',
-          stderr: stderr,
-        );
+        throw GitException('Failed to get blame information', stderr: stderr);
       }
 
       final output = result.stdout.toString();
@@ -915,32 +941,31 @@ class GitService {
       // Check if directory exists
       final dir = Directory(repoPath);
       if (!await dir.exists()) {
-        return {
-          'exists': false,
-          'isValidGit': false,
-        };
+        return {'exists': false, 'isValidGit': false};
       }
 
       // Check if it's a valid git repository. `.git` is a file, not a
       // directory, in a linked worktree or a submodule checkout.
-      final gitEntityType =
-          await FileSystemEntity.type(p.join(repoPath, '.git'));
+      final gitEntityType = await FileSystemEntity.type(
+        p.join(repoPath, '.git'),
+      );
       if (gitEntityType == FileSystemEntityType.notFound) {
-        return {
-          'exists': true,
-          'isValidGit': false,
-        };
+        return {'exists': true, 'isValidGit': false};
       }
 
       // Get current branch (logged)
-      final branchResult = await _execute('branch --show-current', throwOnError: false);
+      final branchResult = await _execute(
+        'branch --show-current',
+        throwOnError: false,
+      );
       final currentBranch = branchResult.exitCode == 0
           ? branchResult.stdout.toString().trim()
           : null;
 
       // Check for remote (logged)
       final remoteResult = await _execute('remote', throwOnError: false);
-      final hasRemote = remoteResult.exitCode == 0 &&
+      final hasRemote =
+          remoteResult.exitCode == 0 &&
           remoteResult.stdout.toString().trim().isNotEmpty;
 
       int commitsAhead = 0;
@@ -973,7 +998,8 @@ class GitService {
           throwOnError: false,
         );
         if (aheadResult.exitCode == 0) {
-          commitsAhead = int.tryParse(aheadResult.stdout.toString().trim()) ?? 0;
+          commitsAhead =
+              int.tryParse(aheadResult.stdout.toString().trim()) ?? 0;
         }
 
         // Check commits behind (logged)
@@ -982,13 +1008,18 @@ class GitService {
           throwOnError: false,
         );
         if (behindResult.exitCode == 0) {
-          commitsBehind = int.tryParse(behindResult.stdout.toString().trim()) ?? 0;
+          commitsBehind =
+              int.tryParse(behindResult.stdout.toString().trim()) ?? 0;
         }
       }
 
       // Check for uncommitted changes (logged)
-      final statusResult = await _execute('status --porcelain', throwOnError: false);
-      final hasUncommittedChanges = statusResult.exitCode == 0 &&
+      final statusResult = await _execute(
+        'status --porcelain',
+        throwOnError: false,
+      );
+      final hasUncommittedChanges =
+          statusResult.exitCode == 0 &&
           statusResult.stdout.toString().trim().isNotEmpty;
 
       return {
@@ -1001,11 +1032,7 @@ class GitService {
         'hasUncommittedChanges': hasUncommittedChanges,
       };
     } catch (e) {
-      return {
-        'exists': true,
-        'isValidGit': false,
-        'error': e.toString(),
-      };
+      return {'exists': true, 'isValidGit': false, 'error': e.toString()};
     }
   }
 
@@ -1022,7 +1049,10 @@ class GitService {
   Future<Result<List<GitBranch>>> getAllBranches() async {
     return runCatchingAsync(() async {
       final result = await _execute('branch -a -vv');
-      return BranchParser.parseAll(result.stdout.toString(), protectedBranches: protectedBranches);
+      return BranchParser.parseAll(
+        result.stdout.toString(),
+        protectedBranches: protectedBranches,
+      );
     });
   }
 
@@ -1035,7 +1065,10 @@ class GitService {
   Future<Result<List<GitBranch>>> getLocalBranches() async {
     return runCatchingAsync(() async {
       final result = await _execute('branch -vv');
-      return BranchParser.parseVerbose(result.stdout.toString(), protectedBranches: protectedBranches);
+      return BranchParser.parseVerbose(
+        result.stdout.toString(),
+        protectedBranches: protectedBranches,
+      );
     });
   }
 
@@ -1048,7 +1081,10 @@ class GitService {
   Future<Result<List<GitBranch>>> getRemoteBranches() async {
     return runCatchingAsync(() async {
       final result = await _execute('branch -r');
-      return BranchParser.parseRemote(result.stdout.toString(), protectedBranches: protectedBranches);
+      return BranchParser.parseRemote(
+        result.stdout.toString(),
+        protectedBranches: protectedBranches,
+      );
     });
   }
 
@@ -1067,9 +1103,15 @@ class GitService {
   /// Returns [Result.Failure] if git command fails.
   Future<Result<List<String>>> getMergedBranches() async {
     return runCatchingAsync(() async {
-      final result = await _execute('branch --merged --format="%(refname:short)"');
+      final result = await _execute(
+        'branch --merged --format="%(refname:short)"',
+      );
       final output = result.stdout.toString();
-      return output.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      return output
+          .split('\n')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
     });
   }
 
@@ -1107,7 +1149,10 @@ class GitService {
   ///
   /// Returns [Result.Success] on successful branch deletion.
   /// Returns [Result.Failure] if git command fails.
-  Future<Result<void>> deleteBranch(String branchName, {bool force = false}) async {
+  Future<Result<void>> deleteBranch(
+    String branchName, {
+    bool force = false,
+  }) async {
     return runCatchingAsync(() async {
       final flag = force ? '-D' : '-d';
       await _execute('branch $flag "$branchName"');
@@ -1115,7 +1160,10 @@ class GitService {
   }
 
   /// Delete a remote branch
-  Future<Result<void>> deleteRemoteBranch(String remoteName, String branchName) async {
+  Future<Result<void>> deleteRemoteBranch(
+    String remoteName,
+    String branchName,
+  ) async {
     return runCatchingAsync(() async {
       await _execute('push "$remoteName" --delete "$branchName"');
     });
@@ -1147,7 +1195,11 @@ class GitService {
   ///
   /// Returns [Result.Success] on successful rename.
   /// Returns [Result.Failure] if git command fails.
-  Future<Result<void>> renameBranch(String newName, {String? oldName, bool force = false}) async {
+  Future<Result<void>> renameBranch(
+    String newName, {
+    String? oldName,
+    bool force = false,
+  }) async {
     return runCatchingAsync(() async {
       final flag = force ? '-M' : '-m';
       if (oldName != null) {
@@ -1200,7 +1252,9 @@ class GitService {
   /// [upstreamBranch] - Upstream branch in format "remote/branch" (e.g., "origin/main")
   Future<void> setUpstream(String upstreamBranch, {String? branchName}) async {
     if (branchName != null) {
-      await _execute('branch --set-upstream-to="$upstreamBranch" "$branchName"');
+      await _execute(
+        'branch --set-upstream-to="$upstreamBranch" "$branchName"',
+      );
     } else {
       await _execute('branch --set-upstream-to="$upstreamBranch"');
     }
@@ -1414,9 +1468,7 @@ class GitService {
   Future<Result<List<GitStash>>> getStashes() async {
     return runCatchingAsync(() async {
       // Use custom format: ref|hash|timestamp|message
-      final result = await _execute(
-        'stash list --format=%gD|%H|%at|%gs',
-      );
+      final result = await _execute('stash list --format=%gD|%H|%at|%gs');
       return StashParser.parseStashList(result.stdout.toString());
     });
   }
@@ -1502,7 +1554,8 @@ class GitService {
     }
     throw GitException(
       'Stash $stashRef no longer exists.',
-      stderr: 'No stash currently resolves to commit $expectedHash. '
+      stderr:
+          'No stash currently resolves to commit $expectedHash. '
           'It may have been dropped or popped outside the app.',
     );
   }
@@ -1513,7 +1566,11 @@ class GitService {
   /// [index] - Also restore staged changes
   /// [expectedHash] - Commit hash of the stash; when given, the stash is
   /// re-located by hash so positional shifts cannot redirect the pop
-  Future<Result<void>> popStash(String stashRef, {bool index = false, String? expectedHash}) async {
+  Future<Result<void>> popStash(
+    String stashRef, {
+    bool index = false,
+    String? expectedHash,
+  }) async {
     return runCatchingAsync(() async {
       final ref = await _resolveStashRef(stashRef, expectedHash);
       final parts = ['stash', 'pop', '"$ref"'];
@@ -1531,7 +1588,10 @@ class GitService {
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
   /// [expectedHash] - Commit hash of the stash; when given, the stash is
   /// re-located by hash so positional shifts cannot redirect the drop
-  Future<Result<void>> dropStash(String stashRef, {String? expectedHash}) async {
+  Future<Result<void>> dropStash(
+    String stashRef, {
+    String? expectedHash,
+  }) async {
     return runCatchingAsync(() async {
       final ref = await _resolveStashRef(stashRef, expectedHash);
       await _execute('stash drop "$ref"');
@@ -1572,7 +1632,10 @@ class GitService {
   ///
   /// [branchName] - Name for the new branch
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
-  Future<Result<void>> branchFromStash(String branchName, String stashRef) async {
+  Future<Result<void>> branchFromStash(
+    String branchName,
+    String stashRef,
+  ) async {
     return runCatchingAsync(() async {
       await _execute('stash branch "$branchName" "$stashRef"');
     });
@@ -1679,7 +1742,10 @@ class GitService {
   ///
   /// [tagName] - Name of the tag
   /// [commitHash] - Optional commit hash (defaults to HEAD)
-  Future<Result<void>> createLightweightTag(String tagName, {String? commitHash}) async {
+  Future<Result<void>> createLightweightTag(
+    String tagName, {
+    String? commitHash,
+  }) async {
     return runCatchingAsync(() async {
       final parts = ['tag', '"$tagName"'];
       if (commitHash != null) {
@@ -1723,7 +1789,10 @@ class GitService {
   ///
   /// [remoteName] - Name of the remote (e.g., "origin")
   /// [tagName] - Name of the tag to delete
-  Future<Result<void>> deleteRemoteTag(String remoteName, String tagName) async {
+  Future<Result<void>> deleteRemoteTag(
+    String remoteName,
+    String tagName,
+  ) async {
     return runCatchingAsync(() async {
       await _execute('push "$remoteName" --delete "refs/tags/$tagName"');
     });
@@ -1817,7 +1886,13 @@ class GitService {
     int? depth,
     String? gitExecutablePath,
   }) async {
-    final shell = Shell(throwOnError: false, verbose: false, stdout: null, stderr: null, environment: ShellService.environment);
+    final shell = Shell(
+      throwOnError: false,
+      verbose: false,
+      stdout: null,
+      stderr: null,
+      environment: ShellService.environment,
+    );
 
     final parts = [_staticGitExecutable(gitExecutablePath), 'clone'];
 
@@ -1963,10 +2038,7 @@ class GitService {
 
       // Only add if it's a conflict
       if (type != null) {
-        conflicts.add(MergeConflict(
-          filePath: file.path,
-          type: type,
-        ));
+        conflicts.add(MergeConflict(filePath: file.path, type: type));
       }
     }
 
@@ -2071,7 +2143,10 @@ class GitService {
           final baseResult = await _execute('show :1:"$filePath"');
           await file.writeAsString(baseResult.stdout.toString());
         } catch (e) {
-          throw GitException('Failed to get base version of file', stderr: e.toString());
+          throw GitException(
+            'Failed to get base version of file',
+            stderr: e.toString(),
+          );
         }
         break;
 
@@ -2131,10 +2206,7 @@ class GitService {
   // ============================================
 
   /// Amend the last commit with currently staged changes
-  Future<void> amendCommit({
-    String? newMessage,
-    bool noEdit = false,
-  }) async {
+  Future<void> amendCommit({String? newMessage, bool noEdit = false}) async {
     final parts = ['commit', '--amend'];
 
     if (noEdit) {
@@ -2260,7 +2332,10 @@ class GitService {
   ///
   /// [maxCount] - Maximum number of entries to return (default 50)
   /// [ref] - Specific ref to show reflog for (default HEAD)
-  Future<Result<List<ReflogEntry>>> getReflog({int maxCount = 50, String ref = 'HEAD'}) async {
+  Future<Result<List<ReflogEntry>>> getReflog({
+    int maxCount = 50,
+    String ref = 'HEAD',
+  }) async {
     return runCatchingAsync(() async {
       final parts = ['reflog', 'show', ref, '-n', maxCount.toString()];
       final result = await _execute(parts.join(' '));
@@ -2286,7 +2361,10 @@ class GitService {
   ///
   /// [selector] - The reflog selector (e.g., HEAD@{2})
   /// [mode] - Reset mode (soft, mixed, or hard)
-  Future<Result<void>> resetToReflog(String selector, {ResetMode mode = ResetMode.mixed}) async {
+  Future<Result<void>> resetToReflog(
+    String selector, {
+    ResetMode mode = ResetMode.mixed,
+  }) async {
     return runCatchingAsync(() async {
       final parts = ['reset'];
 
@@ -2369,9 +2447,7 @@ class GitService {
     // Check if bisect found the commit
     final bisectResult = await _tryGetBisectResult();
     if (bisectResult != null) {
-      return BisectState.completed(
-        foundCommit: bisectResult,
-      );
+      return BisectState.completed(foundCommit: bisectResult);
     }
 
     // Parse bisect log to get good/bad commits
@@ -2398,7 +2474,11 @@ class GitService {
     try {
       final result = await _execute('bisect visualize --oneline');
       if (result.stdout != null) {
-        final lines = result.stdout.toString().split('\n').where((l) => l.trim().isNotEmpty).length;
+        final lines = result.stdout
+            .toString()
+            .split('\n')
+            .where((l) => l.trim().isNotEmpty)
+            .length;
         // Estimate steps remaining (log2 of remaining commits)
         if (lines > 0) {
           stepsRemaining = (lines / 2).ceil();
@@ -2423,7 +2503,9 @@ class GitService {
       if (result.stdout != null) {
         final log = result.stdout.toString();
         // Check for the "first bad commit" message
-        final match = RegExp(r'([0-9a-f]+) is the first bad commit').firstMatch(log);
+        final match = RegExp(
+          r'([0-9a-f]+) is the first bad commit',
+        ).firstMatch(log);
         if (match != null) {
           return match.group(1);
         }
@@ -2593,7 +2675,10 @@ class GitService {
     }
     final head = headResult.stdout.toString().trim();
 
-    final newestResult = await _execute('rev-parse $toCommit', throwOnError: false);
+    final newestResult = await _execute(
+      'rev-parse $toCommit',
+      throwOnError: false,
+    );
     if (newestResult.exitCode != 0) {
       throw Exception('Cannot squash: unable to resolve $toCommit.');
     }
@@ -2608,20 +2693,27 @@ class GitService {
     }
 
     // Step 1: Soft reset to the commit before the range (parent of oldest commit)
-    final result = await _execute('rev-parse $fromCommit^', throwOnError: false);
+    final result = await _execute(
+      'rev-parse $fromCommit^',
+      throwOnError: false,
+    );
 
     // Check if the command failed (non-zero exit code or stderr has content)
     if (result.exitCode != 0) {
       final errorMessage = result.stderr.toString().trim();
       if (errorMessage.contains('unknown revision')) {
-        throw Exception('Cannot squash: The oldest selected commit appears to be the root commit (no parent commit exists).');
+        throw Exception(
+          'Cannot squash: The oldest selected commit appears to be the root commit (no parent commit exists).',
+        );
       }
       throw Exception('Could not find parent commit: $errorMessage');
     }
 
     final parentCommit = result.stdout.toString().trim();
     if (parentCommit.isEmpty) {
-      throw Exception('Could not find parent commit: rev-parse returned empty result');
+      throw Exception(
+        'Could not find parent commit: rev-parse returned empty result',
+      );
     }
 
     // Step 2: Soft reset to parent (keeps all changes in staging area)

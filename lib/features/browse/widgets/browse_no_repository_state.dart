@@ -21,9 +21,7 @@ class BrowseNoRepositoryState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
-            AppLocalizations.of(context)!.noRepositoryOpen,
-          ),
+          TitleLargeLabel(AppLocalizations.of(context)!.noRepositoryOpen),
           const SizedBox(height: AppTheme.paddingS),
           BodyMediumLabel(
             AppLocalizations.of(context)!.openRepositoryToBrowseFiles,

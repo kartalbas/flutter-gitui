@@ -94,16 +94,20 @@ class UpdateService {
 
       // Fetch latest version manifest
       Logger.info('Fetching manifest from Azure...');
-      final response = await http.get(Uri.parse(_manifestUrl)).timeout(
-        const Duration(seconds: 10),
-      );
+      final response = await http
+          .get(Uri.parse(_manifestUrl))
+          .timeout(const Duration(seconds: 10));
 
       Logger.info('Manifest response status: ${response.statusCode}');
 
       if (response.statusCode != 200) {
-        Logger.warning('Failed to fetch update manifest: ${response.statusCode}');
+        Logger.warning(
+          'Failed to fetch update manifest: ${response.statusCode}',
+        );
         Logger.warning('Response body: ${response.body}');
-        throw Exception('Failed to fetch update manifest: HTTP ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch update manifest: HTTP ${response.statusCode}',
+        );
       }
 
       Logger.info('Manifest fetched successfully, parsing...');
@@ -128,11 +132,15 @@ class UpdateService {
         if (Platform.isWindows) {
           platform = 'windows';
           platformData = manifestData['windows'] as Map<String, dynamic>?;
-          downloadFileName = platformData?['fileName'] as String? ?? 'flutter-gitui-v$latestVersion-windows.zip';
+          downloadFileName =
+              platformData?['fileName'] as String? ??
+              'flutter-gitui-v$latestVersion-windows.zip';
         } else if (Platform.isLinux) {
           platform = 'linux';
           platformData = manifestData['linux'] as Map<String, dynamic>?;
-          downloadFileName = platformData?['fileName'] as String? ?? 'flutter-gitui-v$latestVersion-linux.zip';
+          downloadFileName =
+              platformData?['fileName'] as String? ??
+              'flutter-gitui-v$latestVersion-linux.zip';
         } else {
           // Only Windows and Linux publish release archives and can install
           // them; offering an update anywhere else would end in a multi-MB
@@ -262,8 +270,12 @@ class UpdateService {
       final streamedResponse = await request.send();
 
       if (streamedResponse.statusCode != 200) {
-        Logger.error('Failed to download update: ${streamedResponse.statusCode}');
-        throw Exception('Failed to download update: HTTP ${streamedResponse.statusCode}');
+        Logger.error(
+          'Failed to download update: ${streamedResponse.statusCode}',
+        );
+        throw Exception(
+          'Failed to download update: HTTP ${streamedResponse.statusCode}',
+        );
       }
 
       final file = File(filePath);
@@ -319,9 +331,7 @@ class UpdateService {
           .toString()
           .toLowerCase();
       if (actual != expected) {
-        Logger.error(
-          'Update digest mismatch: expected $expected, got $actual',
-        );
+        Logger.error('Update digest mismatch: expected $expected, got $actual');
         try {
           await file.delete();
         } catch (_) {
@@ -356,9 +366,16 @@ class UpdateService {
 
   /// Launch a process in detached mode
   /// This prevents the process from being tied to the parent's lifecycle
-  static Future<bool> _launchDetached(String exePath, List<String> args, String workingDir) async {
+  static Future<bool> _launchDetached(
+    String exePath,
+    List<String> args,
+    String workingDir,
+  ) async {
     try {
-      Logger.info('Launching: $exePath with args: ${args.join(" ")}', forceConsole: true);
+      Logger.info(
+        'Launching: $exePath with args: ${args.join(" ")}',
+        forceConsole: true,
+      );
 
       await Process.start(
         exePath,
@@ -386,7 +403,10 @@ class UpdateService {
       Logger.info('Executable path: $exePath', forceConsole: true);
       Logger.info('App directory: $appDir', forceConsole: true);
       Logger.info('Zip file path: $zipFilePath', forceConsole: true);
-      Logger.info('Zip file exists: ${File(zipFilePath).existsSync()}', forceConsole: true);
+      Logger.info(
+        'Zip file exists: ${File(zipFilePath).existsSync()}',
+        forceConsole: true,
+      );
 
       // Detect universal build structure
       // If running from windows/ or linux/ subdirectory, go up one level to find root
@@ -409,7 +429,10 @@ class UpdateService {
       }
 
       Logger.info('Looking for updater at: $updaterPath', forceConsole: true);
-      Logger.info('Updater exists: ${File(updaterPath).existsSync()}', forceConsole: true);
+      Logger.info(
+        'Updater exists: ${File(updaterPath).existsSync()}',
+        forceConsole: true,
+      );
 
       if (File(updaterPath).existsSync()) {
         // Use dedicated updater executable (preferred method)
@@ -426,18 +449,21 @@ class UpdateService {
         Logger.info('  [2] PID: $currentPid', forceConsole: true);
 
         // Launch updater in detached mode
-        final success = await _launchDetached(
-          updaterPath,
-          [zipFilePath, exePath, currentPid.toString()],
-          rootDir,
-        );
+        final success = await _launchDetached(updaterPath, [
+          zipFilePath,
+          exePath,
+          currentPid.toString(),
+        ], rootDir);
 
         if (!success) {
           Logger.error('Failed to launch updater', null, null, true);
           return false;
         }
 
-        Logger.info('Main app will now exit to allow update', forceConsole: true);
+        Logger.info(
+          'Main app will now exit to allow update',
+          forceConsole: true,
+        );
         return true;
       } else {
         // Fallback to batch script method
@@ -459,7 +485,8 @@ class UpdateService {
         final psRootDir = cmdEscape(rootDir.replaceAll("'", "''"));
         final cmdZipFilePath = cmdEscape(zipFilePath);
         final cmdExePath = cmdEscape(exePath);
-        final updateScript = '''
+        final updateScript =
+            '''
 @echo off
 echo =========================================
 echo Flutter GitUI Update
@@ -502,13 +529,15 @@ del "%~f0"
         await File(updateScriptPath).writeAsString(updateScript);
 
         // Run update script in detached process
-        await Process.start(
-          'cmd.exe',
-          ['/c', updateScriptPath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start('cmd.exe', [
+          '/c',
+          updateScriptPath,
+        ], mode: ProcessStartMode.detached);
 
-        Logger.info('Update script started, exiting app...', forceConsole: true);
+        Logger.info(
+          'Update script started, exiting app...',
+          forceConsole: true,
+        );
         return true;
       }
     } catch (e, stackTrace) {
@@ -568,11 +597,11 @@ del "%~f0"
         Logger.info('  [2] PID: $currentPid');
 
         // Launch updater in detached mode
-        final success = await _launchDetached(
-          updaterPath,
-          [zipFilePath, exePath, currentPid.toString()],
-          rootDir,
-        );
+        final success = await _launchDetached(updaterPath, [
+          zipFilePath,
+          exePath,
+          currentPid.toString(),
+        ], rootDir);
 
         if (!success) {
           Logger.error('Failed to launch updater');
@@ -589,7 +618,8 @@ del "%~f0"
         // The archive is laid out relative to the root, so a universal build
         // must extract into rootDir; extracting into linux/ would nest a
         // second linux/ inside it and leave the real files untouched.
-        final updateScript = '''
+        final updateScript =
+            '''
 #!/bin/bash
 echo "========================================="
 echo "Flutter GitUI Update"
@@ -631,11 +661,9 @@ rm "\$0"
         await Process.run('chmod', ['+x', updateScriptPath]);
 
         // Run update script in detached process
-        await Process.start(
-          '/bin/bash',
-          [updateScriptPath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start('/bin/bash', [
+          updateScriptPath,
+        ], mode: ProcessStartMode.detached);
 
         Logger.info('Update script started, exiting app...');
         return true;
@@ -645,5 +673,4 @@ rm "\$0"
       return false;
     }
   }
-
 }

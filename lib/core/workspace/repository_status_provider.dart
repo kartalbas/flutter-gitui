@@ -10,7 +10,8 @@ import 'workspace_provider.dart';
 import '../services/logger_service.dart';
 
 /// Provider for repository statuses (cached)
-class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatus>> {
+class RepositoryStatusNotifier
+    extends StateNotifier<Map<String, RepositoryStatus>> {
   final Ref ref;
 
   RepositoryStatusNotifier(this.ref) : super({});
@@ -21,12 +22,16 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final configLoading = ref.read(configLoadingProvider);
 
-    Logger.debug('[REFRESH] ${repository.displayName}: gitPath=${gitExecutablePath ?? "null"}, configLoading=$configLoading');
+    Logger.debug(
+      '[REFRESH] ${repository.displayName}: gitPath=${gitExecutablePath ?? "null"}, configLoading=$configLoading',
+    );
 
     // GUARD: If git path not configured yet (config still loading), skip check
     // This prevents marking all repos as "Broken" during startup race condition
     if (gitExecutablePath == null || gitExecutablePath.isEmpty) {
-      Logger.warning('[REFRESH] Skipping ${repository.displayName} - git path not configured yet (configLoading=$configLoading)');
+      Logger.warning(
+        '[REFRESH] Skipping ${repository.displayName} - git path not configured yet (configLoading=$configLoading)',
+      );
       return;
     }
 
@@ -47,11 +52,15 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
       final statusMap = await gitService.getRepositoryStatus(repository.path);
       stopwatch.stop();
 
-      Logger.debug('${repository.displayName}: ${stopwatch.elapsedMilliseconds}ms');
+      Logger.debug(
+        '${repository.displayName}: ${stopwatch.elapsedMilliseconds}ms',
+      );
 
       // Log slow checks (over 2 seconds)
       if (stopwatch.elapsedMilliseconds > 2000) {
-        Logger.warning('Slow status check for ${repository.displayName}: ${stopwatch.elapsedMilliseconds}ms');
+        Logger.warning(
+          'Slow status check for ${repository.displayName}: ${stopwatch.elapsedMilliseconds}ms',
+        );
       }
 
       if (statusMap != null) {
@@ -62,7 +71,8 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
           hasRemote: statusMap['hasRemote'] as bool? ?? false,
           commitsAhead: statusMap['commitsAhead'] as int? ?? 0,
           commitsBehind: statusMap['commitsBehind'] as int? ?? 0,
-          hasUncommittedChanges: statusMap['hasUncommittedChanges'] as bool? ?? false,
+          hasUncommittedChanges:
+              statusMap['hasUncommittedChanges'] as bool? ?? false,
         );
 
         state = {...state, repository.path: status};
@@ -80,7 +90,9 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final configLoading = ref.read(configLoadingProvider);
 
-    Logger.info('[REFRESH_ALL] Starting refresh of ${repositories.length} repositories (gitPath=${gitExecutablePath ?? "null"}, configLoading=$configLoading)');
+    Logger.info(
+      '[REFRESH_ALL] Starting refresh of ${repositories.length} repositories (gitPath=${gitExecutablePath ?? "null"}, configLoading=$configLoading)',
+    );
 
     // First, set all repositories to loading state immediately
     final loadingStates = <String, RepositoryStatus>{};
@@ -95,11 +107,11 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
     // Then refresh all repositories in parallel
     // Each will update the UI as soon as it completes
     final stopwatch = Stopwatch()..start();
-    await Future.wait(
-      repositories.map((repo) => refreshStatus(repo)),
-    );
+    await Future.wait(repositories.map((repo) => refreshStatus(repo)));
     stopwatch.stop();
-    Logger.info('Analyzed ${repositories.length} repositories in ${stopwatch.elapsedMilliseconds}ms');
+    Logger.info(
+      'Analyzed ${repositories.length} repositories in ${stopwatch.elapsedMilliseconds}ms',
+    );
   }
 
   /// Drop the cached status of a repository that left the workspace, so the
@@ -146,40 +158,51 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
 
 /// Workspace repository status provider (for all repos in workspace)
 final workspaceRepositoryStatusProvider =
-    StateNotifierProvider<RepositoryStatusNotifier, Map<String, RepositoryStatus>>((ref) {
-  final notifier = RepositoryStatusNotifier(ref);
+    StateNotifierProvider<
+      RepositoryStatusNotifier,
+      Map<String, RepositoryStatus>
+    >((ref) {
+      final notifier = RepositoryStatusNotifier(ref);
 
-  // Check if config is ALREADY loaded (provider created after config finished loading)
-  final configLoading = ref.read(configLoadingProvider);
-  Logger.debug('[PROVIDER_INIT] workspaceRepositoryStatusProvider created, configLoading=$configLoading');
+      // Check if config is ALREADY loaded (provider created after config finished loading)
+      final configLoading = ref.read(configLoadingProvider);
+      Logger.debug(
+        '[PROVIDER_INIT] workspaceRepositoryStatusProvider created, configLoading=$configLoading',
+      );
 
-  if (!configLoading) {
-    // Config already loaded before this provider was created
-    // Trigger refresh immediately (after microtask to ensure provider is fully initialized)
-    Logger.info('[PROVIDER_INIT] Config already loaded - scheduling immediate refresh');
-    Future.microtask(() => notifier.refreshAll());
-  }
+      if (!configLoading) {
+        // Config already loaded before this provider was created
+        // Trigger refresh immediately (after microtask to ensure provider is fully initialized)
+        Logger.info(
+          '[PROVIDER_INIT] Config already loaded - scheduling immediate refresh',
+        );
+        Future.microtask(() => notifier.refreshAll());
+      }
 
-  // Listen to config loading state for future changes
-  // This handles the case where provider is created BEFORE config finishes loading
-  ref.listen(configLoadingProvider, (previous, next) {
-    Logger.debug('[LISTENER] Config loading state changed: previous=$previous, next=$next');
-    if (previous == true && next == false) {
-      // Config just finished loading - refresh all repository statuses
-      Logger.info('[LISTENER] Config loaded - triggering repository status refresh');
-      Future.microtask(() => notifier.refreshAll());
-    }
-  });
+      // Listen to config loading state for future changes
+      // This handles the case where provider is created BEFORE config finishes loading
+      ref.listen(configLoadingProvider, (previous, next) {
+        Logger.debug(
+          '[LISTENER] Config loading state changed: previous=$previous, next=$next',
+        );
+        if (previous == true && next == false) {
+          // Config just finished loading - refresh all repository statuses
+          Logger.info(
+            '[LISTENER] Config loaded - triggering repository status refresh',
+          );
+          Future.microtask(() => notifier.refreshAll());
+        }
+      });
 
-  return notifier;
-});
+      return notifier;
+    });
 
 /// Provider for a single repository's status
 final repositoryStatusByPathProvider =
     Provider.family<RepositoryStatus, String>((ref, path) {
-  final statuses = ref.watch(workspaceRepositoryStatusProvider);
-  return statuses[path] ?? RepositoryStatus.unknown;
-});
+      final statuses = ref.watch(workspaceRepositoryStatusProvider);
+      return statuses[path] ?? RepositoryStatus.unknown;
+    });
 
 /// Provider for count of repositories needing attention
 final repositoriesNeedingAttentionCountProvider = Provider<int>((ref) {

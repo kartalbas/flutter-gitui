@@ -372,10 +372,7 @@ ${line.summary}
     try {
       // Get the full commit object by specifying the commit hash directly
       // Don't use range syntax (^..) as it fails for boundary commits
-      final result = await gitService.getLog(
-        limit: 1,
-        branch: line.commitHash,
-      );
+      final result = await gitService.getLog(limit: 1, branch: line.commitHash);
 
       final commits = result.unwrapOr([]);
 
@@ -446,10 +443,7 @@ ${line.summary}
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 60,
-            child: TitleSmallLabel('$label:'),
-          ),
+          SizedBox(width: 60, child: TitleSmallLabel('$label:')),
           Expanded(
             child: SelectableText(
               value,
@@ -487,9 +481,7 @@ ${line.summary}
                 blame.uniqueCommits.length.toString(),
               ),
               const SizedBox(height: AppTheme.paddingM),
-              TitleSmallLabel(
-                AppLocalizations.of(context)!.contributors,
-              ),
+              TitleSmallLabel(AppLocalizations.of(context)!.contributors),
               const SizedBox(height: AppTheme.paddingS),
               ...blame.uniqueAuthors.map((author) {
                 final lineCount = blame.linesByAuthor[author]?.length ?? 0;

@@ -5,12 +5,7 @@ class GitException implements Exception {
   final String? stderr;
   final String? stdout;
 
-  GitException(
-    this.message, {
-    this.exitCode,
-    this.stderr,
-    this.stdout,
-  });
+  GitException(this.message, {this.exitCode, this.stderr, this.stdout});
 
   @override
   String toString() {
@@ -28,11 +23,11 @@ class GitException implements Exception {
 /// Exception thrown when repository is not found or invalid
 class RepositoryNotFoundException extends GitException {
   RepositoryNotFoundException(String path)
-      : super('Repository not found at path: $path');
+    : super('Repository not found at path: $path');
 }
 
 /// Exception thrown when Git is not installed
 class GitNotFoundException extends GitException {
   GitNotFoundException()
-      : super('Git executable not found. Please install Git.');
+    : super('Git executable not found. Please install Git.');
 }

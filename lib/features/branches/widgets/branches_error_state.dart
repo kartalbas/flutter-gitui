@@ -9,10 +9,7 @@ import '../../../shared/theme/app_theme.dart';
 class BranchesErrorState extends StatelessWidget {
   final Object error;
 
-  const BranchesErrorState({
-    super.key,
-    required this.error,
-  });
+  const BranchesErrorState({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +24,9 @@ class BranchesErrorState extends StatelessWidget {
           ),
           const SizedBox(height: AppTheme.paddingM),
           TitleMediumLabel(
-            AppLocalizations.of(context)!.errorLoadingBranches(error.toString()),
+            AppLocalizations.of(
+              context,
+            )!.errorLoadingBranches(error.toString()),
             textAlign: TextAlign.center,
           ),
         ],

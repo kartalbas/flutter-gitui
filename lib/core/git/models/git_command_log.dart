@@ -38,7 +38,8 @@ class GitCommandLog {
 
   /// Display formatted timestamp (ISO + relative)
   /// Pass locale code (e.g., 'en', 'ar', 'de') for localized relative time
-  String timestampDisplay([String? locale]) => timestamp.toDisplayString(locale);
+  String timestampDisplay([String? locale]) =>
+      timestamp.toDisplayString(locale);
 
   /// Get the full output (stdout + stderr)
   String get fullOutput {

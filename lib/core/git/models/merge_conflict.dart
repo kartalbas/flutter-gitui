@@ -78,7 +78,8 @@ class MergeConflict {
       oursContent: oursContent,
       theirsContent: theirsContent,
       baseContent: baseContent,
-      conflictMarkersContent: conflictMarkersContent ?? this.conflictMarkersContent,
+      conflictMarkersContent:
+          conflictMarkersContent ?? this.conflictMarkersContent,
       isResolved: isResolved ?? this.isResolved,
       resolutionChoice: resolutionChoice ?? this.resolutionChoice,
     );
@@ -163,11 +164,11 @@ class MergeState {
 
   /// Empty merge state (no merge in progress)
   const MergeState.empty()
-      : isInProgress = false,
-        mergingBranch = null,
-        currentBranch = null,
-        conflicts = const [],
-        message = null;
+    : isInProgress = false,
+      mergingBranch = null,
+      currentBranch = null,
+      conflicts = const [],
+      message = null;
 
   /// Number of conflicts
   int get conflictCount => conflicts.length;

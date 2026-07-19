@@ -46,7 +46,10 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
 
       // Lenient decode so Windows-1252 exports (e.g. from Excel) still parse
       // instead of failing a strict UTF-8 decode.
-      final content = utf8.decode(await file.readAsBytes(), allowMalformed: true);
+      final content = utf8.decode(
+        await file.readAsBytes(),
+        allowMalformed: true,
+      );
 
       // The csv package defaults eol to '\r\n', which leaves LF-only files
       // as a single giant row. Normalize to LF so both styles parse.

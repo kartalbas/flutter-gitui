@@ -6,15 +6,13 @@ class RepositoryBatchResult {
   final bool success;
   final String message;
 
-  const RepositoryBatchResult({
-    required this.success,
-    required this.message,
-  });
+  const RepositoryBatchResult({required this.success, required this.message});
 }
 
 /// Stores results from batch operations for each repository
 /// Key: repository path, Value: operation result
-class RepositoryBatchResultNotifier extends StateNotifier<Map<String, RepositoryBatchResult>> {
+class RepositoryBatchResultNotifier
+    extends StateNotifier<Map<String, RepositoryBatchResult>> {
   RepositoryBatchResultNotifier() : super({});
 
   /// Set a result for a specific repository
@@ -27,10 +25,7 @@ class RepositoryBatchResultNotifier extends StateNotifier<Map<String, Repository
 
   /// Set multiple results at once
   void setResults(Map<String, RepositoryBatchResult> results) {
-    state = {
-      ...state,
-      ...results,
-    };
+    state = {...state, ...results};
   }
 
   /// Clear result for a specific repository
@@ -58,13 +53,14 @@ class RepositoryBatchResultNotifier extends StateNotifier<Map<String, Repository
 
 /// Provider for repository batch operation results
 final repositoryBatchErrorProvider =
-    StateNotifierProvider<RepositoryBatchResultNotifier, Map<String, RepositoryBatchResult>>(
-  (ref) => RepositoryBatchResultNotifier(),
-);
+    StateNotifierProvider<
+      RepositoryBatchResultNotifier,
+      Map<String, RepositoryBatchResult>
+    >((ref) => RepositoryBatchResultNotifier());
 
 /// Convenience provider to get result for a specific repository
 final repositoryBatchErrorByPathProvider =
     Provider.family<RepositoryBatchResult?, String>((ref, repositoryPath) {
-  final results = ref.watch(repositoryBatchErrorProvider);
-  return results[repositoryPath];
-});
+      final results = ref.watch(repositoryBatchErrorProvider);
+      return results[repositoryPath];
+    });

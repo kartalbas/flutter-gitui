@@ -18,10 +18,7 @@ import '../../history/widgets/file_tree_panel.dart';
 class FileHistoryPanel extends ConsumerWidget {
   final String filePath;
 
-  const FileHistoryPanel({
-    super.key,
-    required this.filePath,
-  });
+  const FileHistoryPanel({super.key, required this.filePath});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,13 +68,9 @@ class FileHistoryPanel extends ConsumerWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(
-              l10n.emptyStateNoHistory,
-            ),
+            TitleLargeLabel(l10n.emptyStateNoHistory),
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(
-              l10n.emptyStateNoHistoryMessage,
-            ),
+            BodyMediumLabel(l10n.emptyStateNoHistoryMessage),
           ],
         ),
       );
@@ -86,8 +79,10 @@ class FileHistoryPanel extends ConsumerWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(AppTheme.paddingM),
       itemCount: commits.length,
-      separatorBuilder: (context, index) => const SizedBox(height: AppTheme.paddingS),
-      itemBuilder: (context, index) => _buildCommitCard(context, commits[index]),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppTheme.paddingS),
+      itemBuilder: (context, index) =>
+          _buildCommitCard(context, commits[index]),
     );
   }
 
@@ -130,7 +125,9 @@ class FileHistoryPanel extends ConsumerWidget {
                   const SizedBox(width: AppTheme.paddingS),
                   Flexible(
                     child: BodySmallLabel(
-                      commit.authorDateDisplay(Localizations.localeOf(context).languageCode),
+                      commit.authorDateDisplay(
+                        Localizations.localeOf(context).languageCode,
+                      ),
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -139,9 +136,7 @@ class FileHistoryPanel extends ConsumerWidget {
               ),
               const SizedBox(height: AppTheme.paddingS),
               // Commit message
-              BodyMediumLabel(
-                commit.subject,
-              ),
+              BodyMediumLabel(commit.subject),
               if (commit.body.isNotEmpty) ...[
                 const SizedBox(height: AppTheme.paddingXS),
                 BodySmallLabel(
@@ -173,10 +168,7 @@ class FileHistoryPanel extends ConsumerWidget {
             AppLocalizations.of(context)!.messageErrorLoadingHistory,
           ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
-            error,
-            textAlign: TextAlign.center,
-          ),
+          BodyMediumLabel(error, textAlign: TextAlign.center),
         ],
       ),
     );
@@ -210,10 +202,7 @@ class FileHistoryPanel extends ConsumerWidget {
             ),
 
             // Right: Changed files panel
-            Expanded(
-              flex: 1,
-              child: FileTreePanel(commitHash: commit.hash),
-            ),
+            Expanded(flex: 1, child: FileTreePanel(commitHash: commit.hash)),
           ],
         ),
       ),

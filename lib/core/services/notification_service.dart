@@ -31,7 +31,11 @@ class NotificationService {
   /// Has a copy button to copy the complete error message to clipboard
   /// Has an open log files button if text editor is configured
   /// Requires manual dismissal - does not auto-hide
-  static void showError(BuildContext context, String message, {String? textEditor}) {
+  static void showError(
+    BuildContext context,
+    String message, {
+    String? textEditor,
+  }) {
     if (!context.mounted) return;
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -56,10 +60,7 @@ class NotificationService {
             ),
             const SizedBox(width: AppTheme.paddingS),
             // Copy button
-            _CopyButton(
-              message: message,
-              tooltip: 'Copy error to clipboard',
-            ),
+            _CopyButton(message: message, tooltip: 'Copy error to clipboard'),
             // Open log files button (if text editor configured)
             if (textEditor != null && Logger.logFilePath != null)
               BaseIconButton(
@@ -119,7 +120,11 @@ class NotificationService {
   /// Has a copy button to copy the complete warning message to clipboard
   /// Has an open log files button if text editor is configured
   /// Requires manual dismissal - does not auto-hide
-  static void showWarning(BuildContext context, String message, {String? textEditor}) {
+  static void showWarning(
+    BuildContext context,
+    String message, {
+    String? textEditor,
+  }) {
     if (!context.mounted) return;
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -144,10 +149,7 @@ class NotificationService {
             ),
             const SizedBox(width: AppTheme.paddingS),
             // Copy button
-            _CopyButton(
-              message: message,
-              tooltip: 'Copy warning to clipboard',
-            ),
+            _CopyButton(message: message, tooltip: 'Copy warning to clipboard'),
             // Open log files button (if text editor configured)
             if (textEditor != null && Logger.logFilePath != null)
               BaseIconButton(
@@ -232,4 +234,3 @@ class _CopyButtonState extends State<_CopyButton> {
     );
   }
 }
-

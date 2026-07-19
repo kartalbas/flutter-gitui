@@ -17,13 +17,11 @@ import '../theme/app_theme.dart';
 class UpdateAvailableDialog extends ConsumerStatefulWidget {
   final UpdateInfo updateInfo;
 
-  const UpdateAvailableDialog({
-    super.key,
-    required this.updateInfo,
-  });
+  const UpdateAvailableDialog({super.key, required this.updateInfo});
 
   @override
-  ConsumerState<UpdateAvailableDialog> createState() => _UpdateAvailableDialogState();
+  ConsumerState<UpdateAvailableDialog> createState() =>
+      _UpdateAvailableDialogState();
 }
 
 class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
@@ -92,14 +90,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: theme.colorScheme.outlineVariant,
-                ),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: SingleChildScrollView(
-                child: BodyMediumLabel(
-                  widget.updateInfo.changelog,
-                ),
+                child: BodyMediumLabel(widget.updateInfo.changelog),
               ),
             ),
             const SizedBox(height: AppTheme.paddingL),
@@ -228,12 +222,16 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
   Future<void> _openDownloadInBrowser() async {
     final url = Uri.parse(widget.updateInfo.downloadUrl);
     try {
-      final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
       if (!launched) {
         Logger.error('Could not launch URL: $url');
         if (mounted) {
           setState(() {
-            _errorMessage = 'Could not open browser. Please download manually from:\n${widget.updateInfo.downloadUrl}';
+            _errorMessage =
+                'Could not open browser. Please download manually from:\n${widget.updateInfo.downloadUrl}';
           });
         }
       } else {
@@ -290,7 +288,8 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       if (filePath.isEmpty) {
         if (mounted) {
           setState(() {
-            _errorMessage = 'Failed to download update. Please try again later.';
+            _errorMessage =
+                'Failed to download update. Please try again later.';
             _isDownloading = false;
           });
         }
@@ -302,7 +301,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         Logger.info('Starting update installation...', forceConsole: true);
         Logger.info('Update file: $filePath', forceConsole: true);
 
-        final success = await UpdateService.installUpdate(filePath).then((result) => result.unwrapOr(false));
+        final success = await UpdateService.installUpdate(
+          filePath,
+        ).then((result) => result.unwrapOr(false));
 
         Logger.info('Update installation result: $success', forceConsole: true);
 
@@ -323,7 +324,8 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           Logger.error('Update installation returned false', null, null, true);
           if (mounted) {
             setState(() {
-              _errorMessage = 'Failed to install update. Check logs for details.';
+              _errorMessage =
+                  'Failed to install update. Check logs for details.';
               _isDownloading = false;
             });
           }

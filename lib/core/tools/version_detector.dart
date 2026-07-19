@@ -44,23 +44,24 @@ class VersionDetector {
   static Future<String?> _tryFlag(String executablePath, String flag) async {
     try {
       // Special handling for VS Code - use shell command to avoid launching GUI
-      final fileName = executablePath.split(Platform.pathSeparator).last.toLowerCase();
+      final fileName = executablePath
+          .split(Platform.pathSeparator)
+          .last
+          .toLowerCase();
       final isVSCode = fileName.contains('code.exe') || fileName == 'code.exe';
 
       ProcessResult result;
       if (isVSCode && Platform.isWindows) {
         // Use "code" command via shell to get version without launching GUI
-        result = await Process.run(
-          'cmd',
-          ['/c', 'code', flag],
-          runInShell: false,
-        ).timeout(const Duration(seconds: 3));
+        result = await Process.run('cmd', [
+          '/c',
+          'code',
+          flag,
+        ], runInShell: false).timeout(const Duration(seconds: 3));
       } else {
-        result = await Process.run(
-          executablePath,
-          [flag],
-          runInShell: false,
-        ).timeout(const Duration(seconds: 2));
+        result = await Process.run(executablePath, [
+          flag,
+        ], runInShell: false).timeout(const Duration(seconds: 2));
       }
 
       if (result.exitCode == 0 || result.exitCode == 1) {
@@ -88,16 +89,12 @@ class VersionDetector {
       // Escape path for PowerShell
       final escapedPath = executablePath.replaceAll("'", "''");
 
-      final result = await Process.run(
-        'powershell',
-        [
-          '-NoProfile',
-          '-NonInteractive',
-          '-Command',
-          "(Get-Item '$escapedPath').VersionInfo.ProductVersion"
-        ],
-        runInShell: false,
-      ).timeout(const Duration(seconds: 3));
+      final result = await Process.run('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        "(Get-Item '$escapedPath').VersionInfo.ProductVersion",
+      ], runInShell: false).timeout(const Duration(seconds: 3));
 
       if (result.exitCode == 0) {
         final version = result.stdout.toString().trim();
@@ -107,16 +104,12 @@ class VersionDetector {
       }
 
       // Also try FileVersion if ProductVersion fails
-      final result2 = await Process.run(
-        'powershell',
-        [
-          '-NoProfile',
-          '-NonInteractive',
-          '-Command',
-          "(Get-Item '$escapedPath').VersionInfo.FileVersion"
-        ],
-        runInShell: false,
-      ).timeout(const Duration(seconds: 3));
+      final result2 = await Process.run('powershell', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        "(Get-Item '$escapedPath').VersionInfo.FileVersion",
+      ], runInShell: false).timeout(const Duration(seconds: 3));
 
       if (result2.exitCode == 0) {
         final version = result2.stdout.toString().trim();
@@ -146,11 +139,11 @@ class VersionDetector {
 
         if (await File(plistPath).exists()) {
           // Use PlistBuddy to read version
-          final result = await Process.run(
-            '/usr/libexec/PlistBuddy',
-            ['-c', 'Print :CFBundleShortVersionString', plistPath],
-            runInShell: false,
-          ).timeout(const Duration(seconds: 2));
+          final result = await Process.run('/usr/libexec/PlistBuddy', [
+            '-c',
+            'Print :CFBundleShortVersionString',
+            plistPath,
+          ], runInShell: false).timeout(const Duration(seconds: 2));
 
           if (result.exitCode == 0) {
             final version = result.stdout.toString().trim();
@@ -169,11 +162,9 @@ class VersionDetector {
   /// Try to extract version from --help output
   static Future<String?> _tryVersionFromHelp(String executablePath) async {
     try {
-      final result = await Process.run(
-        executablePath,
-        ['--help'],
-        runInShell: false,
-      ).timeout(const Duration(seconds: 2));
+      final result = await Process.run(executablePath, [
+        '--help',
+      ], runInShell: false).timeout(const Duration(seconds: 2));
 
       final output = result.stdout.toString() + result.stderr.toString();
       return _extractVersion(output);
@@ -234,7 +225,10 @@ class VersionDetector {
     final version = await detectVersion(executablePath);
     if (version == null) return null;
 
-    final fileName = executablePath.split(Platform.pathSeparator).last.toLowerCase();
+    final fileName = executablePath
+        .split(Platform.pathSeparator)
+        .last
+        .toLowerCase();
 
     // Try to identify the tool from filename and version output
     String? toolName;
@@ -251,7 +245,8 @@ class VersionDetector {
       toolName = 'Meld';
     } else if (fileName.contains('winmerge')) {
       toolName = 'WinMerge';
-    } else if (fileName.contains('tortoisemerge') || fileName.contains('tortoisegitmerge')) {
+    } else if (fileName.contains('tortoisemerge') ||
+        fileName.contains('tortoisegitmerge')) {
       toolName = 'TortoiseMerge';
     } else if (fileName.contains('notepad++')) {
       toolName = 'Notepad++';

@@ -166,7 +166,12 @@ class RepositoryListItem extends ConsumerWidget {
                 ],
 
                 // Clean status
-                if (!status.isBroken && !status.hasIncoming && !status.hasOutgoing && !status.hasUncommittedChanges && status.exists && status.isValidGit) ...[
+                if (!status.isBroken &&
+                    !status.hasIncoming &&
+                    !status.hasOutgoing &&
+                    !status.hasUncommittedChanges &&
+                    status.exists &&
+                    status.isValidGit) ...[
                   const SizedBox(width: AppTheme.paddingXS),
                   _buildCompactBadge(
                     context,
@@ -207,7 +212,9 @@ class RepositoryListItem extends ConsumerWidget {
                 PhosphorIconsRegular.folder,
                 size: AppTheme.iconXS,
                 color: isSelected
-                    ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.7)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer.withValues(alpha: 0.7)
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingXS),
@@ -215,7 +222,9 @@ class RepositoryListItem extends ConsumerWidget {
                 child: BodySmallLabel(
                   repository.path,
                   color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -225,15 +234,21 @@ class RepositoryListItem extends ConsumerWidget {
                 PhosphorIconsRegular.clock,
                 size: AppTheme.iconXS,
                 color: isSelected
-                    ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.7)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer.withValues(alpha: 0.7)
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
                 child: BodySmallLabel(
-                  repository.lastAccessed.toDisplayString(Localizations.localeOf(context).languageCode),
+                  repository.lastAccessed.toDisplayString(
+                    Localizations.localeOf(context).languageCode,
+                  ),
                   color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -273,13 +288,16 @@ class RepositoryListItem extends ConsumerWidget {
             tooltip: AppLocalizations.of(context)!.tooltipRemoveFromWorkspace,
           ),
           // Repository menu - only shown if there are menu items available (on far right)
-          if (onOpenInEditor != null || (status.hasRemote && onEditRemoteUrl != null))
+          if (onOpenInEditor != null ||
+              (status.hasRemote && onEditRemoteUrl != null))
             BasePopupMenuButton<String>(
               icon: Icon(
                 PhosphorIconsRegular.dotsThreeVertical,
                 size: AppTheme.iconM,
                 color: isSelected
-                    ? Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.6)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer.withValues(alpha: 0.6)
                     : null,
               ),
               tooltip: AppLocalizations.of(context)!.moreActions,
@@ -298,7 +316,9 @@ class RepositoryListItem extends ConsumerWidget {
                     value: 'edit_remote_url',
                     child: MenuItemContent(
                       icon: PhosphorIconsRegular.link,
-                      label: AppLocalizations.of(context)!.editRemoteUrl('origin'),
+                      label: AppLocalizations.of(
+                        context,
+                      )!.editRemoteUrl('origin'),
                       iconSize: AppTheme.iconM,
                     ),
                   ),
@@ -320,7 +340,9 @@ class RepositoryListItem extends ConsumerWidget {
   }
 
   Widget _buildBatchResultIcon(BuildContext context, WidgetRef ref) {
-    final batchResult = ref.watch(repositoryBatchErrorByPathProvider(repository.path));
+    final batchResult = ref.watch(
+      repositoryBatchErrorByPathProvider(repository.path),
+    );
 
     if (batchResult == null) {
       return const SizedBox.shrink();
@@ -338,11 +360,7 @@ class RepositoryListItem extends ConsumerWidget {
       onTap: () => _showBatchResultDialog(context, ref, batchResult),
       child: Padding(
         padding: const EdgeInsets.only(right: AppTheme.paddingXS),
-        child: Icon(
-          icon,
-          size: 14,
-          color: color,
-        ),
+        child: Icon(icon, size: 14, color: color),
       ),
     );
   }
@@ -357,7 +375,9 @@ class RepositoryListItem extends ConsumerWidget {
       repositoryName: repository.displayName,
       result: result,
       onDismiss: () {
-        ref.read(repositoryBatchErrorProvider.notifier).clearResult(repository.path);
+        ref
+            .read(repositoryBatchErrorProvider.notifier)
+            .clearResult(repository.path);
       },
     );
   }
@@ -379,25 +399,15 @@ class RepositoryListItem extends ConsumerWidget {
             ? color.withValues(alpha: 0.3)
             : color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: 0.6),
-          width: 1,
-        ),
+        border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 12,
-            color: color,
-          ),
+          Icon(icon, size: 12, color: color),
           if (label != null) ...[
             const SizedBox(width: 3),
-            LabelSmallLabel(
-              label,
-              color: color,
-            ),
+            LabelSmallLabel(label, color: color),
           ],
         ],
       ),

@@ -97,13 +97,13 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
 
   /// Keyboard bindings for CallbackShortcuts
   Map<ShortcutActivator, VoidCallback> get keyBindings => {
-        const SingleActivator(LogicalKeyboardKey.arrowUp): navigateUp,
-        const SingleActivator(LogicalKeyboardKey.arrowDown): navigateDown,
-        const SingleActivator(LogicalKeyboardKey.space): toggleSelectedNode,
-        const SingleActivator(LogicalKeyboardKey.enter): toggleSelectedNode,
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): collapseSelected,
-        const SingleActivator(LogicalKeyboardKey.arrowRight): expandSelected,
-      };
+    const SingleActivator(LogicalKeyboardKey.arrowUp): navigateUp,
+    const SingleActivator(LogicalKeyboardKey.arrowDown): navigateDown,
+    const SingleActivator(LogicalKeyboardKey.space): toggleSelectedNode,
+    const SingleActivator(LogicalKeyboardKey.enter): toggleSelectedNode,
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): collapseSelected,
+    const SingleActivator(LogicalKeyboardKey.arrowRight): expandSelected,
+  };
 
   /// Update the tree with new root nodes
   void updateNodes(List<T> rootNodes) {

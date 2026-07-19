@@ -32,7 +32,8 @@ class ThemeSection extends ConsumerWidget {
         : 'JetBrains Mono';
 
     // Ensure current preview font is in the monospace fonts list, otherwise use default
-    final currentPreviewFont = AppTheme.availableMonospaceFonts.contains(ui.previewFontFamily)
+    final currentPreviewFont =
+        AppTheme.availableMonospaceFonts.contains(ui.previewFontFamily)
         ? ui.previewFontFamily
         : 'JetBrains Mono';
 

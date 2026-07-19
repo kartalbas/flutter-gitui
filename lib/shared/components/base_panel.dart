@@ -86,7 +86,8 @@ class _BasePanelState extends State<BasePanel> {
   void didUpdateWidget(BasePanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Reset expansion state if collapsible property changes
-    if (widget.isCollapsible != oldWidget.isCollapsible && !widget.isCollapsible) {
+    if (widget.isCollapsible != oldWidget.isCollapsible &&
+        !widget.isCollapsible) {
       _isExpanded = true;
     }
   }
@@ -111,10 +112,7 @@ class _BasePanelState extends State<BasePanel> {
       child: Container(
         decoration: BoxDecoration(
           border: widget.hasBorder
-              ? Border.all(
-                  color: colorScheme.outline,
-                  width: 1,
-                )
+              ? Border.all(color: colorScheme.outline, width: 1)
               : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusM),
         ),
@@ -139,12 +137,15 @@ class _BasePanelState extends State<BasePanel> {
                         Expanded(child: widget.title),
 
                         // Action buttons
-                        if (widget.actions != null && widget.actions!.isNotEmpty) ...{
+                        if (widget.actions != null &&
+                            widget.actions!.isNotEmpty) ...{
                           SizedBox(width: AppTheme.paddingM),
-                          ...widget.actions!.map((action) => Padding(
-                                padding: EdgeInsets.only(left: AppTheme.paddingS),
-                                child: action,
-                              )),
+                          ...widget.actions!.map(
+                            (action) => Padding(
+                              padding: EdgeInsets.only(left: AppTheme.paddingS),
+                              child: action,
+                            ),
+                          ),
                         },
 
                         // Collapse/expand icon

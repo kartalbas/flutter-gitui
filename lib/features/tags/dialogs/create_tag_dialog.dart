@@ -17,11 +17,7 @@ class CreateTagDialog extends ConsumerStatefulWidget {
   final String? commitHash;
   final String? commitMessage;
 
-  const CreateTagDialog({
-    super.key,
-    this.commitHash,
-    this.commitMessage,
-  });
+  const CreateTagDialog({super.key, this.commitHash, this.commitMessage});
 
   @override
   ConsumerState<CreateTagDialog> createState() => _CreateTagDialogState();
@@ -55,16 +51,18 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     final tagsAsync = ref.watch(tagsProvider);
 
     // Get last 10 tags sorted by date (newest first)
-    final recentTags = tagsAsync.whenData((tags) {
-      final sortedTags = List<GitTag>.from(tags);
-      sortedTags.sort((a, b) {
-        if (a.date == null && b.date == null) return 0;
-        if (a.date == null) return 1;
-        if (b.date == null) return -1;
-        return b.date!.compareTo(a.date!);
-      });
-      return sortedTags.take(10).toList();
-    }).value ?? [];
+    final recentTags =
+        tagsAsync.whenData((tags) {
+          final sortedTags = List<GitTag>.from(tags);
+          sortedTags.sort((a, b) {
+            if (a.date == null && b.date == null) return 0;
+            if (a.date == null) return 1;
+            if (b.date == null) return -1;
+            return b.date!.compareTo(a.date!);
+          });
+          return sortedTags.take(10).toList();
+        }).value ??
+        [];
 
     return BaseDialog(
       title: loc.createTagDialog,
@@ -108,11 +106,10 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 ),
               ),
               const SizedBox(height: AppTheme.paddingM),
-            ] else
-              ...[
-                BodyMediumLabel(loc.createNewTagAtHead),
-                const SizedBox(height: AppTheme.paddingM),
-              ],
+            ] else ...[
+              BodyMediumLabel(loc.createNewTagAtHead),
+              const SizedBox(height: AppTheme.paddingM),
+            ],
             // Template selector
             if (recentTags.isNotEmpty) ...[
               LabelMediumLabel('Use Recent Tag as Template'),
@@ -127,12 +124,16 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                     label: 'No template',
                     icon: PhosphorIconsRegular.x,
                   ),
-                  ...recentTags.map((tag) => BaseDropdownItem<GitTag?>.withBadge(
-                    value: tag,
-                    label: tag.name,
-                    icon: tag.isAnnotated ? PhosphorIconsBold.tag : PhosphorIconsRegular.tag,
-                    badgeText: tag.isAnnotated ? 'annotated' : null,
-                  )),
+                  ...recentTags.map(
+                    (tag) => BaseDropdownItem<GitTag?>.withBadge(
+                      value: tag,
+                      label: tag.name,
+                      icon: tag.isAnnotated
+                          ? PhosphorIconsBold.tag
+                          : PhosphorIconsRegular.tag,
+                      badgeText: tag.isAnnotated ? 'annotated' : null,
+                    ),
+                  ),
                 ],
                 onChanged: (tag) {
                   if (tag != null) {

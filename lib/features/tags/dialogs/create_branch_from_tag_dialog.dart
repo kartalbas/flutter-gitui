@@ -12,13 +12,11 @@ import '../../../shared/components/base_label.dart';
 class CreateBranchFromTagDialog extends StatefulWidget {
   final String tagName;
 
-  const CreateBranchFromTagDialog({
-    super.key,
-    required this.tagName,
-  });
+  const CreateBranchFromTagDialog({super.key, required this.tagName});
 
   @override
-  State<CreateBranchFromTagDialog> createState() => _CreateBranchFromTagDialogState();
+  State<CreateBranchFromTagDialog> createState() =>
+      _CreateBranchFromTagDialogState();
 }
 
 class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
@@ -143,9 +141,8 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
     }
 
     // Return the result
-    Navigator.of(context).pop({
-      'branchName': branchName,
-      'checkout': _checkout,
-    });
+    Navigator.of(
+      context,
+    ).pop({'branchName': branchName, 'checkout': _checkout});
   }
 }

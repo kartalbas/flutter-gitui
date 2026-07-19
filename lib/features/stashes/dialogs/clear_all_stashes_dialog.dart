@@ -18,9 +18,7 @@ class ClearAllStashesDialog extends StatelessWidget {
       title: l10n.clearAllStashesDialog,
       icon: PhosphorIconsRegular.warningCircle,
       variant: DialogVariant.destructive,
-      content: BodyMediumLabel(
-        l10n.clearAllStashesConfirm,
-      ),
+      content: BodyMediumLabel(l10n.clearAllStashesConfirm),
       actions: [
         BaseButton(
           label: l10n.cancel,

@@ -25,7 +25,8 @@ class SettingsSection extends StatefulWidget {
   State<SettingsSection> createState() => _SettingsSectionState();
 }
 
-class _SettingsSectionState extends State<SettingsSection> with SingleTickerProviderStateMixin {
+class _SettingsSectionState extends State<SettingsSection>
+    with SingleTickerProviderStateMixin {
   late bool _isExpanded;
   late AnimationController _animationController;
   late Animation<double> _iconRotation;
@@ -42,13 +43,9 @@ class _SettingsSectionState extends State<SettingsSection> with SingleTickerProv
       vsync: this,
     );
 
-    _iconRotation = Tween<double>(
-      begin: 0,
-      end: 0.5,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _iconRotation = Tween<double>(begin: 0, end: 0.5).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
     if (_isExpanded) {
       _animationController.value = 1.0;
@@ -107,7 +104,9 @@ class _SettingsSectionState extends State<SettingsSection> with SingleTickerProv
       padding: EdgeInsets.zero,
       header: InkWell(
         onTap: _toggleExpanded,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusL)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppTheme.radiusL),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.paddingM),
           child: Row(
@@ -137,7 +136,9 @@ class _SettingsSectionState extends State<SettingsSection> with SingleTickerProv
           children: widget.children,
         ),
         secondChild: const SizedBox.shrink(),
-        crossFadeState: _isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+        crossFadeState: _isExpanded
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
         duration: const Duration(milliseconds: 200),
       ),
     );

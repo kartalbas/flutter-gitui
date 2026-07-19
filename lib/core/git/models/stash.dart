@@ -55,7 +55,8 @@ class GitStash {
 
   /// Display formatted timestamp (ISO + relative)
   /// Pass locale code (e.g., 'en', 'ar', 'de') for localized relative time
-  String timestampDisplay([String? locale]) => timestamp?.toDisplayString(locale) ?? 'No timestamp';
+  String timestampDisplay([String? locale]) =>
+      timestamp?.toDisplayString(locale) ?? 'No timestamp';
 
   /// Short hash (first 7 characters)
   String get shortHash => hash.length > 7 ? hash.substring(0, 7) : hash;

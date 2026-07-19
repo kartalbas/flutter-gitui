@@ -10,8 +10,10 @@ import 'package:flutter/services.dart';
 enum SelectionState {
   /// Item is not selected
   none,
+
   /// Item is the primary/most recent selection
   primary,
+
   /// Item is selected as part of multi-selection (but not primary)
   multiSelected,
 }
@@ -101,7 +103,9 @@ class MultiSelectManager<T> {
     if (selectedItems.contains(item)) {
       selectedItems.remove(item);
       if (_lastSelectedItem == item) {
-        _lastSelectedItem = selectedItems.isNotEmpty ? selectedItems.last : null;
+        _lastSelectedItem = selectedItems.isNotEmpty
+            ? selectedItems.last
+            : null;
       }
     } else {
       selectedItems.add(item);
@@ -110,7 +114,11 @@ class MultiSelectManager<T> {
     onSelectionChanged();
   }
 
-  void _handleRangeSelect(T item, List<T> allItems, VoidCallback onSelectionChanged) {
+  void _handleRangeSelect(
+    T item,
+    List<T> allItems,
+    VoidCallback onSelectionChanged,
+  ) {
     if (_lastSelectedItem == null) {
       _handleSingleSelect(item, onSelectionChanged);
       return;

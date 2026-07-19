@@ -44,7 +44,8 @@ class GitTag {
   bool get isLightweight => type == GitTagType.lightweight;
 
   /// Short hash (first 7 characters)
-  String get shortHash => commitHash.length > 7 ? commitHash.substring(0, 7) : commitHash;
+  String get shortHash =>
+      commitHash.length > 7 ? commitHash.substring(0, 7) : commitHash;
 
   /// Display name with type indicator
   String get displayName => isAnnotated ? '$name (annotated)' : name;
@@ -80,7 +81,8 @@ class GitTag {
 
   /// Display formatted date (ISO + relative)
   /// Pass locale code (e.g., 'en', 'ar', 'de') for localized relative time
-  String dateDisplay([String? locale]) => date?.toDisplayString(locale) ?? 'No date';
+  String dateDisplay([String? locale]) =>
+      date?.toDisplayString(locale) ?? 'No date';
 
   @override
   String toString() => 'GitTag($name -> $shortHash)';
@@ -88,7 +90,9 @@ class GitTag {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is GitTag && other.name == name && other.commitHash == commitHash;
+    return other is GitTag &&
+        other.name == name &&
+        other.commitHash == commitHash;
   }
 
   @override
@@ -96,7 +100,4 @@ class GitTag {
 }
 
 /// Type of Git tag
-enum GitTagType {
-  lightweight,
-  annotated,
-}
+enum GitTagType { lightweight, annotated }

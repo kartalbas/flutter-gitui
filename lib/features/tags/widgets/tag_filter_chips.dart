@@ -45,7 +45,8 @@ class TagFilterChips extends StatelessWidget {
             count: allTags.where((t) => t.isLightweight).length,
             showCount: true,
             selected: selectedFilter == TagFilterType.lightweight,
-            onSelected: (selected) => onFilterChanged(TagFilterType.lightweight),
+            onSelected: (selected) =>
+                onFilterChanged(TagFilterType.lightweight),
           ),
         ],
       ),

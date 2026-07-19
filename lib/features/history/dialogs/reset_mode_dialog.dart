@@ -13,10 +13,7 @@ import '../../../generated/app_localizations.dart';
 class ResetModeDialog extends StatelessWidget {
   final GitCommit commit;
 
-  const ResetModeDialog({
-    super.key,
-    required this.commit,
-  });
+  const ResetModeDialog({super.key, required this.commit});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +28,7 @@ class ResetModeDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(
-            l10n.resetCurrentBranchTo,
-          ),
+          BodyMediumLabel(l10n.resetCurrentBranchTo),
           const SizedBox(height: AppTheme.paddingS),
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -58,9 +53,7 @@ class ResetModeDialog extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      BodySmallLabel(
-                        '${commit.shortHash} by ${commit.author}',
-                      ),
+                      BodySmallLabel('${commit.shortHash} by ${commit.author}'),
                     ],
                   ),
                 ),
@@ -68,13 +61,9 @@ class ResetModeDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleSmallLabel(
-            l10n.chooseResetMode,
-          ),
+          TitleSmallLabel(l10n.chooseResetMode),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
-            l10n.branchPointerWillMove,
-          ),
+          BodySmallLabel(l10n.branchPointerWillMove),
         ],
       ),
       actions: [

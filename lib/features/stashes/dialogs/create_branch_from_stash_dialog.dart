@@ -13,10 +13,7 @@ import '../../../core/git/models/stash.dart';
 class CreateBranchFromStashDialog extends StatefulWidget {
   final GitStash stash;
 
-  const CreateBranchFromStashDialog({
-    super.key,
-    required this.stash,
-  });
+  const CreateBranchFromStashDialog({super.key, required this.stash});
 
   @override
   State<CreateBranchFromStashDialog> createState() =>
@@ -51,7 +48,9 @@ class _CreateBranchFromStashDialogState
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BodyMediumLabel(l10n.createBranchFromStashDescription(widget.stash.ref)),
+          BodyMediumLabel(
+            l10n.createBranchFromStashDescription(widget.stash.ref),
+          ),
           const SizedBox(height: AppTheme.paddingM),
           BaseTextField(
             controller: _branchNameController,
@@ -69,7 +68,8 @@ class _CreateBranchFromStashDialogState
         BaseButton(
           label: l10n.create,
           variant: ButtonVariant.primary,
-          onPressed: () => Navigator.of(context).pop(_branchNameController.text),
+          onPressed: () =>
+              Navigator.of(context).pop(_branchNameController.text),
         ),
       ],
     );

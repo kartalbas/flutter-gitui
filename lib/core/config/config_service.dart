@@ -123,8 +123,12 @@ class ConfigService {
     if (indent == 0) {
       buffer.writeln('# Flutter GitUI Configuration');
       buffer.writeln('# Edit this file to customize your settings');
-      buffer.writeln('# File location: ~/.flutter-gitui/config.yaml (Linux/macOS)');
-      buffer.writeln('#                %USERPROFILE%\\.flutter-gitui\\config.yaml (Windows)');
+      buffer.writeln(
+        '# File location: ~/.flutter-gitui/config.yaml (Linux/macOS)',
+      );
+      buffer.writeln(
+        '#                %USERPROFILE%\\.flutter-gitui\\config.yaml (Windows)',
+      );
       buffer.writeln();
     }
 
@@ -160,7 +164,9 @@ class ConfigService {
                       if (element is bool || element is num) {
                         buffer.writeln('$spaces      - $element');
                       } else {
-                        buffer.writeln('$spaces      - ${_yamlString(element.toString())}');
+                        buffer.writeln(
+                          '$spaces      - ${_yamlString(element.toString())}',
+                        );
                       }
                     }
                   }

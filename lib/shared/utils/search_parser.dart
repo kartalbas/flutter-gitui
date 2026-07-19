@@ -20,10 +20,7 @@ class SearchParser {
   RegExp? _cachedRegex;
   String? _cachedPattern;
 
-  SearchParser({
-    required this.query,
-    required this.mode,
-  });
+  SearchParser({required this.query, required this.mode});
 
   /// Check if a file/folder name matches the search query
   bool matches(String name, String fullPath) {
@@ -86,9 +83,7 @@ class SearchParser {
         .replaceAll('|', r'\|');
 
     // Convert glob wildcards to regex
-    regexPattern = regexPattern
-        .replaceAll('*', '.*')
-        .replaceAll('?', '.');
+    regexPattern = regexPattern.replaceAll('*', '.*').replaceAll('?', '.');
 
     _cachedPattern = pattern;
     _cachedRegex = RegExp(regexPattern, caseSensitive: false);

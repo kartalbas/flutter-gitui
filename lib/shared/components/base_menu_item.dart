@@ -17,9 +17,7 @@ class BaseMenuItem<T> extends PopupMenuItem<T> {
     super.mouseCursor,
     super.labelTextStyle,
     required Widget child,
-  }) : super(
-          child: child,
-        );
+  }) : super(child: child);
 }
 
 /// Base component for menu item content with icon and label
@@ -51,11 +49,7 @@ class MenuItemContent extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(
-          icon,
-          size: iconSize,
-          color: iconColor,
-        ),
+        Icon(icon, size: iconSize, color: iconColor),
         SizedBox(width: spacing),
         Expanded(
           // ignore: avoid_text_with_style
@@ -98,16 +92,16 @@ class MenuItemContentWithCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveLabelColor = labelColor ?? (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
-    final effectiveIconColor = iconColor ?? (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
+    final effectiveLabelColor =
+        labelColor ??
+        (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
+    final effectiveIconColor =
+        iconColor ??
+        (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
 
     return Row(
       children: [
-        Icon(
-          icon,
-          size: iconSize,
-          color: effectiveIconColor,
-        ),
+        Icon(icon, size: iconSize, color: effectiveIconColor),
         SizedBox(width: spacing),
         Expanded(
           // ignore: avoid_text_with_style
@@ -121,11 +115,7 @@ class MenuItemContentWithCheck extends StatelessWidget {
         ),
         if (isSelected) ...[
           SizedBox(width: spacing),
-          Icon(
-            Icons.check,
-            size: iconSize,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.check, size: iconSize, color: theme.colorScheme.primary),
         ],
       ],
     );
@@ -165,17 +155,16 @@ class MenuItemContentTwoLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectivePrimaryColor = primaryLabelColor ?? (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
+    final effectivePrimaryColor =
+        primaryLabelColor ??
+        (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
     final effectiveIconColor = iconColor;
-    final effectiveSecondaryColor = secondaryLabelColor ?? theme.colorScheme.onSurfaceVariant;
+    final effectiveSecondaryColor =
+        secondaryLabelColor ?? theme.colorScheme.onSurfaceVariant;
 
     return Row(
       children: [
-        Icon(
-          icon,
-          size: iconSize,
-          color: effectiveIconColor,
-        ),
+        Icon(icon, size: iconSize, color: effectiveIconColor),
         SizedBox(width: spacing),
         Expanded(
           child: Column(
@@ -205,11 +194,7 @@ class MenuItemContentTwoLine extends StatelessWidget {
         ),
         if (showCheck && isSelected) ...[
           SizedBox(width: spacing),
-          Icon(
-            Icons.check,
-            size: iconSize,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.check, size: iconSize, color: theme.colorScheme.primary),
         ],
       ],
     );

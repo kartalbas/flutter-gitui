@@ -30,7 +30,8 @@ class GitRemote {
   }
 
   /// Check if URL is SSH
-  bool get isSsh => fetchUrl.startsWith('git@') || fetchUrl.startsWith('ssh://');
+  bool get isSsh =>
+      fetchUrl.startsWith('git@') || fetchUrl.startsWith('ssh://');
 
   /// Check if URL is HTTPS
   bool get isHttps => fetchUrl.startsWith('https://');
@@ -90,5 +91,6 @@ class GitRemote {
   int get hashCode => Object.hash(name, fetchUrl, pushUrl);
 
   @override
-  String toString() => 'GitRemote(name: $name, fetch: $fetchUrl, push: $pushUrl)';
+  String toString() =>
+      'GitRemote(name: $name, fetch: $fetchUrl, push: $pushUrl)';
 }

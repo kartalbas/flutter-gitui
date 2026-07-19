@@ -12,10 +12,7 @@ import '../../../core/git/models/commit.dart';
 class CommitDetailsPanel extends StatefulWidget {
   final GitCommit commit;
 
-  const CommitDetailsPanel({
-    super.key,
-    required this.commit,
-  });
+  const CommitDetailsPanel({super.key, required this.commit});
 
   @override
   State<CommitDetailsPanel> createState() => _CommitDetailsPanelState();
@@ -46,90 +43,10 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            // Commit message (prominent)
-            Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppTheme.paddingL),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            PhosphorIconsRegular.chatText,
-                            size: AppTheme.iconS,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          TitleSmallLabel(
-                            l10n.commitMessage,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppTheme.paddingM),
-                      SelectableText(
-                        widget.commit.message,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-            ),
-
-            const SizedBox(height: AppTheme.paddingM),
-
-            // Expandable details section
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _showDetails = !_showDetails;
-                });
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppTheme.paddingM),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _showDetails
-                          ? PhosphorIconsRegular.caretDown
-                          : PhosphorIconsRegular.caretRight,
-                      size: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BodyMediumLabel(
-                      l10n.additionalDetails,
-                    ),
-                    const Spacer(),
-                    BodySmallLabel(
-                      _showDetails ? l10n.hide : l10n.show,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Details content (expandable)
-            if (_showDetails) ...[
-              const SizedBox(height: AppTheme.paddingM),
+              // Commit message (prominent)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(AppTheme.paddingM),
+                padding: const EdgeInsets.all(AppTheme.paddingL),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
@@ -137,162 +54,265 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Author info
-                    _buildSection(
-                      context,
-                      l10n.authorLabel,
-                      PhosphorIconsRegular.user,
-                      child: Column(
-                        children: [
-                          _buildInfoRow(
-                            context,
-                            l10n.name,
-                            widget.commit.author,
-                          ),
-                          _buildInfoRow(
-                            context,
-                            l10n.email,
-                            widget.commit.authorEmail,
-                          ),
-                          _buildInfoRow(
-                            context,
-                            l10n.date,
-                            widget.commit.authorDateDisplay(Localizations.localeOf(context).languageCode),
-                          ),
-                        ],
+                    Row(
+                      children: [
+                        Icon(
+                          PhosphorIconsRegular.chatText,
+                          size: AppTheme.iconS,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: AppTheme.paddingS),
+                        TitleSmallLabel(
+                          l10n.commitMessage,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppTheme.paddingM),
+                    SelectableText(
+                      widget.commit.message,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
+                  ],
+                ),
+              ),
 
-                    const SizedBox(height: AppTheme.paddingM),
+              const SizedBox(height: AppTheme.paddingM),
 
-                    // Committer info (if different from author)
-                    if (widget.commit.committer != widget.commit.author ||
-                        widget.commit.committerEmail != widget.commit.authorEmail) ...[
+              // Expandable details section
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _showDetails = !_showDetails;
+                  });
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _showDetails
+                            ? PhosphorIconsRegular.caretDown
+                            : PhosphorIconsRegular.caretRight,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: AppTheme.paddingS),
+                      BodyMediumLabel(l10n.additionalDetails),
+                      const Spacer(),
+                      BodySmallLabel(
+                        _showDetails ? l10n.hide : l10n.show,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Details content (expandable)
+              if (_showDetails) ...[
+                const SizedBox(height: AppTheme.paddingM),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Author info
                       _buildSection(
                         context,
-                        l10n.committerLabel,
-                        PhosphorIconsRegular.userCircle,
+                        l10n.authorLabel,
+                        PhosphorIconsRegular.user,
                         child: Column(
                           children: [
                             _buildInfoRow(
                               context,
                               l10n.name,
-                              widget.commit.committer,
+                              widget.commit.author,
                             ),
                             _buildInfoRow(
                               context,
                               l10n.email,
-                              widget.commit.committerEmail,
+                              widget.commit.authorEmail,
                             ),
                             _buildInfoRow(
                               context,
                               l10n.date,
-                              widget.commit.committerDateDisplay(Localizations.localeOf(context).languageCode),
+                              widget.commit.authorDateDisplay(
+                                Localizations.localeOf(context).languageCode,
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: AppTheme.paddingM),
-                    ],
 
-                    // Commit hash
-                    _buildSection(
-                      context,
-                      l10n.hash,
-                      PhosphorIconsRegular.hash,
-                      child: CopyableText(
-                        text: widget.commit.hash,
-                        isMonospace: true,
-                        icon: PhosphorIconsRegular.gitCommit,
-                      ),
-                    ),
-
-                    // Parents
-                    if (widget.commit.parents.isNotEmpty) ...[
                       const SizedBox(height: AppTheme.paddingM),
-                      _buildSection(
-                        context,
-                        widget.commit.parents.length > 1
-                            ? l10n.parents
-                            : l10n.parent,
-                        widget.commit.isMergeCommit
-                            ? PhosphorIconsRegular.gitMerge
-                            : PhosphorIconsRegular.gitCommit,
-                        child: Column(
-                          children: widget.commit.parents.map((parent) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 6),
-                              child: CopyableText(
-                                text: parent,
-                                isMonospace: true,
-                                icon: PhosphorIconsRegular.gitCommit,
+
+                      // Committer info (if different from author)
+                      if (widget.commit.committer != widget.commit.author ||
+                          widget.commit.committerEmail !=
+                              widget.commit.authorEmail) ...[
+                        _buildSection(
+                          context,
+                          l10n.committerLabel,
+                          PhosphorIconsRegular.userCircle,
+                          child: Column(
+                            children: [
+                              _buildInfoRow(
+                                context,
+                                l10n.name,
+                                widget.commit.committer,
                               ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-
-                    // Refs (branches, tags)
-                    if (widget.commit.refs.isNotEmpty) ...[
-                      const SizedBox(height: AppTheme.paddingM),
-                      _buildSection(
-                        context,
-                        l10n.references,
-                        PhosphorIconsRegular.gitBranch,
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: widget.commit.refs.map((ref) {
-                            final isTag = ref.contains('tag:');
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppTheme.paddingS,
-                                vertical: AppTheme.paddingXS,
+                              _buildInfoRow(
+                                context,
+                                l10n.email,
+                                widget.commit.committerEmail,
                               ),
-                              decoration: BoxDecoration(
-                                color: isTag
-                                    ? Theme.of(context).colorScheme.tertiaryContainer
-                                    : Theme.of(context).colorScheme.secondaryContainer,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: isTag
-                                      ? Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.3)
-                                      : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
+                              _buildInfoRow(
+                                context,
+                                l10n.date,
+                                widget.commit.committerDateDisplay(
+                                  Localizations.localeOf(context).languageCode,
                                 ),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isTag ? PhosphorIconsRegular.tag : PhosphorIconsRegular.gitBranch,
-                                    size: 12,
-                                    color: isTag
-                                        ? Theme.of(context).colorScheme.onTertiaryContainer
-                                        : Theme.of(context).colorScheme.onSecondaryContainer,
-                                  ),
-                                  const SizedBox(width: AppTheme.paddingXS),
-                                  LabelMediumLabel(
-                                    ref,
-                                    color: isTag
-                                        ? Theme.of(context).colorScheme.onTertiaryContainer
-                                        : Theme.of(context).colorScheme.onSecondaryContainer,
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppTheme.paddingM),
+                      ],
+
+                      // Commit hash
+                      _buildSection(
+                        context,
+                        l10n.hash,
+                        PhosphorIconsRegular.hash,
+                        child: CopyableText(
+                          text: widget.commit.hash,
+                          isMonospace: true,
+                          icon: PhosphorIconsRegular.gitCommit,
                         ),
                       ),
+
+                      // Parents
+                      if (widget.commit.parents.isNotEmpty) ...[
+                        const SizedBox(height: AppTheme.paddingM),
+                        _buildSection(
+                          context,
+                          widget.commit.parents.length > 1
+                              ? l10n.parents
+                              : l10n.parent,
+                          widget.commit.isMergeCommit
+                              ? PhosphorIconsRegular.gitMerge
+                              : PhosphorIconsRegular.gitCommit,
+                          child: Column(
+                            children: widget.commit.parents.map((parent) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: CopyableText(
+                                  text: parent,
+                                  isMonospace: true,
+                                  icon: PhosphorIconsRegular.gitCommit,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+
+                      // Refs (branches, tags)
+                      if (widget.commit.refs.isNotEmpty) ...[
+                        const SizedBox(height: AppTheme.paddingM),
+                        _buildSection(
+                          context,
+                          l10n.references,
+                          PhosphorIconsRegular.gitBranch,
+                          child: Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: widget.commit.refs.map((ref) {
+                              final isTag = ref.contains('tag:');
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppTheme.paddingS,
+                                  vertical: AppTheme.paddingXS,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isTag
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.tertiaryContainer
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isTag
+                                        ? Theme.of(context).colorScheme.tertiary
+                                              .withValues(alpha: 0.3)
+                                        : Theme.of(context)
+                                              .colorScheme
+                                              .secondary
+                                              .withValues(alpha: 0.3),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isTag
+                                          ? PhosphorIconsRegular.tag
+                                          : PhosphorIconsRegular.gitBranch,
+                                      size: 12,
+                                      color: isTag
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onTertiaryContainer
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondaryContainer,
+                                    ),
+                                    const SizedBox(width: AppTheme.paddingXS),
+                                    LabelMediumLabel(
+                                      ref,
+                                      color: isTag
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onTertiaryContainer
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondaryContainer,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
-        ),
     );
   }
 

@@ -21,10 +21,7 @@ import 'viewers/csv_viewer_dialog.dart';
 class FilePreviewPanel extends ConsumerStatefulWidget {
   final String filePath;
 
-  const FilePreviewPanel({
-    super.key,
-    required this.filePath,
-  });
+  const FilePreviewPanel({super.key, required this.filePath});
 
   @override
   ConsumerState<FilePreviewPanel> createState() => _FilePreviewPanelState();
@@ -83,7 +80,9 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
       // Check if file is too large (> 1MB)
       if (_fileSize > 1024 * 1024) {
         _applyIfCurrent(requestedPath, () {
-          _error = _formatFileSize(_fileSize); // Will be formatted with l10n in UI
+          _error = _formatFileSize(
+            _fileSize,
+          ); // Will be formatted with l10n in UI
           _isLoading = false;
         });
         return;
@@ -143,7 +142,9 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
     // Check for null bytes or high percentage of non-printable characters
     if (bytes.contains(0)) return true;
 
-    final nonPrintable = bytes.where((b) => b < 32 && b != 9 && b != 10 && b != 13).length;
+    final nonPrintable = bytes
+        .where((b) => b < 32 && b != 9 && b != 10 && b != 13)
+        .length;
     return nonPrintable > bytes.length * 0.3;
   }
 
@@ -224,10 +225,14 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
           if (!_isLoading && !_isBinary && _error == null) ...[
             // File info
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingM),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.paddingM,
+              ),
               child: Center(
                 child: BodySmallLabel(
-                  AppLocalizations.of(context)!.messageFileInfo(_lineCount, _formatFileSize(_fileSize)),
+                  AppLocalizations.of(
+                    context,
+                  )!.messageFileInfo(_lineCount, _formatFileSize(_fileSize)),
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -279,10 +284,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               AppLocalizations.of(context)!.labelCannotPreviewFile,
             ),
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(
-              errorMessage,
-              textAlign: TextAlign.center,
-            ),
+            BodyMediumLabel(errorMessage, textAlign: TextAlign.center),
           ],
         ),
       );
@@ -299,9 +301,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(
-              AppLocalizations.of(context)!.labelBinaryFile,
-            ),
+            TitleLargeLabel(AppLocalizations.of(context)!.labelBinaryFile),
             const SizedBox(height: AppTheme.paddingS),
             BodyMediumLabel(
               AppLocalizations.of(context)!.labelThisFileCannotBePreviewed,
@@ -368,11 +368,21 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                           _content,
                           style: GoogleFonts.getFont(
                             ref.watch(previewFontFamilyProvider),
-                            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              height: 1.2,
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * _getFontSizeScale(ref.watch(previewFontSizeProvider)),
-                            ),
+                            textStyle: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  height: 1.2,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                  fontSize:
+                                      (Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium?.fontSize ??
+                                          14) *
+                                      _getFontSizeScale(
+                                        ref.watch(previewFontSizeProvider),
+                                      ),
+                                ),
                           ),
                         ),
                       ),

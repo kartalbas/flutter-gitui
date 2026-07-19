@@ -31,9 +31,7 @@ class RepositoriesEmptyState extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          HeadlineMediumLabel(
-            AppLocalizations.of(context)!.noRepositoriesYet,
-          ),
+          HeadlineMediumLabel(AppLocalizations.of(context)!.noRepositoriesYet),
           const SizedBox(height: AppTheme.paddingS),
           BodyLargeLabel(
             AppLocalizations.of(context)!.addRepositoryToGetStarted,
@@ -47,7 +45,9 @@ class RepositoriesEmptyState extends StatelessWidget {
               _ActionCard(
                 icon: PhosphorIconsRegular.folderOpen,
                 title: AppLocalizations.of(context)!.openRepository,
-                description: AppLocalizations.of(context)!.browseExistingRepository,
+                description: AppLocalizations.of(
+                  context,
+                )!.browseExistingRepository,
                 onTap: onOpenRepository,
               ),
               _ActionCard(
@@ -59,7 +59,9 @@ class RepositoriesEmptyState extends StatelessWidget {
               _ActionCard(
                 icon: PhosphorIconsRegular.plus,
                 title: AppLocalizations.of(context)!.initializeRepository,
-                description: AppLocalizations.of(context)!.createNewGitRepository,
+                description: AppLocalizations.of(
+                  context,
+                )!.createNewGitRepository,
                 onTap: onInitRepository,
               ),
             ],
@@ -91,25 +93,15 @@ class _ActionCard extends StatelessWidget {
       child: BaseCard(
         onTap: onTap,
         content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: AppTheme.paddingM),
-                TitleMediumLabel(
-                  title,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppTheme.paddingS),
-                BodySmallLabel(
-                  description,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: AppTheme.paddingM),
+            TitleMediumLabel(title, textAlign: TextAlign.center),
+            const SizedBox(height: AppTheme.paddingS),
+            BodySmallLabel(description, textAlign: TextAlign.center),
+          ],
+        ),
       ),
     );
   }

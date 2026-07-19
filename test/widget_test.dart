@@ -10,9 +10,7 @@ import 'package:flutter_gitui/core/config/app_config.dart';
 void main() {
   testWidgets('App boots past the splash screen', (WidgetTester tester) async {
     await tester.pumpWidget(
-      ProviderScope(
-        child: FlutterGitUIApp(initialConfig: AppConfig.defaults),
-      ),
+      ProviderScope(child: FlutterGitUIApp(initialConfig: AppConfig.defaults)),
     );
 
     // The splash screen is dismissed by a Future.delayed, which pumpAndSettle

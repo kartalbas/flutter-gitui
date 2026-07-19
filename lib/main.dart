@@ -320,10 +320,7 @@ class _NativeLoadingScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppTheme.paddingXL),
               // App title
-              HeadlineMediumLabel(
-                'Flutter GitUI',
-                color: primaryColor,
-              ),
+              HeadlineMediumLabel('Flutter GitUI', color: primaryColor),
               const SizedBox(height: AppTheme.iconXL * 2),
               // Loading indicator
               SizedBox(

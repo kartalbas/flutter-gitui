@@ -100,7 +100,7 @@ class GitRepositoryWatcher {
     ];
 
     return ignoredPaths.any((ignored) => path.contains(ignored)) ||
-           ignoredFiles.any((ignored) => path.endsWith(ignored));
+        ignoredFiles.any((ignored) => path.endsWith(ignored));
   }
 
   /// Dispose of resources

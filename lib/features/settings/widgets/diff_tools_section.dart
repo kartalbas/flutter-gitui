@@ -68,7 +68,9 @@ class DiffToolsSection extends ConsumerWidget {
                           tooltip: l10n.clear,
                           size: ButtonSize.small,
                           onPressed: () async {
-                            await ref.read(configProvider.notifier).setCustomDiffToolPath(null, version: null);
+                            await ref
+                                .read(configProvider.notifier)
+                                .setCustomDiffToolPath(null, version: null);
                             onShowSuccess(l10n.diffToolCleared);
                           },
                         ),
@@ -110,7 +112,9 @@ class DiffToolsSection extends ConsumerWidget {
                           tooltip: l10n.clear,
                           size: ButtonSize.small,
                           onPressed: () async {
-                            await ref.read(configProvider.notifier).setCustomMergeToolPath(null, version: null);
+                            await ref
+                                .read(configProvider.notifier)
+                                .setCustomMergeToolPath(null, version: null);
                             onShowSuccess(l10n.mergeToolCleared);
                           },
                         ),

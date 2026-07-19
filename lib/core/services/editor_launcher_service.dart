@@ -27,7 +27,8 @@ class EditorLauncherService {
       final bundlePath = resolvedPath.endsWith('/')
           ? resolvedPath.substring(0, resolvedPath.length - 1)
           : resolvedPath;
-      final isAppBundle = Platform.isMacOS &&
+      final isAppBundle =
+          Platform.isMacOS &&
           bundlePath.toLowerCase().endsWith('.app') &&
           Directory(bundlePath).existsSync();
 
@@ -43,11 +44,11 @@ class EditorLauncherService {
       if (!isAppBundle && !isBareCommand && !File(resolvedPath).existsSync()) {
         final message = Platform.isWindows
             ? 'Editor executable not found: $editorPath\n'
-                'Tried: $editorPath.cmd, $editorPath.exe, $editorPath.bat\n'
-                'On Windows, editor paths must end with .exe, .cmd, or .bat\n'
-                'Please update your editor path in Settings'
+                  'Tried: $editorPath.cmd, $editorPath.exe, $editorPath.bat\n'
+                  'On Windows, editor paths must end with .exe, .cmd, or .bat\n'
+                  'Please update your editor path in Settings'
             : 'Editor not found: $editorPath\n'
-                'Please update your editor path in Settings';
+                  'Please update your editor path in Settings';
 
         Logger.error('Editor executable not found: $resolvedPath', null);
         throw ProcessException(resolvedPath, [], message);
@@ -56,17 +57,15 @@ class EditorLauncherService {
       // Launch the editor
       Logger.info('Launching editor: $resolvedPath with target: $targetPath');
       if (isAppBundle) {
-        await Process.start(
-          'open',
-          ['-a', bundlePath, targetPath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start('open', [
+          '-a',
+          bundlePath,
+          targetPath,
+        ], mode: ProcessStartMode.detached);
       } else {
-        await Process.start(
-          resolvedPath,
-          [targetPath],
-          mode: ProcessStartMode.detached,
-        );
+        await Process.start(resolvedPath, [
+          targetPath,
+        ], mode: ProcessStartMode.detached);
       }
     });
   }
@@ -101,14 +100,18 @@ class EditorLauncherService {
     for (final ext in extensions) {
       final pathWithExt = '$path$ext';
       if (File(pathWithExt).existsSync()) {
-        Logger.info('[Windows] Resolved editor executable: $path → $pathWithExt');
+        Logger.info(
+          '[Windows] Resolved editor executable: $path → $pathWithExt',
+        );
         return pathWithExt;
       }
     }
 
     // No executable found with common extensions
     Logger.warning('[Windows] Could not find executable for: $path');
-    Logger.warning('[Windows] Tried: ${extensions.map((e) => '$path$e').join(', ')}');
+    Logger.warning(
+      '[Windows] Tried: ${extensions.map((e) => '$path$e').join(', ')}',
+    );
 
     return path; // Return original, will fail with clear error in launch()
   }
@@ -125,7 +128,10 @@ class EditorLauncherService {
         throw Exception('No text editor configured in settings');
       }
 
-      final launchResult = await launch(editorPath: editorPath, targetPath: targetPath);
+      final launchResult = await launch(
+        editorPath: editorPath,
+        targetPath: targetPath,
+      );
       launchResult.unwrap();
     });
   }

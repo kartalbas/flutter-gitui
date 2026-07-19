@@ -1,7 +1,9 @@
 // This file is kept for backward compatibility
 // All functionality has been moved to UnifiedDiffDialog
-export '../../../core/diff/diff_parser.dart' show DiffParser, DiffLine, DiffLineType;
-export '../../../shared/dialogs/unified_diff_dialog.dart' show showUnifiedDiffDialog;
+export '../../../core/diff/diff_parser.dart'
+    show DiffParser, DiffLine, DiffLineType;
+export '../../../shared/dialogs/unified_diff_dialog.dart'
+    show showUnifiedDiffDialog;
 
 // Alias for backward compatibility
 import '../../../shared/dialogs/unified_diff_dialog.dart' as unified;
@@ -12,5 +14,9 @@ Future<void> showDiffViewerDialog(
   required String filePath,
   bool staged = false,
 }) {
-  return unified.showUnifiedDiffDialog(context, filePath: filePath, staged: staged);
+  return unified.showUnifiedDiffDialog(
+    context,
+    filePath: filePath,
+    staged: staged,
+  );
 }

@@ -24,9 +24,7 @@ class ForcePushDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TitleSmallLabel(
-            l10n.needToForcePushChanges,
-          ),
+          TitleSmallLabel(l10n.needToForcePushChanges),
           const SizedBox(height: AppTheme.paddingM),
           BodyMediumLabel(
             l10n.forcePushWarningOverwriteRemote,
@@ -53,4 +51,3 @@ class ForcePushDialog extends StatelessWidget {
     );
   }
 }
-

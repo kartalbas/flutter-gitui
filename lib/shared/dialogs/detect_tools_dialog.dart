@@ -62,7 +62,9 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
       // Pre-select current tools if they were detected
       _preselectCurrentTools();
 
-      Logger.info('Tool detection complete: git=${_gitPath ?? "not found"}, diff tools=${_diffTools.length}, editors=${_textEditors.length}');
+      Logger.info(
+        'Tool detection complete: git=${_gitPath ?? "not found"}, diff tools=${_diffTools.length}, editors=${_textEditors.length}',
+      );
     } catch (e, stack) {
       Logger.error('Error detecting tools', e, stack);
     } finally {
@@ -87,7 +89,9 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
     // let "Apply Selected" overwrite a working diff/merge configuration
     // when detection found nothing.
     if (widget.currentDiffTool != null) {
-      _selectedDiffTool = _diffTools.where((tool) => tool.type == widget.currentDiffTool).firstOrNull;
+      _selectedDiffTool = _diffTools
+          .where((tool) => tool.type == widget.currentDiffTool)
+          .firstOrNull;
     }
 
     // Pre-select current text editor if detected
@@ -135,13 +139,14 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
     for (final editorInfo in commonEditors) {
       try {
-        final result = await ShellService.run('${Platform.isWindows ? 'where' : 'which'} ${editorInfo.command}').then((r) => r.unwrap());
+        final result = await ShellService.run(
+          '${Platform.isWindows ? 'where' : 'which'} ${editorInfo.command}',
+        ).then((r) => r.unwrap());
         if (result.first.exitCode == 0) {
           final path = result.first.stdout.toString().trim();
-          _textEditors.add(_DetectedEditor(
-            name: editorInfo.displayName,
-            path: path,
-          ));
+          _textEditors.add(
+            _DetectedEditor(name: editorInfo.displayName, path: path),
+          );
           Logger.info('Detected ${editorInfo.displayName} at: $path');
         }
       } catch (e) {
@@ -174,7 +179,10 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
         BaseButton(
           label: 'Apply Selected',
           variant: ButtonVariant.primary,
-          onPressed: (_selectedGit != null || _selectedDiffTool != null || _selectedTextEditor != null)
+          onPressed:
+              (_selectedGit != null ||
+                  _selectedDiffTool != null ||
+                  _selectedTextEditor != null)
               ? () {
                   Navigator.of(context).pop({
                     'git': _selectedGit,
@@ -240,8 +248,10 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               value: _gitPath!,
-              groupValue: _selectedGit, // ignore: deprecated_member_use
-              onChanged: (value) { // ignore: deprecated_member_use
+              // ignore: deprecated_member_use
+              groupValue: _selectedGit,
+              // ignore: deprecated_member_use
+              onChanged: (value) {
                 setState(() {
                   _selectedGit = value;
                 });
@@ -269,8 +279,10 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 value: tool,
-                groupValue: _selectedDiffTool, // ignore: deprecated_member_use
-                onChanged: (value) { // ignore: deprecated_member_use
+                // ignore: deprecated_member_use
+                groupValue: _selectedDiffTool,
+                // ignore: deprecated_member_use
+                onChanged: (value) {
                   setState(() {
                     _selectedDiffTool = value;
                   });
@@ -299,8 +311,10 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 value: editor,
-                groupValue: _selectedTextEditor, // ignore: deprecated_member_use
-                onChanged: (value) { // ignore: deprecated_member_use
+                // ignore: deprecated_member_use
+                groupValue: _selectedTextEditor,
+                // ignore: deprecated_member_use
+                onChanged: (value) {
                   setState(() {
                     _selectedTextEditor = value;
                   });

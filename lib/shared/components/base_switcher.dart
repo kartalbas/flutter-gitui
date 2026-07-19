@@ -23,15 +23,23 @@ class BaseSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Check animation speed setting
-    final animationSpeed = Theme.of(context).extension<AnimationSpeedExtension>()?.speed ?? AppAnimationSpeed.normal;
+    final animationSpeed =
+        Theme.of(context).extension<AnimationSpeedExtension>()?.speed ??
+        AppAnimationSpeed.normal;
     final disableAnimations = animationSpeed == AppAnimationSpeed.none;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      splashColor: disableAnimations ? Theme.of(context).colorScheme.surface.withValues(alpha: 0) : null,
-      highlightColor: disableAnimations ? Theme.of(context).colorScheme.surface.withValues(alpha: 0) : null,
-      hoverColor: disableAnimations ? Theme.of(context).colorScheme.surface.withValues(alpha: 0) : null,
+      splashColor: disableAnimations
+          ? Theme.of(context).colorScheme.surface.withValues(alpha: 0)
+          : null,
+      highlightColor: disableAnimations
+          ? Theme.of(context).colorScheme.surface.withValues(alpha: 0)
+          : null,
+      hoverColor: disableAnimations
+          ? Theme.of(context).colorScheme.surface.withValues(alpha: 0)
+          : null,
       child: Tooltip(
         message: tooltip,
         child: Container(

@@ -66,10 +66,7 @@ class BaseDropdownItem<T> {
   final T value;
   final Widget Function(BuildContext) builder;
 
-  const BaseDropdownItem({
-    required this.value,
-    required this.builder,
-  });
+  const BaseDropdownItem({required this.value, required this.builder});
 
   /// Create a simple dropdown item with icon and label
   factory BaseDropdownItem.simple({
@@ -87,10 +84,7 @@ class BaseDropdownItem<T> {
             const SizedBox(width: AppTheme.paddingS),
           ],
           Expanded(
-            child: MenuItemLabel(
-              label,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: MenuItemLabel(label, overflow: TextOverflow.ellipsis),
           ),
           if (trailing != null) ...[
             const SizedBox(width: AppTheme.paddingS),
@@ -119,10 +113,7 @@ class BaseDropdownItem<T> {
             const SizedBox(width: AppTheme.paddingS),
           ],
           Expanded(
-            child: MenuItemLabel(
-              label,
-              overflow: TextOverflow.ellipsis,
-            ),
+            child: MenuItemLabel(label, overflow: TextOverflow.ellipsis),
           ),
           if (badgeText != null) ...[
             const SizedBox(width: AppTheme.paddingS),
@@ -132,12 +123,16 @@ class BaseDropdownItem<T> {
                 vertical: 1,
               ),
               decoration: BoxDecoration(
-                color: badgeColor ?? Theme.of(context).colorScheme.primaryContainer,
+                color:
+                    badgeColor ??
+                    Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(3),
               ),
               child: MenuItemLabel(
                 badgeText,
-                color: badgeTextColor ?? Theme.of(context).colorScheme.onPrimaryContainer,
+                color:
+                    badgeTextColor ??
+                    Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
           ],
@@ -176,7 +171,8 @@ class SearchableBaseDropdown<T> extends StatefulWidget {
   });
 
   @override
-  State<SearchableBaseDropdown<T>> createState() => _SearchableBaseDropdownState<T>();
+  State<SearchableBaseDropdown<T>> createState() =>
+      _SearchableBaseDropdownState<T>();
 }
 
 class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
@@ -238,7 +234,9 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedItem = widget.items.where((item) => item.value == widget.value).firstOrNull;
+    final selectedItem = widget.items
+        .where((item) => item.value == widget.value)
+        .firstOrNull;
     final displayText = selectedItem != null
         ? widget.displayStringForItem(selectedItem.value)
         : widget.hintText ?? '';
@@ -298,7 +296,9 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
                         ),
                       ),
                       Icon(
-                        _isOpen ? PhosphorIconsRegular.caretUp : PhosphorIconsRegular.caretDown,
+                        _isOpen
+                            ? PhosphorIconsRegular.caretUp
+                            : PhosphorIconsRegular.caretDown,
                         size: AppTheme.iconS,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -338,10 +338,12 @@ class _SearchableDropdownOverlay<T> extends StatefulWidget {
   });
 
   @override
-  State<_SearchableDropdownOverlay<T>> createState() => _SearchableDropdownOverlayState<T>();
+  State<_SearchableDropdownOverlay<T>> createState() =>
+      _SearchableDropdownOverlayState<T>();
 }
 
-class _SearchableDropdownOverlayState<T> extends State<_SearchableDropdownOverlay<T>> {
+class _SearchableDropdownOverlayState<T>
+    extends State<_SearchableDropdownOverlay<T>> {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   String _searchQuery = '';
@@ -366,8 +368,13 @@ class _SearchableDropdownOverlayState<T> extends State<_SearchableDropdownOverla
   Widget build(BuildContext context) {
     // Filter items based on search query (only if >= minSearchLength chars)
     final filteredItems = _searchQuery.length >= widget.minSearchLength
-        ? widget.items.where((item) =>
-            item.searchText.toLowerCase().contains(_searchQuery.toLowerCase())).toList()
+        ? widget.items
+              .where(
+                (item) => item.searchText.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ),
+              )
+              .toList()
         : widget.items;
 
     return TapRegion(
@@ -403,7 +410,9 @@ class _SearchableDropdownOverlayState<T> extends State<_SearchableDropdownOverla
             // Divider
             Divider(
               height: 1,
-              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withValues(alpha: 0.3),
             ),
 
             // Items list
@@ -477,10 +486,7 @@ class SearchableDropdownItem<T> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                MenuItemLabel(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                MenuItemLabel(label, overflow: TextOverflow.ellipsis),
                 if (subtitle != null)
                   LabelSmallLabel(
                     subtitle,

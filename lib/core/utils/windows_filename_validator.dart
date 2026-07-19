@@ -7,14 +7,41 @@ import 'package:path/path.dart' as path;
 class WindowsFilenameValidator {
   /// Windows reserved device names (case-insensitive)
   static const Set<String> _reservedNames = {
-    'CON', 'PRN', 'AUX', 'NUL',
-    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+    'CON',
+    'PRN',
+    'AUX',
+    'NUL',
+    'COM1',
+    'COM2',
+    'COM3',
+    'COM4',
+    'COM5',
+    'COM6',
+    'COM7',
+    'COM8',
+    'COM9',
+    'LPT1',
+    'LPT2',
+    'LPT3',
+    'LPT4',
+    'LPT5',
+    'LPT6',
+    'LPT7',
+    'LPT8',
+    'LPT9',
   };
 
   /// Invalid characters in Windows filenames
   static const Set<String> _invalidChars = {
-    '<', '>', ':', '"', '/', '\\', '|', '?', '*'
+    '<',
+    '>',
+    ':',
+    '"',
+    '/',
+    '\\',
+    '|',
+    '?',
+    '*',
   };
 
   /// Check if running on Windows
@@ -29,7 +56,9 @@ class WindowsFilenameValidator {
     final basename = path.basename(filename);
 
     // Split filename and extension
-    final nameWithoutExtension = path.basenameWithoutExtension(basename).toUpperCase();
+    final nameWithoutExtension = path
+        .basenameWithoutExtension(basename)
+        .toUpperCase();
 
     return _reservedNames.contains(nameWithoutExtension);
   }
@@ -96,8 +125,8 @@ class WindowsFilenameValidator {
   /// Check if a Git error message indicates a Windows reserved name issue
   static bool isReservedNameError(String errorMessage) {
     return errorMessage.contains('open("') &&
-           errorMessage.contains('"): No such file or directory') ||
-           errorMessage.contains('unable to index file');
+            errorMessage.contains('"): No such file or directory') ||
+        errorMessage.contains('unable to index file');
   }
 
   /// Extract problematic filename from Git error message

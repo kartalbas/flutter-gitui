@@ -50,143 +50,146 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
       variant: DialogVariant.normal,
       maxWidth: 600,
       content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BodyMediumLabel(l10n.saveChangesToStash),
-            const SizedBox(height: AppTheme.paddingM),
-            BaseTextField(
-              controller: _messageController,
-              label: l10n.messageOptional,
-              hintText: l10n.describeWork,
-              maxLines: 2,
-              autofocus: true,
-            ),
-            const SizedBox(height: AppTheme.paddingM),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BodyMediumLabel(l10n.saveChangesToStash),
+          const SizedBox(height: AppTheme.paddingM),
+          BaseTextField(
+            controller: _messageController,
+            label: l10n.messageOptional,
+            hintText: l10n.describeWork,
+            maxLines: 2,
+            autofocus: true,
+          ),
+          const SizedBox(height: AppTheme.paddingM),
 
-            // File selection mode toggle
-            SwitchListTile(
-              value: _stashAllFiles,
-              onChanged: (value) {
-                setState(() {
-                  _stashAllFiles = value;
-                  if (value) {
-                    // Select all files when switching to "all files" mode
-                    _selectedFiles.clear();
-                    _selectedFiles.addAll(allStatuses.map((f) => f.path));
-                  }
-                });
-              },
-              title: BodyMediumLabel(l10n.stashAllFiles),
-              subtitle: BodySmallLabel(l10n.stashAllFilesToggle),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
-            ),
+          // File selection mode toggle
+          SwitchListTile(
+            value: _stashAllFiles,
+            onChanged: (value) {
+              setState(() {
+                _stashAllFiles = value;
+                if (value) {
+                  // Select all files when switching to "all files" mode
+                  _selectedFiles.clear();
+                  _selectedFiles.addAll(allStatuses.map((f) => f.path));
+                }
+              });
+            },
+            title: BodyMediumLabel(l10n.stashAllFiles),
+            subtitle: BodySmallLabel(l10n.stashAllFilesToggle),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
 
-            // File selection list (only show when not stashing all files)
-            if (!_stashAllFiles && allStatuses.isNotEmpty) ...[
-              const SizedBox(height: AppTheme.paddingM),
-              Row(
-                children: [
-                  TitleSmallLabel(
-                    l10n.selectFilesToStash(_selectedFiles.length, allStatuses.length),
+          // File selection list (only show when not stashing all files)
+          if (!_stashAllFiles && allStatuses.isNotEmpty) ...[
+            const SizedBox(height: AppTheme.paddingM),
+            Row(
+              children: [
+                TitleSmallLabel(
+                  l10n.selectFilesToStash(
+                    _selectedFiles.length,
+                    allStatuses.length,
                   ),
-                  const Spacer(),
-                  BaseButton(
-                    label: l10n.selectAll,
-                    variant: ButtonVariant.tertiary,
-                    onPressed: () {
-                      setState(() {
-                        _selectedFiles.clear();
-                        _selectedFiles.addAll(allStatuses.map((f) => f.path));
-                      });
-                    },
-                  ),
-                  BaseButton(
-                    label: l10n.deselectAll,
-                    variant: ButtonVariant.tertiary,
-                    onPressed: () {
-                      setState(() {
-                        _selectedFiles.clear();
-                      });
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppTheme.paddingS),
-              Container(
-                constraints: const BoxConstraints(maxHeight: 300),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                  borderRadius: BorderRadius.circular(4),
                 ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: allStatuses.length,
-                  itemBuilder: (context, index) {
-                    final file = allStatuses[index];
-                    final isSelected = _selectedFiles.contains(file.path);
-
-                    return CheckboxListTile(
-                      value: isSelected,
-                      onChanged: (value) {
-                        setState(() {
-                          if (value == true) {
-                            _selectedFiles.add(file.path);
-                          } else {
-                            _selectedFiles.remove(file.path);
-                          }
-                        });
-                      },
-                      title: BodyMediumLabel(file.path),
-                      subtitle: LabelMediumLabel(
-                        file.primaryStatus.displayName,
-                        color: file.primaryStatus.color,
-                      ),
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.paddingS,
-                      ),
-                    );
+                const Spacer(),
+                BaseButton(
+                  label: l10n.selectAll,
+                  variant: ButtonVariant.tertiary,
+                  onPressed: () {
+                    setState(() {
+                      _selectedFiles.clear();
+                      _selectedFiles.addAll(allStatuses.map((f) => f.path));
+                    });
                   },
                 ),
-              ),
-            ] else if (!_stashAllFiles && allStatuses.isEmpty) ...[
-              const SizedBox(height: AppTheme.paddingM),
-              BodySmallLabel(
-                l10n.noFilesToStash,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ],
-
-            const SizedBox(height: AppTheme.paddingM),
-            CheckboxListTile(
-              value: _includeUntracked,
-              onChanged: (value) {
-                setState(() {
-                  _includeUntracked = value ?? false;
-                });
-              },
-              title: BodyMediumLabel(l10n.includeUntrackedFiles),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+                BaseButton(
+                  label: l10n.deselectAll,
+                  variant: ButtonVariant.tertiary,
+                  onPressed: () {
+                    setState(() {
+                      _selectedFiles.clear();
+                    });
+                  },
+                ),
+              ],
             ),
-            CheckboxListTile(
-              value: _keepIndex,
-              onChanged: (value) {
-                setState(() {
-                  _keepIndex = value ?? false;
-                });
-              },
-              title: BodyMediumLabel(l10n.keepStagedChanges),
-              subtitle: BodySmallLabel(l10n.keepStagedChangesSubtitle),
-              dense: true,
-              contentPadding: EdgeInsets.zero,
+            const SizedBox(height: AppTheme.paddingS),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 300),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: allStatuses.length,
+                itemBuilder: (context, index) {
+                  final file = allStatuses[index];
+                  final isSelected = _selectedFiles.contains(file.path);
+
+                  return CheckboxListTile(
+                    value: isSelected,
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedFiles.add(file.path);
+                        } else {
+                          _selectedFiles.remove(file.path);
+                        }
+                      });
+                    },
+                    title: BodyMediumLabel(file.path),
+                    subtitle: LabelMediumLabel(
+                      file.primaryStatus.displayName,
+                      color: file.primaryStatus.color,
+                    ),
+                    dense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.paddingS,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ] else if (!_stashAllFiles && allStatuses.isEmpty) ...[
+            const SizedBox(height: AppTheme.paddingM),
+            BodySmallLabel(
+              l10n.noFilesToStash,
+              color: Theme.of(context).colorScheme.error,
             ),
           ],
-        ),
+
+          const SizedBox(height: AppTheme.paddingM),
+          CheckboxListTile(
+            value: _includeUntracked,
+            onChanged: (value) {
+              setState(() {
+                _includeUntracked = value ?? false;
+              });
+            },
+            title: BodyMediumLabel(l10n.includeUntrackedFiles),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+          CheckboxListTile(
+            value: _keepIndex,
+            onChanged: (value) {
+              setState(() {
+                _keepIndex = value ?? false;
+              });
+            },
+            title: BodyMediumLabel(l10n.keepStagedChanges),
+            subtitle: BodySmallLabel(l10n.keepStagedChangesSubtitle),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ],
+      ),
       actions: [
         BaseButton(
           label: l10n.cancel,
@@ -199,12 +202,12 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
           onPressed: _selectedFiles.isEmpty && !_stashAllFiles
               ? null
               : () => Navigator.of(context).pop({
-                    'message': _messageController.text.trim(),
-                    'includeUntracked': _includeUntracked,
-                    'keepIndex': _keepIndex,
-                    'stashAllFiles': _stashAllFiles,
-                    'selectedFiles': _selectedFiles.toList(),
-                  }),
+                  'message': _messageController.text.trim(),
+                  'includeUntracked': _includeUntracked,
+                  'keepIndex': _keepIndex,
+                  'stashAllFiles': _stashAllFiles,
+                  'selectedFiles': _selectedFiles.toList(),
+                }),
         ),
       ],
     );

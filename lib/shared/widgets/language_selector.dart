@@ -13,9 +13,11 @@ import '../../generated/app_localizations.dart';
 /// Language option model
 class LanguageOption {
   final String? code; // null for system default
-  final String label; // Display label (e.g., "EN", "SYS") - deprecated, use icon instead
+  final String
+  label; // Display label (e.g., "EN", "SYS") - deprecated, use icon instead
   final String name; // Full name (e.g., "English", "System Default")
-  final String? countryCode; // ISO country code (e.g., "GB") for flag display, null for system default
+  final String?
+  countryCode; // ISO country code (e.g., "GB") for flag display, null for system default
 
   const LanguageOption({
     required this.code,
@@ -29,13 +31,48 @@ class LanguageOption {
 List<LanguageOption> _getLanguageOptions(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
   return [
-    LanguageOption(code: null, label: 'SYS', name: l10n.systemDefault, countryCode: null),
-    LanguageOption(code: 'en', label: 'EN', name: l10n.english, countryCode: 'US'),
-    LanguageOption(code: 'de', label: 'DE', name: l10n.german, countryCode: 'DE'),
-    LanguageOption(code: 'es', label: 'ES', name: l10n.spanish, countryCode: 'ES'),
-    LanguageOption(code: 'fr', label: 'FR', name: l10n.french, countryCode: 'FR'),
-    LanguageOption(code: 'it', label: 'IT', name: l10n.italian, countryCode: 'IT'),
-    LanguageOption(code: 'tr', label: 'TR', name: l10n.turkish, countryCode: 'TR'),
+    LanguageOption(
+      code: null,
+      label: 'SYS',
+      name: l10n.systemDefault,
+      countryCode: null,
+    ),
+    LanguageOption(
+      code: 'en',
+      label: 'EN',
+      name: l10n.english,
+      countryCode: 'US',
+    ),
+    LanguageOption(
+      code: 'de',
+      label: 'DE',
+      name: l10n.german,
+      countryCode: 'DE',
+    ),
+    LanguageOption(
+      code: 'es',
+      label: 'ES',
+      name: l10n.spanish,
+      countryCode: 'ES',
+    ),
+    LanguageOption(
+      code: 'fr',
+      label: 'FR',
+      name: l10n.french,
+      countryCode: 'FR',
+    ),
+    LanguageOption(
+      code: 'it',
+      label: 'IT',
+      name: l10n.italian,
+      countryCode: 'IT',
+    ),
+    LanguageOption(
+      code: 'tr',
+      label: 'TR',
+      name: l10n.turkish,
+      countryCode: 'TR',
+    ),
   ];
 }
 
@@ -51,7 +88,11 @@ class LanguageSelector extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     // Get current language option
-    final currentOption = _getCurrentLanguageOption(context, currentLocale, languageOptions);
+    final currentOption = _getCurrentLanguageOption(
+      context,
+      currentLocale,
+      languageOptions,
+    );
 
     return BasePopupMenuButton<String?>(
       tooltip: l10n.tooltipLanguage,
@@ -161,15 +202,17 @@ class LanguageSelector extends ConsumerWidget {
       child: SizedBox(
         width: 20,
         height: 20,
-        child: CountryFlag.fromCountryCode(
-          option.countryCode!,
-        ),
+        child: CountryFlag.fromCountryCode(option.countryCode!),
       ),
     );
   }
 
   /// Build flag icon for menu items
-  Widget _buildFlagIcon(BuildContext context, LanguageOption option, bool isSelected) {
+  Widget _buildFlagIcon(
+    BuildContext context,
+    LanguageOption option,
+    bool isSelected,
+  ) {
     // For system default, use globe icon
     if (option.countryCode == null) {
       return Container(
@@ -200,16 +243,16 @@ class LanguageSelector extends ConsumerWidget {
         border: Border.all(
           color: isSelected
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
-              : Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+              : Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withValues(alpha: 0.3),
           width: 1,
         ),
         borderRadius: BorderRadius.circular(14),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(13),
-        child: CountryFlag.fromCountryCode(
-          option.countryCode!,
-        ),
+        child: CountryFlag.fromCountryCode(option.countryCode!),
       ),
     );
   }

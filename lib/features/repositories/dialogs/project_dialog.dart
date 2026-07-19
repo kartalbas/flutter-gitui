@@ -28,10 +28,7 @@ class ProjectDialogResult {
 class ProjectDialog extends StatefulWidget {
   final Workspace? project; // null for create, non-null for edit
 
-  const ProjectDialog({
-    super.key,
-    this.project,
-  });
+  const ProjectDialog({super.key, this.project});
 
   @override
   State<ProjectDialog> createState() => _ProjectDialogState();
@@ -47,7 +44,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.project?.name);
-    _descriptionController = TextEditingController(text: widget.project?.description);
+    _descriptionController = TextEditingController(
+      text: widget.project?.description,
+    );
     _selectedColor = widget.project?.color ?? WorkspaceColors.random();
 
     // The preview row renders the current name, so typing must rebuild the dialog
@@ -72,7 +71,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
     final isEditing = widget.project != null;
 
     return BaseDialog(
-      title: isEditing ? l10n.projectDialogEditTitle : l10n.projectDialogCreateTitle,
+      title: isEditing
+          ? l10n.projectDialogEditTitle
+          : l10n.projectDialogCreateTitle,
       icon: PhosphorIconsBold.folder,
       content: Form(
         key: _formKey,
@@ -81,9 +82,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Project name
-            LabelLargeLabel(
-              l10n.projectNameLabel,
-            ),
+            LabelLargeLabel(l10n.projectNameLabel),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _nameController,
@@ -101,9 +100,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Project description
-            LabelLargeLabel(
-              l10n.projectDescriptionLabel,
-            ),
+            LabelLargeLabel(l10n.projectDescriptionLabel),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _descriptionController,
@@ -115,9 +112,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Color picker
-            LabelLargeLabel(
-              l10n.projectColorLabel,
-            ),
+            LabelLargeLabel(l10n.projectColorLabel),
             const SizedBox(height: AppTheme.paddingS),
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -131,7 +126,8 @@ class _ProjectDialogState extends State<ProjectDialog> {
                 spacing: AppTheme.paddingS,
                 runSpacing: AppTheme.paddingS,
                 children: WorkspaceColors.defaults.map((color) {
-                  final isSelected = _selectedColor.toARGB32() == color.toARGB32();
+                  final isSelected =
+                      _selectedColor.toARGB32() == color.toARGB32();
                   return InkWell(
                     onTap: () {
                       setState(() {
@@ -180,7 +176,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
@@ -195,9 +193,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        LabelSmallLabel(
-                          l10n.previewLabel,
-                        ),
+                        LabelSmallLabel(l10n.previewLabel),
                         const SizedBox(height: AppTheme.paddingXS),
                         Row(
                           children: [
@@ -211,7 +207,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             TitleSmallLabel(
-                              _nameController.text.isEmpty ? l10n.projectNamePreviewPlaceholder : _nameController.text,
+                              _nameController.text.isEmpty
+                                  ? l10n.projectNamePreviewPlaceholder
+                                  : _nameController.text,
                             ),
                           ],
                         ),
@@ -233,7 +231,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
         BaseButton(
           label: isEditing ? l10n.saveProjectButton : l10n.createProjectButton,
           variant: ButtonVariant.primary,
-          leadingIcon: isEditing ? PhosphorIconsBold.floppyDisk : PhosphorIconsBold.plus,
+          leadingIcon: isEditing
+              ? PhosphorIconsBold.floppyDisk
+              : PhosphorIconsBold.plus,
           onPressed: _handleSave,
         ),
       ],
@@ -242,7 +242,11 @@ class _ProjectDialogState extends State<ProjectDialog> {
 
   Color _getContrastingColor(Color color) {
     // Calculate luminance to determine if we should use black or white text
-    final luminance = (0.299 * ((color.r * 255.0).round() & 0xff) + 0.587 * ((color.g * 255.0).round() & 0xff) + 0.114 * ((color.b * 255.0).round() & 0xff)) / 255;
+    final luminance =
+        (0.299 * ((color.r * 255.0).round() & 0xff) +
+            0.587 * ((color.g * 255.0).round() & 0xff) +
+            0.114 * ((color.b * 255.0).round() & 0xff)) /
+        255;
     return luminance > 0.5 ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
   }
 

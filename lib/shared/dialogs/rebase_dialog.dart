@@ -35,16 +35,16 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       icon: PhosphorIconsRegular.gitBranch,
       title: AppLocalizations.of(context)!.rebaseBranch,
       content: rebaseStateAsync.when(
-          data: (state) {
-            if (state.isActive) {
-              return _buildActive(context, state);
-            } else {
-              return _buildStart(context, currentBranchAsync.value);
-            }
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => _buildError(context, error),
-        ),
+        data: (state) {
+          if (state.isActive) {
+            return _buildActive(context, state);
+          } else {
+            return _buildStart(context, currentBranchAsync.value);
+          }
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildError(context, error),
+      ),
       actions: rebaseStateAsync.when(
         data: (state) => _buildActions(context, state),
         loading: () => [
@@ -108,7 +108,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         BaseButton(
           label: AppLocalizations.of(context)!.startRebase,
           variant: ButtonVariant.primary,
-          onPressed: (_selectedBranch != null && !_isRebasing) ? _startRebase : null,
+          onPressed: (_selectedBranch != null && !_isRebasing)
+              ? _startRebase
+              : null,
         ),
       ];
     }
@@ -120,11 +122,15 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
     return branchesAsync.when(
       data: (branches) {
         // Filter out current branch
-        final availableBranches = branches.where((b) => b.name != currentBranch).toList();
+        final availableBranches = branches
+            .where((b) => b.name != currentBranch)
+            .toList();
 
         if (availableBranches.isEmpty) {
           return Center(
-            child: BodyLargeLabel(AppLocalizations.of(context)!.noNodesAvailable),
+            child: BodyLargeLabel(
+              AppLocalizations.of(context)!.noNodesAvailable,
+            ),
           );
         }
 
@@ -143,7 +149,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(AppLocalizations.of(context)!.rebaseWillReplayCommits),
+                    child: BodySmallLabel(
+                      AppLocalizations.of(context)!.rebaseWillReplayCommits,
+                    ),
                   ),
                 ],
               ),
@@ -192,7 +200,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             // Interactive option
             CheckboxListTile(
               title: Text(AppLocalizations.of(context)!.interactiveRebase),
-              subtitle: Text(AppLocalizations.of(context)!.editCommitsDuringRebase),
+              subtitle: Text(
+                AppLocalizations.of(context)!.editCommitsDuringRebase,
+              ),
               value: _interactive,
               onChanged: (value) {
                 setState(() => _interactive = value ?? false);
@@ -204,7 +214,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer.withValues(alpha:0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.errorContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -217,7 +229,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(AppLocalizations.of(context)!.rebaseWarning),
+                    child: BodySmallLabel(
+                      AppLocalizations.of(context)!.rebaseWarning,
+                    ),
                   ),
                 ],
               ),
@@ -257,7 +271,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
                     child: TitleMediumLabel(
-                      state.hasConflicts ? AppLocalizations.of(context)!.rebaseConflicts : AppLocalizations.of(context)!.rebaseInProgress,
+                      state.hasConflicts
+                          ? AppLocalizations.of(context)!.rebaseConflicts
+                          : AppLocalizations.of(context)!.rebaseInProgress,
                     ),
                   ),
                 ],
@@ -295,9 +311,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             children: [
               const Icon(PhosphorIconsRegular.gitBranch, size: 20),
               const SizedBox(width: AppTheme.paddingS),
-              BodyMediumLabel(
-                state.ontoBranch ?? 'Unknown',
-              ),
+              BodyMediumLabel(state.ontoBranch ?? 'Unknown'),
             ],
           ),
         ),
@@ -323,7 +337,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.errorContainer.withValues(alpha:0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.errorContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -343,7 +359,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   ],
                 ),
                 const SizedBox(height: AppTheme.paddingS),
-                BodySmallLabel(AppLocalizations.of(context)!.resolveConflictsInChangesScreen),
+                BodySmallLabel(
+                  AppLocalizations.of(context)!.resolveConflictsInChangesScreen,
+                ),
                 const SizedBox(height: AppTheme.paddingM),
                 BaseButton(
                   label: AppLocalizations.of(context)!.goToChanges,
@@ -366,8 +384,12 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         if (!state.hasConflicts) ...[
           BodySmallLabel(AppLocalizations.of(context)!.rebaseIsInProgress),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel('• ${AppLocalizations.of(context)!.abortToCancelAndReturnToOriginalState}'),
-          BodySmallLabel('• ${AppLocalizations.of(context)!.waitForRebaseToCompleteAutomatically}'),
+          BodySmallLabel(
+            '• ${AppLocalizations.of(context)!.abortToCancelAndReturnToOriginalState}',
+          ),
+          BodySmallLabel(
+            '• ${AppLocalizations.of(context)!.waitForRebaseToCompleteAutomatically}',
+          ),
         ],
       ],
     );
@@ -384,7 +406,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.error(error.toString())),
+          TitleLargeLabel(
+            AppLocalizations.of(context)!.error(error.toString()),
+          ),
           const SizedBox(height: AppTheme.paddingS),
           BodySmallLabel('', textAlign: TextAlign.center),
         ],
@@ -443,7 +467,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.rebaseStartedSuccessfully),
+            content: Text(
+              AppLocalizations.of(context)!.rebaseStartedSuccessfully,
+            ),
             backgroundColor: AppTheme.gitAdded,
           ),
         );
@@ -456,14 +482,20 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           ref.invalidate(rebaseStateProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.rebaseStartedConflictNeedsResolution),
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                )!.rebaseStartedConflictNeedsResolution,
+              ),
               backgroundColor: AppTheme.gitModified,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.failedToStartRebase(e.toString())),
+              content: Text(
+                AppLocalizations.of(context)!.failedToStartRebase(e.toString()),
+              ),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -499,7 +531,11 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToContinueRebase(e.toString())),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.failedToContinueRebase(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -530,7 +566,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToSkip(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.failedToSkip(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -562,7 +600,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToAbortRebase(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.failedToAbortRebase(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

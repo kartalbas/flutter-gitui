@@ -49,15 +49,15 @@ class AppConfig {
 
   /// Default configuration
   static AppConfig get defaults => AppConfig(
-        git: GitConfig.defaults,
-        tools: ToolsConfig.defaults,
-        ui: UiConfig.defaults,
-        browse: BrowseConfig.defaults,
-        commandLog: CommandLogConfig.defaults,
-        behavior: BehaviorConfig.defaults,
-        history: HistoryConfig.defaults,
-        workspace: WorkspaceConfig.defaults,
-      );
+    git: GitConfig.defaults,
+    tools: ToolsConfig.defaults,
+    ui: UiConfig.defaults,
+    browse: BrowseConfig.defaults,
+    commandLog: CommandLogConfig.defaults,
+    behavior: BehaviorConfig.defaults,
+    history: HistoryConfig.defaults,
+    workspace: WorkspaceConfig.defaults,
+  );
 
   /// Copy with modifications
   AppConfig copyWith({
@@ -81,8 +81,11 @@ class AppConfig {
       behavior: behavior ?? this.behavior,
       history: history ?? this.history,
       workspace: workspace ?? this.workspace,
-      lastSeenVersion: identical(lastSeenVersion, _unset) ? this.lastSeenVersion : lastSeenVersion as String?,
-      disableWhatsNewDialog: disableWhatsNewDialog ?? this.disableWhatsNewDialog,
+      lastSeenVersion: identical(lastSeenVersion, _unset)
+          ? this.lastSeenVersion
+          : lastSeenVersion as String?,
+      disableWhatsNewDialog:
+          disableWhatsNewDialog ?? this.disableWhatsNewDialog,
     );
   }
 
@@ -98,7 +101,8 @@ class AppConfig {
       'history': history.toYaml(),
       'workspace': workspace.toYaml(),
       if (lastSeenVersion != null) 'last_seen_version': lastSeenVersion,
-      if (disableWhatsNewDialog != null) 'disable_whats_new_dialog': disableWhatsNewDialog,
+      if (disableWhatsNewDialog != null)
+        'disable_whats_new_dialog': disableWhatsNewDialog,
     };
   }
 
@@ -106,13 +110,25 @@ class AppConfig {
   factory AppConfig.fromYaml(Map<dynamic, dynamic> yaml) {
     return AppConfig(
       git: GitConfig.fromYaml(yaml['git'] as Map<dynamic, dynamic>? ?? {}),
-      tools: ToolsConfig.fromYaml(yaml['tools'] as Map<dynamic, dynamic>? ?? {}),
+      tools: ToolsConfig.fromYaml(
+        yaml['tools'] as Map<dynamic, dynamic>? ?? {},
+      ),
       ui: UiConfig.fromYaml(yaml['ui'] as Map<dynamic, dynamic>? ?? {}),
-      browse: BrowseConfig.fromYaml(yaml['browse'] as Map<dynamic, dynamic>? ?? {}),
-      commandLog: CommandLogConfig.fromYaml(yaml['command_log'] as Map<dynamic, dynamic>? ?? {}),
-      behavior: BehaviorConfig.fromYaml(yaml['behavior'] as Map<dynamic, dynamic>? ?? {}),
-      history: HistoryConfig.fromYaml(yaml['history'] as Map<dynamic, dynamic>? ?? {}),
-      workspace: WorkspaceConfig.fromYaml(yaml['workspace'] as Map<dynamic, dynamic>? ?? {}),
+      browse: BrowseConfig.fromYaml(
+        yaml['browse'] as Map<dynamic, dynamic>? ?? {},
+      ),
+      commandLog: CommandLogConfig.fromYaml(
+        yaml['command_log'] as Map<dynamic, dynamic>? ?? {},
+      ),
+      behavior: BehaviorConfig.fromYaml(
+        yaml['behavior'] as Map<dynamic, dynamic>? ?? {},
+      ),
+      history: HistoryConfig.fromYaml(
+        yaml['history'] as Map<dynamic, dynamic>? ?? {},
+      ),
+      workspace: WorkspaceConfig.fromYaml(
+        yaml['workspace'] as Map<dynamic, dynamic>? ?? {},
+      ),
       lastSeenVersion: yaml['last_seen_version'] as String?,
       disableWhatsNewDialog: yaml['disable_whats_new_dialog'] as bool?,
     );
@@ -125,14 +141,22 @@ class GitConfig {
   final String? defaultUserName;
   final String? defaultUserEmail;
   final String? gitVersion; // Detected git version
-  final List<String> protectedBranches; // Branch names that are protected from deletion/renaming
+  final List<String>
+  protectedBranches; // Branch names that are protected from deletion/renaming
 
   const GitConfig({
     this.executablePath,
     this.defaultUserName,
     this.defaultUserEmail,
     this.gitVersion,
-    this.protectedBranches = const ['main', 'master', 'develop', 'development', 'production', 'staging'],
+    this.protectedBranches = const [
+      'main',
+      'master',
+      'develop',
+      'development',
+      'production',
+      'staging',
+    ],
   });
 
   static const GitConfig defaults = GitConfig();
@@ -145,9 +169,15 @@ class GitConfig {
     List<String>? protectedBranches,
   }) {
     return GitConfig(
-      executablePath: identical(executablePath, _unset) ? this.executablePath : executablePath as String?,
-      defaultUserName: identical(defaultUserName, _unset) ? this.defaultUserName : defaultUserName as String?,
-      defaultUserEmail: identical(defaultUserEmail, _unset) ? this.defaultUserEmail : defaultUserEmail as String?,
+      executablePath: identical(executablePath, _unset)
+          ? this.executablePath
+          : executablePath as String?,
+      defaultUserName: identical(defaultUserName, _unset)
+          ? this.defaultUserName
+          : defaultUserName as String?,
+      defaultUserEmail: identical(defaultUserEmail, _unset)
+          ? this.defaultUserEmail
+          : defaultUserEmail as String?,
       gitVersion: gitVersion ?? this.gitVersion,
       protectedBranches: protectedBranches ?? this.protectedBranches,
     );
@@ -167,9 +197,17 @@ class GitConfig {
     // Parse protected branches from YAML, default to standard list if not present
     List<String> parsedProtectedBranches;
     if (yaml['protected_branches'] != null) {
-      parsedProtectedBranches = (yaml['protected_branches'] as List).cast<String>();
+      parsedProtectedBranches = (yaml['protected_branches'] as List)
+          .cast<String>();
     } else {
-      parsedProtectedBranches = const ['main', 'master', 'develop', 'development', 'production', 'staging'];
+      parsedProtectedBranches = const [
+        'main',
+        'master',
+        'develop',
+        'development',
+        'production',
+        'staging',
+      ];
     }
 
     return GitConfig(
@@ -231,16 +269,36 @@ class ToolsConfig {
     return ToolsConfig(
       textEditor: textEditor ?? this.textEditor,
       textEditorVersion: textEditorVersion ?? this.textEditorVersion,
-      diffTool: identical(diffTool, _unset) ? this.diffTool : diffTool as DiffToolType?,
-      diffToolPath: identical(diffToolPath, _unset) ? this.diffToolPath : diffToolPath as String?,
-      diffToolVersion: identical(diffToolVersion, _unset) ? this.diffToolVersion : diffToolVersion as String?,
-      mergeTool: identical(mergeTool, _unset) ? this.mergeTool : mergeTool as DiffToolType?,
-      mergeToolPath: identical(mergeToolPath, _unset) ? this.mergeToolPath : mergeToolPath as String?,
-      mergeToolVersion: identical(mergeToolVersion, _unset) ? this.mergeToolVersion : mergeToolVersion as String?,
-      customDiffToolPath: identical(customDiffToolPath, _unset) ? this.customDiffToolPath : customDiffToolPath as String?,
-      customDiffToolVersion: identical(customDiffToolVersion, _unset) ? this.customDiffToolVersion : customDiffToolVersion as String?,
-      customMergeToolPath: identical(customMergeToolPath, _unset) ? this.customMergeToolPath : customMergeToolPath as String?,
-      customMergeToolVersion: identical(customMergeToolVersion, _unset) ? this.customMergeToolVersion : customMergeToolVersion as String?,
+      diffTool: identical(diffTool, _unset)
+          ? this.diffTool
+          : diffTool as DiffToolType?,
+      diffToolPath: identical(diffToolPath, _unset)
+          ? this.diffToolPath
+          : diffToolPath as String?,
+      diffToolVersion: identical(diffToolVersion, _unset)
+          ? this.diffToolVersion
+          : diffToolVersion as String?,
+      mergeTool: identical(mergeTool, _unset)
+          ? this.mergeTool
+          : mergeTool as DiffToolType?,
+      mergeToolPath: identical(mergeToolPath, _unset)
+          ? this.mergeToolPath
+          : mergeToolPath as String?,
+      mergeToolVersion: identical(mergeToolVersion, _unset)
+          ? this.mergeToolVersion
+          : mergeToolVersion as String?,
+      customDiffToolPath: identical(customDiffToolPath, _unset)
+          ? this.customDiffToolPath
+          : customDiffToolPath as String?,
+      customDiffToolVersion: identical(customDiffToolVersion, _unset)
+          ? this.customDiffToolVersion
+          : customDiffToolVersion as String?,
+      customMergeToolPath: identical(customMergeToolPath, _unset)
+          ? this.customMergeToolPath
+          : customMergeToolPath as String?,
+      customMergeToolVersion: identical(customMergeToolVersion, _unset)
+          ? this.customMergeToolVersion
+          : customMergeToolVersion as String?,
     );
   }
 
@@ -350,7 +408,8 @@ class UiConfig {
       useSystemTheme: useSystemTheme ?? this.useSystemTheme,
       repositoriesViewMode: repositoriesViewMode ?? this.repositoriesViewMode,
       projectsViewMode: projectsViewMode ?? this.projectsViewMode,
-      navigationRailExtended: navigationRailExtended ?? this.navigationRailExtended,
+      navigationRailExtended:
+          navigationRailExtended ?? this.navigationRailExtended,
       colorScheme: colorScheme ?? this.colorScheme,
       fontFamily: fontFamily ?? this.fontFamily,
       previewFontFamily: previewFontFamily ?? this.previewFontFamily,
@@ -401,7 +460,8 @@ class UiConfig {
               orElse: () => ProjectsViewMode.grid,
             )
           : ProjectsViewMode.grid,
-      navigationRailExtended: yaml['navigation_rail_extended'] as bool? ?? false,
+      navigationRailExtended:
+          yaml['navigation_rail_extended'] as bool? ?? false,
       colorScheme: yaml['color_scheme'] != null
           ? AppColorScheme.values.firstWhere(
               (e) => e.name == yaml['color_scheme'],
@@ -409,7 +469,8 @@ class UiConfig {
             )
           : AppColorScheme.deepPurple,
       fontFamily: yaml['font_family'] as String? ?? 'Inter',
-      previewFontFamily: yaml['preview_font_family'] as String? ?? 'JetBrains Mono',
+      previewFontFamily:
+          yaml['preview_font_family'] as String? ?? 'JetBrains Mono',
       fontSize: yaml['font_size'] != null
           ? AppFontSize.values.firstWhere(
               (e) => e.name == yaml['font_size'],
@@ -468,24 +529,13 @@ enum AppColorScheme {
 }
 
 /// Font size options
-enum AppFontSize {
-  tiny,
-  small,
-  medium,
-  large,
-}
+enum AppFontSize { tiny, small, medium, large }
 
 /// Repositories view mode
-enum RepositoriesViewMode {
-  grid,
-  list,
-}
+enum RepositoriesViewMode { grid, list }
 
 /// Projects view mode
-enum ProjectsViewMode {
-  grid,
-  list,
-}
+enum ProjectsViewMode { grid, list }
 
 /// Animation speed preference
 enum AppAnimationSpeed {
@@ -562,17 +612,11 @@ class CommandLogConfig {
   final bool panelVisible;
   final double panelWidth;
 
-  const CommandLogConfig({
-    this.panelVisible = false,
-    this.panelWidth = 600.0,
-  });
+  const CommandLogConfig({this.panelVisible = false, this.panelWidth = 600.0});
 
   static const CommandLogConfig defaults = CommandLogConfig();
 
-  CommandLogConfig copyWith({
-    bool? panelVisible,
-    double? panelWidth,
-  }) {
+  CommandLogConfig copyWith({bool? panelVisible, double? panelWidth}) {
     return CommandLogConfig(
       panelVisible: panelVisible ?? this.panelVisible,
       panelWidth: panelWidth ?? this.panelWidth,
@@ -580,10 +624,7 @@ class CommandLogConfig {
   }
 
   Map<String, dynamic> toYaml() {
-    return {
-      'panel_visible': panelVisible,
-      'panel_width': panelWidth,
-    };
+    return {'panel_visible': panelVisible, 'panel_width': panelWidth};
   }
 
   factory CommandLogConfig.fromYaml(Map<dynamic, dynamic> yaml) {
@@ -738,15 +779,23 @@ class WorkspaceConfig {
       currentRepository: yaml['current_repository'] as String?,
       repositories: yaml['repositories'] != null
           ? (yaml['repositories'] as List)
-              .map((r) => WorkspaceRepository.fromYaml(r as Map<dynamic, dynamic>))
-              .toList()
+                .map(
+                  (r) =>
+                      WorkspaceRepository.fromYaml(r as Map<dynamic, dynamic>),
+                )
+                .toList()
           : [],
       workspaces: (yaml['workspaces'] ?? yaml['projects']) != null
           ? ((yaml['workspaces'] ?? yaml['projects']) as List)
-              .map((w) => WorkspaceConfigEntry.fromYaml(w as Map<dynamic, dynamic>))
-              .toList()
+                .map(
+                  (w) =>
+                      WorkspaceConfigEntry.fromYaml(w as Map<dynamic, dynamic>),
+                )
+                .toList()
           : [],
-      selectedWorkspaceId: yaml['selected_workspace_id'] ?? yaml['selected_project_id'] as String?,
+      selectedWorkspaceId:
+          yaml['selected_workspace_id'] ??
+          yaml['selected_project_id'] as String?,
     );
   }
 }
@@ -760,7 +809,8 @@ class WorkspaceConfigEntry {
   final int color; // Color value as int for YAML storage
   final String? icon;
   final List<String> repositoryPaths;
-  final String? lastSelectedRepository; // Remember last selected repository for this project
+  final String?
+  lastSelectedRepository; // Remember last selected repository for this project
   final String createdAt;
   final String? updatedAt;
 

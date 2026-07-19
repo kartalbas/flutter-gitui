@@ -24,15 +24,15 @@ class ReflogDialog extends ConsumerWidget {
       icon: PhosphorIconsRegular.clockCounterClockwise,
       title: AppLocalizations.of(context)!.gitReflog,
       content: reflogAsync.when(
-          data: (entries) {
-            if (entries.isEmpty) {
-              return _buildEmpty(context);
-            }
-            return _buildReflogList(context, entries);
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => _buildError(context, error),
-        ),
+        data: (entries) {
+          if (entries.isEmpty) {
+            return _buildEmpty(context);
+          }
+          return _buildReflogList(context, entries);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildError(context, error),
+      ),
       actions: [
         BaseButton(
           label: AppLocalizations.of(context)!.refresh,
@@ -104,7 +104,11 @@ class ReflogDialog extends ConsumerWidget {
               const Icon(PhosphorIconsRegular.info, size: 20),
               const SizedBox(width: AppTheme.paddingS),
               Expanded(
-                child: BodySmallLabel(AppLocalizations.of(context)!.reflogEntriesInfo(entries.length)),
+                child: BodySmallLabel(
+                  AppLocalizations.of(
+                    context,
+                  )!.reflogEntriesInfo(entries.length),
+                ),
               ),
             ],
           ),
@@ -134,7 +138,10 @@ class ReflogDialog extends ConsumerWidget {
           vertical: AppTheme.paddingXS,
         ),
         decoration: BoxDecoration(
-          color: _getActionColor(entry.actionType, context).withValues(alpha:0.1),
+          color: _getActionColor(
+            entry.actionType,
+            context,
+          ).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(4),
         ),
         child: BodySmallLabel(
@@ -202,4 +209,3 @@ Future<void> showReflogDialog(BuildContext context) {
     builder: (context) => const ReflogDialog(),
   );
 }
-

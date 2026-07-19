@@ -176,9 +176,9 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                         ),
                                         child: LabelSmallLabel(
                                           AppLocalizations.of(context)!.current,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer,
                                         ),
                                       ),
                                     ],
@@ -314,9 +314,9 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                         ),
                                         child: LabelSmallLabel(
                                           AppLocalizations.of(context)!.current,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimaryContainer,
                                         ),
                                       ),
                                     ],

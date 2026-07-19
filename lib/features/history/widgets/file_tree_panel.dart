@@ -205,9 +205,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       children: [
         Icon(icon, size: AppTheme.iconXS, color: color),
         const SizedBox(width: AppTheme.paddingXS),
-        BodySmallLabel(
-          count,
-        ),
+        BodySmallLabel(count),
       ],
     );
   }
@@ -258,11 +256,14 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                       ? (node.isExpanded
                             ? PhosphorIconsBold.folderOpen
                             : PhosphorIconsBold.folder)
-                      : FileIconUtils.getIconForExtension(node.fileChange?.extension ?? ''),
+                      : FileIconUtils.getIconForExtension(
+                          node.fileChange?.extension ?? '',
+                        ),
                   size: AppTheme.iconS,
                   color: node.isDirectory
                       ? Theme.of(context).colorScheme.primary
-                      : (node.fileChange?.type.color ?? Theme.of(context).colorScheme.onSurface),
+                      : (node.fileChange?.type.color ??
+                            Theme.of(context).colorScheme.onSurface),
                 ),
                 const SizedBox(width: AppTheme.paddingS),
 
@@ -310,7 +311,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                   // File actions menu
                   const SizedBox(width: AppTheme.paddingXS),
                   PopupMenuButton<String>(
-                    icon: const Icon(PhosphorIconsRegular.dotsThreeVertical, size: AppTheme.iconXS),
+                    icon: const Icon(
+                      PhosphorIconsRegular.dotsThreeVertical,
+                      size: AppTheme.iconXS,
+                    ),
                     tooltip: AppLocalizations.of(context)!.tooltipFileActions,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
@@ -322,7 +326,9 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                         value: 'download',
                         child: MenuItemContent(
                           icon: PhosphorIconsRegular.download,
-                          label: AppLocalizations.of(context)!.labelDownloadFile,
+                          label: AppLocalizations.of(
+                            context,
+                          )!.labelDownloadFile,
                           iconSize: AppTheme.iconS,
                         ),
                       ),
@@ -338,7 +344,9 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                         value: 'open_folder',
                         child: MenuItemContent(
                           icon: PhosphorIconsRegular.folderOpen,
-                          label: AppLocalizations.of(context)!.labelDownloadAndOpenFolder,
+                          label: AppLocalizations.of(
+                            context,
+                          )!.labelDownloadAndOpenFolder,
                           iconSize: AppTheme.iconS,
                         ),
                       ),
@@ -442,10 +450,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       if (gitService == null) {
         Logger.warning('Download file: no repository open');
         if (context.mounted) {
-          NotificationService.showWarning(
-            context,
-            'No repository open',
-          );
+          NotificationService.showWarning(context, 'No repository open');
         }
         return;
       }
@@ -468,7 +473,9 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       final commitRef = isDeleted
           ? '${widget.commitHash}^1'
           : widget.commitHash;
-      Logger.info('Downloading file from commit $commitRef: $filePath -> $outputPath');
+      Logger.info(
+        'Downloading file from commit $commitRef: $filePath -> $outputPath',
+      );
       final fileContent = await gitService.getFileContentAtCommit(
         commitRef,
         filePath,
@@ -479,10 +486,16 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       await file.writeAsBytes(fileContent);
 
       if (context.mounted) {
-        NotificationService.showSuccess(context, AppLocalizations.of(context)!.messageFileSavedTo(outputPath));
+        NotificationService.showSuccess(
+          context,
+          AppLocalizations.of(context)!.messageFileSavedTo(outputPath),
+        );
       }
     } catch (e) {
-      Logger.error('Failed to download file: $filePath from commit ${widget.commitHash}', e);
+      Logger.error(
+        'Failed to download file: $filePath from commit ${widget.commitHash}',
+        e,
+      );
       if (context.mounted) {
         NotificationService.showError(
           context,
@@ -502,10 +515,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       if (gitService == null) {
         Logger.warning('Open in editor: no repository open');
         if (context.mounted) {
-          NotificationService.showWarning(
-            context,
-            'No repository open',
-          );
+          NotificationService.showWarning(context, 'No repository open');
         }
         return;
       }
@@ -551,7 +561,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
         targetPath: tempFilePath,
       );
     } catch (e) {
-      Logger.error('Failed to open file in editor: $filePath from commit ${widget.commitHash}', e);
+      Logger.error(
+        'Failed to open file in editor: $filePath from commit ${widget.commitHash}',
+        e,
+      );
       if (context.mounted) {
         NotificationService.showError(
           context,
@@ -571,10 +584,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       if (gitService == null) {
         Logger.warning('Download and open folder: no repository open');
         if (context.mounted) {
-          NotificationService.showWarning(
-            context,
-            'No repository open',
-          );
+          NotificationService.showWarning(context, 'No repository open');
         }
         return;
       }
@@ -582,7 +592,9 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       // Get repository working directory from provider
       final repoPath = ref.read(currentRepositoryPathProvider);
       if (repoPath == null) {
-        Logger.warning('Download and open folder: repository path not available');
+        Logger.warning(
+          'Download and open folder: repository path not available',
+        );
         if (context.mounted) {
           NotificationService.showWarning(
             context,
@@ -596,7 +608,9 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       final commitRef = isDeleted
           ? '${widget.commitHash}^1'
           : widget.commitHash;
-      Logger.info('Downloading file from commit $commitRef and opening folder: $filePath');
+      Logger.info(
+        'Downloading file from commit $commitRef and opening folder: $filePath',
+      );
       final fileContent = await gitService.getFileContentAtCommit(
         commitRef,
         filePath,
@@ -631,10 +645,16 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       }
 
       if (context.mounted) {
-        NotificationService.showSuccess(context, AppLocalizations.of(context)!.messageFileDownloadedAndFolderOpened);
+        NotificationService.showSuccess(
+          context,
+          AppLocalizations.of(context)!.messageFileDownloadedAndFolderOpened,
+        );
       }
     } catch (e) {
-      Logger.error('Failed to download file and open folder: $filePath from commit ${widget.commitHash}', e);
+      Logger.error(
+        'Failed to download file and open folder: $filePath from commit ${widget.commitHash}',
+        e,
+      );
       if (context.mounted) {
         NotificationService.showError(
           context,
@@ -644,4 +664,3 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
     }
   }
 }
-

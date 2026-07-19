@@ -43,7 +43,9 @@ class AnimationSection extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BodyMediumLabel(l10n.animationSpeed),
-              BodySmallLabel(_getAnimationSpeedName(context, ui.animationSpeed)),
+              BodySmallLabel(
+                _getAnimationSpeedName(context, ui.animationSpeed),
+              ),
             ],
           ),
           trailing: DropdownButton<AppAnimationSpeed>(
@@ -66,7 +68,10 @@ class AnimationSection extends ConsumerWidget {
         ),
         // Info card
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: AppTheme.paddingM, vertical: AppTheme.paddingS),
+          margin: const EdgeInsets.symmetric(
+            horizontal: AppTheme.paddingM,
+            vertical: AppTheme.paddingS,
+          ),
           padding: const EdgeInsets.all(AppTheme.paddingS),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,

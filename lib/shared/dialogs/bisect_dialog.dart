@@ -33,18 +33,18 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       icon: PhosphorIconsRegular.gitBranch,
       title: AppLocalizations.of(context)!.gitBisect,
       content: bisectStateAsync.when(
-          data: (state) {
-            if (state.isCompleted) {
-              return _buildCompleted(context, state);
-            } else if (state.isActive) {
-              return _buildActive(context, state);
-            } else {
-              return _buildStart(context);
-            }
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => _buildError(context, error),
-        ),
+        data: (state) {
+          if (state.isCompleted) {
+            return _buildCompleted(context, state);
+          } else if (state.isActive) {
+            return _buildActive(context, state);
+          } else {
+            return _buildStart(context);
+          }
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildError(context, error),
+      ),
       actions: bisectStateAsync.when(
         data: (state) => _buildActions(context, state),
         loading: () => [
@@ -102,7 +102,10 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         BaseButton(
           label: AppLocalizations.of(context)!.startBisect,
           variant: ButtonVariant.primary,
-          onPressed: (_selectedGoodCommit != null && _selectedBadCommit != null && !_isStarting)
+          onPressed:
+              (_selectedGoodCommit != null &&
+                  _selectedBadCommit != null &&
+                  !_isStarting)
               ? _startBisect
               : null,
         ),
@@ -117,7 +120,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       data: (commits) {
         if (commits.isEmpty) {
           return Center(
-            child: BodyLargeLabel(AppLocalizations.of(context)!.noCommitsAvailable),
+            child: BodyLargeLabel(
+              AppLocalizations.of(context)!.noCommitsAvailable,
+            ),
           );
         }
 
@@ -136,7 +141,11 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(AppLocalizations.of(context)!.bisectHelpsFindCommitThatIntroducedBug),
+                    child: BodySmallLabel(
+                      AppLocalizations.of(
+                        context,
+                      )!.bisectHelpsFindCommitThatIntroducedBug,
+                    ),
                   ),
                 ],
               ),
@@ -144,7 +153,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Good commit selection
-            TitleSmallLabel(AppLocalizations.of(context)!.goodCommitWhereBugWasNotPresent),
+            TitleSmallLabel(
+              AppLocalizations.of(context)!.goodCommitWhereBugWasNotPresent,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             _buildCommitDropdown(
               commits: commits,
@@ -157,12 +168,16 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             const SizedBox(height: AppTheme.paddingM),
 
             // Bad commit selection
-            TitleSmallLabel(AppLocalizations.of(context)!.badCommitWhereBugIsPresent),
+            TitleSmallLabel(
+              AppLocalizations.of(context)!.badCommitWhereBugIsPresent,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             _buildCommitDropdown(
               commits: commits,
               selectedCommit: _selectedBadCommit,
-              hint: AppLocalizations.of(context)!.selectABadCommitDefaultsToHead,
+              hint: AppLocalizations.of(
+                context,
+              )!.selectABadCommitDefaultsToHead,
               onChanged: (hash) {
                 setState(() => _selectedBadCommit = hash);
               },
@@ -195,14 +210,19 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                   const Icon(PhosphorIconsRegular.gitBranch, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: TitleMediumLabel(AppLocalizations.of(context)!.bisectInProgress),
+                    child: TitleMediumLabel(
+                      AppLocalizations.of(context)!.bisectInProgress,
+                    ),
                   ),
                 ],
               ),
               if (state.stepsRemaining != null) ...[
                 const SizedBox(height: AppTheme.paddingS),
                 BodyMediumLabel(
-                  AppLocalizations.of(context)!.approximatelyStepsRemaining(state.stepsRemaining.toString(), state.stepsRemaining as Object),
+                  AppLocalizations.of(context)!.approximatelyStepsRemaining(
+                    state.stepsRemaining.toString(),
+                    state.stepsRemaining as Object,
+                  ),
                 ),
               ],
             ],
@@ -279,18 +299,26 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 children: [
                   if (state.goodCommits.isNotEmpty) ...[
                     BodyMediumLabel(
-                      AppLocalizations.of(context)!.goodCommits(state.goodCommits.length),
+                      AppLocalizations.of(
+                        context,
+                      )!.goodCommits(state.goodCommits.length),
                       color: AppTheme.gitAdded,
                     ),
-                    ...state.goodCommits.map((hash) => BodySmallLabel('  $hash')),
+                    ...state.goodCommits.map(
+                      (hash) => BodySmallLabel('  $hash'),
+                    ),
                     const SizedBox(height: AppTheme.paddingS),
                   ],
                   if (state.badCommits.isNotEmpty) ...[
                     BodyMediumLabel(
-                      AppLocalizations.of(context)!.badCommits(state.badCommits.length),
+                      AppLocalizations.of(
+                        context,
+                      )!.badCommits(state.badCommits.length),
                       color: AppTheme.gitDeleted,
                     ),
-                    ...state.badCommits.map((hash) => BodySmallLabel('  $hash')),
+                    ...state.badCommits.map(
+                      (hash) => BodySmallLabel('  $hash'),
+                    ),
                   ],
                 ],
               ),
@@ -319,7 +347,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
-              color: AppTheme.gitDeleted.withValues(alpha:0.1),
+              color: AppTheme.gitDeleted.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: SelectableText(
@@ -347,7 +375,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.error(error.toString())),
+          TitleLargeLabel(
+            AppLocalizations.of(context)!.error(error.toString()),
+          ),
           const SizedBox(height: AppTheme.paddingS),
           BodySmallLabel('', textAlign: TextAlign.center),
         ],
@@ -414,7 +444,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToStartBisect(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.failedToStartBisect(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -449,7 +481,11 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.markedAs(step.displayName, step.displayName)),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.markedAs(step.displayName, step.displayName),
+            ),
             backgroundColor: AppTheme.gitAdded,
           ),
         );
@@ -458,7 +494,11 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToMarkCommit(e.toString(), 'status')),
+            content: Text(
+              AppLocalizations.of(
+                context,
+              )!.failedToMarkCommit(e.toString(), 'status'),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -489,7 +529,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failedToResetBisect(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.failedToResetBisect(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

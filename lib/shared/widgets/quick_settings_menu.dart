@@ -23,10 +23,7 @@ class QuickSettingsMenu extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return BasePopupMenuButton<String>(
-      icon: const Icon(
-        PhosphorIconsRegular.gear,
-        size: 20,
-      ),
+      icon: const Icon(PhosphorIconsRegular.gear, size: 20),
       tooltip: l10n.tooltipQuickSettings,
       offset: const Offset(0, 40),
       itemBuilder: (context) => [
@@ -77,30 +74,10 @@ class QuickSettingsMenu extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
-        _buildFontSizeItem(
-          context,
-          'Tiny',
-          AppFontSize.tiny,
-          fontSize,
-        ),
-        _buildFontSizeItem(
-          context,
-          'Small',
-          AppFontSize.small,
-          fontSize,
-        ),
-        _buildFontSizeItem(
-          context,
-          'Medium',
-          AppFontSize.medium,
-          fontSize,
-        ),
-        _buildFontSizeItem(
-          context,
-          'Large',
-          AppFontSize.large,
-          fontSize,
-        ),
+        _buildFontSizeItem(context, 'Tiny', AppFontSize.tiny, fontSize),
+        _buildFontSizeItem(context, 'Small', AppFontSize.small, fontSize),
+        _buildFontSizeItem(context, 'Medium', AppFontSize.medium, fontSize),
+        _buildFontSizeItem(context, 'Large', AppFontSize.large, fontSize),
         const PopupMenuDivider(),
 
         // Color Scheme Section
@@ -145,12 +122,7 @@ class QuickSettingsMenu extends ConsumerWidget {
           AppColorScheme.green,
           colorScheme,
         ),
-        _buildColorSchemeItem(
-          context,
-          'Red',
-          AppColorScheme.red,
-          colorScheme,
-        ),
+        _buildColorSchemeItem(context, 'Red', AppColorScheme.red, colorScheme),
         _buildColorSchemeItem(
           context,
           'Pink',
@@ -191,7 +163,8 @@ class QuickSettingsMenu extends ConsumerWidget {
       onSelected: (value) {
         if (value == 'full_settings') {
           // Navigate to settings screen
-          ref.read(navigationDestinationProvider.notifier).state = AppDestination.settings;
+          ref.read(navigationDestinationProvider.notifier).state =
+              AppDestination.settings;
         }
       },
     );

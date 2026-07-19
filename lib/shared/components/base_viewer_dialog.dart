@@ -106,7 +106,8 @@ class BaseViewerDialog extends StatelessWidget {
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
-        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.escape) {
           if (barrierDismissible) {
             Navigator.of(context).pop();
             return KeyEventResult.handled;
@@ -156,7 +157,9 @@ class BaseViewerDialog extends StatelessWidget {
                             BodySmallLabel(
                               subtitle!,
                               color: headerBackgroundColor != null
-                                  ? theme.colorScheme.onSurface.withValues(alpha: 0.7)
+                                  ? theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.7,
+                                    )
                                   : null,
                             ),
                         ],

@@ -51,20 +51,24 @@ class StashParser {
         String branch = 'unknown';
         String message = fullMessage;
 
-        final wipMatch = RegExp(r'^(?:WIP on|On) ([^:]+):(.*)').firstMatch(fullMessage);
+        final wipMatch = RegExp(
+          r'^(?:WIP on|On) ([^:]+):(.*)',
+        ).firstMatch(fullMessage);
         if (wipMatch != null) {
           branch = wipMatch.group(1)?.trim() ?? 'unknown';
           message = wipMatch.group(2)?.trim() ?? '';
         }
 
-        stashes.add(GitStash(
-          ref: ref,
-          index: index,
-          hash: hash,
-          branch: branch,
-          message: message,
-          timestamp: timestamp,
-        ));
+        stashes.add(
+          GitStash(
+            ref: ref,
+            index: index,
+            hash: hash,
+            branch: branch,
+            message: message,
+            timestamp: timestamp,
+          ),
+        );
       } catch (e) {
         // Skip malformed lines
         continue;
@@ -108,7 +112,7 @@ class StashParser {
 
       // Parse summary line: "2 files changed, 8 insertions(+), 7 deletions(-)"
       final summaryMatch = RegExp(
-        r'(\d+) file[s]? changed(?:, (\d+) insertion[s]?\(\+\))?(?:, (\d+) deletion[s]?\(-\))?'
+        r'(\d+) file[s]? changed(?:, (\d+) insertion[s]?\(\+\))?(?:, (\d+) deletion[s]?\(-\))?',
       ).firstMatch(line);
 
       if (summaryMatch != null) {

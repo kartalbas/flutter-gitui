@@ -35,7 +35,9 @@ final gitServiceProvider = Provider<GitService?>((ref) {
   // Narrow the dependency: watching the whole config rebuilt this provider on
   // every cosmetic change (theme, font size, workspace save), discarding a
   // GitService that may still have commands in flight.
-  final protectedBranches = ref.watch(configProvider.select((config) => config.git.protectedBranches));
+  final protectedBranches = ref.watch(
+    configProvider.select((config) => config.git.protectedBranches),
+  );
 
   // Wire up command logging and progress tracking
   return GitService(
@@ -69,9 +71,13 @@ final gitServiceProvider = Provider<GitService?>((ref) {
         // an unguarded read would surface as an unhandled zone error.
         if (!ref.mounted) return;
         if (isComplete) {
-          ref.read(progressProvider.notifier).completeOperation(isAutomatic: true);
+          ref
+              .read(progressProvider.notifier)
+              .completeOperation(isAutomatic: true);
         } else {
-          ref.read(progressProvider.notifier).startOperation(
+          ref
+              .read(progressProvider.notifier)
+              .startOperation(
                 operationName,
                 0,
                 isIndeterminate: true,
@@ -150,7 +156,9 @@ final stagedFilesProvider = Provider<List<FileStatus>>((ref) {
 /// Unstaged files provider
 final unstagedFilesProvider = Provider<List<FileStatus>>((ref) {
   final allStatuses = ref.watch(repositoryStatusProvider).value ?? [];
-  return allStatuses.where((s) => s.hasUnstagedChanges || s.isUntracked).toList();
+  return allStatuses
+      .where((s) => s.hasUnstagedChanges || s.isUntracked)
+      .toList();
 });
 
 /// Repository is clean provider
@@ -186,7 +194,10 @@ final commitHistoryProvider = FutureProvider<List<GitCommit>>((ref) async {
 });
 
 /// Commit history with limit provider
-final commitHistoryLimitProvider = FutureProvider.family<List<GitCommit>, int>((ref, limit) async {
+final commitHistoryLimitProvider = FutureProvider.family<List<GitCommit>, int>((
+  ref,
+  limit,
+) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
@@ -204,17 +215,18 @@ final commitHistoryLimitProvider = FutureProvider.family<List<GitCommit>, int>((
 ///
 /// Auto-disposed: one element per viewed path would otherwise be retained for
 /// the container's lifetime and re-run against every later repository switch.
-final fileHistoryProvider = FutureProvider.autoDispose.family<List<GitCommit>, String>((ref, filePath) async {
-  final gitService = ref.watch(gitServiceProvider);
-  if (gitService == null) return [];
+final fileHistoryProvider = FutureProvider.autoDispose
+    .family<List<GitCommit>, String>((ref, filePath) async {
+      final gitService = ref.watch(gitServiceProvider);
+      if (gitService == null) return [];
 
-  try {
-    final result = await gitService.getFileHistory(filePath);
-    return result.unwrapOr([]);
-  } catch (e) {
-    return [];
-  }
-});
+      try {
+        final result = await gitService.getFileHistory(filePath);
+        return result.unwrapOr([]);
+      } catch (e) {
+        return [];
+      }
+    });
 
 /// File blame provider (who changed what when at line level)
 ///
@@ -230,21 +242,23 @@ final fileHistoryProvider = FutureProvider.autoDispose.family<List<GitCommit>, S
 /// Auto-disposed: a full-file blame payload per viewed path would otherwise be
 /// retained for the container's lifetime and re-run against every later
 /// repository switch.
-final fileBlameProvider = FutureProvider.autoDispose.family<FileBlame?, String>((ref, filePath) async {
-  final gitService = ref.watch(gitServiceProvider);
-  if (gitService == null) return null;
+final fileBlameProvider = FutureProvider.autoDispose.family<FileBlame?, String>(
+  (ref, filePath) async {
+    final gitService = ref.watch(gitServiceProvider);
+    if (gitService == null) return null;
 
-  try {
-    final result = await gitService.getBlame(filePath);
-    return result.when(
-      success: (blame) => blame,
-      failure: (msg, error, stackTrace) => null,
-    );
-  } catch (e) {
-    // Return null on error (file doesn't exist, etc.)
-    return null;
-  }
-});
+    try {
+      final result = await gitService.getBlame(filePath);
+      return result.when(
+        success: (blame) => blame,
+        failure: (msg, error, stackTrace) => null,
+      );
+    } catch (e) {
+      // Return null on error (file doesn't exist, etc.)
+      return null;
+    }
+  },
+);
 
 /// All branches provider (local and remote)
 final allBranchesProvider = FutureProvider<List<GitBranch>>((ref) async {
@@ -543,7 +557,10 @@ class GitActions {
   }
 
   /// Helper to mark refresh for batch or execute immediately
-  Future<void> _refreshOrQueue(RefreshType type, Future<void> Function() refreshFn) async {
+  Future<void> _refreshOrQueue(
+    RefreshType type,
+    Future<void> Function() refreshFn,
+  ) async {
     if (_batchContext != null && _batchContext!.isActive) {
       _batchContext!.markForRefresh(type);
     } else {
@@ -561,9 +578,13 @@ class GitActions {
     if (currentRepoPath != null) {
       // Get the repository object and refresh its status
       final repositories = ref.read(workspaceProvider);
-      final repository = repositories.where((r) => r.path == currentRepoPath).firstOrNull;
+      final repository = repositories
+          .where((r) => r.path == currentRepoPath)
+          .firstOrNull;
       if (repository != null) {
-        await ref.read(workspaceRepositoryStatusProvider.notifier).refreshStatus(repository);
+        await ref
+            .read(workspaceRepositoryStatusProvider.notifier)
+            .refreshStatus(repository);
       }
     }
   }
@@ -625,9 +646,13 @@ class GitActions {
     if (currentRepoPath != null) {
       // Get the repository object and refresh its status
       final repositories = ref.read(workspaceProvider);
-      final repository = repositories.where((r) => r.path == currentRepoPath).firstOrNull;
+      final repository = repositories
+          .where((r) => r.path == currentRepoPath)
+          .firstOrNull;
       if (repository != null) {
-        await ref.read(workspaceRepositoryStatusProvider.notifier).refreshStatus(repository);
+        await ref
+            .read(workspaceRepositoryStatusProvider.notifier)
+            .refreshStatus(repository);
       }
     }
   }
@@ -653,7 +678,10 @@ class GitActions {
   }
 
   /// Delete untracked file
-  Future<void> deleteUntrackedFile(String path, {bool skipRefresh = false}) async {
+  Future<void> deleteUntrackedFile(
+    String path, {
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
@@ -761,7 +789,11 @@ class GitActions {
   }
 
   /// Delete a branch
-  Future<void> deleteBranch(String branchName, {bool force = false, bool skipRefresh = false}) async {
+  Future<void> deleteBranch(
+    String branchName, {
+    bool force = false,
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
@@ -783,11 +815,18 @@ class GitActions {
   }
 
   /// Checkout (switch to) a branch
-  Future<void> switchBranch(String branchName, {bool createIfMissing = false, bool skipRefresh = false}) async {
+  Future<void> switchBranch(
+    String branchName, {
+    bool createIfMissing = false,
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    final result = await gitService.checkoutBranch(branchName, createIfMissing: createIfMissing);
+    final result = await gitService.checkoutBranch(
+      branchName,
+      createIfMissing: createIfMissing,
+    );
     result.unwrap(); // Throw on error to propagate to caller
 
     if (!skipRefresh) {
@@ -817,7 +856,11 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    final result = await gitService.renameBranch(newName, oldName: oldName, force: force);
+    final result = await gitService.renameBranch(
+      newName,
+      oldName: oldName,
+      force: force,
+    );
     result.unwrap(); // Throw on error to propagate to caller
 
     await refreshBranches();
@@ -907,7 +950,11 @@ class GitActions {
   }
 
   /// Set remote URL
-  Future<void> setRemoteUrl(String name, String url, {bool push = false}) async {
+  Future<void> setRemoteUrl(
+    String name,
+    String url, {
+    bool push = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
@@ -1018,7 +1065,11 @@ class GitActions {
   }
 
   /// Apply a stash
-  Future<void> applyStash(String stashRef, {bool index = false, bool skipRefresh = false}) async {
+  Future<void> applyStash(
+    String stashRef, {
+    bool index = false,
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
@@ -1032,11 +1083,20 @@ class GitActions {
   }
 
   /// Pop a stash (apply and remove)
-  Future<void> popStash(String stashRef, {bool index = false, String? expectedHash, bool skipRefresh = false}) async {
+  Future<void> popStash(
+    String stashRef, {
+    bool index = false,
+    String? expectedHash,
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    final result = await gitService.popStash(stashRef, index: index, expectedHash: expectedHash);
+    final result = await gitService.popStash(
+      stashRef,
+      index: index,
+      expectedHash: expectedHash,
+    );
     if (result.isFailure) {
       // A failure can mean the displayed list no longer matches the reflog
       // (stash moved or vanished); re-sync before surfacing the error so the
@@ -1051,11 +1111,18 @@ class GitActions {
   }
 
   /// Drop a stash
-  Future<void> dropStash(String stashRef, {String? expectedHash, bool skipRefresh = false}) async {
+  Future<void> dropStash(
+    String stashRef, {
+    String? expectedHash,
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    final result = await gitService.dropStash(stashRef, expectedHash: expectedHash);
+    final result = await gitService.dropStash(
+      stashRef,
+      expectedHash: expectedHash,
+    );
     if (result.isFailure) {
       // A failure can mean the displayed list no longer matches the reflog
       // (stash moved or vanished); re-sync before surfacing the error so the
@@ -1098,11 +1165,18 @@ class GitActions {
   }
 
   /// Create a lightweight tag
-  Future<void> createLightweightTag(String tagName, {String? commitHash, bool skipRefresh = false}) async {
+  Future<void> createLightweightTag(
+    String tagName, {
+    String? commitHash,
+    bool skipRefresh = false,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    (await gitService.createLightweightTag(tagName, commitHash: commitHash)).unwrap();
+    (await gitService.createLightweightTag(
+      tagName,
+      commitHash: commitHash,
+    )).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.tags, refreshTags);
     }
@@ -1198,7 +1272,11 @@ class GitActions {
   }
 
   /// Delete multiple tags in batch
-  Future<void> deleteTags(List<String> tagNames, {bool deleteFromRemote = false, String? remoteName}) async {
+  Future<void> deleteTags(
+    List<String> tagNames, {
+    bool deleteFromRemote = false,
+    String? remoteName,
+  }) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
@@ -1276,17 +1354,11 @@ class GitActions {
   // ============================================
 
   /// Amend the last commit
-  Future<void> amendCommit({
-    String? newMessage,
-    bool noEdit = false,
-  }) async {
+  Future<void> amendCommit({String? newMessage, bool noEdit = false}) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.amendCommit(
-      newMessage: newMessage,
-      noEdit: noEdit,
-    );
+    await gitService.amendCommit(newMessage: newMessage, noEdit: noEdit);
 
     await refreshStatus();
     // Refresh history to show updated commit
@@ -1360,10 +1432,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    (await gitService.resetToCommit(
-      commitHash,
-      mode: mode,
-    )).unwrap();
+    (await gitService.resetToCommit(commitHash, mode: mode)).unwrap();
 
     await refreshStatus();
     await refreshBranches();
@@ -1442,13 +1511,14 @@ final selectedCommitHashProvider = StateProvider<String?>((ref) => null);
 /// Auto-disposed: one element per clicked commit would otherwise be retained
 /// for the container's lifetime and re-run against every later repository
 /// switch.
-final commitChangedFilesProvider = FutureProvider.autoDispose.family<List<FileChange>, String>((ref, commitHash) async {
-  final gitService = ref.watch(gitServiceProvider);
-  if (gitService == null) return [];
+final commitChangedFilesProvider = FutureProvider.autoDispose
+    .family<List<FileChange>, String>((ref, commitHash) async {
+      final gitService = ref.watch(gitServiceProvider);
+      if (gitService == null) return [];
 
-  try {
-    return await gitService.getCommitChangedFiles(commitHash);
-  } catch (e) {
-    return [];
-  }
-});
+      try {
+        return await gitService.getCommitChangedFiles(commitHash);
+      } catch (e) {
+        return [];
+      }
+    });

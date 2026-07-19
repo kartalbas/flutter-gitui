@@ -16,10 +16,7 @@ import '../components/base_dropdown.dart';
 class CreateTagDialog extends ConsumerStatefulWidget {
   final String? initialCommit;
 
-  const CreateTagDialog({
-    super.key,
-    this.initialCommit,
-  });
+  const CreateTagDialog({super.key, this.initialCommit});
 
   @override
   ConsumerState<CreateTagDialog> createState() => _CreateTagDialogState();
@@ -61,87 +58,101 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-                // Info banner
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(PhosphorIconsRegular.info, size: 20),
-                      const SizedBox(width: AppTheme.paddingS),
-                      Expanded(
-                        child: BodySmallLabel(AppLocalizations.of(context)!.createTagDialogDescription),
+              // Info banner
+              Container(
+                padding: const EdgeInsets.all(AppTheme.paddingM),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    const SizedBox(width: AppTheme.paddingS),
+                    Expanded(
+                      child: BodySmallLabel(
+                        AppLocalizations.of(
+                          context,
+                        )!.createTagDialogDescription,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppTheme.paddingL),
+              ),
+              const SizedBox(height: AppTheme.paddingL),
 
-                // Tag name
+              // Tag name
+              BaseTextField(
+                controller: _tagNameController,
+                label: AppLocalizations.of(context)!.tagName,
+                hintText: AppLocalizations.of(context)!.tagNameHint,
+                prefixIcon: PhosphorIconsRegular.tag,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.enterTagName;
+                  }
+                  if (value.contains(' ')) {
+                    return AppLocalizations.of(context)!.tagNameNoSpaces;
+                  }
+                  return null;
+                },
+                autofocus: true,
+              ),
+              const SizedBox(height: AppTheme.paddingM),
+
+              // Target commit
+              TitleSmallLabel(AppLocalizations.of(context)!.targetCommit),
+              const SizedBox(height: AppTheme.paddingS),
+              commitsAsync.when(
+                data: (commits) => _buildCommitDropdown(commits),
+                loading: () => const LinearProgressIndicator(),
+                error: (_, _) => BodyMediumLabel(
+                  AppLocalizations.of(context)!.errorLoadingCommits,
+                ),
+              ),
+              const SizedBox(height: AppTheme.paddingL),
+
+              // Annotated tag option
+              SwitchListTile(
+                title: BodyMediumLabel(
+                  AppLocalizations.of(context)!.annotatedTag,
+                ),
+                subtitle: BodySmallLabel(
+                  AppLocalizations.of(context)!.includeMessageWithTag,
+                ),
+                value: _isAnnotated,
+                onChanged: (value) {
+                  setState(() => _isAnnotated = value);
+                },
+              ),
+              const SizedBox(height: AppTheme.paddingM),
+
+              // Tag message (only for annotated tags)
+              if (_isAnnotated) ...[
                 BaseTextField(
-                  controller: _tagNameController,
-                  label: AppLocalizations.of(context)!.tagName,
-                  hintText: AppLocalizations.of(context)!.tagNameHint,
-                  prefixIcon: PhosphorIconsRegular.tag,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return AppLocalizations.of(context)!.enterTagName;
-                    }
-                    if (value.contains(' ')) {
-                      return AppLocalizations.of(context)!.tagNameNoSpaces;
-                    }
-                    return null;
-                  },
-                  autofocus: true,
-                ),
-                const SizedBox(height: AppTheme.paddingM),
-
-                // Target commit
-                TitleSmallLabel(AppLocalizations.of(context)!.targetCommit),
-                const SizedBox(height: AppTheme.paddingS),
-                commitsAsync.when(
-                  data: (commits) => _buildCommitDropdown(commits),
-                  loading: () => const LinearProgressIndicator(),
-                  error: (_, _) => BodyMediumLabel(AppLocalizations.of(context)!.errorLoadingCommits),
-                ),
-                const SizedBox(height: AppTheme.paddingL),
-
-                // Annotated tag option
-                SwitchListTile(
-                  title: BodyMediumLabel(AppLocalizations.of(context)!.annotatedTag),
-                  subtitle: BodySmallLabel(AppLocalizations.of(context)!.includeMessageWithTag),
-                  value: _isAnnotated,
-                  onChanged: (value) {
-                    setState(() => _isAnnotated = value);
-                  },
-                ),
-                const SizedBox(height: AppTheme.paddingM),
-
-                // Tag message (only for annotated tags)
-                if (_isAnnotated) ...[
-                  BaseTextField(
-                    controller: _messageController,
-                    label: AppLocalizations.of(context)!.message,
-                    hintText: AppLocalizations.of(context)!.releaseNotesPlaceholder,
-                    maxLines: 3,
-                    validator: _isAnnotated
-                        ? (value) {
-                            if (value == null || value.isEmpty) {
-                              return AppLocalizations.of(context)!.enterTagMessage;
-                            }
-                            return null;
+                  controller: _messageController,
+                  label: AppLocalizations.of(context)!.message,
+                  hintText: AppLocalizations.of(
+                    context,
+                  )!.releaseNotesPlaceholder,
+                  maxLines: 3,
+                  validator: _isAnnotated
+                      ? (value) {
+                          if (value == null || value.isEmpty) {
+                            return AppLocalizations.of(
+                              context,
+                            )!.enterTagMessage;
                           }
-                        : null,
-                  ),
-                  const SizedBox(height: AppTheme.paddingM),
-                ],
+                          return null;
+                        }
+                      : null,
+                ),
+                const SizedBox(height: AppTheme.paddingM),
               ],
-            ),
+            ],
           ),
         ),
+      ),
       actions: [
         BaseButton(
           label: AppLocalizations.of(context)!.cancel,
@@ -187,9 +198,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: LabelMediumLabel(
-                    commit.shortHash,
-                  ),
+                  child: LabelMediumLabel(commit.shortHash),
                 ),
                 const SizedBox(width: AppTheme.paddingS),
                 Flexible(
@@ -231,10 +240,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
           commitHash: commit,
         );
       } else {
-        await gitService.createLightweightTag(
-          tagName,
-          commitHash: commit,
-        );
+        await gitService.createLightweightTag(tagName, commitHash: commit);
       }
 
       // Refresh tags
@@ -248,7 +254,9 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
         setState(() => _isCreating = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.tagCreatedError(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.tagCreatedError(e.toString()),
+            ),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

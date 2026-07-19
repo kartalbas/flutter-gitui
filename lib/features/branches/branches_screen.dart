@@ -198,11 +198,23 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
     );
 
     if (result != null && context.mounted) {
-      // Create the branch using the full branch name (includes prefix)
-      await ref.read(gitActionsProvider).createBranch(
-            result.fullBranchName,
-            checkout: result.checkout,
+      try {
+        // Create the branch using the full branch name (includes prefix)
+        await ref.read(gitActionsProvider).createBranch(
+              result.fullBranchName,
+              checkout: result.checkout,
+            );
+      } catch (e) {
+        if (context.mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
           );
+        }
+      }
     }
   }
 }

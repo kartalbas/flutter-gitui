@@ -940,6 +940,20 @@ class GitService {
     return output.split('\n').where((s) => s.isNotEmpty).toList();
   }
 
+  /// Get names of the local branches already merged into the current HEAD
+  ///
+  /// These are exactly the branches `git branch -d` accepts without -D.
+  ///
+  /// Returns [Result.Success] with the merged branch names on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<List<String>>> getMergedBranches() async {
+    return runCatchingAsync(() async {
+      final result = await _execute('branch --merged --format="%(refname:short)"');
+      final output = result.stdout.toString();
+      return output.split('\n').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    });
+  }
+
   /// Create a new branch
   /// [branchName] - Name of the new branch
   /// [startPoint] - Optional commit/branch to start from (defaults to HEAD)

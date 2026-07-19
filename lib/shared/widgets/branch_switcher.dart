@@ -237,9 +237,33 @@ class BranchSwitcher extends ConsumerWidget {
 
     if (deletableBranches.isEmpty) return;
 
+    final gitService = ref.read(gitServiceProvider);
+    if (gitService == null) return;
+
+    // The badge sits next to the force-delete button, so it has to come from
+    // git's own merge check against HEAD. Ahead/behind counters only describe
+    // the branch's own upstream and say nothing about whether it was merged
+    // here, which made pushed-but-unmerged branches look safe to destroy.
+    final Set<String> mergedBranches;
+    try {
+      mergedBranches = (await gitService.getMergedBranches()).unwrap().toSet();
+    } catch (e) {
+      if (!context.mounted) return;
+      NotificationService.showError(
+        context,
+        'Failed to determine merged branches: $e',
+      );
+      return;
+    }
+
+    if (!context.mounted) return;
+
     final result = await showDialog<_BulkDeleteResult>(
       context: context,
-      builder: (context) => _BulkDeleteBranchesDialog(branches: deletableBranches),
+      builder: (context) => _BulkDeleteBranchesDialog(
+        branches: deletableBranches,
+        mergedBranches: mergedBranches,
+      ),
     );
 
     if (result != null && result.selectedBranches.isNotEmpty && context.mounted) {
@@ -320,8 +344,12 @@ class _BulkDeleteResult {
 /// Dialog for bulk deleting branches with checkboxes
 class _BulkDeleteBranchesDialog extends StatefulWidget {
   final List<GitBranch> branches;
+  final Set<String> mergedBranches;
 
-  const _BulkDeleteBranchesDialog({required this.branches});
+  const _BulkDeleteBranchesDialog({
+    required this.branches,
+    required this.mergedBranches,
+  });
 
   @override
   State<_BulkDeleteBranchesDialog> createState() => _BulkDeleteBranchesDialogState();
@@ -433,13 +461,7 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
   }
 
   bool _isBranchMerged(GitBranch branch) {
-    // Simple heuristic: if branch has upstream and is not behind, it's likely merged
-    // This is a visual indicator only, not a git merge check
-    if (branch.hasUpstream && branch.behindBy != null) {
-      return branch.behindBy == 0 && (branch.aheadBy == null || branch.aheadBy == 0);
-    }
-    // If no tracking info, assume not merged
-    return false;
+    return widget.mergedBranches.contains(branch.name);
   }
 
   void _deleteSelected({required bool force}) {

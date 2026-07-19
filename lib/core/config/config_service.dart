@@ -148,6 +148,22 @@ class ConfigService {
                   buffer.writeln('$spaces    $k: ${_yamlString(v)}');
                 } else if (v is bool || v is num) {
                   buffer.writeln('$spaces    $k: $v');
+                } else if (v is List) {
+                  // A nested list has to stay a YAML sequence: stringifying it
+                  // makes the reader's `as List` cast throw, which drops the
+                  // entire config back to defaults on the next launch.
+                  if (v.isEmpty) {
+                    buffer.writeln('$spaces    $k: []');
+                  } else {
+                    buffer.writeln('$spaces    $k:');
+                    for (final element in v) {
+                      if (element is bool || element is num) {
+                        buffer.writeln('$spaces      - $element');
+                      } else {
+                        buffer.writeln('$spaces      - ${_yamlString(element.toString())}');
+                      }
+                    }
+                  }
                 } else {
                   buffer.writeln('$spaces    $k: ${_yamlString(v.toString())}');
                 }

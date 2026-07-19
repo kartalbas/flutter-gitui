@@ -737,7 +737,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     // Clear selection
     _selectionManager.clearSelection(() => setState(() {}));
 
-    // After reset, ask if user wants to force push to remote
+    // A force push is only warranted when the branch tracks an upstream the reset
+    // moved away from: a local-only repo has nothing to push, and a branch still
+    // ahead of its upstream pushes normally.
+    final branches = await ref.read(localBranchesProvider.future);
+    final divergedFromUpstream = branches.where(
+      (b) => b.isCurrent && b.hasUpstream && b.isBehind,
+    );
+    if (divergedFromUpstream.isEmpty) return;
+
+    final branch = divergedFromUpstream.first;
+    final upstream = branch.upstreamBranch!;
+    final remoteSeparator = upstream.indexOf('/');
+    if (remoteSeparator <= 0) return;
+
     if (!mounted || !context.mounted) return;
 
     final shouldForcePush = await showDialog<bool>(
@@ -746,14 +759,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     );
 
     if (shouldForcePush == true) {
-      // Force push to remote
-      final currentBranch = ref.read(currentBranchProvider).value;
-      if (currentBranch == null) return;
-
+      // The tracked remote need not be named "origin", and the upstream branch
+      // need not share the local branch's name, so push an explicit refspec.
       await ref.read(gitActionsProvider).pushRemote(
         force: true,
-        remote: 'origin',
-        branch: currentBranch,
+        remote: upstream.substring(0, remoteSeparator),
+        branch: '${branch.name}:${upstream.substring(remoteSeparator + 1)}',
       );
 
       if (context.mounted) {

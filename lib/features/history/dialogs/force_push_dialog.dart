@@ -16,7 +16,7 @@ class ForcePushDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return BaseDialog(
-      title: l10n.pushRejected,
+      title: l10n.forcePush,
       icon: PhosphorIconsRegular.warningCircle,
       variant: DialogVariant.destructive,
       maxWidth: 500,
@@ -25,10 +25,8 @@ class ForcePushDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TitleSmallLabel(
-            l10n.pushRejectedHistoryRewritten,
+            l10n.needToForcePushChanges,
           ),
-          const SizedBox(height: AppTheme.paddingM),
-          BodyMediumLabel(l10n.needToForcePushChanges),
           const SizedBox(height: AppTheme.paddingM),
           BodyMediumLabel(
             l10n.forcePushWarningOverwriteRemote,

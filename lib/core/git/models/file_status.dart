@@ -111,6 +111,16 @@ class FileStatus {
   /// Whether this file has unstaged changes
   bool get hasUnstagedChanges => workTreeStatus != FileStatusType.unchanged;
 
+  /// Whether only part of this file's changes are staged (porcelain 'MM'): the
+  /// index holds an earlier version while newer edits sit in the work tree.
+  /// Treating such a file as plain staged hides the newer edits and drops them
+  /// from the commit.
+  bool get isPartiallyStaged => isStaged && hasUnstagedChanges;
+
+  /// Whether every change to this file is in the index, i.e. a commit would
+  /// capture the file exactly as it is on disk.
+  bool get isFullyStaged => isStaged && !hasUnstagedChanges;
+
   /// Whether this file is untracked
   bool get isUntracked =>
       indexStatus == FileStatusType.untracked &&

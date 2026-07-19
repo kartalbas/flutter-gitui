@@ -46,6 +46,12 @@ class GitStatusTreeNode with TreeNodeMixin {
 
   /// Check if this file is staged
   bool get isStaged => fileStatus?.isStaged ?? false;
+
+  /// Check if this file has staged and unstaged changes at the same time
+  bool get isPartiallyStaged => fileStatus?.isPartiallyStaged ?? false;
+
+  /// Check if this file has no changes left outside the index
+  bool get isFullyStaged => fileStatus?.isFullyStaged ?? false;
 }
 
 /// Unified tree view for git changes - shows both staged and unstaged files in one tree
@@ -236,8 +242,10 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       // Toggle directory expansion via controller
       _treeController.toggleNodeExpansion(node);
     } else if (node.fileStatus != null) {
-      // Toggle file staging
-      widget.onToggleStage?.call(node.fileStatus!, node.isStaged);
+      // Toggle file staging. A partially staged file counts as not staged here,
+      // so toggling adds its remaining work tree changes instead of unstaging
+      // the half that is already in the index.
+      widget.onToggleStage?.call(node.fileStatus!, node.isFullyStaged);
     }
   }
 
@@ -326,9 +334,11 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                         ),
                       ),
                       Icon(
-                        _selectedFile!.isStaged
-                            ? PhosphorIconsBold.checkSquare
-                            : PhosphorIconsRegular.square,
+                        _selectedFile!.isPartiallyStaged
+                            ? PhosphorIconsBold.minusSquare
+                            : _selectedFile!.isStaged
+                                ? PhosphorIconsBold.checkSquare
+                                : PhosphorIconsRegular.square,
                         size: AppTheme.iconS,
                         color: _selectedFile!.isStaged
                             ? Theme.of(context).colorScheme.primary
@@ -336,15 +346,21 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                       ),
                       const SizedBox(width: AppTheme.paddingXS),
                       BodySmallLabel(
-                        _selectedFile!.isStaged ? 'Staged' : 'Unstaged',
+                        _selectedFile!.isPartiallyStaged
+                            ? 'Partially staged'
+                            : _selectedFile!.isStaged
+                                ? 'Staged'
+                                : 'Unstaged',
                       ),
                     ],
                   ),
                   padding: EdgeInsets.zero,
                   content: _DiffViewerPanel(
-                    key: ValueKey('${_selectedFile!.path}_${_selectedFile!.isStaged}_$_diffViewMode'),
+                    key: ValueKey('${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode'),
                     filePath: _selectedFile!.path,
-                    staged: _selectedFile!.isStaged,
+                    // A partially staged file shows its work tree half, because that
+                    // is the part the user can otherwise neither see nor stage here.
+                    staged: _selectedFile!.isFullyStaged,
                     viewMode: _diffViewMode,
                     fileStatus: _selectedFile!,
                     onToggleViewMode: () {
@@ -358,7 +374,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                         ? () => widget.onDiscardFile!(_selectedFile!)
                         : null,
                     onToggleStage: widget.onToggleStage != null
-                        ? () => widget.onToggleStage!(_selectedFile!, _selectedFile!.isStaged)
+                        ? () => widget.onToggleStage!(_selectedFile!, _selectedFile!.isFullyStaged)
                         : null,
                     onDeleteFile: _selectedFile!.primaryStatus == FileStatusType.untracked && widget.onDeleteFile != null
                         ? () => widget.onDeleteFile!(_selectedFile!)
@@ -396,14 +412,16 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       },
       onDoubleTap: (!node.isDirectory && node.fileStatus != null)
           ? () {
-              widget.onToggleStage?.call(node.fileStatus!, node.isStaged);
+              widget.onToggleStage?.call(node.fileStatus!, node.isFullyStaged);
             }
           : null,
       leadingWidget: !node.isDirectory
           ? Icon(
-              node.isStaged
-                  ? PhosphorIconsBold.checkSquare
-                  : PhosphorIconsRegular.square,
+              node.isPartiallyStaged
+                  ? PhosphorIconsBold.minusSquare
+                  : node.isStaged
+                      ? PhosphorIconsBold.checkSquare
+                      : PhosphorIconsRegular.square,
               size: AppTheme.iconS,
               color: node.isStaged
                   ? Theme.of(context).colorScheme.primary

@@ -126,7 +126,8 @@ try {
         -CommitShort $commit `
         -CommitFull $commitFull `
         -Tag $versionResult.Tag `
-        -Platform "windows"
+        -Platform "windows" `
+        -SkipWatermark
 
     if (-not $changelogResult -or -not $changelogResult.Success) {
         throw "Changelog generation module failed"
@@ -367,6 +368,18 @@ try {
     }
 
     Write-Log "[OK] Build validated" "Green"
+
+    # Only a validated archive may advance the watermark; otherwise a build that
+    # failed after step 3 would exclude its commits from the next changelog.
+    & "$sharedDir/changelog-generator.ps1" `
+        -ProjectRoot $projectRoot `
+        -ReleaseDir $releaseDir `
+        -Version $version `
+        -CommitShort $commit `
+        -CommitFull $commitFull `
+        -Platform "windows" `
+        -WatermarkOnly | Out-Null
+
     Write-Log ""
 } catch {
     Write-Log "[ERROR] Build validation failed: $($_.Exception.Message)" "Red"

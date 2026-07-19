@@ -28,7 +28,16 @@ param(
 
     [Parameter(Mandatory=$false)]
     [ValidateSet('windows', 'linux', 'macos')]
-    [string]$Platform = 'windows'
+    [string]$Platform = 'windows',
+
+    # A build that fails after this step must leave its commits inside the next
+    # `git log` range, so the caller can defer the watermark until it has a
+    # validated artifact and advance it with -WatermarkOnly afterwards.
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipWatermark,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$WatermarkOnly
 )
 
 function Get-CommitsSinceLastBuild {
@@ -253,6 +262,17 @@ function Save-LastBuildCommit {
 # Main Execution
 # ============================================================================
 
+if ($WatermarkOnly) {
+    Save-LastBuildCommit -ReleaseDir $ReleaseDir -CommitFull $CommitFull -Platform $Platform
+    Write-Host "[OK] Changelog watermark advanced for $Platform" -ForegroundColor Green
+
+    return @{
+        Success = $true
+        ChangelogMarkdown = ""
+        CommitCount = 0
+    }
+}
+
 Write-Host "Generating AI-powered changelog for $Platform..." -ForegroundColor Yellow
 
 try {
@@ -279,7 +299,9 @@ try {
     Update-HistoricalChangelog -ProjectRoot $ProjectRoot -Version $Version -CommitShort $CommitShort -ChangelogContent $changelogContent -Platform $Platform
 
     # Save current commit as last build
-    Save-LastBuildCommit -ReleaseDir $ReleaseDir -CommitFull $CommitFull -Platform $Platform
+    if (-not $SkipWatermark) {
+        Save-LastBuildCommit -ReleaseDir $ReleaseDir -CommitFull $CommitFull -Platform $Platform
+    }
 
     Write-Host "[OK] Changelog generation complete" -ForegroundColor Green
 

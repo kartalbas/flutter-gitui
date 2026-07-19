@@ -21,8 +21,13 @@ jobs:
         include:
           - platform: windows
             os: windows-latest
+          # Pinned deliberately: ubuntu-latest floats onto newer Ubuntu images and
+          # raises the glibc floor of every published bundle, which ships no libc
+          # or libstdc++ of its own and therefore resolves both from the host.
+          # 22.04 provides glibc 2.35, matching the core22 base the snap declares
+          # (release/manifests/snap/snapcraft.yaml).
           - platform: linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
           - platform: macos
             os: macos-latest
     runs-on: ${{ matrix.os }}
@@ -65,6 +70,20 @@ jobs:
 
       - name: Build ${{ matrix.platform }}
         run: flutter build ${{ matrix.platform }} --release
+
+      # Fails loudly if a future runner-image bump lifts the required glibc above
+      # the core22 floor, instead of shipping a binary that refuses to start on
+      # Ubuntu 22.04 or Debian 12. Mirrors the gate in
+      # release/docker/Dockerfile.linux-build.
+      - name: Verify glibc floor
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd build/linux/x64/release/bundle
+          GLIBC_MAX=$(objdump -T flutter_gitui lib/*.so | grep -o 'GLIBC_[0-9][0-9.]*' | sed 's/GLIBC_//' | sort -V | tail -1)
+          echo "highest required glibc: $GLIBC_MAX"
+          { [ "${GLIBC_MAX%%.*}" -eq 2 ] && [ "${GLIBC_MAX#*.}" -le 35 ]; } || { echo "::error::bundle requires glibc $GLIBC_MAX, above the core22 floor 2.35"; exit 1; }
 
       - name: Package artifact
         id: package

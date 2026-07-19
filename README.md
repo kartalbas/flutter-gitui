@@ -69,7 +69,7 @@ Press Ctrl+K, then type:
 
 1. **Flutter SDK** 3.24.0 or higher
 2. **Git** 2.0 or higher
-3. **Platform**: Windows 10+, macOS 10.15+, or Ubuntu 20.04+
+3. **Platform**: Windows 10+, macOS 10.15+, or Linux with glibc 2.35+ (Ubuntu 22.04+, Debian 12+)
 
 ### Installation
 

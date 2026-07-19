@@ -35,17 +35,51 @@ function New-Archive {
     Write-Host "  Creating $Platform archive..." -ForegroundColor Gray
 
     # Include commit hash in filename for development builds (same version, different commits)
-    if ($CommitShort) {
-        $archiveName = "flutter-gitui-v$Version+$CommitShort-$Platform.zip"
+    $stem = if ($CommitShort) {
+        "flutter-gitui-v$Version+$CommitShort-$Platform"
     } else {
-        $archiveName = "flutter-gitui-v$Version-$Platform.zip"
+        "flutter-gitui-v$Version-$Platform"
     }
 
     # Get parent directory for archive output
     $artifactsParent = Split-Path -Parent $ReleaseDir
 
-    Compress-Archive -Path "$ReleaseDir/*" -DestinationPath "$artifactsParent/$archiveName" -Force
-    $archivePath = "$artifactsParent/$archiveName"
+    # Compress-Archive writes a plain zip with no POSIX mode bits, so a Linux
+    # bundle packed with it arrives non-executable and a macOS .app loses its
+    # bundle structure. Pack per platform instead.
+    switch ($Platform) {
+        'linux' {
+            $archiveName = "$stem.tar.gz"
+            $archivePath = Join-Path $artifactsParent $archiveName
+            # Pack inside a container so the executable bits are real. Docker is
+            # already required to build the Linux target.
+            $srcMount = (Resolve-Path $ReleaseDir).Path
+            $outMount = (Resolve-Path $artifactsParent).Path
+            docker run --rm `
+                -v "${srcMount}:/src" `
+                -v "${outMount}:/out" `
+                alpine:3.20 sh -c "cd /src && chmod +x flutter_gitui updater 2>/dev/null; tar czf /out/$archiveName ." | Out-Null
+            if ($LASTEXITCODE -ne 0 -or -not (Test-Path $archivePath)) {
+                throw "Failed to create Linux archive $archiveName"
+            }
+        }
+        'macos' {
+            $archiveName = "$stem.zip"
+            $archivePath = Join-Path $artifactsParent $archiveName
+            # ditto is the only archiver that preserves an .app bundle intact.
+            $app = Get-ChildItem -Path $ReleaseDir -Filter '*.app' -Directory | Select-Object -First 1
+            if (-not $app) { throw "No .app bundle found in $ReleaseDir" }
+            & ditto -c -k --sequesterRsrc --keepParent $app.FullName $archivePath
+            if ($LASTEXITCODE -ne 0 -or -not (Test-Path $archivePath)) {
+                throw "Failed to create macOS archive $archiveName"
+            }
+        }
+        default {
+            $archiveName = "$stem.zip"
+            $archivePath = Join-Path $artifactsParent $archiveName
+            Compress-Archive -Path "$ReleaseDir/*" -DestinationPath $archivePath -Force
+        }
+    }
     $totalSize = (Get-Item $archivePath).Length / 1MB
     $archiveBytes = (Get-Item $archivePath).Length
 

@@ -170,6 +170,12 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                       if (value != null) {
                         setState(() {
                           _selectedSourceBranch = value;
+                          // The target dropdown hides the source branch, so a base that
+                          // just became the source is no longer selectable and would
+                          // otherwise survive as a same-branch pull request.
+                          if (_selectedBaseBranch.name == _selectedSourceBranch.name) {
+                            _resetBranchSelection();
+                          }
                         });
                       }
                     },
@@ -435,6 +441,10 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               isCurrent: true,
             ),
     );
+    // Switching the source scope can land on the branch already used as base.
+    if (_selectedBaseBranch.name == _selectedSourceBranch.name) {
+      _resetBranchSelection();
+    }
   }
 
   void _resetBranchSelection() {
@@ -443,9 +453,9 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
         ? widget.availableBranches
         : widget.availableBranches.where((b) => !b.isRemote).toList();
     _selectedBaseBranch = newFilteredBranches.firstWhere(
-      (branch) => mainBranches.contains(branch.name) && branch.name != widget.currentBranch,
+      (branch) => mainBranches.contains(branch.name) && branch.name != _selectedSourceBranch.name,
       orElse: () => newFilteredBranches.firstWhere(
-        (branch) => branch.name != widget.currentBranch,
+        (branch) => branch.name != _selectedSourceBranch.name,
         orElse: () => newFilteredBranches.isNotEmpty
             ? newFilteredBranches.first
             : const GitBranch(

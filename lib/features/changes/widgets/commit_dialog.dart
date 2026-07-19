@@ -10,6 +10,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_menu_item.dart';
+import '../../../shared/widgets/file_status_badge.dart';
 
 /// Dialog for committing staged changes
 class CommitDialog extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
   final _formKey = GlobalKey<FormState>();
   bool _isAmend = false;
   bool _isCommitting = false;
+  bool _showStagedFiles = false;
 
   @override
   void initState() {
@@ -127,16 +129,56 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                     BaseButton(
                       label: AppLocalizations.of(context)!.viewFiles,
                       variant: ButtonVariant.tertiary,
-                      leadingIcon: PhosphorIconsRegular.list,
-                      onPressed: () {
-                        setState(() {
-                          // Toggle file list visibility
-                        });
-                      },
+                      leadingIcon: _showStagedFiles
+                          ? PhosphorIconsRegular.caretUp
+                          : PhosphorIconsRegular.caretDown,
+                      onPressed: stagedFiles.isEmpty
+                          ? null
+                          : () {
+                              setState(() {
+                                _showStagedFiles = !_showStagedFiles;
+                              });
+                            },
                     ),
                   ],
                 ),
               ),
+
+              // Kept collapsed by default so the message field stays the focus;
+              // the height cap prevents a large stage from pushing the commit
+              // button out of the dialog.
+              if (_showStagedFiles && stagedFiles.isNotEmpty) ...[
+                const SizedBox(height: AppTheme.paddingS),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 160),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: stagedFiles.length,
+                    itemBuilder: (context, index) {
+                      final file = stagedFiles[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          children: [
+                            FileStatusBadge(
+                              code: file.indexStatus.code,
+                              color: file.indexStatus.color,
+                            ),
+                            const SizedBox(width: AppTheme.paddingS),
+                            Expanded(
+                              child: BodySmallLabel(
+                                file.path,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
 
               const SizedBox(height: AppTheme.paddingL),
 

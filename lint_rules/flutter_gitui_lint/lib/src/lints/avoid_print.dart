@@ -5,7 +5,7 @@ class AvoidPrint extends DartLintRule {
   const AvoidPrint() : super(code: _code);
 
   static const _code = LintCode(
-    name: 'avoid_print',
+    name: 'avoid_print_use_logger',
     problemMessage:
         'Avoid using print(). Use Logger.debug(), Logger.info(), Logger.error(), or Logger.warning() from logger_service.dart instead.',
   );

@@ -193,7 +193,7 @@ class Logger {
     // For critical operations (like updates), force output to stdout
     // This ensures visibility when running from terminal in release builds
     if (forceConsole) {
-      // ignore: avoid_print
+      // ignore: avoid_print, avoid_print_use_logger
       print(msg);
     }
   }
@@ -218,7 +218,7 @@ class Logger {
 
     // For critical operations (like updates), force output to stdout
     if (forceConsole) {
-      // ignore: avoid_print
+      // ignore: avoid_print, avoid_print_use_logger
       print(msg);
     }
 
@@ -227,7 +227,7 @@ class Logger {
       debugPrint(errMsg);
       _writeToFile(errMsg);
       if (forceConsole) {
-        // ignore: avoid_print
+        // ignore: avoid_print, avoid_print_use_logger
         print(errMsg);
       }
     }
@@ -236,7 +236,7 @@ class Logger {
       debugPrint(stackMsg);
       _writeToFile(stackMsg);
       if (forceConsole) {
-        // ignore: avoid_print
+        // ignore: avoid_print, avoid_print_use_logger
         print(stackMsg);
       }
     }

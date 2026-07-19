@@ -85,17 +85,12 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     });
   }
 
-  void _executeCommand(GitCommand command) async {
-    // Close palette first to restore context to the main screen
-    Navigator.of(context).pop();
-
-    // Give the navigation time to complete so context is valid
-    await Future.delayed(const Duration(milliseconds: 50));
-
-    // Execute command with restored context
-    if (mounted) {
-      command.onExecute(context, ref);
-    }
+  void _executeCommand(GitCommand command) {
+    // This State is disposed once the sheet's exit animation ends, so commands
+    // that await dialogs cannot use its context or ref. Return the command as
+    // the sheet result and let the palette's opener run it with a long-lived
+    // context.
+    Navigator.of(context).pop(command);
   }
 
   void _moveSelection(int delta) {

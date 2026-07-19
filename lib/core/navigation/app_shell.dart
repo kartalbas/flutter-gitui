@@ -39,6 +39,7 @@ import '../git/git_service.dart';
 import '../git/git_platform_service.dart';
 import '../git/models/branch.dart';
 import 'command_palette.dart';
+import 'git_commands.dart';
 import '../../features/workspaces/workspaces_screen.dart';
 import '../../features/repositories/repositories_screen.dart';
 import '../../features/changes/changes_screen.dart';
@@ -506,13 +507,17 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   /// Show command palette
-  void _showCommandPalette(BuildContext context) {
-    showModalBottomSheet(
+  void _showCommandPalette(BuildContext context) async {
+    // The palette's own context and ref die with the sheet, so it returns the
+    // chosen command and we execute it here with this State's long-lived ones.
+    final command = await showModalBottomSheet<GitCommand>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
       builder: (context) => const CommandPalette(),
     );
+    if (command == null || !mounted) return;
+    command.onExecute(this.context, ref);
   }
 
   /// Show repository switcher dialog

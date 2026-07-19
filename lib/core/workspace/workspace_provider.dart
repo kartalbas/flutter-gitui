@@ -228,8 +228,12 @@ final workspaceProvider = NotifierProvider<WorkspaceNotifier, List<WorkspaceRepo
 
 /// Provider to get recent repositories
 final recentRepositoriesProvider = Provider<List<WorkspaceRepository>>((ref) {
-  final workspace = ref.watch(workspaceProvider.notifier);
-  return workspace.getRecentRepositories();
+  // Watch the state, not the notifier: a notifier dependency only fires when the
+  // notifier itself is replaced, so the ordering would never follow list changes.
+  final workspace = ref.watch(workspaceProvider);
+  final repos = [...workspace];
+  repos.sort((a, b) => b.lastAccessed.compareTo(a.lastAccessed));
+  return repos;
 });
 
 /// Provider to get favorite repositories

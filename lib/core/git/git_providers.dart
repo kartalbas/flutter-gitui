@@ -1138,6 +1138,7 @@ class GitActions {
     if (gitService == null) return;
 
     (await gitService.pushTag(remoteName, tagName)).unwrap();
+    await refreshTags();
   }
 
   /// Push all tags to remote
@@ -1146,6 +1147,7 @@ class GitActions {
     if (gitService == null) return;
 
     (await gitService.pushAllTags(remoteName)).unwrap();
+    await refreshTags();
   }
 
   /// Fetch tags from remote
@@ -1175,7 +1177,7 @@ class GitActions {
     for (final tagName in tagNames) {
       (await gitService.pushTag(remoteName, tagName)).unwrap();
     }
-    ref.invalidate(tagsProvider);
+    await refreshTags();
   }
 
   /// Delete multiple tags in batch
@@ -1189,7 +1191,7 @@ class GitActions {
         (await gitService.deleteRemoteTag(remoteName, tagName)).unwrap();
       }
     }
-    ref.invalidate(tagsProvider);
+    await refreshTags();
   }
 
   // ============================================

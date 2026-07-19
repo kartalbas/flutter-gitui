@@ -52,7 +52,12 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
   }
 
   Future<void> _loadFileContent() async {
-    setState(() {
+    // Capture the file this load belongs to. Several awaits follow, and the
+    // user can select another file meanwhile; without this the slower read
+    // of the previous file overwrote the faster one's content while the
+    // header still showed the newly selected name.
+    final requestedPath = widget.filePath;
+    _applyIfCurrent(requestedPath, () {
       _isLoading = true;
       _error = null;
       _isBinary = false;
@@ -62,7 +67,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
       final file = File(widget.filePath);
 
       if (!await file.exists()) {
-        setState(() {
+        _applyIfCurrent(requestedPath, () {
           _error = 'File not found'; // Will be displayed with l10n in UI
           _isLoading = false;
         });
@@ -71,11 +76,12 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
 
       // Get file size
       final stat = await file.stat();
+      if (!mounted || widget.filePath != requestedPath) return;
       _fileSize = stat.size;
 
       // Check if file is too large (> 1MB)
       if (_fileSize > 1024 * 1024) {
-        setState(() {
+        _applyIfCurrent(requestedPath, () {
           _error = _formatFileSize(_fileSize); // Will be formatted with l10n in UI
           _isLoading = false;
         });
@@ -88,7 +94,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
 
         // Check if content appears to be binary
         if (_containsBinaryCharacters(content)) {
-          setState(() {
+          _applyIfCurrent(requestedPath, () {
             _isBinary = true;
             _isLoading = false;
           });
@@ -99,24 +105,31 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
         final cleanContent = content.replaceAll('\r', '');
         final lineCount = cleanContent.split('\n').length;
 
-        setState(() {
+        _applyIfCurrent(requestedPath, () {
           _content = cleanContent;
           _lineCount = lineCount;
           _isLoading = false;
         });
       } catch (e) {
         // Failed to read as text, probably binary
-        setState(() {
+        _applyIfCurrent(requestedPath, () {
           _isBinary = true;
           _isLoading = false;
         });
       }
     } catch (e) {
-      setState(() {
+      _applyIfCurrent(requestedPath, () {
         _error = 'Error loading file: $e';
         _isLoading = false;
       });
     }
+  }
+
+  /// Applies [update] only while [path] is still the selected file and the
+  /// panel is mounted.
+  void _applyIfCurrent(String path, VoidCallback update) {
+    if (!mounted || widget.filePath != path) return;
+    setState(update);
   }
 
   bool _containsBinaryCharacters(String content) {

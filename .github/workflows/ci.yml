@@ -38,10 +38,6 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    # Non-blocking until #242 is resolved: phosphor_flutter 2.1.0 subclasses
-    # IconData, which is now a final class, so no test can compile. The job runs
-    # so the failure stays visible; flip this off once the icon set is replaced.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

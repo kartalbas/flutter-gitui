@@ -185,6 +185,20 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       sortBy: _sortBy,
     );
 
+    // Chip counts must stay independent of the type filter itself. Derived
+    // from the type-filtered list, the unselected chips read 0 and the user
+    // concludes those tags do not exist.
+    final typeFilterCandidates = _tagsService.filterTags(
+      tags: tags,
+      filterType: TagFilterType.all,
+      searchQuery: _searchQuery,
+      useRegex: _useRegex,
+      dateFilter: _dateFilter,
+      customDateStart: _customDateStart,
+      customDateEnd: _customDateEnd,
+      authorFilter: _authorFilter,
+    );
+
     return Column(
       children: [
         // Sync status notification
@@ -442,7 +456,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
               const SizedBox(height: AppTheme.paddingS),
               // Filter chips
               TagFilterChips(
-                allTags: filteredAndSortedTags,
+                allTags: typeFilterCandidates,
                 selectedFilter: _filterType,
                 onFilterChanged: (filterType) {
                   setState(() {

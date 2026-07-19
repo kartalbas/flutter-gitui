@@ -43,9 +43,8 @@ class AvoidTextField extends DartLintRule {
         }
         // Check if decoration has complex Widget-based suffixIcon/prefixIcon
         if (name == 'decoration') {
-          final decorationExpr = arg.expression;
-          if (decorationExpr is InstanceCreationExpression) {
-            if (_hasComplexIconWidget(decorationExpr)) {
+          for (final candidate in _decorationCandidates(arg.expression)) {
+            if (_hasComplexIconWidget(candidate)) {
               return true;
             }
           }
@@ -53,6 +52,32 @@ class AvoidTextField extends DartLintRule {
       }
     }
     return false;
+  }
+
+  /// An overridable decoration is idiomatically written as
+  /// `widget.decoration ?? InputDecoration(...)` or behind a conditional, so the
+  /// wrapper has to be unwrapped to reach every InputDecoration that can actually
+  /// be constructed here — otherwise the suffixIcon exemption silently never applies.
+  Iterable<InstanceCreationExpression> _decorationCandidates(Expression expr) {
+    if (expr is ParenthesizedExpression) {
+      return _decorationCandidates(expr.expression);
+    }
+    if (expr is BinaryExpression && expr.operator.lexeme == '??') {
+      return [
+        ..._decorationCandidates(expr.leftOperand),
+        ..._decorationCandidates(expr.rightOperand),
+      ];
+    }
+    if (expr is ConditionalExpression) {
+      return [
+        ..._decorationCandidates(expr.thenExpression),
+        ..._decorationCandidates(expr.elseExpression),
+      ];
+    }
+    if (expr is InstanceCreationExpression) {
+      return [expr];
+    }
+    return const [];
   }
 
   /// Check if InputDecoration has complex Widget icons (not just IconData)

@@ -602,14 +602,21 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
         filePath,
       );
 
-      // Full path to the file in repository
-      final fullFilePath = path.join(repoPath, filePath);
+      // Download into a temporary directory, never into the working tree.
+      // Writing the historical version over the working copy silently destroyed
+      // uncommitted edits -- and this action is a download, not a restore.
+      final shortHash = widget.commitHash.length >= 8
+          ? widget.commitHash.substring(0, 8)
+          : widget.commitHash;
+      final fullFilePath = path.join(
+        Directory.systemTemp.path,
+        'flutter-gitui',
+        shortHash,
+        path.basename(filePath),
+      );
 
-      // Ensure parent directories exist
       final file = File(fullFilePath);
       await file.parent.create(recursive: true);
-
-      // Silently overwrite the file
       await file.writeAsBytes(fileContent);
 
       // Open the folder in file explorer

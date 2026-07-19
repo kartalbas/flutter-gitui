@@ -150,14 +150,19 @@ class DiffTool {
 
   /// Command to launch diff with two files
   List<String> diffCommand(String leftFile, String rightFile, {String? label}) {
-    final args = diffArgs
+    // Tokenize before substituting: a path or label containing spaces must stay
+    // a single argv entry, and these arguments reach Process.start unquoted.
+    String substitute(String token) => token
         .replaceAll('\$LOCAL', leftFile)
         .replaceAll('\$REMOTE', rightFile)
         .replaceAll('\$BASE', leftFile)
         .replaceAll('\$MERGED', rightFile)
         .replaceAll('\$LABEL', label ?? '');
 
-    return [executablePath, ...args.split(' ').where((a) => a.isNotEmpty)];
+    return [
+      executablePath,
+      ...diffArgs.split(' ').where((a) => a.isNotEmpty).map(substitute),
+    ];
   }
 
   /// Command to launch 3-way merge
@@ -167,13 +172,18 @@ class DiffTool {
     String remote,
     String merged,
   ) {
-    final args = mergeArgs
+    // Tokenize before substituting: a path containing spaces must stay a single
+    // argv entry, and these arguments reach Process.start unquoted.
+    String substitute(String token) => token
         .replaceAll('\$BASE', base)
         .replaceAll('\$LOCAL', local)
         .replaceAll('\$REMOTE', remote)
         .replaceAll('\$MERGED', merged);
 
-    return [executablePath, ...args.split(' ').where((a) => a.isNotEmpty)];
+    return [
+      executablePath,
+      ...mergeArgs.split(' ').where((a) => a.isNotEmpty).map(substitute),
+    ];
   }
 
   DiffTool copyWith({

@@ -51,7 +51,11 @@ Future<void> checkForUpdates(dynamic ref) async {
   try {
     ref.read(checkingForUpdatesProvider.notifier).state = true;
 
-    final updateInfo = await UpdateService.checkForUpdates().then((result) => result.unwrapOr(null));
+    // unwrapOr(null) collapsed "the check failed" into "no update available":
+    // an offline or server error was logged as being up to date and still
+    // refreshed lastUpdateCheckProvider below. Throwing instead keeps the
+    // previous timestamp and lets the catch record the real error.
+    final updateInfo = (await UpdateService.checkForUpdates()).unwrap();
 
     // Check if this version was dismissed
     final dismissedVersion = ref.read(dismissedUpdateVersionProvider);

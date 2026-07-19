@@ -68,8 +68,12 @@ class GitService {
       // gets launchd's minimal PATH, can still resolve a Homebrew git.
       environment: {
         ...ShellService.environment,
-        'LC_ALL': 'C.UTF-8',
-        'LANG': 'C.UTF-8',
+        // macOS libc provides no `C.UTF-8` locale, so git's perl- and sh-based
+        // helpers print a `setlocale` warning on stderr for every invocation,
+        // which then leaks into GitException messages and the command log.
+        // `en_US.UTF-8` exists there and is equally English plus UTF-8.
+        'LC_ALL': Platform.isMacOS ? 'en_US.UTF-8' : 'C.UTF-8',
+        'LANG': Platform.isMacOS ? 'en_US.UTF-8' : 'C.UTF-8',
         // Never let git block on an interactive credential prompt. There is no
         // terminal attached to a GUI process, so a prompt would hang the
         // operation forever instead of failing with an authentication error.

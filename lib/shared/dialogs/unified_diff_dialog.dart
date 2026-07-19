@@ -79,12 +79,16 @@ class UnifiedDiffDialog extends ConsumerStatefulWidget {
 
 class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
   late bool _compactMode;
+  // The dialog rebuilds on the compact toggle and on preview font changes; a
+  // future created in build would re-run git and reset the viewer each time.
+  late final Future<String> _diffFuture;
 
   @override
   void initState() {
     super.initState();
     // Initialize compact mode from config
     _compactMode = ref.read(configProvider).ui.diffCompactMode;
+    _diffFuture = _loadDiff();
   }
 
   @override
@@ -141,7 +145,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
 
   Widget _buildDiffView(BuildContext context) {
     return FutureBuilder<String>(
-      future: _loadDiff(),
+      future: _diffFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

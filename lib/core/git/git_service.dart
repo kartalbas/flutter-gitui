@@ -112,11 +112,35 @@ class GitService {
   /// Check if directory is a Git repository
   static Future<bool> isGitRepository(String path) async {
     try {
-      final gitDir = Directory(p.join(path, '.git'));
-      return await gitDir.exists();
+      // In a linked worktree or a submodule checkout `.git` is a file holding a
+      // `gitdir:` pointer instead of a directory, so accept any entity.
+      final type = await FileSystemEntity.type(p.join(path, '.git'));
+      return type != FileSystemEntityType.notFound;
     } catch (e) {
       return false;
     }
+  }
+
+  /// Resolve the directory git keeps this checkout's state in.
+  ///
+  /// Only a normal checkout keeps that state in `<repo>/.git`. A linked
+  /// worktree keeps it under `<main>/.git/worktrees/<id>/` and a submodule
+  /// under the superproject's `.git/modules/<name>/`, so state files such as
+  /// MERGE_HEAD or rebase-merge/ have to be located through git itself.
+  Future<String> _resolveGitDir() async {
+    try {
+      final result = await _execute(
+        'rev-parse --absolute-git-dir',
+        throwOnError: false,
+      );
+      if (result.exitCode == 0) {
+        final gitDir = result.stdout.toString().trim();
+        if (gitDir.isNotEmpty) return gitDir;
+      }
+    } catch (e) {
+      // Fall through to the conventional location.
+    }
+    return p.join(repoPath, '.git');
   }
 
   /// Execute a Git command
@@ -839,9 +863,11 @@ class GitService {
         };
       }
 
-      // Check if it's a valid git repository
-      final gitDir = Directory('$repoPath/.git');
-      if (!await gitDir.exists()) {
+      // Check if it's a valid git repository. `.git` is a file, not a
+      // directory, in a linked worktree or a submodule checkout.
+      final gitEntityType =
+          await FileSystemEntity.type(p.join(repoPath, '.git'));
+      if (gitEntityType == FileSystemEntityType.notFound) {
         return {
           'exists': true,
           'isValidGit': false,
@@ -1809,7 +1835,7 @@ class GitService {
   /// Check if merge is in progress
   Future<bool> isMergeInProgress() async {
     try {
-      final mergeHeadFile = File(p.join(repoPath, '.git', 'MERGE_HEAD'));
+      final mergeHeadFile = File(p.join(await _resolveGitDir(), 'MERGE_HEAD'));
       return await mergeHeadFile.exists();
     } catch (e) {
       return false;
@@ -1829,7 +1855,7 @@ class GitService {
     String? message;
 
     try {
-      final mergeMsgFile = File(p.join(repoPath, '.git', 'MERGE_MSG'));
+      final mergeMsgFile = File(p.join(await _resolveGitDir(), 'MERGE_MSG'));
       if (await mergeMsgFile.exists()) {
         final content = await mergeMsgFile.readAsString();
         final parsed = MergeParser.parseMergeMsg(content);
@@ -2260,9 +2286,10 @@ class GitService {
 
   /// Get current bisect state
   Future<BisectState> getBisectState() async {
-    // Check if bisect is active by looking for .git/BISECT_LOG
-    final bisectLogFile = File(p.join(repoPath, '.git', 'BISECT_LOG'));
-    final bisectStartFile = File(p.join(repoPath, '.git', 'BISECT_START'));
+    // Check if bisect is active by looking for BISECT_LOG in the git dir
+    final gitDir = await _resolveGitDir();
+    final bisectLogFile = File(p.join(gitDir, 'BISECT_LOG'));
+    final bisectStartFile = File(p.join(gitDir, 'BISECT_START'));
 
     if (!await bisectLogFile.exists() || !await bisectStartFile.exists()) {
       return BisectState.idle();
@@ -2400,9 +2427,10 @@ class GitService {
 
   /// Get current rebase state
   Future<RebaseState> getRebaseState() async {
-    // Check if rebase is active by looking for .git/rebase-merge or .git/rebase-apply
-    final rebaseMergeDir = Directory(p.join(repoPath, '.git', 'rebase-merge'));
-    final rebaseApplyDir = Directory(p.join(repoPath, '.git', 'rebase-apply'));
+    // Check if rebase is active by looking for rebase-merge or rebase-apply
+    final gitDir = await _resolveGitDir();
+    final rebaseMergeDir = Directory(p.join(gitDir, 'rebase-merge'));
+    final rebaseApplyDir = Directory(p.join(gitDir, 'rebase-apply'));
 
     if (!await rebaseMergeDir.exists() && !await rebaseApplyDir.exists()) {
       return RebaseState.idle();

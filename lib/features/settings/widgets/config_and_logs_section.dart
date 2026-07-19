@@ -11,6 +11,7 @@ import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/config/config_providers.dart';
+import '../../../core/config/config_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/editor_launcher_service.dart';
 import 'settings_section.dart';
@@ -120,20 +121,9 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
   Future<void> _openConfigFolder(BuildContext context, String? textEditor) async {
     try {
-      // Get the user's home directory
-      final homeDir = Platform.isWindows
-          ? Platform.environment['USERPROFILE']
-          : Platform.environment['HOME'];
-
-      if (homeDir == null) {
-        if (context.mounted) {
-          NotificationService.showError(context, 'Could not determine home directory');
-        }
-        return;
-      }
-
-      // Construct path to .flutter-gitui folder
-      final configFolderPath = '$homeDir${Platform.pathSeparator}.flutter-gitui';
+      // Single source of truth for the config location, so this stays in sync
+      // with the documents-directory fallback used when HOME/USERPROFILE is unset.
+      final configFolderPath = await ConfigService.getConfigDirPath();
       final configFolder = Directory(configFolderPath);
 
       if (!await configFolder.exists()) {

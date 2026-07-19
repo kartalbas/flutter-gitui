@@ -371,8 +371,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           // Resolve the actual selection. commits.first is the newest commit in
           // the list, not the one the user picked, so the tag landed on the
           // wrong commit whenever the selection was anything else.
-          
-onPressed: () {
+          onPressed: () {
             if (_selectionManager.selectedCount != 1) return;
             final hash = _selectionManager.selectedItems.first;
             for (final commit in commits) {

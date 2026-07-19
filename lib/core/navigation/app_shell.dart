@@ -88,6 +88,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   bool _hasCheckedSettings = false;
   bool _hasShownConfigLoadWarning = false;
   bool _hasShownGitPathWarning = false;
+  bool _whatsNewScheduled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -159,9 +160,13 @@ class _AppShellState extends ConsumerState<AppShell> {
     // The actual check of whether to show is done by VersionService.shouldShowWhatsNew()
     // NOTE: We don't require allSettingsConfigured here because users should see release
     // notes even if they haven't finished setting up the app yet
-    if (!whatsNewChecked && !configLoading) {
+    if (!whatsNewChecked && !_whatsNewScheduled && !configLoading) {
+      // Latch synchronously: the provider is only updated inside the callback below,
+      // so further rebuilds in the same frame would each queue another callback
+      _whatsNewScheduled = true;
       // Mark as checked and show dialog AFTER build phase to prevent state modification error
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
         ref.read(whatsNewDialogCheckedProvider.notifier).state = true;
         ChangelogDialog.showIfNeeded(context, ref);
       });

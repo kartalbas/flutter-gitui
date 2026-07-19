@@ -12,6 +12,7 @@ import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
+import '../../core/config/config_providers.dart';
 
 /// Dialog for initializing a new Git repository
 class InitializeRepositoryDialog extends ConsumerStatefulWidget {
@@ -223,6 +224,7 @@ class _InitializeRepositoryDialogState
         path: path,
         bare: _bare,
         initialBranch: branchName.isEmpty ? null : branchName,
+        gitExecutablePath: ref.read(gitExecutablePathProvider),
       );
 
       if (mounted) {

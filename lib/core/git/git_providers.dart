@@ -161,7 +161,9 @@ final isRepositoryCleanProvider = Provider<bool>((ref) {
 
 /// Check if Git is installed
 final isGitInstalledProvider = FutureProvider<bool>((ref) async {
-  return await GitService.isGitInstalled();
+  return await GitService.isGitInstalled(
+    gitExecutablePath: ref.watch(gitExecutablePathProvider),
+  );
 });
 
 /// Commit history provider

@@ -99,10 +99,24 @@ class GitService {
     return _networkCommands.contains(first) ? _networkTimeout : _localTimeout;
   }
 
+  /// Resolves the git executable for the static helpers.
+  ///
+  /// These run without an instance and so cannot go through [_execute], but a
+  /// configured path must still win: a git installed outside PATH is exactly
+  /// the case that setting exists for, and ignoring it here made cloning and
+  /// initializing fail while every other operation worked. The bare fallback
+  /// keeps the install check usable before the path has been configured.
+  static String _staticGitExecutable(String? gitExecutablePath) =>
+      (gitExecutablePath == null || gitExecutablePath.isEmpty)
+          ? 'git'
+          : '"$gitExecutablePath"';
+
   /// Check if Git is installed
-  static Future<bool> isGitInstalled() async {
+  static Future<bool> isGitInstalled({String? gitExecutablePath}) async {
     try {
-      final result = await ShellService.run('git --version');
+      final result = await ShellService.run(
+        '${_staticGitExecutable(gitExecutablePath)} --version',
+      );
       return result.unwrap().first.exitCode == 0;
     } catch (e) {
       return false;
@@ -1768,10 +1782,11 @@ class GitService {
     required String destinationPath,
     String? branchName,
     int? depth,
+    String? gitExecutablePath,
   }) async {
     final shell = Shell(throwOnError: false, verbose: false, stdout: null, stderr: null, environment: ShellService.environment);
 
-    final parts = ['git', 'clone'];
+    final parts = [_staticGitExecutable(gitExecutablePath), 'clone'];
 
     if (branchName != null) {
       parts.addAll(['--branch', '"$branchName"']);
@@ -1808,6 +1823,7 @@ class GitService {
     required String path,
     bool bare = false,
     String? initialBranch,
+    String? gitExecutablePath,
   }) async {
     // Ensure directory exists
     final dir = Directory(path);
@@ -1824,7 +1840,7 @@ class GitService {
       environment: ShellService.environment,
     );
 
-    final parts = ['git', 'init'];
+    final parts = [_staticGitExecutable(gitExecutablePath), 'init'];
 
     if (bare) {
       parts.add('--bare');

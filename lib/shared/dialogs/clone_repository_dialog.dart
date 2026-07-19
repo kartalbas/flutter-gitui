@@ -11,6 +11,7 @@ import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
+import '../../core/config/config_providers.dart';
 import '../components/base_dialog.dart';
 
 /// Dialog for cloning a Git repository
@@ -285,6 +286,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
         destinationPath: path,
         branchName: branchName.isEmpty ? null : branchName,
         depth: _shallowClone ? _depth : null,
+        gitExecutablePath: ref.read(gitExecutablePathProvider),
       );
 
       if (mounted) {

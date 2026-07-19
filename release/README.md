@@ -42,7 +42,6 @@ release/
 │   ├── build-prep.ps1              # Build environment preparation
 │   ├── generate-docs.ps1           # README/PDF generation
 │   ├── create-archive.ps1          # ZIP and manifest creation
-│   ├── upload-to-azure-rest.ps1    # Azure Blob Storage upload
 │   ├── update-winget-manifest.ps1  # Winget package manifest generation
 │   ├── build-summary.ps1           # Build validation
 │   └── git-commit.ps1              # Git commit and push
@@ -69,13 +68,13 @@ release/
 4. **Build Preparation** - Cleans previous builds, creates artifact folders
 5. **Windows Build** - Builds Windows binaries with Flutter
 6. **Documentation** - Generates README.md (and optional PDF)
-7. **Create Archive** - Creates platform-specific ZIP and manifest
-8. **Winget Manifest** - Updates winget package manifest with SHA256
-9. **Azure Upload** - Uploads to Azure Blob Storage (optional)
+7. **Prepare Changelog for Distribution** - Bundles the changelog into the release
+8. **Create Archive** - Creates platform-specific ZIP and manifest
+9. **Winget Manifest** - Writes the winget manifests from the published GitHub release
 10. **Build Summary** - Validates build and displays summary
 11. **Git Commit** - Commits version changes to repository
 
-### Linux Build Process (11 Steps)
+### Linux Build Process (12 Steps)
 
 1. **Version Management** - Gets version from git tags
 2. **Icon Sync**
@@ -84,10 +83,17 @@ release/
 5. **Build Preparation**
 6. **Linux Build** - Builds Linux binaries in Docker container
 7. **Documentation**
-8. **Create Archive**
-9. **Azure Upload** (optional)
-10. **Build Summary**
-11. **Git Commit**
+8. **Prepare Changelog for Distribution**
+9. **Create Archive**
+10. **Snap Package**
+11. **Build Summary**
+12. **Git Commit**
+
+Release archives are published by the `Release` GitHub Actions workflow, which
+attaches `latest-windows.json` and `latest-linux.json` to the release it builds.
+The in-app updater reads both the manifest and the archive from that one
+release, and picks the pre-release or the final channel from the pre-release
+suffix of the version it is running.
 
 ## Shared Modules
 
@@ -161,27 +167,14 @@ Creates platform-specific ZIP archive and JSON manifest for auto-update feature.
 - `release/artifacts/flutter-gitui-v{version}-{platform}.zip`
 - `release/artifacts/latest-{platform}.json`
 
-### upload-to-azure-rest.ps1
-Uploads release archive and manifest to Azure Blob Storage using REST API.
-
-**Parameters:**
-- `FilePath` - File to upload (optional, auto-detects if not specified)
-
-**Configuration:**
-- Set `FLUTTERGITUIARTIFACTS_CONNECTION_STRING` in `.env` file
-
-**Container:** `releases`
-
 ### update-winget-manifest.ps1
-Updates winget package manifest files with correct SHA256 hash after archive creation.
+Writes the winget package manifests for a published GitHub release. Installer URL and SHA256 both come from the `latest-windows.json` asset of that release, so the pinned digest always describes exactly the archive the URL serves. Fails when the release is still a draft or carries no manifest asset.
 
 **Parameters:**
-- `ArchivePath` - Path to the release archive
-- `Version` - Release version
+- `Tag` - Release tag to describe (e.g. `v0.1.0`)
+- `Repository` - Repository to read the release from (default: `kartalbas/flutter-gitui`)
 - `WingetPkgsPath` - Optional path to winget-pkgs repo (falls back to `WINGET_PKGS_PATH`, then `%USERPROFILE%\repos\winget-pkgs`; fails if none resolve)
 - `SkipWinget` - Skip the manifest update instead of failing when no winget-pkgs repo is configured
-- `Platform` - Target platform (windows/linux/macos)
-- `DownloadUrlBase` - Base URL for downloads (default: Azure blob storage)
 
 **Output:**
 - `manifests/f/FlutterGitUI/FlutterGitUI/{version}/FlutterGitUI.yaml`
@@ -250,9 +243,6 @@ Builds Linux binaries in a Docker container.
 Create a `.env` file in the project root with the following optional variables:
 
 ```env
-# Azure Blob Storage (for release uploads)
-FLUTTERGITUIARTIFACTS_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...
-
 # Optional: AI-assisted release changelog (any chat-completions style endpoint)
 CHANGELOG_API_URL=
 CHANGELOG_API_KEY=
@@ -263,13 +253,11 @@ CHANGELOG_API_MODEL=
 
 All platform-specific build scripts support:
 
-**`-SkipAzureUpload`** - Skip uploading to Azure Blob Storage
-
-**`-SkipWinget`** - Skip the winget manifest update (Windows only). Without it, the build fails when no winget-pkgs repo is found; set `WINGET_PKGS_PATH` to point at your local checkout.
+**`-SkipWinget`** - Skip the winget manifest update (Windows only). Without it, the build fails when no winget-pkgs repo is found, or when the GitHub release for the current tag is not published yet; set `WINGET_PKGS_PATH` to point at your local checkout.
 
 Example:
 ```powershell
-.\windows-release.ps1 -SkipAzureUpload
+.\windows-release.ps1 -SkipWinget
 ```
 
 ## Requirements
@@ -354,11 +342,9 @@ Example:
 - Check `.env` for `CHANGELOG_API_URL`, `CHANGELOG_API_KEY` and `CHANGELOG_API_MODEL`
 - Verify internet connectivity when the changelog API is configured
 
-**"Azure upload failed"**
-- Azure upload is optional (use `-SkipAzureUpload` to skip)
-- Check connection string in `.env` file
-- Verify network connectivity
-- Check Azure storage account permissions
+**"Release ... is not published"**
+- The winget manifests are written from the published GitHub release, so publish the draft release for the current tag first
+- Use `-SkipWinget` to build without touching the winget manifests
 
 ### PDF Generation Issues
 
@@ -478,7 +464,6 @@ Before committing changes:
 - Test Windows build on Windows
 - Test Linux build on Docker
 - Verify all artifacts are created correctly
-- Check that uploads work (if configured)
 - Verify git commits are created properly
 
 ## License

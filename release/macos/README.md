@@ -36,9 +36,8 @@ The macOS build script will follow the same pattern as Windows and Linux:
 7. **Create Archive** (shared with platform=macos)
    - Package as DMG or zip
    - Include README and changelog
-8. **Azure Upload** (shared, optional)
-9. **Build Summary** (shared)
-10. **Git Commit** (shared)
+8. **Build Summary** (shared)
+9. **Git Commit** (shared)
 
 ### Technical Requirements
 
@@ -67,7 +66,6 @@ All shared modules are designed to work cross-platform:
 - ✅ `build-prep.ps1` - Platform parameter supports macOS
 - ✅ `generate-docs.ps1` - Platform parameter supports macOS
 - ✅ `create-archive.ps1` - Platform parameter supports macOS
-- ✅ `upload-to-azure-rest.ps1` - Cross-platform REST API
 - ✅ `build-summary.ps1` - Cross-platform
 - ✅ `git-commit.ps1` - Cross-platform
 

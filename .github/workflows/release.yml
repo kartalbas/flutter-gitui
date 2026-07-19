@@ -94,14 +94,18 @@ jobs:
           NAME="flutter-gitui-v${VERSION}-${{ matrix.platform }}"
           mkdir -p dist
 
+          # Flat archives: the in-app updater extracts an update straight over
+          # the installation directory, so a wrapping top-level folder would
+          # leave every installed file untouched. It also keeps the published
+          # layout equal to the one release/shared/create-archive.ps1 produces.
           case "${{ matrix.platform }}" in
             windows)
               cp -r build/windows/x64/runner/Release "dist/${NAME}"
-              (cd dist && 7z a -tzip "${NAME}.zip" "${NAME}" >/dev/null)
+              (cd "dist/${NAME}" && 7z a -tzip "../${NAME}.zip" . >/dev/null)
               ;;
             linux)
               cp -r build/linux/x64/release/bundle "dist/${NAME}"
-              (cd dist && tar -czf "${NAME}.tar.gz" "${NAME}")
+              (cd dist && tar -czf "${NAME}.tar.gz" -C "${NAME}" .)
               ;;
             macos)
               APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)
@@ -140,11 +144,73 @@ jobs:
       - name: List artifacts
         run: ls -la dist/
 
+      - name: Determine release metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="v${{ inputs.version }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          # The client derives its channel from the pre-release suffix of its
+          # own version, so the release has to carry the matching flag. Reading
+          # it off the tag is what keeps a stable install from ever being
+          # offered an alpha; a checkbox somebody has to remember would not.
+          case "${TAG#v}" in
+            *-*) PRERELEASE=true ;;
+            *) PRERELEASE=false ;;
+          esac
+          {
+            echo "tag=${TAG}"
+            echo "prerelease=${PRERELEASE}"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.meta.outputs.tag }}
           draft: true
+          prerelease: ${{ steps.meta.outputs.prerelease }}
           generate_release_notes: true
           files: |
             dist/*.zip
             dist/*.tar.gz
+
+      # The updater reads the manifest as an asset of the very release it is
+      # about to install from, so the digest and the archive it describes can
+      # never come from different builds. It runs after the release exists
+      # because the changelog is the release notes GitHub just generated.
+      - name: Attach update manifests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.meta.outputs.tag }}"
+          VERSION="${TAG#v}"
+          RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          CHANGELOG=$(gh release view "$TAG" --json body --jq .body)
+          for PLATFORM in windows linux; do
+            case "$PLATFORM" in
+              windows) FILE="flutter-gitui-v${VERSION}-windows.zip" ;;
+              linux) FILE="flutter-gitui-v${VERSION}-linux.tar.gz" ;;
+            esac
+            if [ ! -f "dist/$FILE" ]; then
+              echo "::error::missing dist/$FILE"
+              exit 1
+            fi
+            jq -n \
+              --arg version "$VERSION" \
+              --arg releaseDate "$RELEASE_DATE" \
+              --arg changelog "$CHANGELOG" \
+              --arg platform "$PLATFORM" \
+              --arg fileName "$FILE" \
+              --argjson fileSize "$(stat -c %s "dist/$FILE")" \
+              --arg sha256 "$(sha256sum "dist/$FILE" | cut -d ' ' -f 1)" \
+              '{version: $version, releaseDate: $releaseDate, changelog: $changelog, platform: $platform}
+               + {($platform): {fileName: $fileName, fileSize: $fileSize, sha256: $sha256, platform: $platform}}' \
+              > "dist/latest-${PLATFORM}.json"
+          done
+          gh release upload "$TAG" dist/latest-windows.json dist/latest-linux.json --clobber

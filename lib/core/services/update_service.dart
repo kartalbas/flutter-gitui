@@ -58,12 +58,9 @@ class UpdateInfo {
 
 /// Service for checking and downloading app updates
 class UpdateService {
-  static const String _storageAccount = 'fluttergituiartifacts';
-  static const String _containerName = 'releases';
-
-  /// Base URL for Azure Blob Storage
-  static String get _baseUrl =>
-      'https://$_storageAccount.blob.core.windows.net/$_containerName';
+  /// Published releases of the project, newest first.
+  static const String _releasesUrl =
+      'https://api.github.com/repos/kartalbas/flutter-gitui/releases';
 
   /// Get platform-specific manifest file name
   static String get _manifestFileName {
@@ -75,15 +72,21 @@ class UpdateService {
     return 'latest.json'; // fallback
   }
 
-  /// URL for the latest version manifest (platform-specific)
-  static String get _manifestUrl => '$_baseUrl/$_manifestFileName';
+  /// Download URL of the release asset called [name], null when absent.
+  static String? _assetUrl(List<dynamic> assets, String name) {
+    for (final asset in assets) {
+      if (asset is Map<String, dynamic> && asset['name'] == name) {
+        return asset['browser_download_url'] as String?;
+      }
+    }
+    return null;
+  }
 
   /// Check for updates
   /// Returns Result\<UpdateInfo?\> - Success(UpdateInfo) if update available, Success(null) if up-to-date, Failure on error
   static Future<Result<UpdateInfo?>> checkForUpdates() async {
     return runCatchingAsync(() async {
       Logger.info('Checking for updates...');
-      Logger.info('Manifest URL: $_manifestUrl');
 
       // Get current version
       final packageInfo = await PackageInfo.fromPlatform();
@@ -92,10 +95,64 @@ class UpdateService {
       final fullVersion = '$currentVersion+$currentBuild';
       Logger.info('Current version: $fullVersion');
 
-      // Fetch latest version manifest
-      Logger.info('Fetching manifest from Azure...');
+      // A build whose own version carries a pre-release suffix stays on the
+      // pre-release channel, a final build only ever sees final releases.
+      // Deriving the channel from the running version is what keeps a stable
+      // install from being offered an alpha, with nothing to configure.
+      final acceptPreRelease = _preReleaseIdentifiers(
+        currentVersion,
+      ).isNotEmpty;
+
+      final releasesResponse = await http
+          .get(
+            Uri.parse(_releasesUrl),
+            headers: const {'Accept': 'application/vnd.github+json'},
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (releasesResponse.statusCode != 200) {
+        Logger.warning(
+          'Failed to list releases: ${releasesResponse.statusCode}',
+        );
+        throw Exception(
+          'Failed to fetch releases: HTTP ${releasesResponse.statusCode}',
+        );
+      }
+
+      final releases =
+          json.decode(utf8.decode(releasesResponse.bodyBytes)) as List<dynamic>;
+
+      // A draft is neither listed here nor serves its assets, so publishing the
+      // draft is the step that makes a release reachable by the updater.
+      Map<String, dynamic>? release;
+      for (final entry in releases) {
+        if (entry is! Map<String, dynamic>) continue;
+        if (entry['draft'] == true) continue;
+        if (!acceptPreRelease && entry['prerelease'] == true) continue;
+        release = entry;
+        break;
+      }
+
+      if (release == null) {
+        Logger.info('✓ No published release for this channel');
+        return null;
+      }
+
+      // Manifest and archive are both read from this one release, so the
+      // digest can never end up describing bytes from a different build.
+      final assets = release['assets'] as List<dynamic>? ?? const <dynamic>[];
+      final manifestUrl = _assetUrl(assets, _manifestFileName);
+      if (manifestUrl == null) {
+        Logger.warning('Release ${release['tag_name']} has no manifest asset');
+        throw Exception(
+          'Failed to fetch update manifest: the latest release publishes no '
+          '$_manifestFileName.',
+        );
+      }
+
+      Logger.info('Manifest URL: $manifestUrl');
       final response = await http
-          .get(Uri.parse(_manifestUrl))
+          .get(Uri.parse(manifestUrl))
           .timeout(const Duration(seconds: 10));
 
       Logger.info('Manifest response status: ${response.statusCode}');
@@ -159,7 +216,14 @@ class UpdateService {
           );
         }
 
-        final downloadUrl = '$_baseUrl/$downloadFileName';
+        final downloadUrl = _assetUrl(assets, downloadFileName);
+        if (downloadUrl == null) {
+          Logger.warning('Release asset not found: $downloadFileName');
+          throw Exception(
+            'Update rejected: the release publishes no $downloadFileName '
+            'asset.',
+          );
+        }
         final fileSize = platformData?['fileSize'] as int? ?? 0;
         final sha256Digest = platformData?['sha256'] as String?;
 

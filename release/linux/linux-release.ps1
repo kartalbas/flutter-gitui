@@ -6,11 +6,6 @@
 # Calls modular shared components and Linux-specific build modules.
 # ============================================================================
 
-param(
-    [Parameter(Mandatory=$false)]
-    [switch]$SkipAzureUpload = $false
-)
-
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
@@ -70,7 +65,7 @@ Write-Log ""
 # ============================================================================
 
 $currentStep = 1
-$totalSteps = 13
+$totalSteps = 12
 
 Write-Log "[Step $currentStep/$totalSteps] Managing version..." "Yellow"
 
@@ -331,37 +326,6 @@ try {
 } catch {
     Write-Log "[ERROR] Archive creation failed: $($_.Exception.Message)" "Red"
     exit 1
-}
-
-# ============================================================================
-# STEP 9: AZURE UPLOAD (Optional)
-# ============================================================================
-
-if (-not $SkipAzureUpload) {
-    $currentStep++
-    Write-Log "[Step $currentStep/$totalSteps] Uploading to Azure..." "Yellow"
-
-    try {
-        $uploadOutput = & (Join-Path $sharedDir "upload-to-azure-rest.ps1") -FilePath $archiveResult.Archive.FilePath 2>&1
-        $uploadOutput | ForEach-Object {
-            Write-Host $_
-            $_ | Out-File -FilePath $buildLogFile -Append -Encoding UTF8
-        }
-
-        if ($LASTEXITCODE -eq 0) {
-            Write-Log "[OK] Upload complete" "Green"
-        } else {
-            Write-Log "[ERROR] Upload failed" "Red"
-            exit 1
-        }
-        Write-Log ""
-    } catch {
-        Write-Log "[ERROR] Upload failed: $($_.Exception.Message)" "Red"
-        exit 1
-    }
-} else {
-    Write-Log "[SKIP] Azure upload (--SkipAzureUpload)" "Yellow"
-    Write-Log ""
 }
 
 # ============================================================================

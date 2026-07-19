@@ -1443,15 +1443,15 @@
   "rebaseWarning": "Advertencia de rebase",
   "rebaseConflicts": "Conflictos de rebase",
   "rebaseInProgress": "Rebase en progreso",
-  "step": "Paso {current} de {total}",
+  "step": "Paso {progressText}",
   "@step": {
-    "description": "Progress indicator for rebase steps",
-    "placeholders": {
-      "progressText": {
-        "type": "String"
+      "description": "Rebase progress step label",
+      "placeholders": {
+        "progressText": {
+          "type": "String"
+        }
       }
-    }
-  },
+    },
   "rebasingOnto": "Haciendo rebase sobre {branch}...",
   "currentCommit": "Commit actual",
   "conflictsDetected": "Conflictos detectados",

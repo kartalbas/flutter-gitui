@@ -265,7 +265,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               if (state.progressText != null) ...[
                 const SizedBox(height: AppTheme.paddingS),
                 BodyMediumLabel(
-                  AppLocalizations.of(context)!.step(state.progressText ?? '', 1, 1),
+                  AppLocalizations.of(context)!.step(state.progressText ?? ''),
                 ),
               ],
             ],

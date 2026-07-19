@@ -1443,15 +1443,15 @@
   "rebaseWarning": "Attention: Le rebase réécrit l'historique. Évitez de rebaser des commits déjà push és.",
   "rebaseConflicts": "Conflits de rebase",
   "rebaseInProgress": "Rebase en cours",
-  "step": "Étape",
+  "step": "Étape {progressText}",
   "@step": {
-    "description": "Progress indicator for rebase steps",
-    "placeholders": {
-      "progressText": {
-        "type": "String"
+      "description": "Rebase progress step label",
+      "placeholders": {
+        "progressText": {
+          "type": "String"
+        }
       }
-    }
-  },
+    },
   "rebasingOnto": "Rebase sur {branchName}",
   "currentCommit": "Commit actuel",
   "conflictsDetected": "Conflits détectés",

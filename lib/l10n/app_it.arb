@@ -545,7 +545,7 @@
   "rebaseWarning": "Attenzione: Il rebase riscrive la cronologia dei commit",
   "rebaseConflicts": "Conflitti di Rebase",
   "rebaseInProgress": "Rebase in corso",
-  "step": "Passo",
+  "step": "Passo {progressText}",
   "rebasingOnto": "Rebase su",
   "currentCommit": "Commit corrente",
   "conflictsDetected": "Conflitti rilevati",

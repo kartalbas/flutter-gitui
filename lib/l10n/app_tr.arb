@@ -715,7 +715,7 @@
   "editCommitsDuringRebase": "Rebase sırasında commit'leri düzenle",
   "rebaseWarning": "Uyarı: Rebase, commit geçmişini yeniden yazar",
   "rebaseConflicts": "Rebase Çakışmaları",
-  "step": "Adım",
+  "step": "Adım {progressText}",
   "rebasingOnto": "Rebase hedefi",
   "currentCommit": "Mevcut Commit",
   "resolveConflictsInChangesScreen": "Çakışmaları Değişiklikler ekranında çözün",

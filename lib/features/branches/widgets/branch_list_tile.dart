@@ -164,7 +164,10 @@ class BranchListTile extends ConsumerWidget {
 
   Future<void> _checkoutBranch(BuildContext context, WidgetRef ref) async {
     try {
-      await ref.read(gitActionsProvider).switchBranch(branch.shortName);
+      // Remote branches must be checked out by their bare name; passing the
+      // remote-qualified ref would detach HEAD instead of creating a local
+      // tracking branch. For local branches this is identical to shortName.
+      await ref.read(gitActionsProvider).switchBranch(branch.branchNameWithoutRemote);
     } catch (e) {
       if (context.mounted) {
         NotificationService.showError(

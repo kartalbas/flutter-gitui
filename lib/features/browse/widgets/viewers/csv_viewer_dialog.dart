@@ -45,9 +45,10 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
 
       final content = await file.readAsString();
 
-      // Parse CSV
-      const converter = CsvToListConverter();
-      final rows = converter.convert(content);
+      // The csv package defaults eol to '\r\n', which leaves LF-only files
+      // as a single giant row. Normalize to LF so both styles parse.
+      const converter = CsvToListConverter(eol: '\n');
+      final rows = converter.convert(content.replaceAll('\r\n', '\n'));
 
       setState(() {
         _rows = rows;

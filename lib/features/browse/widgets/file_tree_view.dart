@@ -286,6 +286,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     } finally {
       if (mounted) {
         setState(() => _isSearching = false);
+        // The guard above drops queries that arrive mid-search; re-run the
+        // latest one so the tree never sits on results for a stale query.
+        if (widget.searchQuery.isNotEmpty && widget.searchQuery != query) {
+          unawaited(_performSearch(widget.searchQuery));
+        }
       }
     }
   }

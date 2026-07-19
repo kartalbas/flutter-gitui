@@ -430,10 +430,11 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       final gitService = ref.read(gitServiceProvider);
       if (gitService == null) return;
 
-      await gitService.rebaseBranch(
+      // Throw on failure so the conflict handling in catch actually runs
+      (await gitService.rebaseBranch(
         ontoBranch: _selectedBranch!,
         interactive: _interactive,
-      );
+      )).unwrap();
 
       // Refresh rebase state
       ref.invalidate(rebaseStateProvider);
@@ -480,7 +481,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       final gitService = ref.read(gitServiceProvider);
       if (gitService == null) return;
 
-      await gitService.continueRebase();
+      (await gitService.continueRebase()).unwrap();
 
       // Refresh state
       ref.invalidate(rebaseStateProvider);
@@ -511,7 +512,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       final gitService = ref.read(gitServiceProvider);
       if (gitService == null) return;
 
-      await gitService.skipRebase();
+      (await gitService.skipRebase()).unwrap();
 
       // Refresh state
       ref.invalidate(rebaseStateProvider);
@@ -542,7 +543,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       final gitService = ref.read(gitServiceProvider);
       if (gitService == null) return;
 
-      await gitService.abortRebase();
+      (await gitService.abortRebase()).unwrap();
 
       // Refresh state
       ref.invalidate(rebaseStateProvider);

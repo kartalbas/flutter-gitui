@@ -33,7 +33,7 @@ class CountryFlag extends StatelessWidget {
     final lowerCode = countryCode.toLowerCase();
 
     // List of supported country codes
-    const supportedCodes = ['us', 'sa', 'de', 'es', 'fr', 'it', 'ru', 'tr', 'cn'];
+    const supportedCodes = ['us', 'de', 'es', 'fr', 'it', 'tr'];
 
     // Fallback to a placeholder if flag not found
     if (!supportedCodes.contains(lowerCode)) {

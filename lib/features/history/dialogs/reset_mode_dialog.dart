@@ -32,7 +32,7 @@ class ResetModeDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BodyMediumLabel(
-            l10n.resetCurrentBranchTo(commit.shortHash),
+            l10n.resetCurrentBranchTo,
           ),
           const SizedBox(height: AppTheme.paddingS),
           Container(

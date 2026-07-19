@@ -31,14 +31,11 @@ List<LanguageOption> _getLanguageOptions(BuildContext context) {
   return [
     LanguageOption(code: null, label: 'SYS', name: l10n.systemDefault, countryCode: null),
     LanguageOption(code: 'en', label: 'EN', name: l10n.english, countryCode: 'US'),
-    LanguageOption(code: 'ar', label: 'AR', name: l10n.arabic, countryCode: 'SA'),
     LanguageOption(code: 'de', label: 'DE', name: l10n.german, countryCode: 'DE'),
     LanguageOption(code: 'es', label: 'ES', name: l10n.spanish, countryCode: 'ES'),
     LanguageOption(code: 'fr', label: 'FR', name: l10n.french, countryCode: 'FR'),
     LanguageOption(code: 'it', label: 'IT', name: l10n.italian, countryCode: 'IT'),
-    LanguageOption(code: 'ru', label: 'RU', name: l10n.russian, countryCode: 'RU'),
     LanguageOption(code: 'tr', label: 'TR', name: l10n.turkish, countryCode: 'TR'),
-    LanguageOption(code: 'zh', label: 'ZH', name: l10n.chinese, countryCode: 'CN'),
   ];
 }
 

@@ -82,14 +82,11 @@ void main() async {
   );
 
   // Initialize timeago locales for all supported languages
-  timeago.setLocaleMessages('ar', timeago.ArMessages());
   timeago.setLocaleMessages('de', timeago.DeMessages());
   timeago.setLocaleMessages('es', timeago.EsMessages());
   timeago.setLocaleMessages('fr', timeago.FrMessages());
   timeago.setLocaleMessages('it', timeago.ItMessages());
-  timeago.setLocaleMessages('ru', timeago.RuMessages());
   timeago.setLocaleMessages('tr', timeago.TrMessages());
-  timeago.setLocaleMessages('zh', timeago.ZhMessages());
 
   // Detect WSL2 environment and log for user awareness
   // Note: Environment variables must be set before launching the app
@@ -220,14 +217,11 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
       ],
       supportedLocales: const [
         Locale('en'), // English
-        Locale('ar'), // Arabic
         Locale('de'), // German
         Locale('es'), // Spanish
         Locale('fr'), // French
         Locale('it'), // Italian
-        Locale('ru'), // Russian
         Locale('tr'), // Turkish
-        Locale('zh'), // Chinese (Simplified)
       ],
       theme: AppTheme.lightTheme(
         colorScheme: colorScheme,

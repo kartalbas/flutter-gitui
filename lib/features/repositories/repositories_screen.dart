@@ -733,14 +733,19 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     // Fetch origin remote
     final remotesResult = await gitService.getRemotes();
     if (!context.mounted) return;
-    final remotes = remotesResult.unwrapOrNotify(
+    final remotes = remotesResult.unwrapOrNotifyNull(
       context,
       errorPrefix: 'Failed to fetch remotes',
     );
-    final originRemote = remotes.firstWhere(
-      (remote) => remote.name == 'origin',
-      orElse: () => throw Exception('No origin remote found'),
-    );
+    if (remotes == null) return;
+    // The menu entry is offered for any remote, not just 'origin', so fall back
+    // to the first remote instead of failing on the conventional name.
+    final origin = remotes.where((remote) => remote.name == 'origin').firstOrNull;
+    final originRemote = origin ?? remotes.firstOrNull;
+    if (originRemote == null) {
+      NotificationService.showError(context, 'No remote found');
+      return;
+    }
 
     if (!context.mounted) return;
 
@@ -753,7 +758,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     if (newUrl == null || !context.mounted) return;
 
     // Update remote URL
-    final result = await gitService.setRemoteUrl('origin', newUrl);
+    final result = await gitService.setRemoteUrl(originRemote.name, newUrl);
     if (!context.mounted) return;
     result.executeWithNotification(
       context,

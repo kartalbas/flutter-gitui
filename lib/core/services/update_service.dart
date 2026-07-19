@@ -239,17 +239,48 @@ class UpdateService {
       int downloaded = 0;
       final contentLength = streamedResponse.contentLength ?? 0;
 
-      await for (final chunk in streamedResponse.stream) {
-        sink.add(chunk);
-        downloaded += chunk.length;
+      try {
+        await for (final chunk in streamedResponse.stream) {
+          sink.add(chunk);
+          downloaded += chunk.length;
 
-        if (contentLength > 0 && onProgress != null) {
-          final progress = downloaded / contentLength;
-          onProgress(progress);
+          if (contentLength > 0 && onProgress != null) {
+            final progress = downloaded / contentLength;
+            onProgress(progress);
+          }
         }
+
+        await sink.close();
+      } catch (_) {
+        // Close before deleting: an open sink keeps the temp file locked on
+        // Windows, so the delete and any retry would fail with a sharing
+        // violation.
+        try {
+          await sink.close();
+        } catch (_) {
+          // The original transfer error is what matters.
+        }
+        try {
+          await file.delete();
+        } catch (_) {
+          // Best effort; the transfer failure is what matters.
+        }
+        rethrow;
       }
 
-      await sink.close();
+      // A truncated body can end the stream without throwing; reject it here
+      // so the digest check reports tampering, not mere network trouble.
+      if ((contentLength > 0 && downloaded != contentLength) ||
+          (updateInfo.fileSize > 0 && downloaded != updateInfo.fileSize)) {
+        try {
+          await file.delete();
+        } catch (_) {
+          // Best effort; the incomplete transfer is what matters.
+        }
+        throw Exception(
+          'Update rejected: incomplete download ($downloaded bytes received).',
+        );
+      }
 
       // Verify before the archive is ever handed to the installer.
       final actual = (await crypto.sha256.bind(file.openRead()).first)

@@ -18,6 +18,7 @@ final historySearchFilterProvider =
 final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   final filter = ref.watch(historySearchFilterProvider);
+  final searchService = ref.watch(historySearchServiceProvider);
 
   if (gitService == null) return [];
 
@@ -44,9 +45,10 @@ final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
       limitOverride = 1;
     }
 
+    // Text criteria are matched client-side: git log --grep/--author cannot
+    // express the case-sensitivity, regex and fuzzy options the UI offers, and
+    // pre-filtering with them would drop commits the matcher should keep.
     final result = await gitService.getLog(
-      grepMessage: filter.query,
-      author: filter.author,
       since: filter.fromDate?.toIso8601String(),
       until: filter.toDate?.toIso8601String(),
       filePath: filter.filePath,
@@ -54,7 +56,7 @@ final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
       limit: limitOverride ?? 1000, // Use 1 for tags, 1000 for regular search
     );
 
-    return result.unwrapOr([]); // Return empty list on error
+    return searchService.filterCommits(result.unwrapOr([]), filter);
   } catch (e) {
     return [];
   }

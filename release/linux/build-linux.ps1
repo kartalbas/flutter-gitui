@@ -58,7 +58,6 @@ function Test-LinuxBuildPrerequisites {
 
         if ($LASTEXITCODE -eq 0) {
             Write-Host "  [Docker] Base image built successfully" -ForegroundColor Green
-            return $true
         } else {
             Write-Host "  [Docker] Base image build failed" -ForegroundColor Red
             return $false

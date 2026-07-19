@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:process_run/shell.dart';
@@ -400,11 +401,40 @@ class GitService {
   Future<Result<String>> commit(String message, {bool amend = false}) async {
     return runCatchingAsync(() async {
       final amendFlag = amend ? '--amend' : '';
-      final escapedMessage = message.replaceAll('"', '\\"').replaceAll('\n', '\\n');
-
-      final result = await _execute('commit $amendFlag -m "$escapedMessage"');
-      return result.stdout.toString();
+      return _withMessageFile(message, (path) async {
+        final result = await _execute('commit $amendFlag -F "$path"');
+        return result.stdout.toString();
+      });
     });
+  }
+
+  /// Writes [message] to a temporary file and hands its path to [action].
+  ///
+  /// A commit message is arbitrary user text. Embedding it in a command string
+  /// requires escaping quotes and newlines, and the shell layer splits the
+  /// script on newlines -- so a normal "subject, blank line, body" message was
+  /// both written into history as a literal `\n` and a way to smuggle in extra
+  /// commands. `-F <file>` removes the problem instead of escaping around it.
+  Future<T> _withMessageFile<T>(
+    String message,
+    Future<T> Function(String path) action,
+  ) async {
+    final file = File(
+      p.join(
+        Directory.systemTemp.path,
+        'flutter-gitui-msg-${DateTime.now().microsecondsSinceEpoch}.txt',
+      ),
+    );
+    try {
+      await file.writeAsString(message, encoding: utf8, flush: true);
+      return await action(file.path);
+    } finally {
+      try {
+        await file.delete();
+      } catch (_) {
+        // A leftover temp file is harmless; never mask the real result.
+      }
+    }
   }
 
   /// Get last commit message
@@ -2357,8 +2387,9 @@ class GitService {
     await _execute('reset --soft $parentCommit');
 
     // Step 3: Create new commit with all the changes
-    final escapedMessage = newMessage.replaceAll('"', '\\"');
-    await _execute('commit -m "$escapedMessage"');
+    await _withMessageFile(newMessage, (path) async {
+      await _execute('commit -F "$path"');
+    });
   }
 
   // ============================================

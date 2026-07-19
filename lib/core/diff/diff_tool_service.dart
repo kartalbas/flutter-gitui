@@ -271,8 +271,17 @@ class DiffToolService {
       case DiffToolType.tortoiseGitMerge:
         return ['TortoiseGitMerge.exe'];
 
+      case DiffToolType.vimdiff:
+        return ['vimdiff'];
+
+      case DiffToolType.opendiff:
+        // Ships with the Xcode command line tools at /usr/bin/opendiff.
+        return Platform.isMacOS ? ['opendiff'] : [];
+
       default:
-        return [''];
+        // An empty name would make 'which'/'where' probe an empty argument,
+        // which always fails, so report no candidates for unhandled types.
+        return [];
     }
   }
 
@@ -388,6 +397,12 @@ class DiffToolService {
       executablePath: '',
       diffArgs: '-d \$LOCAL \$REMOTE',
       mergeArgs: '-d \$BASE \$LOCAL \$REMOTE \$MERGED',
+    ),
+    const DiffTool(
+      type: DiffToolType.opendiff,
+      executablePath: '',
+      diffArgs: '\$LOCAL \$REMOTE',
+      mergeArgs: '\$LOCAL \$REMOTE -ancestor \$BASE -merge \$MERGED',
     ),
   ];
 }

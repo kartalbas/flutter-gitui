@@ -56,6 +56,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
         Logger.info('Update found: ${updateInfo.version}');
         await showDialog(
           context: context,
+          // A download runs inside this dialog; dismissing it by tapping
+          // outside would abandon the transfer. The startup path already
+          // does this.
+          barrierDismissible: false,
           builder: (context) => UpdateAvailableDialog(updateInfo: updateInfo),
         );
       } else {

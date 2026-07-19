@@ -277,6 +277,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       final filePath = await UpdateService.downloadUpdate(
         widget.updateInfo,
         onProgress: (progress) {
+          // The dialog can be dismissed mid-download and this callback fires
+          // from inside the download stream: an unguarded setState threw
+          // there and aborted the transfer.
+          if (!mounted) return;
           setState(() {
             _downloadProgress = progress;
           });

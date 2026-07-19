@@ -8,7 +8,10 @@
 
 param(
     [Parameter(Mandatory=$false)]
-    [switch]$SkipAzureUpload = $false
+    [switch]$SkipAzureUpload = $false,
+
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipWinget = $false
 )
 
 $ErrorActionPreference = "Continue"
@@ -295,7 +298,8 @@ Write-Log "[Step $currentStep/$totalSteps] Updating winget manifest..." "Yellow"
 try {
     $wingetOutput = & "$sharedDir/update-winget-manifest.ps1" `
         -ArchivePath $archiveResult.Archive.FilePath `
-        -Version $version 2>&1
+        -Version $version `
+        -SkipWinget:$SkipWinget 2>&1
     $wingetOutput | ForEach-Object {
         Write-Host $_
         $_ | Out-File -FilePath $buildLogFile -Append -Encoding UTF8
@@ -304,17 +308,18 @@ try {
 
     if ($wingetResult -and $wingetResult.Success) {
         if ($wingetResult.Skipped) {
-            Write-Log "[SKIP] Winget-pkgs repo not found" "Yellow"
+            Write-Log "[SKIP] Winget manifest update skipped on request" "Yellow"
         } else {
             Write-Log "[OK] Winget manifest updated" "Green"
         }
     } else {
-        Write-Log "[WARN] Winget manifest update failed" "Yellow"
+        Write-Log "[ERROR] Winget manifest update failed: $($wingetResult.Error)" "Red"
+        exit 1
     }
     Write-Log ""
 } catch {
-    Write-Log "[WARN] Winget manifest update failed: $($_.Exception.Message)" "Yellow"
-    Write-Log ""
+    Write-Log "[ERROR] Winget manifest update failed: $($_.Exception.Message)" "Red"
+    exit 1
 }
 
 # ============================================================================

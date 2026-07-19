@@ -178,7 +178,8 @@ Updates winget package manifest files with correct SHA256 hash after archive cre
 **Parameters:**
 - `ArchivePath` - Path to the release archive
 - `Version` - Release version
-- `WingetPkgsPath` - Optional path to winget-pkgs repo (auto-detects if not specified)
+- `WingetPkgsPath` - Optional path to winget-pkgs repo (falls back to `WINGET_PKGS_PATH`, then `%USERPROFILE%\repos\winget-pkgs`; fails if none resolve)
+- `SkipWinget` - Skip the manifest update instead of failing when no winget-pkgs repo is configured
 - `Platform` - Target platform (windows/linux/macos)
 - `DownloadUrlBase` - Base URL for downloads (default: Azure blob storage)
 
@@ -263,6 +264,8 @@ CHANGELOG_API_MODEL=
 All platform-specific build scripts support:
 
 **`-SkipAzureUpload`** - Skip uploading to Azure Blob Storage
+
+**`-SkipWinget`** - Skip the winget manifest update (Windows only). Without it, the build fails when no winget-pkgs repo is found; set `WINGET_PKGS_PATH` to point at your local checkout.
 
 Example:
 ```powershell

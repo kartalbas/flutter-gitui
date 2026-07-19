@@ -58,6 +58,24 @@ import '../../features/about/about_dialog.dart';
 /// This persists across widget rebuilds to prevent showing dialog multiple times
 final whatsNewDialogCheckedProvider = StateProvider<bool>((ref) => false);
 
+/// Localized label for a missing required setting
+String _requiredSettingLabel(AppLocalizations l10n, RequiredSetting setting) {
+  switch (setting) {
+    case RequiredSetting.gitExecutablePath:
+      return l10n.gitExecutablePath;
+    case RequiredSetting.textEditor:
+      return l10n.textEditor;
+    case RequiredSetting.diffTool:
+      return l10n.diffTool;
+    case RequiredSetting.mergeTool:
+      return l10n.mergeTool;
+    case RequiredSetting.userName:
+      return l10n.userName;
+    case RequiredSetting.userEmail:
+      return l10n.userEmail;
+  }
+}
+
 /// App shell with navigation rail and main content area
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
@@ -78,7 +96,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     final configLoadFailed = ref.watch(configLoadFailureProvider);
     final gitPathInvalid = ref.watch(gitPathInvalidProvider);
     final allSettingsConfigured = ref.watch(allRequiredSettingsConfiguredProvider);
-    final missingSettings = ref.watch(missingRequiredSettingsProvider(context));
+    final missingSettings = ref.watch(missingRequiredSettingsProvider);
     final isRailExtended = ref.watch(navigationRailExtendedProvider);
     final whatsNewChecked = ref.watch(whatsNewDialogCheckedProvider);
 
@@ -411,7 +429,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                                   ),
                                   const SizedBox(height: AppTheme.paddingXS),
                                   BodySmallLabel(
-                                    'Please configure: ${missingSettings.join(', ')}',
+                                    'Please configure: ${missingSettings.map((s) => _requiredSettingLabel(AppLocalizations.of(context)!, s)).join(', ')}',
                                     color: Theme.of(context).colorScheme.onErrorContainer,
                                   ),
                                 ],

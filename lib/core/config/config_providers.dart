@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
-import '../../generated/app_localizations.dart';
 
 import 'app_config.dart';
 import 'config_service.dart';
@@ -819,29 +818,43 @@ final allRequiredSettingsConfiguredProvider = Provider<bool>((ref) {
   return hasGitExecutable && hasTextEditor && hasDiffTool && hasMergeTool && hasUserName && hasUserEmail;
 });
 
+/// A required setting, identified by a stable key rather than a localized label
+enum RequiredSetting {
+  gitExecutablePath,
+  textEditor,
+  diffTool,
+  mergeTool,
+  userName,
+  userEmail,
+}
+
 /// Get list of missing required settings
-final missingRequiredSettingsProvider = Provider.family<List<String>, BuildContext>((ref, context) {
+///
+/// Keys are returned instead of localized strings so this provider needs no
+/// BuildContext. A context-keyed family would retain every AppShell element the
+/// theme-keyed MaterialApp rebuild creates, and would keep serving strings from
+/// the locale that was active when the entry was first computed.
+final missingRequiredSettingsProvider = Provider<List<RequiredSetting>>((ref) {
   final config = ref.watch(configProvider);
-  final l10n = AppLocalizations.of(context)!;
-  final missing = <String>[];
+  final missing = <RequiredSetting>[];
 
   if (config.git.executablePath == null || config.git.executablePath!.isEmpty) {
-    missing.add(l10n.gitExecutablePath);
+    missing.add(RequiredSetting.gitExecutablePath);
   }
   if (config.tools.textEditor == null || config.tools.textEditor!.isEmpty) {
-    missing.add(l10n.textEditor);
+    missing.add(RequiredSetting.textEditor);
   }
   if (config.tools.diffTool == null) {
-    missing.add(l10n.diffTool);
+    missing.add(RequiredSetting.diffTool);
   }
   if (config.tools.mergeTool == null) {
-    missing.add(l10n.mergeTool);
+    missing.add(RequiredSetting.mergeTool);
   }
   if (config.git.defaultUserName == null || config.git.defaultUserName!.isEmpty) {
-    missing.add(l10n.userName);
+    missing.add(RequiredSetting.userName);
   }
   if (config.git.defaultUserEmail == null || config.git.defaultUserEmail!.isEmpty) {
-    missing.add(l10n.userEmail);
+    missing.add(RequiredSetting.userEmail);
   }
 
   return missing;

@@ -1397,5 +1397,11 @@
   "targetBranch": "Hedef dal",
   "viewCommitInHistory": "Commit'i geçmişte görüntüle",
   "language": "Dil",
-  "languageDescription": "Tercih ettiğiniz dili seçin"
+  "languageDescription": "Tercih ettiğiniz dili seçin",
+  "requiredSettingsMissing": "Gerekli ayarlar eksik",
+  "pleaseConfigureSettings": "Lütfen yapılandırın: {settings}",
+  "detectTools": "Araçları algıla",
+  "applySelected": "Seçileni uygula",
+  "noToolsDetected": "Araç algılanmadı",
+  "noToolsDetectedHint": "git, karşılaştırma araçları ve düzenleyicilerin sisteminizde kurulu olduğundan emin olun"
 }

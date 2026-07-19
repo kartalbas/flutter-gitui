@@ -170,7 +170,7 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     return BaseDialog(
-      title: 'Detect Tools',
+      title: l10n.detectTools,
       icon: PhosphorIconsRegular.magnifyingGlass,
       content: _isDetecting
           ? const Center(
@@ -187,7 +187,7 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         BaseButton(
-          label: 'Apply Selected',
+          label: l10n.applySelected,
           variant: ButtonVariant.primary,
           onPressed:
               (_selectedGit != null ||
@@ -220,12 +220,12 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
             ),
             const SizedBox(height: AppTheme.paddingL),
             BodyMediumLabel(
-              'No tools detected',
+              l10n.noToolsDetected,
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: AppTheme.paddingM),
             BodySmallLabel(
-              'Make sure git, diff tools, and editors are installed on your system',
+              l10n.noToolsDetectedHint,
               textAlign: TextAlign.center,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

@@ -3559,5 +3559,20 @@
   "openGitLog": "Open git.log",
   "openConfigFolder": "Open Config Folder",
   "deleteAppLog": "Delete app.log",
-  "deleteGitLog": "Delete git.log"
+  "deleteGitLog": "Delete git.log",
+  "requiredSettingsMissing": "Required settings missing",
+  "pleaseConfigureSettings": "Please configure: {settings}",
+  "@pleaseConfigureSettings": {
+    "description": "Warning banner body listing the settings that still need configuration",
+    "placeholders": {
+      "settings": {
+        "type": "String",
+        "example": "Git executable, User name"
+      }
+    }
+  },
+  "detectTools": "Detect Tools",
+  "applySelected": "Apply Selected",
+  "noToolsDetected": "No tools detected",
+  "noToolsDetectedHint": "Make sure git, diff tools, and editors are installed on your system"
 }

@@ -2480,5 +2480,11 @@
   "strategy": "Estrategia",
   "successfullyRebasedBranch": "{targetBranch} rebasada exitosamente sobre {sourceBranch}",
   "targetBranch": "Rama de destino",
-  "viewCommitInHistory": "Ver commit en el historial"
+  "viewCommitInHistory": "Ver commit en el historial",
+  "requiredSettingsMissing": "Faltan ajustes obligatorios",
+  "pleaseConfigureSettings": "Configure: {settings}",
+  "detectTools": "Detectar herramientas",
+  "applySelected": "Aplicar selección",
+  "noToolsDetected": "No se detectaron herramientas",
+  "noToolsDetectedHint": "Asegúrese de que git, las herramientas de comparación y los editores estén instalados en su sistema"
 }

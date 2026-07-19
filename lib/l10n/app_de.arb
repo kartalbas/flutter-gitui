@@ -2480,5 +2480,11 @@
   "strategy": "Strategie",
   "successfullyRebasedBranch": "{targetBranch} erfolgreich auf {sourceBranch} rebast",
   "targetBranch": "Ziel-Branch",
-  "viewCommitInHistory": "Commit in Historie anzeigen"
+  "viewCommitInHistory": "Commit in Historie anzeigen",
+  "requiredSettingsMissing": "Erforderliche Einstellungen fehlen",
+  "pleaseConfigureSettings": "Bitte konfigurieren: {settings}",
+  "detectTools": "Werkzeuge erkennen",
+  "applySelected": "Auswahl übernehmen",
+  "noToolsDetected": "Keine Werkzeuge erkannt",
+  "noToolsDetectedHint": "Stellen Sie sicher, dass Git, Diff-Werkzeuge und Editoren auf Ihrem System installiert sind"
 }

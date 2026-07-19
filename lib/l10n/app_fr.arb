@@ -2480,5 +2480,11 @@
   "targetBranch": "Branche cible",
   "viewCommitInHistory": "Voir le commit dans l'historique",
   "language": "Langue",
-  "languageDescription": "Sélectionnez votre langue préférée"
+  "languageDescription": "Sélectionnez votre langue préférée",
+  "requiredSettingsMissing": "Paramètres requis manquants",
+  "pleaseConfigureSettings": "Veuillez configurer : {settings}",
+  "detectTools": "Détecter les outils",
+  "applySelected": "Appliquer la sélection",
+  "noToolsDetected": "Aucun outil détecté",
+  "noToolsDetectedHint": "Assurez-vous que git, les outils de comparaison et les éditeurs sont installés sur votre système"
 }

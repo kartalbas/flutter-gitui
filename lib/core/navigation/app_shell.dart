@@ -509,7 +509,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       TitleMediumLabel(
-                                        'Required settings missing',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.requiredSettingsMissing,
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.onErrorContainer,
@@ -518,7 +520,18 @@ class _AppShellState extends ConsumerState<AppShell> {
                                         height: AppTheme.paddingXS,
                                       ),
                                       BodySmallLabel(
-                                        'Please configure: ${missingSettings.map((s) => _requiredSettingLabel(AppLocalizations.of(context)!, s)).join(', ')}',
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.pleaseConfigureSettings(
+                                          missingSettings
+                                              .map(
+                                                (s) => _requiredSettingLabel(
+                                                  AppLocalizations.of(context)!,
+                                                  s,
+                                                ),
+                                              )
+                                              .join(', '),
+                                        ),
                                         color: Theme.of(
                                           context,
                                         ).colorScheme.onErrorContainer,

@@ -62,8 +62,33 @@ class GitService {
         ...Platform.environment,
         'LC_ALL': 'C.UTF-8',
         'LANG': 'C.UTF-8',
+        // Never let git block on an interactive credential prompt. There is no
+        // terminal attached to a GUI process, so a prompt would hang the
+        // operation forever instead of failing with an authentication error.
+        'GIT_TERMINAL_PROMPT': '0',
+        'GIT_ASKPASS': '',
+        'SSH_ASKPASS': '',
+        // Same for SSH host-key and password prompts.
+        'GIT_SSH_COMMAND': 'ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new',
       },
     );
+  }
+
+  /// Upper bound for a single git invocation.
+  ///
+  /// Local commands are fast; network commands may legitimately take minutes on
+  /// a large clone, so they get their own, longer bound. Without a limit a
+  /// stalled connection hangs the operation forever.
+  static const Duration _localTimeout = Duration(seconds: 60);
+  static const Duration _networkTimeout = Duration(minutes: 10);
+
+  static const Set<String> _networkCommands = {
+    'clone', 'fetch', 'pull', 'push', 'remote', 'ls-remote', 'submodule',
+  };
+
+  static Duration _timeoutFor(String command) {
+    final first = command.trimLeft().split(RegExp(r'\s+')).first;
+    return _networkCommands.contains(first) ? _networkTimeout : _localTimeout;
   }
 
   /// Check if Git is installed
@@ -112,7 +137,16 @@ class GitService {
         onProgressUpdate!(operationName, false);
       }
 
-      final results = await _shell.run(fullCommand);
+      final timeout = _timeoutFor(command);
+      final results = await _shell.run(fullCommand).timeout(
+        timeout,
+        onTimeout: () => throw GitException(
+          'Git command timed out after ${timeout.inSeconds}s: $operationName',
+          stderr:
+              'The command did not finish in time. If this was a network '
+              'operation, check connectivity and your credentials.',
+        ),
+      );
       final result = results.first;
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);

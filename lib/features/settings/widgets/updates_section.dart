@@ -32,6 +32,9 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
   Future<void> _loadVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
+    // Fired from initState: leaving Settings before the platform channel
+    // returns disposes this State, and setState on it would assert.
+    if (!mounted) return;
     setState(() {
       _currentVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
     });

@@ -114,10 +114,16 @@ function Build-Updater {
         # Get dependencies
         dart pub get *> $null
 
-        # Compile to native executable
-        dart compile exe updater.dart -o updater.exe 2>&1 | Out-Null
+        # updater.exe is gitignored and survives between builds, so a leftover
+        # binary would satisfy the existence check below and ship an updater
+        # that does not match updater.dart.
+        Remove-Item "updater.exe" -Force -ErrorAction SilentlyContinue
 
-        if (Test-Path "updater.exe") {
+        # Compile to native executable
+        $compileOutput = & dart compile exe updater.dart -o updater.exe 2>&1
+        $compileExit = $LASTEXITCODE
+
+        if ($compileExit -eq 0 -and (Test-Path "updater.exe")) {
             Write-Host "    ✓ Updater compiled successfully" -ForegroundColor Green
             Pop-Location
             return @{
@@ -125,7 +131,10 @@ function Build-Updater {
                 Path = Join-Path $UpdaterDir "updater.exe"
             }
         } else {
-            Write-Host "    ! Failed to compile updater.exe" -ForegroundColor Yellow
+            Write-Host "    ! Failed to compile updater.exe (exit code $compileExit)" -ForegroundColor Yellow
+            if ($compileOutput) {
+                $compileOutput | ForEach-Object { Write-Host "      $_" -ForegroundColor Gray }
+            }
             Pop-Location
             return @{
                 Success = $false
@@ -217,6 +226,12 @@ try {
 
     # Compile updater
     $updaterResult = Build-Updater -UpdaterDir $UpdaterDir
+
+    # The archive drives auto-update, so releasing it without a freshly built
+    # updater would leave clients running unknown update logic.
+    if (-not $updaterResult.Success) {
+        throw "Updater compilation failed"
+    }
 
     # Copy artifacts
     $artifactInfo = Copy-WindowsArtifacts -ProjectRoot $ProjectRoot -ReleaseDir $ReleaseDir -UpdaterPath $updaterResult.Path

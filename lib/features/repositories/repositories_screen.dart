@@ -382,29 +382,22 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
     // Show feedback with detailed error messages
     if (mounted) {
-      String message;
-      Color? backgroundColor;
-
       if (addedCount > 0) {
-        message = 'Added $addedCount ${addedCount == 1 ? 'repository' : 'repositories'}';
+        String message = 'Added $addedCount ${addedCount == 1 ? 'repository' : 'repositories'}';
         if (duplicateCount > 0) {
           message += ' ($duplicateCount already existed)';
         }
         if (invalidCount > 0) {
           message += ' ($invalidCount invalid)';
         }
-        backgroundColor = AppTheme.gitAdded;
+        NotificationService.showSuccess(context, message);
       } else if (duplicateCount > 0) {
-        message = '$duplicateCount ${duplicateCount == 1 ? 'repository' : 'repositories'} already in workspace';
-        backgroundColor = Theme.of(context).colorScheme.surfaceContainerHighest;
+        NotificationService.showInfo(
+          context,
+          '$duplicateCount ${duplicateCount == 1 ? 'repository' : 'repositories'} already in workspace',
+        );
       } else {
-        message = 'No valid Git repositories found';
-        backgroundColor = Theme.of(context).colorScheme.error;
-      }
-
-      // Show appropriate notification based on result
-      if (backgroundColor == Theme.of(context).colorScheme.error) {
-        NotificationService.showError(context, message);
+        NotificationService.showError(context, 'No valid Git repositories found');
       }
     }
   }

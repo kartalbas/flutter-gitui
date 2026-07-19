@@ -47,8 +47,17 @@ class TagsService {
             if (customDateStart != null && tag.date!.isBefore(customDateStart)) {
               return false;
             }
-            if (customDateEnd != null && tag.date!.isAfter(customDateEnd)) {
-              return false;
+            // The date picker yields midnight of the selected day, so the end
+            // bound must cover that whole day instead of cutting off at 00:00.
+            if (customDateEnd != null) {
+              final endOfDay = DateTime(
+                customDateEnd.year,
+                customDateEnd.month,
+                customDateEnd.day + 1,
+              );
+              if (!tag.date!.isBefore(endOfDay)) {
+                return false;
+              }
             }
             break;
           case DateRangeFilter.all:

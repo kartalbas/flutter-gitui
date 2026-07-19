@@ -49,13 +49,21 @@ class _ProjectDialogState extends State<ProjectDialog> {
     _nameController = TextEditingController(text: widget.project?.name);
     _descriptionController = TextEditingController(text: widget.project?.description);
     _selectedColor = widget.project?.color ?? WorkspaceColors.random();
+
+    // The preview row renders the current name, so typing must rebuild the dialog
+    _nameController.addListener(_onNameChanged);
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  void _onNameChanged() {
+    setState(() {});
   }
 
   @override

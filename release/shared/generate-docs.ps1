@@ -137,10 +137,8 @@ $ChangelogContent
 ``````
 flutter-gitui/
 ├── flutter-gitui            # Main executable
-├── linux/                   # Linux binaries
-│   ├── flutter_gitui        # Application binary
-│   ├── lib/                 # Required libraries
-│   └── data/                # Application data files
+├── lib/                     # Required libraries
+├── data/                    # Application data files
 ├── updater                  # Auto-updater
 └── README.md                # This file
 ``````

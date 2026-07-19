@@ -293,6 +293,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   /// Expand all directories in the tree
   Future<void> expandAll() async {
     await _expandAllNodes(_rootNodes);
+    if (!mounted) return;
     // The controller caches its flattened list and only rebuilds it in
     // updateNodes and the toggle methods. Without this the chevrons flipped
     // but the visible rows never changed.
@@ -337,6 +338,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       final dir = Directory(widget.repositoryPath);
       final nodes = await _buildTreeNodes(dir.path, isRoot: true);
 
+      // Scanning a large repository takes a moment; the user may have navigated
+      // away in the meantime. Reading a provider off an unmounted ref throws,
+      // and the catch below would then setState on a defunct State.
+      if (!mounted) return;
+
       // Get file statuses
       final statusAsync = ref.read(repositoryStatusProvider);
       final statuses = statusAsync.value ?? [];
@@ -353,6 +359,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       _treeController.updateNodes(_rootNodes);
     } catch (e) {
       Logger.error('Error loading file tree', e);
+      if (!mounted) return;
       setState(() => _isLoading = false);
     }
   }

@@ -122,6 +122,8 @@ class FileIconUtils {
         return PhosphorIconsBold.question;
       case FileStatusType.ignored:
         return PhosphorIconsBold.fileX;
+      case FileStatusType.unmerged:
+        return PhosphorIconsBold.warning;
       case FileStatusType.unchanged:
         return PhosphorIconsBold.file;
     }

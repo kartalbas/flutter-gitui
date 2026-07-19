@@ -10,6 +10,8 @@ enum FileStatusType {
   copied,
   untracked,
   ignored,
+  /// Unmerged: the file has conflicts from a merge, rebase or cherry-pick.
+  unmerged,
   unchanged;
 
   /// Display name
@@ -29,6 +31,8 @@ enum FileStatusType {
         return 'Untracked';
       case FileStatusType.ignored:
         return 'Ignored';
+      case FileStatusType.unmerged:
+        return 'Unmerged';
       case FileStatusType.unchanged:
         return 'Unchanged';
     }
@@ -51,6 +55,10 @@ enum FileStatusType {
         return AppTheme.gitUntracked;
       case FileStatusType.ignored:
         return AppTheme.gitUntracked;
+      case FileStatusType.unmerged:
+        // Conflicts must stand out; reuse the delete colour rather than adding a
+        // token the theme does not define yet.
+        return AppTheme.gitDeleted;
       case FileStatusType.unchanged:
         return AppTheme.gitUntracked;
     }
@@ -73,6 +81,8 @@ enum FileStatusType {
         return '?';
       case FileStatusType.ignored:
         return '!';
+      case FileStatusType.unmerged:
+        return 'U';
       case FileStatusType.unchanged:
         return ' ';
     }

@@ -77,6 +77,10 @@ class StatusParser {
         return FileStatusType.untracked;
       case '!':
         return FileStatusType.ignored;
+      case 'U':
+        // Unmerged. Without this, the porcelain codes UU/AU/UA/DU/UD all decayed
+        // to 'unchanged', so getMergeState() could never see a conflict.
+        return FileStatusType.unmerged;
       case ' ':
       default:
         return FileStatusType.unchanged;

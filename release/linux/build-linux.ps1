@@ -123,21 +123,35 @@ function Invoke-LinuxBuild {
     }
 
     # Copy build artifacts out of container
+    $copyExitCode = 0
     if ($buildExitCode -eq 0) {
         Write-Host "  [Linux] Copying build artifacts from container..." -ForegroundColor Gray
-        docker cp "${containerName}:/app/build" $ProjectRoot 2>&1 | Out-Null
+        $copyOutput = docker cp "${containerName}:/app/build" $ProjectRoot 2>&1
+        $copyExitCode = $LASTEXITCODE
+        if ($LogFile) {
+            "" | Add-Content $LogFile -Encoding ASCII
+            "=== ARTIFACT COPY ===" | Add-Content $LogFile -Encoding ASCII
+            $copyOutput | ForEach-Object { Add-Content $LogFile -Value $_.ToString() -Encoding ASCII }
+            "Copy exit code: $copyExitCode" | Add-Content $LogFile -Encoding ASCII
+        }
+        if ($copyExitCode -ne 0) {
+            $copyOutput | ForEach-Object { Write-Host "  [Lnx] $_" -ForegroundColor Red }
+            Write-Host "  [Linux] Artifact copy failed - container $containerName kept for inspection" -ForegroundColor Red
+        }
     }
 
-    # Clean up container
-    docker rm $containerName 2>&1 | Out-Null
+    # A failed copy leaves the container in place so the build tree stays recoverable
+    if ($copyExitCode -eq 0) {
+        docker rm $containerName 2>&1 | Out-Null
+    }
     Pop-Location
 
     $buildTime = (Get-Date) - $startTime
 
     return @{
-        Success = ($buildExitCode -eq 0)
+        Success = ($buildExitCode -eq 0 -and $copyExitCode -eq 0)
         BuildTime = $buildTime
-        ExitCode = $buildExitCode
+        ExitCode = if ($buildExitCode -ne 0) { $buildExitCode } else { $copyExitCode }
         ContainerName = $containerName
     }
 }

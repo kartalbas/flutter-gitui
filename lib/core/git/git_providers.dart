@@ -271,7 +271,9 @@ final localBranchesProvider = FutureProvider<List<GitBranch>>((ref) async {
     success: (branches) => branches,
     failure: (msg, error, stackTrace) {
       Logger.error('Failed to get local branches: $msg', error);
-      return []; // Provider yields empty list to indicate error state
+      // Surface the failure so the AsyncValue enters its error state; an empty
+      // list renders as 'No local branches' while every git call fails.
+      throw Exception(msg);
     },
   );
 });
@@ -286,7 +288,9 @@ final remoteBranchesProvider = FutureProvider<List<GitBranch>>((ref) async {
     success: (branches) => branches,
     failure: (msg, error, stackTrace) {
       Logger.error('Failed to get remote branches: $msg', error);
-      return []; // Provider yields empty list to indicate error state
+      // Surface the failure so the AsyncValue enters its error state; an empty
+      // list renders as 'No remote branches' while every git call fails.
+      throw Exception(msg);
     },
   );
 });
@@ -355,12 +359,16 @@ final tagsProvider = FutureProvider<List<GitTag>>((ref) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
-  try {
-    final result = await gitService.getTags();
-    return result.unwrapOr([]);
-  } catch (e) {
-    return [];
-  }
+  final result = await gitService.getTags();
+  return result.when(
+    success: (tags) => tags,
+    failure: (msg, error, stackTrace) {
+      Logger.error('Failed to get tags: $msg', error);
+      // Surface the failure so the AsyncValue enters its error state; an empty
+      // list renders as 'No Tags' while every git call fails.
+      throw Exception(msg);
+    },
+  );
 });
 
 /// Tag count provider

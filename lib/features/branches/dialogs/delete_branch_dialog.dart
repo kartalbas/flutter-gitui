@@ -5,6 +5,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/models/branch.dart';
 
 /// Result from delete branch dialog
@@ -15,7 +16,7 @@ enum DeleteBranchResult {
 }
 
 /// Dialog to confirm deleting a branch
-class DeleteBranchDialog extends StatelessWidget {
+class DeleteBranchDialog extends StatefulWidget {
   final GitBranch branch;
 
   const DeleteBranchDialog({
@@ -24,8 +25,19 @@ class DeleteBranchDialog extends StatelessWidget {
   });
 
   @override
+  State<DeleteBranchDialog> createState() => _DeleteBranchDialogState();
+}
+
+class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
+  // Force delete (git branch -D) discards unmerged commits, recoverable only
+  // via reflog, so it stays behind an explicit opt-in instead of sitting next
+  // to the safe delete as an equally reachable one-click action.
+  bool _force = false;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final branch = widget.branch;
 
     // Don't allow deleting protected branches
     if (branch.isProtected) {
@@ -70,8 +82,28 @@ class DeleteBranchDialog extends StatelessWidget {
       title: l10n.deleteBranchDialog,
       icon: PhosphorIconsRegular.warning,
       variant: DialogVariant.destructive,
-      content: BodyMediumLabel(
-        l10n.deleteBranchConfirm(branch.shortName),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BodyMediumLabel(
+            l10n.deleteBranchConfirm(branch.shortName),
+          ),
+          const SizedBox(height: AppTheme.paddingS),
+          CheckboxListTile(
+            value: _force,
+            onChanged: (value) => setState(() => _force = value ?? false),
+            title: BodyMediumLabel(l10n.forceDelete),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+          ),
+          if (_force)
+            BodySmallLabel(
+              l10n.forceDeleteWarning,
+              color: Theme.of(context).colorScheme.error,
+            ),
+        ],
       ),
       actions: [
         BaseButton(
@@ -80,16 +112,10 @@ class DeleteBranchDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(DeleteBranchResult.cancel),
         ),
         BaseButton(
-          label: l10n.delete,
+          label: _force ? l10n.forceDelete : l10n.delete,
           variant: ButtonVariant.danger,
-          onPressed: () => Navigator.of(context).pop(DeleteBranchResult.delete),
-        ),
-        Tooltip(
-          message: l10n.forceDeleteWarning,
-          child: BaseButton(
-            label: l10n.forceDelete,
-            variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(DeleteBranchResult.forceDelete),
+          onPressed: () => Navigator.of(context).pop(
+            _force ? DeleteBranchResult.forceDelete : DeleteBranchResult.delete,
           ),
         ),
       ],

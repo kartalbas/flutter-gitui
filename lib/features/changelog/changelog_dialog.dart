@@ -30,6 +30,9 @@ class ChangelogDialog extends HookConsumerWidget {
     // Load the current value of disable_whats_new_dialog from config
     useEffect(() {
       versionService.isWhatsNewDialogDisabled().then((isDisabled) {
+        // The dialog can be dismissed before the config read returns; the hook
+        // notifiers are disposed with it and must not be written afterwards
+        if (!context.mounted) return;
         // The load is async, so the user may already have ticked the checkbox;
         // adopt the persisted value only while it is still untouched
         if (dontShowAgain.value == initialDontShowAgain.value) {

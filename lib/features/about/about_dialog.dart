@@ -17,7 +17,11 @@ class AppAboutDialog extends HookConsumerWidget {
     final version = useState<String>('...');
 
     useEffect(() {
-      versionService.getCurrentVersion().then((v) => version.value = v);
+      versionService.getCurrentVersion().then((v) {
+        // The dialog can be closed before the version resolves; the hook
+        // notifier is disposed with it and must not be written afterwards
+        if (context.mounted) version.value = v;
+      });
       return null;
     }, []);
 

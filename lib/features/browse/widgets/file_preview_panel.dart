@@ -315,21 +315,24 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
   Widget _buildTextPreview() {
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerLowest,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Line numbers
-          Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              border: Border(
-                right: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
+      child: SingleChildScrollView(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Line numbers
+            Container(
+              padding: const EdgeInsets.all(AppTheme.paddingM),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                border: Border(
+                  right: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                 ),
               ),
-            ),
-            child: SingleChildScrollView(
+              // Gutter and content scroll together through the single outer
+              // scroll view, so a number always stays next to the line it
+              // labels.
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(
@@ -341,38 +344,38 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                 ),
               ),
             ),
-          ),
 
-          // Content
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth,
-                    ),
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppTheme.paddingM),
-                      child: SelectableText(
-                        _content,
-                        style: GoogleFonts.getFont(
-                          ref.watch(previewFontFamilyProvider),
-                          textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.2,
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * _getFontSizeScale(ref.watch(previewFontSizeProvider)),
+            // Content
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: constraints.maxWidth,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppTheme.paddingM),
+                        child: SelectableText(
+                          _content,
+                          style: GoogleFonts.getFont(
+                            ref.watch(previewFontFamilyProvider),
+                            textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.2,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontSize: (Theme.of(context).textTheme.bodyMedium?.fontSize ?? 14) * _getFontSizeScale(ref.watch(previewFontSizeProvider)),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

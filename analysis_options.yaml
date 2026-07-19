@@ -26,8 +26,12 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # A desktop session stays open for hours and switches repositories
+    # repeatedly, so a subscription or sink that outlives its widget keeps
+    # reacting to a repository the user already left. Neither leak is visible
+    # at runtime, which is why they are caught statically instead.
+    - cancel_subscriptions
+    - close_sinks
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

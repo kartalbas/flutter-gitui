@@ -102,6 +102,17 @@ class RepositoryStatusNotifier extends StateNotifier<Map<String, RepositoryStatu
     Logger.info('Analyzed ${repositories.length} repositories in ${stopwatch.elapsedMilliseconds}ms');
   }
 
+  /// Drop the cached status of a repository that left the workspace, so the
+  /// stale entry no longer feeds the workspace-wide counters below.
+  void removeStatus(String path) {
+    if (!state.containsKey(path)) {
+      return;
+    }
+    final newState = Map<String, RepositoryStatus>.from(state);
+    newState.remove(path);
+    state = newState;
+  }
+
   /// Get status for a specific repository path
   RepositoryStatus getStatus(String path) {
     return state[path] ?? RepositoryStatus.unknown;

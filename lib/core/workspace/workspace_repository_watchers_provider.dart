@@ -101,7 +101,9 @@ final workspaceRepositoryWatchersProvider =
 
   // Listen for workspace changes and update watchers accordingly
   ref.listen(workspaceProvider, (previous, next) async {
-    if (previous == null || next.isEmpty) return;
+    // An empty `next` is the "last repository removed" transition and must still
+    // be processed, otherwise every running watcher leaks for the session.
+    if (previous == null) return;
 
     final previousPaths = previous.map((r) => r.path).toSet();
     final nextPaths = next.map((r) => r.path).toSet();
@@ -119,6 +121,7 @@ final workspaceRepositoryWatchersProvider =
     // Remove watchers for deleted repositories
     for (final path in removed) {
       await notifier.removeWatcher(path);
+      ref.read(workspaceRepositoryStatusProvider.notifier).removeStatus(path);
     }
   });
 

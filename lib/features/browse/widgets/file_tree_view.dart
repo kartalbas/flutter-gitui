@@ -720,10 +720,13 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
     try {
       Logger.info('Opening file in editor: $filePath with editor: $editor');
-      await EditorLauncherService.launch(
+      // launch() reports failures via Result and never throws; unwrap so
+      // they reach the catch below and the error notification is shown.
+      final result = await EditorLauncherService.launch(
         editorPath: editor,
         targetPath: filePath,
       );
+      result.unwrap();
     } catch (e) {
       Logger.error('Error opening editor: $editor with file: $filePath', e);
       if (mounted) {

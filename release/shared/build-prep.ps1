@@ -20,7 +20,10 @@ param(
 )
 
 function Clear-PreviousBuilds {
-    param([string]$ProjectRoot)
+    param(
+        [string]$ProjectRoot,
+        [string]$Platform
+    )
 
     Write-Host "  Cleaning previous builds..." -ForegroundColor Gray
 
@@ -31,7 +34,12 @@ function Clear-PreviousBuilds {
     }
 
     Push-Location $ProjectRoot
-    flutter config --enable-windows-desktop 2>&1 | Out-Null
+    $desktopFlag = switch ($Platform) {
+        'linux' { '--enable-linux-desktop' }
+        'macos' { '--enable-macos-desktop' }
+        default { '--enable-windows-desktop' }
+    }
+    flutter config $desktopFlag 2>&1 | Out-Null
     flutter clean 2>&1 | Out-Null
     Pop-Location
 
@@ -57,7 +65,10 @@ function New-ReleaseStructure {
 }
 
 function Initialize-FlutterDependencies {
-    param([string]$ProjectRoot)
+    param(
+        [string]$ProjectRoot,
+        [string]$Platform
+    )
 
     Write-Host "  Resolving Flutter dependencies..." -ForegroundColor Gray
 
@@ -66,8 +77,10 @@ function Initialize-FlutterDependencies {
     # CRITICAL: Remove plugin symlinks directory manually
     # Git Bash can create Unix-style symlinks (/c/Users/...) that Windows CMake can't follow
     # We need to delete the entire directory and let PowerShell's flutter create fresh ones
+    # Only a Windows build consumes this directory, so other targets must not be gated on it
+    $isWindowsBuild = $Platform -eq 'windows'
     $pluginSymlinksPath = "windows/flutter/ephemeral/.plugin_symlinks"
-    if (Test-Path $pluginSymlinksPath) {
+    if ($isWindowsBuild -and (Test-Path $pluginSymlinksPath)) {
         Write-Host "    Removing old plugin symlinks directory..." -ForegroundColor Gray
         Remove-Item -Recurse -Force $pluginSymlinksPath -ErrorAction SilentlyContinue
     }
@@ -91,7 +104,9 @@ function Initialize-FlutterDependencies {
     Start-Sleep -Milliseconds 500
 
     # Verify plugin symlinks were created and are valid
-    if (Test-Path $pluginSymlinksPath) {
+    if (-not $isWindowsBuild) {
+        Write-Host "    Skipping Windows plugin symlink verification for $Platform" -ForegroundColor Gray
+    } elseif (Test-Path $pluginSymlinksPath) {
         $symlinkCount = (Get-ChildItem $pluginSymlinksPath -ErrorAction SilentlyContinue).Count
         Write-Host "    Plugin symlinks: $symlinkCount plugins created" -ForegroundColor Gray
 
@@ -123,9 +138,9 @@ function Initialize-FlutterDependencies {
 Write-Host "Preparing build environment..." -ForegroundColor Yellow
 
 try {
-    Clear-PreviousBuilds -ProjectRoot $ProjectRoot
+    Clear-PreviousBuilds -ProjectRoot $ProjectRoot -Platform $Platform
     New-ReleaseStructure -ReleaseDir $ReleaseDir -Platform $Platform
-    Initialize-FlutterDependencies -ProjectRoot $ProjectRoot
+    Initialize-FlutterDependencies -ProjectRoot $ProjectRoot -Platform $Platform
 
     Write-Host "[OK] Build preparation complete for $Platform" -ForegroundColor Green
 

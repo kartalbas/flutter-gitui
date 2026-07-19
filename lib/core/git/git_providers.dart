@@ -199,7 +199,10 @@ final commitHistoryLimitProvider = FutureProvider.family<List<GitCommit>, int>((
 });
 
 /// File history provider
-final fileHistoryProvider = FutureProvider.family<List<GitCommit>, String>((ref, filePath) async {
+///
+/// Auto-disposed: one element per viewed path would otherwise be retained for
+/// the container's lifetime and re-run against every later repository switch.
+final fileHistoryProvider = FutureProvider.autoDispose.family<List<GitCommit>, String>((ref, filePath) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 
@@ -221,7 +224,11 @@ final fileHistoryProvider = FutureProvider.family<List<GitCommit>, String>((ref,
 ///
 /// Parameters:
 /// - [filePath]: Path to the file relative to repository root
-final fileBlameProvider = FutureProvider.family<FileBlame?, String>((ref, filePath) async {
+///
+/// Auto-disposed: a full-file blame payload per viewed path would otherwise be
+/// retained for the container's lifetime and re-run against every later
+/// repository switch.
+final fileBlameProvider = FutureProvider.autoDispose.family<FileBlame?, String>((ref, filePath) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return null;
 
@@ -1425,7 +1432,11 @@ final isRebaseActiveProvider = Provider<bool>((ref) {
 final selectedCommitHashProvider = StateProvider<String?>((ref) => null);
 
 /// Provider for changed files in a specific commit
-final commitChangedFilesProvider = FutureProvider.family<List<FileChange>, String>((ref, commitHash) async {
+///
+/// Auto-disposed: one element per clicked commit would otherwise be retained
+/// for the container's lifetime and re-run against every later repository
+/// switch.
+final commitChangedFilesProvider = FutureProvider.autoDispose.family<List<FileChange>, String>((ref, commitHash) async {
   final gitService = ref.watch(gitServiceProvider);
   if (gitService == null) return [];
 

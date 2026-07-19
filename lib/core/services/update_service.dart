@@ -433,7 +433,10 @@ class UpdateService {
         // single-quoted PowerShell strings early; doubling them keeps each
         // path one literal.
         final psZipFilePath = zipFilePath.replaceAll("'", "''");
-        final psAppDir = appDir.replaceAll("'", "''");
+        // The archive is laid out relative to the root, so a universal build
+        // must extract into rootDir; extracting into windows/ would nest a
+        // second windows/ inside it and leave the real files untouched.
+        final psRootDir = rootDir.replaceAll("'", "''");
         final updateScript = '''
 @echo off
 echo =========================================
@@ -444,7 +447,7 @@ echo Waiting for application to close...
 timeout /t 3 /nobreak >nul
 
 echo Extracting update...
-powershell -Command "Expand-Archive -Path '$psZipFilePath' -DestinationPath '$psAppDir' -Force"
+powershell -Command "Expand-Archive -Path '$psZipFilePath' -DestinationPath '$psRootDir' -Force"
 if errorlevel 1 (
   echo ERROR: Failed to extract update!
   pause
@@ -550,6 +553,9 @@ del "%~f0"
         Logger.info('Updater not found, using fallback shell script');
 
         final updateScriptPath = path.join(appDir, '_update.sh');
+        // The archive is laid out relative to the root, so a universal build
+        // must extract into rootDir; extracting into linux/ would nest a
+        // second linux/ inside it and leave the real files untouched.
         final updateScript = '''
 #!/bin/bash
 echo "========================================="
@@ -560,7 +566,7 @@ echo "Waiting for application to close..."
 sleep 3
 
 echo "Extracting update..."
-unzip -o "$zipFilePath" -d "$appDir"
+unzip -o "$zipFilePath" -d "$rootDir"
 if [ \$? -ne 0 ]; then
   echo "ERROR: Failed to extract update!"
   read -p "Press Enter to exit..."
@@ -568,8 +574,8 @@ if [ \$? -ne 0 ]; then
 fi
 
 echo "Setting permissions..."
-chmod +x "$appDir/flutter-gitui"
-chmod +x "$appDir/linux/flutter_gitui"
+chmod +x "$rootDir/flutter-gitui"
+chmod +x "$rootDir/linux/flutter_gitui"
 
 echo "Cleaning up..."
 rm "$zipFilePath" 2>/dev/null

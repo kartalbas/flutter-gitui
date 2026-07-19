@@ -656,6 +656,12 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
   /// Generate a synthetic diff for untracked files showing all content as additions
   String _generateSyntheticDiff(String filePath, String content) {
     final lines = content.split('\n');
+    // A file ending in a newline yields a trailing empty element that is not a
+    // real line; keeping it would inflate the hunk count by one and render a
+    // phantom added line.
+    if (lines.length > 1 && lines.last.isEmpty) {
+      lines.removeLast();
+    }
     final buffer = StringBuffer();
 
     // Add diff header

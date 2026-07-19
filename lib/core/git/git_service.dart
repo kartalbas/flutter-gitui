@@ -648,12 +648,16 @@ class GitService {
       }
 
       // Add search filters
+      //
+      // These carry user text, so they are quoted like every other argument
+      // built here. Interpolated raw, a quote in the value produced a
+      // malformed command whose failure surfaced as an empty result list.
       if (grepMessage != null && grepMessage.isNotEmpty) {
-        args.write(' --grep="$grepMessage"');
+        args.write(' --grep=${_quoteArg(grepMessage)}');
       }
 
       if (author != null && author.isNotEmpty) {
-        args.write(' --author="$author"');
+        args.write(' --author=${_quoteArg(author)}');
       }
 
       if (since != null && since.isNotEmpty) {
@@ -670,12 +674,12 @@ class GitService {
 
       // Add branch
       if (branch != null) {
-        args.write(' "$branch"');
+        args.write(' ${_quoteArg(branch)}');
       }
 
       // Add file path
       if (filePath != null) {
-        args.write(' -- "$filePath"');
+        args.write(' -- ${_quoteArg(filePath)}');
       }
 
       final result = await _execute(args.toString(), throwOnError: false);

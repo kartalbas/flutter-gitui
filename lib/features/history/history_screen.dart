@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +12,7 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_filter_chip.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_diff_viewer.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/git_service.dart';
 import '../../core/config/config_providers.dart';
@@ -46,12 +49,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final _selectionManager = MultiSelectManager<String>();
   final _scrollController = ScrollController();
   bool _fabIsExpanded = false;
+  Timer? _searchDebounce;
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _applySearch(String query) {
+    final notifier = ref.read(historySearchFilterProvider.notifier);
+    if (query.isEmpty) {
+      notifier.state = const HistorySearchFilter.empty();
+    } else {
+      final searchService = ref.read(historySearchServiceProvider);
+      notifier.state = searchService.parseQuery(query);
+    }
   }
 
   void _collapseFAB() {
@@ -203,25 +218,21 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           showClearButton: _searchController.text.isNotEmpty,
                           onChanged: (query) {
                             setState(() {}); // Update suffix icon
+                            // Every filter change re-runs
+                            // filteredCommitsProvider, which shells out to a
+                            // `git log -n 1000`; unthrottled, each keystroke
+                            // started its own git process on large repos.
+                            _searchDebounce?.cancel();
                             if (query.isEmpty) {
-                              ref
-                                      .read(
-                                        historySearchFilterProvider.notifier,
-                                      )
-                                      .state =
-                                  const HistorySearchFilter.empty();
+                              // Clearing restores the full history at once.
+                              _applySearch(query);
                             } else {
-                              // Parse and apply search
-                              final searchService = ref.read(
-                                historySearchServiceProvider,
+                              _searchDebounce = Timer(
+                                AppConstants.debounceMilliseconds,
+                                () {
+                                  if (mounted) _applySearch(query);
+                                },
                               );
-                              final filter = searchService.parseQuery(query);
-                              ref
-                                      .read(
-                                        historySearchFilterProvider.notifier,
-                                      )
-                                      .state =
-                                  filter;
                             }
                           },
                         ),

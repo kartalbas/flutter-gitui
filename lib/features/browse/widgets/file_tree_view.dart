@@ -293,12 +293,17 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   /// Expand all directories in the tree
   Future<void> expandAll() async {
     await _expandAllNodes(_rootNodes);
+    // The controller caches its flattened list and only rebuilds it in
+    // updateNodes and the toggle methods. Without this the chevrons flipped
+    // but the visible rows never changed.
+    _treeController.updateNodes(_rootNodes);
     setState(() {});
   }
 
   /// Collapse all directories in the tree
   void collapseAll() {
     _collapseAllNodes(_rootNodes);
+    _treeController.updateNodes(_rootNodes);
     setState(() {});
   }
 

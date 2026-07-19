@@ -154,8 +154,8 @@ function Copy-WindowsArtifacts {
     $windowsBuildPath = Join-Path $ProjectRoot "build/windows/x64/runner/Release"
 
     # Copy main binaries
-    Copy-Item "$windowsBuildPath/*.exe" $ReleaseDir -Force
-    Copy-Item "$windowsBuildPath/*.dll" $ReleaseDir -Force
+    Copy-Item "$windowsBuildPath/*.exe" $ReleaseDir -Force -ErrorAction Stop
+    Copy-Item "$windowsBuildPath/*.dll" $ReleaseDir -Force -ErrorAction Stop
 
     # Copy updater.exe if it was compiled successfully
     if ($UpdaterPath -and (Test-Path $UpdaterPath)) {
@@ -164,7 +164,21 @@ function Copy-WindowsArtifacts {
     }
 
     Write-Host "  [Windows] Copying data files..." -ForegroundColor Gray
-    Copy-Item "$windowsBuildPath/data" "$ReleaseDir/" -Recurse -Force
+    Copy-Item "$windowsBuildPath/data" "$ReleaseDir/" -Recurse -Force -ErrorAction Stop
+
+    # A copy that silently failed (antivirus or a running instance holding a
+    # lock) must not reach the archive step: data/ alone clears the 1MB size
+    # guard, so an exe-less zip would ship to auto-update and winget clients.
+    $exePath = Join-Path $ReleaseDir "flutter_gitui.exe"
+    if (-not (Test-Path $exePath)) {
+        throw "flutter_gitui.exe missing from release directory: $exePath"
+    }
+    if (-not (Get-ChildItem "$ReleaseDir/*.dll" -ErrorAction SilentlyContinue)) {
+        throw "No DLLs copied to release directory: $ReleaseDir"
+    }
+    if (-not (Test-Path (Join-Path $ReleaseDir "data/icudtl.dat"))) {
+        throw "Flutter data files missing from release directory: $ReleaseDir/data"
+    }
 
     $windowsSize = (Get-ChildItem "$ReleaseDir" -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
 

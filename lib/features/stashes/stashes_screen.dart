@@ -156,17 +156,27 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
       final stashAllFiles = result['stashAllFiles'] as bool;
       final selectedFiles = result['selectedFiles'] as List<String>;
 
-      await ref.read(gitActionsProvider).createStash(
-        message: message.isEmpty ? null : message,
-        includeUntracked: includeUntracked,
-        keepIndex: keepIndex,
-        files: stashAllFiles ? null : selectedFiles,
-      );
-
-      if (context.mounted) {
-        context.showSuccessIfMounted(
-          AppLocalizations.of(context)!.stashCreatedSuccess,
+      try {
+        await ref.read(gitActionsProvider).createStash(
+          message: message.isEmpty ? null : message,
+          includeUntracked: includeUntracked,
+          keepIndex: keepIndex,
+          files: stashAllFiles ? null : selectedFiles,
         );
+
+        if (context.mounted) {
+          context.showSuccessIfMounted(
+            AppLocalizations.of(context)!.stashCreatedSuccess,
+          );
+        }
+      } catch (e) {
+        // Staying silent on a failed stash lets the user discard a working
+        // tree whose changes were never saved.
+        if (context.mounted) {
+          context.showErrorIfMounted(
+            AppLocalizations.of(context)!.createStashError(e.toString()),
+          );
+        }
       }
     }
   }
@@ -178,11 +188,19 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
     );
 
     if (confirmed == true && context.mounted) {
-      await ref.read(gitActionsProvider).clearStashes();
-      if (context.mounted) {
-        context.showSuccessIfMounted(
-          AppLocalizations.of(context)!.allStashesClearedSuccess,
-        );
+      try {
+        await ref.read(gitActionsProvider).clearStashes();
+        if (context.mounted) {
+          context.showSuccessIfMounted(
+            AppLocalizations.of(context)!.allStashesClearedSuccess,
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          context.showErrorIfMounted(
+            AppLocalizations.of(context)!.clearStashesError(e.toString()),
+          );
+        }
       }
     }
   }

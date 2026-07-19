@@ -220,6 +220,11 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
           variant: ButtonVariant.primary,
           leadingIcon: PhosphorIconsRegular.arrowSquareOut,
           onPressed: () async {
+            // Launching the external tool outlives the route's exit
+            // transition, so the messenger is captured while the dialog
+            // context is still mounted; afterwards the guard would be false
+            // and the failure would go unreported.
+            final messenger = ScaffoldMessenger.of(context);
             Navigator.of(context).pop();
             // Open in external tool
             try {
@@ -229,11 +234,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
                 await ref.read(diffActionsProvider).diffUnstagedFile(widget.filePath!);
               }
             } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.snackbarFailedToOpenExternalTool(e.toString()))),
-                );
-              }
+              messenger.showSnackBar(
+                SnackBar(content: Text(l10n.snackbarFailedToOpenExternalTool(e.toString()))),
+              );
             }
           },
         ),

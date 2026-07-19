@@ -365,6 +365,25 @@ class GitService {
     });
   }
 
+  /// Get the repository-relative paths git ignores
+  ///
+  /// `--directory` collapses a wholly ignored directory into a single entry
+  /// with a trailing slash, so a caller filtering a tree never has to descend
+  /// into it. `-z` is required rather than cosmetic: the default output escapes
+  /// non-ASCII paths and wraps them in quotes, and such a path matches nothing.
+  ///
+  /// Returns [Result.Success] with the ignored paths on success.
+  /// Returns [Result.Failure] if git command fails.
+  Future<Result<List<String>>> getIgnoredPaths() async {
+    return runCatchingAsync(() async {
+      final result = await _execute(
+        'ls-files --others --ignored --exclude-standard --directory -z',
+      );
+      final output = result.stdout.toString();
+      return output.split(' ').where((s) => s.isNotEmpty).toList();
+    });
+  }
+
   // ============================================
   // Staging Operations
   // ============================================

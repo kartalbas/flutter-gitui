@@ -91,6 +91,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   String _lastSearchQuery = ''; // Track search query changes
   SearchMode _lastSearchMode = SearchMode.simple; // Track search mode changes
   Timer? _searchDebounce; // Debounce timer for search
+  Set<String> _ignoredPaths = {}; // Repository-relative paths git ignores
 
   // Provider notifiers saved for safe dispose
   late final StateController<List<FileTreeNode>> _treeNodesNotifier;
@@ -136,6 +137,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       final cachedNodes = ref.read(_browseTreeNodesProvider);
       if (cachedNodes.isNotEmpty) {
         _rootNodes = cachedNodes;
+
+        // The cached nodes were filtered when they were built, but this branch
+        // skips _loadFileTree, and expanding a directory later rebuilds its
+        // children and needs the ignore list just the same.
+        unawaited(_loadIgnoredPaths());
 
         // Apply latest statuses to cached nodes (status may have changed while in other view)
         final statusAsync = ref.read(repositoryStatusProvider);
@@ -340,6 +346,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     setState(() => _isLoading = true);
 
     try {
+      await _loadIgnoredPaths();
+      if (!mounted) return;
+
       final dir = Directory(widget.repositoryPath);
       final nodes = await _buildTreeNodes(dir.path, isRoot: true);
 
@@ -369,6 +378,48 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     }
   }
 
+  /// Refresh the set of repository-relative paths git ignores
+  ///
+  /// Loaded once per tree build rather than per node: asking git about every
+  /// entry would mean one process launch for each row in the tree.
+  Future<void> _loadIgnoredPaths() async {
+    if (widget.showIgnored) {
+      _ignoredPaths = {};
+      return;
+    }
+
+    final gitService = ref.read(gitServiceProvider);
+    if (gitService == null) {
+      _ignoredPaths = {};
+      return;
+    }
+
+    try {
+      final paths = await gitService.getIgnoredPaths().then((result) => result.unwrap());
+      // Directory entries arrive with a trailing slash; strip it so they compare
+      // equal to the relative path built from a FileSystemEntity.
+      _ignoredPaths = paths
+          .map((path) => path.endsWith('/') ? path.substring(0, path.length - 1) : path)
+          .toSet();
+    } catch (e) {
+      // Listing an ignored file is a far smaller failure than an empty tree.
+      Logger.error('Error loading ignored paths', e);
+      _ignoredPaths = {};
+    }
+  }
+
+  /// Whether [fullPath] is one of the ignored paths loaded for this tree
+  ///
+  /// Matching the entry itself is enough: git collapses a wholly ignored
+  /// directory into one entry, and that directory is filtered out here before
+  /// it can ever be expanded, so its children are never reached.
+  bool _isIgnored(String fullPath) {
+    if (_ignoredPaths.isEmpty) return false;
+    // git uses forward slashes, Windows uses backslashes
+    final relativePath = p.relative(fullPath, from: widget.repositoryPath).replaceAll('\\', '/');
+    return _ignoredPaths.contains(relativePath);
+  }
+
   Future<List<FileTreeNode>> _buildTreeNodes(String dirPath, {bool isRoot = false}) async {
     final dir = Directory(dirPath);
     final nodes = <FileTreeNode>[];
@@ -395,6 +446,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
         // Skip hidden files if not shown
         if (!widget.showHidden && name.startsWith('.')) continue;
+
+        // Skip git-ignored entries if not shown
+        if (!widget.showIgnored && _isIgnored(entity.path)) continue;
 
         final isDirectory = entity is Directory;
 

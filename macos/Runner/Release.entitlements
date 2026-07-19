@@ -2,7 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!--
+		App Sandbox is intentionally disabled.
+
+		This application is a front end for the git command line: every operation
+		spawns `git` with a working directory somewhere in the user's file system.
+		A sandboxed process passes its sandbox on to its children, so a sandboxed
+		`git` cannot read or write anything outside the app container, and the
+		Powerbox grant for a user-picked folder does not cover a child process
+		walking that directory tree. Repository paths are also restored from
+		configuration at launch, where no grant exists at all.
+
+		The app is therefore distributed with a Developer ID signature and
+		notarization rather than through the Mac App Store.
+	-->
 	<key>com.apple.security.app-sandbox</key>
+	<false/>
+	<!-- Update checks, downloads and network git remotes. -->
+	<key>com.apple.security.network.client</key>
 	<true/>
 </dict>
 </plist>

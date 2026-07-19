@@ -408,6 +408,23 @@ class GitService {
     });
   }
 
+  /// Quotes [value] for use as a single argument in a git command string.
+  ///
+  /// The shell layer splits the script it is given on newlines, so a newline
+  /// inside user text started an additional command. Escaping quotes alone was
+  /// not enough. Newlines are rejected outright: no git argument built here
+  /// legitimately contains one -- multi-line messages go through
+  /// [_withMessageFile] instead.
+  static String _quoteArg(String value) {
+    if (value.contains('\n') || value.contains('\r')) {
+      throw GitException(
+        'Line breaks are not allowed in this field.',
+        stderr: 'A newline in a git argument would be executed as a separate command.',
+      );
+    }
+    final escaped = value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+    return '"$escaped"';
+  }
   /// Writes [message] to a temporary file and hands its path to [action].
   ///
   /// A commit message is arbitrary user text. Embedding it in a command string
@@ -1012,7 +1029,7 @@ class GitService {
       }
 
       if (message != null && message.isNotEmpty) {
-        args.write(' -m "${message.replaceAll('"', '\\"')}"');
+        args.write(' -m ${_quoteArg(message)}');
       }
 
       args.write(' "$branchName"');
@@ -1264,7 +1281,7 @@ class GitService {
 
       if (message != null && message.isNotEmpty) {
         parts.add('-m');
-        parts.add('"${message.replaceAll('"', '\\"')}"');
+        parts.add(_quoteArg(message));
       }
 
       // Add specific files if provided
@@ -1489,7 +1506,7 @@ class GitService {
     return runCatchingAsync(() async {
       final parts = ['tag', '-a', '"$tagName"'];
       parts.add('-m');
-      parts.add('"${message.replaceAll('"', '\\"')}"');
+      parts.add(_quoteArg(message));
       if (commitHash != null) {
         parts.add('"$commitHash"');
       }
@@ -1924,7 +1941,7 @@ class GitService {
       parts.add('--no-edit');
     } else if (newMessage != null && newMessage.isNotEmpty) {
       parts.add('-m');
-      parts.add('"${newMessage.replaceAll('"', '\\"')}"');
+      parts.add(_quoteArg(newMessage));
     }
 
     await _execute(parts.join(' '));
@@ -1977,7 +1994,7 @@ class GitService {
 
       if (message != null && message.isNotEmpty) {
         parts.add('-m');
-        parts.add('"${message.replaceAll('"', '\\"')}"');
+        parts.add(_quoteArg(message));
       }
 
       parts.add(commitHash);

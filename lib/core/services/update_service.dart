@@ -444,13 +444,24 @@ echo Flutter GitUI Update
 echo =========================================
 echo.
 echo Waiting for application to close...
-timeout /t 3 /nobreak >nul
+rem timeout.exe needs a console stdin, which this detached script does not have,
+rem so it would abort instantly and let extraction race the still-running app.
+rem Poll the app PID like updater.exe does and sleep with ping instead.
+set _tries=0
+:waitloop
+tasklist /FI "PID eq $pid" /NH 2>nul | find "$pid" >nul
+if errorlevel 1 goto closed
+set /a _tries+=1
+if %_tries% geq 30 goto closed
+ping -n 2 127.0.0.1 >nul
+goto waitloop
+:closed
 
 echo Extracting update...
 powershell -Command "Expand-Archive -Path '$psZipFilePath' -DestinationPath '$psRootDir' -Force"
 if errorlevel 1 (
-  echo ERROR: Failed to extract update!
-  pause
+  rem No console is attached, so pause would linger forever in a hidden window.
+  echo ERROR: Failed to extract update!>>"%~dp0_update_error.log"
   exit /b 1
 )
 
@@ -462,7 +473,7 @@ start "" "$exePath"
 
 echo.
 echo Deleting update script...
-timeout /t 2 /nobreak >nul
+ping -n 3 127.0.0.1 >nul
 del "%~f0"
 ''';
 

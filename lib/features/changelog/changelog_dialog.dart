@@ -23,18 +23,36 @@ class ChangelogDialog extends HookConsumerWidget {
     final changelogAsync = ref.watch(changelogDataProvider);
     final currentIndex = useState(initialIndex);
     final dontShowAgain = useState(false);
-    final initialDontShowAgain = useState<bool?>(null); // Track initial state
+    final initialDontShowAgain = useState(false); // Track persisted state
     final screenSize = MediaQuery.of(context).size;
     final versionService = ref.watch(versionServiceProvider);
 
     // Load the current value of disable_whats_new_dialog from config
     useEffect(() {
       versionService.isWhatsNewDialogDisabled().then((isDisabled) {
-        dontShowAgain.value = isDisabled;
-        initialDontShowAgain.value = isDisabled; // Save initial state
+        // The load is async, so the user may already have ticked the checkbox;
+        // adopt the persisted value only while it is still untouched
+        if (dontShowAgain.value == initialDontShowAgain.value) {
+          dontShowAgain.value = isDisabled;
+        }
+        initialDontShowAgain.value = isDisabled; // Save persisted state
       });
       return null;
     }, []);
+
+    // Every close path has to persist the checkbox, not just the Close button
+    Future<void> closeDialog(BuildContext dialogContext) async {
+      if (dontShowAgain.value != initialDontShowAgain.value) {
+        if (dontShowAgain.value) {
+          await versionService.disableWhatsNewDialog();
+        } else {
+          await versionService.enableWhatsNewDialog();
+        }
+      }
+      if (dialogContext.mounted) {
+        Navigator.of(dialogContext).pop();
+      }
+    }
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -127,7 +145,7 @@ class ChangelogDialog extends HookConsumerWidget {
                       TitleLargeLabel('Release History'),
                       const Spacer(),
                       BaseIconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => closeDialog(context),
                         icon: Icons.close,
                         tooltip: 'Close',
                       ),
@@ -323,21 +341,7 @@ class ChangelogDialog extends HookConsumerWidget {
                           BaseButton(
                             label: 'Close',
                             variant: ButtonVariant.primary,
-                            onPressed: () async {
-                              // Save preference if it changed
-                              if (initialDontShowAgain.value != null &&
-                                  dontShowAgain.value != initialDontShowAgain.value) {
-                                final versionService = ref.read(versionServiceProvider);
-                                if (dontShowAgain.value) {
-                                  await versionService.disableWhatsNewDialog();
-                                } else {
-                                  await versionService.enableWhatsNewDialog();
-                                }
-                              }
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            },
+                            onPressed: () => closeDialog(context),
                           ),
                         ],
                       ),
@@ -365,6 +369,7 @@ class ChangelogDialog extends HookConsumerWidget {
   static Future<void> show(BuildContext context, {int initialIndex = 0}) async {
     await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (_) => ChangelogDialog(initialIndex: initialIndex),
     );
   }

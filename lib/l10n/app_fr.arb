@@ -1327,15 +1327,12 @@
   "branchNameCannotBeEmpty": "Le nom de la branche ne peut pas être vide",
   "branchNameInvalidCharacters": "Le nom de la branche contient des caractères invalides",
   "customPrefixMustEndWithSlash": "Le préfixe personnalisé doit se terminer par /",
-  "willCreateInRepositories": "Créera dans les dépôts suivants:",
+  "willCreateInRepositories": "Créera dans {count, plural, =1{{count} dépôt} other{{count} dépôts}}:",
   "@willCreateInRepositories": {
     "description": "Label showing how many repositories will get the branch",
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "repositoryLabel": {
-        "type": "String"
       }
     }
   },

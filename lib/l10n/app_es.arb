@@ -1327,15 +1327,12 @@
   "branchNameCannotBeEmpty": "El nombre de rama no puede estar vacío",
   "branchNameInvalidCharacters": "El nombre de rama contiene caracteres no válidos",
   "customPrefixMustEndWithSlash": "El prefijo personalizado debe terminar con /",
-  "willCreateInRepositories": "Se creará en {count} {repositoryLabel}:",
+  "willCreateInRepositories": "Se creará en {count, plural, =1{{count} repositorio} other{{count} repositorios}}:",
   "@willCreateInRepositories": {
     "description": "Label showing how many repositories will get the branch",
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "repositoryLabel": {
-        "type": "String"
       }
     }
   },

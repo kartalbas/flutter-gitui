@@ -476,7 +476,7 @@
   "branchNameCannotBeEmpty": "Il nome del branch non può essere vuoto",
   "branchNameInvalidCharacters": "Il nome del branch contiene caratteri non validi",
   "customPrefixMustEndWithSlash": "Il prefisso personalizzato deve terminare con /",
-  "willCreateInRepositories": "Verrà creato in {count} {repositoryLabel}:",
+  "willCreateInRepositories": "Verrà creato in {count, plural, =1{{count} repository} other{{count} repository}}:",
   "repository": "repository",
   "setUpstreamLabel": "Imposta upstream (push -u origin)",
   "setUpstreamDescription": "Pusha il branch e imposta il tracciamento remoto",

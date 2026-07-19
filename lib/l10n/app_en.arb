@@ -1369,15 +1369,12 @@
   "branchNameCannotBeEmpty": "Branch name cannot be empty",
   "branchNameInvalidCharacters": "Branch name contains invalid characters",
   "customPrefixMustEndWithSlash": "Custom prefix must end with /",
-  "willCreateInRepositories": "Will create in {count} {repositoryLabel}:",
+  "willCreateInRepositories": "Will create in {count, plural, =1{{count} repository} other{{count} repositories}}:",
   "@willCreateInRepositories": {
     "description": "Label showing how many repositories will get the branch",
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "repositoryLabel": {
-        "type": "String"
       }
     }
   },

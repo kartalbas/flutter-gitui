@@ -291,7 +291,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
 
             // Repository list
             TitleSmallLabel(
-              l10n.willCreateInRepositories(widget.repositories.length, widget.repositories.length == 1 ? l10n.repository : '${l10n.repository}ies'),
+              l10n.willCreateInRepositories(widget.repositories.length),
             ),
             const SizedBox(height: AppTheme.paddingS),
 

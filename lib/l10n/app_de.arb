@@ -1327,15 +1327,12 @@
   "branchNameCannotBeEmpty": "Branch-Name darf nicht leer sein",
   "branchNameInvalidCharacters": "Branch-Name enthält ungültige Zeichen",
   "customPrefixMustEndWithSlash": "Benutzerdefiniertes Präfix muss mit / enden",
-  "willCreateInRepositories": "Wird in {count} {repositoryLabel} erstellt:",
+  "willCreateInRepositories": "Wird in {count, plural, =1{{count} Repository} other{{count} Repositories}} erstellt:",
   "@willCreateInRepositories": {
     "description": "Label showing how many repositories will get the branch",
     "placeholders": {
       "count": {
         "type": "int"
-      },
-      "repositoryLabel": {
-        "type": "String"
       }
     }
   },

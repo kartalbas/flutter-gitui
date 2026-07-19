@@ -657,7 +657,7 @@
   "fullBranchNameLabel": "Tam Dal Adı",
   "enterBranchNameLabel": "Dal adı girin",
   "customPrefixMustEndWithSlash": "Özel ön ek '/' ile bitmelidir",
-  "willCreateInRepositories": "Şu depoda(larda) oluşturulacak:",
+  "willCreateInRepositories": "{count, plural, =1{{count} depoda} other{{count} depoda}} oluşturulacak:",
   "repository": "Depo",
   "setUpstreamLabel": "Upstream belirle",
   "setUpstreamDescription": "Uzak takip dalı oluştur",

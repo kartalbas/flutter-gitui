@@ -13,6 +13,10 @@ COPY . .
 # relative to the executable. Moving lib/ and data/ into a subdirectory
 # produced a bundle that could not start at all, so they stay siblings of the
 # executable here.
+#
+# The glibc check guards the snap's declared base: core22
+# (release/manifests/snap/snapcraft.yaml) ships glibc 2.35, so a bundle linked
+# against newer symbols would publish fine and then fail to start for the user.
 CMD ["sh", "-c", "flutter pub get && flutter build linux --release --verbose && \
      cd release/updater && dart pub get && dart compile exe updater.dart -o updater && cd ../.. && \
      cd build/linux/x64/release && \
@@ -21,4 +25,6 @@ CMD ["sh", "-c", "flutter pub get && flutter build linux --release --verbose && 
      mv universal/flutter_gitui universal/flutter-gitui && \
      if [ -f /app/release/updater/updater ]; then cp /app/release/updater/updater universal/updater && chmod +x universal/updater && echo 'Updater compiled and copied'; fi && \
      chmod +x universal/flutter-gitui && \
-     test -d universal/lib && test -d universal/data || { echo 'FATAL: bundle layout is missing lib/ or data/'; exit 1; }"]
+     test -d universal/lib && test -d universal/data || { echo 'FATAL: bundle layout is missing lib/ or data/'; exit 1; } && \
+     GLIBC_MAX=$(objdump -T universal/flutter-gitui universal/lib/*.so | grep -o 'GLIBC_[0-9][0-9.]*' | sed 's/GLIBC_//' | sort -V | tail -1) && \
+     { [ \"${GLIBC_MAX%%.*}\" -eq 2 ] && [ \"${GLIBC_MAX#*.}\" -le 35 ]; } || { echo \"FATAL: bundle requires glibc $GLIBC_MAX, above the core22 floor 2.35\"; exit 1; }"]

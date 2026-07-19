@@ -133,7 +133,8 @@ if ($snapFile) {
         exit 1
     }
 
-    return $destPath
+    # Falling through to the explicit exit keeps $LASTEXITCODE meaningful for
+    # callers; a bare return would leave the previous command's code in place.
     exit 0
 } else {
     Write-Host "[ERROR] Snap build failed" -ForegroundColor Red

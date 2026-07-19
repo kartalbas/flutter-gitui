@@ -101,3 +101,7 @@ if ($syncedCount -gt 0) {
 } else {
     Write-Host "[OK] All icons are up-to-date!" -ForegroundColor Green
 }
+
+# Callers gate the release on $LASTEXITCODE, which PowerShell leaves at the
+# previous command's value unless a script exits explicitly.
+exit 0

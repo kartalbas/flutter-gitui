@@ -341,6 +341,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     // Use batch operation for better performance and data safety
     // This validates all repos in parallel and writes to YAML only once
     final results = await ref.read(workspaceProvider.notifier).addRepositoriesBatch(paths);
+    if (!mounted) return;
 
     // Count results
     int addedCount = results.where((r) => r.success).length;
@@ -372,6 +373,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
         }
       }
     }
+
+    if (!mounted) return;
 
     // Trigger status analysis for all repositories (including newly added ones)
     // GUARD: Only trigger if config has finished loading
@@ -517,6 +520,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     if (result != null && context.mounted) {
       // Add to workspace
       final added = await ref.read(workspaceProvider.notifier).addRepository(result);
+      if (!context.mounted) return;
 
       if (added) {
         // Add to currently selected project
@@ -526,6 +530,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
             selectedProject.id,
             result.replaceAll('\\', '/'),
           );
+          if (!context.mounted) return;
         }
 
         // Trigger status analysis for the newly added repository
@@ -587,6 +592,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     if (confirmed == true) {
       // Remove repository from workspace
       await ref.read(workspaceProvider.notifier).removeRepository(repo.path);
+      if (!context.mounted) return;
 
       // A removed repository must not stay selected, otherwise multi-select mode
       // stays active with nothing visible selected
@@ -597,6 +603,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       for (final project in projects) {
         if (project.containsRepository(repo.path)) {
           await ref.read(projectProvider.notifier).removeRepositoryFromWorkspace(project.id, repo.path);
+          if (!context.mounted) return;
         }
       }
 
@@ -620,10 +627,12 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     // Run FULL repository analysis (like on startup)
     Logger.info('Running full repository status analysis...');
     await ref.read(workspaceRepositoryStatusProvider.notifier).refreshAll();
+    if (!mounted) return;
 
     // Now validate and remove any that failed analysis
     Logger.info('Checking for invalid repositories after analysis...');
     await ref.read(workspaceProvider.notifier).validateRepositories();
+    if (!mounted) return;
 
     // Get count after validation
     final remainingRepos = ref.read(workspaceProvider).length;
@@ -679,6 +688,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
       // Clear all repositories from workspace
       await ref.read(workspaceProvider.notifier).clearAll();
+      if (!context.mounted) return;
 
       // No repository is left to be selected
       ref.read(repositoryMultiSelectProvider.notifier).clearSelection();
@@ -689,6 +699,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
         for (final path in repoPaths) {
           if (project.containsRepository(path)) {
             await ref.read(projectProvider.notifier).removeRepositoryFromWorkspace(project.id, path);
+            if (!context.mounted) return;
           }
         }
       }

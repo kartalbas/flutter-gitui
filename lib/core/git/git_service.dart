@@ -2363,8 +2363,30 @@ class GitService {
     required String toCommit,
     required String newMessage,
   }) async {
-    // Use reset and commit to squash
-    // This is simpler than interactive rebase and works well for consecutive commits
+    // Squashing via `reset --soft <oldest>^` followed by a new commit rewinds
+    // from HEAD. That is only equivalent to squashing the selected range when
+    // the newest selected commit IS HEAD -- otherwise every commit between
+    // toCommit and HEAD is silently absorbed into the new commit as well.
+    // Refuse rather than destroy work the user did not select.
+    final headResult = await _execute('rev-parse HEAD', throwOnError: false);
+    if (headResult.exitCode != 0) {
+      throw Exception('Cannot squash: unable to resolve HEAD.');
+    }
+    final head = headResult.stdout.toString().trim();
+
+    final newestResult = await _execute('rev-parse $toCommit', throwOnError: false);
+    if (newestResult.exitCode != 0) {
+      throw Exception('Cannot squash: unable to resolve $toCommit.');
+    }
+    final newest = newestResult.stdout.toString().trim();
+
+    if (head.isEmpty || newest.isEmpty || head != newest) {
+      throw Exception(
+        'Cannot squash: the newest selected commit is not the current HEAD. '
+        'Squashing a range that does not end at HEAD would also absorb the '
+        'commits after it. Select a range ending at the latest commit.',
+      );
+    }
 
     // Step 1: Soft reset to the commit before the range (parent of oldest commit)
     final result = await _execute('rev-parse $fromCommit^', throwOnError: false);

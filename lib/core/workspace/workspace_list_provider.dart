@@ -18,14 +18,23 @@ final projectProvider = StateNotifierProvider<ProjectNotifier, List<Workspace>>(
 class ProjectNotifier extends StateNotifier<List<Workspace>> {
   final Ref ref;
   final _uuid = const Uuid();
-  bool _isSaving = false;
+  int _pendingSaves = 0;
 
   ProjectNotifier(this.ref) : super([]) {
     // Watch config provider so we reload when config changes
     ref.listen(configProvider, (previous, next) {
-      // Don't reload if we're the one who triggered the save
-      if (_isSaving) {
+      // A save that is still in flight publishes its own workspaces through
+      // this listener. Reloading then would resurrect the pre-save snapshot and
+      // discard the in-memory edit of a second operation started meanwhile.
+      if (_pendingSaves > 0) {
         Logger.debug('ProjectNotifier: Config changed due to our own save, ignoring');
+        return;
+      }
+      // The notification may also arrive after the save completed (chained
+      // provider updates), so compare content as well: when the config already
+      // describes our state there is nothing external to load.
+      if (_matchesState(next.workspace.workspaces)) {
+        Logger.debug('ProjectNotifier: Config already matches current workspaces, ignoring');
         return;
       }
       Logger.debug('ProjectNotifier: Config changed externally, reloading projects');
@@ -94,17 +103,41 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     );
   }
 
+  /// Whether the given config entries already describe the current in-memory
+  /// state, in which case reloading them would be a no-op.
+  bool _matchesState(List<WorkspaceConfigEntry> entries) {
+    if (entries.length != state.length) return false;
+    for (var i = 0; i < entries.length; i++) {
+      final entry = entries[i];
+      final current = _toWorkspaceConfigEntry(state[i]);
+      if (entry.id != current.id ||
+          entry.name != current.name ||
+          entry.description != current.description ||
+          entry.color != current.color ||
+          entry.icon != current.icon ||
+          entry.lastSelectedRepository != current.lastSelectedRepository ||
+          entry.createdAt != current.createdAt ||
+          entry.updatedAt != current.updatedAt ||
+          entry.repositoryPaths.length != current.repositoryPaths.length) {
+        return false;
+      }
+      for (var j = 0; j < entry.repositoryPaths.length; j++) {
+        if (entry.repositoryPaths[j] != current.repositoryPaths[j]) return false;
+      }
+    }
+    return true;
+  }
+
   /// Save workspaces to YAML config using the SINGLE config provider
   Future<void> _saveProjects() async {
-    _isSaving = true;
+    _pendingSaves++;
     try {
       final workspaceEntries = state.map(_toWorkspaceConfigEntry).toList();
       await ref.read(configProvider.notifier).updateWorkspaces(workspaceEntries);
     } finally {
-      // Reset flag after a small delay to ensure config change propagates
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _isSaving = false;
-      });
+      // Released synchronously and on the failure path too, so a save that
+      // throws cannot leave the listener permanently deaf to external changes.
+      _pendingSaves--;
     }
   }
 

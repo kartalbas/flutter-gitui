@@ -27,6 +27,11 @@ class AvoidNullColorInCopyWith extends DartLintRule {
       // Check if this is a copyWith call
       if (node.methodName.name != 'copyWith') return;
 
+      // The guidance here is about text rendering, so it only holds for
+      // TextStyle. Domain models pass `color: null` to mean "leave the existing
+      // value unchanged", which is correct and must not be reported.
+      if (node.realTarget?.staticType?.element?.name != 'TextStyle') return;
+
       // Check for color: null argument
       for (final arg in node.argumentList.arguments) {
         if (arg is NamedExpression) {

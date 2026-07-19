@@ -59,6 +59,13 @@ class DiffActions {
 
   DiffActions(this.ref);
 
+  /// Git is often missing from PATH on Windows, so honor the executable
+  /// configured in Settings like every other git invocation in the app.
+  String get _gitExecutable {
+    final configured = ref.read(gitExecutablePathProvider);
+    return (configured == null || configured.isEmpty) ? 'git' : configured;
+  }
+
   /// Launch diff for unstaged file
   Future<void> diffUnstagedFile(String filePath) async {
     final tool = ref.read(selectedDiffToolProvider);
@@ -84,7 +91,7 @@ class DiffActions {
     try {
       // Get HEAD version of file
       final result = await Process.run(
-        'git',
+        _gitExecutable,
         ['show', 'HEAD:$filePath'],
         workingDirectory: repoPath,
       );
@@ -99,6 +106,10 @@ class DiffActions {
           headFile,
           workingFile,
           label: filePath,
+        );
+      } else {
+        throw Exception(
+          'Failed to read HEAD version of $filePath: ${result.stderr}',
         );
       }
     } catch (e) {
@@ -126,14 +137,14 @@ class DiffActions {
     try {
       // Get HEAD version
       final headResult = await Process.run(
-        'git',
+        _gitExecutable,
         ['show', 'HEAD:$filePath'],
         workingDirectory: repoPath,
       );
 
       // Get staged version
       final stagedResult = await Process.run(
-        'git',
+        _gitExecutable,
         ['show', ':$filePath'],
         workingDirectory: repoPath,
       );
@@ -148,6 +159,11 @@ class DiffActions {
           headFile,
           stagedFile,
           label: filePath,
+        );
+      } else {
+        final failed = headResult.exitCode != 0 ? headResult : stagedResult;
+        throw Exception(
+          'Failed to read $filePath from git: ${failed.stderr}',
         );
       }
     } catch (e) {
@@ -179,14 +195,14 @@ class DiffActions {
     try {
       // Get from version
       final fromResult = await Process.run(
-        'git',
+        _gitExecutable,
         ['show', '$fromCommit:$filePath'],
         workingDirectory: repoPath,
       );
 
       // Get to version
       final toResult = await Process.run(
-        'git',
+        _gitExecutable,
         ['show', '$toCommit:$filePath'],
         workingDirectory: repoPath,
       );
@@ -201,6 +217,11 @@ class DiffActions {
           fromFile,
           toFile,
           label: filePath,
+        );
+      } else {
+        final failed = fromResult.exitCode != 0 ? fromResult : toResult;
+        throw Exception(
+          'Failed to read $filePath from git: ${failed.stderr}',
         );
       }
     } catch (e) {

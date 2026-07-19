@@ -150,8 +150,10 @@ class BatchOperationsService {
 
       final status = statuses[repo.path];
 
-      // Skip if repo has no remote
-      if (!(status?.hasRemote ?? false)) {
+      // A missing or still-loading status carries no information about the
+      // remote, so attempt the operation and let git report the real error
+      // rather than claiming the repository has no remote configured.
+      if (status != null && !status.isLoading && !status.hasRemote) {
         results.add(BatchOperationResult(
           repository: repo,
           success: false,
@@ -201,8 +203,10 @@ class BatchOperationsService {
 
       final status = statuses[repo.path];
 
-      // Skip if repo has no remote
-      if (!(status?.hasRemote ?? false)) {
+      // A missing or still-loading status carries no information about the
+      // remote, so attempt the operation and let git report the real error
+      // rather than claiming the repository has no remote configured.
+      if (status != null && !status.isLoading && !status.hasRemote) {
         results.add(BatchOperationResult(
           repository: repo,
           success: false,
@@ -252,8 +256,10 @@ class BatchOperationsService {
 
       final status = statuses[repo.path];
 
-      // Skip if repo has no remote
-      if (!(status?.hasRemote ?? false)) {
+      // A missing or still-loading status carries no information about the
+      // remote, so attempt the operation and let git report the real error
+      // rather than claiming the repository has no remote configured.
+      if (status != null && !status.isLoading && !status.hasRemote) {
         results.add(BatchOperationResult(
           repository: repo,
           success: false,

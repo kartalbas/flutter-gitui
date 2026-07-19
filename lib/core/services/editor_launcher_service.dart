@@ -31,8 +31,16 @@ class EditorLauncherService {
           bundlePath.toLowerCase().endsWith('.app') &&
           Directory(bundlePath).existsSync();
 
+      // A bare command name has no directory part, so File.existsSync() would
+      // resolve it against the process CWD and wrongly report it missing.
+      // Process.start hands such a name to the OS PATH search (execvp on
+      // Linux/macOS, CreateProcess on Windows), which is what a user configuring
+      // `code` or `gedit` expects.
+      final isBareCommand =
+          !resolvedPath.contains('/') && !resolvedPath.contains(r'\');
+
       // Verify the resolved path exists
-      if (!isAppBundle && !File(resolvedPath).existsSync()) {
+      if (!isAppBundle && !isBareCommand && !File(resolvedPath).existsSync()) {
         final message = Platform.isWindows
             ? 'Editor executable not found: $editorPath\n'
                 'Tried: $editorPath.cmd, $editorPath.exe, $editorPath.bat\n'

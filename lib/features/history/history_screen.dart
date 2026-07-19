@@ -677,19 +677,52 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     BuildContext context,
     List<GitCommit> commits,
   ) async {
-    final selectedHashes = _selectionManager.selectedItems.toList();
+    final selected = _selectionManager.selectedItems;
 
-    if (selectedHashes.isEmpty) return;
+    if (selected.isEmpty) return;
 
-    // Cherry-pick each commit in order
-    for (final hash in selectedHashes) {
-      await ref.read(gitActionsProvider).cherryPickCommit(hash);
+    // The history list is newest-first and the selection preserves that order,
+    // so replaying it as-is would apply a commit before its ancestors. Walk the
+    // list backwards to cherry-pick oldest-first.
+    final orderedHashes = [
+      for (final commit in commits.reversed)
+        if (selected.contains(commit.hash)) commit.hash,
+    ];
+    // A selection made before the current filter can hold hashes that are no
+    // longer listed; keep them so nothing the user picked is silently skipped.
+    orderedHashes.addAll(
+      selected.where((hash) => !orderedHashes.contains(hash)),
+    );
+
+    final l10n = AppLocalizations.of(context)!;
+    String? failure;
+
+    try {
+      for (final hash in orderedHashes) {
+        await ref.read(gitActionsProvider).cherryPickCommit(hash);
+      }
+    } catch (e) {
+      // A failed pick leaves the repository mid-cherry-pick, so every later pick
+      // would fail too: stop at the first error and report it.
+      failure = e.toString();
     }
 
     // Refresh providers to update UI
     ref.invalidate(commitHistoryProvider);
     ref.invalidate(localBranchesProvider);
     ref.invalidate(currentBranchProvider);
+
+    if (!context.mounted) return;
+
+    if (failure != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.cherryPickFailed(failure)),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+      return;
+    }
 
     // Clear selection
     _selectionManager.clearSelection(() => setState(() {}));

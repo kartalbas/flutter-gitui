@@ -102,7 +102,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen> with TickerProv
             // Inline search field
             InlineSearchField(
               controller: _searchController,
-              hintText: 'Search branches...',
+              hintText: l10n.searchBranches,
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;

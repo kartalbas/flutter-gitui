@@ -246,8 +246,8 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
     final flattenedNodes = _treeController.flattenedNodes;
 
     if (flattenedNodes.isEmpty) {
-      return const Center(
-        child: BodyMediumLabel('No changes'),
+      return Center(
+        child: BodyMediumLabel(AppLocalizations.of(context)!.noChanges),
       );
     }
 

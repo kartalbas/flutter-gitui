@@ -478,13 +478,13 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
               if (_searchQuery.isNotEmpty || _filterType != TagFilterType.all) ...[
                 const SizedBox(width: AppTheme.paddingS),
                 BodySmallLabel(
-                  'of ${tags.length}',
+                  AppLocalizations.of(context)!.ofTotal(tags.length),
                 ),
               ],
               const Spacer(),
               if (localOnlyTags.isNotEmpty)
                 BaseButton(
-                  label: 'Push ${localOnlyTags.length}',
+                  label: AppLocalizations.of(context)!.pushCount(localOnlyTags.length),
                   variant: ButtonVariant.secondary,
                   leadingIcon: PhosphorIconsRegular.upload,
                   onPressed: () => _pushAllTags(context),

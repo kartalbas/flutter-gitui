@@ -403,10 +403,18 @@ try {
         -ProjectRoot $projectRoot `
         -Version $version
 
-    if ($gitResult -and $gitResult.Success) {
-        Write-Log "[OK] Changes committed and pushed" "Green"
-    } else {
+    if ($gitResult -and $gitResult.Committed) {
+        if ($gitResult.Pushed) {
+            Write-Log "[OK] Changes committed and pushed" "Green"
+        } else {
+            # The module reports a failed push as Committed without Pushed; without
+            # this branch a commit stranded on the local repo looks like a clean run.
+            Write-Log "[WARN] Changes committed but push to remote failed" "Yellow"
+        }
+    } elseif ($gitResult -and $gitResult.NoChanges) {
         Write-Log "[INFO] No changes to commit" "Gray"
+    } else {
+        Write-Log "[WARN] Git commit failed: $($gitResult.Error)" "Yellow"
     }
     Write-Log ""
 } catch {

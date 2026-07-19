@@ -607,8 +607,10 @@ if [ \$? -ne 0 ]; then
 fi
 
 echo "Setting permissions..."
-chmod +x "$rootDir/flutter-gitui"
-chmod +x "$rootDir/linux/flutter_gitui"
+# Restore the exec bit on the binary that is relaunched below; archives zipped
+# on Windows CI lose file modes, and hardcoded name guesses miss both the
+# standard and the universal layout.
+chmod +x "$exePath"
 
 echo "Cleaning up..."
 rm "$zipFilePath" 2>/dev/null

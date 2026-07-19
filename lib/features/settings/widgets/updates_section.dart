@@ -44,7 +44,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
     try {
       Logger.info('Manual update check initiated');
-      final updateInfo = await UpdateService.checkForUpdates().then((result) => result.unwrapOr(null));
+      // unwrapOr(null) collapsed "the check failed" into "no update available",
+      // so a network or server error was reported to the user as being up to
+      // date. Rethrow instead, so the catch below reports the real outcome.
+      final updateInfo = (await UpdateService.checkForUpdates()).unwrap();
 
       if (!mounted) return;
 

@@ -66,9 +66,13 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
     } catch (e, stack) {
       Logger.error('Error detecting tools', e, stack);
     } finally {
-      setState(() {
-        _isDetecting = false;
-      });
+      // Detection runs several seconds of shell probes while Cancel stays
+      // enabled, so the dialog can be gone by the time this resolves.
+      if (mounted) {
+        setState(() {
+          _isDetecting = false;
+        });
+      }
     }
   }
 

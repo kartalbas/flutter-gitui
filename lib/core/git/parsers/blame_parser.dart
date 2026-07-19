@@ -140,8 +140,10 @@ class BlameParser {
       if (line.isEmpty) continue;
 
       // Regular expression to parse: <hash> (<author> <date> <time> <tz> <line>) <content>
+      // Boundary commits are printed with a leading '^' on the hash, so the
+      // marker must be tolerated or those lines are silently dropped.
       final regex = RegExp(
-        r'^([0-9a-f]+)\s+\((.+?)\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+([+-]\d{4})\s+(\d+)\)\s*(.*)$',
+        r'^\^?([0-9a-f]+)\s+\((.+?)\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s+([+-]\d{4})\s+(\d+)\)\s*(.*)$',
       );
       final match = regex.firstMatch(line);
 
@@ -150,10 +152,13 @@ class BlameParser {
         final author = match.group(2)!.trim();
         final date = match.group(3)!;
         final time = match.group(4)!;
+        final timezone = match.group(5)!;
         final lineNumber = int.parse(match.group(6)!);
         final lineContent = (match.group(7) ?? '').replaceAll('\r', ''); // Remove carriage returns
 
-        final authorTime = DateTime.parse('$date $time');
+        // git prints the timestamp in the commit's own timezone, so the offset
+        // has to be applied before converting to the viewer's local time.
+        final authorTime = DateTime.parse('$date $time$timezone').toLocal();
 
         lines.add(
           BlameLine(

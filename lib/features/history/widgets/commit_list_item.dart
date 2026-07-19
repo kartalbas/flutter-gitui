@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../core/config/config_providers.dart';
 import '../../../core/git/models/commit.dart';
 
 /// Individual commit item in the history list
-class CommitListItem extends StatelessWidget {
+class CommitListItem extends ConsumerWidget {
   final GitCommit commit;
   final bool isSelected;
   final bool isMultiSelected;
@@ -24,30 +26,33 @@ class CommitListItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final showCommitGraph = ref.watch(showCommitGraphProvider);
+
     return BaseListItem(
       isSelected: isSelected,
       isMultiSelected: isMultiSelected,
       onTap: onTap,
-      leading:
-          // Commit graph line (simplified - just a dot for now)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: commit.isMergeCommit
-                    ? Theme.of(context).colorScheme.tertiary
-                    : Theme.of(context).colorScheme.primary,
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  width: 2,
+      // Commit graph line (simplified - just a dot for now)
+      leading: showCommitGraph
+          ? Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: commit.isMergeCommit
+                      ? Theme.of(context).colorScheme.tertiary
+                      : Theme.of(context).colorScheme.primary,
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    width: 2,
+                  ),
                 ),
               ),
-            ),
-          ),
+            )
+          : null,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

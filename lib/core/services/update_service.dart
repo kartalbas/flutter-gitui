@@ -121,7 +121,7 @@ class UpdateService {
       Logger.info('Comparing with current: $fullVersion');
 
       // Compare versions
-      if (_isNewerVersion(latestVersion, fullVersion)) {
+      if (isNewerVersion(latestVersion, fullVersion)) {
         Logger.info('✓ New version available: $latestVersion > $fullVersion');
 
         // Determine platform from manifest
@@ -190,9 +190,13 @@ class UpdateService {
     });
   }
 
-  /// Compare two semantic version strings
-  /// Returns true if newVersion is greater than currentVersion
-  static bool _isNewerVersion(String newVersion, String currentVersion) {
+  /// Whether [newVersion] takes precedence over [currentVersion].
+  ///
+  /// Ordering follows semantic versioning precedence, pre-release identifiers
+  /// included: 0.5.0-alpha < 0.5.0-alpha.2 < 0.5.0-beta < 0.5.0. Treating a
+  /// pre-release as its bare release instead would leave everyone running
+  /// 0.5.0-alpha permanently "up to date" and never offer them 0.5.0.
+  static bool isNewerVersion(String newVersion, String currentVersion) {
     final newParts = _releaseParts(newVersion);
     final currentParts = _releaseParts(currentVersion);
 
@@ -202,18 +206,75 @@ class UpdateService {
       if (newParts[i] < currentParts[i]) return false;
     }
 
+    final preRelease = _comparePreRelease(
+      _preReleaseIdentifiers(newVersion),
+      _preReleaseIdentifiers(currentVersion),
+    );
+    if (preRelease != 0) return preRelease > 0;
+
     // Builds between two tags share major.minor.patch and differ only in the
     // build number, so ignoring it would report every one of them as current.
+    // It breaks a tie only: precedence above never depends on it.
     return _buildNumber(newVersion) > _buildNumber(currentVersion);
+  }
+
+  /// Pre-release identifiers of a version, empty for a final release.
+  static List<String> _preReleaseIdentifiers(String version) {
+    // Build metadata ('+42') carries no precedence and may itself contain '-'.
+    final release = version.split('+')[0];
+    final separator = release.indexOf('-');
+    if (separator < 0) return const <String>[];
+    final preRelease = release.substring(separator + 1);
+    if (preRelease.isEmpty) return const <String>[];
+    return preRelease.split('.');
+  }
+
+  /// Semantic versioning precedence of two pre-release identifier lists.
+  ///
+  /// Negative when [a] ranks below [b], positive when it ranks above, zero
+  /// when the two are equal.
+  static int _comparePreRelease(List<String> a, List<String> b) {
+    // A pre-release always ranks below the release it leads up to.
+    if (a.isEmpty || b.isEmpty) {
+      if (a.isEmpty && b.isEmpty) return 0;
+      return a.isEmpty ? 1 : -1;
+    }
+
+    for (var i = 0; i < a.length && i < b.length; i++) {
+      if (a[i] == b[i]) continue;
+      final left = _identifierNumber(a[i]);
+      final right = _identifierNumber(b[i]);
+      if (left != null && right != null) return left.compareTo(right);
+      // A numeric identifier always ranks below an alphanumeric one.
+      if (left != null) return -1;
+      if (right != null) return 1;
+      return a[i].compareTo(b[i]);
+    }
+
+    // Every shared identifier matched, so the longer list is the later one.
+    return a.length.compareTo(b.length);
+  }
+
+  /// Numeric value of a pre-release identifier, null when it is alphanumeric.
+  ///
+  /// Digits only: int.tryParse would also accept a signed identifier such as
+  /// '-1' and sort it below every genuine number.
+  static int? _identifierNumber(String identifier) {
+    if (identifier.isEmpty) return null;
+    for (final unit in identifier.codeUnits) {
+      if (unit < 0x30 || unit > 0x39) return null;
+    }
+    return int.tryParse(identifier);
   }
 
   /// Major, minor and patch of a version, always exactly three components.
   ///
   /// A shorter version ('1.4') pads with zeros and a pre-release suffix
-  /// ('1.4.0-hotfix1') is ignored, so a slightly nonstandard manifest version
-  /// still compares instead of aborting. Anything genuinely unparseable throws:
-  /// reporting it as "not newer" would leave every client permanently on "up to
-  /// date" with nothing but a log line to show for it.
+  /// ('1.4.0-hotfix1') is ordered separately by [_comparePreRelease], so a
+  /// slightly nonstandard manifest version still compares instead of aborting.
+  /// Anything genuinely unparseable throws: reporting it as "not newer" would
+  /// leave every client permanently on "up to date" with nothing but a log line
+  /// to show for it.
   static List<int> _releaseParts(String version) {
     // Build metadata ('+42') is ordered separately by _buildNumber.
     final release = version.split('+')[0].split('-')[0];

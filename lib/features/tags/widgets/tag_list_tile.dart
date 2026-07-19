@@ -517,6 +517,22 @@ class TagListTile extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       // Capture localization strings before async operations
       final l10n = AppLocalizations.of(context)!;
+
+      // Deleting a tag off a server is destructive, so the target remote is
+      // picked explicitly instead of guessed, just like the push flow. It is
+      // resolved before the operation starts so a cancelled picker leaves the
+      // tag untouched instead of deleting it locally only.
+      String? remoteName;
+      if (willDeleteFromRemote) {
+        remoteName = remotes.length == 1
+            ? remotes.first
+            : await showDialog<String>(
+                context: context,
+                builder: (context) => SelectRemoteDialog(remotes: remotes),
+              );
+        if (remoteName == null || !context.mounted) return;
+      }
+
       // Deleting the tag refreshes the list and unmounts this very tile, after
       // which WidgetRef throws. The notifier outlives the tile, so hold it
       // directly to guarantee the progress overlay is always cleared.
@@ -539,12 +555,7 @@ class TagListTile extends ConsumerWidget {
         await ref.read(gitActionsProvider).deleteTag(tag.name);
 
         // Delete from remote if tag was synced (this will also auto-refresh)
-        if (willDeleteFromRemote) {
-          // Resolved only here: remotes is guaranteed non-empty when
-          // willDeleteFromRemote is true, so .first cannot throw.
-          final remoteName = remotes.contains('origin')
-              ? 'origin'
-              : remotes.first;
+        if (remoteName != null) {
           progress.updateProgress(
             2,
             statusMessage: l10n.progressDeletingTagFromRemote(

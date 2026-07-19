@@ -790,7 +790,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       // Get remote name if deleting from remote
       String? remoteName;
       if (deleteFromRemote && hasRemotes) {
-        remoteName = remotes.contains('origin') ? 'origin' : remotes.first;
+        // Deleting tags off a server is destructive, so the target remote is
+        // picked explicitly instead of guessed, just like the push flows.
+        remoteName = remotes.length == 1
+            ? remotes.first
+            : await showDialog<String>(
+                context: context,
+                builder: (context) => SelectRemoteDialog(remotes: remotes),
+              );
+        if (remoteName == null || !context.mounted) return;
       }
 
       // Use batch operation to delete all selected tags at once

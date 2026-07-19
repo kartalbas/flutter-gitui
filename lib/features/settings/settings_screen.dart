@@ -23,7 +23,6 @@ import '../../core/services/notification_service.dart';
 import 'widgets/git_config_section.dart';
 import 'widgets/theme_section.dart';
 import 'widgets/animation_section.dart';
-import 'widgets/behavior_section.dart';
 import 'widgets/history_section.dart';
 import 'widgets/updates_section.dart';
 import 'widgets/config_and_logs_section.dart';
@@ -72,10 +71,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.paddingXL),
           const AnimationSection(),
-          const SizedBox(height: AppTheme.paddingXL),
-          BehaviorSection(
-            onEditAutoFetchInterval: () => _editAutoFetchInterval(context, ref),
-          ),
           const SizedBox(height: AppTheme.paddingXL),
           HistorySection(
             onEditCommitHistoryLimit: () => _editCommitHistoryLimit(context, ref),
@@ -534,48 +529,6 @@ class SettingsScreen extends ConsumerWidget {
 
     if (result != null && result.isNotEmpty) {
       await ref.read(configProvider.notifier).setDefaultUserEmail(result);
-    }
-  }
-
-  Future<void> _editAutoFetchInterval(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context)!;
-    final behavior = ref.read(behaviorConfigProvider);
-    final controller = TextEditingController(text: behavior.autoFetchInterval.toString());
-
-    final result = await showDialog<int>(
-      context: context,
-      builder: (dialogContext) => BaseDialog(
-        title: l10n.autoFetchInterval,
-        icon: PhosphorIconsRegular.timer,
-        content: BaseTextField(
-          controller: controller,
-          autofocus: true,
-          label: l10n.minutes,
-          hintText: l10n.minutesHint,
-          prefixIcon: PhosphorIconsRegular.timer,
-        ),
-        actions: [
-          BaseButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            label: l10n.cancel,
-            variant: ButtonVariant.tertiary,
-          ),
-          BaseButton(
-            onPressed: () {
-              final value = int.tryParse(controller.text);
-              if (value != null && value > 0) {
-                Navigator.of(dialogContext).pop(value);
-              }
-            },
-            label: l10n.save,
-            variant: ButtonVariant.primary,
-          ),
-        ],
-      ),
-    );
-
-    if (result != null) {
-      await ref.read(configProvider.notifier).setAutoFetchInterval(result);
     }
   }
 

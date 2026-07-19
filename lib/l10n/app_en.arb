@@ -2033,7 +2033,6 @@
       }
     }
   },
-  "fontSize": "Font Size",
   "fontSizeUpdated": "Font size updated",
   "diffAndMergeTools": "Diff & Merge Tools",
   "preferredDiffTool": "Preferred Diff Tool",

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../core/services/shell_service.dart';
@@ -102,7 +103,9 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
   Future<void> _detectGit() async {
     try {
-      final command = 'which git';
+      // which does not exist on Windows; the equivalent is where.
+      final lookup = Platform.isWindows ? 'where' : 'which';
+      final command = '$lookup git';
       final result = await ShellService.run(command).then((r) => r.unwrap());
       if (result.first.exitCode == 0) {
         _gitPath = result.first.stdout.toString().trim();
@@ -131,7 +134,7 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
     for (final editorInfo in commonEditors) {
       try {
-        final result = await ShellService.run('which ${editorInfo.command}').then((r) => r.unwrap());
+        final result = await ShellService.run('${Platform.isWindows ? 'where' : 'which'} ${editorInfo.command}').then((r) => r.unwrap());
         if (result.first.exitCode == 0) {
           final path = result.first.stdout.toString().trim();
           _textEditors.add(_DetectedEditor(

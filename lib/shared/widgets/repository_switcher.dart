@@ -82,9 +82,8 @@ class RepositorySwitcher extends ConsumerWidget {
         );
       }).toList(),
     ).then((selectedRepo) {
-      if (selectedRepo != null) {
-        ref.read(configProvider.notifier).setCurrentRepository(selectedRepo.path);
-      }
+      if (!context.mounted || selectedRepo == null) return;
+      ref.read(configProvider.notifier).setCurrentRepository(selectedRepo.path);
     });
   }
 

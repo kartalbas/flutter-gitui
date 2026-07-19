@@ -69,9 +69,8 @@ class WorkspaceSwitcher extends ConsumerWidget {
         );
       }).toList(),
     ).then((selectedProjectFromMenu) {
-      if (selectedProjectFromMenu != null) {
-        ref.read(selectedProjectProvider.notifier).selectProject(selectedProjectFromMenu);
-      }
+      if (!context.mounted || selectedProjectFromMenu == null) return;
+      ref.read(selectedProjectProvider.notifier).selectProject(selectedProjectFromMenu);
     });
   }
 

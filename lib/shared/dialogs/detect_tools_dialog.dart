@@ -113,9 +113,19 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
       final command = '$lookup git';
       final result = await ShellService.run(command).then((r) => r.unwrap());
       if (result.first.exitCode == 0) {
-        _gitPath = result.first.stdout.toString().trim();
-        _selectedGit = _gitPath; // Auto-select if found
-        Logger.info('Detected git at: $_gitPath');
+        // where prints one line per PATH match, so storing the raw stdout would
+        // persist a multi-line string that no git invocation can execute.
+        final matches = result.first.stdout
+            .toString()
+            .split('\n')
+            .map((line) => line.trim())
+            .where((line) => line.isNotEmpty)
+            .toList();
+        if (matches.isNotEmpty) {
+          _gitPath = matches.first;
+          _selectedGit = _gitPath; // Auto-select if found
+          Logger.info('Detected git at: $_gitPath');
+        }
       }
     } catch (e) {
       Logger.warning('Failed to detect git', e);

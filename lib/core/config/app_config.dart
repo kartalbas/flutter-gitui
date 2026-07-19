@@ -290,6 +290,10 @@ class ToolsConfig {
 }
 
 /// UI configuration
+/// Sentinel distinguishing 'argument omitted' from an explicit null in
+/// copyWith, so a nullable field can actually be cleared.
+const Object _unset = Object();
+
 class UiConfig {
   final ThemeMode themeMode;
   final bool useSystemTheme;
@@ -334,7 +338,10 @@ class UiConfig {
     String? previewFontFamily,
     AppFontSize? fontSize,
     AppFontSize? previewFontSize,
-    String? locale,
+    // Sentinel-based so an explicit null can clear the locale. With a plain
+    // String? the ?? below swallowed null and 'System Default' could never be
+    // selected again once a language had been chosen.
+    Object? locale = _unset,
     bool? diffCompactMode,
     AppAnimationSpeed? animationSpeed,
   }) {
@@ -349,7 +356,7 @@ class UiConfig {
       previewFontFamily: previewFontFamily ?? this.previewFontFamily,
       fontSize: fontSize ?? this.fontSize,
       previewFontSize: previewFontSize ?? this.previewFontSize,
-      locale: locale ?? this.locale,
+      locale: identical(locale, _unset) ? this.locale : locale as String?,
       diffCompactMode: diffCompactMode ?? this.diffCompactMode,
       animationSpeed: animationSpeed ?? this.animationSpeed,
     );

@@ -754,7 +754,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (_selectionManager.selectedCount != 1) return;
 
     final hash = _selectionManager.selectedItems.first;
-    final commit = commits.firstWhere((c) => c.hash == hash);
+    // A selection made before the current filter can point at a commit that is
+    // no longer listed, and there is nothing to describe in the reset dialog
+    // then, so bail out instead of letting the lookup throw.
+    final matches = commits.where((c) => c.hash == hash);
+    if (matches.isEmpty) return;
+    final commit = matches.first;
 
     // Show dialog to choose reset mode
     final mode = await _showResetModeDialog(context, commit);

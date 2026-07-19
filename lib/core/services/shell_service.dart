@@ -64,6 +64,10 @@ class ShellService {
       stderr: null,
       workingDirectory: workingDirectory,
       environment: environment,
+      // Callers inspect ProcessResult.exitCode themselves. Throwing on a
+      // non-zero exit would discard the result and turn expected outcomes,
+      // such as an unset git config key, into hard failures.
+      throwOnError: false,
     );
   }
 

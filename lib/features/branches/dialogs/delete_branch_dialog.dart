@@ -39,6 +39,33 @@ class DeleteBranchDialog extends StatelessWidget {
       );
     }
 
+    // Remote branches are removed with `git push --delete`, which has no force
+    // variant and performs no merge check, so offering "Force Delete" would
+    // imply a distinction that does not exist on this path.
+    if (branch.isRemote) {
+      return BaseDialog(
+        title: l10n.deleteBranchDialog,
+        icon: PhosphorIconsRegular.warning,
+        variant: DialogVariant.destructive,
+        content: BodyMediumLabel(
+          'Delete branch "${branch.branchNameWithoutRemote}" on remote "${branch.remoteName ?? ""}"?\n\n'
+          'This deletes the branch on the server for everyone, including any unmerged commits. This action cannot be undone.',
+        ),
+        actions: [
+          BaseButton(
+            label: l10n.cancel,
+            variant: ButtonVariant.tertiary,
+            onPressed: () => Navigator.of(context).pop(DeleteBranchResult.cancel),
+          ),
+          BaseButton(
+            label: l10n.delete,
+            variant: ButtonVariant.danger,
+            onPressed: () => Navigator.of(context).pop(DeleteBranchResult.delete),
+          ),
+        ],
+      );
+    }
+
     return BaseDialog(
       title: l10n.deleteBranchDialog,
       icon: PhosphorIconsRegular.warning,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,7 +14,11 @@ class NotificationService {
   static void showSuccess(BuildContext context, String message) {
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    // ScaffoldMessenger queues snackbars: a still-visible error, which never
+    // auto-dismisses, would otherwise keep this one hidden indefinitely.
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -32,6 +38,9 @@ class NotificationService {
     // Resolve the messenger now: the snackbar outlives this context, so
     // button callbacks must not look it up after the widget is disposed.
     final messenger = ScaffoldMessenger.of(context);
+    // A queued snackbar stays invisible until the current one is gone, so drop
+    // anything pending and let the newest problem be the one on screen.
+    messenger.clearSnackBars();
     messenger.showSnackBar(
       SnackBar(
         content: Row(
@@ -47,21 +56,9 @@ class NotificationService {
             ),
             const SizedBox(width: AppTheme.paddingS),
             // Copy button
-            BaseIconButton(
-              icon: Icons.content_copy,
+            _CopyButton(
+              message: message,
               tooltip: 'Copy error to clipboard',
-              size: ButtonSize.small,
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: message));
-                // Show brief feedback
-                messenger.showSnackBar(
-                  SnackBar(
-                    content: const Text('Error copied to clipboard'),
-                    duration: const Duration(seconds: 1),
-                    backgroundColor: colorScheme.primary,
-                  ),
-                );
-              },
             ),
             // Open log files button (if text editor configured)
             if (textEditor != null && Logger.logFilePath != null)
@@ -105,7 +102,11 @@ class NotificationService {
   static void showInfo(BuildContext context, String message) {
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    // ScaffoldMessenger queues snackbars: a still-visible error, which never
+    // auto-dismisses, would otherwise keep this one hidden indefinitely.
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -125,6 +126,9 @@ class NotificationService {
     // Resolve the messenger now: the snackbar outlives this context, so
     // button callbacks must not look it up after the widget is disposed.
     final messenger = ScaffoldMessenger.of(context);
+    // A queued snackbar stays invisible until the current one is gone, so drop
+    // anything pending and let the newest problem be the one on screen.
+    messenger.clearSnackBars();
     messenger.showSnackBar(
       SnackBar(
         content: Row(
@@ -140,21 +144,9 @@ class NotificationService {
             ),
             const SizedBox(width: AppTheme.paddingS),
             // Copy button
-            BaseIconButton(
-              icon: Icons.content_copy,
+            _CopyButton(
+              message: message,
               tooltip: 'Copy warning to clipboard',
-              size: ButtonSize.small,
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: message));
-                // Show brief feedback
-                messenger.showSnackBar(
-                  SnackBar(
-                    content: const Text('Warning copied to clipboard'),
-                    duration: const Duration(seconds: 1),
-                    backgroundColor: colorScheme.primary,
-                  ),
-                );
-              },
             ),
             // Open log files button (if text editor configured)
             if (textEditor != null && Logger.logFilePath != null)
@@ -191,6 +183,52 @@ class NotificationService {
           },
         ),
       ),
+    );
+  }
+}
+
+/// Copy button that confirms in place rather than posting a snackbar.
+///
+/// A confirmation snackbar would be queued behind the error or warning
+/// snackbar hosting this button, so it could never be seen while the message
+/// it belongs to is still on screen.
+class _CopyButton extends StatefulWidget {
+  const _CopyButton({required this.message, required this.tooltip});
+
+  final String message;
+  final String tooltip;
+
+  @override
+  State<_CopyButton> createState() => _CopyButtonState();
+}
+
+class _CopyButtonState extends State<_CopyButton> {
+  Timer? _resetTimer;
+  bool _copied = false;
+
+  @override
+  void dispose() {
+    _resetTimer?.cancel();
+    super.dispose();
+  }
+
+  void _copy() {
+    Clipboard.setData(ClipboardData(text: widget.message));
+    _resetTimer?.cancel();
+    setState(() => _copied = true);
+    _resetTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      setState(() => _copied = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BaseIconButton(
+      icon: _copied ? Icons.check : Icons.content_copy,
+      tooltip: _copied ? 'Copied to clipboard' : widget.tooltip,
+      size: ButtonSize.small,
+      onPressed: _copy,
     );
   }
 }

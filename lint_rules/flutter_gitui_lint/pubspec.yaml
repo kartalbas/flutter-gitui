@@ -6,10 +6,17 @@ publish_to: none
 environment:
   sdk: ^3.9.2
 
+# Resolved through the root pubspec.lock so plugin and host share one analyzer
+# and one custom_lint_visitor build; a separate resolution drifts apart on the
+# next `pub get` and the plugin dies with a silent PLUGIN_ERROR.
+resolution: workspace
+
 dependencies:
   analyzer: ^8.0.0
   custom_lint_builder: ^0.8.0
 
 dev_dependencies:
   custom_lint: ^0.8.1
-  lints: ^5.0.0
+  # Must track the lints major that the root app's flutter_lints pulls in,
+  # otherwise the shared workspace resolution has no solution.
+  lints: ^6.0.0

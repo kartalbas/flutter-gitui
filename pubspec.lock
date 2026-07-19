@@ -379,13 +379,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_gitui_lint:
-    dependency: "direct dev"
-    description:
-      path: "lint_rules/flutter_gitui_lint"
-      relative: true
-    source: path
-    version: "1.0.0"
   flutter_highlight:
     dependency: "direct main"
     description:

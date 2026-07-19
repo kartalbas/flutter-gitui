@@ -6,6 +6,12 @@ version: 0.1.0
 environment:
   sdk: ^3.9.2
 
+# custom_lint merges the plugin's dependencies with this app's into one
+# generated client; that merge is unsatisfiable if the two resolve analyzer
+# independently, so the plugin resolves as a member of this workspace.
+workspace:
+  - lint_rules/flutter_gitui_lint
+
 dependencies:
   flutter:
     sdk: flutter

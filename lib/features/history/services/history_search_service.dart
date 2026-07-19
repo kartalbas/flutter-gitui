@@ -224,6 +224,7 @@ class HistorySearchService {
     DateTime? fromDate;
     DateTime? toDate;
     List<String>? hashPrefixes;
+    List<String>? tags;
 
     // Parse query tokens
     final tokens = _tokenizeQuery(query);
@@ -249,6 +250,10 @@ class HistorySearchService {
           case 'h':
             hashPrefixes ??= [];
             hashPrefixes.add(value);
+            break;
+          case 'tag':
+            tags ??= [];
+            tags.add(value);
             break;
           case 'from':
           case 'after':
@@ -280,6 +285,7 @@ class HistorySearchService {
       fromDate: fromDate,
       toDate: toDate,
       hashPrefixes: hashPrefixes,
+      tags: tags,
     );
   }
 

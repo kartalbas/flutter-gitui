@@ -28,7 +28,9 @@ class StashParser {
         final ref = parts[0].trim();
         final hash = parts[1].trim();
         final timestampStr = parts[2].trim();
-        final fullMessage = parts[3].trim();
+        // Only the message field can contain the '|' separator, so everything
+        // past the first three fields belongs to it and must be rejoined.
+        final fullMessage = parts.sublist(3).join('|').trim();
 
         // Extract index from ref (stash@{0} -> 0)
         final indexMatch = RegExp(r'stash@\{(\d+)\}').firstMatch(ref);

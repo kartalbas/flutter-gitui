@@ -179,6 +179,27 @@ Settings are stored in: ``~/.flutter-gitui/config.yaml``
     return $readme
 }
 
+function Resolve-PdfEngine {
+    param([string]$Name)
+
+    # An explicit override wins so build machines with an unusual LaTeX layout do
+    # not depend on this list staying exhaustive.
+    $candidates = @()
+    if ($env:PANDOC_PDF_ENGINE) { $candidates += $env:PANDOC_PDF_ENGINE }
+
+    $onPath = Get-Command $Name -ErrorAction SilentlyContinue
+    if ($onPath) { $candidates += $onPath.Source }
+
+    $candidates += "$env:LOCALAPPDATA\Programs\MiKTeX\miktex\bin\x64\$Name.exe"
+    $candidates += "$env:ProgramFiles\MiKTeX\miktex\bin\x64\$Name.exe"
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+
+    return $null
+}
+
 function New-Pdf {
     param([string]$ReleaseDir)
 
@@ -194,41 +215,25 @@ function New-Pdf {
     $readmePath = "$ReleaseDir/README.md"
     $pdfPath = "$ReleaseDir/README.pdf"
 
-    # Try to find xelatex (check common installation paths)
-    $xelatexPaths = @(
-        "xelatex",  # Try PATH first
-        "D:\bin\scoop\apps\latex\current\texmfs\install\miktex\bin\x64\xelatex.exe",  # Scoop install
-        "$env:LOCALAPPDATA\Programs\MiKTeX\miktex\bin\x64\xelatex.exe",  # Standard MiKTeX install
-        "$env:ProgramFiles\MiKTeX\miktex\bin\x64\xelatex.exe"  # System-wide install
-    )
+    # xelatex first (best quality), pdflatex as fallback
+    foreach ($engineName in @("xelatex", "pdflatex")) {
+        $enginePath = Resolve-PdfEngine -Name $engineName
+        if (-not $enginePath) { continue }
 
-    # Try xelatex first (best quality)
-    foreach ($xelatexPath in $xelatexPaths) {
         try {
-            & pandoc $readmePath -o $pdfPath --pdf-engine=$xelatexPath -V geometry:margin=1in 2>&1 | Out-Null
+            $output = & pandoc $readmePath -o $pdfPath --pdf-engine=$enginePath -V geometry:margin=1in 2>&1
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "  [OK] README.pdf generated" -ForegroundColor Green
                 return $true
             }
-        } catch {}
-    }
 
-    # Fallback to pdflatex
-    $pdflatexPaths = @(
-        "pdflatex",  # Try PATH first
-        "D:\bin\scoop\apps\latex\current\texmfs\install\miktex\bin\x64\pdflatex.exe",  # Scoop install
-        "$env:LOCALAPPDATA\Programs\MiKTeX\miktex\bin\x64\pdflatex.exe",  # Standard MiKTeX install
-        "$env:ProgramFiles\MiKTeX\miktex\bin\x64\pdflatex.exe"  # System-wide install
-    )
-
-    foreach ($pdflatexPath in $pdflatexPaths) {
-        try {
-            & pandoc $readmePath -o $pdfPath --pdf-engine=$pdflatexPath -V geometry:margin=1in 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  [OK] README.pdf generated" -ForegroundColor Green
-                return $true
-            }
-        } catch {}
+            # The engine resolved, so this is a genuine pandoc failure and must not
+            # be reported as a missing installation.
+            Write-Host "  [WARN] pandoc failed with $engineName (exit $LASTEXITCODE)" -ForegroundColor Yellow
+            if ($output) { Write-Host "  $($output -join ([Environment]::NewLine + '  '))" -ForegroundColor DarkGray }
+        } catch {
+            Write-Host "  [WARN] pandoc failed with ${engineName}: $($_.Exception.Message)" -ForegroundColor Yellow
+        }
     }
 
     Write-Host "  [INFO] PDF generation skipped - no PDF engine available" -ForegroundColor Cyan

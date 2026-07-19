@@ -82,8 +82,10 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           ),
           const SizedBox(height: AppTheme.paddingM),
 
-          // Branch list
-          Expanded(
+          // Branch list needs an explicit height: BaseDialog wraps the content
+          // in a SingleChildScrollView, so a flex child would be unbounded.
+          SizedBox(
+            height: 400,
             child: localBranchesAsync.when(
               data: (localBranches) {
                 final remoteBranches = _showRemoteBranches
@@ -206,16 +208,16 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
       return;
     }
 
-    // Close dialog
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-
     try {
-      // Switch to the branch
+      // Checking out a remote branch under its local name lets git create the
+      // tracking branch, instead of one literally named "origin/<branch>".
       await ref
           .read(gitActionsProvider)
-          .switchBranch(branch.name, createIfMissing: branch.isRemote);
+          .switchBranch(branch.branchNameWithoutRemote);
+      // Close only after success, so a failure can still be reported here.
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       if (mounted) {
         NotificationService.showError(

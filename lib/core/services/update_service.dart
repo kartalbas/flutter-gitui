@@ -185,27 +185,43 @@ class UpdateService {
   /// Compare two semantic version strings
   /// Returns true if newVersion is greater than currentVersion
   static bool _isNewerVersion(String newVersion, String currentVersion) {
-    try {
-      // Remove build number (+xxx) if present
-      final newVer = newVersion.split('+')[0];
-      final currentVer = currentVersion.split('+')[0];
+    final newParts = _releaseParts(newVersion);
+    final currentParts = _releaseParts(currentVersion);
 
-      final newParts = newVer.split('.').map(int.parse).toList();
-      final currentParts = currentVer.split('.').map(int.parse).toList();
-
-      // Compare major, minor, patch
-      for (var i = 0; i < 3; i++) {
-        if (newParts[i] > currentParts[i]) return true;
-        if (newParts[i] < currentParts[i]) return false;
-      }
-
-      // Builds between two tags share major.minor.patch and differ only in the
-      // build number, so ignoring it would report every one of them as current.
-      return _buildNumber(newVersion) > _buildNumber(currentVersion);
-    } catch (e) {
-      Logger.error('Error comparing versions', e);
-      return false;
+    // Compare major, minor, patch
+    for (var i = 0; i < 3; i++) {
+      if (newParts[i] > currentParts[i]) return true;
+      if (newParts[i] < currentParts[i]) return false;
     }
+
+    // Builds between two tags share major.minor.patch and differ only in the
+    // build number, so ignoring it would report every one of them as current.
+    return _buildNumber(newVersion) > _buildNumber(currentVersion);
+  }
+
+  /// Major, minor and patch of a version, always exactly three components.
+  ///
+  /// A shorter version ('1.4') pads with zeros and a pre-release suffix
+  /// ('1.4.0-hotfix1') is ignored, so a slightly nonstandard manifest version
+  /// still compares instead of aborting. Anything genuinely unparseable throws:
+  /// reporting it as "not newer" would leave every client permanently on "up to
+  /// date" with nothing but a log line to show for it.
+  static List<int> _releaseParts(String version) {
+    // Build metadata ('+42') is ordered separately by _buildNumber.
+    final release = version.split('+')[0].split('-')[0];
+    final components = release.split('.');
+    if (components.length > 3) {
+      throw FormatException('Unsupported version format: $version');
+    }
+    final parts = <int>[0, 0, 0];
+    for (var i = 0; i < components.length; i++) {
+      final value = int.tryParse(components[i]);
+      if (value == null) {
+        throw FormatException('Unsupported version format: $version');
+      }
+      parts[i] = value;
+    }
+    return parts;
   }
 
   /// Numeric build component of a version, 0 when absent or non-numeric.

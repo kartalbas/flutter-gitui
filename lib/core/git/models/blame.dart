@@ -23,11 +23,18 @@ class BlameLine with _$BlameLine {
 
   /// Get author initials for avatar
   String get authorInitials {
-    final parts = author.split(' ');
+    // git preserves user.name verbatim, including repeated or surrounding
+    // whitespace, so a naive split can yield empty parts that break indexing.
+    final parts = author
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return author.length >= 2 ? author.substring(0, 2).toUpperCase() : author.toUpperCase();
+    final name = parts.isEmpty ? '' : parts.first;
+    return name.length >= 2 ? name.substring(0, 2).toUpperCase() : name.toUpperCase();
   }
 }
 

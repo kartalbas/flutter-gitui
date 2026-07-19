@@ -30,8 +30,11 @@ class RepositoriesFilterChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isAllSelected = selectedRepositories.length == filteredRepositories.length &&
-        filteredRepositories.isNotEmpty;
+    // Selection is tracked over the unfiltered repo list, so only containment of
+    // every visible repo may flip the button to 'Deselect all'
+    final selectedPaths = selectedRepositories.map((r) => r.path).toSet();
+    final isAllSelected = filteredRepositories.isNotEmpty &&
+        filteredRepositories.every((r) => selectedPaths.contains(r.path));
 
     return Row(
       children: [

@@ -404,7 +404,7 @@ class GitService {
         'ls-files --others --ignored --exclude-standard --directory -z',
       );
       final output = result.stdout.toString();
-      return output.split(' ').where((s) => s.isNotEmpty).toList();
+      return output.split('\x00').where((s) => s.isNotEmpty).toList();
     });
   }
 

@@ -24,6 +24,9 @@ class RepositoryStatus {
   /// Whether the status is currently being checked
   final bool isLoading;
 
+  /// Whether the check never ran because no git executable is configured
+  final bool isGitNotConfigured;
+
   const RepositoryStatus({
     this.commitsAhead = 0,
     this.commitsBehind = 0,
@@ -33,6 +36,7 @@ class RepositoryStatus {
     this.currentBranch,
     this.hasRemote = false,
     this.isLoading = false,
+    this.isGitNotConfigured = false,
   });
 
   /// Default status for broken/invalid repositories
@@ -46,6 +50,15 @@ class RepositoryStatus {
     exists: true,
     isValidGit: true,
     isLoading: true,
+  );
+
+  /// Status for repositories that could not be checked because no git
+  /// executable is configured; not loading, so the card stops spinning, and not
+  /// broken, since nothing is known to be wrong with the repository itself.
+  static const RepositoryStatus gitNotConfigured = RepositoryStatus(
+    exists: true,
+    isValidGit: true,
+    isGitNotConfigured: true,
   );
 
   /// Whether the repository is broken (doesn't exist or invalid git)

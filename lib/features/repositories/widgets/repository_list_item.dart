@@ -109,7 +109,15 @@ class RepositoryListItem extends ConsumerWidget {
               _buildBatchResultIcon(context, ref),
 
               // Show loading while analyzing
-              if (status.isLoading) ...[
+              if (status.isGitNotConfigured) ...[
+                _buildCompactBadge(
+                  context,
+                  PhosphorIconsRegular.gear,
+                  Theme.of(context).colorScheme.tertiary,
+                  isSelected,
+                  label: 'Git not configured',
+                ),
+              ] else if (status.isLoading) ...[
                 SizedBox(
                   width: 12,
                   height: 12,

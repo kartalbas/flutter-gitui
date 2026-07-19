@@ -32,6 +32,12 @@ class RepositoryStatusNotifier
       Logger.warning(
         '[REFRESH] Skipping ${repository.displayName} - git path not configured yet (configLoading=$configLoading)',
       );
+      // While the config is still loading a path may still arrive, so keep the
+      // loading state. Once loading has finished, an empty path is the final
+      // answer and the card must say so instead of spinning forever.
+      if (!configLoading) {
+        state = {...state, repository.path: RepositoryStatus.gitNotConfigured};
+      }
       return;
     }
 

@@ -163,10 +163,13 @@ class BatchOperationsService {
 
       final status = statuses[repo.path];
 
-      // A missing or still-loading status carries no information about the
-      // remote, so attempt the operation and let git report the real error
-      // rather than claiming the repository has no remote configured.
-      if (status != null && !status.isLoading && !status.hasRemote) {
+      // A missing, still-loading or never-checked status carries no information
+      // about the remote, so attempt the operation and let git report the real
+      // error rather than claiming the repository has no remote configured.
+      if (status != null &&
+          !status.isLoading &&
+          !status.isGitNotConfigured &&
+          !status.hasRemote) {
         results.add(
           BatchOperationResult(
             repository: repo,
@@ -225,10 +228,13 @@ class BatchOperationsService {
 
       final status = statuses[repo.path];
 
-      // A missing or still-loading status carries no information about the
-      // remote, so attempt the operation and let git report the real error
-      // rather than claiming the repository has no remote configured.
-      if (status != null && !status.isLoading && !status.hasRemote) {
+      // A missing, still-loading or never-checked status carries no information
+      // about the remote, so attempt the operation and let git report the real
+      // error rather than claiming the repository has no remote configured.
+      if (status != null &&
+          !status.isLoading &&
+          !status.isGitNotConfigured &&
+          !status.hasRemote) {
         results.add(
           BatchOperationResult(
             repository: repo,
@@ -287,10 +293,13 @@ class BatchOperationsService {
 
       final status = statuses[repo.path];
 
-      // A missing or still-loading status carries no information about the
-      // remote, so attempt the operation and let git report the real error
-      // rather than claiming the repository has no remote configured.
-      if (status != null && !status.isLoading && !status.hasRemote) {
+      // A missing, still-loading or never-checked status carries no information
+      // about the remote, so attempt the operation and let git report the real
+      // error rather than claiming the repository has no remote configured.
+      if (status != null &&
+          !status.isLoading &&
+          !status.isGitNotConfigured &&
+          !status.hasRemote) {
         results.add(
           BatchOperationResult(
             repository: repo,

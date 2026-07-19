@@ -226,7 +226,15 @@ class RepositoryCard extends ConsumerWidget {
 
           // Status badges - show loading or actual status
           const SizedBox(height: AppTheme.paddingM),
-          if (status.isLoading)
+          if (status.isGitNotConfigured)
+            _buildStatusBadge(
+              context,
+              PhosphorIconsRegular.gear,
+              'Git not configured',
+              Theme.of(context).colorScheme.tertiary,
+              isSelected,
+            )
+          else if (status.isLoading)
             // Show loading indicator while analyzing
             Row(
               children: [

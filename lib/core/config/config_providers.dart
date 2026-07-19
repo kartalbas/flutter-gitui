@@ -24,7 +24,10 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
 
   // Normal constructor - loads config asynchronously
   ConfigNotifier(this._ref) : super(AppConfig.defaults) {
-    _loadConfig();
+    // Deferred because _loadConfig() writes the loading state provider before
+    // its first await, which inside configProvider's own creation trips
+    // Riverpod's "cannot modify providers during initialization" error.
+    Future(() => _loadConfig());
   }
 
   // Constructor with pre-loaded config - skips loading

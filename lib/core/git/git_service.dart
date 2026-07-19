@@ -1341,13 +1341,41 @@ class GitService {
     });
   }
 
+  /// Resolves which ref a destructive stash command should target.
+  ///
+  /// Stash refs are positional: any stash created or dropped outside the app
+  /// renumbers the remaining entries, so a ref captured at list time can
+  /// silently address a different stash than the one the user picked. When
+  /// the caller supplies the stash's immutable commit hash, the list is
+  /// re-read and the entry located by hash, so the command hits the chosen
+  /// stash even after indices shifted.
+  Future<String> _resolveStashRef(String stashRef, String? expectedHash) async {
+    if (expectedHash == null) {
+      return stashRef;
+    }
+    final stashes = (await getStashes()).unwrap();
+    for (final stash in stashes) {
+      if (stash.hash == expectedHash) {
+        return stash.ref;
+      }
+    }
+    throw GitException(
+      'Stash $stashRef no longer exists.',
+      stderr: 'No stash currently resolves to commit $expectedHash. '
+          'It may have been dropped or popped outside the app.',
+    );
+  }
+
   /// Pop a stash (apply and remove)
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
   /// [index] - Also restore staged changes
-  Future<Result<void>> popStash(String stashRef, {bool index = false}) async {
+  /// [expectedHash] - Commit hash of the stash; when given, the stash is
+  /// re-located by hash so positional shifts cannot redirect the pop
+  Future<Result<void>> popStash(String stashRef, {bool index = false, String? expectedHash}) async {
     return runCatchingAsync(() async {
-      final parts = ['stash', 'pop', '"$stashRef"'];
+      final ref = await _resolveStashRef(stashRef, expectedHash);
+      final parts = ['stash', 'pop', '"$ref"'];
 
       if (index) {
         parts.add('--index');
@@ -1360,9 +1388,12 @@ class GitService {
   /// Drop a stash (remove without applying)
   ///
   /// [stashRef] - Stash reference (e.g., "stash@{0}")
-  Future<Result<void>> dropStash(String stashRef) async {
+  /// [expectedHash] - Commit hash of the stash; when given, the stash is
+  /// re-located by hash so positional shifts cannot redirect the drop
+  Future<Result<void>> dropStash(String stashRef, {String? expectedHash}) async {
     return runCatchingAsync(() async {
-      await _execute('stash drop "$stashRef"');
+      final ref = await _resolveStashRef(stashRef, expectedHash);
+      await _execute('stash drop "$ref"');
     });
   }
 

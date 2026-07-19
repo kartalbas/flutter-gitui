@@ -1005,11 +1005,18 @@ class GitActions {
   }
 
   /// Pop a stash (apply and remove)
-  Future<void> popStash(String stashRef, {bool index = false, bool skipRefresh = false}) async {
+  Future<void> popStash(String stashRef, {bool index = false, String? expectedHash, bool skipRefresh = false}) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    (await gitService.popStash(stashRef, index: index)).unwrap();
+    final result = await gitService.popStash(stashRef, index: index, expectedHash: expectedHash);
+    if (result.isFailure) {
+      // A failure can mean the displayed list no longer matches the reflog
+      // (stash moved or vanished); re-sync before surfacing the error so the
+      // next attempt targets real entries.
+      await refreshStashes();
+    }
+    result.unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.stashes, refreshStashes);
       await _refreshOrQueue(RefreshType.status, refreshStatus);
@@ -1017,11 +1024,18 @@ class GitActions {
   }
 
   /// Drop a stash
-  Future<void> dropStash(String stashRef, {bool skipRefresh = false}) async {
+  Future<void> dropStash(String stashRef, {String? expectedHash, bool skipRefresh = false}) async {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    (await gitService.dropStash(stashRef)).unwrap();
+    final result = await gitService.dropStash(stashRef, expectedHash: expectedHash);
+    if (result.isFailure) {
+      // A failure can mean the displayed list no longer matches the reflog
+      // (stash moved or vanished); re-sync before surfacing the error so the
+      // next attempt targets real entries.
+      await refreshStashes();
+    }
+    result.unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.stashes, refreshStashes);
     }

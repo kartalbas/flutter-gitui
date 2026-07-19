@@ -239,7 +239,7 @@ class StashListTile extends ConsumerWidget {
 
   Future<void> _popStash(BuildContext context, WidgetRef ref) async {
     try {
-      await ref.read(gitActionsProvider).popStash(stash.ref);
+      await ref.read(gitActionsProvider).popStash(stash.ref, expectedHash: stash.hash);
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
@@ -302,7 +302,7 @@ class StashListTile extends ConsumerWidget {
 
     if (confirmed == true && context.mounted) {
       try {
-        await ref.read(gitActionsProvider).dropStash(stash.ref);
+        await ref.read(gitActionsProvider).dropStash(stash.ref, expectedHash: stash.hash);
       } catch (e) {
         if (context.mounted) {
           final l10n = AppLocalizations.of(context)!;

@@ -587,26 +587,22 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
   void _selectAllTags(List<GitTag> tags) {
     setState(() {
-      // Apply same filters as the list view
-      final filteredAndSortedTags = tags.where((tag) {
-        // Apply type filter
-        if (_filterType == TagFilterType.annotated && !tag.isAnnotated) {
-          return false;
-        }
-        if (_filterType == TagFilterType.lightweight && !tag.isLightweight) {
-          return false;
-        }
+      // Use the very same filter the list view uses. A reimplementation here
+      // only honoured the type filter and a plain substring search, so
+      // 'Select All' selected tags hidden by the active date, author or regex
+      // filters -- and a batch delete then removed tags the user never saw.
+      final visible = _tagsService.filterTags(
+        tags: tags,
+        filterType: _filterType,
+        searchQuery: _searchQuery,
+        useRegex: _useRegex,
+        dateFilter: _dateFilter,
+        customDateStart: _customDateStart,
+        customDateEnd: _customDateEnd,
+        authorFilter: _authorFilter,
+      );
 
-        // Apply search filter
-        if (_searchQuery.isEmpty) return true;
-
-        final query = _searchQuery.toLowerCase();
-        return tag.name.toLowerCase().contains(query) ||
-               tag.displayMessage.toLowerCase().contains(query) ||
-               tag.commitHash.toLowerCase().contains(query);
-      });
-
-      _selectedTags.addAll(filteredAndSortedTags.map((tag) => tag.name));
+      _selectedTags.addAll(visible.map((tag) => tag.name));
     });
   }
 

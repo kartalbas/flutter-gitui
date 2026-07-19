@@ -38,6 +38,15 @@ class RepositoryMultiSelectNotifier extends StateNotifier<Set<String>> {
     state = {};
   }
 
+  /// Drop selected paths that are no longer part of the workspace, so a removal
+  /// cannot leave multi-select mode active with nothing visible selected
+  void retainPaths(Set<String> paths) {
+    final retained = state.where(paths.contains).toSet();
+    if (retained.length != state.length) {
+      state = retained;
+    }
+  }
+
   /// Check if a repository is selected
   bool isSelected(WorkspaceRepository repository) {
     return state.contains(repository.path);

@@ -595,6 +595,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       // Remove repository from workspace
       await ref.read(workspaceProvider.notifier).removeRepository(repo.path);
 
+      // A removed repository must not stay selected, otherwise multi-select mode
+      // stays active with nothing visible selected
+      ref.read(repositoryMultiSelectProvider.notifier).deselect(repo);
+
       // Remove repository path from all projects that contain it
       final projects = ref.read(projectProvider);
       for (final project in projects) {
@@ -631,6 +635,11 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     // Get count after validation
     final remainingRepos = ref.read(workspaceProvider).length;
     final removedCount = totalRepos - remainingRepos;
+
+    // Repositories dropped by validation must not stay selected
+    ref.read(repositoryMultiSelectProvider.notifier).retainPaths(
+          ref.read(workspaceProvider).map((repo) => repo.path).toSet(),
+        );
     Logger.info('Dashboard: Validation complete. Removed: $removedCount, Remaining: $remainingRepos');
 
     // Show feedback to user with proper colors
@@ -677,6 +686,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
 
       // Clear all repositories from workspace
       await ref.read(workspaceProvider.notifier).clearAll();
+
+      // No repository is left to be selected
+      ref.read(repositoryMultiSelectProvider.notifier).clearSelection();
 
       // Remove all repository paths from all projects
       final projects = ref.read(projectProvider);

@@ -488,13 +488,15 @@ class TagListTile extends ConsumerWidget {
         icon: PhosphorIconsRegular.warningCircle,
         title: AppLocalizations.of(context)!.dialogTitleDeleteTag,
         content: Text(
-          isLocalOnly
+          // Without remotes the tag can only be deleted locally, so the
+          // dialog must not claim it will also be removed from a remote.
+          willDeleteFromRemote
               ? AppLocalizations.of(
                   context,
-                )!.dialogContentDeleteTagLocal(tag.name)
+                )!.dialogContentDeleteTagRemote(tag.name)
               : AppLocalizations.of(
                   context,
-                )!.dialogContentDeleteTagRemote(tag.name),
+                )!.dialogContentDeleteTagLocal(tag.name),
         ),
         variant: DialogVariant.destructive,
         actions: [
@@ -515,7 +517,6 @@ class TagListTile extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       // Capture localization strings before async operations
       final l10n = AppLocalizations.of(context)!;
-      final remoteName = remotes.contains('origin') ? 'origin' : remotes.first;
 
       try {
         // Start progress tracking
@@ -539,6 +540,11 @@ class TagListTile extends ConsumerWidget {
 
         // Delete from remote if tag was synced (this will also auto-refresh)
         if (willDeleteFromRemote) {
+          // Resolved only here: remotes is guaranteed non-empty when
+          // willDeleteFromRemote is true, so .first cannot throw.
+          final remoteName = remotes.contains('origin')
+              ? 'origin'
+              : remotes.first;
           ref
               .read(progressProvider.notifier)
               .updateProgress(

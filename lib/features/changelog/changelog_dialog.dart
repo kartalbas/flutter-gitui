@@ -442,6 +442,17 @@ class ChangelogDialog extends HookConsumerWidget {
       return;
     }
 
+    // The changelog is a bundled asset that only the local release scripts
+    // regenerate, so a tagged build can ship notes for an older version.
+    // Announcing those as LATEST would tell the user they installed the wrong
+    // build, so stay silent until the asset catches up with the app.
+    if (latestRelease.version != currentVersion.split('+').first) {
+      Logger.info(
+        '[ChangelogDialog] Not showing - changelog latest ${latestRelease.version} does not match app $currentVersion',
+      );
+      return;
+    }
+
     // Compare without the build number so this matches shouldShowWhatsNew, which
     // treats "0.1.0+1" and "0.1.0+2" as the same version.
     final isVersionUpgrade =

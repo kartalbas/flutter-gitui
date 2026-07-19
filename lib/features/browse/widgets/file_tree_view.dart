@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../generated/app_localizations.dart';

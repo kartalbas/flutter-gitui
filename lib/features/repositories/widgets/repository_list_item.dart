@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 
 import '../../../generated/app_localizations.dart';

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../../shared/components/base_viewer_dialog.dart';

@@ -3,7 +3,7 @@ import '../components/base_animated_widgets.dart';
 import '../components/base_menu_item.dart';
 import '../components/country_flag.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'dart:ui' as ui;
 
 import '../theme/app_theme.dart';

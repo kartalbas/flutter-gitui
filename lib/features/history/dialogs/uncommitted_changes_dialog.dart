@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_button.dart';

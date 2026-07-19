@@ -53,7 +53,12 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
       setState(() {
         _rows = rows;
         _rowCount = rows.length;
-        _columnCount = rows.isNotEmpty ? rows[0].length : 0;
+        // DataTable asserts every row has exactly columns.length cells, so
+        // ragged CSV rows must be measured against the widest row.
+        _columnCount = rows.fold(
+          0,
+          (max, row) => row.length > max ? row.length : max,
+        );
         _isLoading = false;
       });
     } catch (e) {
@@ -119,7 +124,7 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
 
     final firstRow = _rows[0];
     return List.generate(
-      firstRow.length,
+      _columnCount,
       (index) => DataColumn(
         label: Container(
           padding: const EdgeInsets.symmetric(
@@ -127,7 +132,7 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
             vertical: AppTheme.paddingXS,
           ),
           child: TitleSmallLabel(
-            firstRow[index]?.toString() ?? '',
+            index < firstRow.length ? firstRow[index]?.toString() ?? '' : '',
           ),
         ),
       ),
@@ -139,14 +144,15 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
 
     return _rows.skip(1).map((row) {
       return DataRow(
-        cells: row.map((cell) {
+        cells: List.generate(_columnCount, (index) {
+          final cell = index < row.length ? row[index] : null;
           return DataCell(
             SelectableText(
               cell?.toString() ?? '',
               style: const TextStyle(fontFamily: 'monospace'),
             ),
           );
-        }).toList(),
+        }),
       );
     }).toList();
   }

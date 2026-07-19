@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -42,7 +43,9 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
         return;
       }
 
-      final content = await file.readAsString();
+      // Lenient decode so non-UTF-8 markdown still renders instead of
+      // failing a strict UTF-8 decode.
+      final content = utf8.decode(await file.readAsBytes(), allowMalformed: true);
       setState(() {
         _content = content;
         _isLoading = false;

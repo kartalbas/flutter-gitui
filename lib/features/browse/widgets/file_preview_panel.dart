@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,16 +91,22 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
 
       // Try to read as text
       try {
-        final content = await file.readAsString();
+        final bytes = await file.readAsBytes();
 
-        // Check if content appears to be binary
-        if (_containsBinaryCharacters(content)) {
+        // Binary detection works on the raw bytes: a strict UTF-8 decode also
+        // throws for legacy single-byte encodings such as Windows-1252, which
+        // are ordinary previewable text.
+        if (_containsBinaryBytes(bytes)) {
           _applyIfCurrent(requestedPath, () {
             _isBinary = true;
             _isLoading = false;
           });
           return;
         }
+
+        // allowMalformed keeps non-UTF-8 text viewable via replacement
+        // characters instead of failing the whole preview.
+        final content = utf8.decode(bytes, allowMalformed: true);
 
         // Remove carriage returns to prevent double line spacing
         final cleanContent = content.replaceAll('\r', '');
@@ -132,12 +139,12 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
     setState(update);
   }
 
-  bool _containsBinaryCharacters(String content) {
+  bool _containsBinaryBytes(List<int> bytes) {
     // Check for null bytes or high percentage of non-printable characters
-    if (content.contains('\x00')) return true;
+    if (bytes.contains(0)) return true;
 
-    final nonPrintable = content.codeUnits.where((c) => c < 32 && c != 9 && c != 10 && c != 13).length;
-    return nonPrintable > content.length * 0.3;
+    final nonPrintable = bytes.where((b) => b < 32 && b != 9 && b != 10 && b != 13).length;
+    return nonPrintable > bytes.length * 0.3;
   }
 
   String _formatFileSize(int bytes) {

@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.4"
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      # Scoped to the application sources on purpose: the lint_rules/ package
+      # does not compile against analyzer 8.x and is analyzed by its own job.
+      - name: Analyze application code
+        run: flutter analyze lib test
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    # Non-blocking until #242 is resolved: phosphor_flutter 2.1.0 subclasses
+    # IconData, which is now a final class, so no test can compile. The job runs
+    # so the failure stays visible; flip this off once the icon set is replaced.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test --reporter expanded
+
+  build:
+    name: Build ${{ matrix.platform }}
+    needs: analyze
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+          - platform: linux
+            os: ubuntu-latest
+          - platform: macos
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install Linux build dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Build ${{ matrix.platform }}
+        run: flutter build ${{ matrix.platform }} --release
+
+      - name: Collect build output
+        shell: bash
+        run: |
+          mkdir -p dist
+          case "${{ matrix.platform }}" in
+            windows) cp -r build/windows/x64/runner/Release dist/flutter-gitui ;;
+            linux)   cp -r build/linux/x64/release/bundle   dist/flutter-gitui ;;
+            macos)   cp -r build/macos/Build/Products/Release/*.app dist/ ;;
+          esac
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flutter-gitui-${{ matrix.platform }}
+          path: dist/
+          retention-days: 14

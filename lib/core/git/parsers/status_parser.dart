@@ -49,6 +49,13 @@ class StatusParser {
         }
       }
 
+      // Porcelain collapses a wholly untracked directory into a single 'dir/'
+      // entry; keeping the trailing slash yields an empty final path segment,
+      // which surfaces as a blank-named leaf in the changes tree.
+      if (newPath.length > 1 && newPath.endsWith('/')) {
+        newPath = newPath.substring(0, newPath.length - 1);
+      }
+
       final status = FileStatus(
         path: newPath,
         indexStatus: _parseStatus(indexCode),

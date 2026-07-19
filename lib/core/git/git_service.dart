@@ -544,9 +544,18 @@ class GitService {
 
   /// Delete untracked file
   Future<void> deleteUntrackedFile(String filePath) async {
-    final file = File(p.join(repoPath, filePath));
+    final target = p.join(repoPath, filePath);
+    final file = File(target);
     if (await file.exists()) {
       await file.delete();
+      return;
+    }
+    // Porcelain reports a wholly untracked directory as one entry, and
+    // File.exists() is false for a directory, so the delete needs the
+    // directory API or it silently does nothing.
+    final directory = Directory(target);
+    if (await directory.exists()) {
+      await directory.delete(recursive: true);
     }
   }
 

@@ -7,13 +7,18 @@ WORKDIR /app
 COPY . .
 
 # Build command - artifacts go to /app/build which gets copied out
-# Create final structure: main executable at root, libs and data in linux/ subdirectory
+#
+# The bundle layout is Flutter's, not ours: the executable is linked with
+# RPATH "$ORIGIN/lib" (linux/CMakeLists.txt) and the embedder resolves data/
+# relative to the executable. Moving lib/ and data/ into a subdirectory
+# produced a bundle that could not start at all, so they stay siblings of the
+# executable here.
 CMD ["sh", "-c", "flutter pub get && flutter build linux --release --verbose && \
      cd release/updater && dart pub get && dart compile exe updater.dart -o updater && cd ../.. && \
      cd build/linux/x64/release && \
-     mkdir -p universal/linux && \
-     mv bundle/flutter_gitui universal/flutter-gitui && \
-     mv bundle/lib universal/linux/ && \
-     mv bundle/data universal/linux/ && \
-     if [ -f /app/release/updater/updater ]; then cp /app/release/updater/updater universal/linux/updater && chmod +x universal/linux/updater && echo 'Updater compiled and copied'; fi && \
-     chmod +x universal/flutter-gitui"]
+     rm -rf universal && mkdir -p universal && \
+     cp -a bundle/. universal/ && \
+     mv universal/flutter_gitui universal/flutter-gitui && \
+     if [ -f /app/release/updater/updater ]; then cp /app/release/updater/updater universal/updater && chmod +x universal/updater && echo 'Updater compiled and copied'; fi && \
+     chmod +x universal/flutter-gitui && \
+     test -d universal/lib && test -d universal/data || { echo 'FATAL: bundle layout is missing lib/ or data/'; exit 1; }"]

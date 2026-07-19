@@ -58,7 +58,7 @@ function New-Archive {
             docker run --rm `
                 -v "${srcMount}:/src" `
                 -v "${outMount}:/out" `
-                alpine:3.20 sh -c "cd /src && chmod +x flutter_gitui updater 2>/dev/null; tar czf /out/$archiveName ." | Out-Null
+                alpine:3.20 sh -c "cd /src && chmod +x flutter-gitui updater 2>/dev/null; tar czf /out/$archiveName ." | Out-Null
             if ($LASTEXITCODE -ne 0 -or -not (Test-Path $archivePath)) {
                 throw "Failed to create Linux archive $archiveName"
             }

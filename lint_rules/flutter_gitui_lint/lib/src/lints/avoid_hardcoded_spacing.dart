@@ -40,7 +40,10 @@ class AvoidHardcodedSpacing extends DartLintRule {
   void _checkExpression(Expression expression, DiagnosticReporter reporter) {
     if (expression is DoubleLiteral) {
       final value = expression.value;
-      if (_commonSpacingValues.contains(value.toInt())) {
+      // Fractional values are deliberate optical adjustments with no AppTheme
+      // counterpart, so only whole-valued doubles may match a spacing constant.
+      if (value == value.roundToDouble() &&
+          _commonSpacingValues.contains(value.toInt())) {
         reporter.atNode(expression, code);
       }
     } else if (expression is IntegerLiteral) {

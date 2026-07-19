@@ -724,6 +724,31 @@ class GitService {
     return LogParser.parse(output);
   }
 
+  /// Expands the path field of a `--numstat` line into the paths it stands for.
+  ///
+  /// A rename is not printed as a plain path there: git factors out the common
+  /// prefix and suffix and emits `pfx{old => new}sfx`, or `old => new` when the
+  /// two share nothing. Comparing that field literally against the plain paths
+  /// from `--name-status` never matched, so every renamed file was reported
+  /// with zero additions and deletions.
+  static List<String> _expandNumstatPath(String statsPath) {
+    final arrow = statsPath.indexOf(' => ');
+    if (arrow < 0) return [statsPath];
+
+    final open = statsPath.lastIndexOf('{', arrow);
+    final close = statsPath.indexOf('}', arrow);
+    if (open < 0 || close < 0) {
+      return [statsPath.substring(0, arrow), statsPath.substring(arrow + 4)];
+    }
+
+    final prefix = statsPath.substring(0, open);
+    final suffix = statsPath.substring(close + 1);
+    return [
+      '$prefix${statsPath.substring(open + 1, arrow)}$suffix',
+      '$prefix${statsPath.substring(arrow + 4, close)}$suffix',
+    ];
+  }
+
   /// Get changed files for a specific commit with statistics
   Future<List<FileChange>> getCommitChangedFiles(String commitHash) async {
     try {
@@ -765,8 +790,9 @@ class GitService {
           final statsParts = statsLine.split('\t');
           if (statsParts.length < 3) continue;
 
-          final statsPath = statsParts[2];
-          if (statsPath == path || (oldPath != null && statsPath == oldPath)) {
+          final statsPaths = _expandNumstatPath(statsParts[2]);
+          if (statsPaths.contains(path) ||
+              (oldPath != null && statsPaths.contains(oldPath))) {
             additions = int.tryParse(statsParts[0]) ?? 0;
             deletions = int.tryParse(statsParts[1]) ?? 0;
             break;

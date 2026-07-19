@@ -288,10 +288,12 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       ).then((result) => result.unwrapOr(''));
 
       if (filePath.isEmpty) {
-        setState(() {
-          _errorMessage = 'Failed to download update. Please try again later.';
-          _isDownloading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Failed to download update. Please try again later.';
+            _isDownloading = false;
+          });
+        }
         return;
       }
 

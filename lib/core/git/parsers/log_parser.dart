@@ -5,18 +5,19 @@ class LogParser {
   LogParser._();
 
   /// Custom format string for git log
-  /// Format: hash|short|author|email|date|committer|cemail|cdate|parents|refs|subject|body
+  /// Fields: hash, short, author, email, date, committer, cemail, cdate,
+  /// parents, refs, subject, body — delimited by the unit separator (%x1f)
+  /// because '|' can legitimately appear in subjects and author names.
   static const String gitLogFormat =
-      '%H|%h|%an|%ae|%aI|%cn|%ce|%cI|%P|%D|%s|%b';
+      '%H%x1f%h%x1f%an%x1f%ae%x1f%aI%x1f%cn%x1f%ce%x1f%cI%x1f%P%x1f%D%x1f%s%x1f%b';
 
   /// Separator between commits
   static const String commitSeparator = '<<COMMIT_END>>';
 
   /// Parse git log output with custom format
   ///
-  /// Expected format per commit:
-  /// hash|short|author|email|date|committer|cemail|cdate|parents|refs|subject
-  /// body (multiple lines)
+  /// Expected format per commit: one header line whose twelfth field (%b)
+  /// carries the body's first line, then the remaining body lines, then
   /// `<<COMMIT_END>>`
   static List<GitCommit> parse(String output) {
     if (output.trim().isEmpty) {
@@ -48,9 +49,9 @@ class LogParser {
     final lines = block.split('\n');
     if (lines.isEmpty) return null;
 
-    // First line contains the pipe-separated fields
-    final fields = lines[0].split('|');
-    if (fields.length < 11) return null; // Need at least 11 fields
+    // First line contains the unit-separator-delimited fields
+    final fields = lines[0].split('\x1f');
+    if (fields.length < 12) return null; // Need all 12 fields
 
     final hash = fields[0].trim();
     final shortHash = fields[1].trim();
@@ -64,8 +65,11 @@ class LogParser {
     final refsStr = fields[9].trim();
     final subject = fields[10].trim();
 
-    // Body is everything after the first line
-    final body = lines.length > 1 ? lines.sublist(1).join('\n').trim() : '';
+    // %b emits the body's first line on the header line after the last
+    // separator, so it must be stitched back onto the remaining lines
+    final body = [fields.sublist(11).join('\x1f'), ...lines.sublist(1)]
+        .join('\n')
+        .trim();
 
     // Parse dates
     DateTime? authorDate;

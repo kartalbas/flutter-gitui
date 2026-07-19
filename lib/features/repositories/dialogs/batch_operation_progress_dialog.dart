@@ -114,7 +114,32 @@ class _BatchOperationProgressDialogState extends State<BatchOperationProgressDia
     } catch (e) {
       if (mounted) {
         setState(() {
+          // A throw aborts the batch before any per-repository result exists, so
+          // every repository has to be surfaced as failed. Otherwise the summary
+          // renders as a success and callers read the null result as a plain
+          // dismissal, hiding the failure completely.
+          final error = e.toString();
+          _results = [
+            for (final repo in widget.repositories)
+              BatchOperationResult(
+                repository: repo,
+                success: false,
+                error: error,
+              ),
+          ];
           _isRunning = false;
+          _successCount = 0;
+          _failureCount = widget.repositories.length;
+
+          for (final repo in widget.repositories) {
+            _progress[repo.path] = RepositoryProgress(
+              repository: repo,
+              status: error,
+              completed: true,
+              success: false,
+              error: error,
+            );
+          }
         });
       }
     }

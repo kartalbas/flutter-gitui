@@ -252,8 +252,10 @@ Create a `.env` file in the project root with the following optional variables:
 # Azure Blob Storage (for release uploads)
 FLUTTERGITUIARTIFACTS_CONNECTION_STRING=DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...
 
-# Anthropic Claude API (for AI-powered changelogs)
-ANTHROPIC_API_KEY=sk-ant-...
+# Optional: AI-assisted release changelog (any chat-completions style endpoint)
+CHANGELOG_API_URL=
+CHANGELOG_API_KEY=
+CHANGELOG_API_MODEL=
 ```
 
 ### Build Parameters
@@ -345,9 +347,9 @@ Example:
 - Verify git commits follow conventional commit format
 
 **"Changelog generation failed"**
-- Claude API key is optional (falls back to simple changelog)
-- Check `.env` file for `ANTHROPIC_API_KEY` if using AI generation
-- Verify internet connection if using Claude API
+- The changelog API is optional (falls back to a plain commit bullet list)
+- Check `.env` for `CHANGELOG_API_URL`, `CHANGELOG_API_KEY` and `CHANGELOG_API_MODEL`
+- Verify internet connectivity when the changelog API is configured
 
 **"Azure upload failed"**
 - Azure upload is optional (use `-SkipAzureUpload` to skip)

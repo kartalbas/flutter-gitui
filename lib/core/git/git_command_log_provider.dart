@@ -36,9 +36,3 @@ final gitCommandLogProvider =
     StateNotifierProvider<GitCommandLogNotifier, List<GitCommandLog>>((ref) {
       return GitCommandLogNotifier();
     });
-
-/// Provider for the command log panel visibility
-final commandLogPanelVisibleProvider = StateProvider<bool>((ref) => false);
-
-/// Provider for the command log panel width
-final commandLogPanelWidthProvider = StateProvider<double>((ref) => 600.0);

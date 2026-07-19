@@ -550,8 +550,8 @@ Map<ShortcutActivator, VoidCallback> _buildShortcuts() {
 
     // Toggle Command Log
     const SingleActivator(LogicalKeyboardKey.keyL, control: true): () {
-      ref.read(commandLogPanelVisibleProvider.notifier).state =
-          !ref.read(commandLogPanelVisibleProvider);
+      ref.read(configProvider.notifier).setCommandLogPanelVisible(
+          !ref.read(commandLogPanelVisibleProvider));
     },
 
     // Repository Switcher

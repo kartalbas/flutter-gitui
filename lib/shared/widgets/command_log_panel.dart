@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_card.dart';
 import '../components/base_button.dart';
+import '../../core/config/config_providers.dart';
 import '../../core/git/git_command_log_provider.dart';
 import '../../core/git/models/git_command_log.dart';
 
@@ -91,7 +92,7 @@ class CommandLogPanel extends ConsumerWidget {
             icon: PhosphorIconsRegular.x,
             tooltip: l10n.close,
             onPressed: () {
-              ref.read(commandLogPanelVisibleProvider.notifier).state = false;
+              ref.read(configProvider.notifier).setCommandLogPanelVisible(false);
             },
           ),
         ],

@@ -20,9 +20,8 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_dialog.dart';
-import '../git/git_command_log_provider.dart';
 import '../git/git_providers.dart';
-import '../config/config_providers.dart' hide commandLogPanelVisibleProvider;
+import '../config/config_providers.dart';
 import '../services/notification_service.dart';
 import '../../shared/dialogs/repository_switcher_dialog.dart';
 import '../workspace/repository_status_provider.dart';
@@ -442,8 +441,8 @@ class _AppShellState extends ConsumerState<AppShell> {
                             icon: PhosphorIconsRegular.terminal,
                             tooltip: AppLocalizations.of(context)!.toggleCommandLogTooltip,
                             onPressed: () {
-                              ref.read(commandLogPanelVisibleProvider.notifier).state =
-                                  !ref.read(commandLogPanelVisibleProvider);
+                              ref.read(configProvider.notifier).setCommandLogPanelVisible(
+                                  !ref.read(commandLogPanelVisibleProvider));
                             },
                             size: ButtonSize.small,
                           ),
@@ -537,8 +536,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     // Toggle Command Log
     bind(LogicalKeyboardKey.keyL, () {
-      ref.read(commandLogPanelVisibleProvider.notifier).state =
-          !ref.read(commandLogPanelVisibleProvider);
+      ref.read(configProvider.notifier).setCommandLogPanelVisible(
+          !ref.read(commandLogPanelVisibleProvider));
     });
 
     // Repository Switcher

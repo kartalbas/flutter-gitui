@@ -211,12 +211,23 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
         onPressed: () async {
           // Reuse the already-resolved diff instead of spawning a second git
           // process for content that is on screen.
-          final diffOutput = await _diffFuture;
-          await Clipboard.setData(ClipboardData(text: diffOutput));
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.snackbarDiffCopied)),
-            );
+          try {
+            final diffOutput = await _diffFuture;
+            await Clipboard.setData(ClipboardData(text: diffOutput));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.snackbarDiffCopied)),
+              );
+            }
+          } catch (e) {
+            // The button stays enabled while the content area shows the load
+            // error, and awaiting the failed future rethrows here, so the
+            // failure has to be reported instead of escaping unhandled.
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.messageErrorLoadingDiff(e.toString()))),
+              );
+            }
           }
         },
       ),

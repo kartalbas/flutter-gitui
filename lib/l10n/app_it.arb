@@ -48,7 +48,6 @@
   "noRepositoryOpen": "Nessun repository aperto",
   "openRepositoryToContinue": "Apri un repository per continuare",
   "errorLoadingData": "Errore nel caricamento di {dataType}",
-  "error": "Errore",
   "retry": "Riprova",
   "selectedCount": "{count} Selezionato/i",
   "exitSelection": "Esci dalla selezione",

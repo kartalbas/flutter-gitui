@@ -75,7 +75,6 @@
       }
     }
   },
-  "error": "Error",
   "retry": "Retry",
   "selectedCount": "{count} Selected",
   "@selectedCount": {

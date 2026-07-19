@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,18 @@ void main() async {
   // Load config synchronously BEFORE building any UI
   // This ensures splash screen displays with correct colors from first frame
   Logger.info('[MAIN] Loading configuration before UI initialization');
-  final initialConfig = await ConfigService.load().then((result) => result.unwrap());
+  // A damaged config file must never prevent the app from starting: unwrap()
+  // here would throw before runApp() and leave the user with a window that
+  // never appears and no way to repair the file from inside the app.
+  final configResult = await ConfigService.load();
+  final initialConfig = configResult.when(
+    success: (config) => config,
+    failure: (message, error, stackTrace) {
+      Logger.error('[MAIN] Configuration could not be loaded: $message');
+      unawaited(_backupUnreadableConfig());
+      return AppConfig.defaults;
+    },
+  );
   Logger.info(
     '[MAIN] Configuration loaded: colorScheme=${initialConfig.ui.colorScheme}, fontFamily=${initialConfig.ui.fontFamily}',
   );
@@ -361,4 +373,29 @@ Future<bool> _detectWSL2() async {
   }
 
   return false;
+}
+
+/// Moves an unreadable configuration file aside so the app can start with
+/// defaults without silently discarding whatever the user had configured.
+///
+/// Writing defaults over a merely unparseable file would destroy the user's
+/// repositories and workspaces; keeping a timestamped copy lets them recover
+/// or report it.
+Future<void> _backupUnreadableConfig() async {
+  try {
+    final path = await ConfigService.getConfigFilePath();
+    final file = File(path);
+    if (!await file.exists()) return;
+
+    final stamp = DateTime.now()
+        .toIso8601String()
+        .replaceAll(':', '-')
+        .split('.')
+        .first;
+    final backup = '$path.corrupt-$stamp.bak';
+    await file.copy(backup);
+    Logger.warning('[MAIN] Unreadable configuration backed up to $backup');
+  } catch (e) {
+    Logger.error('[MAIN] Could not back up unreadable configuration: $e');
+  }
 }

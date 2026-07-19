@@ -679,8 +679,18 @@ class GitService {
   /// Returns [Result.Failure] if git command fails.
   Future<Result<GitCommit?>> getCommit(String hash) async {
     return runCatchingAsync(() async {
-      // Internal call - unwrap the Result since we're in the same service
-      final commits = await getLog(limit: 1).then((result) => result.unwrap());
+      // The hash is caller-supplied, so it is quoted like every other argument
+      // built here rather than interpolated raw. The trailing "--" keeps git
+      // from falling back to resolving an unknown revision as a pathspec.
+      final result = await _execute(
+        'log --format="${LogParser.gitLogFormat}${LogParser.commitSeparator}" '
+        '-n 1 ${_quoteArg(hash)} --',
+        throwOnError: false,
+      );
+      if (result.exitCode != 0) {
+        return null;
+      }
+      final commits = LogParser.parse(result.stdout.toString());
       return commits.isNotEmpty ? commits.first : null;
     });
   }

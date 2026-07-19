@@ -29,7 +29,10 @@ class NotificationService {
     if (!context.mounted) return;
 
     final colorScheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context).showSnackBar(
+    // Resolve the messenger now: the snackbar outlives this context, so
+    // button callbacks must not look it up after the widget is disposed.
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
@@ -51,7 +54,7 @@ class NotificationService {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: message));
                 // Show brief feedback
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(
                     content: const Text('Error copied to clipboard'),
                     duration: const Duration(seconds: 1),
@@ -91,7 +94,7 @@ class NotificationService {
           label: 'DISMISS',
           textColor: colorScheme.onError,
           onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            messenger.hideCurrentSnackBar();
           },
         ),
       ),
@@ -119,7 +122,10 @@ class NotificationService {
     if (!context.mounted) return;
 
     final colorScheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context).showSnackBar(
+    // Resolve the messenger now: the snackbar outlives this context, so
+    // button callbacks must not look it up after the widget is disposed.
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
@@ -141,7 +147,7 @@ class NotificationService {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: message));
                 // Show brief feedback
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(
                     content: const Text('Warning copied to clipboard'),
                     duration: const Duration(seconds: 1),
@@ -181,7 +187,7 @@ class NotificationService {
           label: 'DISMISS',
           textColor: colorScheme.onSecondary,
           onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            messenger.hideCurrentSnackBar();
           },
         ),
       ),

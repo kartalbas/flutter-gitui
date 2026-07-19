@@ -209,7 +209,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
         variant: ButtonVariant.tertiary,
         leadingIcon: PhosphorIconsRegular.copy,
         onPressed: () async {
-          final diffOutput = await _loadDiff();
+          // Reuse the already-resolved diff instead of spawning a second git
+          // process for content that is on screen.
+          final diffOutput = await _diffFuture;
           await Clipboard.setData(ClipboardData(text: diffOutput));
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

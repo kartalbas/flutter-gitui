@@ -7,6 +7,8 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../shared/components/base_select_all_button.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
+import '../../../core/workspace/models/repository_status.dart';
+import '../../../core/workspace/repository_status_provider.dart';
 import '../repository_multi_select_provider.dart';
 
 /// Filter chips and selection controls for repositories screen
@@ -30,11 +32,19 @@ class RepositoriesFilterChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Mirror the per-card selectability rule: a broken repo renders neither a
+    // checkbox nor a tap target, so selecting it would strand it in the selection
+    final statuses = ref.watch(workspaceRepositoryStatusProvider);
+    final selectableRepositories = filteredRepositories.where((r) {
+      final status = statuses[r.path] ?? RepositoryStatus.unknown;
+      return r.isValidGitRepo && (status.isLoading || !status.isBroken);
+    }).toList();
+
     // Selection is tracked over the unfiltered repo list, so only containment of
     // every visible repo may flip the button to 'Deselect all'
     final selectedPaths = selectedRepositories.map((r) => r.path).toSet();
-    final isAllSelected = filteredRepositories.isNotEmpty &&
-        filteredRepositories.every((r) => selectedPaths.contains(r.path));
+    final isAllSelected = selectableRepositories.isNotEmpty &&
+        selectableRepositories.every((r) => selectedPaths.contains(r.path));
 
     return Row(
       children: [
@@ -59,14 +69,14 @@ class RepositoriesFilterChips extends ConsumerWidget {
         const SizedBox(width: AppTheme.paddingM),
 
         // Select All / Deselect All
-        if (filteredRepositories.isNotEmpty)
+        if (selectableRepositories.isNotEmpty)
           BaseSelectAllButton(
             isAllSelected: isAllSelected,
             onPressed: () {
               if (isAllSelected) {
                 ref.read(repositoryMultiSelectProvider.notifier).clearSelection();
               } else {
-                ref.read(repositoryMultiSelectProvider.notifier).selectAll(filteredRepositories);
+                ref.read(repositoryMultiSelectProvider.notifier).selectAll(selectableRepositories);
               }
             },
           ),

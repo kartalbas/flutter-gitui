@@ -58,6 +58,11 @@ class GitService {
       verbose: false, // Disable console output to prevent FileSystemException on Windows GUI apps
       stdout: null, // Don't pipe to stdout (invalid handle on Windows GUI apps)
       stderr: null, // Don't pipe to stderr (invalid handle on Windows GUI apps)
+      // Git is forced to emit UTF-8 via LC_ALL/LANG below, so decode with
+      // UTF-8 too; the default systemEncoding is the ANSI code page on
+      // Windows, which garbles non-ASCII names, messages, and diffs.
+      stdoutEncoding: utf8,
+      stderrEncoding: utf8,
       // Set environment to force UTF-8 encoding for git output
       environment: {
         ...Platform.environment,

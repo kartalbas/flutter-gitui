@@ -707,9 +707,27 @@ class GitService {
   /// Returns the raw file content as bytes
   Future<List<int>> getFileContentAtCommit(String commitHash, String filePath) async {
     try {
-      final result = await _execute(
-        'show "$commitHash:$filePath"',
-        throwOnError: false,
+      if (gitExecutablePath == null || gitExecutablePath!.isEmpty) {
+        throw GitException(
+          'Git executable path not configured. Please configure it in Settings.',
+          stderr: 'Git executable path is required but not set in configuration.',
+        );
+      }
+
+      // The shared shell always decodes stdout to a String, so the content can
+      // never come back as bytes through _execute -- and decoding would corrupt
+      // binary files anyway. Run the process directly with a null encoding to
+      // receive the file content exactly as git emits it.
+      final result = await Process.run(
+        gitExecutablePath!,
+        ['show', '$commitHash:$filePath'],
+        workingDirectory: repoPath,
+        stdoutEncoding: null,
+      ).timeout(
+        _localTimeout,
+        onTimeout: () => throw GitException(
+          'Git command timed out after ${_localTimeout.inSeconds}s: show',
+        ),
       );
 
       if (result.exitCode != 0) {
@@ -719,7 +737,6 @@ class GitService {
         );
       }
 
-      // Return raw bytes - git show outputs the file content as-is
       return result.stdout as List<int>;
     } catch (e) {
       throw GitException(

@@ -32,8 +32,10 @@ final gitServiceProvider = Provider<GitService?>((ref) {
   final gitExecutablePath = ref.watch(gitExecutablePathProvider);
 
   // Get protected branches from config
-  final config = ref.watch(configProvider);
-  final protectedBranches = config.git.protectedBranches;
+  // Narrow the dependency: watching the whole config rebuilt this provider on
+  // every cosmetic change (theme, font size, workspace save), discarding a
+  // GitService that may still have commands in flight.
+  final protectedBranches = ref.watch(configProvider.select((config) => config.git.protectedBranches));
 
   // Wire up command logging and progress tracking
   return GitService(
@@ -41,8 +43,12 @@ final gitServiceProvider = Provider<GitService?>((ref) {
     gitExecutablePath: gitExecutablePath,
     protectedBranches: protectedBranches,
     onCommandExecuted: (log) {
-      // Add to command log provider for UI display
-      ref.read(gitCommandLogProvider.notifier).addLog(log);
+      // A long-running command can finish after this provider was disposed;
+      // reading the disposed Ref would throw and abort the completion path.
+      if (ref.mounted) {
+        // Add to command log provider for UI display
+        ref.read(gitCommandLogProvider.notifier).addLog(log);
+      }
 
       // Also log to git.log file
       Logger.git(
@@ -59,6 +65,9 @@ final gitServiceProvider = Provider<GitService?>((ref) {
       // Schedule the progress update asynchronously to avoid modifying
       // providers during another provider's initialization
       Future.microtask(() {
+        // The microtask gap lets the provider be disposed before this runs;
+        // an unguarded read would surface as an unhandled zone error.
+        if (!ref.mounted) return;
         if (isComplete) {
           ref.read(progressProvider.notifier).completeOperation();
         } else {

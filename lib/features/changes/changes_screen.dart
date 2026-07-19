@@ -191,7 +191,11 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
               BaseButton(
                 label: AppLocalizations.of(context)!.tooltipDiscardAllChanges,
                 leadingIcon: PhosphorIconsRegular.trash,
-                onPressed: unstagedFiles.isNotEmpty
+                // Discarding restores tracked files from the index and cannot
+                // reach untracked ones, which the unstaged list also carries.
+                // Enabling on that whole list offered a destructive action that
+                // did nothing once the only difference was a new file.
+                onPressed: unstagedFiles.any((file) => !file.isUntracked)
                     ? () => _confirmDiscardAll(context, ref)
                     : null,
                 variant: ButtonVariant.dangerSecondary,

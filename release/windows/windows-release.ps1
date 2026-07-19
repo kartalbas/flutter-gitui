@@ -289,40 +289,6 @@ try {
 }
 
 # ============================================================================
-# STEP 8: UPDATE WINGET MANIFEST
-# ============================================================================
-
-$currentStep++
-Write-Log "[Step $currentStep/$totalSteps] Updating winget manifest..." "Yellow"
-
-try {
-    $wingetOutput = & "$sharedDir/update-winget-manifest.ps1" `
-        -ArchivePath $archiveResult.Archive.FilePath `
-        -Version $version `
-        -SkipWinget:$SkipWinget 2>&1
-    $wingetOutput | ForEach-Object {
-        Write-Host $_
-        $_ | Out-File -FilePath $buildLogFile -Append -Encoding UTF8
-    }
-    $wingetResult = $wingetOutput | Select-Object -Last 1
-
-    if ($wingetResult -and $wingetResult.Success) {
-        if ($wingetResult.Skipped) {
-            Write-Log "[SKIP] Winget manifest update skipped on request" "Yellow"
-        } else {
-            Write-Log "[OK] Winget manifest updated" "Green"
-        }
-    } else {
-        Write-Log "[ERROR] Winget manifest update failed: $($wingetResult.Error)" "Red"
-        exit 1
-    }
-    Write-Log ""
-} catch {
-    Write-Log "[ERROR] Winget manifest update failed: $($_.Exception.Message)" "Red"
-    exit 1
-}
-
-# ============================================================================
 # STEP 9: AZURE UPLOAD (Optional)
 # ============================================================================
 
@@ -354,7 +320,51 @@ if (-not $SkipAzureUpload) {
 }
 
 # ============================================================================
-# STEP 10: BUILD SUMMARY
+# STEP 10: UPDATE WINGET MANIFEST
+# ============================================================================
+
+# The manifest pins an installer URL in the release container together with the
+# archive hash, so it may only be written once that exact blob is published. If
+# it were written before the upload, a skipped or failed upload would leave a
+# manifest pointing at a URL that never appears - or at a stale blob of the same
+# name - and winget validation would only catch it after the PR is opened.
+if (-not $SkipAzureUpload) {
+    $currentStep++
+    Write-Log "[Step $currentStep/$totalSteps] Updating winget manifest..." "Yellow"
+
+    try {
+        $wingetOutput = & "$sharedDir/update-winget-manifest.ps1" `
+            -ArchivePath $archiveResult.Archive.FilePath `
+            -Version $version `
+            -SkipWinget:$SkipWinget 2>&1
+        $wingetOutput | ForEach-Object {
+            Write-Host $_
+            $_ | Out-File -FilePath $buildLogFile -Append -Encoding UTF8
+        }
+        $wingetResult = $wingetOutput | Select-Object -Last 1
+
+        if ($wingetResult -and $wingetResult.Success) {
+            if ($wingetResult.Skipped) {
+                Write-Log "[SKIP] Winget manifest update skipped on request" "Yellow"
+            } else {
+                Write-Log "[OK] Winget manifest updated" "Green"
+            }
+        } else {
+            Write-Log "[ERROR] Winget manifest update failed: $($wingetResult.Error)" "Red"
+            exit 1
+        }
+        Write-Log ""
+    } catch {
+        Write-Log "[ERROR] Winget manifest update failed: $($_.Exception.Message)" "Red"
+        exit 1
+    }
+} else {
+    Write-Log "[SKIP] Winget manifest update (--SkipAzureUpload)" "Yellow"
+    Write-Log ""
+}
+
+# ============================================================================
+# STEP 11: BUILD SUMMARY
 # ============================================================================
 
 $currentStep++
@@ -392,7 +402,7 @@ try {
 }
 
 # ============================================================================
-# STEP 11: GIT COMMIT
+# STEP 12: GIT COMMIT
 # ============================================================================
 
 $currentStep++

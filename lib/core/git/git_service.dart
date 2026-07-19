@@ -2482,10 +2482,19 @@ class GitService {
     // Step 2: Soft reset to parent (keeps all changes in staging area)
     await _execute('reset --soft $parentCommit');
 
-    // Step 3: Create new commit with all the changes
-    await _withMessageFile(newMessage, (path) async {
-      await _execute('commit -F "$path"');
-    });
+    // Step 3: Create new commit with all the changes. The soft reset above has
+    // already rewound the branch, so a commit failure here (hooks, signing,
+    // config) would leave the selected commits missing from history. Restore
+    // the original HEAD before surfacing the error; a soft reset never touches
+    // the index or working tree, so nothing is lost either way.
+    try {
+      await _withMessageFile(newMessage, (path) async {
+        await _execute('commit -F "$path"');
+      });
+    } catch (e) {
+      await _execute('reset --soft $head', throwOnError: false);
+      rethrow;
+    }
   }
 
   // ============================================

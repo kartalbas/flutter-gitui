@@ -44,6 +44,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
         try {
           final result = await gitService.getLastCommitMessage();
           final lastMessage = result.unwrap();
+          if (!mounted) return;
           _messageController.text = lastMessage;
         } catch (e) {
           // Ignore errors loading last commit
@@ -67,9 +68,8 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      setState(() => _isCommitting = false);
-
       if (mounted) {
+        setState(() => _isCommitting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(

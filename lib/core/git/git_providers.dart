@@ -546,7 +546,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.stageFile(path);
+    (await gitService.stageFile(path)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.status, refreshStatus);
     }
@@ -557,7 +557,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.unstageFile(path);
+    (await gitService.unstageFile(path)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.status, refreshStatus);
     }
@@ -568,7 +568,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.stageAll();
+    (await gitService.stageAll()).unwrap();
     await refreshStatus();
   }
 
@@ -577,7 +577,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.unstageAll();
+    (await gitService.unstageAll()).unwrap();
     await refreshStatus();
   }
 
@@ -642,7 +642,7 @@ class GitActions {
     if (gitService == null) return;
 
     for (final path in paths) {
-      await gitService.stageFile(path);
+      (await gitService.stageFile(path)).unwrap();
     }
     await refreshStatus();
   }
@@ -653,7 +653,7 @@ class GitActions {
     if (gitService == null) return;
 
     for (final path in paths) {
-      await gitService.unstageFile(path);
+      (await gitService.unstageFile(path)).unwrap();
     }
     await refreshStatus();
   }
@@ -721,11 +721,11 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.createBranch(
+    (await gitService.createBranch(
       branchName,
       startPoint: startPoint,
       checkout: checkout,
-    );
+    )).unwrap();
 
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.branches, refreshBranches);
@@ -751,7 +751,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.deleteRemoteBranch(remoteName, branchName);
+    (await gitService.deleteRemoteBranch(remoteName, branchName)).unwrap();
     await refreshBranches();
   }
 
@@ -855,7 +855,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.addRemote(name, url);
+    (await gitService.addRemote(name, url)).unwrap();
     await refreshRemotes();
   }
 
@@ -864,7 +864,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.removeRemote(name);
+    (await gitService.removeRemote(name)).unwrap();
     await refreshRemotes();
     await refreshBranches(); // Remote branches may have changed
   }
@@ -874,7 +874,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.renameRemote(oldName, newName);
+    (await gitService.renameRemote(oldName, newName)).unwrap();
     await refreshRemotes();
     await refreshBranches();
   }
@@ -884,7 +884,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.setRemoteUrl(name, url, push: push);
+    (await gitService.setRemoteUrl(name, url, push: push)).unwrap();
     await refreshRemotes();
   }
 
@@ -898,12 +898,12 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.fetch(
+    (await gitService.fetch(
       remote: remote,
       branch: branch,
       prune: prune,
       all: all,
-    );
+    )).unwrap();
     await refreshBranches();
     await refreshStatus();
   }
@@ -918,12 +918,12 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.pull(
+    (await gitService.pull(
       remote: remote,
       branch: branch,
       rebase: rebase,
       ffOnly: ffOnly,
-    );
+    )).unwrap();
     await refreshBranches();
     await refreshStatus();
   }
@@ -940,14 +940,14 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.push(
+    (await gitService.push(
       remote: remote,
       branch: branch,
       force: force,
       setUpstream: setUpstream,
       all: all,
       tags: tags,
-    );
+    )).unwrap();
     await refreshBranches();
   }
 
@@ -956,7 +956,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.pruneRemote(remote);
+    (await gitService.pruneRemote(remote)).unwrap();
     await refreshBranches();
   }
 
@@ -1061,7 +1061,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.createLightweightTag(tagName, commitHash: commitHash);
+    (await gitService.createLightweightTag(tagName, commitHash: commitHash)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.tags, refreshTags);
     }
@@ -1077,11 +1077,11 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.createAnnotatedTag(
+    (await gitService.createAnnotatedTag(
       tagName,
       message: message,
       commitHash: commitHash,
-    );
+    )).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.tags, refreshTags);
     }
@@ -1092,7 +1092,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.deleteTag(tagName);
+    (await gitService.deleteTag(tagName)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.tags, refreshTags);
     }
@@ -1103,7 +1103,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.deleteRemoteTag(remoteName, tagName);
+    (await gitService.deleteRemoteTag(remoteName, tagName)).unwrap();
     await refreshTags();
   }
 
@@ -1113,7 +1113,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.pushTag(remoteName, tagName);
+    (await gitService.pushTag(remoteName, tagName)).unwrap();
   }
 
   /// Push all tags to remote
@@ -1121,7 +1121,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.pushAllTags(remoteName);
+    (await gitService.pushAllTags(remoteName)).unwrap();
   }
 
   /// Fetch tags from remote
@@ -1129,7 +1129,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.fetchTags(remoteName: remoteName);
+    (await gitService.fetchTags(remoteName: remoteName)).unwrap();
     await refreshTags();
   }
 
@@ -1138,7 +1138,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.checkoutTag(tagName);
+    (await gitService.checkoutTag(tagName)).unwrap();
     await refreshBranches();
     await refreshStatus();
   }
@@ -1149,7 +1149,7 @@ class GitActions {
     if (gitService == null) return;
 
     for (final tagName in tagNames) {
-      await gitService.pushTag(remoteName, tagName);
+      (await gitService.pushTag(remoteName, tagName)).unwrap();
     }
     ref.invalidate(tagsProvider);
   }
@@ -1160,9 +1160,9 @@ class GitActions {
     if (gitService == null) return;
 
     for (final tagName in tagNames) {
-      await gitService.deleteTag(tagName);
+      (await gitService.deleteTag(tagName)).unwrap();
       if (deleteFromRemote && remoteName != null) {
-        await gitService.deleteRemoteTag(remoteName, tagName);
+        (await gitService.deleteRemoteTag(remoteName, tagName)).unwrap();
       }
     }
     ref.invalidate(tagsProvider);
@@ -1201,7 +1201,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.abortMerge();
+    (await gitService.abortMerge()).unwrap();
 
     await refreshStatus();
     await refreshBranches();
@@ -1213,7 +1213,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.continueMerge(message: message);
+    (await gitService.continueMerge(message: message)).unwrap();
 
     await refreshStatus();
     await refreshBranches();
@@ -1258,10 +1258,10 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.cherryPickCommit(
+    (await gitService.cherryPickCommit(
       commitHash,
       noCommit: noCommit,
-    );
+    )).unwrap();
 
     await refreshStatus();
     if (!noCommit) {
@@ -1297,11 +1297,11 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.revertCommit(
+    (await gitService.revertCommit(
       commitHash,
       noCommit: noCommit,
       message: message,
-    );
+    )).unwrap();
 
     await refreshStatus();
     if (!noCommit) {
@@ -1317,10 +1317,10 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.resetToCommit(
+    (await gitService.resetToCommit(
       commitHash,
       mode: mode,
-    );
+    )).unwrap();
 
     await refreshStatus();
     await refreshBranches();
@@ -1336,11 +1336,11 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.cleanWorkingDirectory(
+    (await gitService.cleanWorkingDirectory(
       directories: directories,
       force: force,
       dryRun: dryRun,
-    );
+    )).unwrap();
 
     if (!dryRun) {
       await refreshStatus();

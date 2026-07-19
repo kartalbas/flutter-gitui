@@ -23,7 +23,6 @@ dependencies:
   hooks_riverpod: ^3.0.3                 # Riverpod + Flutter hooks integration
   riverpod: ^3.0.3                       # Core Riverpod library
   riverpod_annotation: ^3.0.3            # Code generation for riverpod
-  state_notifier: ^1.0.0                 # StateNotifier for legacy compatibility
 
   # Navigation
   go_router: ^17.0.0                     # Declarative routing
@@ -31,7 +30,6 @@ dependencies:
   # UI Components
   cupertino_icons: ^1.0.8
   flutter_hooks: ^0.21.3+1                 # React-style hooks
-  animations: ^2.0.11                     # Smooth transitions
 
   # Theming
   flex_color_scheme: ^8.0.2              # Beautiful Material Design 3 themes
@@ -63,26 +61,17 @@ dependencies:
   yaml: ^3.1.2                           # YAML configuration files
 
   # UI Utilities
-  flutter_typeahead: ^5.2.0              # Autocomplete search
   fuzzywuzzy: ^1.1.6                     # Fuzzy string matching
   intl: ^0.20.2                          # Internationalization
   collection: ^1.19.1                     # Collection utilities
 
   # Charts & Visualization
   fl_chart: ^1.1.1                      # Charts for statistics
-  flutter_colorpicker: ^1.1.0            # Color picker for themes
-
-  # Syntax Highlighting (for commit messages, file previews)
-  flutter_highlight: ^0.7.0              # Syntax highlighting
-  highlight: ^0.7.0
 
   # File Viewers
   flutter_markdown_plus: ^1.0.5          # Markdown rendering (maintained fork)
   csv: ^6.0.0                            # CSV parsing for spreadsheets
   photo_view: ^0.15.0                    # Image zoom/pan viewer
-
-  # Diff Utilities
-  diff_match_patch: ^0.4.1               # Diff algorithms
 
   # Time & Dates
   timeago: ^3.7.0                        # Relative time (2 hours ago)
@@ -90,9 +79,6 @@ dependencies:
   # Icons
   phosphor_flutter: ^2.1.0               # Beautiful icon set
   flutter_svg: ^2.0.16                   # SVG rendering for country flags
-
-  # Notifications
-  local_notifier: ^0.1.6                 # Desktop notifications
 
   # Utilities
   freezed_annotation: ^3.1.0             # Immutable models

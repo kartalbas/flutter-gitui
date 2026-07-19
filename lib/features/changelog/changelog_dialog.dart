@@ -406,7 +406,10 @@ class ChangelogDialog extends HookConsumerWidget {
       return;
     }
 
-    final isVersionUpgrade = lastSeenVersion == null || lastSeenVersion != currentVersion;
+    // Compare without the build number so this matches shouldShowWhatsNew, which
+    // treats "0.1.0+1" and "0.1.0+2" as the same version.
+    final isVersionUpgrade =
+        lastSeenVersion == null || lastSeenVersion.split('+').first != currentVersion.split('+').first;
     Logger.info('[ChangelogDialog] Is version upgrade: $isVersionUpgrade');
 
     // Show dialog with latest release
@@ -422,8 +425,11 @@ class ChangelogDialog extends HookConsumerWidget {
     // (unless user disables it via "Don't show again")
     if (isVersionUpgrade) {
       Logger.info('[ChangelogDialog] Version upgrade detected - marking version as seen');
-      await versionService.markVersionAsSeen(latestRelease.version);
-      Logger.info('[ChangelogDialog] Version marked as seen: ${latestRelease.version}');
+      // Record the app's own version, not the changelog entry's: the bundled
+      // changelog can lag behind the app, and disableWhatsNewDialog() stores
+      // currentVersion - writing anything else here would revert that preference.
+      await versionService.markVersionAsSeen(currentVersion);
+      Logger.info('[ChangelogDialog] Version marked as seen: $currentVersion');
     } else {
       Logger.info('[ChangelogDialog] Normal run - NOT marking version as seen');
     }

@@ -33,6 +33,26 @@ class ShellService {
     return _hasConsole!;
   }
 
+  /// Process environment with a PATH usable from a Finder-launched app.
+  ///
+  /// A macOS GUI app inherits launchd's minimal PATH rather than the user's
+  /// shell PATH, so Homebrew and MacPorts prefixes would be invisible to
+  /// `which` lookups and to executable resolution unless they are added back.
+  static Map<String, String> get environment {
+    if (!Platform.isMacOS) return Platform.environment;
+
+    const extraPaths = ['/opt/homebrew/bin', '/usr/local/bin', '/opt/local/bin'];
+    final currentPath = Platform.environment['PATH'] ?? '';
+    final entries = currentPath.split(':');
+    final missing = extraPaths.where((path) => !entries.contains(path)).toList();
+    if (missing.isEmpty) return Platform.environment;
+
+    return {
+      ...Platform.environment,
+      'PATH': [...missing, if (currentPath.isNotEmpty) currentPath].join(':'),
+    };
+  }
+
   /// Create a Shell that's safe for GUI apps
   ///
   /// Returns a Shell with verbose=false and null stdout/stderr
@@ -43,6 +63,7 @@ class ShellService {
       stdout: null,
       stderr: null,
       workingDirectory: workingDirectory,
+      environment: environment,
     );
   }
 

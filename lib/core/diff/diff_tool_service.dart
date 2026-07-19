@@ -207,10 +207,31 @@ class DiffToolService {
   }
 
   /// macOS search paths
-  /// Returns empty list - relies on PATH environment variable via 'which' command
-  /// This respects user's installation method (Homebrew, MacPorts, App Store, direct download, etc.)
+  /// GUI tools installed as .app bundles never appear on PATH, and a
+  /// Finder-launched app only inherits launchd's minimal PATH, so the
+  /// well-known bundle binaries must be probed directly before 'which'.
+  /// Homebrew/MacPorts installs are covered by the augmented PATH in
+  /// ShellService.environment.
   static List<String> _getMacOSSearchPaths(DiffToolType type) {
-    return [];
+    switch (type) {
+      case DiffToolType.vscode:
+        return ['/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code'];
+      case DiffToolType.intellijIdea:
+        return [
+          '/Applications/IntelliJ IDEA.app/Contents/MacOS/idea',
+          '/Applications/IntelliJ IDEA CE.app/Contents/MacOS/idea',
+        ];
+      case DiffToolType.beyondCompare:
+        return ['/Applications/Beyond Compare.app/Contents/MacOS/bcomp'];
+      case DiffToolType.kdiff3:
+        return ['/Applications/kdiff3.app/Contents/MacOS/kdiff3'];
+      case DiffToolType.p4merge:
+        return ['/Applications/p4merge.app/Contents/MacOS/p4merge'];
+      case DiffToolType.meld:
+        return ['/Applications/Meld.app/Contents/MacOS/Meld'];
+      default:
+        return [];
+    }
   }
 
   /// Linux search paths

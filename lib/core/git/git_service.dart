@@ -63,9 +63,11 @@ class GitService {
       // Windows, which garbles non-ASCII names, messages, and diffs.
       stdoutEncoding: utf8,
       stderrEncoding: utf8,
-      // Set environment to force UTF-8 encoding for git output
+      // Set environment to force UTF-8 encoding for git output. Base it on
+      // ShellService.environment so a Finder-launched macOS app, which only
+      // gets launchd's minimal PATH, can still resolve a Homebrew git.
       environment: {
-        ...Platform.environment,
+        ...ShellService.environment,
         'LC_ALL': 'C.UTF-8',
         'LANG': 'C.UTF-8',
         // Never let git block on an interactive credential prompt. There is no
@@ -1642,7 +1644,7 @@ class GitService {
     String? branchName,
     int? depth,
   }) async {
-    final shell = Shell(throwOnError: false, verbose: false, stdout: null, stderr: null);
+    final shell = Shell(throwOnError: false, verbose: false, stdout: null, stderr: null, environment: ShellService.environment);
 
     final parts = ['git', 'clone'];
 
@@ -1694,6 +1696,7 @@ class GitService {
       verbose: false,
       stdout: null,
       stderr: null,
+      environment: ShellService.environment,
     );
 
     final parts = ['git', 'init'];

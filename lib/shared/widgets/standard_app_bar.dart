@@ -97,7 +97,7 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
         // Additional actions (if provided)
         // Example: View mode toggle, advanced filters button
-        if (additionalActions != null) ...additionalActions!,
+        ...?additionalActions,
 
         // More menu (always present) - uses BasePopupMenuButton for centralized animation control
         BasePopupMenuButton(

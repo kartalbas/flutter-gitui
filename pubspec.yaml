@@ -37,7 +37,8 @@ dependencies:
     git:
       url: https://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
-      ref: main
+      # Pinned: 'main' floats, so a release could silently ship a different plugin.
+      ref: eb3964990cf19629c89ff8cb4a37640c7b3d5601
   file_picker: ^10.3.6                    # File/folder dialogs
   url_launcher: ^6.3.1                   # Launch external apps
   path_provider: ^2.1.5                  # Standard directories

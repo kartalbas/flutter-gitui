@@ -53,7 +53,7 @@ class KeyboardNavigableTreeView<T extends TreeNodeMixin> extends StatelessWidget
     // Merge bindings
     final bindings = <ShortcutActivator, VoidCallback>{
       ...controller.keyBindings,
-      if (additionalBindings != null) ...additionalBindings!,
+      ...?additionalBindings,
     };
 
     return GestureDetector(

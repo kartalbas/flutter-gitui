@@ -1272,8 +1272,11 @@ class GitService {
       }
 
       final result = await _execute(parts.join(' '));
-      // Git fetch outputs to stderr, not stdout
-      final output = result.stderr.toString().trim();
+      // Git writes transfer progress to stderr but the result summary to stdout
+      final output = [
+        result.stderr.toString().trim(),
+        result.stdout.toString().trim(),
+      ].where((part) => part.isNotEmpty).join('\n');
       return output.isNotEmpty ? output : 'Fetch completed';
     });
   }
@@ -1297,8 +1300,11 @@ class GitService {
       }
 
       final result = await _execute(parts.join(' '));
-      // Git pull outputs to stderr, not stdout
-      final output = result.stderr.toString().trim();
+      // Git writes transfer progress to stderr but the merge summary to stdout
+      final output = [
+        result.stderr.toString().trim(),
+        result.stdout.toString().trim(),
+      ].where((part) => part.isNotEmpty).join('\n');
       return output.isNotEmpty ? output : 'Pull completed';
     });
   }
@@ -1328,8 +1334,11 @@ class GitService {
       }
 
       final result = await _execute(parts.join(' '));
-      // Git push outputs to stderr, not stdout
-      final output = result.stderr.toString().trim();
+      // Git writes transfer progress to stderr but the result summary to stdout
+      final output = [
+        result.stderr.toString().trim(),
+        result.stdout.toString().trim(),
+      ].where((part) => part.isNotEmpty).join('\n');
       return output.isNotEmpty ? output : 'Push completed';
     });
   }

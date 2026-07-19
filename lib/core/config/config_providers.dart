@@ -85,7 +85,17 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       if (workspaceValidation.needsSave && !loadFailed) {
         Logger.config('Saving workspace validation changes to config');
         final saveResult = await ConfigService.save(config);
-        saveResult.unwrap(); // Throw on error
+        // A failed write of this cleanup must not abort the load: throwing here
+        // would drop the config that was just read successfully and leave the
+        // session on defaults, which the next save would persist over the
+        // user's repositories and workspaces.
+        saveResult.when(
+          success: (_) {},
+          failure: (message, error, stackTrace) => Logger.warning(
+            '[CONFIG] Workspace validation changes could not be saved: $message',
+            error,
+          ),
+        );
       }
 
       state = config;
@@ -268,7 +278,16 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     if (needsSave) {
       Logger.config('Saving updated tool versions to config');
       final saveResult = await ConfigService.save(updatedConfig);
-      saveResult.unwrap(); // Throw on error
+      // Refreshed version numbers are cosmetic: a failed write must not
+      // propagate into the caller's catch, which would discard the loaded
+      // configuration in favour of defaults.
+      saveResult.when(
+        success: (_) {},
+        failure: (message, error, stackTrace) => Logger.warning(
+          '[CONFIG] Updated tool versions could not be saved: $message',
+          error,
+        ),
+      );
     }
 
     return updatedConfig;

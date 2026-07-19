@@ -415,7 +415,7 @@ class GitService {
   /// Stage a file
   Future<Result<void>> stageFile(String filePath) async {
     return runCatchingAsync(() async {
-      await _execute('add "$filePath"');
+      await _execute('add -- "$filePath"');
     });
   }
 
@@ -429,7 +429,7 @@ class GitService {
   /// Unstage a file
   Future<Result<void>> unstageFile(String filePath) async {
     return runCatchingAsync(() async {
-      await _execute('reset HEAD "$filePath"');
+      await _execute('reset HEAD -- "$filePath"');
     });
   }
 
@@ -573,7 +573,7 @@ class GitService {
     // "checkout --" only rewrites the worktree from the index, so a change that
     // was already staged survived the discard untouched. Dropping the staged
     // version first puts HEAD's content back in the index for the restore.
-    await _execute('reset HEAD "$filePath"', throwOnError: false);
+    await _execute('reset HEAD -- "$filePath"', throwOnError: false);
     // A file that only ever existed as a staged addition has nothing left to
     // restore once it leaves the index -- it becomes untracked, and checkout
     // reports an unknown pathspec, which is not a failure of the discard.

@@ -35,8 +35,13 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     // Fired from initState: leaving Settings before the platform channel
     // returns disposes this State, and setState on it would assert.
     if (!mounted) return;
+    // Releases are stamped without build metadata, so package_info_plus reports
+    // an empty build number; appending it would render "0.5.0-alpha+".
+    final buildNumber = packageInfo.buildNumber;
     setState(() {
-      _currentVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+      _currentVersion = buildNumber.isEmpty
+          ? packageInfo.version
+          : '${packageInfo.version}+$buildNumber';
     });
   }
 

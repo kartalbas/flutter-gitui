@@ -16,7 +16,12 @@ class VersionService {
   /// Get the current app version
   Future<String> getCurrentVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
-    return '${packageInfo.version}+${packageInfo.buildNumber}';
+    // Releases are stamped without build metadata, so package_info_plus reports
+    // an empty build number; appending it would render "0.5.0-alpha+".
+    final buildNumber = packageInfo.buildNumber;
+    return buildNumber.isEmpty
+        ? packageInfo.version
+        : '${packageInfo.version}+$buildNumber';
   }
 
   /// Get the last version the user saw the changelog for

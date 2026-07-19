@@ -27,6 +27,25 @@ except ImportError:
 
 # Font configurations: source -> destination mappings
 FONTS_TO_GENERATE = {
+    # The Inter variable font ships in-repo, so the static cuts are regenerated
+    # from it instead of downloaded: a failed download once committed HTML pages
+    # here, and Inter is both the default font family and the theme fallback.
+    'inter': {
+        'source_dir': 'assets/google_fonts/inter',
+        'dest_dir': 'assets/google_fonts/inter',
+        'files': [
+            {
+                'source': 'Inter[opsz,wght].ttf',
+                'instances': [
+                    {'name': 'Inter-Light.ttf', 'wght': 300, 'opsz': 14},
+                    {'name': 'Inter-Regular.ttf', 'wght': 400, 'opsz': 14},
+                    {'name': 'Inter-Medium.ttf', 'wght': 500, 'opsz': 14},
+                    {'name': 'Inter-SemiBold.ttf', 'wght': 600, 'opsz': 14},
+                    {'name': 'Inter-Bold.ttf', 'wght': 700, 'opsz': 14},
+                ]
+            },
+        ]
+    },
     'jetbrainsmono': {
         'source_dir': 'D:/repos/github/fonts/ofl/jetbrainsmono',
         'dest_dir': 'assets/google_fonts/jetbrainsmono',
@@ -152,6 +171,14 @@ def generate_static_font(source_path, dest_path, axes):
         # Save static font
         font.save(dest_path)
         font.close()
+
+        # Without this, anything that produced an error page instead of a font
+        # would ship as a valid-looking .ttf asset and fail only at runtime.
+        with open(dest_path, 'rb') as generated:
+            signature = generated.read(4)
+        if signature not in (b'\x00\x01\x00\x00', b'true', b'OTTO'):
+            print(f"    [ERROR] {os.path.basename(dest_path)} is not a font: {signature!r}")
+            return False
 
         print(f"    [OK] Created {os.path.basename(dest_path)}")
         return True

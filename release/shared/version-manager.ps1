@@ -73,7 +73,9 @@ function Update-PubspecVersion {
     )
 
     $pubspecContent = Get-Content $PubspecPath -Raw
-    $pubspecContent = $pubspecContent -replace "version:\s*.+", "version: $NewVersion"
+    # Anchored per line so keys that merely end in 'version:' (msix_version,
+    # min_sdk_version) are not rewritten by the global -replace.
+    $pubspecContent = $pubspecContent -replace '(?m)^version:\s*.+$', "version: $NewVersion"
     $pubspecContent | Set-Content $PubspecPath -NoNewline
 
     Write-Host "  [OK] Updated pubspec.yaml to $NewVersion" -ForegroundColor Green

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 
 import 'diff_tool_service.dart';
 import 'models/diff_tool.dart';
@@ -75,7 +76,10 @@ class DiffActions {
     if (repoPath == null) return;
 
     final tempDir = Directory.systemTemp.createTempSync('gitdiff_');
-    final headFile = '${tempDir.path}/HEAD_$filePath'.replaceAll('/', '_');
+    // Flatten only the repo-relative name; replacing '/' in tempDir.path would
+    // collapse the absolute POSIX path into a relative one written to the CWD.
+    final safeName = filePath.replaceAll('/', '_');
+    final headFile = p.join(tempDir.path, 'HEAD_$safeName');
 
     try {
       // Get HEAD version of file
@@ -113,8 +117,11 @@ class DiffActions {
     if (repoPath == null) return;
 
     final tempDir = Directory.systemTemp.createTempSync('gitdiff_');
-    final headFile = '${tempDir.path}/HEAD_$filePath'.replaceAll('/', '_');
-    final stagedFile = '${tempDir.path}/STAGED_$filePath'.replaceAll('/', '_');
+    // Flatten only the repo-relative name; replacing '/' in tempDir.path would
+    // collapse the absolute POSIX path into a relative one written to the CWD.
+    final safeName = filePath.replaceAll('/', '_');
+    final headFile = p.join(tempDir.path, 'HEAD_$safeName');
+    final stagedFile = p.join(tempDir.path, 'STAGED_$safeName');
 
     try {
       // Get HEAD version
@@ -163,8 +170,11 @@ class DiffActions {
     if (repoPath == null) return;
 
     final tempDir = Directory.systemTemp.createTempSync('gitdiff_');
-    final fromFile = '${tempDir.path}/${fromCommit.substring(0, 7)}_$filePath'.replaceAll('/', '_');
-    final toFile = '${tempDir.path}/${toCommit.substring(0, 7)}_$filePath'.replaceAll('/', '_');
+    // Flatten only the repo-relative name; replacing '/' in tempDir.path would
+    // collapse the absolute POSIX path into a relative one written to the CWD.
+    final safeName = filePath.replaceAll('/', '_');
+    final fromFile = p.join(tempDir.path, '${fromCommit.substring(0, 7)}_$safeName');
+    final toFile = p.join(tempDir.path, '${toCommit.substring(0, 7)}_$safeName');
 
     try {
       // Get from version

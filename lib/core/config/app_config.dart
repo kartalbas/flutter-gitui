@@ -69,7 +69,7 @@ class AppConfig {
     BehaviorConfig? behavior,
     HistoryConfig? history,
     WorkspaceConfig? workspace,
-    String? lastSeenVersion,
+    Object? lastSeenVersion = _unset,
     bool? disableWhatsNewDialog,
   }) {
     return AppConfig(
@@ -81,7 +81,7 @@ class AppConfig {
       behavior: behavior ?? this.behavior,
       history: history ?? this.history,
       workspace: workspace ?? this.workspace,
-      lastSeenVersion: lastSeenVersion ?? this.lastSeenVersion,
+      lastSeenVersion: identical(lastSeenVersion, _unset) ? this.lastSeenVersion : lastSeenVersion as String?,
       disableWhatsNewDialog: disableWhatsNewDialog ?? this.disableWhatsNewDialog,
     );
   }
@@ -138,16 +138,16 @@ class GitConfig {
   static const GitConfig defaults = GitConfig();
 
   GitConfig copyWith({
-    String? executablePath,
-    String? defaultUserName,
-    String? defaultUserEmail,
+    Object? executablePath = _unset,
+    Object? defaultUserName = _unset,
+    Object? defaultUserEmail = _unset,
     String? gitVersion,
     List<String>? protectedBranches,
   }) {
     return GitConfig(
-      executablePath: executablePath ?? this.executablePath,
-      defaultUserName: defaultUserName ?? this.defaultUserName,
-      defaultUserEmail: defaultUserEmail ?? this.defaultUserEmail,
+      executablePath: identical(executablePath, _unset) ? this.executablePath : executablePath as String?,
+      defaultUserName: identical(defaultUserName, _unset) ? this.defaultUserName : defaultUserName as String?,
+      defaultUserEmail: identical(defaultUserEmail, _unset) ? this.defaultUserEmail : defaultUserEmail as String?,
       gitVersion: gitVersion ?? this.gitVersion,
       protectedBranches: protectedBranches ?? this.protectedBranches,
     );
@@ -217,30 +217,30 @@ class ToolsConfig {
   ToolsConfig copyWith({
     String? textEditor,
     String? textEditorVersion,
-    DiffToolType? diffTool,
-    String? diffToolPath,
-    String? diffToolVersion,
-    DiffToolType? mergeTool,
-    String? mergeToolPath,
-    String? mergeToolVersion,
-    String? customDiffToolPath,
-    String? customDiffToolVersion,
-    String? customMergeToolPath,
-    String? customMergeToolVersion,
+    Object? diffTool = _unset,
+    Object? diffToolPath = _unset,
+    Object? diffToolVersion = _unset,
+    Object? mergeTool = _unset,
+    Object? mergeToolPath = _unset,
+    Object? mergeToolVersion = _unset,
+    Object? customDiffToolPath = _unset,
+    Object? customDiffToolVersion = _unset,
+    Object? customMergeToolPath = _unset,
+    Object? customMergeToolVersion = _unset,
   }) {
     return ToolsConfig(
       textEditor: textEditor ?? this.textEditor,
       textEditorVersion: textEditorVersion ?? this.textEditorVersion,
-      diffTool: diffTool ?? this.diffTool,
-      diffToolPath: diffToolPath ?? this.diffToolPath,
-      diffToolVersion: diffToolVersion ?? this.diffToolVersion,
-      mergeTool: mergeTool ?? this.mergeTool,
-      mergeToolPath: mergeToolPath ?? this.mergeToolPath,
-      mergeToolVersion: mergeToolVersion ?? this.mergeToolVersion,
-      customDiffToolPath: customDiffToolPath ?? this.customDiffToolPath,
-      customDiffToolVersion: customDiffToolVersion ?? this.customDiffToolVersion,
-      customMergeToolPath: customMergeToolPath ?? this.customMergeToolPath,
-      customMergeToolVersion: customMergeToolVersion ?? this.customMergeToolVersion,
+      diffTool: identical(diffTool, _unset) ? this.diffTool : diffTool as DiffToolType?,
+      diffToolPath: identical(diffToolPath, _unset) ? this.diffToolPath : diffToolPath as String?,
+      diffToolVersion: identical(diffToolVersion, _unset) ? this.diffToolVersion : diffToolVersion as String?,
+      mergeTool: identical(mergeTool, _unset) ? this.mergeTool : mergeTool as DiffToolType?,
+      mergeToolPath: identical(mergeToolPath, _unset) ? this.mergeToolPath : mergeToolPath as String?,
+      mergeToolVersion: identical(mergeToolVersion, _unset) ? this.mergeToolVersion : mergeToolVersion as String?,
+      customDiffToolPath: identical(customDiffToolPath, _unset) ? this.customDiffToolPath : customDiffToolPath as String?,
+      customDiffToolVersion: identical(customDiffToolVersion, _unset) ? this.customDiffToolVersion : customDiffToolVersion as String?,
+      customMergeToolPath: identical(customMergeToolPath, _unset) ? this.customMergeToolPath : customMergeToolPath as String?,
+      customMergeToolVersion: identical(customMergeToolVersion, _unset) ? this.customMergeToolVersion : customMergeToolVersion as String?,
     );
   }
 

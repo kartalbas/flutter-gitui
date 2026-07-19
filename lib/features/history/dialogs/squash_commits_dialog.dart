@@ -45,6 +45,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
   late TextEditingController _messageController;
   late List<GitCommit> _selectedCommits;
   bool _areConsecutive = true;
+  bool _isRootCommit = false;
   String? _errorMessage;
 
   @override
@@ -64,10 +65,6 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
       _messageController = TextEditingController(text: _selectedCommits.first.message);
     } else {
       _messageController = TextEditingController();
-    }
-
-    if (!_areConsecutive) {
-      _errorMessage ??= AppLocalizations.of(context)!.selectedCommitsMustBeConsecutive;
     }
   }
 
@@ -95,9 +92,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
 
     // The root commit has no parent to reset onto, so it cannot be squashed.
     if (_selectedCommits.last.parents.isEmpty) {
-      setState(() {
-        _errorMessage = AppLocalizations.of(context)!.cannotSquashRootCommit;
-      });
+      _isRootCommit = true;
       return false;
     }
 
@@ -151,6 +146,14 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // Localization lookups register an inherited-widget dependency, which is
+    // forbidden while initState runs, so the checks done there only record
+    // flags and the message is resolved here.
+    final errorMessage = _errorMessage ??
+        (_isRootCommit
+            ? l10n.cannotSquashRootCommit
+            : (!_areConsecutive ? l10n.selectedCommitsMustBeConsecutive : null));
+
     return BaseDialog(
       title: l10n.squashCommitsDialog,
       icon: PhosphorIconsRegular.arrowsInLineVertical,
@@ -160,7 +163,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (_errorMessage != null)
+          if (errorMessage != null)
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
@@ -176,7 +179,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                   const SizedBox(width: AppTheme.paddingM),
                   Expanded(
                     child: BodyMediumLabel(
-                      _errorMessage!,
+                      errorMessage,
                       color: Theme.of(context).colorScheme.onErrorContainer,
                     ),
                   ),

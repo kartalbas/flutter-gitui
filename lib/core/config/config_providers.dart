@@ -293,11 +293,8 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     return updatedConfig;
   }
 
-  /// Save current config to YAML file with state recovery on failure
+  /// Save current config to YAML file
   Future<void> _saveConfig() async {
-    // Capture current state before attempting save
-    final previousState = state;
-
     try {
       Logger.debug('_saveConfig called');
       Logger.debug('Current state.git.executablePath = ${state.git.executablePath}');
@@ -311,9 +308,11 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       saveResult.unwrap(); // Throw on error
       Logger.debug('ConfigService.save completed successfully');
     } catch (e, stack) {
-      Logger.error('Error saving config - reverting to previous state', e, stack);
-      // Revert state to before the save attempt
-      state = previousState;
+      // Every setter assigns state before awaiting this, so a snapshot taken
+      // here already contains the change and could only ever roll back another
+      // setter's newer update that landed while this save queued behind the
+      // write lock. The failure reaches the caller through the rethrow instead.
+      Logger.error('Error saving config', e, stack);
       rethrow;
     }
   }

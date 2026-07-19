@@ -978,12 +978,12 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.createStash(
+    (await gitService.createStash(
       message: message,
       includeUntracked: includeUntracked,
       keepIndex: keepIndex,
       files: files,
-    );
+    )).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.stashes, refreshStashes);
       await _refreshOrQueue(RefreshType.status, refreshStatus);
@@ -995,7 +995,9 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.applyStash(stashRef, index: index);
+    // unwrap() so a Failure throws and reaches the caller's catch block; a
+    // discarded Result would let a failed stash operation look successful.
+    (await gitService.applyStash(stashRef, index: index)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.stashes, refreshStashes);
       await _refreshOrQueue(RefreshType.status, refreshStatus);
@@ -1007,7 +1009,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.popStash(stashRef, index: index);
+    (await gitService.popStash(stashRef, index: index)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.stashes, refreshStashes);
       await _refreshOrQueue(RefreshType.status, refreshStatus);
@@ -1019,7 +1021,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.dropStash(stashRef);
+    (await gitService.dropStash(stashRef)).unwrap();
     if (!skipRefresh) {
       await _refreshOrQueue(RefreshType.stashes, refreshStashes);
     }
@@ -1030,7 +1032,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.clearStashes();
+    (await gitService.clearStashes()).unwrap();
     await refreshStashes();
   }
 
@@ -1039,7 +1041,7 @@ class GitActions {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    await gitService.branchFromStash(branchName, stashRef);
+    (await gitService.branchFromStash(branchName, stashRef)).unwrap();
     await refreshStashes();
     await refreshBranches();
     await refreshStatus();

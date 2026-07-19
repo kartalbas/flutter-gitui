@@ -204,13 +204,13 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
         onLoadChildren!(node).then((success) {
           if (success) {
             node.isExpanded = true;
-            _flattenedNodes = _flattenTree(_rootNodes);
+            _reflattenPreservingSelection();
             notifyListeners();
           }
         });
       } else {
         node.isExpanded = !node.isExpanded;
-        _flattenedNodes = _flattenTree(_rootNodes);
+        _reflattenPreservingSelection();
         notifyListeners();
       }
     } else {
@@ -231,7 +231,7 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
 
     if (node.isDirectory && node.isExpanded) {
       node.isExpanded = false;
-      _flattenedNodes = _flattenTree(_rootNodes);
+      _reflattenPreservingSelection();
       notifyListeners();
     }
   }
@@ -252,13 +252,13 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
         onLoadChildren!(node).then((success) {
           if (success) {
             node.isExpanded = true;
-            _flattenedNodes = _flattenTree(_rootNodes);
+            _reflattenPreservingSelection();
             notifyListeners();
           }
         });
       } else {
         node.isExpanded = true;
-        _flattenedNodes = _flattenTree(_rootNodes);
+        _reflattenPreservingSelection();
         notifyListeners();
       }
     }
@@ -272,13 +272,13 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
         onLoadChildren!(node).then((success) {
           if (success) {
             node.isExpanded = true;
-            _flattenedNodes = _flattenTree(_rootNodes);
+            _reflattenPreservingSelection();
             notifyListeners();
           }
         });
       } else {
         node.isExpanded = !node.isExpanded;
-        _flattenedNodes = _flattenTree(_rootNodes);
+        _reflattenPreservingSelection();
         notifyListeners();
       }
     }
@@ -317,6 +317,72 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
       }
     }
     return result;
+  }
+
+  /// Reflatten the visible rows while keeping the selection on the same node.
+  ///
+  /// Expanding or collapsing a directory shifts every index below it, so a bare
+  /// index would afterwards point at an unrelated row while listeners still
+  /// render the previously selected node. When the selected node is hidden by a
+  /// collapsed ancestor it cannot stay selected, so the selection moves to the
+  /// row it folded into and listeners are told about the change.
+  void _reflattenPreservingSelection() {
+    final previous = selectedNode;
+    _flattenedNodes = _flattenTree(_rootNodes);
+
+    if (previous == null) {
+      _selectedIndex = -1;
+      return;
+    }
+
+    var newIndex = _indexOfNode(previous);
+    if (newIndex < 0) {
+      final anchor = _visibleAncestorOf(previous);
+      newIndex = anchor == null ? -1 : _indexOfNode(anchor);
+    }
+
+    _selectedIndex = newIndex;
+    _validateSelection();
+
+    if (!identical(selectedNode, previous)) {
+      onSelectionChanged?.call(selectedNode);
+    }
+  }
+
+  /// Index of [node] among the visible rows, or -1 when it is not visible
+  int _indexOfNode(T node) {
+    for (int i = 0; i < _flattenedNodes.length; i++) {
+      if (identical(_flattenedNodes[i], node)) return i;
+    }
+    return -1;
+  }
+
+  /// Innermost ancestor of [target] that is still visible.
+  ///
+  /// Resolved by walking the node structure instead of by splitting paths: the
+  /// trees sharing this controller use different separators in [fullPath], git
+  /// status paths being slash separated while browse paths are native.
+  T? _visibleAncestorOf(T target) {
+    final ancestors = _ancestorChain(_rootNodes, target);
+    if (ancestors == null || ancestors.isEmpty) return null;
+
+    for (final ancestor in ancestors) {
+      // A collapsed directory is itself visible and hides everything below it
+      if (!ancestor.isExpanded) return ancestor;
+    }
+    return ancestors.last;
+  }
+
+  /// Ancestors of [target] within [nodes], outermost first, or null if absent
+  List<T>? _ancestorChain(List<T> nodes, T target) {
+    for (final node in nodes) {
+      if (identical(node, target)) return <T>[];
+      if (node.isDirectory && node.children.isNotEmpty) {
+        final below = _ancestorChain(node.children.cast<T>(), target);
+        if (below != null) return <T>[node, ...below];
+      }
+    }
+    return null;
   }
 
   /// Validate and adjust selection after tree updates

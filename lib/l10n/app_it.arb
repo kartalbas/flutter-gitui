@@ -327,7 +327,7 @@
   "enterBranchName": "Inserisci un nome per il branch",
   "rename": "Rinomina",
   "mergeBranchDialog": "Unisci Branch",
-  "mergeBranchConfirm": "Unire \"{branchName}\" nel branch corrente?",
+  "mergeBranchConfirm": "Unire \"{sourceBranch}\" in \"{targetBranch}\"?",
   "deleteBranchDialog": "Elimina Branch",
   "deleteBranchConfirm": "Eliminare il branch \"{branchName}\"?\\n\\nQuesta azione non può essere annullata.",
   "searchRemotesDialog": "Cerca Remoti",

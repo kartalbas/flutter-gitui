@@ -1029,15 +1029,18 @@
   "enterBranchName": "Branch-Name eingeben",
   "rename": "Umbenennen",
   "mergeBranchDialog": "Branch mergen",
-  "mergeBranchConfirm": "\"{branchName}\" in aktuellen Branch mergen?",
+  "mergeBranchConfirm": "\"{sourceBranch}\" in \"{targetBranch}\" mergen?",
   "@mergeBranchConfirm": {
-    "description": "Confirmation message for merging branch",
-    "placeholders": {
-      "branchName": {
-        "type": "String"
+      "description": "Confirmation message for merging branch",
+      "placeholders": {
+        "sourceBranch": {
+          "type": "String"
+        },
+        "targetBranch": {
+          "type": "String"
+        }
       }
-    }
-  },
+    },
   "deleteBranchDialog": "Branch löschen",
   "deleteBranchConfirm": "Branch \"{branchName}\" löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
   "@deleteBranchConfirm": {

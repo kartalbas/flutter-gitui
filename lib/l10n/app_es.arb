@@ -1029,15 +1029,18 @@
   "enterBranchName": "Introduzca el nombre de rama",
   "rename": "Renombrar",
   "mergeBranchDialog": "Fusionar rama",
-  "mergeBranchConfirm": "¿Fusionar \"{branchName}\" en la rama actual?",
+  "mergeBranchConfirm": "¿Fusionar \"{sourceBranch}\" en \"{targetBranch}\"?",
   "@mergeBranchConfirm": {
-    "description": "Confirmation message for merging branch",
-    "placeholders": {
-      "branchName": {
-        "type": "String"
+      "description": "Confirmation message for merging branch",
+      "placeholders": {
+        "sourceBranch": {
+          "type": "String"
+        },
+        "targetBranch": {
+          "type": "String"
+        }
       }
-    }
-  },
+    },
   "deleteBranchDialog": "¿Eliminar rama?",
   "deleteBranchConfirm": "¿Eliminar rama \"{branchName}\"?\n\nEsta acción no se puede deshacer.",
   "@deleteBranchConfirm": {

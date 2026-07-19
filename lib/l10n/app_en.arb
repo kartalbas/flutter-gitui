@@ -1046,15 +1046,18 @@
   "enterBranchName": "Please enter a branch name",
   "rename": "Rename",
   "mergeBranchDialog": "Merge Branch",
-  "mergeBranchConfirm": "Merge \"{branchName}\" into current branch?",
+  "mergeBranchConfirm": "Merge \"{sourceBranch}\" into \"{targetBranch}\"?",
   "@mergeBranchConfirm": {
-    "description": "Confirmation message for merging branch",
-    "placeholders": {
-      "branchName": {
-        "type": "String"
+      "description": "Confirmation message for merging branch",
+      "placeholders": {
+        "sourceBranch": {
+          "type": "String"
+        },
+        "targetBranch": {
+          "type": "String"
+        }
       }
-    }
-  },
+    },
   "deleteBranchDialog": "Delete Branch",
   "deleteBranchConfirm": "Delete branch \"{branchName}\"?\n\nThis action cannot be undone.",
   "@deleteBranchConfirm": {

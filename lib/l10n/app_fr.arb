@@ -1031,13 +1031,16 @@
   "mergeBranchDialog": "Fusionner la branche",
   "mergeBranchConfirm": "Fusionner \"{sourceBranch}\" dans \"{targetBranch}\"?",
   "@mergeBranchConfirm": {
-    "description": "Confirmation message for merging branch",
-    "placeholders": {
-      "branchName": {
-        "type": "String"
+      "description": "Confirmation message for merging branch",
+      "placeholders": {
+        "sourceBranch": {
+          "type": "String"
+        },
+        "targetBranch": {
+          "type": "String"
+        }
       }
-    }
-  },
+    },
   "deleteBranchDialog": "Supprimer la branche?",
   "deleteBranchConfirm": "Supprimer la branche \"{branchName}\"?\n\nCette action ne peut pas être annulée.",
   "@deleteBranchConfirm": {

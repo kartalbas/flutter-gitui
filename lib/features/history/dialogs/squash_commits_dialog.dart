@@ -67,7 +67,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
     }
 
     if (!_areConsecutive) {
-      _errorMessage = AppLocalizations.of(context)!.selectedCommitsMustBeConsecutive;
+      _errorMessage ??= AppLocalizations.of(context)!.selectedCommitsMustBeConsecutive;
     }
   }
 
@@ -80,27 +80,25 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
   bool _checkIfConsecutive() {
     if (_selectedCommits.length < 2) return false;
 
-    // Get indices of selected commits in the full list
-    final indices = _selectedCommits
-        .map((c) => widget.commits.indexWhere((commit) => commit.hash == c.hash))
-        .toList()
-      ..sort();
+    // The displayed list can be search-filtered or truncated by the commit
+    // limit, so positions in it say nothing about real adjacency. Walk the
+    // parent chain instead: each newer commit must have the next selected
+    // commit as its first parent, otherwise the reset-based squash would
+    // silently absorb the unselected commits in between.
+    for (int i = 1; i < _selectedCommits.length; i++) {
+      final newer = _selectedCommits[i - 1];
+      if (newer.parents.isEmpty ||
+          newer.parents.first != _selectedCommits[i].hash) {
+        return false;
+      }
+    }
 
-    // Check if the oldest commit (highest index) is the last commit in the list
-    // If it is, it's likely the root commit and can't be squashed
-    final oldestIndex = indices.last;
-    if (oldestIndex == widget.commits.length - 1) {
+    // The root commit has no parent to reset onto, so it cannot be squashed.
+    if (_selectedCommits.last.parents.isEmpty) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!.cannotSquashRootCommit;
       });
       return false;
-    }
-
-    // Check if indices are consecutive
-    for (int i = 1; i < indices.length; i++) {
-      if (indices[i] != indices[i - 1] + 1) {
-        return false;
-      }
     }
 
     return true;

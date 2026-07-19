@@ -177,6 +177,15 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
         });
       }
     });
+
+    // Initialize update checker on startup (after config is loaded)
+    // Load dismissed update version and check for updates 5 seconds after app starts
+    Future.delayed(const Duration(seconds: 5), () async {
+      if (!mounted) return;
+      await loadDismissedUpdateVersion(ref);
+      if (!mounted) return;
+      await checkForUpdates(ref);
+    });
   }
 
   @override
@@ -187,13 +196,6 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
     if (_showSplash) {
       return _NativeLoadingScreen(config: widget.initialConfig);
     }
-
-    // Initialize update checker on startup (after config is loaded)
-    // Load dismissed update version and check for updates 5 seconds after app starts
-    Future.delayed(const Duration(seconds: 5), () async {
-      await loadDismissedUpdateVersion(ref);
-      await checkForUpdates(ref);
-    });
 
     // Config loaded - now we can read user's theme preferences
     final themeMode = ref.watch(themeModeProvider);

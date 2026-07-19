@@ -34,11 +34,14 @@ function New-Archive {
 
     Write-Host "  Creating $Platform archive..." -ForegroundColor Gray
 
-    # Include commit hash in filename for development builds (same version, different commits)
+    # Include commit hash in filename for development builds (same version, different commits).
+    # The client rejects any manifest fileName outside [A-Za-z0-9._-], so the
+    # build metadata has to join with '-' rather than '+'.
+    $safeVersion = $Version -replace '\+', '-'
     $stem = if ($CommitShort) {
-        "flutter-gitui-v$Version+$CommitShort-$Platform"
+        "flutter-gitui-v$safeVersion-$CommitShort-$Platform"
     } else {
-        "flutter-gitui-v$Version-$Platform"
+        "flutter-gitui-v$safeVersion-$Platform"
     }
 
     # Get parent directory for archive output
@@ -105,9 +108,9 @@ function New-UpdateManifest {
 
     Write-Host "  Creating update manifest..." -ForegroundColor Gray
 
-    # Construct full version string including commit hash if provided
-    # This ensures update detection works correctly when using commit-based builds
-    $fullVersion = if ($CommitShort) { "$Version+$CommitShort" } else { $Version }
+    # $Version already carries the build number that update detection compares.
+    # Appending the commit would only add a second '+' component the client drops.
+    $fullVersion = $Version
 
     # Create latest.json manifest for auto-update feature
     $manifestData = @{

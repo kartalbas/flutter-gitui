@@ -41,12 +41,18 @@ function Get-VersionFromTag {
         throw "Invalid tag format: $latestTag. Expected: v{major}.{minor}.{patch} (e.g., v0.1.0)"
     }
 
-    Write-Host "  Version: $baseVersion" -ForegroundColor Gray
+    # Commits since the tag. Without it every build between two tags carries the
+    # same version string and the updater can never see a newer release.
+    $commitsSinceTag = (git rev-list --count "$latestTag..HEAD" 2>$null)
+    $buildNumber = if ($commitsSinceTag) { [int]$commitsSinceTag } else { 0 }
+
+    Write-Host "  Version: $baseVersion+$buildNumber" -ForegroundColor Gray
 
     return @{
         Tag = $latestTag
         BaseVersion = $baseVersion
-        FullVersion = $baseVersion
+        FullVersion = "$baseVersion+$buildNumber"
+        BuildNumber = $buildNumber
         Major = $major
         Minor = $minor
         Patch = $patch

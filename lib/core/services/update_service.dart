@@ -202,11 +202,20 @@ class UpdateService {
         if (newParts[i] < currentParts[i]) return false;
       }
 
-      return false;
+      // Builds between two tags share major.minor.patch and differ only in the
+      // build number, so ignoring it would report every one of them as current.
+      return _buildNumber(newVersion) > _buildNumber(currentVersion);
     } catch (e) {
       Logger.error('Error comparing versions', e);
       return false;
     }
+  }
+
+  /// Numeric build component of a version, 0 when absent or non-numeric.
+  static int _buildNumber(String version) {
+    final parts = version.split('+');
+    if (parts.length < 2) return 0;
+    return int.tryParse(parts[1]) ?? 0;
   }
 
   /// Download update file

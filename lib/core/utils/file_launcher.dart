@@ -33,13 +33,15 @@ class FileLauncher {
       Logger.info('url_launcher failed, trying platform-specific command');
 
       if (Platform.isWindows) {
-        // Windows: Use start command via cmd
+        // Launch through explorer.exe rather than `cmd /c start`. cmd re-parses
+        // its whole command line, so a file name containing &, ^, | or %VAR%
+        // would be interpreted as shell syntax instead of a path.
         await Process.start(
-          'cmd',
-          ['/c', 'start', '', filePath],
+          'explorer.exe',
+          [filePath],
           mode: ProcessStartMode.detached,
         );
-        Logger.info('Opened file with Windows start command: $filePath');
+        Logger.info('Opened file with Windows explorer: $filePath');
         return true;
       } else if (Platform.isMacOS) {
         // macOS: Use open command

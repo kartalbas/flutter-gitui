@@ -777,7 +777,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       );
     } catch (e) {
       Logger.error('Error opening editor: $editor with folder: ${repository.path}', e);
-      if (mounted) {
+      if (context.mounted) {
         context.showErrorIfMounted(
           'Failed to open editor: $editor\nFolder: ${repository.path}\nError: $e',
         );

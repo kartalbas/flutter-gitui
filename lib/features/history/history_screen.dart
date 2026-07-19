@@ -744,7 +744,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         branch: currentBranch,
       );
 
-      if (mounted) {
+      if (context.mounted) {
         context.showSuccessIfMounted(
           AppLocalizations.of(context)!.forcePushSuccessful,
         );

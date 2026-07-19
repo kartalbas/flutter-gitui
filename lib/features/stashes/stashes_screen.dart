@@ -163,7 +163,7 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
         files: stashAllFiles ? null : selectedFiles,
       );
 
-      if (mounted) {
+      if (context.mounted) {
         context.showSuccessIfMounted(
           AppLocalizations.of(context)!.stashCreatedSuccess,
         );
@@ -179,7 +179,7 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
 
     if (confirmed == true && context.mounted) {
       await ref.read(gitActionsProvider).clearStashes();
-      if (mounted) {
+      if (context.mounted) {
         context.showSuccessIfMounted(
           AppLocalizations.of(context)!.allStashesClearedSuccess,
         );

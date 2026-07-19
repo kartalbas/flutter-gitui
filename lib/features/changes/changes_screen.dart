@@ -261,7 +261,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     if (result != null) {
       final success = await ref.read(gitActionsProvider).openRepository(result);
 
-      if (!success && mounted) {
+      if (!success && context.mounted) {
         context.showErrorIfMounted('Not a valid Git repository');
       }
     }

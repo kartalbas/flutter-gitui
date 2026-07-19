@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/notification_service.dart';
 import 'result.dart';
 
-/// UI-focused extensions for Result<T> to simplify error handling in widgets
+/// UI-focused extensions for `Result<T>` to simplify error handling in widgets
 extension ResultUIExtensions<T> on Result<T> {
   /// Unwrap with automatic error notification on failure
   /// Shows user-friendly error message via NotificationService
@@ -78,7 +78,7 @@ extension ResultUIExtensions<T> on Result<T> {
     );
   }
 
-  /// Map Result<T> to Result<R> with automatic error forwarding
+  /// Map `Result<T>` to `Result<R>` with automatic error forwarding
   Result<R> mapResult<R>(R Function(T value) transform) {
     return when(
       success: (value) {
@@ -94,7 +94,7 @@ extension ResultUIExtensions<T> on Result<T> {
     );
   }
 
-  /// Fold Result<T> into a widget, handling both success and error cases
+  /// Fold `Result<T>` into a widget, handling both success and error cases
   Widget fold({
     required Widget Function(T value) onSuccess,
     required Widget Function(String message) onError,
@@ -106,7 +106,7 @@ extension ResultUIExtensions<T> on Result<T> {
   }
 }
 
-/// Extensions for Future<Result<T>> to simplify async UI operations
+/// Extensions for `Future<Result<T>>` to simplify async UI operations
 extension FutureResultUIExtensions<T> on Future<Result<T>> {
   /// Execute async operation with loading state and automatic error handling
   /// Returns the result value on success, null on error

@@ -348,7 +348,7 @@ class DiffToolService {
       type: DiffToolType.vscode,
       executablePath: '',
       diffArgs: '--wait --diff \$LOCAL \$REMOTE',
-      mergeArgs: '--wait --merge \$LOCAL \$REMOTE \$BASE \$MERGED',
+      mergeArgs: '--wait --merge \$REMOTE \$LOCAL \$BASE \$MERGED',
     ),
     const DiffTool(
       type: DiffToolType.intellijIdea,

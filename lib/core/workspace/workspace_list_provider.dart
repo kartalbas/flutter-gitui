@@ -204,6 +204,13 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
 
     state = state.where((project) => project.id != projectId).toList();
     await _saveProjects();
+
+    // The deleted workspace may still be selected; fall back to the default one so
+    // consumers don't keep filtering against a workspace that no longer exists
+    final selectedWorkspace = ref.read(selectedProjectProvider);
+    if (selectedWorkspace?.id == projectId) {
+      await ref.read(selectedProjectProvider.notifier).selectProjectById('default');
+    }
   }
 
   /// Add a repository to a project

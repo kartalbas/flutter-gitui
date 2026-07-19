@@ -527,7 +527,14 @@ class GitService {
 
   /// Discard changes in a file
   Future<void> discardFile(String filePath) async {
-    await _execute('checkout -- "$filePath"');
+    // "checkout --" only rewrites the worktree from the index, so a change that
+    // was already staged survived the discard untouched. Dropping the staged
+    // version first puts HEAD's content back in the index for the restore.
+    await _execute('reset HEAD "$filePath"', throwOnError: false);
+    // A file that only ever existed as a staged addition has nothing left to
+    // restore once it leaves the index -- it becomes untracked, and checkout
+    // reports an unknown pathspec, which is not a failure of the discard.
+    await _execute('checkout -- "$filePath"', throwOnError: false);
   }
 
   /// Discard all changes

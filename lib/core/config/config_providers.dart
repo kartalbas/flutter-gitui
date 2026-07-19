@@ -219,8 +219,11 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
           );
           needsSave = true;
         }
-        // Git path is valid - clear any previous error flag
-        _gitPathInvalid = false;
+        // A null version means the executable could not be read at all (missing
+        // file, or every detection strategy failed), which detectVersion reports
+        // by returning null rather than throwing - so the flag must be derived
+        // from the result instead of relying on the catch block below.
+        _gitPathInvalid = version == null;
       } catch (e) {
         Logger.warning(
           'Failed to detect git version - git path may be invalid',

@@ -36,7 +36,11 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     Logger.info('[CONFIG] Using pre-loaded configuration (gitPath=${config.git.executablePath ?? "null"})');
     // Schedule loading state update after provider initialization completes
     // This avoids Riverpod's "cannot modify providers during initialization" error
-    Future(() {
+    Future(() async {
+      // The loading flag is released only after validation, so consumers that
+      // wait for it (repository status refresh, the git path warning) never
+      // observe an unvalidated configuration.
+      await _validatePreloadedConfig();
       _ref.read(_configLoadingStateProvider.notifier).state = false;
       Logger.info('[CONFIG] Pre-loaded config initialization completed (_configLoadingStateProvider set to false)');
     });
@@ -97,6 +101,34 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       _isLoading = false;
       _ref.read(_configLoadingStateProvider.notifier).state = false;
       Logger.info('[CONFIG] Loading configuration completed (_isLoading=false)');
+    }
+  }
+
+  /// Run the startup validation pipeline on a configuration that was loaded
+  /// before the app was built.
+  ///
+  /// The pre-loaded path bypasses _loadConfig entirely, so without this a
+  /// normal app start would never refresh stale tool versions, never detect an
+  /// unusable git executable and never clear a current_repository that points
+  /// at a repository the user has since removed.
+  Future<void> _validatePreloadedConfig() async {
+    try {
+      var config = await _validateToolVersions(state);
+
+      final workspaceValidation = _validateWorkspace(config);
+      config = workspaceValidation.config;
+      if (workspaceValidation.needsSave) {
+        Logger.config('Saving workspace validation changes to config');
+        final saveResult = await ConfigService.save(config);
+        saveResult.unwrap(); // Throw on error
+      }
+
+      state = config;
+      Logger.info('[CONFIG] Pre-loaded configuration validated (gitPathInvalid=$_gitPathInvalid)');
+    } catch (e, stack) {
+      // A failed validation must not take the app down: the configuration the
+      // user already has stays in effect.
+      Logger.error('Error validating pre-loaded config', e, stack);
     }
   }
 
@@ -706,6 +738,10 @@ final configLoadFailureProvider = Provider<bool>((ref) {
 final gitPathInvalidProvider = Provider<bool>((ref) {
   // This triggers a rebuild when the notifier changes
   ref.watch(configProvider);
+  // An unusable git path changes no config value, so watching the config alone
+  // would keep this cached at its initial false. The loading flag flips once
+  // startup validation has finished and therefore carries the result.
+  ref.watch(configLoadingProvider);
   return ref.read(configProvider.notifier).gitPathInvalid;
 });
 

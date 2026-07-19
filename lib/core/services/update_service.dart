@@ -71,8 +71,6 @@ class UpdateService {
       return 'latest-windows.json';
     } else if (Platform.isLinux) {
       return 'latest-linux.json';
-    } else if (Platform.isMacOS) {
-      return 'latest-macos.json';
     }
     return 'latest.json'; // fallback
   }
@@ -135,11 +133,10 @@ class UpdateService {
           platform = 'linux';
           platformData = manifestData['linux'] as Map<String, dynamic>?;
           downloadFileName = platformData?['fileName'] as String? ?? 'flutter-gitui-v$latestVersion-linux.zip';
-        } else if (Platform.isMacOS) {
-          platform = 'macos';
-          platformData = manifestData['macos'] as Map<String, dynamic>?;
-          downloadFileName = platformData?['fileName'] as String? ?? 'flutter-gitui-v$latestVersion-macos.zip';
         } else {
+          // Only Windows and Linux publish release archives and can install
+          // them; offering an update anywhere else would end in a multi-MB
+          // download that can never be applied.
           Logger.warning('Unsupported platform for updates');
           throw Exception('Unsupported platform for updates');
         }
@@ -334,8 +331,6 @@ class UpdateService {
         return await _installWindowsUpdate(updateFilePath);
       } else if (Platform.isLinux) {
         return await _installLinuxUpdate(updateFilePath);
-      } else if (Platform.isMacOS) {
-        return await _installMacOSUpdate(updateFilePath);
       } else {
         Logger.warning('Update installation not supported on this platform');
         throw Exception('Update installation not supported on this platform');
@@ -610,19 +605,4 @@ rm "\$0"
     }
   }
 
-  /// Install macOS update (.dmg or .zip file)
-  static Future<bool> _installMacOSUpdate(String updateFilePath) async {
-    try {
-      // macOS update process typically involves:
-      // 1. Mount DMG
-      // 2. Copy app to /Applications
-      // 3. Restart
-
-      Logger.warning('macOS update installation not yet implemented');
-      return false;
-    } catch (e, stackTrace) {
-      Logger.error('Error installing macOS update', e, stackTrace);
-      return false;
-    }
-  }
 }

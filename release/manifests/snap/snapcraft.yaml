@@ -34,6 +34,9 @@ apps:
     environment:
       # Flutter/GTK environment
       GDK_BACKEND: x11,wayland
+      # Classic confinement does not add staged library paths to the loader
+      # search path the way strict confinement does.
+      LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
       # Git configuration
       GIT_TERMINAL_PROMPT: '0'
 
@@ -41,6 +44,10 @@ parts:
   flutter-gitui:
     plugin: dump
     source: bundle
+    # local_notifier links its plugin .so against libnotify.so.4 but leaves
+    # local_notifier_bundled_libraries empty, so nothing stages it for us.
+    stage-packages:
+      - libnotify4
     organize:
       flutter-gitui: bin/flutter-gitui
       linux/lib: lib

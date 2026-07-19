@@ -158,6 +158,7 @@ flutter-gitui/
 ## System Requirements
 
 - Linux with GTK 3.0+
+- libnotify (Debian/Ubuntu: ``libnotify4``, Fedora: ``libnotify``, Arch: ``libnotify``)
 - Git must be installed and available in PATH
 
 ---

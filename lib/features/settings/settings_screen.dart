@@ -482,6 +482,8 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
 
+    controller.dispose();
+
     if (result != null && result.isNotEmpty) {
       await ref.read(configProvider.notifier).setDefaultUserName(result);
     }
@@ -527,6 +529,8 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
 
+    controller.dispose();
+
     if (result != null && result.isNotEmpty) {
       await ref.read(configProvider.notifier).setDefaultUserEmail(result);
     }
@@ -568,6 +572,8 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+
+    controller.dispose();
 
     if (result != null) {
       await ref.read(configProvider.notifier).setDefaultCommitLimit(result);

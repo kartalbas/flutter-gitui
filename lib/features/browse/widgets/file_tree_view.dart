@@ -878,10 +878,10 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Show rename dialog
       if (!context.mounted) return;
+      final controller = TextEditingController(text: currentName);
       final newName = await showDialog<String>(
         context: context,
         builder: (context) {
-          final controller = TextEditingController(text: currentName);
           return BaseDialog(
             title: AppLocalizations.of(context)!.dialogTitleRenameFile,
             icon: PhosphorIconsRegular.pencilSimple,
@@ -906,6 +906,8 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
           );
         },
       );
+
+      controller.dispose();
 
       if (newName == null || newName.isEmpty || newName == currentName) {
         return;

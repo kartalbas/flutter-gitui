@@ -194,9 +194,11 @@ class SettingsScreen extends ConsumerWidget {
     if (result != null && result.files.single.path != null) {
       final selectedPath = result.files.single.path!;
 
-      // Verify file exists
-      final file = File(selectedPath);
-      if (!await file.exists()) {
+      // Verify the selection exists. macOS GUI editors are `.app` bundle
+      // directories, which File.exists() never reports as present.
+      final exists = await File(selectedPath).exists() ||
+          (Platform.isMacOS && await Directory(selectedPath).exists());
+      if (!exists) {
         if (context.mounted) {
           _showError(context, l10n.selectedFileDoesNotExist);
         }

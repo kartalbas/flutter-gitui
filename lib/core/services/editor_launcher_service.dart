@@ -21,8 +21,18 @@ class EditorLauncherService {
       // Resolve to platform-specific executable
       final resolvedPath = _resolveExecutablePath(editorPath);
 
+      // macOS GUI editors are `.app` bundle directories: File.existsSync() never
+      // reports one as present and Process.start cannot execute a directory, so
+      // a bundle has to be handed to `open -a` instead.
+      final bundlePath = resolvedPath.endsWith('/')
+          ? resolvedPath.substring(0, resolvedPath.length - 1)
+          : resolvedPath;
+      final isAppBundle = Platform.isMacOS &&
+          bundlePath.toLowerCase().endsWith('.app') &&
+          Directory(bundlePath).existsSync();
+
       // Verify the resolved path exists
-      if (!File(resolvedPath).existsSync()) {
+      if (!isAppBundle && !File(resolvedPath).existsSync()) {
         final message = Platform.isWindows
             ? 'Editor executable not found: $editorPath\n'
                 'Tried: $editorPath.cmd, $editorPath.exe, $editorPath.bat\n'
@@ -37,11 +47,19 @@ class EditorLauncherService {
 
       // Launch the editor
       Logger.info('Launching editor: $resolvedPath with target: $targetPath');
-      await Process.start(
-        resolvedPath,
-        [targetPath],
-        mode: ProcessStartMode.detached,
-      );
+      if (isAppBundle) {
+        await Process.start(
+          'open',
+          ['-a', bundlePath, targetPath],
+          mode: ProcessStartMode.detached,
+        );
+      } else {
+        await Process.start(
+          resolvedPath,
+          [targetPath],
+          mode: ProcessStartMode.detached,
+        );
+      }
     });
   }
 

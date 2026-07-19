@@ -520,52 +520,62 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Build keyboard shortcuts
   Map<ShortcutActivator, VoidCallback> _buildShortcuts() {
-    return {
-      // Command Palette
-      const SingleActivator(LogicalKeyboardKey.keyK, control: true): () {
-        _showCommandPalette(context);
-      },
+    final bindings = <ShortcutActivator, VoidCallback>{};
 
-      // Toggle Command Log
-      const SingleActivator(LogicalKeyboardKey.keyL, control: true): () {
-        ref.read(commandLogPanelVisibleProvider.notifier).state =
-            !ref.read(commandLogPanelVisibleProvider);
-      },
+    // Control and Meta are both bound so the shortcuts follow the Command-key
+    // convention on macOS without losing the Ctrl-based bindings that Windows
+    // and Linux users expect.
+    void bind(LogicalKeyboardKey key, VoidCallback callback) {
+      bindings[SingleActivator(key, control: true)] = callback;
+      bindings[SingleActivator(key, meta: true)] = callback;
+    }
 
-      // Repository Switcher
-      const SingleActivator(LogicalKeyboardKey.keyR, control: true): () {
-        _showRepositorySwitcher(context);
-      },
+    // Command Palette
+    bind(LogicalKeyboardKey.keyK, () {
+      _showCommandPalette(context);
+    });
 
-      // Navigation shortcuts
-      const SingleActivator(LogicalKeyboardKey.digit1, control: true): () {
-        _navigateTo(AppDestination.workspaces);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit2, control: true): () {
-        _navigateTo(AppDestination.repositories);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit3, control: true): () {
-        _navigateTo(AppDestination.changes);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit4, control: true): () {
-        _navigateTo(AppDestination.history);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit5, control: true): () {
-        _navigateTo(AppDestination.browse);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit6, control: true): () {
-        _navigateTo(AppDestination.branches);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit7, control: true): () {
-        _navigateTo(AppDestination.stashes);
-      },
-      const SingleActivator(LogicalKeyboardKey.digit8, control: true): () {
-        _navigateTo(AppDestination.tags);
-      },
-      const SingleActivator(LogicalKeyboardKey.comma, control: true): () {
-        _navigateTo(AppDestination.settings);
-      },
-    };
+    // Toggle Command Log
+    bind(LogicalKeyboardKey.keyL, () {
+      ref.read(commandLogPanelVisibleProvider.notifier).state =
+          !ref.read(commandLogPanelVisibleProvider);
+    });
+
+    // Repository Switcher
+    bind(LogicalKeyboardKey.keyR, () {
+      _showRepositorySwitcher(context);
+    });
+
+    // Navigation shortcuts
+    bind(LogicalKeyboardKey.digit1, () {
+      _navigateTo(AppDestination.workspaces);
+    });
+    bind(LogicalKeyboardKey.digit2, () {
+      _navigateTo(AppDestination.repositories);
+    });
+    bind(LogicalKeyboardKey.digit3, () {
+      _navigateTo(AppDestination.changes);
+    });
+    bind(LogicalKeyboardKey.digit4, () {
+      _navigateTo(AppDestination.history);
+    });
+    bind(LogicalKeyboardKey.digit5, () {
+      _navigateTo(AppDestination.browse);
+    });
+    bind(LogicalKeyboardKey.digit6, () {
+      _navigateTo(AppDestination.branches);
+    });
+    bind(LogicalKeyboardKey.digit7, () {
+      _navigateTo(AppDestination.stashes);
+    });
+    bind(LogicalKeyboardKey.digit8, () {
+      _navigateTo(AppDestination.tags);
+    });
+    bind(LogicalKeyboardKey.comma, () {
+      _navigateTo(AppDestination.settings);
+    });
+
+    return bindings;
   }
 
   /// Navigate to destination

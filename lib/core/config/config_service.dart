@@ -145,35 +145,64 @@ class ConfigService {
               final itemMap = item as Map<String, dynamic>;
               itemMap.forEach((k, v) {
                 if (v is String) {
-                  // Escape backslashes for Windows paths in YAML
-                  final escapedV = v.replaceAll('\\', '\\\\');
-                  buffer.writeln('$spaces    $k: "$escapedV"');
-                } else {
+                  buffer.writeln('$spaces    $k: ${_yamlString(v)}');
+                } else if (v is bool || v is num) {
                   buffer.writeln('$spaces    $k: $v');
+                } else {
+                  buffer.writeln('$spaces    $k: ${_yamlString(v.toString())}');
                 }
               });
             } else if (item is String) {
-              // Escape backslashes for Windows paths in YAML
-              final escapedItem = item.replaceAll('\\', '\\\\');
-              buffer.writeln('$spaces  - "$escapedItem"');
-            } else {
+              buffer.writeln('$spaces  - ${_yamlString(item)}');
+            } else if (item is bool || item is num) {
               buffer.writeln('$spaces  - $item');
+            } else {
+              buffer.writeln('$spaces  - ${_yamlString(item.toString())}');
             }
           }
         }
       } else if (value is String) {
-        // Escape backslashes for Windows paths in YAML
-        final escapedValue = value.replaceAll('\\', '\\\\');
-        buffer.writeln('$spaces$key: "$escapedValue"');
+        buffer.writeln('$spaces$key: ${_yamlString(value)}');
       } else if (value is bool || value is num) {
         buffer.writeln('$spaces$key: $value');
       } else {
-        // Escape backslashes for Windows paths in YAML
-        final escapedValue = value.toString().replaceAll('\\', '\\\\');
-        buffer.writeln('$spaces$key: "$escapedValue"');
+        buffer.writeln('$spaces$key: ${_yamlString(value.toString())}');
       }
     });
 
+    return buffer.toString();
+  }
+
+  /// Renders [value] as a YAML double-quoted scalar.
+  ///
+  /// Previously only backslashes were escaped, so a quote, newline or tab in a
+  /// repository name or description produced a file the parser rejected on the
+  /// next launch. Every character that YAML's double-quoted style treats
+  /// specially is escaped here, in one place.
+  static String _yamlString(String value) {
+    final buffer = StringBuffer('"');
+    for (final rune in value.runes) {
+      switch (rune) {
+        case 0x5C: // backslash
+          buffer.write(r'\\');
+        case 0x22: // double quote
+          buffer.write(r'\"');
+        case 0x0A: // line feed
+          buffer.write(r'\n');
+        case 0x0D: // carriage return
+          buffer.write(r'\r');
+        case 0x09: // tab
+          buffer.write(r'\t');
+        default:
+          // Remaining C0 control characters have no literal representation.
+          if (rune < 0x20) {
+            buffer.write('\\x${rune.toRadixString(16).padLeft(2, '0')}');
+          } else {
+            buffer.writeCharCode(rune);
+          }
+      }
+    }
+    buffer.write('"');
     return buffer.toString();
   }
 }

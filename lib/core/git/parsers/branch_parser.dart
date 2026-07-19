@@ -69,6 +69,19 @@ class BranchParser {
       // Remove the * marker and trim
       var branchLine = isCurrent ? trimmed.substring(1).trim() : trimmed;
 
+      // git marks a branch checked out in another worktree with '+'. It is a
+      // real branch; only the marker has to go, otherwise the entry was named
+      // literally '+'.
+      if (branchLine.startsWith('+')) {
+        branchLine = branchLine.substring(1).trim();
+      }
+
+      // A detached HEAD is reported as '(HEAD detached at abc1234)'. That is a
+      // state, not a branch: parsing it produced an entry named '(HEAD' that
+      // the UI offered to merge and delete. The app reaches this state on its
+      // own whenever a tag is checked out.
+      if (branchLine.startsWith('(')) return null;
+
       // For remote branches, remove "remotes/" prefix
       if (branchLine.startsWith('remotes/')) {
         branchLine = branchLine.substring('remotes/'.length);

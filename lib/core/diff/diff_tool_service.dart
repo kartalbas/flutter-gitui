@@ -13,12 +13,12 @@ class DiffToolService {
     Logger.info('Detecting available diff/merge tools...');
     final tools = <DiffTool>[];
 
-    // On Linux, check git's configured tools first (respects user's preferences)
-    // This helps users who already configured their preferred diff tool in git
-    if (Platform.isLinux) {
-      Logger.info('Checking git config for user-configured diff/merge tools (Linux)');
-      await _addGitConfiguredTools(tools);
-    }
+    // Check git's configured tools first so an explicit diff.tool/merge.tool
+    // preference outranks detection order. The probe is not platform-specific:
+    // the same 'git config' lookups apply on Windows and macOS, and they
+    // degrade quietly when git is absent or the key is unset.
+    Logger.info('Checking git config for user-configured diff/merge tools');
+    await _addGitConfiguredTools(tools);
 
     // Check each known tool
     for (final toolDef in _knownTools) {
@@ -41,7 +41,7 @@ class DiffToolService {
     return tools;
   }
 
-  /// Add tools configured in git config (Linux preference detection)
+  /// Add tools configured in git config (user preference detection)
   static Future<void> _addGitConfiguredTools(List<DiffTool> tools) async {
     try {
       // Check git's configured diff tool

@@ -64,14 +64,30 @@ class VersionService {
     }
   }
 
+  /// The stored preference as the tri-state it actually is: null means the user
+  /// has never expressed one. The public getter above flattens null to false
+  /// because it also seeds the dialog's checkbox, which must not render as
+  /// ticked for a choice nobody made.
+  Future<bool?> _storedWhatsNewPreference() async {
+    try {
+      final config = await ConfigService.load().then(
+        (result) => result.unwrap(),
+      );
+      return config.disableWhatsNewDialog;
+    } catch (e) {
+      Logger.warning('Failed to check dialog disabled state', e);
+      return null;
+    }
+  }
+
   /// Check if the user should see the "What's New" dialog
   ///
   /// Use cases:
   /// 1. First run (lastSeenVersion == null) -> Always show
   /// 2. After any update/upgrade (version changed) -> Always show
   /// 3. Normal runs (version unchanged):
-  ///    - User disabled dialog -> Don't show
-  ///    - User didn't disable -> Show every time
+  ///    - User opted in explicitly -> Show every time
+  ///    - Otherwise (disabled, or never asked) -> Don't show
   Future<bool> shouldShowWhatsNew() async {
     final currentVersion = await getCurrentVersion();
     final lastSeenVersion = await getLastSeenVersion();
@@ -98,10 +114,14 @@ class VersionService {
       return true;
     }
 
-    // Case 3: Normal run (same version) - check user preference
-    final isDisabled = await isWhatsNewDialogDisabled();
-    if (isDisabled) {
-      Logger.info('[VersionService] Normal run - dialog disabled by user');
+    // Case 3: Normal run (same version). A non-dismissible modal on every single
+    // launch is noise, so silence is the default and only an explicit opt-in
+    // (the user clearing "Don't show on startup", which persists false) brings
+    // it back. Reading the raw preference rather than the flattened getter keeps
+    // that decision out of the checkbox's own state.
+    final preference = await _storedWhatsNewPreference();
+    if (preference != false) {
+      Logger.info('[VersionService] Normal run - dialog not opted in');
       return false;
     }
 

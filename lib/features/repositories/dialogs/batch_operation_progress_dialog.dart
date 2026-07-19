@@ -208,7 +208,7 @@ class _BatchOperationProgressDialogState extends State<BatchOperationProgressDia
                           ),
                           const SizedBox(height: AppTheme.paddingXS),
                           BodySmallLabel(
-                            l10n.successCount(_successCount, _failureCount, _successCount),
+                            l10n.successCount(_successCount, _failureCount),
                           ),
                         ],
                       ),

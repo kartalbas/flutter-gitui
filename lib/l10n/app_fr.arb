@@ -1294,7 +1294,7 @@
   "operationInProgress": "En attente...",
   "operationsCompleted": "Toutes les opérations terminées avec succès",
   "operationsCompletedWithErrors": "Terminé avec des erreurs",
-  "successCount": "{count} réussi(e)s",
+  "successCount": "{successCount} réussi(e)s, {failureCount} échoué(e)s",
   "@successCount": {
     "description": "Summary of operation results",
     "placeholders": {

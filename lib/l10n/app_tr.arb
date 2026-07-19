@@ -644,7 +644,7 @@
   "operationInProgress": "İşlem devam ediyor...",
   "operationsCompleted": "İşlemler tamamlandı",
   "operationsCompletedWithErrors": "İşlemler hatalarla tamamlandı",
-  "successCount": "Başarılı: {count}",
+  "successCount": "{successCount} başarılı, {failureCount} başarısız",
   "completed": "Tamamlandı",
   "failed": "Başarısız",
   "createBranchDialogTitle": "Dal Oluştur",

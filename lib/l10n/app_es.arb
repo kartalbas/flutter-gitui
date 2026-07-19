@@ -1294,7 +1294,7 @@
   "operationInProgress": "Operación en progreso",
   "operationsCompleted": "{completed} de {total} operaciones completadas",
   "operationsCompletedWithErrors": "{completed} de {total} operaciones completadas ({errors} con errores)",
-  "successCount": "{count} exitoso(s)",
+  "successCount": "{successCount} correcto(s), {failureCount} fallido(s)",
   "@successCount": {
     "description": "Summary of operation results",
     "placeholders": {

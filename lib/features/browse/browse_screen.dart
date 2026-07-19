@@ -87,8 +87,10 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       final normalizedRepoPath = path.normalize(repositoryPath);
       final normalizedFilePath = path.normalize(selectedFile);
 
-      // Check if file belongs to current repository
-      if (!normalizedFilePath.startsWith(normalizedRepoPath)) {
+      // A prefix test would accept a sibling repository whose path starts with the
+      // same characters (D:\repos\app-v2 under D:\repos\app); isWithin compares whole
+      // path segments and is case-insensitive on Windows.
+      if (!path.isWithin(normalizedRepoPath, normalizedFilePath)) {
         shouldClearSelection = true;
       }
       // Check if file exists

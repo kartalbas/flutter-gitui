@@ -798,7 +798,7 @@ del "%~f0"
     }
   }
 
-  /// Install Linux update (.zip file)
+  /// Install Linux update (.tar.gz archive)
   static Future<bool> _installLinuxUpdate(String zipFilePath) async {
     try {
       // Get app installation directory
@@ -867,6 +867,9 @@ del "%~f0"
         Logger.info('Updater not found, using fallback shell script');
 
         final updateScriptPath = path.join(appDir, '_update.sh');
+        // The script runs detached with no terminal attached, so a failure has
+        // to leave its reason on disk to be diagnosable at all.
+        final errorLogPath = path.join(appDir, '_update_error.log');
         // The archive is laid out relative to the root, so a universal build
         // must extract into rootDir; extracting into linux/ would nest a
         // second linux/ inside it and leave the real files untouched.
@@ -881,17 +884,20 @@ echo "Waiting for application to close..."
 sleep 3
 
 echo "Extracting update..."
-unzip -o "$zipFilePath" -d "$rootDir"
+# The Linux bundle ships as a gzipped tarball because a plain zip carries no
+# POSIX mode bits, so a bundle packed that way would arrive non-executable.
+# tar is part of every Linux base system, which unzip is not.
+tar -xzf "$zipFilePath" -C "$rootDir"
 if [ \$? -ne 0 ]; then
-  echo "ERROR: Failed to extract update!"
-  read -p "Press Enter to exit..."
+  # Stop rather than relaunch the unchanged binary: that would report an update
+  # that never happened and offer the very same one again on the next start.
+  echo "ERROR: Failed to extract update!" >> "$errorLogPath"
   exit 1
 fi
 
 echo "Setting permissions..."
-# Restore the exec bit on the binary that is relaunched below; archives zipped
-# on Windows CI lose file modes, and hardcoded name guesses miss both the
-# standard and the universal layout.
+# The tarball already carries the exec bit; re-assert it on the binary that is
+# relaunched below so a bundle repacked without mode bits still starts.
 chmod +x "$exePath"
 
 echo "Cleaning up..."

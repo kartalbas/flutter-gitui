@@ -101,7 +101,7 @@ If `updater.exe` is not found, the update service falls back to a batch script a
 
 **Linux:** Creates `_update.sh` with:
 - 3-second wait
-- unzip extraction
+- tar extraction
 - Permission fixes
 - File cleanup
 - App restart
@@ -177,13 +177,13 @@ Press any key to exit...
 
 ### Dart Packages
 
-- **archive** (^3.6.1) - For extracting zip files
+- **archive** (^3.6.1) - For extracting zip and tar.gz archives
 - **path** (^1.9.0) - For cross-platform path handling
 
 ### System Requirements
 
 - **Windows:** PowerShell (for fallback), CMD
-- **Linux:** bash, unzip, chmod
+- **Linux:** bash, tar, chmod
 - **Dart SDK:** ^3.5.0
 
 ## Security Considerations

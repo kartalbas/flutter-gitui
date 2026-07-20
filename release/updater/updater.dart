@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as path;
 
@@ -147,7 +148,7 @@ void main(List<String> args) async {
       _log('      Extracting to: $extractDir');
     }
 
-    final skippedUpdater = await _extractZip(zipPath, extractDir);
+    final skippedUpdater = await _extractArchive(zipPath, extractDir);
     _log('      ✓ Update extracted to: $extractDir');
     if (skippedUpdater) {
       _log('      ℹ Note: Updater itself was skipped (will be updated on next cycle)');
@@ -235,11 +236,11 @@ Future<void> _waitForProcessToExit(int pid, {Duration timeout = const Duration(s
   throw Exception('Timeout waiting for application to exit (PID: $pid)');
 }
 
-/// Extract a zip file to a destination directory
+/// Extract an update archive to a destination directory
 /// Returns true if the updater itself was skipped
-Future<bool> _extractZip(String zipPath, String destinationDir) async {
-  final bytes = File(zipPath).readAsBytesSync();
-  final archive = ZipDecoder().decodeBytes(bytes);
+Future<bool> _extractArchive(String archivePath, String destinationDir) async {
+  final bytes = File(archivePath).readAsBytesSync();
+  final archive = _decodeArchive(bytes);
 
   // Get current updater executable path to skip it during extraction
   final currentExePath = Platform.resolvedExecutable;
@@ -251,7 +252,10 @@ Future<bool> _extractZip(String zipPath, String destinationDir) async {
   bool skippedUpdater = false;
 
   for (final file in archive) {
-    final filename = file.name;
+    // `tar -czf archive -C bundle .` records every entry with a leading './',
+    // which would otherwise be carried into the output path and would stop the
+    // updater from recognising its own executable below.
+    final filename = path.normalize(file.name);
     final filePath = path.join(destinationDir, filename);
 
     // Normalize paths for comparison (convert forward slashes to platform-specific)
@@ -291,4 +295,18 @@ Future<bool> _extractZip(String zipPath, String destinationDir) async {
   }
 
   return skippedUpdater;
+}
+
+/// Decode an update archive, choosing the decoder from the container format.
+///
+/// Linux bundles ship as gzipped tarballs because a plain zip stores no POSIX
+/// mode bits: a bundle packed that way extracts without the executable bit and
+/// cannot be relaunched. The gzip magic number identifies them regardless of
+/// what the downloaded file happens to be named.
+Archive _decodeArchive(Uint8List bytes) {
+  final isGzip = bytes.length >= 2 && bytes[0] == 0x1f && bytes[1] == 0x8b;
+  if (isGzip) {
+    return TarDecoder().decodeBytes(GZipDecoder().decodeBytes(bytes));
+  }
+  return ZipDecoder().decodeBytes(bytes);
 }

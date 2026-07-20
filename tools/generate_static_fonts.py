@@ -165,11 +165,19 @@ def generate_static_font(source_path, dest_path, axes):
         # Load variable font
         font = TTFont(source_path)
 
-        # Instantiate to specific axis values
-        instancer.instantiateVariableFont(font, axes)
+        # instantiateVariableFont returns the pinned font and leaves its input
+        # alone unless inplace is set, so ignoring the return value silently
+        # saved five identical copies of the variable source. updateFontNames
+        # rewrites the name records and usWeightClass, without which every cut
+        # still announces itself as Regular 400 and the weight a caller asks
+        # for is whatever the default instance happens to be.
+        static = instancer.instantiateVariableFont(
+            font, axes, inplace=False, updateFontNames=True
+        )
 
         # Save static font
-        font.save(dest_path)
+        static.save(dest_path)
+        static.close()
         font.close()
 
         # Without this, anything that produced an error page instead of a font
@@ -179,6 +187,25 @@ def generate_static_font(source_path, dest_path, axes):
         if signature not in (b'\x00\x01\x00\x00', b'true', b'OTTO'):
             print(f"    [ERROR] {os.path.basename(dest_path)} is not a font: {signature!r}")
             return False
+
+        # A valid font is not enough: the whole point is a PINNED one. A file
+        # that still carries fvar is the variable source under a static name,
+        # which renders every weight identically.
+        check = TTFont(dest_path, lazy=True)
+        try:
+            if 'fvar' in check:
+                print(f"    [ERROR] {os.path.basename(dest_path)} still has variation axes")
+                return False
+            expected = axes.get('wght')
+            actual = check['OS/2'].usWeightClass
+            if expected is not None and actual != expected:
+                print(
+                    f"    [ERROR] {os.path.basename(dest_path)} reports weight "
+                    f"{actual}, expected {expected}"
+                )
+                return False
+        finally:
+            check.close()
 
         print(f"    [OK] Created {os.path.basename(dest_path)}")
         return True

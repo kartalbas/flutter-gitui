@@ -28,8 +28,12 @@ jobs:
           # (release/manifests/snap/snapcraft.yaml).
           - platform: linux
             os: ubuntu-22.04
-          - platform: macos
-            os: macos-latest
+          # macOS is deliberately absent from the RELEASE matrix while the build
+          # is ad-hoc signed with no hardened runtime: Gatekeeper refuses such an
+          # app with "is damaged and can't be opened", so publishing it would
+          # ship an artifact that cannot start. CI still builds macOS on every
+          # push, so compile breakage is caught; only publishing waits for a
+          # Developer ID certificate and notarisation.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

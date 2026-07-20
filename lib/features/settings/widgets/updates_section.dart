@@ -87,8 +87,14 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to check for updates: ${e.toString()}'),
+            // The raw exception named an internal host and an OS errno, which
+            // reads as a broken app; the service phrases each failure mode as
+            // something the user can act on.
+            content: Text(UpdateService.describeCheckFailure(e)),
             backgroundColor: Theme.of(context).colorScheme.error,
+            // The message says what to do next and carries a URL, which four
+            // seconds is not enough to read.
+            duration: const Duration(seconds: 8),
           ),
         );
       }

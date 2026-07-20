@@ -56,11 +56,29 @@ class UpdateInfo {
   }
 }
 
+/// A failed update check, already phrased for the person who started it.
+///
+/// The transport error behind it belongs in the log: a SocketException naming
+/// an internal host and an errno, or a rate-limit JSON body, tells the user
+/// nothing they can act on.
+class UpdateCheckException implements Exception {
+  final String message;
+
+  const UpdateCheckException(this.message);
+
+  @override
+  String toString() => message;
+}
+
 /// Service for checking and downloading app updates
 class UpdateService {
   /// Published releases of the project, newest first.
   static const String _releasesUrl =
       'https://api.github.com/repos/kartalbas/flutter-gitui/releases';
+
+  /// Where a release can always be fetched by hand when the check fails.
+  static const String _releasesPageUrl =
+      'https://github.com/kartalbas/flutter-gitui/releases';
 
   /// Get platform-specific manifest file name
   static String get _manifestFileName {
@@ -85,7 +103,7 @@ class UpdateService {
   /// Check for updates
   /// Returns Result\<UpdateInfo?\> - Success(UpdateInfo) if update available, Success(null) if up-to-date, Failure on error
   static Future<Result<UpdateInfo?>> checkForUpdates() async {
-    return runCatchingAsync(() async {
+    final result = await runCatchingAsync(() async {
       Logger.info('Checking for updates...');
 
       // Get current version
@@ -114,9 +132,8 @@ class UpdateService {
         Logger.warning(
           'Failed to list releases: ${releasesResponse.statusCode}',
         );
-        throw Exception(
-          'Failed to fetch releases: HTTP ${releasesResponse.statusCode}',
-        );
+        Logger.warning('Response body: ${releasesResponse.body}');
+        throw _releaseListFailure(releasesResponse);
       }
 
       final releases =
@@ -134,6 +151,21 @@ class UpdateService {
       }
 
       if (release == null) {
+        // A channel that publishes nothing at all is a broken update channel,
+        // not an up-to-date install, and calling it "up to date" would hide
+        // that for as long as it lasts. A channel that merely holds no release
+        // for this build -- a stable install while only pre-releases exist --
+        // genuinely has nothing to offer.
+        final anyPublished = releases.any(
+          (entry) => entry is Map<String, dynamic> && entry['draft'] != true,
+        );
+        if (!anyPublished) {
+          Logger.warning('No published release exists yet');
+          throw UpdateCheckException(
+            'No release has been published yet, so there is nothing to update '
+            'to. Releases appear at $_releasesPageUrl.',
+          );
+        }
         Logger.info('✓ No published release for this channel');
         return null;
       }
@@ -144,9 +176,10 @@ class UpdateService {
       final manifestUrl = _assetUrl(assets, _manifestFileName);
       if (manifestUrl == null) {
         Logger.warning('Release ${release['tag_name']} has no manifest asset');
-        throw Exception(
-          'Failed to fetch update manifest: the latest release publishes no '
-          '$_manifestFileName.',
+        throw UpdateCheckException(
+          'Release ${release['tag_name']} publishes no update information for '
+          'this platform, so it cannot be installed automatically. Download it '
+          'from $_releasesPageUrl.',
         );
       }
 
@@ -162,8 +195,10 @@ class UpdateService {
           'Failed to fetch update manifest: ${response.statusCode}',
         );
         Logger.warning('Response body: ${response.body}');
-        throw Exception(
-          'Failed to fetch update manifest: HTTP ${response.statusCode}',
+        throw UpdateCheckException(
+          'The update information of release ${release['tag_name']} could not '
+          'be downloaded (HTTP ${response.statusCode}). Try again later, or '
+          'download the release from $_releasesPageUrl.',
         );
       }
 
@@ -203,25 +238,29 @@ class UpdateService {
           // them; offering an update anywhere else would end in a multi-MB
           // download that can never be applied.
           Logger.warning('Unsupported platform for updates');
-          throw Exception('Unsupported platform for updates');
+          throw UpdateCheckException(
+            'Automatic updates are published for Windows and Linux only. '
+            'Download a release from $_releasesPageUrl.',
+          );
         }
 
         // The manifest is remote input; anything but a plain basename could
         // escape the temp directory or the generated update script.
         if (!RegExp(r'^[A-Za-z0-9._-]+$').hasMatch(downloadFileName)) {
           Logger.warning('Rejected manifest fileName: $downloadFileName');
-          throw Exception(
-            'Update rejected: the release manifest fileName is not a valid '
-            'archive name.',
+          throw UpdateCheckException(
+            'Release ${release['tag_name']} names an archive that is not a '
+            'valid file name, so the update was refused. Download the release '
+            'from $_releasesPageUrl.',
           );
         }
 
         final downloadUrl = _assetUrl(assets, downloadFileName);
         if (downloadUrl == null) {
           Logger.warning('Release asset not found: $downloadFileName');
-          throw Exception(
-            'Update rejected: the release publishes no $downloadFileName '
-            'asset.',
+          throw UpdateCheckException(
+            'Release ${release['tag_name']} publishes no $downloadFileName, so '
+            'the update cannot be downloaded. Get it from $_releasesPageUrl.',
           );
         }
         final fileSize = platformData?['fileSize'] as int? ?? 0;
@@ -252,6 +291,94 @@ class UpdateService {
         return null;
       }
     });
+
+    // runCatchingAsync keeps only e.toString() as the failure message, which
+    // for a transport error is a line naming a host and an OS errno. Replace
+    // it with the sentence for this failure mode, and log the original here so
+    // the diagnosis the message points at is actually in the log.
+    if (result case Failure<UpdateInfo?>(:final error, :final stackTrace)) {
+      Logger.error('Update check failed', error, stackTrace);
+      return Failure(
+        _checkFailureMessage(error),
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+    return result;
+  }
+
+  /// The user-facing sentence behind a failed update check.
+  ///
+  /// unwrap() rethrows a Failure as Exception(message), so what reaches a
+  /// caller's catch is the phrased message behind Dart's 'Exception: ' prefix.
+  /// Stripping it here keeps exception syntax out of the UI.
+  static String describeCheckFailure(Object error) {
+    const prefix = 'Exception: ';
+    final text = error.toString();
+    if (text.startsWith(prefix) && text.length > prefix.length) {
+      return text.substring(prefix.length);
+    }
+    return _checkFailureMessage(error);
+  }
+
+  /// What to tell the user about [error], and what they can do about it.
+  static String _checkFailureMessage(Object? error) {
+    if (error is UpdateCheckException) return error.message;
+    if (error is TimeoutException) {
+      return 'GitHub did not answer within 10 seconds. Check your connection '
+          'and try again, or download from $_releasesPageUrl.';
+    }
+    // Offline, blocked by a proxy, or unable to resolve the host: all of these
+    // arrive as a socket, TLS or client failure and all mean the same thing to
+    // the user.
+    if (error is SocketException ||
+        error is HandshakeException ||
+        error is http.ClientException) {
+      return 'GitHub could not be reached. Check your internet connection or '
+          'proxy settings and try again, or download from $_releasesPageUrl.';
+    }
+    if (error is FormatException) {
+      return 'GitHub returned an update response this version cannot read. '
+          'Try again later, or download from $_releasesPageUrl.';
+    }
+    return 'The update check failed. See the application log for details, or '
+        'download from $_releasesPageUrl.';
+  }
+
+  /// Why a release listing did not return 200, phrased for the user.
+  static UpdateCheckException _releaseListFailure(http.Response response) {
+    final status = response.statusCode;
+    // An exhausted quota answers 403 -- or 429 for a secondary limit -- with
+    // x-ratelimit-remaining 0 and a JSON body that means nothing to the user,
+    // while the reset header says exactly how long the wait is.
+    if ((status == 403 || status == 429) &&
+        response.headers['x-ratelimit-remaining'] == '0') {
+      final wait = _rateLimitWait(response.headers['x-ratelimit-reset']);
+      return UpdateCheckException(
+        'GitHub is rate-limiting update checks from this network. $wait, or '
+        'download the update from $_releasesPageUrl.',
+      );
+    }
+    return UpdateCheckException(
+      'GitHub could not be asked for releases (HTTP $status). Try again later, '
+      'or download the update from $_releasesPageUrl.',
+    );
+  }
+
+  /// How long until a rate limit resets, from x-ratelimit-reset epoch seconds.
+  static String _rateLimitWait(String? resetHeader) {
+    final reset = int.tryParse(resetHeader ?? '');
+    if (reset == null) return 'Try again later';
+    final minutes = DateTime.fromMillisecondsSinceEpoch(
+      reset * 1000,
+      isUtc: true,
+    ).difference(DateTime.now().toUtc()).inMinutes;
+    if (minutes <= 1) return 'Try again in about a minute';
+    if (minutes < 60) return 'Try again in about $minutes minutes';
+    final hours = (minutes / 60).round();
+    return hours == 1
+        ? 'Try again in about an hour'
+        : 'Try again in about $hours hours';
   }
 
   /// Whether [newVersion] takes precedence over [currentVersion].

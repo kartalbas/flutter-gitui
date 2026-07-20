@@ -136,6 +136,14 @@ jobs:
               cp release/updater/updater "dist/${NAME}/updater"
               chmod +x "dist/${NAME}/updater"
               cp LICENSE README.md "dist/${NAME}/"
+              # No .desktop file is shipped ready-made: a menu only reads
+              # entries out of an XDG applications directory, and from there
+              # nothing in the entry can point back at wherever the archive was
+              # unpacked. The script writes the entry at install time with the
+              # absolute path baked in.
+              cp release/linux/install-desktop-entry.sh "dist/${NAME}/"
+              chmod +x "dist/${NAME}/install-desktop-entry.sh"
+              cp assets/icons/app_icon.svg "dist/${NAME}/flutter-gitui.svg"
               (cd dist && tar -czf "${NAME}.tar.gz" -C "${NAME}" .)
               ;;
             macos)

@@ -17,9 +17,11 @@ Get the latest build from the [releases page](https://github.com/kartalbas/flutt
 | Platform | File | How to start |
 |----------|------|--------------|
 | Windows | `flutter-gitui-v<version>-windows.zip` | Extract, run `flutter_gitui.exe` |
-| Linux | `flutter-gitui-v<version>-linux.tar.gz` | Extract, run `./flutter_gitui` |
+| Linux | `flutter-gitui-v<version>-linux.tar.gz` | Extract, run `./flutter_gitui` (optionally `./install-desktop-entry.sh` first) |
 
 Both archives are flat — their contents land directly in the target directory rather than in a wrapping folder. Each release also carries a `latest-<platform>.json` manifest holding the SHA-256 of the archive it names; the in-app update check verifies that digest before installing anything.
+
+The Linux archive additionally carries `install-desktop-entry.sh`. Running it once — no root, nothing written outside your own `~/.local/share` — creates a desktop entry with the absolute path of the extracted directory baked into it and installs the application icon into the user icon theme, so Flutter GitUI appears in the application menu with its icon; `./install-desktop-entry.sh --uninstall` removes both again. That path is recorded absolutely, so re-run the script if you move the directory. Skipping the script costs nothing else: `./flutter_gitui` still starts the application, it simply stays absent from the menu and shows a generic icon in file managers.
 
 ### Requirements
 

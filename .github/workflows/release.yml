@@ -72,6 +72,21 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      # An accepted in-app update hands the install over to a detached helper
+      # binary sitting next to the app; without it update_service degrades to a
+      # generated batch/shell script that overwrites the running installation.
+      # release/updater is a package of its own, so it resolves separately.
+      - name: Build updater
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd release/updater
+          dart pub get
+          case "${{ matrix.platform }}" in
+            windows) dart compile exe updater.dart -o updater.exe ;;
+            *) dart compile exe updater.dart -o updater ;;
+          esac
+
       - name: Build ${{ matrix.platform }}
         # Bash on every runner (Windows included) so the ${GITHUB_SHA::7} substring
         # expansion is portable; without these defines BuildInfo falls back to
@@ -112,10 +127,13 @@ jobs:
           case "${{ matrix.platform }}" in
             windows)
               cp -r build/windows/x64/runner/Release "dist/${NAME}"
+              cp release/updater/updater.exe "dist/${NAME}/updater.exe"
               (cd "dist/${NAME}" && 7z a -tzip "../${NAME}.zip" . >/dev/null)
               ;;
             linux)
               cp -r build/linux/x64/release/bundle "dist/${NAME}"
+              cp release/updater/updater "dist/${NAME}/updater"
+              chmod +x "dist/${NAME}/updater"
               (cd dist && tar -czf "${NAME}.tar.gz" -C "${NAME}" .)
               ;;
             macos)

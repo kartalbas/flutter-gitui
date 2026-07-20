@@ -7,6 +7,7 @@ import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_tool_service.dart';
 import '../../core/diff/models/diff_tool.dart';
 import '../../core/services/logger_service.dart';
+import '../../core/utils/executable_path.dart';
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
@@ -153,7 +154,10 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
           '${Platform.isWindows ? 'where' : 'which'} ${editorInfo.command}',
         ).then((r) => r.unwrap());
         if (result.first.exitCode == 0) {
-          final path = result.first.stdout.toString().trim();
+          // Same reduction the git lookup above performs: the raw stdout can
+          // list several matches, and only the first one is a usable path.
+          final path = normalizeExecutablePath(result.first.stdout.toString());
+          if (path == null) continue;
           _textEditors.add(
             _DetectedEditor(name: editorInfo.displayName, path: path),
           );

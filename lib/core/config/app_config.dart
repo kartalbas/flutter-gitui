@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../diff/models/diff_tool.dart';
+import '../utils/executable_path.dart';
 import '../workspace/models/workspace_repository.dart';
 
 /// Complete application configuration model
@@ -329,7 +330,11 @@ class ToolsConfig {
 
   factory ToolsConfig.fromYaml(Map<dynamic, dynamic> yaml) {
     return ToolsConfig(
-      textEditor: yaml['text_editor'] as String?,
+      // Auto-detect once stored the raw multi-line output of where/which here,
+      // and such a value can never be launched. Repairing it on load makes the
+      // whole app - settings field, launcher, version probe - see the single
+      // usable path, and the next save persists the repair.
+      textEditor: normalizeExecutablePath(yaml['text_editor'] as String?),
       textEditorVersion: yaml['text_editor_version'] as String?,
       diffTool: yaml['diff_tool'] != null
           ? DiffToolType.values.firstWhere(

@@ -85,10 +85,14 @@ class ConfigAndLogsSection extends ConsumerWidget {
     try {
       final logPath = Logger.logFilePath;
       if (logPath != null) {
-        await EditorLauncherService.launch(
+        // launch() is built on runCatchingAsync and never throws, so without
+        // unwrapping the failure the catch below can never fire and the click
+        // is silently swallowed.
+        final launchResult = await EditorLauncherService.launch(
           editorPath: textEditor,
           targetPath: logPath,
         );
+        launchResult.unwrap();
       } else {
         if (context.mounted) {
           NotificationService.showWarning(
@@ -109,10 +113,11 @@ class ConfigAndLogsSection extends ConsumerWidget {
     try {
       final gitLogPath = Logger.gitLogFilePath;
       if (gitLogPath != null) {
-        await EditorLauncherService.launch(
+        final launchResult = await EditorLauncherService.launch(
           editorPath: textEditor,
           targetPath: gitLogPath,
         );
+        launchResult.unwrap();
       } else {
         if (context.mounted) {
           NotificationService.showWarning(
@@ -151,10 +156,11 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
       // Open folder in text editor if configured, otherwise use file explorer
       if (textEditor != null && textEditor.isNotEmpty) {
-        await EditorLauncherService.launch(
+        final launchResult = await EditorLauncherService.launch(
           editorPath: textEditor,
           targetPath: configFolderPath,
         );
+        launchResult.unwrap();
       } else {
         // Fall back to file explorer
         if (Platform.isWindows) {

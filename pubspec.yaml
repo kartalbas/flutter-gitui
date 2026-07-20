@@ -61,7 +61,6 @@ dependencies:
   yaml: ^3.1.2                           # YAML configuration files
 
   # UI Utilities
-  fuzzywuzzy: ^1.1.6                     # Fuzzy string matching
   intl: ^0.20.2                          # Internationalization
   collection: ^1.19.1                     # Collection utilities
 

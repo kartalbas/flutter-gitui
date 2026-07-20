@@ -1,6 +1,5 @@
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
-
 import '../../../core/git/models/commit.dart';
+import '../../../shared/utils/fuzzy_match.dart';
 import '../models/history_search_filter.dart';
 
 /// Service for searching and filtering commit history
@@ -129,9 +128,14 @@ class HistorySearchService {
     final normalizedText = caseSensitive ? text : text.toLowerCase();
     final normalizedSearch = caseSensitive ? search : search.toLowerCase();
 
-    // Try partial ratio for better substring matching
-    final ratio = partialRatio(normalizedText, normalizedSearch);
-    return ratio >= fuzzyMatchThreshold;
+    // Score against the closest-fitting stretch of the text, so a query
+    // buried in a long commit message counts as well as one standing alone.
+    final score = partialMatchScore(
+      normalizedText,
+      normalizedSearch,
+      minScore: fuzzyMatchThreshold,
+    );
+    return score > 0;
   }
 
   /// Search commits and return with relevance scores
@@ -207,7 +211,13 @@ class HistorySearchService {
 
     // Fuzzy match
     if (fuzzyMatch) {
-      return partialRatio(normalizedText, normalizedSearch);
+      // Apply the floor here rather than after weighting: searchCommits
+      // triples this number, so a sub-threshold score must never reach the sum.
+      return partialMatchScore(
+        normalizedText,
+        normalizedSearch,
+        minScore: fuzzyMatchThreshold,
+      );
     }
 
     return 0;

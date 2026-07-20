@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 
 import '../../generated/app_localizations.dart';
 import '../../shared/components/base_badge.dart';
@@ -10,6 +9,7 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_list_item.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/utils/fuzzy_match.dart';
 import 'git_commands.dart';
 
 /// Command palette for searching and executing Git operations
@@ -60,15 +60,15 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     // Fuzzy search
     final results = <GitCommand>[];
     for (final command in GitCommands.all) {
-      final titleScore = ratio(
+      final titleScore = similarityRatio(
         query.toLowerCase(),
         command.getTitle(l10n).toLowerCase(),
       );
-      final descScore = ratio(
+      final descScore = similarityRatio(
         query.toLowerCase(),
         command.getDescription(l10n).toLowerCase(),
       );
-      final categoryScore = ratio(
+      final categoryScore = similarityRatio(
         query.toLowerCase(),
         command.category.getLocalizedName(l10n).toLowerCase(),
       );
@@ -87,8 +87,14 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
 
     // Sort by relevance
     results.sort((a, b) {
-      final aScore = ratio(query.toLowerCase(), a.getTitle(l10n).toLowerCase());
-      final bScore = ratio(query.toLowerCase(), b.getTitle(l10n).toLowerCase());
+      final aScore = similarityRatio(
+        query.toLowerCase(),
+        a.getTitle(l10n).toLowerCase(),
+      );
+      final bScore = similarityRatio(
+        query.toLowerCase(),
+        b.getTitle(l10n).toLowerCase(),
+      );
       return bScore.compareTo(aScore);
     });
 

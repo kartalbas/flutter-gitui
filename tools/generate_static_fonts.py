@@ -10,7 +10,7 @@ Requirements:
     pip install fonttools
 
 Usage:
-    python tool/generate_static_fonts.py
+    python tools/generate_static_fonts.py
 """
 
 import os

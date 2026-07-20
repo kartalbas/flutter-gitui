@@ -7,7 +7,7 @@
 // to compile on every platform. The package stays as a dependency purely so its
 // font assets are bundled; its Dart code is never imported.
 //
-// Regenerate with tool/generate_phosphor_icons.ps1 after a package upgrade.
+// Regenerate with tools/generate_phosphor_icons.ps1 after a package upgrade.
 
 import 'package:flutter/widgets.dart';
 

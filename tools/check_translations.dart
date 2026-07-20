@@ -132,7 +132,7 @@ void main() async {
   print('💾 Generating missing keys files...');
   print('');
 
-  final outputDir = Directory('tool/translation_reports');
+  final outputDir = Directory('tools/translation_reports');
   if (!await outputDir.exists()) {
     await outputDir.create(recursive: true);
   }
@@ -163,7 +163,7 @@ void main() async {
   }
 
   print('');
-  print('✨ Done! Check tool/translation_reports/ for detailed missing keys.');
+  print('✨ Done! Check tools/translation_reports/ for detailed missing keys.');
 }
 
 class MissingKeysInfo {

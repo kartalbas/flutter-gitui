@@ -93,5 +93,5 @@ text_violations_current.txt
 text_with_style_violations.txt
 docs/UI-CONCEPT.md.backup
 
-# Output of tool/check_translations.dart - regenerate locally, never commit
-tool/translation_reports/
+# Output of tools/check_translations.dart - regenerate locally, never commit
+tools/translation_reports/

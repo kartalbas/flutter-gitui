@@ -79,8 +79,7 @@ universal-build/release/
 *.obj
 
 # Release build system - commit source, ignore artifacts
-release/artifacts/**/*
-!release/artifacts/.gitignore
+release/artifacts/
 
 build_windows.log
 build_linux.log

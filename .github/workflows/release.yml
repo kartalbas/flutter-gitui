@@ -107,8 +107,8 @@ jobs:
 
           # Flat archives: the in-app updater extracts an update straight over
           # the installation directory, so a wrapping top-level folder would
-          # leave every installed file untouched. It also keeps the published
-          # layout equal to the one release/shared/create-archive.ps1 produces.
+          # leave every installed file untouched, and the winget manifest pins
+          # flutter_gitui.exe at the archive root.
           case "${{ matrix.platform }}" in
             windows)
               cp -r build/windows/x64/runner/Release "dist/${NAME}"

@@ -128,12 +128,14 @@ jobs:
             windows)
               cp -r build/windows/x64/runner/Release "dist/${NAME}"
               cp release/updater/updater.exe "dist/${NAME}/updater.exe"
+              cp LICENSE README.md "dist/${NAME}/"
               (cd "dist/${NAME}" && 7z a -tzip "../${NAME}.zip" . >/dev/null)
               ;;
             linux)
               cp -r build/linux/x64/release/bundle "dist/${NAME}"
               cp release/updater/updater "dist/${NAME}/updater"
               chmod +x "dist/${NAME}/updater"
+              cp LICENSE README.md "dist/${NAME}/"
               (cd dist && tar -czf "${NAME}.tar.gz" -C "${NAME}" .)
               ;;
             macos)

@@ -2,31 +2,52 @@
 
 > Modern, cross-platform Git GUI built with Flutter
 
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)
-![Flutter](https://img.shields.io/badge/Flutter-3.24+-02569B?logo=flutter)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-blue)
+![Flutter](https://img.shields.io/badge/Flutter-3.44.4-02569B?logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.9.2+-0175C2?logo=dart)
 ![License](https://img.shields.io/badge/license-ELv2-blue)
-![Status](https://img.shields.io/badge/status-In%20Development-yellow)
+![Status](https://img.shields.io/badge/status-0.5.0--alpha-orange)
 
 ---
 
-## ⚠️ Project Status
+## Download
 
-**This project is in active development.**
+Get the latest build from the [releases page](https://github.com/kartalbas/flutter-gitui/releases).
+
+| Platform | File | How to start |
+|----------|------|--------------|
+| Windows | `flutter-gitui-v<version>-windows.zip` | Extract, run `flutter_gitui.exe` |
+| Linux | `flutter-gitui-v<version>-linux.tar.gz` | Extract, run `./flutter_gitui` |
+
+Both archives are flat — their contents land directly in the target directory rather than in a wrapping folder. Each release also carries a `latest-<platform>.json` manifest holding the SHA-256 of the archive it names; the in-app update check verifies that digest before installing anything.
+
+### Requirements
+
+- **A git executable.** This application drives the Git CLI and does not bundle one. On first start it opens Settings and names exactly which settings are missing, with one-click detection for git, diff tools and editors.
+- **Linux:** glibc 2.35 or newer — Ubuntu 22.04+, Debian 12+, or anything more recent. The build is pinned to that floor and CI fails if a toolchain change raises it.
+- **Windows:** nothing beyond the archive. The Microsoft C++ runtime ships inside it.
+
+---
+
+## Project Status
+
+**This project is in active development.** The current release is an alpha.
 
 | Platform | Status |
 |----------|--------|
-| Windows  | Primary development platform. Core features working, but not feature-complete. |
-| macOS    | Not tested yet. |
-| Linux    | Not tested yet. |
+| Windows | Built and published. Primary development platform. |
+| Linux | Built and published. |
+| macOS | Builds on every commit, but not published: the app is signed ad-hoc without a hardened runtime, so Gatekeeper refuses to open it. Publishing waits on a Developer ID certificate and notarisation. |
+
+Known limitations of the current alpha are listed in the release notes.
 
 ---
 
 ## What Is This?
 
 A modern, cross-platform Git GUI that:
-- Runs on **Windows, macOS, and Linux**
-- Uses **Material Design 3** for a beautiful, consistent UI
+- Runs on **Windows and Linux** (macOS builds, but see the status table above)
+- Uses **Material Design 3** for a consistent UI
 - Features a **command palette** for quick access to all Git operations
 - Integrates with **external diff/merge tools** (VS Code, Beyond Compare, etc.)
 
@@ -63,38 +84,29 @@ Press Ctrl+K, then type:
 
 ---
 
-## Quick Start
+## Building From Source
+
+Only needed to develop the application — to use it, take an archive from the [releases page](https://github.com/kartalbas/flutter-gitui/releases).
 
 ### Prerequisites
 
-1. **Flutter SDK** 3.24.0 or higher
+1. **Flutter SDK** 3.44.4 (the version CI builds with; the Dart constraint is `^3.9.2`)
 2. **Git** 2.0 or higher
-3. **Platform**: Windows 10+, macOS 10.15+, or Linux with glibc 2.35+ (Ubuntu 22.04+, Debian 12+)
+3. **Windows:** Visual Studio with the "Desktop development with C++" workload
+4. **Linux:** `clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libnotify-dev`
 
-### Installation
+### Build
 
 ```bash
-# Clone this repository
 git clone https://github.com/kartalbas/flutter-gitui.git
 cd flutter-gitui
-
-# Get dependencies
 flutter pub get
 
-# Run on desktop
-flutter run -d windows  # or macos, linux
-```
+# Run
+flutter run -d windows   # or linux, macos
 
-### Build Release
-
-```bash
-# Windows
+# Release build
 flutter build windows --release
-
-# macOS
-flutter build macos --release
-
-# Linux
 flutter build linux --release
 ```
 
@@ -126,7 +138,12 @@ flutter build linux --release
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/my-feature`
 3. Make changes and test: `flutter test`
-4. Format code: `dart format .`
+4. Match the gates CI enforces, or the build fails:
+   ```bash
+   dart format lib test
+   flutter analyze lib test
+   flutter test
+   ```
 5. Commit with conventional commits: `git commit -m "feat: add feature"`
 6. Push and create PR
 

@@ -34,6 +34,13 @@ class AppConfig {
   final String? lastSeenVersion;
   final bool? disableWhatsNewDialog;
 
+  /// Schema version stamped into every file this build writes.
+  ///
+  /// Version 1 is the first that serialises an absent optional value as a real
+  /// YAML null; a file without the stamp was written by a build that stored the
+  /// text "null" instead, and is repaired once on load.
+  static const int currentConfigVersion = 1;
+
   const AppConfig({
     required this.git,
     required this.tools,
@@ -92,6 +99,7 @@ class AppConfig {
   /// Convert to YAML map
   Map<String, dynamic> toYaml() {
     return {
+      'config_version': currentConfigVersion,
       'git': git.toYaml(),
       'tools': tools.toYaml(),
       'ui': ui.toYaml(),

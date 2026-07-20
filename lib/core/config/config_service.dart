@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:yaml/yaml.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import 'app_config.dart';
+import 'config_migration.dart';
 import '../services/logger_service.dart';
 import '../utils/result.dart';
 
@@ -83,8 +85,34 @@ class ConfigService {
 
       final config = AppConfig.fromYaml(yamlMap);
       Logger.config('Loaded config from: $configPath');
+
+      final storedVersion = yamlMap['config_version'] as int?;
+      if (storedVersion == null ||
+          storedVersion < AppConfig.currentConfigVersion) {
+        return _migrate(config);
+      }
       return config;
     });
+  }
+
+  /// Repairs data written by an older build and stamps the current schema
+  /// version, so the repair judges stored values exactly once.
+  ///
+  /// Everything the user enters afterwards is written by the current
+  /// serialiser, which emits a bare `null` for an absent value and a quoted
+  /// `"null"` for that text, so the ambiguity the repair resolves cannot recur
+  /// and a deliberate value is never second-guessed.
+  static Future<AppConfig> _migrate(AppConfig config) async {
+    final migrated = repairStringifiedNulls(config);
+    final saveResult = await save(migrated);
+    if (saveResult.isFailure) {
+      // A config directory that cannot be written must not stop the app from
+      // starting: the repair is idempotent and runs again on the next launch.
+      Logger.warning(
+        'Could not persist config migration: ${saveResult.errorOrNull}',
+      );
+    }
+    return migrated;
   }
 
   /// Save configuration to YAML file
@@ -114,6 +142,11 @@ class ConfigService {
       });
     });
   }
+
+  /// The exact YAML text [save] writes, so the serialisation can be
+  /// round-tripped in a test without touching the user's home directory.
+  @visibleForTesting
+  static String toYamlString(Map<String, dynamic> map) => _toYamlString(map);
 
   /// Convert map to YAML string with proper formatting and comments
   static String _toYamlString(Map<String, dynamic> map, [int indent = 0]) {
@@ -148,7 +181,13 @@ class ConfigService {
               buffer.writeln('$spaces  -');
               final itemMap = item as Map<String, dynamic>;
               itemMap.forEach((k, v) {
-                if (v is String) {
+                // An absent value has to become a bare YAML null. Falling
+                // through to the stringifying branch below wrote the text
+                // "null", which the reader hands back as an ordinary non-empty
+                // string, so a repository with no alias rendered as "null".
+                if (v == null) {
+                  buffer.writeln('$spaces    $k: null');
+                } else if (v is String) {
                   buffer.writeln('$spaces    $k: ${_yamlString(v)}');
                 } else if (v is bool || v is num) {
                   buffer.writeln('$spaces    $k: $v');
@@ -161,7 +200,9 @@ class ConfigService {
                   } else {
                     buffer.writeln('$spaces    $k:');
                     for (final element in v) {
-                      if (element is bool || element is num) {
+                      if (element == null) {
+                        buffer.writeln('$spaces      - null');
+                      } else if (element is bool || element is num) {
                         buffer.writeln('$spaces      - $element');
                       } else {
                         buffer.writeln(
@@ -174,6 +215,8 @@ class ConfigService {
                   buffer.writeln('$spaces    $k: ${_yamlString(v.toString())}');
                 }
               });
+            } else if (item == null) {
+              buffer.writeln('$spaces  - null');
             } else if (item is String) {
               buffer.writeln('$spaces  - ${_yamlString(item)}');
             } else if (item is bool || item is num) {

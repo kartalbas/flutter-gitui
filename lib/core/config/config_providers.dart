@@ -770,21 +770,6 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     await _saveConfig();
   }
 
-  Future<void> addSearchHistory(String query) async {
-    final history = [...state.history.searchHistory];
-    if (!history.contains(query)) {
-      history.insert(0, query);
-      // Keep only last 20 searches
-      if (history.length > 20) {
-        history.removeLast();
-      }
-      state = state.copyWith(
-        history: state.history.copyWith(searchHistory: history),
-      );
-      await _saveConfig();
-    }
-  }
-
   // Workspace Configuration Methods
   Future<void> setCurrentRepository(String? path) async {
     // Handle explicit null (clearing current repository)
@@ -1079,9 +1064,6 @@ final defaultCommitLimitProvider = Provider<int>(
 );
 final showCommitGraphProvider = Provider<bool>(
   (ref) => ref.watch(historyConfigProvider).showCommitGraph,
-);
-final searchHistoryProvider = Provider<List<String>>(
-  (ref) => ref.watch(historyConfigProvider).searchHistory,
 );
 
 // Workspace

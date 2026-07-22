@@ -3475,6 +3475,18 @@
       }
     }
   },
+  "commitsMatchedOfLoaded": "{matched} of {loaded} loaded commits match",
+  "@commitsMatchedOfLoaded": {
+    "description": "How many of the loaded commits match the active search filters",
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "loaded": {
+        "type": "int"
+      }
+    }
+  },
   "accessed": "Accessed:",
   "edit": "Edit",
   "pullFromRemote": "Pull from remote",

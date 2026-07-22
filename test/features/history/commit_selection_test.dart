@@ -3,8 +3,11 @@
 // it. Every destructive action reads the resolved value, so a mistake here
 // lands a reset or a revert on a commit the user was not looking at.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:riverpod/legacy.dart';
 
+import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/models/commit.dart';
 import 'package:flutter_gitui/features/history/providers/commit_selection_provider.dart';
 
@@ -266,7 +269,32 @@ void main() {
       expect(end.primaryHash, 'ddd');
     });
 
-    test('a primary that is no longer displayed restarts at the newest', () {
+    test('movement steps from the promoted survivor, not the raw primary', () {
+      // A refilter dropped the primary zzz; resolve() promotes ccc and the
+      // highlight follows it, so the arrow keys must step from that row
+      // instead of jumping back to the top of the list.
+      const selection = CommitSelection(
+        hashes: {'ccc', 'zzz'},
+        primaryHash: 'zzz',
+      );
+
+      expect(selection.moved(displayed, 1).primaryHash, 'ddd');
+      expect(selection.moved(displayed, -1).primaryHash, 'bbb');
+    });
+
+    test('movement collapses a multi-selection to the target commit', () {
+      const selection = CommitSelection(
+        hashes: {'aaa', 'bbb', 'ccc'},
+        primaryHash: 'bbb',
+      );
+
+      final moved = selection.moved(displayed, 1);
+
+      expect(moved.hashes, {'ccc'});
+      expect(moved.primaryHash, 'ccc');
+    });
+
+    test('a selection with no survivor at all restarts at the newest', () {
       final moved = CommitSelection.single('zzz').moved(displayed, 1);
 
       expect(moved.primaryHash, 'aaa');
@@ -276,6 +304,30 @@ void main() {
       final selection = CommitSelection.single('aaa');
 
       expect(selection.moved(const [], 1), selection);
+    });
+  });
+
+  group('repository scope', () {
+    test('switching repositories resets the selection', () {
+      final repositoryPath = StateProvider<String?>((ref) => r'C:\repo-a');
+      final container = ProviderContainer(
+        overrides: [
+          currentRepositoryPathProvider.overrideWith(
+            (ref) => ref.watch(repositoryPath),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(commitSelectionProvider.notifier).selectSingle('aaa');
+      expect(container.read(commitSelectionProvider).hashes, {'aaa'});
+
+      // A hash names a commit in one repository only; a selection surviving
+      // the switch would let an action run against a repository that never
+      // contained it.
+      container.read(repositoryPath.notifier).state = r'C:\repo-b';
+
+      expect(container.read(commitSelectionProvider), CommitSelection.empty);
     });
   });
 

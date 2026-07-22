@@ -171,11 +171,14 @@ class CommitSelection {
   CommitSelection moved(List<GitCommit> displayed, int delta) {
     if (displayed.isEmpty) return this;
 
-    // An unresolvable primary is no selection at all (see [resolve]), so start
-    // from the newest commit rather than from a row nobody can see.
-    final current = displayed.indexWhere(
-      (commit) => commit.hash == primaryHash,
-    );
+    // Step from the primary the user can see: when the stored primary dropped
+    // out of the list, [resolve] promotes a survivor and the highlight follows
+    // it, so starting anywhere else would visibly jump the selection. Only
+    // when nothing survives does movement restart at the newest commit.
+    final primary = resolve(displayed).primary;
+    final current = primary == null
+        ? -1
+        : displayed.indexWhere((commit) => commit.hash == primary.hash);
     final next = current == -1
         ? 0
         : (current + delta).clamp(0, displayed.length - 1);

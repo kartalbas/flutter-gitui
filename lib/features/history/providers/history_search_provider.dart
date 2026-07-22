@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 
+import '../../../core/config/config_providers.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/commit.dart';
 import '../models/history_search_filter.dart';
@@ -14,89 +15,49 @@ final historySearchFilterProvider = StateProvider<HistorySearchFilter>(
   (ref) => const HistorySearchFilter.empty(),
 );
 
-/// Provider for filtered commits based on search criteria
-/// Now searches across ALL commits using git log, not just loaded ones
-final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
+/// The window of commits loaded from git for the history view.
+///
+/// Loading or reshaping this window is the only step that may invoke git.
+/// Only the filter parts git alone can answer reshape it - which commits
+/// touched a file, are reachable from a branch, or carry a tag - and they use
+/// the same configured limit as browsing, so a search can never quietly cover
+/// a different stretch of history than the list it filters.
+final commitWindowProvider = FutureProvider<List<GitCommit>>((ref) async {
+  final filter = ref.watch(historySearchFilterProvider);
+
+  // Awaited even when a git-scoped filter replaces it: invalidating
+  // commitHistoryProvider is the app-wide refresh signal, and depending on it
+  // here is what makes Refresh work while a filter is active.
+  final history = await ref.watch(commitHistoryProvider.future);
+  if (!filter.needsGitWindow) return history;
+
   final gitService = ref.watch(gitServiceProvider);
-  final filter = ref.watch(historySearchFilterProvider);
-  final searchService = ref.watch(historySearchServiceProvider);
+  if (gitService == null) return const [];
 
-  if (gitService == null) return [];
+  // A tag names exactly one commit, so the window is that commit alone.
+  final tags = filter.tags;
+  final tag = (tags != null && tags.isNotEmpty) ? tags.first : null;
 
-  // If no search filter, return default history
-  if (filter.isEmpty) {
-    // Awaiting the future propagates the loading and error states; mapping them
-    // to an empty list showed 'No commits yet' until the git log returned.
-    return await ref.watch(commitHistoryProvider.future);
-  }
-
-  // Use git log with search parameters to search ALL commits
-  try {
-    // If searching by tags, use tag with -n 1 to get only the commit the tag points to
-    String? branchOrTag = filter.branch;
-    int? limitOverride;
-
-    if (filter.tags != null && filter.tags!.isNotEmpty) {
-      // Use the first tag for filtering
-      branchOrTag = filter.tags!.first;
-      // Override limit to 1 to get only the commit the tag points to
-      limitOverride = 1;
-    }
-
-    // Text criteria are matched client-side: git log --grep/--author cannot
-    // express the case-sensitivity, regex and fuzzy options the UI offers, and
-    // pre-filtering with them would drop commits the matcher should keep.
-    final result = await gitService.getLog(
-      since: filter.fromDate?.toIso8601String(),
-      until: filter.toDate?.toIso8601String(),
-      filePath: filter.filePath,
-      branch: branchOrTag,
-      limit: limitOverride ?? 1000, // Use 1 for tags, 1000 for regular search
-    );
-
-    return searchService.filterCommits(result.unwrapOr([]), filter);
-  } catch (e) {
-    return [];
-  }
-});
-
-/// Provider for search results with relevance scores
-final searchResultsProvider = Provider<List<SearchResult>?>((ref) {
-  final commitsAsync = ref.watch(commitHistoryProvider);
-  final filter = ref.watch(historySearchFilterProvider);
-  final searchService = ref.watch(historySearchServiceProvider);
-
-  if (filter.query == null || filter.query!.isEmpty) {
-    return null;
-  }
-
-  return commitsAsync.when(
-    data: (commits) => searchService.searchCommits(
-      commits,
-      filter.query!,
-      caseSensitive: filter.caseSensitive,
-      useRegex: filter.useRegex,
-      fuzzyMatch: filter.fuzzyMatch,
-    ),
-    loading: () => null,
-    error: (_, _) => null,
+  final result = await gitService.getLog(
+    filePath: filter.filePath,
+    branch: tag ?? filter.branch,
+    limit: tag != null ? 1 : ref.watch(defaultCommitLimitProvider),
   );
+
+  // Throwing keeps the failure visible: swallowed into an empty list, it
+  // rendered as "no results, clear your filters" while git itself was broken.
+  return result.unwrap();
 });
 
-/// Provider for search history (recent searches)
-final searchHistoryProvider = StateProvider<List<String>>((ref) => []);
+/// The commits the history view displays: the loaded window narrowed by the
+/// in-memory criteria - text, fuzzy, regex, hash prefix, author, date.
+///
+/// This is a pure function over [commitWindowProvider], so a keystroke in the
+/// search field recomputes a list match instead of spawning a git process.
+final filteredCommitsProvider = FutureProvider<List<GitCommit>>((ref) async {
+  final filter = ref.watch(historySearchFilterProvider);
+  final searchService = ref.watch(historySearchServiceProvider);
 
-/// Provider to add a search to history
-final addSearchToHistoryProvider = Provider((ref) {
-  return (String query) {
-    if (query.trim().isEmpty) return;
-
-    final history = ref.read(searchHistoryProvider);
-    final updatedHistory = [
-      query,
-      ...history.where((q) => q != query),
-    ].take(20).toList(); // Keep last 20 searches
-
-    ref.read(searchHistoryProvider.notifier).state = updatedHistory;
-  };
+  final window = await ref.watch(commitWindowProvider.future);
+  return searchService.filterCommits(window, filter);
 });

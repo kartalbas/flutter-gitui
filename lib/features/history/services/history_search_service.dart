@@ -138,91 +138,6 @@ class HistorySearchService {
     return score > 0;
   }
 
-  /// Search commits and return with relevance scores
-  List<SearchResult> searchCommits(
-    List<GitCommit> commits,
-    String query, {
-    bool caseSensitive = false,
-    bool useRegex = false,
-    bool fuzzyMatch = true,
-  }) {
-    if (query.isEmpty) {
-      return commits
-          .map((commit) => SearchResult(commit: commit, score: 100))
-          .toList();
-    }
-
-    final results = <SearchResult>[];
-
-    for (final commit in commits) {
-      int score = 0;
-
-      // Score commit message match
-      final messageScore = _getMatchScore(
-        commit.message,
-        query,
-        caseSensitive,
-        fuzzyMatch,
-      );
-      score += messageScore * 3; // Message has highest weight
-
-      // Score author match
-      final authorScore = _getMatchScore(
-        commit.author,
-        query,
-        caseSensitive,
-        fuzzyMatch,
-      );
-      score += authorScore * 2; // Author has medium weight
-
-      // Score hash match (exact prefix match gets bonus)
-      if (commit.hash.toLowerCase().startsWith(query.toLowerCase())) {
-        score += 100;
-      } else if (commit.hash.toLowerCase().contains(query.toLowerCase())) {
-        score += 50;
-      }
-
-      if (score >= fuzzyMatchThreshold) {
-        results.add(SearchResult(commit: commit, score: score));
-      }
-    }
-
-    // Sort by relevance score (descending)
-    results.sort((a, b) => b.score.compareTo(a.score));
-
-    return results;
-  }
-
-  /// Get match score for text
-  int _getMatchScore(
-    String text,
-    String search,
-    bool caseSensitive,
-    bool fuzzyMatch,
-  ) {
-    final normalizedText = caseSensitive ? text : text.toLowerCase();
-    final normalizedSearch = caseSensitive ? search : search.toLowerCase();
-
-    // Exact match gets highest score
-    if (normalizedText == normalizedSearch) return 100;
-
-    // Contains gets high score
-    if (normalizedText.contains(normalizedSearch)) return 90;
-
-    // Fuzzy match
-    if (fuzzyMatch) {
-      // Apply the floor here rather than after weighting: searchCommits
-      // triples this number, so a sub-threshold score must never reach the sum.
-      return partialMatchScore(
-        normalizedText,
-        normalizedSearch,
-        minScore: fuzzyMatchThreshold,
-      );
-    }
-
-    return 0;
-  }
-
   /// Parse search query with advanced syntax
   /// Supports: author:name, date:YYYY-MM-DD, hash:abc123, etc.
   HistorySearchFilter parseQuery(String query) {
@@ -359,12 +274,4 @@ class HistorySearchService {
       return null;
     }
   }
-}
-
-/// Search result with relevance score
-class SearchResult {
-  final GitCommit commit;
-  final int score; // 0-100+ relevance score
-
-  const SearchResult({required this.commit, required this.score});
 }

@@ -192,24 +192,6 @@ final commitHistoryProvider = FutureProvider<List<GitCommit>>((ref) async {
   );
 });
 
-/// Commit history with limit provider
-final commitHistoryLimitProvider = FutureProvider.family<List<GitCommit>, int>((
-  ref,
-  limit,
-) async {
-  final gitService = ref.watch(gitServiceProvider);
-  if (gitService == null) return [];
-
-  final result = await gitService.getLog(limit: limit);
-  return result.when(
-    success: (commits) => commits,
-    failure: (msg, error, stackTrace) {
-      Logger.error('Failed to get commit history: $msg', error);
-      return []; // Provider yields empty list to indicate error state
-    },
-  );
-});
-
 /// File history provider
 ///
 /// Auto-disposed: one element per viewed path would otherwise be retained for

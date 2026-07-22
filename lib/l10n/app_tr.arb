@@ -1320,6 +1320,7 @@
   "thisMonth": "Bu ay",
   "last30Days": "Son 30 gün",
   "commitsCount": "{count} commit",
+  "commitsMatchedOfLoaded": "Yüklenen {loaded} commit'ten {matched} tanesi eşleşiyor",
   "accessed": "Erişildi:",
   "edit": "Düzenle",
   "pullFromRemote": "Uzak sunucudan çek",

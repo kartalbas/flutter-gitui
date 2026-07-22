@@ -1214,6 +1214,7 @@
   "thisMonth": "Questo mese",
   "last30Days": "Ultimi 30 giorni",
   "commitsCount": "{count} commit",
+  "commitsMatchedOfLoaded": "{matched} dei {loaded} commit caricati corrispondono",
   "accessed": "Accesso:",
   "edit": "Modifica",
   "pullFromRemote": "Scarica dal remoto",

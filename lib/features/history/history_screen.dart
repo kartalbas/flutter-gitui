@@ -101,7 +101,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ref.read(commitSelectionProvider.notifier).move(commits, -1);
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.enter &&
-        !ref.read(commitSelectionProvider).isEmpty) {
+        // Resolved, not raw: a stale selection the screen no longer shows must
+        // not claim the key while the view says nothing is selected.
+        ref.read(commitSelectionProvider).resolve(commits).isNotEmpty) {
       // Enter key could be used for additional actions in the future
       return KeyEventResult.handled;
     }
@@ -216,10 +218,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           showClearButton: _searchController.text.isNotEmpty,
                           onChanged: (query) {
                             setState(() {}); // Update suffix icon
-                            // Every filter change re-runs
-                            // filteredCommitsProvider, which shells out to a
-                            // `git log -n 1000`; unthrottled, each keystroke
-                            // started its own git process on large repos.
+                            // Filtering is pure over the loaded window and
+                            // never invokes git, but fuzzy-scoring every
+                            // loaded commit still stutters typing on large
+                            // windows, so bursts are coalesced.
                             _searchDebounce?.cancel();
                             if (query.isEmpty) {
                               // Clearing restores the full history at once.
@@ -347,6 +349,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final selectedCount = selection.count;
     final l10n = AppLocalizations.of(context)!;
 
+    // A search only covers the loaded window, so the header reports "matched
+    // X of Y loaded" instead of implying the whole history was searched.
+    final searchFilter = ref.watch(historySearchFilterProvider);
+    final loadedCount =
+        ref.watch(commitWindowProvider).value?.length ?? commits.length;
+
     // Build FAB actions based on selection
     final fabActions = <DiffViewerAction>[
       // Squash Commits (requires 2+ commits)
@@ -429,9 +437,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         ),
                         const SizedBox(width: AppTheme.paddingS),
                         TitleSmallLabel(
-                          AppLocalizations.of(
-                            context,
-                          )!.commitsCount(commits.length),
+                          searchFilter.isNotEmpty
+                              ? l10n.commitsMatchedOfLoaded(
+                                  commits.length,
+                                  loadedCount,
+                                )
+                              : l10n.commitsCount(commits.length),
                         ),
                       ],
                     ),

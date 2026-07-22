@@ -282,11 +282,6 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
     // Apply filter
     ref.read(historySearchFilterProvider.notifier).state = filter;
 
-    // Add to search history if there's a query
-    if (filter.query != null && filter.query!.isNotEmpty) {
-      ref.read(addSearchToHistoryProvider)(filter.query!);
-    }
-
     Navigator.of(context).pop();
   }
 

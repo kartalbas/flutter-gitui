@@ -93,6 +93,15 @@ class HistorySearchFilter extends Equatable {
   /// Check if filter has any criteria
   bool get isNotEmpty => !isEmpty;
 
+  /// True when the filter names something only git can answer - the commits
+  /// that touched a file, the reach of a branch, or a tag's target. These
+  /// reshape the loaded window itself; every other criterion is applied in
+  /// memory over that window.
+  bool get needsGitWindow =>
+      (filePath != null && filePath!.isNotEmpty) ||
+      (branch != null && branch!.isNotEmpty) ||
+      (tags != null && tags!.isNotEmpty);
+
   /// Count of active filters
   int get activeFilterCount {
     int count = 0;

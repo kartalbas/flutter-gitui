@@ -14,26 +14,24 @@ import '../../../core/git/git_providers.dart';
 import '../../../generated/app_localizations.dart';
 
 /// Dialog for squashing multiple commits into one
+///
+/// [selectedCommits] arrives already resolved against the displayed history,
+/// newest first, so the dialog never has to decide what an unlisted hash means.
 Future<bool?> showSquashCommitsDialog(
   BuildContext context, {
-  required List<GitCommit> commits,
-  required Set<String> selectedHashes,
+  required List<GitCommit> selectedCommits,
 }) {
   return showDialog<bool>(
     context: context,
     builder: (context) =>
-        _SquashCommitsDialog(commits: commits, selectedHashes: selectedHashes),
+        _SquashCommitsDialog(selectedCommits: selectedCommits),
   );
 }
 
 class _SquashCommitsDialog extends ConsumerStatefulWidget {
-  final List<GitCommit> commits;
-  final Set<String> selectedHashes;
+  final List<GitCommit> selectedCommits;
 
-  const _SquashCommitsDialog({
-    required this.commits,
-    required this.selectedHashes,
-  });
+  const _SquashCommitsDialog({required this.selectedCommits});
 
   @override
   ConsumerState<_SquashCommitsDialog> createState() =>
@@ -51,10 +49,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
   void initState() {
     super.initState();
 
-    // Get selected commits in order
-    _selectedCommits = widget.commits
-        .where((c) => widget.selectedHashes.contains(c.hash))
-        .toList();
+    _selectedCommits = widget.selectedCommits;
 
     // Check if commits are consecutive
     _areConsecutive = _checkIfConsecutive();
@@ -116,17 +111,13 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
     }
 
     try {
-      // Sort commits from oldest to newest for squashing
-      final sortedCommits = List<GitCommit>.from(_selectedCommits)
-        ..sort((a, b) {
-          final aIndex = widget.commits.indexOf(a);
-          final bIndex = widget.commits.indexOf(b);
-          return bIndex.compareTo(aIndex); // Reverse order (oldest first)
-        });
+      // The selection arrives in display order, so reversing it yields the
+      // oldest-to-newest range the squash resets onto.
+      final oldestFirst = _selectedCommits.reversed.toList();
 
       // Get the commit range
-      final oldestCommit = sortedCommits.first;
-      final newestCommit = sortedCommits.last;
+      final oldestCommit = oldestFirst.first;
+      final newestCommit = oldestFirst.last;
 
       // Call squash method
       await ref

@@ -18,7 +18,6 @@ import '../../core/git/git_service.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/commit.dart';
 import '../../shared/widgets/widgets.dart';
-import '../../shared/widgets/multi_select_mixin.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/utils/result_extensions.dart';
 import 'widgets/commit_list_item.dart';
@@ -27,7 +26,7 @@ import '../tags/dialogs/create_tag_dialog.dart';
 import 'widgets/file_tree_panel.dart';
 import 'widgets/history_empty_states.dart';
 import 'providers/history_search_provider.dart';
-import 'providers/selected_commit_provider.dart';
+import 'providers/commit_selection_provider.dart';
 import 'models/history_search_filter.dart';
 import '../../core/services/logger_service.dart';
 import 'dialogs/advanced_search_dialog.dart';
@@ -46,7 +45,6 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final _searchController = TextEditingController();
-  final _selectionManager = MultiSelectManager<String>();
   final _scrollController = ScrollController();
   bool _fabIsExpanded = false;
   Timer? _searchDebounce;
@@ -83,22 +81,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     });
   }
 
-  void _moveSelection(List<GitCommit> commits, int delta) {
-    if (commits.isEmpty) return;
-
-    final currentIndex = ref.read(selectedCommitIndexProvider);
-    int newIndex;
-
-    if (currentIndex == -1 && delta > 0) {
-      newIndex = 0;
-    } else {
-      newIndex = (currentIndex + delta).clamp(0, commits.length - 1);
-    }
-
-    ref.read(selectedCommitIndexProvider.notifier).state = newIndex;
-    ref.read(selectedCommitProvider.notifier).state = commits[newIndex];
-  }
-
   KeyEventResult _handleKeyEvent(
     List<GitCommit> commits,
     FocusNode node,
@@ -113,13 +95,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      _moveSelection(commits, 1);
+      ref.read(commitSelectionProvider.notifier).move(commits, 1);
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      _moveSelection(commits, -1);
+      ref.read(commitSelectionProvider.notifier).move(commits, -1);
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.enter &&
-        ref.read(selectedCommitProvider) != null) {
+        !ref.read(commitSelectionProvider).isEmpty) {
       // Enter key could be used for additional actions in the future
       return KeyEventResult.handled;
     }
@@ -183,8 +165,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             '[HistoryScreen] Auto-selecting commit: ${commits.first.shortHash}',
           );
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(selectedCommitIndexProvider.notifier).state = 0;
-            ref.read(selectedCommitProvider.notifier).state = commits.first;
+            if (!mounted) return;
+            ref
+                .read(commitSelectionProvider.notifier)
+                .selectSingle(commits.first.hash);
           });
         }
       });
@@ -355,7 +339,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Widget _buildCommitHistory(BuildContext context, List<GitCommit> commits) {
-    final selectedCount = _selectionManager.selectedCount;
+    // One resolution of the selection feeds the highlight, the details panel,
+    // the action button and every action, so none of them can act on a commit
+    // the user is not looking at.
+    final selection = ref.watch(commitSelectionProvider).resolve(commits);
+    final selectedHashes = selection.hashes;
+    final selectedCount = selection.count;
     final l10n = AppLocalizations.of(context)!;
 
     // Build FAB actions based on selection
@@ -365,46 +354,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         DiffViewerAction(
           icon: PhosphorIconsRegular.arrowsInLineVertical,
           label: l10n.squashCommits,
-          onPressed: () => _showSquashDialog(context, commits),
+          onPressed: () => _showSquashDialog(context, selection),
         ),
       // Cherry-pick (requires 1+ commits)
       if (selectedCount > 0)
         DiffViewerAction(
           icon: PhosphorIconsRegular.arrowBendDownRight,
           label: l10n.cherryPick,
-          onPressed: () => _performCherryPick(context, commits),
+          onPressed: () => _performCherryPick(context, selection),
         ),
       // Revert (requires exactly 1 commit)
       if (selectedCount == 1)
         DiffViewerAction(
           icon: PhosphorIconsRegular.arrowCounterClockwise,
           label: l10n.revert,
-          onPressed: () => _performRevert(context, commits),
+          onPressed: () => _performRevert(context, selection),
         ),
       // Reset to Here (requires exactly 1 commit)
       if (selectedCount == 1)
         DiffViewerAction(
           icon: PhosphorIconsRegular.arrowCounterClockwise,
           label: l10n.resetToHere,
-          onPressed: () => _performReset(context, commits),
+          onPressed: () => _performReset(context, selection),
         ),
       // Create Tag (requires exactly 1 commit)
       if (selectedCount == 1)
         DiffViewerAction(
           icon: PhosphorIconsRegular.tag,
           label: l10n.createTag,
-          // Resolve the actual selection. commits.first is the newest commit in
-          // the list, not the one the user picked, so the tag landed on the
-          // wrong commit whenever the selection was anything else.
           onPressed: () {
-            if (_selectionManager.selectedCount != 1) return;
-            final hash = _selectionManager.selectedItems.first;
-            for (final commit in commits) {
-              if (commit.hash == hash) {
-                _showCreateTagDialog(context, commit);
-                return;
-              }
-            }
+            final commit = selection.single;
+            if (commit == null) return;
+            _showCreateTagDialog(context, commit);
           },
         ),
     ];
@@ -460,9 +441,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   Expanded(
                     child: Consumer(
                       builder: (context, ref, child) {
-                        final selectedCommit = ref.watch(
-                          selectedCommitProvider,
-                        );
                         final currentBranch = ref
                             .watch(currentBranchProvider)
                             .value;
@@ -472,58 +450,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           itemCount: commits.length,
                           itemBuilder: (context, index) {
                             final commit = commits[index];
-                            final isSelected =
-                                selectedCommit?.hash == commit.hash;
-                            final isMultiSelected = _selectionManager
-                                .isItemSelected(commit.hash);
 
                             return CommitListItem(
                               commit: commit,
-                              isSelected: isSelected,
-                              isMultiSelected: isMultiSelected,
+                              isSelected:
+                                  selection.primary?.hash == commit.hash,
+                              isMultiSelected: selectedHashes.contains(
+                                commit.hash,
+                              ),
                               currentBranch: currentBranch,
-                              onTap: () {
-                                // Handle platform-aware multi-selection
-                                final isCtrlPressed =
-                                    MultiSelectManager.isMultiSelectModifierPressed();
-                                final isShiftPressed =
-                                    MultiSelectManager.isRangeSelectModifierPressed();
-
-                                if (isCtrlPressed || isShiftPressed) {
-                                  // Multi-select mode
-                                  _selectionManager.handleItemClick(
-                                    item: commit.hash,
-                                    allItems: commits
-                                        .map((c) => c.hash)
-                                        .toList(),
-                                    isControlPressed: isCtrlPressed,
-                                    isShiftPressed: isShiftPressed,
-                                    onSelectionChanged: () => setState(() {}),
-                                  );
-                                } else {
-                                  // Single selection mode - select commit in both providers
-                                  _selectionManager.handleItemClick(
-                                    item: commit.hash,
-                                    allItems: commits
-                                        .map((c) => c.hash)
-                                        .toList(),
-                                    isControlPressed: false,
-                                    isShiftPressed: false,
-                                    onSelectionChanged: () => setState(() {}),
-                                  );
-                                  ref
-                                          .read(selectedCommitProvider.notifier)
-                                          .state =
-                                      commit;
-                                  ref
-                                          .read(
-                                            selectedCommitIndexProvider
-                                                .notifier,
-                                          )
-                                          .state =
-                                      index;
-                                }
-                              },
+                              onTap: () => ref
+                                  .read(commitSelectionProvider.notifier)
+                                  .handleClick(
+                                    hash: commit.hash,
+                                    displayedHashes: [
+                                      for (final c in commits) c.hash,
+                                    ],
+                                    isControlPressed:
+                                        CommitSelectionNotifier.isMultiSelectModifierPressed(),
+                                    isShiftPressed:
+                                        CommitSelectionNotifier.isRangeSelectModifierPressed(),
+                                  ),
                             );
                           },
                         );
@@ -538,38 +485,26 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           // Commit details (middle)
           Expanded(
             flex: 2,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final selectedCommit = ref.watch(selectedCommitProvider);
-
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      right: BorderSide(
-                        color: Theme.of(context).colorScheme.outlineVariant,
-                      ),
-                    ),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  right: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
-                  child: selectedCommit == null
-                      ? _buildNoCommitSelected(context)
-                      : CommitDetailsPanel(commit: selectedCommit),
-                );
-              },
+                ),
+              ),
+              child: selection.primary == null
+                  ? _buildNoCommitSelected(context)
+                  : CommitDetailsPanel(commit: selection.primary!),
             ),
           ),
 
           // File tree (right side)
           Expanded(
             flex: 2,
-            child: Consumer(
-              builder: (context, ref, child) {
-                final selectedCommit = ref.watch(selectedCommitProvider);
-
-                return selectedCommit == null
-                    ? _buildNoCommitSelected(context)
-                    : FileTreePanel(commitHash: selectedCommit.hash);
-              },
-            ),
+            child: selection.primary == null
+                ? _buildNoCommitSelected(context)
+                : FileTreePanel(commitHash: selection.primary!.hash),
           ),
         ],
       ),
@@ -645,12 +580,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Future<void> _showSquashDialog(
     BuildContext context,
-    List<GitCommit> commits,
+    ResolvedCommitSelection selection,
   ) async {
     final result = await showSquashCommitsDialog(
       context,
-      commits: commits,
-      selectedHashes: _selectionManager.selectedItems,
+      selectedCommits: selection.commits,
     );
 
     if (result == true && mounted) {
@@ -659,8 +593,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ref.invalidate(localBranchesProvider);
       ref.invalidate(currentBranchProvider);
 
-      // Clear selection
-      _selectionManager.clearSelection(() => setState(() {}));
+      // The squashed commits no longer exist, so keeping them selected would
+      // aim the next action at rewritten history.
+      ref.read(commitSelectionProvider.notifier).clear();
     }
   }
 
@@ -701,31 +636,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Future<void> _performCherryPick(
     BuildContext context,
-    List<GitCommit> commits,
+    ResolvedCommitSelection selection,
   ) async {
-    final selected = _selectionManager.selectedItems;
+    if (selection.isEmpty) return;
 
-    if (selected.isEmpty) return;
-
-    // The history list is newest-first and the selection preserves that order,
-    // so replaying it as-is would apply a commit before its ancestors. Walk the
-    // list backwards to cherry-pick oldest-first.
-    final orderedHashes = [
-      for (final commit in commits.reversed)
-        if (selected.contains(commit.hash)) commit.hash,
-    ];
-    // A selection made before the current filter can hold hashes that are no
-    // longer listed; keep them so nothing the user picked is silently skipped.
-    orderedHashes.addAll(
-      selected.where((hash) => !orderedHashes.contains(hash)),
-    );
+    // The history list is newest-first, so replaying it as-is would apply a
+    // commit before its ancestors.
+    final ordered = selection.oldestFirst;
 
     final l10n = AppLocalizations.of(context)!;
     String? failure;
 
     try {
-      for (final hash in orderedHashes) {
-        await ref.read(gitActionsProvider).cherryPickCommit(hash);
+      for (final commit in ordered) {
+        await ref.read(gitActionsProvider).cherryPickCommit(commit.hash);
       }
     } catch (e) {
       // A failed pick leaves the repository mid-cherry-pick, so every later pick
@@ -750,19 +674,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       return;
     }
 
-    // Clear selection
-    _selectionManager.clearSelection(() => setState(() {}));
+    // The picked commits are now duplicated onto the current branch; a stale
+    // selection would let a second press replay them again.
+    ref.read(commitSelectionProvider.notifier).clear();
   }
 
   Future<void> _performRevert(
     BuildContext context,
-    List<GitCommit> commits,
+    ResolvedCommitSelection selection,
   ) async {
-    if (_selectionManager.selectedCount != 1) return;
+    final commit = selection.single;
+    if (commit == null) return;
 
-    final hash = _selectionManager.selectedItems.first;
-
-    await ref.read(gitActionsProvider).revertCommit(hash);
+    await ref.read(gitActionsProvider).revertCommit(commit.hash);
 
     // Refresh providers to update UI
     ref.invalidate(commitHistoryProvider);
@@ -770,36 +694,30 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     ref.invalidate(currentBranchProvider);
 
     // Clear selection
-    _selectionManager.clearSelection(() => setState(() {}));
+    ref.read(commitSelectionProvider.notifier).clear();
   }
 
   Future<void> _performReset(
     BuildContext context,
-    List<GitCommit> commits,
+    ResolvedCommitSelection selection,
   ) async {
-    if (_selectionManager.selectedCount != 1) return;
-
-    final hash = _selectionManager.selectedItems.first;
-    // A selection made before the current filter can point at a commit that is
-    // no longer listed, and there is nothing to describe in the reset dialog
-    // then, so bail out instead of letting the lookup throw.
-    final matches = commits.where((c) => c.hash == hash);
-    if (matches.isEmpty) return;
-    final commit = matches.first;
+    final commit = selection.single;
+    if (commit == null) return;
 
     // Show dialog to choose reset mode
     final mode = await _showResetModeDialog(context, commit);
     if (mode == null) return;
 
-    await ref.read(gitActionsProvider).resetToCommit(hash, mode: mode);
+    await ref.read(gitActionsProvider).resetToCommit(commit.hash, mode: mode);
 
     // Refresh providers to update UI
     ref.invalidate(commitHistoryProvider);
     ref.invalidate(localBranchesProvider);
     ref.invalidate(currentBranchProvider);
 
-    // Clear selection
-    _selectionManager.clearSelection(() => setState(() {}));
+    // The commits above the reset target are gone from this branch, so the
+    // selection must not survive into the rewritten history.
+    ref.read(commitSelectionProvider.notifier).clear();
 
     // A force push is only warranted when the branch tracks an upstream the reset
     // moved away from: a local-only repo has nothing to push, and a branch still

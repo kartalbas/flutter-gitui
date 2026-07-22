@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod/legacy.dart';
 
 import 'git_service.dart';
 import 'git_command_log_provider.dart';
@@ -1502,9 +1501,6 @@ final isRebaseActiveProvider = Provider<bool>((ref) {
 // ============================================
 // Commit Details
 // ============================================
-
-/// Provider for selected commit hash (used by commit details)
-final selectedCommitHashProvider = StateProvider<String?>((ref) => null);
 
 /// Provider for changed files in a specific commit
 ///

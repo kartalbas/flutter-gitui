@@ -146,10 +146,14 @@ class BaseDialog extends StatelessWidget {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Calculate dialog size as 90% of available space (10% margins on all sides)
           final availableWidth = MediaQuery.of(context).size.width;
           final availableHeight = MediaQuery.of(context).size.height;
-          final dialogWidth = availableWidth * 0.9;
+          // Honour the caller's maxWidth, which was accepted and then ignored:
+          // every dialog rendered at 90% of the window regardless. The 90% only
+          // survives as a ceiling so a wide dialog cannot outgrow a small
+          // screen; the height still shrinks to its content below.
+          final widthCeiling = availableWidth * 0.9;
+          final dialogWidth = maxWidth < widthCeiling ? maxWidth : widthCeiling;
           final dialogHeight = availableHeight * 0.9;
 
           // ignore: avoid_dialog

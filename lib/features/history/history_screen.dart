@@ -19,7 +19,7 @@ import '../../core/config/config_providers.dart';
 import '../../core/git/models/commit.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../core/navigation/navigation_item.dart';
-import '../../core/utils/result_extensions.dart';
+import '../../core/services/notification_service.dart';
 import 'widgets/commit_list_item.dart';
 import 'widgets/commit_details_panel.dart';
 import '../tags/dialogs/create_tag_dialog.dart';
@@ -27,6 +27,7 @@ import 'widgets/file_tree_panel.dart';
 import 'widgets/history_empty_states.dart';
 import 'providers/history_search_provider.dart';
 import 'providers/commit_selection_provider.dart';
+import 'services/commit_action_runner.dart';
 import 'models/history_search_filter.dart';
 import '../../core/services/logger_service.dart';
 import 'dialogs/advanced_search_dialog.dart';
@@ -622,27 +623,61 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ),
     );
 
-    if (result != null && result['name'] != null && mounted) {
-      final tagName = result['name'] as String;
-      if (tagName.isEmpty) return;
+    if (result == null || result['name'] == null || !context.mounted) return;
+    final tagName = result['name'] as String;
+    if (tagName.isEmpty) return;
 
-      if (result['annotated'] == true) {
-        await ref
-            .read(gitActionsProvider)
-            .createAnnotatedTag(
-              tagName,
-              message: result['message'] as String,
-              commitHash: commit.hash,
-            );
-      } else {
-        await ref
-            .read(gitActionsProvider)
-            .createLightweightTag(tagName, commitHash: commit.hash);
-      }
+    final l10n = AppLocalizations.of(context)!;
+    await _runCommitAction(
+      context,
+      invoke: () => result['annotated'] == true
+          ? ref
+                .read(gitActionsProvider)
+                .createAnnotatedTag(
+                  tagName,
+                  message: result['message'] as String,
+                  commitHash: commit.hash,
+                )
+          : ref
+                .read(gitActionsProvider)
+                .createLightweightTag(tagName, commitHash: commit.hash),
+      describeFailure: l10n.tagCreatedError,
+    );
+  }
 
-      // Refresh tags provider
-      ref.invalidate(tagsProvider);
+  /// The one sequence behind every commit action on this screen.
+  ///
+  /// Routing through [runCommitAction] means an action cannot skip the reload
+  /// or swallow its error: every outcome invalidates the same providers, and a
+  /// failure always reaches the user through the same notification. Returns
+  /// whether the action succeeded, so multi-step flows (a reset offering a
+  /// force push) know whether to continue.
+  Future<bool> _runCommitAction(
+    BuildContext context, {
+    required Future<void> Function() invoke,
+    required String Function(String error) describeFailure,
+  }) async {
+    final failure = await runCommitAction(
+      invoke: invoke,
+      refresh: () {
+        // The union of everything a commit action can change: the commit
+        // window itself plus the branch heads and tags decorating its rows.
+        // One fixed set instead of five hand-picked ones is what keeps the
+        // refresh impossible to forget.
+        ref.invalidate(commitHistoryProvider);
+        ref.invalidate(localBranchesProvider);
+        ref.invalidate(currentBranchProvider);
+        ref.invalidate(tagsProvider);
+      },
+      clearSelection: () => ref.read(commitSelectionProvider.notifier).clear(),
+    );
+
+    if (failure == null) return true;
+
+    if (context.mounted) {
+      NotificationService.showError(context, describeFailure(failure));
     }
+    return false;
   }
 
   Future<void> _performCherryPick(
@@ -656,38 +691,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final ordered = selection.oldestFirst;
 
     final l10n = AppLocalizations.of(context)!;
-    String? failure;
-
-    try {
-      for (final commit in ordered) {
-        await ref.read(gitActionsProvider).cherryPickCommit(commit.hash);
-      }
-    } catch (e) {
-      // A failed pick leaves the repository mid-cherry-pick, so every later pick
-      // would fail too: stop at the first error and report it.
-      failure = e.toString();
-    }
-
-    // Refresh providers to update UI
-    ref.invalidate(commitHistoryProvider);
-    ref.invalidate(localBranchesProvider);
-    ref.invalidate(currentBranchProvider);
-
-    if (!context.mounted) return;
-
-    if (failure != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.cherryPickFailed(failure)),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-      return;
-    }
-
-    // The picked commits are now duplicated onto the current branch; a stale
-    // selection would let a second press replay them again.
-    ref.read(commitSelectionProvider.notifier).clear();
+    await _runCommitAction(
+      context,
+      // A failed pick leaves the repository mid-cherry-pick, so every later
+      // pick would fail too: the first error stops the replay.
+      invoke: () async {
+        for (final commit in ordered) {
+          await ref.read(gitActionsProvider).cherryPickCommit(commit.hash);
+        }
+      },
+      describeFailure: l10n.cherryPickFailed,
+    );
   }
 
   Future<void> _performRevert(
@@ -697,15 +711,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final commit = selection.single;
     if (commit == null) return;
 
-    await ref.read(gitActionsProvider).revertCommit(commit.hash);
-
-    // Refresh providers to update UI
-    ref.invalidate(commitHistoryProvider);
-    ref.invalidate(localBranchesProvider);
-    ref.invalidate(currentBranchProvider);
-
-    // Clear selection
-    ref.read(commitSelectionProvider.notifier).clear();
+    final l10n = AppLocalizations.of(context)!;
+    await _runCommitAction(
+      context,
+      invoke: () => ref.read(gitActionsProvider).revertCommit(commit.hash),
+      describeFailure: l10n.revertFailed,
+    );
   }
 
   Future<void> _performReset(
@@ -717,18 +728,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     // Show dialog to choose reset mode
     final mode = await _showResetModeDialog(context, commit);
-    if (mode == null) return;
+    if (mode == null || !context.mounted) return;
 
-    await ref.read(gitActionsProvider).resetToCommit(commit.hash, mode: mode);
-
-    // Refresh providers to update UI
-    ref.invalidate(commitHistoryProvider);
-    ref.invalidate(localBranchesProvider);
-    ref.invalidate(currentBranchProvider);
-
-    // The commits above the reset target are gone from this branch, so the
-    // selection must not survive into the rewritten history.
-    ref.read(commitSelectionProvider.notifier).clear();
+    final l10n = AppLocalizations.of(context)!;
+    final didReset = await _runCommitAction(
+      context,
+      invoke: () =>
+          ref.read(gitActionsProvider).resetToCommit(commit.hash, mode: mode),
+      describeFailure: l10n.resetFailed,
+    );
+    // A failed reset did not move the branch, so there is no divergence to
+    // force-push away; offering one would overwrite the remote for nothing.
+    if (!didReset) return;
 
     // A force push is only warranted when the branch tracks an upstream the reset
     // moved away from: a local-only repo has nothing to push, and a branch still
@@ -755,22 +766,26 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           )
         : true;
 
-    if (shouldForcePush == true) {
-      // The tracked remote need not be named "origin", and the upstream branch
-      // need not share the local branch's name, so push an explicit refspec.
-      await ref
+    if (shouldForcePush != true || !context.mounted) return;
+
+    // The tracked remote need not be named "origin", and the upstream branch
+    // need not share the local branch's name, so push an explicit refspec.
+    final didPush = await _runCommitAction(
+      context,
+      invoke: () => ref
           .read(gitActionsProvider)
           .pushRemote(
             force: true,
             remote: upstream.substring(0, remoteSeparator),
             branch: '${branch.name}:${upstream.substring(remoteSeparator + 1)}',
-          );
+          ),
+      describeFailure: l10n.forcePushFailed,
+    );
 
-      if (context.mounted) {
-        context.showSuccessIfMounted(
-          AppLocalizations.of(context)!.forcePushSuccessful,
-        );
-      }
+    // A force push changes nothing visible locally, so without an explicit
+    // confirmation the user cannot tell it ran at all.
+    if (didPush && context.mounted) {
+      NotificationService.showSuccess(context, l10n.forcePushSuccessful);
     }
   }
 

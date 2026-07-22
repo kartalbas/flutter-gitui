@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:process_run/shell.dart';
 
+import 'discarding_sink.dart';
+
 import '../utils/result.dart';
 
 /// Service for running shell commands in a GUI-safe manner
@@ -61,13 +63,16 @@ class ShellService {
 
   /// Create a Shell that's safe for GUI apps
   ///
-  /// Returns a Shell with verbose=false and null stdout/stderr
-  /// to prevent "handle is invalid" errors on Windows GUI apps.
+  /// Console output is disabled and both streams are given a sink that
+  /// discards, because process_run reads a null sink as "not configured" and
+  /// falls back to the process-wide console when a ProcessException escapes.
+  /// This application has no console, so that write fails with an invalid
+  /// handle and buries the real error.
   static Shell createShell({String? workingDirectory}) {
     return Shell(
       verbose: false,
-      stdout: null,
-      stderr: null,
+      stdout: DiscardingSink(),
+      stderr: DiscardingSink(),
       workingDirectory: workingDirectory,
       environment: environment,
       // Callers inspect ProcessResult.exitCode themselves. Throwing on a

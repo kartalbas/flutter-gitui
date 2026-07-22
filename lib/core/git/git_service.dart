@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:process_run/shell.dart';
 
+import '../services/discarding_sink.dart';
 import '../services/shell_service.dart';
 import '../utils/result.dart';
 import 'git_exception.dart';
@@ -57,8 +58,12 @@ class GitService {
       throwOnError: false, // We'll handle errors ourselves
       verbose:
           false, // Disable console output to prevent FileSystemException on Windows GUI apps
-      stdout: null, // Don't pipe to stdout (invalid handle on Windows GUI apps)
-      stderr: null, // Don't pipe to stderr (invalid handle on Windows GUI apps)
+      // A sink rather than null: process_run reads null as "not configured" and
+      // falls back to the process-wide console when a ProcessException escapes,
+      // and a Windows GUI app has no console, so that write fails with an
+      // invalid handle and hides the git error behind a FileSystemException.
+      stdout: DiscardingSink(),
+      stderr: DiscardingSink(),
       // Git is forced to emit UTF-8 via LC_ALL/LANG below, so decode with
       // UTF-8 too; the default systemEncoding is the ANSI code page on
       // Windows, which garbles non-ASCII names, messages, and diffs.
@@ -179,6 +184,18 @@ class GitService {
       throw GitException(
         'Git executable path not configured. Please configure it in Settings.',
         stderr: 'Git executable path is required but not set in configuration.',
+      );
+    }
+
+    // A repository can be moved or deleted while the workspace still lists it.
+    // Without this the OS rejects the working directory and every operation
+    // surfaces as an opaque ProcessException instead of naming the real cause.
+    if (!Directory(repoPath).existsSync()) {
+      throw GitException(
+        'Repository directory no longer exists: $repoPath',
+        stderr:
+            'The directory was moved or deleted. Restore it, or remove the '
+            'repository from the workspace.',
       );
     }
 
@@ -1889,8 +1906,10 @@ class GitService {
     final shell = Shell(
       throwOnError: false,
       verbose: false,
-      stdout: null,
-      stderr: null,
+      // See the constructor: null lets process_run fall back to a console this
+      // application does not have.
+      stdout: DiscardingSink(),
+      stderr: DiscardingSink(),
       environment: ShellService.environment,
     );
 

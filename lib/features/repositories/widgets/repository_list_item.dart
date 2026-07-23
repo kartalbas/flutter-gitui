@@ -90,18 +90,6 @@ class RepositoryListItem extends ConsumerWidget {
                 ),
               ),
 
-              // Favorite icon
-              if (repository.isFavorite) ...[
-                const SizedBox(width: AppTheme.paddingS),
-                Icon(
-                  PhosphorIconsBold.star,
-                  size: 14,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.primary,
-                ),
-              ],
-
               // Status badges or loading indicator
               const SizedBox(width: AppTheme.paddingS),
 
@@ -283,8 +271,11 @@ class RepositoryListItem extends ConsumerWidget {
         children: [
           BaseIconButton(
             icon: repository.isFavorite
-                ? PhosphorIconsBold.star
+                ? PhosphorIconsFill.star
                 : PhosphorIconsRegular.star,
+            iconColor: repository.isFavorite
+                ? Theme.of(context).colorScheme.primary
+                : null,
             onPressed: onToggleFavorite,
             tooltip: repository.isFavorite
                 ? AppLocalizations.of(context)!.tooltipRemoveFromFavorites

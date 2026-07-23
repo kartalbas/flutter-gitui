@@ -309,6 +309,7 @@ class BaseIconButton extends StatelessWidget {
     this.variant = ButtonVariant.ghost,
     this.size = ButtonSize.medium,
     this.isDisabled = false,
+    this.iconColor,
   });
 
   /// Callback when button is pressed (null if disabled)
@@ -328,6 +329,12 @@ class BaseIconButton extends StatelessWidget {
 
   /// Whether button is disabled
   final bool isDisabled;
+
+  /// Overrides the variant's icon color, so toggle-style buttons can make
+  /// their active state (e.g. a favorited star) read unmistakably without
+  /// changing the button chrome. Ignored while disabled, because the "on"
+  /// tint must never survive into the disabled treatment.
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -403,6 +410,10 @@ class BaseIconButton extends StatelessWidget {
       }
     }
 
+    final effectiveIconColor = isEffectivelyDisabled
+        ? foregroundColor
+        : iconColor ?? foregroundColor;
+
     final button = Material(
       color: backgroundColor,
       borderRadius: BorderRadius.circular(AppTheme.radiusS),
@@ -418,7 +429,7 @@ class BaseIconButton extends StatelessWidget {
                 : null,
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
           ),
-          child: Icon(icon, size: iconSize, color: foregroundColor),
+          child: Icon(icon, size: iconSize, color: effectiveIconColor),
         ),
       ),
     );

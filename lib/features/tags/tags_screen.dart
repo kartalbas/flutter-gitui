@@ -254,8 +254,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   const SizedBox(width: AppTheme.paddingS),
                   BaseIconButton(
                     icon: _hasActiveFilters()
-                        ? PhosphorIconsBold.funnel
+                        ? PhosphorIconsFill.funnel
                         : PhosphorIconsRegular.funnel,
+                    iconColor: _hasActiveFilters()
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
                     tooltip: AppLocalizations.of(context)!.advancedFilters,
                     onPressed: () => _showAdvancedFiltersDialog(context, tags),
                     variant: ButtonVariant.secondary,
@@ -420,8 +423,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   BasePopupMenuButton<TagGroupBy>(
                     icon: Icon(
                       _groupBy != TagGroupBy.none
-                          ? PhosphorIconsBold.rows
+                          ? PhosphorIconsFill.rows
                           : PhosphorIconsRegular.rows,
+                      color: _groupBy != TagGroupBy.none
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
                     ),
                     tooltip: AppLocalizations.of(context)!.groupTags,
                     onSelected: (groupBy) {

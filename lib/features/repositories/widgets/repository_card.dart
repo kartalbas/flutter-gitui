@@ -87,8 +87,11 @@ class RepositoryCard extends ConsumerWidget {
               _buildBatchResultIcon(context, ref),
               BaseIconButton(
                 icon: repository.isFavorite
-                    ? PhosphorIconsBold.star
+                    ? PhosphorIconsFill.star
                     : PhosphorIconsRegular.star,
+                iconColor: repository.isFavorite
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
                 onPressed: onToggleFavorite,
                 tooltip: repository.isFavorite
                     ? AppLocalizations.of(context)!.tooltipRemoveFromFavorites

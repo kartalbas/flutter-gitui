@@ -33,6 +33,12 @@ class FileTreeNode with TreeNodeMixin {
   final String name;
   @override
   final String fullPath;
+
+  /// Repository-relative path with forward slashes, as git reports paths.
+  ///
+  /// Computed once at construction: deriving it from [fullPath] on every
+  /// status pass dominated the cost of refreshing a large tree.
+  final String relativePath;
   @override
   final bool isDirectory;
   @override
@@ -44,6 +50,7 @@ class FileTreeNode with TreeNodeMixin {
   FileTreeNode({
     required this.name,
     required this.fullPath,
+    required this.relativePath,
     required this.isDirectory,
     List<FileTreeNode>? children,
     this.isExpanded = false,
@@ -308,16 +315,16 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     if (!mounted) return;
     // The controller caches its flattened list and only rebuilds it in
     // updateNodes and the toggle methods. Without this the chevrons flipped
-    // but the visible rows never changed.
+    // but the visible rows never changed. No setState: the rows sit under a
+    // ListenableBuilder that updateNodes already notifies, and nothing else
+    // in this widget depends on the expansion state.
     _treeController.updateNodes(_rootNodes);
-    setState(() {});
   }
 
   /// Collapse all directories in the tree
   void collapseAll() {
     _collapseAllNodes(_rootNodes);
     _treeController.updateNodes(_rootNodes);
-    setState(() {});
   }
 
   Future<void> _expandAllNodes(List<FileTreeNode> nodes) async {
@@ -414,17 +421,13 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     }
   }
 
-  /// Whether [fullPath] is one of the ignored paths loaded for this tree
+  /// Whether [relativePath] is one of the ignored paths loaded for this tree
   ///
   /// Matching the entry itself is enough: git collapses a wholly ignored
   /// directory into one entry, and that directory is filtered out here before
   /// it can ever be expanded, so its children are never reached.
-  bool _isIgnored(String fullPath) {
+  bool _isIgnored(String relativePath) {
     if (_ignoredPaths.isEmpty) return false;
-    // git uses forward slashes, Windows uses backslashes
-    final relativePath = p
-        .relative(fullPath, from: widget.repositoryPath)
-        .replaceAll('\\', '/');
     return _ignoredPaths.contains(relativePath);
   }
 
@@ -459,8 +462,13 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
         // Skip hidden files if not shown
         if (!widget.showHidden && name.startsWith('.')) continue;
 
+        // git uses forward slashes, Windows uses backslashes
+        final relativePath = p
+            .relative(entity.path, from: widget.repositoryPath)
+            .replaceAll('\\', '/');
+
         // Skip git-ignored entries if not shown
-        if (!widget.showIgnored && _isIgnored(entity.path)) continue;
+        if (!widget.showIgnored && _isIgnored(relativePath)) continue;
 
         final isDirectory = entity is Directory;
 
@@ -468,6 +476,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
           FileTreeNode(
             name: name,
             fullPath: entity.path,
+            relativePath: relativePath,
             isDirectory: isDirectory,
             children: [], // Load children on expand
           ),
@@ -481,29 +490,32 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   }
 
   void _applyStatuses(List<FileTreeNode> nodes, List<FileStatus> statuses) {
-    for (final node in nodes) {
-      // Find matching status
-      // Normalize path separators: git uses forward slashes, Windows uses backslashes
-      final relativePath = p
-          .relative(node.fullPath, from: widget.repositoryPath)
-          .replaceAll('\\', '/');
-      final status = statuses.firstWhere(
-        (s) => s.path == relativePath,
-        orElse: () => const FileStatus(
-          path: '',
-          indexStatus: FileStatusType.unchanged,
-          workTreeStatus: FileStatusType.unchanged,
-        ),
-      );
+    // Index the statuses by path once: scanning the whole status list for
+    // every node made a status pass cost node count times status count
+    // comparisons on large trees. putIfAbsent keeps the first entry for a
+    // path, matching what the previous linear scan picked.
+    final statusByPath = <String, FileStatus>{};
+    for (final status in statuses) {
+      statusByPath.putIfAbsent(status.path, () => status);
+    }
+    _applyIndexedStatuses(nodes, statusByPath);
+  }
 
-      // Set status if changed, or clear it if unchanged
-      if (status.primaryStatus != FileStatusType.unchanged) {
+  void _applyIndexedStatuses(
+    List<FileTreeNode> nodes,
+    Map<String, FileStatus> statusByPath,
+  ) {
+    for (final node in nodes) {
+      final status = statusByPath[node.relativePath];
+
+      // Clear the status when the file was restored to unchanged
+      if (status != null && status.primaryStatus != FileStatusType.unchanged) {
         node.status = status.primaryStatus;
       } else {
-        node.status = null; // Clear status when file is restored to unchanged
+        node.status = null;
       }
 
-      _applyStatuses(node.children, statuses);
+      _applyIndexedStatuses(node.children, statusByPath);
     }
   }
 
@@ -747,6 +759,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
           final filteredNode = FileTreeNode(
             name: node.name,
             fullPath: node.fullPath,
+            relativePath: node.relativePath,
             isDirectory: true,
             children: matchingChildren.isNotEmpty
                 ? matchingChildren

@@ -310,13 +310,23 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
   /// Flatten the tree into a list of visible nodes
   List<T> _flattenTree(List<T> nodes) {
     final result = <T>[];
+    _flattenInto(nodes, result);
+    return result;
+  }
+
+  /// Append the visible nodes under [nodes] to [result]
+  ///
+  /// Recursing into a shared accumulator instead of returning a list per
+  /// level: the previous shape allocated and copied an intermediate list for
+  /// every expanded directory on each reflatten, which every expand/collapse
+  /// toggle triggers.
+  void _flattenInto(List<T> nodes, List<T> result) {
     for (final node in nodes) {
       result.add(node);
       if (node.isDirectory && node.isExpanded && node.children.isNotEmpty) {
-        result.addAll(_flattenTree(node.children.cast<T>()));
+        _flattenInto(node.children.cast<T>(), result);
       }
     }
-    return result;
   }
 
   /// Reflatten the visible rows while keeping the selection on the same node.

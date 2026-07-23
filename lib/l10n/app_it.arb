@@ -47,6 +47,7 @@
   "branch": "Branch",
   "noRepositoryOpen": "Nessun repository aperto",
   "openRepositoryToContinue": "Apri un repository per continuare",
+  "mergeCurrentRepositoryOnly": "Il merge funziona solo sul repository corrente. Cancella la selezione per continuare.",
   "errorLoadingData": "Errore nel caricamento di {dataType}",
   "retry": "Riprova",
   "selectedCount": "{count} Selezionato/i",

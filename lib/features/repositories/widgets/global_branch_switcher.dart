@@ -11,6 +11,7 @@ import '../../../core/config/config_providers.dart';
 import '../../../core/workspace/workspace_provider.dart';
 import '../../../core/workspace/repository_status_provider.dart';
 import '../providers/global_branch_provider.dart';
+import '../repository_multi_select_provider.dart';
 import '../services/batch_operations_service.dart';
 import '../dialogs/batch_operation_progress_dialog.dart';
 import '../repository_batch_error_provider.dart';
@@ -22,14 +23,27 @@ class GlobalBranchSwitcher extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final branchesAsync = ref.watch(globalBranchesProvider);
+    // An active multi-selection narrows the cross-repo checkout to the
+    // selected repositories, so the switcher follows the same effective
+    // target rule as the other toolbar git actions (#303); without a
+    // selection it keeps its all-repositories default, because narrowing to
+    // the current repository would duplicate the per-repo branch switcher.
+    final selectedPaths = ref.watch(repositoryMultiSelectProvider);
 
     return branchesAsync.when(
       data: (branches) {
+        final visibleBranches = selectedPaths.isEmpty
+            ? branches
+            : branches
+                  .map((branch) => branch.restrictedTo(selectedPaths))
+                  .whereType<GlobalBranchInfo>()
+                  .toList();
+
         // Determine label to show
         String label;
-        if (branches.isNotEmpty) {
+        if (visibleBranches.isNotEmpty) {
           // Show most common branch (branch that can be switched in most repos)
-          label = branches.first.branchName;
+          label = visibleBranches.first.branchName;
         } else {
           label = 'No branches';
         }
@@ -37,12 +51,12 @@ class GlobalBranchSwitcher extends ConsumerWidget {
         return BaseSwitcher(
           icon: PhosphorIconsBold.gitBranch,
           label: label,
-          tooltip: branches.isEmpty
+          tooltip: visibleBranches.isEmpty
               ? 'No branches available to switch'
               : 'Checkout branch across repositories',
-          showDropdown: branches.isNotEmpty,
-          onTap: branches.isNotEmpty
-              ? () => _showBranchMenu(context, ref, branches)
+          showDropdown: visibleBranches.isNotEmpty,
+          onTap: visibleBranches.isNotEmpty
+              ? () => _showBranchMenu(context, ref, visibleBranches)
               : null,
         );
       },
@@ -215,6 +229,12 @@ class GlobalBranchSwitcher extends ConsumerWidget {
       );
     }
     ref.read(repositoryBatchErrorProvider.notifier).setResults(resultsMap);
+
+    // The batch consumed the selection, mirroring the other toolbar git
+    // actions, so a stale selection cannot re-target the next action.
+    if (ref.read(repositoryMultiSelectProvider).isNotEmpty) {
+      ref.read(repositoryMultiSelectProvider.notifier).clearSelection();
+    }
 
     // Update selected branch
     ref.read(selectedGlobalBranchProvider.notifier).state =

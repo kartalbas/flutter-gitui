@@ -32,6 +32,29 @@ class GlobalBranchInfo {
 
   /// Check if this branch exists in all repositories
   bool get existsInAll => repositoryCount == totalRepositories;
+
+  /// Restricts the checkout targets to [paths], returning null when none of
+  /// them can switch to this branch. The active multi-selection narrows the
+  /// switcher the same way it narrows the other toolbar git actions, so the
+  /// menu never promises more repositories than the checkout will touch.
+  GlobalBranchInfo? restrictedTo(Set<String> paths) {
+    final restrictedPaths = <String>[];
+    final restrictedNames = <String>[];
+    for (var i = 0; i < repositoryPaths.length; i++) {
+      if (paths.contains(repositoryPaths[i])) {
+        restrictedPaths.add(repositoryPaths[i]);
+        restrictedNames.add(repositoryNames[i]);
+      }
+    }
+    if (restrictedPaths.isEmpty) return null;
+    return GlobalBranchInfo(
+      branchName: branchName,
+      repositoryCount: restrictedPaths.length,
+      totalRepositories: paths.length,
+      repositoryPaths: restrictedPaths,
+      repositoryNames: restrictedNames,
+    );
+  }
 }
 
 /// Provider that aggregates all unique branches across all repositories

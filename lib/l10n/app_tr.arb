@@ -56,6 +56,7 @@
   "branch": "Dal",
   "noRepositoryOpen": "Açık Depo Yok",
   "openRepositoryToContinue": "Devam etmek için bir depo açın",
+  "mergeCurrentRepositoryOnly": "Merge yalnızca mevcut depoda çalışır. Devam etmek için seçimi temizleyin.",
   "errorLoadingData": "{dataType} yüklenirken hata",
   "@errorLoadingData": {
     "description": "Generic error loading message",

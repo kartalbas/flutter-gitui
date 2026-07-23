@@ -30,6 +30,7 @@ import '../workspace/workspace_provider.dart';
 import '../workspace/models/repository_status.dart';
 import '../workspace/models/workspace_repository.dart';
 import 'navigation_item.dart';
+import '../../features/repositories/git_action_targets.dart';
 import '../../features/repositories/repository_multi_select_provider.dart';
 import '../../features/repositories/repository_batch_error_provider.dart';
 import '../../features/repositories/services/batch_operations_service.dart';
@@ -247,6 +248,14 @@ class _AppShellState extends ConsumerState<AppShell> {
     // Get currently selected repository path
     final currentRepoPath = ref.watch(currentRepositoryPathProvider);
 
+    // One resolution drives both the git buttons' enabled state and their
+    // handlers, so the toolbar can never promise a target set the handlers
+    // would not act on (#303).
+    final gitActionTargets = GitActionTargets(
+      selectedPaths: ref.watch(repositoryMultiSelectProvider),
+      currentRepositoryPath: currentRepoPath,
+    );
+
     // Get status of selected repository (if any)
     final selectedRepoStatus = currentRepoPath != null
         ? ref.watch(repositoryStatusByPathProvider(currentRepoPath))
@@ -391,72 +400,143 @@ class _AppShellState extends ConsumerState<AppShell> {
                           ),
                           child: Row(
                             children: [
-                              // Workspace switcher
-                              const WorkspaceSwitcher(),
-                              const SizedBox(width: AppTheme.paddingM),
-                              // Repository switcher
-                              const RepositorySwitcher(),
-                              const SizedBox(width: AppTheme.paddingM),
-                              // Branch switcher
-                              const BranchSwitcher(),
-                              const SizedBox(width: AppTheme.paddingM),
-                              // Global branch switcher
-                              const GlobalBranchSwitcher(),
-                              const SizedBox(width: AppTheme.paddingM),
-                              // Create Branch and Create PR buttons
-                              if (currentRepoPath != null) ...[
-                                _buildGitOperationButton(
-                                  context,
-                                  ref,
-                                  PhosphorIconsRegular.gitBranch,
-                                  AppLocalizations.of(context)!.createBranch,
-                                  () => _performCreateBranch(ref),
+                              // The switcher/action cluster scrolls because
+                              // the git actions are always rendered now
+                              // (#303) and must not overflow the toolbar at
+                              // the minimum window width.
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      // Workspace switcher
+                                      const WorkspaceSwitcher(),
+                                      const SizedBox(width: AppTheme.paddingM),
+                                      // Repository switcher
+                                      const RepositorySwitcher(),
+                                      const SizedBox(width: AppTheme.paddingM),
+                                      // Branch switcher
+                                      const BranchSwitcher(),
+                                      const SizedBox(width: AppTheme.paddingM),
+                                      // Global branch switcher
+                                      const GlobalBranchSwitcher(),
+                                      const SizedBox(width: AppTheme.paddingM),
+                                      // The git actions stay rendered without a
+                                      // target and grey out with a reason, so the
+                                      // toolbar never shows an unexplained gap (#303).
+                                      _buildGitOperationButton(
+                                        context,
+                                        ref,
+                                        PhosphorIconsRegular.gitBranch,
+                                        _gitActionTooltip(
+                                          context,
+                                          gitActionTargets.batchActionBlock,
+                                          enabledLabel: AppLocalizations.of(
+                                            context,
+                                          )!.createBranch,
+                                        ),
+                                        gitActionTargets.batchActionBlock ==
+                                                null
+                                            ? () => _performCreateBranch(ref)
+                                            : null,
+                                      ),
+                                      const SizedBox(width: AppTheme.paddingS),
+                                      _buildGitOperationButton(
+                                        context,
+                                        ref,
+                                        PhosphorIconsRegular.gitPullRequest,
+                                        _gitActionTooltip(
+                                          context,
+                                          gitActionTargets.createPrBlock,
+                                          enabledLabel: AppLocalizations.of(
+                                            context,
+                                          )!.createPr,
+                                          unsupportedSelectionLabel:
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.selectOnlyOneRepoForPr,
+                                        ),
+                                        gitActionTargets.createPrBlock == null
+                                            ? () => _performCreatePR(ref)
+                                            : null,
+                                      ),
+                                      const SizedBox(width: AppTheme.paddingS),
+                                      _buildGitOperationButton(
+                                        context,
+                                        ref,
+                                        PhosphorIconsRegular.gitMerge,
+                                        _gitActionTooltip(
+                                          context,
+                                          gitActionTargets.mergeBlock,
+                                          enabledLabel: AppLocalizations.of(
+                                            context,
+                                          )!.mergeBranches,
+                                          unsupportedSelectionLabel:
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.mergeCurrentRepositoryOnly,
+                                        ),
+                                        gitActionTargets.mergeBlock == null
+                                            ? () =>
+                                                  _performMergeBranches(context)
+                                            : null,
+                                      ),
+                                      const SizedBox(width: AppTheme.paddingM),
+                                      _buildGitOperationButton(
+                                        context,
+                                        ref,
+                                        PhosphorIconsRegular.arrowClockwise,
+                                        _gitActionTooltip(
+                                          context,
+                                          gitActionTargets.batchActionBlock,
+                                          enabledLabel: AppLocalizations.of(
+                                            context,
+                                          )!.fetch,
+                                        ),
+                                        gitActionTargets.batchActionBlock ==
+                                                null
+                                            ? () => _performFetch(ref)
+                                            : null,
+                                      ),
+                                      const SizedBox(width: AppTheme.paddingS),
+                                      _buildGitOperationButton(
+                                        context,
+                                        ref,
+                                        PhosphorIconsRegular.arrowDown,
+                                        _gitActionTooltip(
+                                          context,
+                                          gitActionTargets.batchActionBlock,
+                                          enabledLabel: AppLocalizations.of(
+                                            context,
+                                          )!.pull,
+                                        ),
+                                        gitActionTargets.batchActionBlock ==
+                                                null
+                                            ? () => _performPull(ref)
+                                            : null,
+                                      ),
+                                      const SizedBox(width: AppTheme.paddingS),
+                                      _buildGitOperationButton(
+                                        context,
+                                        ref,
+                                        PhosphorIconsRegular.arrowUp,
+                                        _gitActionTooltip(
+                                          context,
+                                          gitActionTargets.batchActionBlock,
+                                          enabledLabel: AppLocalizations.of(
+                                            context,
+                                          )!.push,
+                                        ),
+                                        gitActionTargets.batchActionBlock ==
+                                                null
+                                            ? () => _performPush(ref)
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                _buildGitOperationButton(
-                                  context,
-                                  ref,
-                                  PhosphorIconsRegular.gitPullRequest,
-                                  AppLocalizations.of(context)!.createPr,
-                                  () => _performCreatePR(ref),
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                _buildGitOperationButton(
-                                  context,
-                                  ref,
-                                  PhosphorIconsRegular.gitMerge,
-                                  AppLocalizations.of(context)!.mergeBranches,
-                                  () => _performMergeBranches(context),
-                                ),
-                                const SizedBox(width: AppTheme.paddingM),
-                              ],
-                              // Git operations (Fetch, Pull, Push)
-                              if (currentRepoPath != null) ...[
-                                _buildGitOperationButton(
-                                  context,
-                                  ref,
-                                  PhosphorIconsRegular.arrowClockwise,
-                                  AppLocalizations.of(context)!.fetch,
-                                  () => _performFetch(ref),
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                _buildGitOperationButton(
-                                  context,
-                                  ref,
-                                  PhosphorIconsRegular.arrowDown,
-                                  AppLocalizations.of(context)!.pull,
-                                  () => _performPull(ref),
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                _buildGitOperationButton(
-                                  context,
-                                  ref,
-                                  PhosphorIconsRegular.arrowUp,
-                                  AppLocalizations.of(context)!.push,
-                                  () => _performPush(ref),
-                                ),
-                              ],
-                              const Spacer(),
+                              ),
+                              const SizedBox(width: AppTheme.paddingS),
                               BaseIconButton(
                                 icon: PhosphorIconsRegular.magnifyingGlass,
                                 tooltip: AppLocalizations.of(
@@ -705,13 +785,32 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
+  /// Tooltip for a toolbar git action: its label while it can run, otherwise
+  /// the reason it cannot, so a disabled button explains itself instead of
+  /// leaving the user guessing why nothing happens (#303).
+  String _gitActionTooltip(
+    BuildContext context,
+    GitActionBlock? block, {
+    required String enabledLabel,
+    String? unsupportedSelectionLabel,
+  }) {
+    switch (block) {
+      case null:
+        return enabledLabel;
+      case GitActionBlock.noRepository:
+        return AppLocalizations.of(context)!.openRepositoryToContinue;
+      case GitActionBlock.unsupportedSelection:
+        return unsupportedSelectionLabel ?? enabledLabel;
+    }
+  }
+
   /// Build a git operation button
   Widget _buildGitOperationButton(
     BuildContext context,
     WidgetRef ref,
     IconData icon,
     String tooltip,
-    VoidCallback onPressed,
+    VoidCallback? onPressed,
   ) {
     return BaseIconButton(
       icon: icon,
@@ -722,30 +821,34 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
+  /// Resolves the repositories the toolbar git actions act on through
+  /// [GitActionTargets], so the handlers target exactly the set the buttons
+  /// advertised when they were enabled.
+  List<WorkspaceRepository> _resolveGitActionRepositories() {
+    final allRepositories = ref.read(workspaceProvider);
+    final targetPaths = GitActionTargets(
+      selectedPaths: ref.read(repositoryMultiSelectProvider),
+      currentRepositoryPath: ref.read(currentRepositoryPathProvider),
+    ).effectivePaths.toSet();
+    // Workspace entries carry the display metadata, so known paths resolve
+    // to them in workspace order; the current repository can be open without
+    // being registered, which is why leftover paths get an ad-hoc entry.
+    final targets = allRepositories
+        .where((repo) => targetPaths.contains(repo.path))
+        .toList();
+    final knownPaths = targets.map((repo) => repo.path).toSet();
+    targets.addAll(
+      targetPaths
+          .where((path) => !knownPaths.contains(path))
+          .map(WorkspaceRepository.fromPath),
+    );
+    return targets;
+  }
+
   /// Perform fetch operation
   Future<void> _performFetch(WidgetRef ref) async {
-    // Get repositories to operate on (either selected or current)
     final selectedPaths = ref.read(repositoryMultiSelectProvider);
-    final allRepositories = ref.read(workspaceProvider);
-
-    List<WorkspaceRepository> repositoriesToFetch;
-    if (selectedPaths.isNotEmpty) {
-      // Use selected repositories
-      repositoriesToFetch = allRepositories
-          .where((repo) => selectedPaths.contains(repo.path))
-          .toList();
-    } else {
-      // Use current repository
-      final currentPath = ref.read(currentRepositoryPathProvider);
-      if (currentPath == null) return;
-
-      final currentRepo = allRepositories.firstWhere(
-        (repo) => repo.path == currentPath,
-        orElse: () => WorkspaceRepository.fromPath(currentPath),
-      );
-      repositoriesToFetch = [currentRepo];
-    }
-
+    final repositoriesToFetch = _resolveGitActionRepositories();
     if (repositoriesToFetch.isEmpty) return;
 
     // Get statuses for all repositories
@@ -806,28 +909,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Perform pull operation
   Future<void> _performPull(WidgetRef ref) async {
-    // Get repositories to operate on (either selected or current)
     final selectedPaths = ref.read(repositoryMultiSelectProvider);
-    final allRepositories = ref.read(workspaceProvider);
-
-    List<WorkspaceRepository> repositoriesToPull;
-    if (selectedPaths.isNotEmpty) {
-      // Use selected repositories
-      repositoriesToPull = allRepositories
-          .where((repo) => selectedPaths.contains(repo.path))
-          .toList();
-    } else {
-      // Use current repository
-      final currentPath = ref.read(currentRepositoryPathProvider);
-      if (currentPath == null) return;
-
-      final currentRepo = allRepositories.firstWhere(
-        (repo) => repo.path == currentPath,
-        orElse: () => WorkspaceRepository.fromPath(currentPath),
-      );
-      repositoriesToPull = [currentRepo];
-    }
-
+    final repositoriesToPull = _resolveGitActionRepositories();
     if (repositoriesToPull.isEmpty) return;
 
     // Get statuses for all repositories
@@ -885,28 +968,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Perform push operation
   Future<void> _performPush(WidgetRef ref) async {
-    // Get repositories to operate on (either selected or current)
     final selectedPaths = ref.read(repositoryMultiSelectProvider);
-    final allRepositories = ref.read(workspaceProvider);
-
-    List<WorkspaceRepository> repositoriesToPush;
-    if (selectedPaths.isNotEmpty) {
-      // Use selected repositories
-      repositoriesToPush = allRepositories
-          .where((repo) => selectedPaths.contains(repo.path))
-          .toList();
-    } else {
-      // Use current repository
-      final currentPath = ref.read(currentRepositoryPathProvider);
-      if (currentPath == null) return;
-
-      final currentRepo = allRepositories.firstWhere(
-        (repo) => repo.path == currentPath,
-        orElse: () => WorkspaceRepository.fromPath(currentPath),
-      );
-      repositoriesToPush = [currentRepo];
-    }
-
+    final repositoriesToPush = _resolveGitActionRepositories();
     if (repositoriesToPush.isEmpty) return;
 
     // Get statuses for all repositories
@@ -977,28 +1040,8 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Perform create branch operation
   Future<void> _performCreateBranch(WidgetRef ref) async {
-    // Get repositories to operate on (either selected or current)
     final selectedPaths = ref.read(repositoryMultiSelectProvider);
-    final allRepositories = ref.read(workspaceProvider);
-
-    List<WorkspaceRepository> repositoriesToCreateBranch;
-    if (selectedPaths.isNotEmpty) {
-      // Use selected repositories
-      repositoriesToCreateBranch = allRepositories
-          .where((repo) => selectedPaths.contains(repo.path))
-          .toList();
-    } else {
-      // Use current repository
-      final currentPath = ref.read(currentRepositoryPathProvider);
-      if (currentPath == null) return;
-
-      final currentRepo = allRepositories.firstWhere(
-        (repo) => repo.path == currentPath,
-        orElse: () => WorkspaceRepository.fromPath(currentPath),
-      );
-      repositoriesToCreateBranch = [currentRepo];
-    }
-
+    final repositoriesToCreateBranch = _resolveGitActionRepositories();
     if (repositoriesToCreateBranch.isEmpty) return;
     if (!context.mounted) return;
 

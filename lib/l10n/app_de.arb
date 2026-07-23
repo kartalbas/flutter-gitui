@@ -56,6 +56,7 @@
   "branch": "Branch",
   "noRepositoryOpen": "Kein Repository geöffnet",
   "openRepositoryToContinue": "Öffnen Sie ein Repository, um fortzufahren",
+  "mergeCurrentRepositoryOnly": "Merge funktioniert nur im aktuellen Repository. Heben Sie die Auswahl auf, um fortzufahren.",
   "errorLoadingData": "Fehler beim Laden von {dataType}",
   "@errorLoadingData": {
     "description": "Generic error loading message",

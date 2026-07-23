@@ -5,6 +5,7 @@ import 'package:riverpod/legacy.dart';
 import 'app_config.dart';
 import 'config_service.dart';
 import '../diff/models/diff_tool.dart';
+import '../services/update_check_policy.dart';
 import '../tools/version_detector.dart';
 import '../workspace/models/workspace_repository.dart';
 import '../services/logger_service.dart';
@@ -755,6 +756,38 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     await _saveConfig();
   }
 
+  // Updates Configuration Methods
+  Future<void> setUpdateCheckFrequency(UpdateCheckFrequency frequency) async {
+    state = state.copyWith(
+      updates: state.updates.copyWith(checkFrequency: frequency),
+    );
+    await _saveConfig();
+  }
+
+  Future<void> setUpdateAutoDownload(bool enabled) async {
+    state = state.copyWith(
+      updates: state.updates.copyWith(autoDownload: enabled),
+    );
+    await _saveConfig();
+  }
+
+  /// Persists when the last update check ran and what it concluded, so the
+  /// daily/weekly schedule survives restarts and Settings can show the result.
+  Future<void> recordUpdateCheck({
+    required DateTime time,
+    required UpdateCheckOutcome outcome,
+    String? detail,
+  }) async {
+    state = state.copyWith(
+      updates: state.updates.copyWith(
+        lastCheckTime: time,
+        lastCheckOutcome: outcome,
+        lastCheckDetail: detail,
+      ),
+    );
+    await _saveConfig();
+  }
+
   // History Configuration Methods
   Future<void> setDefaultCommitLimit(int limit) async {
     state = state.copyWith(
@@ -961,6 +994,9 @@ final historyConfigProvider = Provider<HistoryConfig>(
 );
 final workspaceConfigProvider = Provider<WorkspaceConfig>(
   (ref) => ref.watch(configProvider).workspace,
+);
+final updatesConfigProvider = Provider<UpdatesConfig>(
+  (ref) => ref.watch(configProvider).updates,
 );
 
 // Individual setting providers (for backward compatibility and convenience)

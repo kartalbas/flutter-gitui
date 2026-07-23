@@ -8,6 +8,7 @@ import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/git_providers.dart';
+import '../../../core/services/exit_guard.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/widgets/file_status_badge.dart';
@@ -27,16 +28,35 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
   bool _isCommitting = false;
   bool _showStagedFiles = false;
 
+  // Captured in initState because ref must not be touched from dispose.
+  UnsavedInputNotifier? _unsavedInput;
+
   @override
   void initState() {
     super.initState();
+    // A half-written commit message must be able to hold back a
+    // restart-and-install, so its presence is mirrored into the app-wide
+    // unsaved-input registry.
+    _unsavedInput = ref.read(unsavedInputProvider.notifier);
+    _messageController.addListener(_syncUnsavedInput);
     _loadLastCommitIfAmend();
   }
 
   @override
   void dispose() {
+    // Whatever closes this dialog - commit, cancel, escape - takes the text
+    // with it, so the registration must not outlive the field.
+    _unsavedInput?.unregister(UnsavedInputKind.commitMessage);
     _messageController.dispose();
     super.dispose();
+  }
+
+  void _syncUnsavedInput() {
+    if (_messageController.text.trim().isEmpty) {
+      _unsavedInput?.unregister(UnsavedInputKind.commitMessage);
+    } else {
+      _unsavedInput?.register(UnsavedInputKind.commitMessage);
+    }
   }
 
   Future<void> _loadLastCommitIfAmend() async {

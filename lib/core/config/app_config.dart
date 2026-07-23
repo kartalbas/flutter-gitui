@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../diff/models/diff_tool.dart';
+import '../services/update_check_policy.dart';
 import '../utils/executable_path.dart';
 import '../workspace/models/workspace_repository.dart';
 
@@ -31,6 +32,9 @@ class AppConfig {
   // Workspace Settings
   final WorkspaceConfig workspace;
 
+  // Update Settings
+  final UpdatesConfig updates;
+
   // App Metadata (last seen version for changelog)
   final String? lastSeenVersion;
   final bool? disableWhatsNewDialog;
@@ -51,6 +55,7 @@ class AppConfig {
     required this.behavior,
     required this.history,
     required this.workspace,
+    required this.updates,
     this.lastSeenVersion,
     this.disableWhatsNewDialog,
   });
@@ -65,6 +70,7 @@ class AppConfig {
     behavior: BehaviorConfig.defaults,
     history: HistoryConfig.defaults,
     workspace: WorkspaceConfig.defaults,
+    updates: UpdatesConfig.defaults,
   );
 
   /// Copy with modifications
@@ -77,6 +83,7 @@ class AppConfig {
     BehaviorConfig? behavior,
     HistoryConfig? history,
     WorkspaceConfig? workspace,
+    UpdatesConfig? updates,
     Object? lastSeenVersion = _unset,
     bool? disableWhatsNewDialog,
   }) {
@@ -89,6 +96,7 @@ class AppConfig {
       behavior: behavior ?? this.behavior,
       history: history ?? this.history,
       workspace: workspace ?? this.workspace,
+      updates: updates ?? this.updates,
       lastSeenVersion: identical(lastSeenVersion, _unset)
           ? this.lastSeenVersion
           : lastSeenVersion as String?,
@@ -109,6 +117,7 @@ class AppConfig {
       'behavior': behavior.toYaml(),
       'history': history.toYaml(),
       'workspace': workspace.toYaml(),
+      'updates': updates.toYaml(),
       if (lastSeenVersion != null) 'last_seen_version': lastSeenVersion,
       if (disableWhatsNewDialog != null)
         'disable_whats_new_dialog': disableWhatsNewDialog,
@@ -137,6 +146,9 @@ class AppConfig {
       ),
       workspace: WorkspaceConfig.fromYaml(
         yaml['workspace'] as Map<dynamic, dynamic>? ?? {},
+      ),
+      updates: UpdatesConfig.fromYaml(
+        yaml['updates'] as Map<dynamic, dynamic>? ?? {},
       ),
       lastSeenVersion: yaml['last_seen_version'] as String?,
       disableWhatsNewDialog: yaml['disable_whats_new_dialog'] as bool?,
@@ -700,6 +712,92 @@ class BehaviorConfig {
       confirmForcePush: yaml['confirm_force_push'] as bool? ?? true,
       confirmDelete: yaml['confirm_delete'] as bool? ?? true,
     );
+  }
+}
+
+/// Update behaviour configuration
+///
+/// Checking and downloading may be automatic; installing never is. These
+/// settings only control how the app looks for updates and whether it stages
+/// the download - the restart that applies an update stays an explicit user
+/// action.
+class UpdatesConfig {
+  final UpdateCheckFrequency checkFrequency;
+  final bool autoDownload;
+  final DateTime? lastCheckTime;
+  final UpdateCheckOutcome? lastCheckOutcome;
+
+  /// What the outcome refers to: the version found for
+  /// [UpdateCheckOutcome.updateAvailable], the user-facing failure message
+  /// for [UpdateCheckOutcome.failed], null for an up-to-date result.
+  final String? lastCheckDetail;
+
+  const UpdatesConfig({
+    this.checkFrequency = UpdateCheckFrequency.onStart,
+    this.autoDownload = false,
+    this.lastCheckTime,
+    this.lastCheckOutcome,
+    this.lastCheckDetail,
+  });
+
+  static const UpdatesConfig defaults = UpdatesConfig();
+
+  UpdatesConfig copyWith({
+    UpdateCheckFrequency? checkFrequency,
+    bool? autoDownload,
+    Object? lastCheckTime = _unset,
+    Object? lastCheckOutcome = _unset,
+    Object? lastCheckDetail = _unset,
+  }) {
+    return UpdatesConfig(
+      checkFrequency: checkFrequency ?? this.checkFrequency,
+      autoDownload: autoDownload ?? this.autoDownload,
+      lastCheckTime: identical(lastCheckTime, _unset)
+          ? this.lastCheckTime
+          : lastCheckTime as DateTime?,
+      lastCheckOutcome: identical(lastCheckOutcome, _unset)
+          ? this.lastCheckOutcome
+          : lastCheckOutcome as UpdateCheckOutcome?,
+      lastCheckDetail: identical(lastCheckDetail, _unset)
+          ? this.lastCheckDetail
+          : lastCheckDetail as String?,
+    );
+  }
+
+  Map<String, dynamic> toYaml() {
+    return {
+      'check_frequency': checkFrequency.name,
+      'auto_download': autoDownload,
+      'last_check_time': lastCheckTime?.toIso8601String(),
+      'last_check_outcome': lastCheckOutcome?.name,
+      'last_check_detail': lastCheckDetail,
+    };
+  }
+
+  factory UpdatesConfig.fromYaml(Map<dynamic, dynamic> yaml) {
+    final storedTime = yaml['last_check_time'] as String?;
+    return UpdatesConfig(
+      checkFrequency: yaml['check_frequency'] != null
+          ? UpdateCheckFrequency.values.firstWhere(
+              (e) => e.name == yaml['check_frequency'],
+              orElse: () => UpdateCheckFrequency.onStart,
+            )
+          : UpdateCheckFrequency.onStart,
+      autoDownload: yaml['auto_download'] as bool? ?? false,
+      // tryParse: a hand-edited timestamp must degrade to "never checked"
+      // instead of taking the whole configuration down.
+      lastCheckTime: storedTime != null ? DateTime.tryParse(storedTime) : null,
+      lastCheckOutcome: _outcomeFromName(yaml['last_check_outcome'] as String?),
+      lastCheckDetail: yaml['last_check_detail'] as String?,
+    );
+  }
+
+  static UpdateCheckOutcome? _outcomeFromName(String? name) {
+    if (name == null) return null;
+    for (final outcome in UpdateCheckOutcome.values) {
+      if (outcome.name == name) return outcome;
+    }
+    return null;
   }
 }
 

@@ -3595,5 +3595,57 @@
   "detectTools": "Detect Tools",
   "applySelected": "Apply Selected",
   "noToolsDetected": "No tools detected",
-  "noToolsDetectedHint": "Make sure git, diff tools, and editors are installed on your system"
+  "noToolsDetectedHint": "Make sure git, diff tools, and editors are installed on your system",
+  "updates": "Updates",
+  "currentVersion": "Current Version",
+  "checkForUpdates": "Check for Updates",
+  "checkingForUpdates": "Checking...",
+  "viewReleaseHistory": "View Release History",
+  "upToDateMessage": "You're up to date! (v{version})",
+  "@upToDateMessage": {
+    "description": "Snackbar after a manual update check found nothing newer",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.5.4-alpha"
+      }
+    }
+  },
+  "updateCheckFrequency": "Check for updates",
+  "updateFrequencyOnStart": "On every start",
+  "updateFrequencyDaily": "Once a day",
+  "updateFrequencyWeekly": "Once a week",
+  "updateFrequencyNever": "Never",
+  "autoDownloadUpdates": "Download updates in the background",
+  "autoDownloadUpdatesDescription": "When an update is found, download it right away so installing is quick. Installing still only happens when you choose to restart.",
+  "lastUpdateCheck": "Last check",
+  "lastUpdateCheckNever": "No check has run yet",
+  "updateCheckResultUpToDate": "Up to date",
+  "updateCheckResultUpdateAvailable": "Update {version} available",
+  "@updateCheckResultUpdateAvailable": {
+    "description": "Result line in Settings after a check found an update",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.5.5-alpha"
+      }
+    }
+  },
+  "updateCheckResultFailed": "Check failed",
+  "updateReadyTooltip": "Update {version} available - click to review and install",
+  "@updateReadyTooltip": {
+    "description": "Tooltip of the quiet toolbar indicator shown while an update is available",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.5.5-alpha"
+      }
+    }
+  },
+  "restartAndInstall": "Restart & Install",
+  "updateOperationRunningTitle": "Git Operation Running",
+  "updateOperationRunningBody": "A git operation is still running. Installing the update now would close the application in the middle of it. Wait for the operation to finish, then try again.",
+  "updateUnsavedInputTitle": "Unsaved Input",
+  "updateUnsavedInputBody": "A commit message is being written. Installing the update restarts the application, and that input will be lost.",
+  "installAnyway": "Install Anyway"
 }

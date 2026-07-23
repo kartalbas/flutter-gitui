@@ -78,6 +78,14 @@ class ProgressNotifier extends StateNotifier<ProgressInfo?> {
   // progress must neither overwrite its label nor clear it mid-flow.
   bool _hasExplicitOperation = false;
 
+  /// Whether any operation is in flight right now, indicator visible or not.
+  ///
+  /// [state] cannot answer this: it stays null for the whole show delay and
+  /// for every fast operation. The restart-and-install path must not exit the
+  /// process while a git operation runs, so it asks this instead.
+  bool get hasActiveOperation =>
+      _hasExplicitOperation || _automaticOperationCount > 0;
+
   // Held back by the show delay. Kept out of [state] so that an operation
   // finishing before the delay elapses leaves nothing to render.
   ProgressInfo? _pending;

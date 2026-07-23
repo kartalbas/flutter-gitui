@@ -18,6 +18,7 @@ import 'core/config/config_service.dart';
 import 'core/navigation/app_shell.dart';
 import 'core/services/logger_service.dart';
 import 'core/services/version_service.dart';
+import 'core/services/update_check_policy.dart';
 import 'core/services/update_providers.dart';
 import 'core/services/notification_service.dart';
 import 'features/merge/conflict_resolution_screen.dart';
@@ -178,12 +179,21 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
       }
     });
 
-    // Initialize update checker on startup (after config is loaded)
-    // Load dismissed update version and check for updates 5 seconds after app starts
+    // Ask five seconds after launch whether an update check is due. The user
+    // owns this schedule (#294): the frequency setting decides, "never" sends
+    // no request at all, and a failed check stays in the log and in Settings
+    // instead of opening anything over the user's work.
     Future.delayed(const Duration(seconds: 5), () async {
       if (!mounted) return;
       await loadDismissedUpdateVersion(ref);
       if (!mounted) return;
+      final updates = ref.read(configProvider).updates;
+      final checkIsDue = shouldCheckForUpdates(
+        frequency: updates.checkFrequency,
+        lastCheck: updates.lastCheckTime,
+        now: DateTime.now(),
+      );
+      if (!checkIsDue) return;
       await checkForUpdates(ref);
     });
   }

@@ -220,30 +220,10 @@ class _AppShellState extends ConsumerState<AppShell> {
       });
     }
 
-    // Show update available notification if new version is available
-    // Only show once per session for each version
+    // An available update never announces itself with a popup: installing it
+    // closes the application, so the user picks the moment (#294). The quiet
+    // toolbar indicator below is the only signal.
     final updateAvailable = ref.watch(updateAvailableProvider);
-    final dialogShownVersion = ref.watch(updateDialogShownProvider);
-
-    if (updateAvailable != null &&
-        !configLoading &&
-        allSettingsConfigured &&
-        dialogShownVersion != updateAvailable.version) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
-          // Mark this version as shown for this session
-          ref.read(updateDialogShownProvider.notifier).state =
-              updateAvailable.version;
-
-          showDialog(
-            context: context,
-            barrierDismissible: false, // Prevent dismissing by clicking outside
-            builder: (context) =>
-                UpdateAvailableDialog(updateInfo: updateAvailable),
-          );
-        }
-      });
-    }
 
     // Get currently selected repository path
     final currentRepoPath = ref.watch(currentRepositoryPathProvider);
@@ -566,6 +546,31 @@ class _AppShellState extends ConsumerState<AppShell> {
                               // Quick settings menu
                               const QuickSettingsMenu(),
                               const SizedBox(width: AppTheme.paddingS),
+                              // Quiet, permanent signal that an update is
+                              // ready; the user opens it when they choose.
+                              if (updateAvailable != null) ...[
+                                BaseIconButton(
+                                  icon: PhosphorIconsFill.downloadSimple,
+                                  iconColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
+                                  tooltip: AppLocalizations.of(context)!
+                                      .updateReadyTooltip(
+                                        updateAvailable.version,
+                                      ),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (_) => UpdateAvailableDialog(
+                                        updateInfo: updateAvailable,
+                                      ),
+                                    );
+                                  },
+                                  size: ButtonSize.small,
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
+                              ],
                               // Language selector
                               const LanguageSelector(),
                             ],

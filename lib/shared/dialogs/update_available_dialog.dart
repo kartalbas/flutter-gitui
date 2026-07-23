@@ -8,6 +8,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/services/update_service.dart';
 import '../../core/services/update_providers.dart';
 import '../../core/services/logger_service.dart';
+import '../../core/services/exit_guard.dart';
+import '../../core/services/progress_service.dart';
+import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
 import '../components/base_button.dart';
 import '../components/base_label.dart';
@@ -33,6 +36,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final staged = ref.watch(readyUpdateProvider);
+    final hasStagedDownload =
+        staged != null && staged.info.version == widget.updateInfo.version;
 
     return BaseDialog(
       title: 'Update Available',
@@ -193,7 +199,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
             onPressed: _openDownloadInBrowser,
           ),
           BaseButton(
-            label: 'Download & Install',
+            label: hasStagedDownload
+                ? AppLocalizations.of(context)!.restartAndInstall
+                : 'Download & Install',
             variant: ButtonVariant.primary,
             onPressed: _downloadAndInstall,
           ),
@@ -263,6 +271,62 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
     }
   }
 
+  /// Whether exiting for the installer is acceptable right now.
+  ///
+  /// Refuses while a git operation is in flight - the exit would kill the
+  /// process in the middle of it - and asks before discarding unsaved input
+  /// such as a commit message being written.
+  Future<bool> _confirmReadyToRestart() async {
+    if (!mounted) return false;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (ref.read(progressProvider.notifier).hasActiveOperation) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => BaseDialog(
+          title: l10n.updateOperationRunningTitle,
+          icon: PhosphorIconsRegular.warningCircle,
+          content: BodyMediumLabel(l10n.updateOperationRunningBody),
+          actions: [
+            BaseButton(
+              label: l10n.ok,
+              variant: ButtonVariant.primary,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+
+    if (ref.read(unsavedInputProvider).isNotEmpty) {
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (context) => BaseDialog(
+          title: l10n.updateUnsavedInputTitle,
+          icon: PhosphorIconsRegular.warningCircle,
+          variant: DialogVariant.destructive,
+          content: BodyMediumLabel(l10n.updateUnsavedInputBody),
+          actions: [
+            BaseButton(
+              label: l10n.cancel,
+              variant: ButtonVariant.tertiary,
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            BaseButton(
+              label: l10n.installAnyway,
+              variant: ButtonVariant.danger,
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
+      return proceed == true;
+    }
+
+    return true;
+  }
+
   Future<void> _downloadAndInstall() async {
     setState(() {
       _isDownloading = true;
@@ -271,19 +335,28 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
     });
 
     try {
-      // Download update
-      final filePath = await UpdateService.downloadUpdate(
-        widget.updateInfo,
-        onProgress: (progress) {
-          // The dialog can be dismissed mid-download and this callback fires
-          // from inside the download stream: an unguarded setState threw
-          // there and aborted the transfer.
-          if (!mounted) return;
-          setState(() {
-            _downloadProgress = progress;
-          });
-        },
-      ).then((result) => result.unwrapOr(''));
+      // A download staged in the background for exactly this version skips
+      // the transfer; its digest was already verified against the manifest.
+      final staged = ref.read(readyUpdateProvider);
+      String filePath;
+      if (staged != null &&
+          staged.info.version == widget.updateInfo.version &&
+          File(staged.filePath).existsSync()) {
+        filePath = staged.filePath;
+      } else {
+        filePath = await UpdateService.downloadUpdate(
+          widget.updateInfo,
+          onProgress: (progress) {
+            // The dialog can be dismissed mid-download and this callback
+            // fires from inside the download stream: an unguarded setState
+            // threw there and aborted the transfer.
+            if (!mounted) return;
+            setState(() {
+              _downloadProgress = progress;
+            });
+          },
+        ).then((result) => result.unwrapOr(''));
+      }
 
       if (filePath.isEmpty) {
         if (mounted) {
@@ -298,6 +371,18 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
 
       // Install update
       if (mounted) {
+        // Installing replaces the running application and closes it, so this
+        // is the last moment to notice work the exit would destroy (#294).
+        final readyToRestart = await _confirmReadyToRestart();
+        if (!readyToRestart) {
+          if (mounted) {
+            setState(() {
+              _isDownloading = false;
+            });
+          }
+          return;
+        }
+        if (!mounted) return;
         Logger.info('Starting update installation...', forceConsole: true);
         Logger.info('Update file: $filePath', forceConsole: true);
 

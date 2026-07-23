@@ -245,6 +245,49 @@ void main() {
     });
   });
 
+  group('context click', () {
+    test('on a selected commit keeps the whole selection', () {
+      final selection = CommitSelection.empty
+          .click('aaa')
+          .click('ccc', control: true);
+
+      expect(selection.contextClicked('ccc', displayed), selection);
+    });
+
+    test('on an unselected commit selects that commit alone', () {
+      final selection = CommitSelection.empty
+          .click('aaa')
+          .click('bbb', control: true);
+
+      final next = selection.contextClicked('ddd', displayed);
+
+      expect(next.hashes, {'ddd'});
+      expect(next.primaryHash, 'ddd');
+    });
+
+    test('membership is judged on the resolved selection', () {
+      // 'zzz' no longer resolves, but 'aaa' does: right-clicking a commit
+      // the user can see selected must keep the selection.
+      const selection = CommitSelection(
+        hashes: {'aaa', 'zzz'},
+        primaryHash: 'aaa',
+      );
+
+      expect(selection.contextClicked('aaa', displayed), selection);
+    });
+
+    test('an entirely stale selection does not capture the right-click', () {
+      // The stored hash is not displayed, so the menu must act on the
+      // clicked commit, never on the invisible leftover.
+      final next = CommitSelection.single(
+        'zzz',
+      ).contextClicked('bbb', displayed);
+
+      expect(next.hashes, {'bbb'});
+      expect(next.primaryHash, 'bbb');
+    });
+  });
+
   group('keyboard movement', () {
     test('writes the same value a click does, so actions see it', () {
       final moved = CommitSelection.empty.moved(displayed, 1);

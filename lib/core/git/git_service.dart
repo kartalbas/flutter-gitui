@@ -595,8 +595,12 @@ class GitService {
     String filePath,
   ) async {
     return runCatchingAsync(() async {
+      // Merges need the diff pinned to the first parent: without the flags
+      // git falls back to the dense combined format, which is empty for
+      // every cleanly merged file, so the viewer showed nothing. Non-merge
+      // commits produce identical output with and without them.
       final result = await _execute(
-        'show "$commitHash" -- "$filePath"',
+        'show -m --first-parent "$commitHash" -- "$filePath"',
         throwOnError: false,
       );
       return result.stdout.toString();
@@ -805,15 +809,20 @@ class GitService {
   /// Get changed files for a specific commit with statistics
   Future<List<FileChange>> getCommitChangedFiles(String commitHash) async {
     try {
-      // Get file stats (additions/deletions)
+      // Both queries pin the diff to the first parent because git's default
+      // merge handling splits them: on a clean merge `git show` still prints
+      // numstat numbers but NO name-status lines - the dense combined format
+      // suppresses them - and the join below is driven by the status lines,
+      // so every merge listed no files at all. Diffing against the first
+      // parent makes the two queries agree and reports what the merge
+      // brought onto its branch; non-merge commits are unaffected.
       final statsResult = await _execute(
-        'show --numstat --format="" "$commitHash"',
+        'show -m --first-parent --numstat --format="" "$commitHash"',
         throwOnError: false,
       );
 
-      // Get file status (added/modified/deleted/renamed)
       final statusResult = await _execute(
-        'show --name-status --format="" "$commitHash"',
+        'show -m --first-parent --name-status --format="" "$commitHash"',
         throwOnError: false,
       );
 

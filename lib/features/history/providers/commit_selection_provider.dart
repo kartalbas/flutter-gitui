@@ -186,6 +186,19 @@ class CommitSelection {
     return CommitSelection.single(displayed[next].hash);
   }
 
+  /// The selection a right-click on [hash] acts on.
+  ///
+  /// A commit already inside the resolved selection keeps the whole
+  /// selection - the menu then acts on all of it - while any other commit is
+  /// selected alone first: the convention every file manager follows.
+  /// Judging membership on [resolve] rather than the raw hashes keeps this
+  /// on the one rule for what "selected" means instead of introducing a
+  /// second notion.
+  CommitSelection contextClicked(String hash, List<GitCommit> displayed) =>
+      resolve(displayed).hashes.contains(hash)
+      ? this
+      : CommitSelection.single(hash);
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -230,6 +243,11 @@ class CommitSelectionNotifier extends Notifier<CommitSelection> {
 
   void move(List<GitCommit> displayed, int delta) =>
       state = state.moved(displayed, delta);
+
+  void handleContextClick({
+    required String hash,
+    required List<GitCommit> displayed,
+  }) => state = state.contextClicked(hash, displayed);
 
   void clear() => state = CommitSelection.empty;
 

@@ -26,6 +26,10 @@ class CommitListItem extends ConsumerWidget {
   /// and the lanes line up vertically.
   final int graphLaneCount;
 
+  /// Right-click handler, handed the global cursor position so the caller
+  /// can anchor a context menu on the commit under the cursor.
+  final void Function(Offset globalPosition)? onSecondaryTap;
+
   const CommitListItem({
     super.key,
     required this.commit,
@@ -35,6 +39,7 @@ class CommitListItem extends ConsumerWidget {
     this.currentBranch,
     this.graphRow,
     this.graphLaneCount = 0,
+    this.onSecondaryTap,
   });
 
   @override
@@ -46,6 +51,7 @@ class CommitListItem extends ConsumerWidget {
       isSelected: isSelected,
       isMultiSelected: isMultiSelected,
       onTap: onTap,
+      onSecondaryTap: onSecondaryTap,
       // With lanes available the leading slot only reserves their width; the
       // drawing happens in the overlay below, which can span the full row
       // height. Without lanes a plain dot still marks the commit.

@@ -19,6 +19,7 @@ import '../../../core/git/widgets/commit_file_diff_dialog.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/editor_launcher_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../providers/commit_diff_provider.dart';
 
 /// Tree node representing a file or directory
 class FileTreeNode with TreeNodeMixin {
@@ -211,6 +212,13 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
   }
 
   Widget _buildTreeNode(BuildContext context, FileTreeNode node, int depth) {
+    // The file whose diff the neighboring panel currently shows. Marking it
+    // here is what visually ties the list to the in-place diff.
+    final isDisplayedFile =
+        !node.isDirectory &&
+        ref.watch(displayedCommitFileProvider(widget.commitHash)).value ==
+            node.fullPath;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -222,20 +230,38 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                   });
                 }
               : () {
-                  // Show diff for file
+                  // A click highlights the file so its diff renders in the
+                  // panel beside this list; the dialog stays reachable via
+                  // double-click and the menu for a focused read.
+                  ref
+                      .read(highlightedCommitFileProvider.notifier)
+                      .state = HighlightedCommitFile(
+                    commitHash: widget.commitHash,
+                    path: node.fullPath,
+                  );
+                },
+          onDoubleTap: node.isDirectory
+              ? null
+              : () {
                   showCommitFileDiffDialog(
                     context,
                     commitHash: widget.commitHash,
                     filePath: node.fullPath,
                   );
                 },
-          child: Padding(
+          child: Container(
             padding: EdgeInsets.only(
               left: depth * AppTheme.paddingM,
               top: 2,
               bottom: 2,
               right: AppTheme.paddingXS,
             ),
+            decoration: isDisplayedFile
+                ? BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                  )
+                : null,
             child: Row(
               children: [
                 // Expand/collapse icon for directories
@@ -323,6 +349,14 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     ),
                     itemBuilder: (context) => [
                       PopupMenuItem(
+                        value: 'view_diff',
+                        child: MenuItemContent(
+                          icon: PhosphorIconsRegular.gitDiff,
+                          label: AppLocalizations.of(context)!.viewDiff,
+                          iconSize: AppTheme.iconS,
+                        ),
+                      ),
+                      PopupMenuItem(
                         value: 'download',
                         child: MenuItemContent(
                           icon: PhosphorIconsRegular.download,
@@ -355,6 +389,13 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                       final isDeleted =
                           node.fileChange!.type == FileChangeType.deleted;
                       switch (value) {
+                        case 'view_diff':
+                          showCommitFileDiffDialog(
+                            context,
+                            commitHash: widget.commitHash,
+                            filePath: node.fullPath,
+                          );
+                          break;
                         case 'download':
                           await _downloadFile(
                             context,

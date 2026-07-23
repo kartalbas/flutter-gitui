@@ -12,6 +12,7 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_filter_chip.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_diff_viewer.dart';
+import '../../shared/components/base_menu_item.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/git_service.dart';
@@ -24,6 +25,7 @@ import 'widgets/commit_list_item.dart';
 import 'widgets/commit_details_panel.dart';
 import '../tags/dialogs/create_tag_dialog.dart';
 import 'widgets/file_tree_panel.dart';
+import 'widgets/commit_diff_panel.dart';
 import 'widgets/history_empty_states.dart';
 import 'providers/history_search_provider.dart';
 import 'providers/commit_selection_provider.dart';
@@ -34,6 +36,8 @@ import 'dialogs/advanced_search_dialog.dart';
 import 'dialogs/squash_commits_dialog.dart';
 import 'dialogs/reset_mode_dialog.dart';
 import 'dialogs/force_push_dialog.dart';
+import 'dialogs/create_branch_from_commit_dialog.dart';
+import 'dialogs/compare_commits_dialog.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 
 /// History screen - Commit log and history
@@ -49,6 +53,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final _scrollController = ScrollController();
   bool _fabIsExpanded = false;
   Timer? _searchDebounce;
+
+  /// Marks the primary-selected row so a keyboard-opened context menu can
+  /// anchor to it even though no cursor position exists.
+  final GlobalKey _selectedRowKey = GlobalKey();
 
   @override
   void dispose() {
@@ -92,6 +100,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     // ESC key dismissal for FAB
     if (event.logicalKey == LogicalKeyboardKey.escape && _fabIsExpanded) {
       _collapseFAB();
+      return KeyEventResult.handled;
+    }
+
+    // Shift+F10 and the dedicated menu key open the same menu a right-click
+    // does, anchored to the selected row. The menu itself is arrow-key
+    // navigable, which is what makes every entry reachable without a mouse.
+    if (event.logicalKey == LogicalKeyboardKey.contextMenu ||
+        (event.logicalKey == LogicalKeyboardKey.f10 &&
+            HardwareKeyboard.instance.isShiftPressed)) {
+      if (ref.read(commitSelectionProvider).resolve(commits).isEmpty) {
+        return KeyEventResult.ignored;
+      }
+      unawaited(_showCommitContextMenu(commits, _selectedRowMenuPosition()));
       return KeyEventResult.handled;
     }
 
@@ -470,17 +491,28 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           itemCount: commits.length,
                           itemBuilder: (context, index) {
                             final commit = commits[index];
+                            final isPrimary =
+                                selection.primary?.hash == commit.hash;
 
                             return CommitListItem(
+                              // The key follows the primary row so the
+                              // keyboard path can anchor the context menu to
+                              // its on-screen position.
+                              key: isPrimary ? _selectedRowKey : null,
                               commit: commit,
-                              isSelected:
-                                  selection.primary?.hash == commit.hash,
+                              isSelected: isPrimary,
                               isMultiSelected: selectedHashes.contains(
                                 commit.hash,
                               ),
                               currentBranch: currentBranch,
                               graphRow: graph?.rowFor(commit.hash),
                               graphLaneCount: graph?.laneCount ?? 0,
+                              onSecondaryTap: (position) =>
+                                  _onCommitContextClick(
+                                    commits,
+                                    commit,
+                                    position,
+                                  ),
                               onTap: () => ref
                                   .read(commitSelectionProvider.notifier)
                                   .handleClick(
@@ -504,7 +536,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             ),
           ),
 
-          // Commit details (middle)
+          // Metadata and changed files share the middle column so the right
+          // column can hold the highlighted file's diff in place - seeing a
+          // commit's changes no longer requires opening a dialog per file.
           Expanded(
             flex: 2,
             child: Container(
@@ -517,16 +551,28 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
               child: selection.primary == null
                   ? _buildNoCommitSelected(context)
-                  : CommitDetailsPanel(commit: selection.primary!),
+                  : Column(
+                      children: [
+                        Expanded(
+                          child: CommitDetailsPanel(commit: selection.primary!),
+                        ),
+                        const SizedBox(height: AppTheme.paddingS),
+                        Expanded(
+                          child: FileTreePanel(
+                            commitHash: selection.primary!.hash,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
 
-          // File tree (right side)
+          // The highlighted file's diff (right side)
           Expanded(
-            flex: 2,
+            flex: 3,
             child: selection.primary == null
                 ? _buildNoCommitSelected(context)
-                : FileTreePanel(commitHash: selection.primary!.hash),
+                : CommitDiffPanel(commitHash: selection.primary!.hash),
           ),
         ],
       ),
@@ -588,6 +634,274 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       onPressed: () {
         ref.read(historySearchFilterProvider.notifier).state = filter;
       },
+    );
+  }
+
+  /// Right-click follows the file-manager convention: on a commit already
+  /// inside the selection the menu acts on the whole selection, on any other
+  /// commit the click selects it first. Both paths go through the notifier,
+  /// so the menu acts on the same resolved selection every surface shows.
+  void _onCommitContextClick(
+    List<GitCommit> commits,
+    GitCommit commit,
+    Offset position,
+  ) {
+    ref
+        .read(commitSelectionProvider.notifier)
+        .handleContextClick(hash: commit.hash, displayed: commits);
+    unawaited(_showCommitContextMenu(commits, position));
+  }
+
+  /// Where a keyboard-opened context menu appears: on the selected row when
+  /// it is on screen, otherwise over the list area, so the menu never opens
+  /// at a stale or off-screen coordinate.
+  Offset _selectedRowMenuPosition() {
+    final rowBox = _selectedRowKey.currentContext?.findRenderObject();
+    if (rowBox is RenderBox && rowBox.attached) {
+      return rowBox.localToGlobal(
+        Offset(AppTheme.paddingXL, rowBox.size.height / 2),
+      );
+    }
+    final screen = MediaQuery.of(context).size;
+    return Offset(screen.width / 3, screen.height / 3);
+  }
+
+  Future<void> _showCommitContextMenu(
+    List<GitCommit> commits,
+    Offset position,
+  ) async {
+    final selection = ref.read(commitSelectionProvider).resolve(commits);
+    if (selection.isEmpty) return;
+
+    final overlay =
+        Overlay.of(context).context.findRenderObject()! as RenderBox;
+    // A value-returning menu instead of per-item onTap callbacks: the action
+    // runs after the menu route has closed, so its dialogs and notifications
+    // are not torn down together with the menu.
+    final action = await showMenu<_CommitContextAction>(
+      context: context,
+      position: RelativeRect.fromRect(
+        position & Size.zero,
+        Offset.zero & overlay.size,
+      ),
+      items: _buildCommitContextMenuItems(selection),
+    );
+
+    if (action == null || !mounted) return;
+    await _runCommitContextAction(action, selection);
+  }
+
+  List<PopupMenuEntry<_CommitContextAction>> _buildCommitContextMenuItems(
+    ResolvedCommitSelection selection,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final errorColor = Theme.of(context).colorScheme.error;
+    final count = selection.count;
+
+    return [
+      BaseMenuItem(
+        value: _CommitContextAction.copySha,
+        child: MenuItemContent(
+          icon: PhosphorIconsRegular.copy,
+          label: l10n.copySha,
+        ),
+      ),
+      BaseMenuItem(
+        value: _CommitContextAction.copyMessage,
+        child: MenuItemContent(
+          icon: PhosphorIconsRegular.chatText,
+          label: l10n.copyCommitMessage,
+        ),
+      ),
+      if (count == 1) ...[
+        BaseMenuItem(
+          value: _CommitContextAction.createBranch,
+          child: MenuItemContent(
+            icon: PhosphorIconsRegular.gitBranch,
+            label: l10n.createBranchFromCommit,
+          ),
+        ),
+        BaseMenuItem(
+          value: _CommitContextAction.createTag,
+          child: MenuItemContent(
+            icon: PhosphorIconsRegular.tag,
+            label: l10n.createTag,
+          ),
+        ),
+      ],
+      if (count == 2)
+        BaseMenuItem(
+          value: _CommitContextAction.compare,
+          child: MenuItemContent(
+            icon: PhosphorIconsRegular.gitDiff,
+            label: l10n.compareCommits,
+          ),
+        ),
+      BaseMenuItem(
+        value: _CommitContextAction.cherryPick,
+        child: MenuItemContent(
+          icon: PhosphorIconsRegular.arrowBendDownRight,
+          label: l10n.cherryPick,
+        ),
+      ),
+      // Everything below the divider rewrites or moves history. The visual
+      // break plus the error color keeps a hand aiming at a copy entry from
+      // landing on a reset by one pixel.
+      const PopupMenuDivider(),
+      if (count >= 2)
+        BaseMenuItem(
+          value: _CommitContextAction.squash,
+          child: MenuItemContent(
+            icon: PhosphorIconsRegular.arrowsInLineVertical,
+            label: l10n.squashCommits,
+            iconColor: errorColor,
+            labelColor: errorColor,
+          ),
+        ),
+      if (count == 1) ...[
+        BaseMenuItem(
+          value: _CommitContextAction.revert,
+          child: MenuItemContent(
+            icon: PhosphorIconsRegular.arrowCounterClockwise,
+            label: l10n.revert,
+            iconColor: errorColor,
+            labelColor: errorColor,
+          ),
+        ),
+        BaseMenuItem(
+          value: _CommitContextAction.reset,
+          child: MenuItemContent(
+            icon: PhosphorIconsRegular.arrowCounterClockwise,
+            label: l10n.resetToHere,
+            iconColor: errorColor,
+            labelColor: errorColor,
+          ),
+        ),
+      ],
+    ];
+  }
+
+  Future<void> _runCommitContextAction(
+    _CommitContextAction action,
+    ResolvedCommitSelection selection,
+  ) async {
+    switch (action) {
+      case _CommitContextAction.copySha:
+        await _copyCommitShas(context, selection);
+      case _CommitContextAction.copyMessage:
+        await _copyCommitMessages(context, selection);
+      case _CommitContextAction.createBranch:
+        await _showCreateBranchFromCommitDialog(context, selection);
+      case _CommitContextAction.createTag:
+        final commit = selection.single;
+        if (commit != null) await _showCreateTagDialog(context, commit);
+      case _CommitContextAction.compare:
+        _showCompareCommitsDialog(context, selection);
+      case _CommitContextAction.cherryPick:
+        await _performCherryPick(context, selection);
+      case _CommitContextAction.squash:
+        await _showSquashDialog(context, selection);
+      case _CommitContextAction.revert:
+        await _performRevert(context, selection);
+      case _CommitContextAction.reset:
+        await _performReset(context, selection);
+    }
+  }
+
+  /// Copying reads the repository without touching it, so it deliberately
+  /// stays outside [_runCommitAction]: reloading four providers and clearing
+  /// the selection over a clipboard write would throw away the very
+  /// selection the user is still working with.
+  Future<void> _copyCommitShas(
+    BuildContext context,
+    ResolvedCommitSelection selection,
+  ) async {
+    if (selection.isEmpty) return;
+
+    await Clipboard.setData(
+      ClipboardData(
+        text: [for (final commit in selection.commits) commit.hash].join('\n'),
+      ),
+    );
+    if (context.mounted) {
+      NotificationService.showSuccess(
+        context,
+        AppLocalizations.of(context)!.shaCopiedToClipboard,
+      );
+    }
+  }
+
+  Future<void> _copyCommitMessages(
+    BuildContext context,
+    ResolvedCommitSelection selection,
+  ) async {
+    if (selection.isEmpty) return;
+
+    await Clipboard.setData(
+      ClipboardData(
+        text: [
+          for (final commit in selection.commits) commit.message,
+        ].join('\n\n'),
+      ),
+    );
+    if (context.mounted) {
+      NotificationService.showSuccess(
+        context,
+        AppLocalizations.of(context)!.commitMessageCopiedToClipboard,
+      );
+    }
+  }
+
+  Future<void> _showCreateBranchFromCommitDialog(
+    BuildContext context,
+    ResolvedCommitSelection selection,
+  ) async {
+    final commit = selection.single;
+    if (commit == null) return;
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => CreateBranchFromCommitDialog(commit: commit),
+    );
+    if (result == null || !context.mounted) return;
+
+    final branchName = result['branchName'] as String;
+    final l10n = AppLocalizations.of(context)!;
+    final didCreate = await _runCommitAction(
+      context,
+      invoke: () => ref
+          .read(gitActionsProvider)
+          .createBranch(
+            branchName,
+            startPoint: commit.hash,
+            checkout: result['checkout'] as bool,
+          ),
+      describeFailure: l10n.createBranchError,
+    );
+
+    // Creating a branch changes nothing visible in the working tree, so
+    // without an explicit confirmation the user cannot tell it happened.
+    if (didCreate && context.mounted) {
+      NotificationService.showSuccess(
+        context,
+        l10n.snackbarBranchCreatedSuccess(branchName),
+      );
+    }
+  }
+
+  void _showCompareCommitsDialog(
+    BuildContext context,
+    ResolvedCommitSelection selection,
+  ) {
+    final commits = selection.commits;
+    if (commits.length != 2) return;
+
+    // Display order is newest first, so first and last map onto the newer
+    // and older end of the range git log expects.
+    showDialog(
+      context: context,
+      builder: (context) =>
+          CompareCommitsDialog(newer: commits.first, older: commits.last),
     );
   }
 
@@ -808,6 +1122,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       builder: (context) => ResetModeDialog(commit: commit),
     );
   }
+}
+
+/// Everything the commit context menu can do.
+///
+/// One value type for the whole menu keeps its conditions - which entries a
+/// one-, two- or many-commit selection gets - in a single builder instead of
+/// scattered across callbacks.
+enum _CommitContextAction {
+  copySha,
+  copyMessage,
+  createBranch,
+  createTag,
+  compare,
+  cherryPick,
+  squash,
+  revert,
+  reset,
 }
 
 /// Draggable Speed Dial FAB for history actions

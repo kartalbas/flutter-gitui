@@ -37,6 +37,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The changelog generator walks every release tag and the commit
+          # ranges between them; a shallow clone contains neither.
+          fetch-depth: 0
 
       - uses: subosito/flutter-action@v2
         with:
@@ -71,6 +75,20 @@ jobs:
 
       - name: Resolve dependencies
         run: flutter pub get
+
+      # Runs before `flutter build` because assets/changelog.json ships inside
+      # the asset bundle: regenerating it here is what makes "View Release
+      # History" describe the build the user actually installed. The same run
+      # writes the release-notes markdown that the publish job attaches as the
+      # GitHub release body, so the two cannot drift apart. Reads only local git
+      # history (needs the fetch-depth: 0 checkout above), no network or token.
+      - name: Generate changelog and release notes
+        shell: bash
+        run: |
+          dart run tools/changelog/generate_changelog.dart \
+            --version "${{ steps.version.outputs.value }}" \
+            --asset-out assets/changelog.json \
+            --notes-out dist/release-notes.md
 
       # An accepted in-app update hands the install over to a detached helper
       # binary sitting next to the app; without it update_service degrades to a
@@ -163,6 +181,16 @@ jobs:
             dist/*.tar.gz
           retention-days: 30
 
+      # Both platforms generate identical notes from the same history; one
+      # copy is enough for the publish job, which picks it up through the same
+      # release-* download pattern as the archives.
+      - uses: actions/upload-artifact@v4
+        if: matrix.platform == 'linux'
+        with:
+          name: release-notes
+          path: dist/release-notes.md
+          retention-days: 30
+
   publish:
     name: Publish GitHub Release
     needs: build
@@ -251,12 +279,20 @@ jobs:
               echo "reusing existing release ${id} for ${TAG}"
               return 0
             fi
-            local flags=(--draft --generate-notes --title "$TAG" --target "$GITHUB_SHA")
+            # The body comes from the build's generated notes, not from
+            # --generate-notes: the same generation wrote the changelog asset
+            # baked into the archives, so release page and in-app history
+            # describe the same release by construction.
+            local flags=(--draft --notes-file dist/release-notes.md --title "$TAG" --target "$GITHUB_SHA")
             if [ "$PRERELEASE" = "true" ]; then
               flags+=(--prerelease)
             fi
             gh release create "$TAG" "${flags[@]}"
           }
+          if [ ! -f dist/release-notes.md ]; then
+            echo "::error::dist/release-notes.md missing from build artifacts"
+            exit 1
+          fi
           retry ensure_release
 
           shopt -s nullglob
@@ -272,7 +308,7 @@ jobs:
       # The updater reads the manifest as an asset of the very release it is
       # about to install from, so the digest and the archive it describes can
       # never come from different builds. It runs after the release exists
-      # because the changelog is the release notes GitHub just generated.
+      # because the changelog field mirrors the release body just attached.
       - name: Attach update manifests
         env:
           GH_TOKEN: ${{ github.token }}

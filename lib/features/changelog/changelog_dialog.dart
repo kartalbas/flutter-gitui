@@ -442,10 +442,11 @@ class ChangelogDialog extends HookConsumerWidget {
       return;
     }
 
-    // The changelog is a bundled asset that only the local release scripts
-    // regenerate, so a tagged build can ship notes for an older version.
-    // Announcing those as LATEST would tell the user they installed the wrong
-    // build, so stay silent until the asset catches up with the app.
+    // Release builds regenerate assets/changelog.json in CI before packing
+    // (tools/changelog/generate_changelog.dart), so on an installed release
+    // both versions match and the dialog shows. A source build still runs
+    // against the checked-in seed asset, and announcing its entry as LATEST
+    // would describe a release this build is not - the guard stays for that.
     if (latestRelease.version != currentVersion.split('+').first) {
       Logger.info(
         '[ChangelogDialog] Not showing - changelog latest ${latestRelease.version} does not match app $currentVersion',

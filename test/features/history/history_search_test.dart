@@ -53,6 +53,10 @@ class ScriptedGitService extends GitService {
 
   final ScriptedGetLog onGetLog;
 
+  /// Recorded rather than scripted: the ordering flag matters to the lane
+  /// renderer, not to which commits a scripted answer returns.
+  bool? lastTopoOrder;
+
   @override
   Future<Result<List<GitCommit>>> getLog({
     int? limit,
@@ -63,7 +67,11 @@ class ScriptedGitService extends GitService {
     String? since,
     String? until,
     bool allMatch = false,
-  }) => onGetLog(limit: limit, branch: branch, filePath: filePath);
+    bool topoOrder = false,
+  }) {
+    lastTopoOrder = topoOrder;
+    return onGetLog(limit: limit, branch: branch, filePath: filePath);
+  }
 }
 
 List<String> hashesOf(List<GitCommit> commits) => [
@@ -247,6 +255,28 @@ void main() {
       expect(await container.read(filteredCommitsProvider.future), tagged);
       expect(seenBranch, 'v1.0.0');
       expect(seenLimit, 1);
+    });
+
+    test('the scoped window is loaded in topological order', () async {
+      final service = ScriptedGitService(
+        ({limit, branch, filePath}) async => Success([commit('ccc')]),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          gitServiceProvider.overrideWith((ref) => service),
+          defaultCommitLimitProvider.overrideWith((ref) => 42),
+          commitHistoryProvider.overrideWith((ref) => [commit('aaa')]),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      container.read(historySearchFilterProvider.notifier).state =
+          const HistorySearchFilter(filePath: 'lib/main.dart');
+      await container.read(filteredCommitsProvider.future);
+
+      // The lane pass assumes children sort above parents; a scoped window
+      // loaded in date order would hand it rows the lanes cannot explain.
+      expect(service.lastTopoOrder, isTrue);
     });
 
     test(

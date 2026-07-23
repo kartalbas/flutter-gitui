@@ -180,7 +180,7 @@ final commitHistoryProvider = FutureProvider<List<GitCommit>>((ref) async {
 
   final limit = ref.watch(defaultCommitLimitProvider);
 
-  final result = await gitService.getLog(limit: limit);
+  final result = await gitService.getLog(limit: limit, topoOrder: true);
   return result.when(
     success: (commits) => commits,
     failure: (msg, error, stackTrace) {

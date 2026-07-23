@@ -7,6 +7,8 @@ import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/git/models/commit.dart';
+import '../models/commit_graph.dart';
+import 'commit_graph_painter.dart';
 
 /// Individual commit item in the history list
 class CommitListItem extends ConsumerWidget {
@@ -16,6 +18,14 @@ class CommitListItem extends ConsumerWidget {
   final VoidCallback onTap;
   final String? currentBranch;
 
+  /// This commit's precomputed lanes, or null when the displayed list is not
+  /// the window the graph pass walked (an in-memory filter removed rows).
+  final CommitGraphRow? graphRow;
+
+  /// Lane columns of the whole window, so every row reserves the same width
+  /// and the lanes line up vertically.
+  final int graphLaneCount;
+
   const CommitListItem({
     super.key,
     required this.commit,
@@ -23,19 +33,29 @@ class CommitListItem extends ConsumerWidget {
     required this.onTap,
     this.isMultiSelected = false,
     this.currentBranch,
+    this.graphRow,
+    this.graphLaneCount = 0,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showCommitGraph = ref.watch(showCommitGraphProvider);
+    final row = graphRow;
 
-    return BaseListItem(
+    final listItem = BaseListItem(
       isSelected: isSelected,
       isMultiSelected: isMultiSelected,
       onTap: onTap,
-      // Commit graph line (simplified - just a dot for now)
-      leading: showCommitGraph
-          ? Padding(
+      // With lanes available the leading slot only reserves their width; the
+      // drawing happens in the overlay below, which can span the full row
+      // height. Without lanes a plain dot still marks the commit.
+      leading: !showCommitGraph
+          ? null
+          : row != null
+          ? SizedBox(
+              width: CommitGraphRowPainter.leadingWidthFor(graphLaneCount),
+            )
+          : Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Container(
                 width: 12,
@@ -51,8 +71,7 @@ class CommitListItem extends ConsumerWidget {
                   ),
                 ),
               ),
-            )
-          : null,
+            ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,6 +209,25 @@ class CommitListItem extends ConsumerWidget {
           ),
         ],
       ),
+    );
+
+    if (!showCommitGraph || row == null) {
+      return listItem;
+    }
+
+    // The overlay, not the leading widget, carries the painter: only here
+    // does it cover the full item height, divider strip included, so this
+    // row's lane lines meet the neighboring rows' without gaps. It ignores
+    // pointers so the item underneath keeps receiving taps.
+    return Stack(
+      children: [
+        listItem,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(painter: CommitGraphRowPainter(row: row)),
+          ),
+        ),
+      ],
     );
   }
 }

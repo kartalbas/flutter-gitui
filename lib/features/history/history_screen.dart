@@ -356,6 +356,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final loadedCount =
         ref.watch(commitWindowProvider).value?.length ?? commits.length;
 
+    // Lanes are positions in the exact row sequence the graph pass walked.
+    // The in-memory filter only ever removes rows, so an unchanged length
+    // means the displayed list is the window itself; anything narrower falls
+    // back to the plain dot instead of drawing lanes to missing neighbors.
+    final graph = commits.length == loadedCount
+        ? ref.watch(commitGraphProvider).value
+        : null;
+
     // Build FAB actions based on selection
     final fabActions = <DiffViewerAction>[
       // Squash Commits (requires 2+ commits)
@@ -471,6 +479,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 commit.hash,
                               ),
                               currentBranch: currentBranch,
+                              graphRow: graph?.rowFor(commit.hash),
+                              graphLaneCount: graph?.laneCount ?? 0,
                               onTap: () => ref
                                   .read(commitSelectionProvider.notifier)
                                   .handleClick(

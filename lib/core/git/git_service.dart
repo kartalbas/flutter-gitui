@@ -674,6 +674,7 @@ class GitService {
     String? since,
     String? until,
     bool allMatch = false,
+    bool topoOrder = false,
   }) async {
     return runCatchingAsync(() async {
       final args = StringBuffer('log');
@@ -686,6 +687,13 @@ class GitService {
       // Add limit
       if (limit != null) {
         args.write(' -n $limit');
+      }
+
+      // Children always sort above their parents, which is what lets the
+      // history view's lane pass draw parent edges without crossing rows
+      // that plain date order would interleave.
+      if (topoOrder) {
+        args.write(' --topo-order');
       }
 
       // Add search filters

@@ -4,6 +4,7 @@ import 'package:riverpod/legacy.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/commit.dart';
+import '../models/commit_graph.dart';
 import '../models/history_search_filter.dart';
 import '../services/history_search_service.dart';
 
@@ -42,11 +43,24 @@ final commitWindowProvider = FutureProvider<List<GitCommit>>((ref) async {
     filePath: filter.filePath,
     branch: tag ?? filter.branch,
     limit: tag != null ? 1 : ref.watch(defaultCommitLimitProvider),
+    // The same ordering as the unscoped window: the graph pass assumes
+    // children sort above parents in whatever window it is handed.
+    topoOrder: true,
   );
 
   // Throwing keeps the failure visible: swallowed into an empty list, it
   // rendered as "no results, clear your filters" while git itself was broken.
   return result.unwrap();
+});
+
+/// The lane layout of the loaded window, recomputed only when the window is.
+///
+/// Living next to the window is what keeps the pass out of the rows: each
+/// list item merely looks its lanes up, so scrolling, selection changes and
+/// repaints never walk the parent links again.
+final commitGraphProvider = FutureProvider<CommitGraph>((ref) async {
+  final window = await ref.watch(commitWindowProvider.future);
+  return CommitGraph.fromCommits(window);
 });
 
 /// The commits the history view displays: the loaded window narrowed by the

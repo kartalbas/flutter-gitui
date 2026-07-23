@@ -478,6 +478,22 @@ class AppTheme {
   static const Color branchTag = Color(0xFFFF9800); // Orange
   static const Color branchStash = Color(0xFF9C27B0); // Purple
 
+  /// Commit graph lane colors
+  ///
+  /// The history graph cycles through these per branch lane. Mid-tone hues
+  /// are chosen so a two-pixel line stays readable on both the light and the
+  /// dark surface, which no single colorScheme role guarantees.
+  static const List<Color> commitGraphLaneColors = [
+    Color(0xFF2196F3), // Blue
+    Color(0xFF4CAF50), // Green
+    Color(0xFFFF9800), // Orange
+    Color(0xFFAB47BC), // Purple
+    Color(0xFF26C6DA), // Cyan
+    Color(0xFFEC407A), // Pink
+    Color(0xFF9CCC65), // Light green
+    Color(0xFF5C6BC0), // Indigo
+  ];
+
   // ============================================
   // Animation Durations
   // ============================================

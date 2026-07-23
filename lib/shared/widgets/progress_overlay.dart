@@ -7,7 +7,8 @@ import '../components/base_label.dart';
 import '../components/base_card.dart';
 import '../../core/services/progress_service.dart';
 
-/// Global progress overlay that shows when operations are in progress
+/// Global progress overlay that shows when operations run long enough for
+/// the progress service to surface them
 class ProgressOverlay extends ConsumerWidget {
   const ProgressOverlay({super.key});
 
@@ -17,6 +18,18 @@ class ProgressOverlay extends ConsumerWidget {
 
     if (progress == null) {
       return const SizedBox.shrink();
+    }
+
+    // Background git commands must never steal input or attention, so they
+    // get the thin activity line along the top edge that browsers and editors
+    // use, instead of a dialog blocking the whole window (#288).
+    if (!progress.isBlocking) {
+      return const IgnorePointer(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: LinearProgressIndicator(minHeight: 3),
+        ),
+      );
     }
 
     return Stack(

@@ -15,14 +15,18 @@ class RepositoryProgress {
   final WorkspaceRepository repository;
   final String status;
   final bool completed;
-  final bool success;
+
+  /// Null until the outcome is known: the service moves past a repository
+  /// before its result is delivered, so a row can be finished while its
+  /// success or failure is still pending.
+  final bool? success;
   final String? error;
 
   const RepositoryProgress({
     required this.repository,
     required this.status,
     this.completed = false,
-    this.success = false,
+    this.success,
     this.error,
   });
 
@@ -70,18 +74,18 @@ class _BatchOperationProgressDialogState
   List<BatchOperationResult>? _results;
   int _successCount = 0;
   int _failureCount = 0;
+  String? _activeRepositoryPath;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize progress for all repositories with default status
+    // Localizations are not accessible from initState, so rows start with an
+    // empty status and the build method substitutes the localized waiting
+    // text until the service reports on a repository.
     _progress = {
       for (final repo in widget.repositories)
-        repo.path: RepositoryProgress(
-          repository: repo,
-          status: 'In progress...',
-        ),
+        repo.path: RepositoryProgress(repository: repo, status: ''),
     };
 
     // Start the operation
@@ -154,13 +158,25 @@ class _BatchOperationProgressDialogState
     int total,
     String status,
   ) {
-    if (mounted) {
-      setState(() {
-        _progress[repository.path] = _progress[repository.path]!.copyWith(
-          status: status,
-        );
-      });
-    }
+    if (!mounted) return;
+    setState(() {
+      // The service reports repository `current` (1-based) before working on
+      // it, so every repository ahead of it in the list is already finished.
+      // Marking them here is what moves the counter and the bar during the
+      // run instead of letting everything snap to done at the end. Outcomes
+      // are not known yet, so `success` stays null until the results arrive.
+      for (var i = 0; i < current - 1 && i < widget.repositories.length; i++) {
+        final path = widget.repositories[i].path;
+        final entry = _progress[path]!;
+        if (!entry.completed) {
+          _progress[path] = entry.copyWith(completed: true);
+        }
+      }
+      _activeRepositoryPath = repository.path;
+      _progress[repository.path] = _progress[repository.path]!.copyWith(
+        status: status,
+      );
+    });
   }
 
   @override
@@ -189,7 +205,10 @@ class _BatchOperationProgressDialogState
             children: [
               Expanded(
                 child: LinearProgressIndicator(
-                  value: _isRunning ? null : progress,
+                  // A determinate fraction, even at zero, tells the user how
+                  // far along the batch is; the indeterminate animation hid
+                  // that for the whole run.
+                  value: progress,
                   minHeight: AppTheme.paddingS,
                   borderRadius: BorderRadius.circular(AppTheme.paddingXS),
                 ),
@@ -198,6 +217,16 @@ class _BatchOperationProgressDialogState
               TitleMediumLabel('$completedCount / $totalCount'),
             ],
           ),
+
+          // The row list can scroll the active repository out of view, so the
+          // name of the one being worked on is pinned under the bar to keep a
+          // slow repository distinguishable from a stalled run.
+          if (_isRunning && _activeRepositoryPath != null) ...[
+            const SizedBox(height: AppTheme.paddingS),
+            BodySmallLabel(
+              _progress[_activeRepositoryPath]!.repository.displayName,
+            ),
+          ],
 
           const SizedBox(height: AppTheme.paddingL),
 
@@ -275,6 +304,20 @@ class _BatchOperationProgressDialogState
                 final repo = widget.repositories[index];
                 final progress = _progress[repo.path]!;
 
+                // A repository can be finished before its outcome is known
+                // (the service only delivers results at the end), and a row
+                // the service has not reached yet is waiting, not working.
+                final String statusText;
+                if (progress.completed) {
+                  statusText = progress.success == null
+                      ? l10n.completed
+                      : progress.status;
+                } else {
+                  statusText = repo.path == _activeRepositoryPath
+                      ? progress.status
+                      : l10n.operationInProgress;
+                }
+
                 return BaseListItem(
                   leading: _buildStatusIcon(progress),
                   content: Column(
@@ -282,20 +325,20 @@ class _BatchOperationProgressDialogState
                     children: [
                       BodyMediumLabel(repo.displayName),
                       LabelMediumLabel(
-                        progress.status,
+                        statusText,
                         color: progress.error != null
                             ? Theme.of(context).colorScheme.error
                             : null,
                       ),
                     ],
                   ),
-                  trailing: progress.completed
+                  trailing: progress.success != null
                       ? Icon(
-                          progress.success
+                          progress.success == true
                               ? PhosphorIconsBold.checkCircle
                               : PhosphorIconsBold.xCircle,
                           size: AppTheme.paddingM,
-                          color: progress.success
+                          color: progress.success == true
                               ? AppTheme.gitAdded
                               : Theme.of(context).colorScheme.error,
                         )
@@ -320,22 +363,41 @@ class _BatchOperationProgressDialogState
 
   Widget _buildStatusIcon(RepositoryProgress progress) {
     if (!progress.completed) {
-      return SizedBox(
-        width: AppTheme.paddingM,
-        height: AppTheme.paddingM,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Theme.of(context).colorScheme.primary,
-        ),
+      // Only the repository the service is on gets a spinner; spinning every
+      // row made a stalled run indistinguishable from a busy one.
+      if (progress.repository.path == _activeRepositoryPath) {
+        return SizedBox(
+          width: AppTheme.paddingM,
+          height: AppTheme.paddingM,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      }
+      return Icon(
+        PhosphorIconsRegular.circle,
+        size: AppTheme.paddingM,
+        color: Theme.of(context).colorScheme.outline,
+      );
+    }
+
+    if (progress.success == null) {
+      // Finished mid-run: the outcome only arrives with the final results,
+      // so a neutral check avoids claiming success or failure prematurely.
+      return Icon(
+        PhosphorIconsRegular.checkCircle,
+        size: AppTheme.paddingM,
+        color: Theme.of(context).colorScheme.outline,
       );
     }
 
     return Icon(
-      progress.success
+      progress.success == true
           ? PhosphorIconsRegular.checkCircle
           : PhosphorIconsRegular.xCircle,
       size: AppTheme.paddingM,
-      color: progress.success
+      color: progress.success == true
           ? AppTheme.gitAdded
           : Theme.of(context).colorScheme.error,
     );

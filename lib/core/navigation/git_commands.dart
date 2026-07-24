@@ -15,9 +15,11 @@ import '../../shared/dialogs/merge_branch_dialog.dart';
 import '../../shared/dialogs/rebase_dialog.dart';
 import '../../shared/dialogs/reflog_dialog.dart';
 import '../git/git_providers.dart';
+import '../git/destructive_action.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/dialogs/confirm_destructive.dart';
 import '../services/notification_service.dart';
 
 /// Category of Git command
@@ -367,29 +369,17 @@ class GitCommands {
         final l10n = AppLocalizations.of(context);
         if (l10n == null) return;
 
-        final confirmed = await BaseDialog.show<bool>(
+        final confirmed = await confirmDestructive(
           context: context,
-          dialog: BaseDialog(
-            title: l10n.amendLastCommitDialog,
-            icon: PhosphorIconsRegular.pencilSimple,
-            variant: DialogVariant.confirmation,
-            content: BodyMediumLabel(l10n.amendLastCommitConfirm),
-            actions: [
-              BaseButton(
-                label: l10n.cancel,
-                variant: ButtonVariant.tertiary,
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              BaseButton(
-                label: l10n.amend,
-                variant: ButtonVariant.primary,
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
+          ref: ref,
+          action: DestructiveAction.amend,
+          icon: PhosphorIconsRegular.pencilSimple,
+          title: l10n.amendLastCommitDialog,
+          message: l10n.amendLastCommitConfirm,
+          confirmLabel: l10n.amend,
         );
 
-        if (confirmed == true) {
+        if (confirmed) {
           try {
             await ref.read(gitActionsProvider).amendCommit(noEdit: true);
           } catch (e) {
@@ -452,29 +442,17 @@ class GitCommands {
         final l10n = AppLocalizations.of(context);
         if (l10n == null) return;
 
-        final confirmed = await BaseDialog.show<bool>(
+        final confirmed = await confirmDestructive(
           context: context,
-          dialog: BaseDialog(
-            title: l10n.discardAllChangesDialog,
-            icon: PhosphorIconsRegular.trash,
-            variant: DialogVariant.destructive,
-            content: BodyMediumLabel(l10n.discardAllChangesConfirm),
-            actions: [
-              BaseButton(
-                label: l10n.cancel,
-                variant: ButtonVariant.tertiary,
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              BaseButton(
-                label: l10n.discardAll,
-                variant: ButtonVariant.danger,
-                onPressed: () => Navigator.of(context).pop(true),
-              ),
-            ],
-          ),
+          ref: ref,
+          action: DestructiveAction.discardAll,
+          icon: PhosphorIconsRegular.trash,
+          title: l10n.discardAllChangesDialog,
+          message: l10n.discardAllChangesConfirm,
+          confirmLabel: l10n.discardAll,
         );
 
-        if (confirmed == true) {
+        if (confirmed) {
           try {
             await ref.read(gitActionsProvider).discardAll();
           } catch (e) {
@@ -837,29 +815,17 @@ class GitCommands {
 
           if (!context.mounted) return;
 
-          final confirmed = await BaseDialog.show<bool>(
+          final confirmed = await confirmDestructive(
             context: context,
-            dialog: BaseDialog(
-              title: l10n.cleanWorkingDirectoryDialog,
-              icon: PhosphorIconsRegular.warningCircle,
-              variant: DialogVariant.destructive,
-              content: BodyMediumLabel(l10n.cleanWorkingDirectoryConfirm),
-              actions: [
-                BaseButton(
-                  label: l10n.cancel,
-                  variant: ButtonVariant.tertiary,
-                  onPressed: () => Navigator.of(context).pop(false),
-                ),
-                BaseButton(
-                  label: l10n.clean,
-                  variant: ButtonVariant.danger,
-                  onPressed: () => Navigator.of(context).pop(true),
-                ),
-              ],
-            ),
+            ref: ref,
+            action: DestructiveAction.cleanWorkingDirectory,
+            icon: PhosphorIconsRegular.warningCircle,
+            title: l10n.cleanWorkingDirectoryDialog,
+            message: l10n.cleanWorkingDirectoryConfirm,
+            confirmLabel: l10n.clean,
           );
 
-          if (confirmed == true) {
+          if (confirmed) {
             await ref
                 .read(gitActionsProvider)
                 .cleanWorkingDirectory(force: true, directories: true);

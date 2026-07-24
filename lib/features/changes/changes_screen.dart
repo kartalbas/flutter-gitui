@@ -10,9 +10,11 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/git/git_providers.dart';
+import '../../core/git/destructive_action.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/git/models/file_status.dart';
+import '../../shared/dialogs/confirm_destructive.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../core/services/services.dart';
 import '../../core/utils/windows_filename_validator.dart';
@@ -344,33 +346,19 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     WidgetRef ref,
     FileStatus file,
   ) async {
-    final confirmed = await BaseDialog.show<bool>(
+    final confirmed = await confirmDestructive(
       context: context,
-      dialog: BaseDialog(
-        icon: PhosphorIconsRegular.arrowCounterClockwise,
-        title: AppLocalizations.of(context)!.discardChangesQuestion,
-        variant: DialogVariant.destructive,
-        content: BodyMediumLabel(
-          AppLocalizations.of(
-            context,
-          )!.dialogContentDiscardChangesFile(file.path),
-        ),
-        actions: [
-          BaseButton(
-            label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          BaseButton(
-            label: AppLocalizations.of(context)!.discardAll,
-            variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+      ref: ref,
+      action: DestructiveAction.discardFile,
+      icon: PhosphorIconsRegular.arrowCounterClockwise,
+      title: AppLocalizations.of(context)!.discardChangesQuestion,
+      message: AppLocalizations.of(
+        context,
+      )!.dialogContentDiscardChangesFile(file.path),
+      confirmLabel: AppLocalizations.of(context)!.discardAll,
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       await ref.read(gitActionsProvider).discardFile(file.path);
     }
   }
@@ -380,31 +368,17 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     WidgetRef ref,
     FileStatus file,
   ) async {
-    final confirmed = await BaseDialog.show<bool>(
+    final confirmed = await confirmDestructive(
       context: context,
-      dialog: BaseDialog(
-        icon: PhosphorIconsRegular.trash,
-        title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
-        variant: DialogVariant.destructive,
-        content: BodyMediumLabel(
-          AppLocalizations.of(context)!.dialogContentDeleteFile(file.path),
-        ),
-        actions: [
-          BaseButton(
-            label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          BaseButton(
-            label: AppLocalizations.of(context)!.delete,
-            variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+      ref: ref,
+      action: DestructiveAction.deleteUntrackedFile,
+      icon: PhosphorIconsRegular.trash,
+      title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
+      message: AppLocalizations.of(context)!.dialogContentDeleteFile(file.path),
+      confirmLabel: AppLocalizations.of(context)!.delete,
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       await ref.read(gitActionsProvider).deleteUntrackedFile(file.path);
     }
   }
@@ -527,31 +501,17 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
   }
 
   Future<void> _confirmDiscardAll(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await confirmDestructive(
       context: context,
-      builder: (context) => BaseDialog(
-        icon: PhosphorIconsRegular.trash,
-        title: AppLocalizations.of(context)!.discardAllChangesQuestion,
-        variant: DialogVariant.destructive,
-        content: BodyMediumLabel(
-          AppLocalizations.of(context)!.discardAllChangesConfirm,
-        ),
-        actions: [
-          BaseButton(
-            label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          BaseButton(
-            label: AppLocalizations.of(context)!.discardAll,
-            variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+      ref: ref,
+      action: DestructiveAction.discardAll,
+      icon: PhosphorIconsRegular.trash,
+      title: AppLocalizations.of(context)!.discardAllChangesQuestion,
+      message: AppLocalizations.of(context)!.discardAllChangesConfirm,
+      confirmLabel: AppLocalizations.of(context)!.discardAll,
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       await ref.read(gitActionsProvider).discardAll();
     }
   }

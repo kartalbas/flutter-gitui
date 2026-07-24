@@ -10,9 +10,10 @@ import '../../../shared/components/base_animated_widgets.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../core/git/git_providers.dart';
+import '../../../core/git/destructive_action.dart';
 import '../../../core/git/models/stash.dart';
+import '../../../shared/dialogs/confirm_destructive.dart';
 import '../dialogs/create_branch_from_stash_dialog.dart';
-import '../dialogs/drop_stash_dialog.dart';
 import '../dialogs/stash_diff_dialog.dart';
 
 /// Individual stash list tile with expansion and action buttons
@@ -297,19 +298,24 @@ class StashListTile extends ConsumerWidget {
   }
 
   Future<void> _confirmDropStash(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await confirmDestructive(
       context: context,
-      builder: (context) => DropStashDialog(stash: stash),
+      ref: ref,
+      action: DestructiveAction.dropStash,
+      icon: PhosphorIconsRegular.warningCircle,
+      title: l10n.dropStashDialog,
+      message: l10n.dropStashConfirm(stash.ref),
+      confirmLabel: l10n.drop,
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       try {
         await ref
             .read(gitActionsProvider)
             .dropStash(stash.ref, expectedHash: stash.hash);
       } catch (e) {
         if (context.mounted) {
-          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.snackbarFailedToDropStash(e.toString())),

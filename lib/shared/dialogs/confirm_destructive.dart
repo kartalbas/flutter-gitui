@@ -31,6 +31,7 @@ Future<bool> confirmDestructive({
   required String title,
   required String message,
   String? confirmLabel,
+  IconData? icon,
 }) async {
   final tier = action.tier;
   if (tier.isSilenceable && !ref.read(confirmDestructiveActionsProvider)) {
@@ -43,6 +44,7 @@ Future<bool> confirmDestructive({
     context: context,
     dialog: BaseDialog(
       title: title,
+      icon: icon,
       variant: destructive
           ? DialogVariant.destructive
           : DialogVariant.confirmation,

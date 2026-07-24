@@ -9,12 +9,13 @@ import '../../shared/components/base_menu_item.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../core/git/git_providers.dart';
+import '../../core/git/destructive_action.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/stash.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/utils/result_extensions.dart';
+import '../../shared/dialogs/confirm_destructive.dart';
 import 'dialogs/create_stash_dialog.dart';
-import 'dialogs/clear_all_stashes_dialog.dart';
 import 'widgets/stash_list_tile.dart';
 import 'widgets/stashes_no_repository_state.dart';
 import 'widgets/stashes_error_state.dart';
@@ -182,12 +183,18 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
   }
 
   Future<void> _confirmClearAllStashes(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await confirmDestructive(
       context: context,
-      builder: (context) => const ClearAllStashesDialog(),
+      ref: ref,
+      action: DestructiveAction.clearStashes,
+      icon: PhosphorIconsRegular.warningCircle,
+      title: l10n.clearAllStashesDialog,
+      message: l10n.clearAllStashesConfirm,
+      confirmLabel: l10n.clearAll,
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       try {
         await ref.read(gitActionsProvider).clearStashes();
         if (context.mounted) {

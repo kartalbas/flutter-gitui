@@ -172,7 +172,14 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
   /// Validate workspace configuration
   /// Ensures current_repository is null or exists in repositories list
   ({AppConfig config, bool needsSave}) _validateWorkspace(AppConfig config) {
-    final currentRepo = config.workspace.currentRepository;
+    // Compare in the canonical forward-slash form the workspace stores repo
+    // paths in. A config persisted before current_repository was normalized (a
+    // Windows backslash path) would otherwise look absent here and be cleared,
+    // deselecting the user's repository on the first launch after the upgrade.
+    final currentRepo = config.workspace.currentRepository?.replaceAll(
+      '\\',
+      '/',
+    );
 
     // If no current repository is set, nothing to validate
     if (currentRepo == null) {
@@ -798,8 +805,15 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
 
   // Workspace Configuration Methods
   Future<void> setCurrentRepository(String? path) async {
+    // Store the path in the same canonical form the workspace uses for every
+    // repository (forward slashes; see WorkspaceNotifier.addRepository). A
+    // directory picker returns backslashes on Windows, and the active-repo
+    // lookups compare this value against workspace repo paths by exact string,
+    // so without normalizing here the active repository's status would silently
+    // never refresh on Windows.
+    final normalized = path?.replaceAll('\\', '/');
     // Handle explicit null (clearing current repository)
-    if (path == null) {
+    if (normalized == null) {
       // Create new WorkspaceConfig with null to actually clear it
       // (copyWith won't work because of the ?? operator)
       // IMPORTANT: Must preserve ALL fields when creating new object
@@ -813,7 +827,7 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
       );
     } else {
       state = state.copyWith(
-        workspace: state.workspace.copyWith(currentRepository: path),
+        workspace: state.workspace.copyWith(currentRepository: normalized),
       );
     }
     await _saveConfig();
@@ -1094,7 +1108,14 @@ final showCommitGraphProvider = Provider<bool>(
 
 // Workspace
 final currentRepositoryPathProvider = Provider<String?>(
-  (ref) => ref.watch(workspaceConfigProvider).currentRepository,
+  // Normalize to forward slashes on read as well as on write, so a config
+  // persisted before setCurrentRepository normalized (a Windows backslash
+  // path) still matches the forward-slash workspace repo paths every active-
+  // repo lookup compares against.
+  (ref) => ref
+      .watch(workspaceConfigProvider)
+      .currentRepository
+      ?.replaceAll('\\', '/'),
 );
 
 /// Check if all required settings are configured

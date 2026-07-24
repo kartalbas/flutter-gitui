@@ -88,25 +88,47 @@ final gitServiceProvider = Provider<GitService?>((ref) {
   );
 });
 
-/// Repository file watcher provider
-/// Watches for file system changes and automatically refreshes the status
+/// Repository file watcher provider.
+///
+/// Watches the ACTIVE repository for file system changes and refreshes its
+/// state. This is the single live watcher in the app: only the active
+/// repository is watched (issue #312), so background repositories no longer run
+/// a watcher each - the app's main idle-to-peak CPU cost on many-repo (GitOps)
+/// workspaces. Riverpod recreates this provider when the active repository
+/// changes, disposing the old watcher and starting a new one, which keeps the
+/// switch race-free.
 final repositoryWatcherProvider = Provider<GitRepositoryWatcher?>((ref) {
   final repoPath = ref.watch(currentRepositoryPathProvider);
   if (repoPath == null) return null;
 
-  // Create watcher that auto-refreshes on changes
+  // The repository may have changed while it sat in the background unwatched,
+  // so refresh its workspace-list badge once on activation. On a file change the
+  // watcher calls refreshStatus() below, which already refreshes the badge as
+  // well as the detailed views, so it is not repeated there. Guarded because the
+  // element can be disposed (a fast re-switch) before this microtask runs.
+  Future.microtask(() {
+    if (!ref.mounted) return;
+    for (final repo in ref.read(workspaceProvider)) {
+      if (repo.path == repoPath) {
+        ref
+            .read(workspaceRepositoryStatusProvider.notifier)
+            .refreshStatus(repo);
+        break;
+      }
+    }
+  });
+
   final watcher = GitRepositoryWatcher(
     repositoryPath: repoPath,
     onRepositoryChanged: () {
-      // Automatically refresh status when repository changes
+      // refreshStatus() refreshes the active repo's detailed views AND its
+      // workspace-list badge (see GitActions.refreshStatus).
       ref.read(gitActionsProvider).refreshStatus();
     },
   );
 
-  // Start watching
   watcher.start();
 
-  // Cleanup when provider is disposed
   ref.onDispose(() {
     watcher.dispose();
   });

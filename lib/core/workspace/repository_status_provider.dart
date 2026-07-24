@@ -200,6 +200,19 @@ final workspaceRepositoryStatusProvider =
         }
       });
 
+      // Drop the cached status of any repository that leaves the workspace, so
+      // its stale entry no longer feeds the workspace-wide counters. This used
+      // to live in the per-repository watchers; it belongs with the status.
+      ref.listen(workspaceProvider, (previous, next) {
+        if (previous == null) return;
+        final nextPaths = next.map((r) => r.path).toSet();
+        for (final repo in previous) {
+          if (!nextPaths.contains(repo.path)) {
+            notifier.removeStatus(repo.path);
+          }
+        }
+      });
+
       return notifier;
     });
 

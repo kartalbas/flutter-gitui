@@ -25,7 +25,6 @@ import '../config/config_providers.dart';
 import '../services/notification_service.dart';
 import '../../shared/dialogs/repository_switcher_dialog.dart';
 import '../workspace/repository_status_provider.dart';
-import '../workspace/workspace_repository_watchers_provider.dart';
 import '../workspace/workspace_provider.dart';
 import '../workspace/models/repository_status.dart';
 import '../workspace/models/workspace_repository.dart';
@@ -149,12 +148,10 @@ class _AppShellState extends ConsumerState<AppShell> {
     // IMPORTANT: Only enable repository watcher AFTER config is fully loaded
     // This prevents race condition where status checks start before git path is configured
     if (!configLoading) {
-      // Enable global file system watcher for automatic updates across all views
+      // The single live file-system watcher, on the active repository only
+      // (issue #312). It refreshes the active repository's detailed views and
+      // its workspace-list badge; background repositories are no longer watched.
       ref.watch(repositoryWatcherProvider);
-
-      // Initialize workspace repository watchers for ALL repositories
-      // This watches all repositories in the workspace and triggers validation on file changes
-      ref.watch(workspaceRepositoryWatchersProvider);
 
       // Auto-fetch is a background behavior of the whole app, so it is driven
       // from the shell instead of a screen that may not be open.

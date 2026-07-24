@@ -113,9 +113,14 @@ class ReleaseNotes {
 /// read like and describes what the release did. Issue titles are phrased as
 /// the problem ("X is broken") and read wrong under a section heading, so
 /// they are only a fallback when a subject has no text of its own.
-/// Follow-up commits to an issue already covered add nothing: one issue is
-/// one item. Bullets carry no "(#n)" citation, matching the format the app
-/// already renders.
+///
+/// Every distinct commit becomes its own bullet, so an issue delivered across
+/// several commits keeps every part of it. An earlier design folded all
+/// commits of one issue to the first commit's subject, which silently dropped
+/// the later, often more descriptive ones. Only an exact-duplicate subject is
+/// dropped - a change re-applied after a revert, or the same line reached twice
+/// - because repeating it says nothing new. Bullets carry no "(#n)" citation,
+/// matching the format the app already renders.
 ReleaseNotes buildReleaseNotes(
   List<ParsedCommit> commits,
   Map<int, String> issueTitles,
@@ -123,18 +128,10 @@ ReleaseNotes buildReleaseNotes(
   final items = {
     for (final section in ReleaseSection.values) section: <String>[],
   };
-  final coveredIssues = <int>{};
   for (final commit in commits) {
     final section = sectionFor(commit.subject);
     if (section == null) continue;
-    final newIssues = commit.issues.where(
-      (issue) => !coveredIssues.contains(issue),
-    );
-    if (commit.issues.isNotEmpty && newIssues.isEmpty) continue;
-    coveredIssues.addAll(commit.issues);
     final line = _itemLine(commit, issueTitles);
-    // Two issue-less commits can share a subject (a change re-applied after
-    // a revert); repeating the line would say nothing new.
     if (!items[section]!.contains(line)) {
       items[section]!.add(line);
     }

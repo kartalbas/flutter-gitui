@@ -111,16 +111,21 @@ void main() {
       expect(notes.items[ReleaseSection.features], ['Add a fetch button']);
     });
 
-    test('folds follow-up commits for the same issue into one item', () {
+    test('keeps every distinct commit of an issue, folding exact dups', () {
       final notes = buildReleaseNotes([
-        const ParsedCommit(subject: 'fix: first attempt', issues: [247]),
-        const ParsedCommit(subject: 'fix: second attempt', issues: [247]),
-        const ParsedCommit(subject: 'feat: follow-up', issues: [247]),
+        const ParsedCommit(subject: 'fix: first part', issues: [247]),
+        const ParsedCommit(subject: 'fix: second part', issues: [247]),
+        const ParsedCommit(subject: 'fix: first part', issues: [247]),
+        const ParsedCommit(subject: 'feat: the follow-up', issues: [247]),
       ], const {});
-      // The first commit that references the issue supplies the item; the
-      // later ones for the same issue add nothing.
-      expect(notes.items[ReleaseSection.bugFixes], ['First attempt']);
-      expect(notes.items[ReleaseSection.features], isEmpty);
+      // An issue delivered across several commits keeps every distinct part
+      // (an earlier design folded them to the first commit's subject); only an
+      // identical subject is dropped.
+      expect(notes.items[ReleaseSection.bugFixes], [
+        'First part',
+        'Second part',
+      ]);
+      expect(notes.items[ReleaseSection.features], ['The follow-up']);
     });
 
     test('folds every issue a commit closes into one item', () {

@@ -756,6 +756,13 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     await _saveConfig();
   }
 
+  Future<void> setConfirmDestructiveActions(bool confirm) async {
+    state = state.copyWith(
+      behavior: state.behavior.copyWith(confirmDestructiveActions: confirm),
+    );
+    await _saveConfig();
+  }
+
   // Updates Configuration Methods
   Future<void> setUpdateCheckFrequency(UpdateCheckFrequency frequency) async {
     state = state.copyWith(
@@ -1092,6 +1099,9 @@ final confirmForcePushProvider = Provider<bool>(
 );
 final confirmDeleteProvider = Provider<bool>(
   (ref) => ref.watch(behaviorConfigProvider).confirmDelete,
+);
+final confirmDestructiveActionsProvider = Provider<bool>(
+  (ref) => ref.watch(behaviorConfigProvider).confirmDestructiveActions,
 );
 
 // History

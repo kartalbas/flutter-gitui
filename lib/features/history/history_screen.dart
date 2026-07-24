@@ -16,8 +16,10 @@ import '../../shared/components/base_menu_item.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/git_service.dart';
+import '../../core/git/destructive_action.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/commit.dart';
+import '../../shared/dialogs/confirm_destructive.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/services/notification_service.dart';
@@ -1015,6 +1017,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final ordered = selection.oldestFirst;
 
     final l10n = AppLocalizations.of(context)!;
+    final confirmed = await confirmDestructive(
+      context: context,
+      ref: ref,
+      action: DestructiveAction.cherryPick,
+      title: l10n.cherryPickConfirmTitle,
+      message: l10n.cherryPickConfirmMessage(ordered.length),
+      confirmLabel: l10n.cherryPick,
+    );
+    if (!confirmed || !context.mounted) return;
+
     await _runCommitAction(
       context,
       // A failed pick leaves the repository mid-cherry-pick, so every later
@@ -1036,6 +1048,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (commit == null) return;
 
     final l10n = AppLocalizations.of(context)!;
+    final confirmed = await confirmDestructive(
+      context: context,
+      ref: ref,
+      action: DestructiveAction.revert,
+      title: l10n.revertCommitConfirmTitle,
+      message: l10n.revertCommitConfirmMessage(commit.shortHash),
+      confirmLabel: l10n.revert,
+    );
+    if (!confirmed || !context.mounted) return;
+
     await _runCommitAction(
       context,
       invoke: () => ref.read(gitActionsProvider).revertCommit(commit.hash),

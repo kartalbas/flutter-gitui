@@ -3521,6 +3521,28 @@
   "squashCommits": "Squash Commits",
   "cherryPick": "Cherry-pick",
   "revert": "Revert",
+  "revertCommitConfirmTitle": "Revert commit?",
+  "revertCommitConfirmMessage": "This creates a new commit that undoes the changes in {commit}.",
+  "@revertCommitConfirmMessage": {
+    "description": "Confirmation body for reverting a commit",
+    "placeholders": {
+      "commit": {
+        "type": "String"
+      }
+    }
+  },
+  "cherryPickConfirmTitle": "Cherry-pick?",
+  "cherryPickConfirmMessage": "{count, plural, =1{Apply the selected commit onto the current branch?} other{Apply {count} selected commits onto the current branch?}}",
+  "@cherryPickConfirmMessage": {
+    "description": "Confirmation body for cherry-picking one or more commits",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmDestructiveActions": "Confirm destructive actions",
+  "confirmDestructiveActionsDescription": "Ask before revert, cherry-pick and other reversible history changes",
   "resetToHere": "Reset to here",
   "forcePushingToRemote": "Force pushing to remote...",
   "pushingToRemote": "Pushing to remote...",

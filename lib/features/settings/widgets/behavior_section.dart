@@ -78,6 +78,17 @@ class BehaviorSection extends ConsumerWidget {
             ref.read(configProvider.notifier).setConfirmDelete(value);
           },
         ),
+        SwitchListTile(
+          secondary: const Icon(PhosphorIconsRegular.warningDiamond),
+          title: Text(l10n.confirmDestructiveActions),
+          subtitle: Text(l10n.confirmDestructiveActionsDescription),
+          value: behavior.confirmDestructiveActions,
+          onChanged: (value) {
+            ref
+                .read(configProvider.notifier)
+                .setConfirmDestructiveActions(value);
+          },
+        ),
       ],
     );
   }

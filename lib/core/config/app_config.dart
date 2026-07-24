@@ -668,12 +668,18 @@ class BehaviorConfig {
   final bool confirmForcePush;
   final bool confirmDelete;
 
+  /// Master switch for the recoverable destructive tiers (revert, cherry-pick,
+  /// reset --soft/--mixed, rebase, squash, amend, local branch/tag delete).
+  /// Permanent and remote destructive actions ignore this and always confirm.
+  final bool confirmDestructiveActions;
+
   const BehaviorConfig({
     this.autoFetch = false,
     this.autoFetchInterval = 5,
     this.confirmPush = true,
     this.confirmForcePush = true,
     this.confirmDelete = true,
+    this.confirmDestructiveActions = true,
   });
 
   static const BehaviorConfig defaults = BehaviorConfig();
@@ -684,6 +690,7 @@ class BehaviorConfig {
     bool? confirmPush,
     bool? confirmForcePush,
     bool? confirmDelete,
+    bool? confirmDestructiveActions,
   }) {
     return BehaviorConfig(
       autoFetch: autoFetch ?? this.autoFetch,
@@ -691,6 +698,8 @@ class BehaviorConfig {
       confirmPush: confirmPush ?? this.confirmPush,
       confirmForcePush: confirmForcePush ?? this.confirmForcePush,
       confirmDelete: confirmDelete ?? this.confirmDelete,
+      confirmDestructiveActions:
+          confirmDestructiveActions ?? this.confirmDestructiveActions,
     );
   }
 
@@ -701,6 +710,7 @@ class BehaviorConfig {
       'confirm_push': confirmPush,
       'confirm_force_push': confirmForcePush,
       'confirm_delete': confirmDelete,
+      'confirm_destructive_actions': confirmDestructiveActions,
     };
   }
 
@@ -711,6 +721,8 @@ class BehaviorConfig {
       confirmPush: yaml['confirm_push'] as bool? ?? true,
       confirmForcePush: yaml['confirm_force_push'] as bool? ?? true,
       confirmDelete: yaml['confirm_delete'] as bool? ?? true,
+      confirmDestructiveActions:
+          yaml['confirm_destructive_actions'] as bool? ?? true,
     );
   }
 }

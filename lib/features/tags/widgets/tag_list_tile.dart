@@ -8,12 +8,13 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_animated_widgets.dart';
-import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../core/git/git_providers.dart';
+import '../../../core/git/destructive_action.dart';
 import '../../../core/git/models/tag.dart';
 import '../../../core/services/progress_service.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../shared/dialogs/confirm_destructive.dart';
 import '../dialogs/checkout_tag_dialog.dart';
 import '../dialogs/select_remote_dialog.dart';
 import '../dialogs/create_branch_from_tag_dialog.dart';
@@ -482,42 +483,28 @@ class TagListTile extends ConsumerWidget {
     final willDeleteFromRemote = !isLocalOnly && hasRemotes;
 
     if (!context.mounted) return;
-    final confirmed = await showDialog<bool>(
+    // Capture localization strings before async operations.
+    final l10n = AppLocalizations.of(context)!;
+    // A tag that also lives on a remote is a remote-tier delete that always
+    // confirms; a local-only tag is reflog-recoverable and runs under the
+    // master destructive switch.
+    final confirmed = await confirmDestructive(
       context: context,
-      builder: (context) => BaseDialog(
-        icon: PhosphorIconsRegular.warningCircle,
-        title: AppLocalizations.of(context)!.dialogTitleDeleteTag,
-        content: Text(
-          // Without remotes the tag can only be deleted locally, so the
-          // dialog must not claim it will also be removed from a remote.
-          willDeleteFromRemote
-              ? AppLocalizations.of(
-                  context,
-                )!.dialogContentDeleteTagRemote(tag.name)
-              : AppLocalizations.of(
-                  context,
-                )!.dialogContentDeleteTagLocal(tag.name),
-        ),
-        variant: DialogVariant.destructive,
-        actions: [
-          BaseButton(
-            label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          BaseButton(
-            label: AppLocalizations.of(context)!.delete,
-            variant: ButtonVariant.danger,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+      ref: ref,
+      action: willDeleteFromRemote
+          ? DestructiveAction.deleteRemoteTag
+          : DestructiveAction.deleteLocalTag,
+      icon: PhosphorIconsRegular.warningCircle,
+      title: l10n.dialogTitleDeleteTag,
+      // Without remotes the tag can only be deleted locally, so the message
+      // must not claim it will also be removed from a remote.
+      message: willDeleteFromRemote
+          ? l10n.dialogContentDeleteTagRemote(tag.name)
+          : l10n.dialogContentDeleteTagLocal(tag.name),
+      confirmLabel: l10n.delete,
     );
 
-    if (confirmed == true && context.mounted) {
-      // Capture localization strings before async operations
-      final l10n = AppLocalizations.of(context)!;
-
+    if (confirmed && context.mounted) {
       // Deleting a tag off a server is destructive, so the target remote is
       // picked explicitly instead of guessed, just like the push flow. It is
       // resolved before the operation starts so a cancelled picker leaves the

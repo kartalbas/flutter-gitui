@@ -665,20 +665,19 @@ class BehaviorConfig {
   final bool autoFetch;
   final int autoFetchInterval; // minutes
   final bool confirmPush;
-  final bool confirmForcePush;
-  final bool confirmDelete;
 
   /// Master switch for the recoverable destructive tiers (revert, cherry-pick,
   /// reset --soft/--mixed, rebase, squash, amend, local branch/tag delete).
   /// Permanent and remote destructive actions ignore this and always confirm.
+  /// This one toggle replaces the retired confirmForcePush/confirmDelete
+  /// switches: force push and remote deletes always confirm as remote-tier
+  /// actions, and branch/tag deletes fall under this master switch.
   final bool confirmDestructiveActions;
 
   const BehaviorConfig({
     this.autoFetch = false,
     this.autoFetchInterval = 5,
     this.confirmPush = true,
-    this.confirmForcePush = true,
-    this.confirmDelete = true,
     this.confirmDestructiveActions = true,
   });
 
@@ -688,16 +687,12 @@ class BehaviorConfig {
     bool? autoFetch,
     int? autoFetchInterval,
     bool? confirmPush,
-    bool? confirmForcePush,
-    bool? confirmDelete,
     bool? confirmDestructiveActions,
   }) {
     return BehaviorConfig(
       autoFetch: autoFetch ?? this.autoFetch,
       autoFetchInterval: autoFetchInterval ?? this.autoFetchInterval,
       confirmPush: confirmPush ?? this.confirmPush,
-      confirmForcePush: confirmForcePush ?? this.confirmForcePush,
-      confirmDelete: confirmDelete ?? this.confirmDelete,
       confirmDestructiveActions:
           confirmDestructiveActions ?? this.confirmDestructiveActions,
     );
@@ -708,8 +703,6 @@ class BehaviorConfig {
       'auto_fetch': autoFetch,
       'auto_fetch_interval': autoFetchInterval,
       'confirm_push': confirmPush,
-      'confirm_force_push': confirmForcePush,
-      'confirm_delete': confirmDelete,
       'confirm_destructive_actions': confirmDestructiveActions,
     };
   }
@@ -719,8 +712,6 @@ class BehaviorConfig {
       autoFetch: yaml['auto_fetch'] as bool? ?? false,
       autoFetchInterval: yaml['auto_fetch_interval'] as int? ?? 5,
       confirmPush: yaml['confirm_push'] as bool? ?? true,
-      confirmForcePush: yaml['confirm_force_push'] as bool? ?? true,
-      confirmDelete: yaml['confirm_delete'] as bool? ?? true,
       confirmDestructiveActions:
           yaml['confirm_destructive_actions'] as bool? ?? true,
     );

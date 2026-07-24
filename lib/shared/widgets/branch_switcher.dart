@@ -10,12 +10,13 @@ import '../components/base_dialog.dart';
 import '../components/base_button.dart';
 import '../components/base_label.dart';
 import '../../core/git/git_providers.dart';
+import '../../core/git/destructive_action.dart';
 import '../../core/git/models/branch.dart';
 import '../../core/services/notification_service.dart';
+import '../dialogs/confirm_destructive.dart';
 import '../../features/branches/dialogs/delete_branch_dialog.dart';
 import '../../features/branches/dialogs/rename_branch_dialog.dart';
 import '../../core/config/app_config.dart';
-import '../../core/config/config_providers.dart';
 
 /// Branch switcher widget - displays current branch and allows switching
 class BranchSwitcher extends ConsumerWidget {
@@ -288,23 +289,25 @@ class BranchSwitcher extends ConsumerWidget {
     if (result != null &&
         result.selectedBranches.isNotEmpty &&
         context.mounted) {
-      // Force deleting discards unmerged commits the user has no obvious way to
-      // recover, so the confirm-delete setting gates the whole batch.
-      if (ref.read(confirmDeleteProvider)) {
-        final l10n = AppLocalizations.of(context)!;
-        final message = l10n.deleteAllUnprotectedBranchesConfirm(
-          result.selectedBranches.length,
-        );
-        final confirmed = await showConfirmationDialog(
-          context: context,
-          title: l10n.deleteAllUnprotectedBranches,
-          message: result.force
-              ? '$message\n\n${l10n.forceDeleteWarning}'
-              : message,
-          confirmText: l10n.deleteAll,
-        );
-        if (!confirmed || !context.mounted) return;
-      }
+      // Deleting branches is reflog-recoverable, so the batch confirmation
+      // runs under the master "confirm destructive actions" switch; force
+      // deleting adds the unmerged-loss warning to the same prompt.
+      final l10n = AppLocalizations.of(context)!;
+      final message = l10n.deleteAllUnprotectedBranchesConfirm(
+        result.selectedBranches.length,
+      );
+      final confirmed = await confirmDestructive(
+        context: context,
+        ref: ref,
+        action: DestructiveAction.deleteLocalBranch,
+        icon: PhosphorIconsRegular.trash,
+        title: l10n.deleteAllUnprotectedBranches,
+        message: result.force
+            ? '$message\n\n${l10n.forceDeleteWarning}'
+            : message,
+        confirmLabel: l10n.deleteAll,
+      );
+      if (!confirmed || !context.mounted) return;
       await _deleteAllUnprotectedBranches(
         context,
         ref,

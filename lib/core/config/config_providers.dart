@@ -742,20 +742,6 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     await _saveConfig();
   }
 
-  Future<void> setConfirmForcePush(bool confirm) async {
-    state = state.copyWith(
-      behavior: state.behavior.copyWith(confirmForcePush: confirm),
-    );
-    await _saveConfig();
-  }
-
-  Future<void> setConfirmDelete(bool confirm) async {
-    state = state.copyWith(
-      behavior: state.behavior.copyWith(confirmDelete: confirm),
-    );
-    await _saveConfig();
-  }
-
   Future<void> setConfirmDestructiveActions(bool confirm) async {
     state = state.copyWith(
       behavior: state.behavior.copyWith(confirmDestructiveActions: confirm),
@@ -1093,12 +1079,6 @@ final autoFetchIntervalProvider = Provider<int>(
 );
 final confirmPushProvider = Provider<bool>(
   (ref) => ref.watch(behaviorConfigProvider).confirmPush,
-);
-final confirmForcePushProvider = Provider<bool>(
-  (ref) => ref.watch(behaviorConfigProvider).confirmForcePush,
-);
-final confirmDeleteProvider = Provider<bool>(
-  (ref) => ref.watch(behaviorConfigProvider).confirmDelete,
 );
 final confirmDestructiveActionsProvider = Provider<bool>(
   (ref) => ref.watch(behaviorConfigProvider).confirmDestructiveActions,

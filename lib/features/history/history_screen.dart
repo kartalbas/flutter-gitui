@@ -1103,14 +1103,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     if (!mounted || !context.mounted) return;
 
-    // The dialog is the only barrier before remote history is overwritten, so
-    // it is skipped only when the user explicitly turned the setting off.
-    final shouldForcePush = ref.read(confirmForcePushProvider)
-        ? await showDialog<bool>(
-            context: context,
-            builder: (context) => const ForcePushDialog(),
-          )
-        : true;
+    // Force push overwrites remote history and can destroy work that is not
+    // the user's own, so it always confirms: a remote-tier destructive action
+    // no setting can silence.
+    final shouldForcePush = await showDialog<bool>(
+      context: context,
+      builder: (context) => const ForcePushDialog(),
+    );
 
     if (shouldForcePush != true || !context.mounted) return;
 

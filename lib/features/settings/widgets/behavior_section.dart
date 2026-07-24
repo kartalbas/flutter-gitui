@@ -61,24 +61,6 @@ class BehaviorSection extends ConsumerWidget {
           },
         ),
         SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.warningCircle),
-          title: Text(l10n.confirmForcePush),
-          subtitle: Text(l10n.confirmForcePushDescription),
-          value: behavior.confirmForcePush,
-          onChanged: (value) {
-            ref.read(configProvider.notifier).setConfirmForcePush(value);
-          },
-        ),
-        SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.trash),
-          title: Text(l10n.confirmDelete),
-          subtitle: Text(l10n.confirmDeleteDescription),
-          value: behavior.confirmDelete,
-          onChanged: (value) {
-            ref.read(configProvider.notifier).setConfirmDelete(value);
-          },
-        ),
-        SwitchListTile(
           secondary: const Icon(PhosphorIconsRegular.warningDiamond),
           title: Text(l10n.confirmDestructiveActions),
           subtitle: Text(l10n.confirmDestructiveActionsDescription),

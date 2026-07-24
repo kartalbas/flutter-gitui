@@ -500,7 +500,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       final fileName = filePath.split('/').last;
 
       // Show save file dialog
-      final outputPath = await FilePicker.platform.saveFile(
+      final outputPath = await FilePicker.saveFile(
         dialogTitle: 'Save file',
         fileName: fileName,
       );

@@ -316,7 +316,7 @@ class GitCommands {
           return;
         }
 
-        final result = await FilePicker.platform.getDirectoryPath(
+        final result = await FilePicker.getDirectoryPath(
           dialogTitle: l10n.selectGitRepository,
         );
 

@@ -51,10 +51,10 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
         allowMalformed: true,
       );
 
-      // The csv package defaults eol to '\r\n', which leaves LF-only files
-      // as a single giant row. Normalize to LF so both styles parse.
-      const converter = CsvToListConverter(eol: '\n');
-      final rows = converter.convert(content.replaceAll('\r\n', '\n'));
+      // csv 8's decoder auto-detects the line ending and delimiter, so LF-only
+      // and CRLF files (and ';'-separated exports) all parse without the old
+      // explicit eol workaround.
+      final rows = Csv().decode(content);
 
       setState(() {
         _rows = rows;

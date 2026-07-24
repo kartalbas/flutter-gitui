@@ -201,7 +201,7 @@ class _InitializeRepositoryDialogState
       return;
     }
 
-    final result = await FilePicker.platform.getDirectoryPath(
+    final result = await FilePicker.getDirectoryPath(
       dialogTitle: AppLocalizations.of(context)!.selectDirectoryToInitialize,
     );
 

@@ -251,7 +251,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
       return;
     }
 
-    final result = await FilePicker.platform.getDirectoryPath(
+    final result = await FilePicker.getDirectoryPath(
       dialogTitle: AppLocalizations.of(context)!.selectDestinationForClone,
     );
 

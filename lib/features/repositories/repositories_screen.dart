@@ -571,7 +571,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       return;
     }
 
-    final result = await FilePicker.platform.getDirectoryPath(
+    final result = await FilePicker.getDirectoryPath(
       dialogTitle: 'Select Git Repository',
     );
 

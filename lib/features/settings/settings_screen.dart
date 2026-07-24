@@ -91,7 +91,7 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _selectGitExecutable(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
 
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       dialogTitle: l10n.selectGitExecutable,
       type: Platform.isWindows ? FileType.custom : FileType.any,
       allowedExtensions: Platform.isWindows ? ['exe'] : null,
@@ -202,7 +202,7 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _selectTextEditor(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
 
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       dialogTitle: l10n.selectTextEditor,
       type: Platform.isWindows ? FileType.custom : FileType.any,
       // .cmd/.bat wrappers are the only entry point for CLI-installed editors
@@ -294,7 +294,7 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _selectDiffTool(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
 
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       dialogTitle: l10n.selectDiffTool,
       type: Platform.isWindows ? FileType.custom : FileType.any,
       // .cmd/.bat wrappers are the only entry point for CLI-installed tools
@@ -360,7 +360,7 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _selectMergeTool(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
 
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       dialogTitle: l10n.selectMergeTool,
       type: Platform.isWindows ? FileType.custom : FileType.any,
       // .cmd/.bat wrappers are the only entry point for CLI-installed tools

@@ -264,7 +264,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     }
 
     // Use file picker to select directory
-    final result = await FilePicker.platform.getDirectoryPath(
+    final result = await FilePicker.getDirectoryPath(
       dialogTitle: 'Select Git Repository',
     );
 

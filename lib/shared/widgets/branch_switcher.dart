@@ -198,14 +198,21 @@ class BranchSwitcher extends ConsumerWidget {
     WidgetRef ref,
     GitBranch branch,
   ) async {
-    final result = await showDialog<bool>(
+    // DeleteBranchDialog returns a DeleteBranchResult (it also collects the
+    // force choice), so the old `showDialog<bool>` + `result == true` guard
+    // never matched and the delete silently did nothing.
+    final result = await showDialog<DeleteBranchResult>(
       context: context,
       builder: (context) => DeleteBranchDialog(branch: branch),
     );
-    // Dialog returns true if delete was confirmed
-    if (result == true && context.mounted) {
+    if (result != null &&
+        result != DeleteBranchResult.cancel &&
+        context.mounted) {
       try {
-        await ref.read(gitActionsProvider).deleteBranch(branch.name);
+        final force = result == DeleteBranchResult.forceDelete;
+        await ref
+            .read(gitActionsProvider)
+            .deleteBranch(branch.name, force: force);
         if (!context.mounted) return;
         NotificationService.showSuccess(
           context,

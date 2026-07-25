@@ -89,6 +89,16 @@ void main() {
       expect(diff, contains('quoted'));
     });
 
+    test('the working-tree file content decodes instead of vanishing', () async {
+      // readAsString decoded strictly and the throw was swallowed, so the file
+      // looked empty. It must come back with its readable text intact.
+      final content = await service.getFileContent('legacy.txt');
+
+      expect(content, isNotNull);
+      expect(content, contains('quoted'));
+      expect(content, contains('�'));
+    });
+
     test('a working-tree diff decodes instead of throwing', () async {
       File(
         '${repoDir.path}/legacy.txt',

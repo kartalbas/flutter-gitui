@@ -621,7 +621,11 @@ class GitService {
     try {
       final file = File(p.join(repoPath, filePath));
       if (await file.exists()) {
-        return await file.readAsString();
+        // Decoded leniently rather than through readAsString, whose strict
+        // UTF-8 decode threw on a Windows-1252 or Latin-1 file. The throw was
+        // swallowed by the catch below, so such a file silently looked empty
+        // instead of showing its content. Undecodable bytes become U+FFFD.
+        return utf8.decode(await file.readAsBytes(), allowMalformed: true);
       }
       return null;
     } catch (e) {

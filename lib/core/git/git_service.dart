@@ -67,8 +67,16 @@ class GitService {
       // Git is forced to emit UTF-8 via LC_ALL/LANG below, so decode with
       // UTF-8 too; the default systemEncoding is the ANSI code page on
       // Windows, which garbles non-ASCII names, messages, and diffs.
-      stdoutEncoding: utf8,
-      stderrEncoding: utf8,
+      //
+      // Lenient, because git echoes file bytes verbatim whenever it emits
+      // content (diff, show, blame) and a repository may hold a Windows-1252
+      // or Latin-1 file that is not valid UTF-8. Strict decoding threw a
+      // FormatException from inside the output stream, which escaped the
+      // Result wrappers and surfaced as a "Platform Error" popup with no diff
+      // shown. Undecodable bytes now become U+FFFD, matching what the file
+      // preview and the CSV and Markdown viewers already do.
+      stdoutEncoding: const Utf8Codec(allowMalformed: true),
+      stderrEncoding: const Utf8Codec(allowMalformed: true),
       // Set environment to force UTF-8 encoding for git output. Base it on
       // ShellService.environment so a Finder-launched macOS app, which only
       // gets launchd's minimal PATH, can still resolve a Homebrew git.

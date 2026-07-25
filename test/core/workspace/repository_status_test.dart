@@ -98,6 +98,79 @@ void main() {
       expect(verified.isRemoteUnchecked, isFalse);
     });
 
+    test('a local refresh may not undo a verification made meanwhile', () {
+      // The active repository is refreshed from several places at once: the
+      // sweep contacts the remote, the watcher and local operations do not.
+      // Whichever writes last must not lose what the other established, so the
+      // non-fetching refresh takes the verification from the state as it is
+      // when it writes - here, already verified by the sweep.
+      final verifiedBySweep = RepositoryStatus(
+        exists: true,
+        isValidGit: true,
+        hasRemote: true,
+        remoteCheckedAt: checkedAt,
+      );
+
+      final resolved = resolveVerification(
+        fetched: false,
+        fetchedAt: null,
+        fetchFailure: RemoteCheckFailure.none,
+        current: verifiedBySweep,
+      );
+
+      expect(resolved.checkedAt, checkedAt);
+      expect(resolved.failure, RemoteCheckFailure.none);
+    });
+
+    test('a local refresh carries over a failure just the same', () {
+      final needsSignIn = const RepositoryStatus(
+        exists: true,
+        isValidGit: true,
+        hasRemote: true,
+        remoteCheckFailure: RemoteCheckFailure.authenticationRequired,
+      );
+
+      final resolved = resolveVerification(
+        fetched: false,
+        fetchedAt: null,
+        fetchFailure: RemoteCheckFailure.none,
+        current: needsSignIn,
+      );
+
+      expect(resolved.failure, RemoteCheckFailure.authenticationRequired);
+    });
+
+    test('a refresh that fetched reports its own result, not the old one', () {
+      // Going offline must be able to retract an earlier verification.
+      final wasVerified = RepositoryStatus(
+        exists: true,
+        isValidGit: true,
+        hasRemote: true,
+        remoteCheckedAt: checkedAt,
+      );
+
+      final resolved = resolveVerification(
+        fetched: true,
+        fetchedAt: null,
+        fetchFailure: RemoteCheckFailure.unreachable,
+        current: wasVerified,
+      );
+
+      expect(resolved.checkedAt, isNull);
+      expect(resolved.failure, RemoteCheckFailure.unreachable);
+    });
+
+    test('nothing known yet stays unchecked', () {
+      final resolved = resolveVerification(
+        fetched: false,
+        fetchedAt: null,
+        fetchFailure: RemoteCheckFailure.none,
+        current: null,
+      );
+      expect(resolved.checkedAt, isNull);
+      expect(resolved.failure, RemoteCheckFailure.none);
+    });
+
     test('counts stay authoritative once they are known', () {
       // Being unchecked concerns only the clean case: a repository already
       // known to be behind must keep reporting it.

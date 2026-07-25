@@ -1,6 +1,32 @@
 import '../../git/models/git_remote_identity.dart';
 import 'remote_check_failure.dart';
 
+/// The verification a freshly computed status should carry.
+///
+/// A repository is refreshed from several places at once - the background sweep
+/// contacts the remote, while the file watcher and local operations only
+/// recompute the counts. Only a refresh that actually fetched may set the
+/// verification; one that did not must carry over whatever is known *at the
+/// moment it writes*, which is why [current] is passed in rather than captured
+/// when the refresh started. Reading it too early let a local refresh finish
+/// last and write back the "never verified" it had seen at its start, undoing a
+/// verification the sweep had made in between - which is what made the active
+/// repository, the only one refreshed from both sides, fall back to unchecked.
+({DateTime? checkedAt, RemoteCheckFailure failure}) resolveVerification({
+  required bool fetched,
+  required DateTime? fetchedAt,
+  required RemoteCheckFailure fetchFailure,
+  required RepositoryStatus? current,
+}) {
+  if (fetched) {
+    return (checkedAt: fetchedAt, failure: fetchFailure);
+  }
+  return (
+    checkedAt: current?.remoteCheckedAt,
+    failure: current?.remoteCheckFailure ?? RemoteCheckFailure.none,
+  );
+}
+
 /// Status of a repository including sync state and health
 class RepositoryStatus {
   /// Number of commits ahead of remote (unpushed)

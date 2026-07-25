@@ -92,32 +92,25 @@ class RepositoryStatusNotifier
       // now instead of the last fetch. A failure here (offline, no auth) must
       // not fail the whole check: the local state is still worth showing, it
       // simply stays marked unverified.
-      DateTime? remoteCheckedAt;
-      var remoteCheckFailure = RemoteCheckFailure.none;
+      DateTime? fetchedAt;
+      var fetchFailure = RemoteCheckFailure.none;
       if (fetchRemote) {
         final fetched = await gitService.fetch();
         fetched.when(
-          success: (_) => remoteCheckedAt = DateTime.now(),
+          success: (_) => fetchedAt = DateTime.now(),
           failure: (message, error, stackTrace) {
             // Which failure it is decides what the card can offer: only a
             // missing sign-in is something the user can resolve, and saying so
             // is the difference between an actionable card and a silent one.
-            remoteCheckFailure = classifyRemoteCheckFailure(
+            fetchFailure = classifyRemoteCheckFailure(
               error is GitException ? '$message\n${error.stderr}' : message,
             );
             Logger.debug(
               '[REFRESH] Fetch failed for ${repository.displayName}: '
-              '$remoteCheckFailure',
+              '$fetchFailure',
             );
           },
         );
-      } else {
-        // Keep an earlier verification and its reason: a plain refresh must
-        // neither downgrade a repository that was fetched a moment ago back to
-        // unchecked, nor forget that it needs a sign-in.
-        final previous = state[repository.path];
-        remoteCheckedAt = previous?.remoteCheckedAt;
-        remoteCheckFailure = previous?.remoteCheckFailure ?? remoteCheckFailure;
       }
 
       final statusMap = await gitService.getRepositoryStatus(repository.path);
@@ -135,6 +128,19 @@ class RepositoryStatusNotifier
       }
 
       if (statusMap != null) {
+        // Resolved against the state as it is *now*, not as it was before the
+        // awaits above. The active repository is refreshed from several places
+        // at once - the sweep with a fetch, the watcher and local operations
+        // without - and a value captured earlier would let the local refresh
+        // finish last and write back the "never verified" it saw at its start,
+        // undoing a verification the sweep had meanwhile made.
+        final verification = resolveVerification(
+          fetched: fetchRemote,
+          fetchedAt: fetchedAt,
+          fetchFailure: fetchFailure,
+          current: state[repository.path],
+        );
+
         final status = RepositoryStatus(
           exists: statusMap['exists'] as bool? ?? false,
           isValidGit: statusMap['isValidGit'] as bool? ?? false,
@@ -144,8 +150,8 @@ class RepositoryStatusNotifier
           commitsBehind: statusMap['commitsBehind'] as int? ?? 0,
           hasUncommittedChanges:
               statusMap['hasUncommittedChanges'] as bool? ?? false,
-          remoteCheckedAt: remoteCheckedAt,
-          remoteCheckFailure: remoteCheckFailure,
+          remoteCheckedAt: verification.checkedAt,
+          remoteCheckFailure: verification.failure,
           remoteUrl: statusMap['remoteUrl'] as String?,
         );
 

@@ -15,6 +15,7 @@ import '../../../core/workspace/repository_status_provider.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../repository_batch_error_provider.dart';
 import '../../../shared/dialogs/batch_result_dialog.dart';
+import 'sync_on_double_tap.dart';
 
 /// Card widget displaying a workspace repository
 class RepositoryCard extends ConsumerWidget {
@@ -292,64 +293,70 @@ class RepositoryCard extends ConsumerWidget {
               ],
             )
           else
-            // Show actual status badges after analysis
-            Wrap(
-              spacing: AppTheme.paddingXS,
-              runSpacing: AppTheme.paddingXS,
-              children: [
-                // Broken status
-                if (status.isBroken)
-                  _buildStatusBadge(
-                    context,
-                    PhosphorIconsRegular.warningCircle,
-                    'Broken',
-                    Theme.of(context).colorScheme.error,
-                    isSelected,
-                  ),
+            // Show actual status badges after analysis. Double-clicking them
+            // syncs this one repository, which is where a user looking at
+            // "↓2" wants to act.
+            SyncOnDoubleTap(
+              repository: repository,
+              onSingleTap: onTap,
+              child: Wrap(
+                spacing: AppTheme.paddingXS,
+                runSpacing: AppTheme.paddingXS,
+                children: [
+                  // Broken status
+                  if (status.isBroken)
+                    _buildStatusBadge(
+                      context,
+                      PhosphorIconsRegular.warningCircle,
+                      'Broken',
+                      Theme.of(context).colorScheme.error,
+                      isSelected,
+                    ),
 
-                // Commits behind (need to pull)
-                if (status.hasIncoming)
-                  _buildStatusBadge(
-                    context,
-                    PhosphorIconsRegular.arrowDown,
-                    '↓${status.commitsBehind}',
-                    Theme.of(context).colorScheme.tertiary,
-                    isSelected,
-                  ),
+                  // Commits behind (need to pull)
+                  if (status.hasIncoming)
+                    _buildStatusBadge(
+                      context,
+                      PhosphorIconsRegular.arrowDown,
+                      '↓${status.commitsBehind}',
+                      Theme.of(context).colorScheme.tertiary,
+                      isSelected,
+                    ),
 
-                // Commits ahead (need to push)
-                if (status.hasOutgoing)
-                  _buildStatusBadge(
-                    context,
-                    PhosphorIconsRegular.arrowUp,
-                    '↑${status.commitsAhead}',
-                    Theme.of(context).colorScheme.primary,
-                    isSelected,
-                  ),
+                  // Commits ahead (need to push)
+                  if (status.hasOutgoing)
+                    _buildStatusBadge(
+                      context,
+                      PhosphorIconsRegular.arrowUp,
+                      '↑${status.commitsAhead}',
+                      Theme.of(context).colorScheme.primary,
+                      isSelected,
+                    ),
 
-                // Uncommitted changes
-                if (status.hasUncommittedChanges)
-                  _buildStatusBadge(
-                    context,
-                    PhosphorIconsRegular.pencilSimple,
-                    'Changes',
-                    Theme.of(context).colorScheme.secondary,
-                    isSelected,
-                  ),
+                  // Uncommitted changes
+                  if (status.hasUncommittedChanges)
+                    _buildStatusBadge(
+                      context,
+                      PhosphorIconsRegular.pencilSimple,
+                      'Changes',
+                      Theme.of(context).colorScheme.secondary,
+                      isSelected,
+                    ),
 
-                // Nothing outstanding. The remote-tracking refs only move on a
-                // fetch, so claiming to be in sync before one has happened
-                // would report a clean state that was never verified. A
-                // repository the check could not reach says why instead, and
-                // the one case the user can resolve offers to do it.
-                if (!status.isBroken &&
-                    !status.hasIncoming &&
-                    !status.hasOutgoing &&
-                    !status.hasUncommittedChanges &&
-                    status.exists &&
-                    status.isValidGit)
-                  _buildVerificationBadge(context, ref, status, isSelected),
-              ],
+                  // Nothing outstanding. The remote-tracking refs only move on a
+                  // fetch, so claiming to be in sync before one has happened
+                  // would report a clean state that was never verified. A
+                  // repository the check could not reach says why instead, and
+                  // the one case the user can resolve offers to do it.
+                  if (!status.isBroken &&
+                      !status.hasIncoming &&
+                      !status.hasOutgoing &&
+                      !status.hasUncommittedChanges &&
+                      status.exists &&
+                      status.isValidGit)
+                    _buildVerificationBadge(context, ref, status, isSelected),
+                ],
+              ),
             ),
 
           const Spacer(),

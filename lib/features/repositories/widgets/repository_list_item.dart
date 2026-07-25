@@ -13,6 +13,7 @@ import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../core/workspace/repository_status_provider.dart';
 import '../../../core/extensions/date_time_extensions.dart';
 import '../repository_batch_error_provider.dart';
+import 'sync_on_double_tap.dart';
 import '../../../shared/dialogs/batch_result_dialog.dart';
 
 /// List item widget displaying a workspace repository in a compact row format
@@ -96,123 +97,135 @@ class RepositoryListItem extends ConsumerWidget {
               // Batch operation result icon
               _buildBatchResultIcon(context, ref),
 
-              // Show loading while analyzing
-              if (status.isGitNotConfigured) ...[
-                _buildCompactBadge(
-                  context,
-                  PhosphorIconsRegular.gear,
-                  Theme.of(context).colorScheme.tertiary,
-                  isSelected,
-                  label: 'Git not configured',
+              // Double-clicking the badges syncs this one repository, matching
+              // the card view - the row showing "↓2" is where the user wants
+              // to act on it.
+              SyncOnDoubleTap(
+                repository: repository,
+                onSingleTap: onTap,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Show loading while analyzing
+                    if (status.isGitNotConfigured) ...[
+                      _buildCompactBadge(
+                        context,
+                        PhosphorIconsRegular.gear,
+                        Theme.of(context).colorScheme.tertiary,
+                        isSelected,
+                        label: 'Git not configured',
+                      ),
+                    ] else if (status.isLoading) ...[
+                      SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ] else ...[
+                      // Broken
+                      if (status.isBroken)
+                        _buildCompactBadge(
+                          context,
+                          PhosphorIconsRegular.warningCircle,
+                          Theme.of(context).colorScheme.error,
+                          isSelected,
+                          label: 'Broken',
+                        ),
+
+                      // Behind (pull)
+                      if (status.hasIncoming) ...[
+                        const SizedBox(width: AppTheme.paddingXS),
+                        _buildCompactBadge(
+                          context,
+                          PhosphorIconsRegular.arrowDown,
+                          Theme.of(context).colorScheme.tertiary,
+                          isSelected,
+                          label: '↓${status.commitsBehind}',
+                        ),
+                      ],
+
+                      // Ahead (push)
+                      if (status.hasOutgoing) ...[
+                        const SizedBox(width: AppTheme.paddingXS),
+                        _buildCompactBadge(
+                          context,
+                          PhosphorIconsRegular.arrowUp,
+                          Theme.of(context).colorScheme.primary,
+                          isSelected,
+                          label: '↑${status.commitsAhead}',
+                        ),
+                      ],
+
+                      // Uncommitted
+                      if (status.hasUncommittedChanges) ...[
+                        const SizedBox(width: AppTheme.paddingXS),
+                        _buildCompactBadge(
+                          context,
+                          PhosphorIconsRegular.pencilSimple,
+                          Theme.of(context).colorScheme.secondary,
+                          isSelected,
+                          label: 'Changes',
+                        ),
+                      ],
+
+                      // Clean status. Only claimed once the remote has actually been
+                      // contacted: the ahead/behind counts come from the local
+                      // remote-tracking refs, which a fetch is what moves.
+                      if (!status.isBroken &&
+                          !status.hasIncoming &&
+                          !status.hasOutgoing &&
+                          !status.hasUncommittedChanges &&
+                          status.exists &&
+                          status.isValidGit) ...[
+                        const SizedBox(width: AppTheme.paddingXS),
+                        if (status.needsSignIn)
+                          _buildCompactBadge(
+                            context,
+                            PhosphorIconsRegular.signIn,
+                            Theme.of(context).colorScheme.tertiary,
+                            isSelected,
+                            label: 'Sign-in required',
+                          )
+                        else if (status.isRemoteUnreachable)
+                          _buildCompactBadge(
+                            context,
+                            PhosphorIconsRegular.cloudSlash,
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                            isSelected,
+                            label: 'Unreachable',
+                          )
+                        else if (status.remoteCheckFailedUnknown)
+                          _buildCompactBadge(
+                            context,
+                            PhosphorIconsRegular.warningCircle,
+                            Theme.of(context).colorScheme.error,
+                            isSelected,
+                            label: 'Check failed',
+                          )
+                        else if (status.isRemoteUnchecked)
+                          _buildCompactBadge(
+                            context,
+                            PhosphorIconsRegular.clockCountdown,
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                            isSelected,
+                            label: 'Not checked',
+                          )
+                        else
+                          _buildCompactBadge(
+                            context,
+                            PhosphorIconsRegular.checkCircle,
+                            Theme.of(context).colorScheme.primary,
+                            isSelected,
+                            label: 'Up to date',
+                          ),
+                      ],
+                    ],
+                  ],
                 ),
-              ] else if (status.isLoading) ...[
-                SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ] else ...[
-                // Broken
-                if (status.isBroken)
-                  _buildCompactBadge(
-                    context,
-                    PhosphorIconsRegular.warningCircle,
-                    Theme.of(context).colorScheme.error,
-                    isSelected,
-                    label: 'Broken',
-                  ),
-
-                // Behind (pull)
-                if (status.hasIncoming) ...[
-                  const SizedBox(width: AppTheme.paddingXS),
-                  _buildCompactBadge(
-                    context,
-                    PhosphorIconsRegular.arrowDown,
-                    Theme.of(context).colorScheme.tertiary,
-                    isSelected,
-                    label: '↓${status.commitsBehind}',
-                  ),
-                ],
-
-                // Ahead (push)
-                if (status.hasOutgoing) ...[
-                  const SizedBox(width: AppTheme.paddingXS),
-                  _buildCompactBadge(
-                    context,
-                    PhosphorIconsRegular.arrowUp,
-                    Theme.of(context).colorScheme.primary,
-                    isSelected,
-                    label: '↑${status.commitsAhead}',
-                  ),
-                ],
-
-                // Uncommitted
-                if (status.hasUncommittedChanges) ...[
-                  const SizedBox(width: AppTheme.paddingXS),
-                  _buildCompactBadge(
-                    context,
-                    PhosphorIconsRegular.pencilSimple,
-                    Theme.of(context).colorScheme.secondary,
-                    isSelected,
-                    label: 'Changes',
-                  ),
-                ],
-
-                // Clean status. Only claimed once the remote has actually been
-                // contacted: the ahead/behind counts come from the local
-                // remote-tracking refs, which a fetch is what moves.
-                if (!status.isBroken &&
-                    !status.hasIncoming &&
-                    !status.hasOutgoing &&
-                    !status.hasUncommittedChanges &&
-                    status.exists &&
-                    status.isValidGit) ...[
-                  const SizedBox(width: AppTheme.paddingXS),
-                  if (status.needsSignIn)
-                    _buildCompactBadge(
-                      context,
-                      PhosphorIconsRegular.signIn,
-                      Theme.of(context).colorScheme.tertiary,
-                      isSelected,
-                      label: 'Sign-in required',
-                    )
-                  else if (status.isRemoteUnreachable)
-                    _buildCompactBadge(
-                      context,
-                      PhosphorIconsRegular.cloudSlash,
-                      Theme.of(context).colorScheme.onSurfaceVariant,
-                      isSelected,
-                      label: 'Unreachable',
-                    )
-                  else if (status.remoteCheckFailedUnknown)
-                    _buildCompactBadge(
-                      context,
-                      PhosphorIconsRegular.warningCircle,
-                      Theme.of(context).colorScheme.error,
-                      isSelected,
-                      label: 'Check failed',
-                    )
-                  else if (status.isRemoteUnchecked)
-                    _buildCompactBadge(
-                      context,
-                      PhosphorIconsRegular.clockCountdown,
-                      Theme.of(context).colorScheme.onSurfaceVariant,
-                      isSelected,
-                      label: 'Not checked',
-                    )
-                  else
-                    _buildCompactBadge(
-                      context,
-                      PhosphorIconsRegular.checkCircle,
-                      Theme.of(context).colorScheme.primary,
-                      isSelected,
-                      label: 'Up to date',
-                    ),
-                ],
-              ],
+              ),
             ],
           ),
           const SizedBox(height: AppTheme.paddingXS),

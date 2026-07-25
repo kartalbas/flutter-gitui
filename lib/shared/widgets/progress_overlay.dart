@@ -5,6 +5,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_card.dart';
+import '../dialogs/background_activity_dialog.dart';
 import '../../core/services/progress_service.dart';
 
 /// The caption under the background activity line.
@@ -31,12 +32,32 @@ class _BackgroundProgressLabel extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(
         bottom: Radius.circular(AppTheme.radiusS),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.paddingM,
-          vertical: AppTheme.paddingXS,
+      // The count says how far the sweep got, not which repository is slow,
+      // which already finished, or which failed and why. That is one click
+      // away rather than absent.
+      child: InkWell(
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(AppTheme.radiusS),
         ),
-        child: LabelMediumLabel(text, color: colorScheme.onSurfaceVariant),
+        onTap: () => showBackgroundActivityDialog(context),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.paddingM,
+            vertical: AppTheme.paddingXS,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LabelMediumLabel(text, color: colorScheme.onSurfaceVariant),
+              const SizedBox(width: AppTheme.paddingXS),
+              Icon(
+                PhosphorIconsRegular.caretRight,
+                size: 12,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -62,22 +83,24 @@ class ProgressOverlay extends ConsumerWidget {
     // count: an anonymous line cannot say what is running or whether it is
     // progressing at all.
     if (!progress.isBlocking) {
-      return IgnorePointer(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              LinearProgressIndicator(
+      return Align(
+        alignment: Alignment.topCenter,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // The line itself must not swallow clicks meant for the content
+            // it floats over; only the caption is a target.
+            IgnorePointer(
+              child: LinearProgressIndicator(
                 minHeight: 3,
                 value: progress.isIndeterminate || progress.totalSteps <= 0
                     ? null
                     : progress.progress,
               ),
-              if (progress.operationName.isNotEmpty)
-                _BackgroundProgressLabel(progress: progress),
-            ],
-          ),
+            ),
+            if (progress.operationName.isNotEmpty)
+              _BackgroundProgressLabel(progress: progress),
+          ],
         ),
       );
     }

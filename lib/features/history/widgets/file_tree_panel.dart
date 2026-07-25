@@ -67,6 +67,12 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
     final changedFilesAsync = ref.watch(
       commitChangedFilesProvider(widget.commitHash),
     );
+    // Watched once for the whole list. Doing it per row subscribed every node
+    // to this provider, so each of its loading/data transitions rebuilt the
+    // entire tree.
+    final displayedPath = ref
+        .watch(displayedCommitFileProvider(widget.commitHash))
+        .value;
 
     return BasePanel(
       title: Row(
@@ -105,6 +111,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
 
           final stats = FileChangeStats(files);
           final tree = _buildFileTree(files);
+          final rows = _flattenVisible(tree);
 
           return Column(
             children: [
@@ -167,13 +174,21 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                 ),
               ),
 
-              // File tree
+              // File tree. Built lazily from the flattened rows so only the
+              // visible ones are created.
               Expanded(
-                child: ListView(
+                child: ListView.builder(
                   padding: const EdgeInsets.all(AppTheme.paddingS),
-                  children: tree
-                      .map((node) => _buildTreeNode(context, node, 0))
-                      .toList(),
+                  itemCount: rows.length,
+                  itemBuilder: (context, index) {
+                    final row = rows[index];
+                    return _buildTreeRow(
+                      context,
+                      row.node,
+                      row.depth,
+                      displayedPath,
+                    );
+                  },
                 ),
               ),
             ],
@@ -217,230 +232,237 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
     );
   }
 
-  Widget _buildTreeNode(BuildContext context, FileTreeNode node, int depth) {
+  /// The rows the list shows, in display order, each with its indent depth.
+  ///
+  /// The tree used to render as a Column nested per directory inside a plain
+  /// ListView, which built every node - including those scrolled out of view -
+  /// on every interaction. Flattening lets ListView.builder create only the
+  /// rows actually on screen.
+  List<({FileTreeNode node, int depth})> _flattenVisible(
+    List<FileTreeNode> nodes,
+  ) {
+    final rows = <({FileTreeNode node, int depth})>[];
+
+    void visit(List<FileTreeNode> level, int depth) {
+      for (final node in level) {
+        rows.add((node: node, depth: depth));
+        if (node.isDirectory && node.isExpanded) {
+          visit(node.children, depth + 1);
+        }
+      }
+    }
+
+    visit(nodes, 0);
+    return rows;
+  }
+
+  Widget _buildTreeRow(
+    BuildContext context,
+    FileTreeNode node,
+    int depth,
+    String? displayedPath,
+  ) {
     // The file whose diff the neighboring panel currently shows. Marking it
     // here is what visually ties the list to the in-place diff.
-    final isDisplayedFile =
-        !node.isDirectory &&
-        ref.watch(displayedCommitFileProvider(widget.commitHash)).value ==
-            node.fullPath;
+    final isDisplayedFile = !node.isDirectory && displayedPath == node.fullPath;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          // No onDoubleTap: registering one makes Flutter withhold every single
-          // tap until the 300 ms double-tap window closes, which is what made
-          // clicking a file feel slow. The tracker reports the double click.
-          onTap: () {
-            final isDoubleTap = _tapTracker.registerTap(node, DateTime.now());
-            if (node.isDirectory) {
-              setState(() {
-                node.isExpanded = !node.isExpanded;
-              });
-              return;
-            }
-            if (isDoubleTap) {
-              showCommitFileDiffDialog(
-                context,
-                commitHash: widget.commitHash,
-                filePath: node.fullPath,
-              );
-              return;
-            }
-            // A click highlights the file so its diff renders in the panel
-            // beside this list; the dialog stays reachable via double-click
-            // and the menu for a focused read.
-            ref
-                .read(highlightedCommitFileProvider.notifier)
-                .state = HighlightedCommitFile(
-              commitHash: widget.commitHash,
-              path: node.fullPath,
-            );
-          },
-          child: Container(
-            padding: EdgeInsets.only(
-              left: depth * AppTheme.paddingM,
-              top: 2,
-              bottom: 2,
-              right: AppTheme.paddingXS,
+    return InkWell(
+      // No onDoubleTap: registering one makes Flutter withhold every single
+      // tap until the 300 ms double-tap window closes, which is what made
+      // clicking a file feel slow. The tracker reports the double click.
+      onTap: () {
+        final isDoubleTap = _tapTracker.registerTap(node, DateTime.now());
+        if (node.isDirectory) {
+          setState(() {
+            node.isExpanded = !node.isExpanded;
+          });
+          return;
+        }
+        if (isDoubleTap) {
+          showCommitFileDiffDialog(
+            context,
+            commitHash: widget.commitHash,
+            filePath: node.fullPath,
+          );
+          return;
+        }
+        // A click highlights the file so its diff renders in the panel
+        // beside this list; the dialog stays reachable via double-click
+        // and the menu for a focused read.
+        ref
+            .read(highlightedCommitFileProvider.notifier)
+            .state = HighlightedCommitFile(
+          commitHash: widget.commitHash,
+          path: node.fullPath,
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.only(
+          left: depth * AppTheme.paddingM,
+          top: 2,
+          bottom: 2,
+          right: AppTheme.paddingXS,
+        ),
+        decoration: isDisplayedFile
+            ? BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(AppTheme.radiusS),
+              )
+            : null,
+        child: Row(
+          children: [
+            // Expand/collapse icon for directories
+            if (node.isDirectory) ...[
+              Icon(
+                node.isExpanded
+                    ? PhosphorIconsRegular.caretDown
+                    : PhosphorIconsRegular.caretRight,
+                size: AppTheme.iconXS,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppTheme.paddingXS),
+            ],
+
+            // Folder/file icon
+            Icon(
+              node.isDirectory
+                  ? (node.isExpanded
+                        ? PhosphorIconsBold.folderOpen
+                        : PhosphorIconsBold.folder)
+                  : FileIconUtils.getIconForExtension(
+                      node.fileChange?.extension ?? '',
+                    ),
+              size: AppTheme.iconS,
+              color: node.isDirectory
+                  ? Theme.of(context).colorScheme.primary
+                  : (node.fileChange?.type.color ??
+                        Theme.of(context).colorScheme.onSurface),
             ),
-            decoration: isDisplayedFile
-                ? BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                  )
-                : null,
-            child: Row(
-              children: [
-                // Expand/collapse icon for directories
-                if (node.isDirectory) ...[
-                  Icon(
-                    node.isExpanded
-                        ? PhosphorIconsRegular.caretDown
-                        : PhosphorIconsRegular.caretRight,
-                    size: AppTheme.iconXS,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: AppTheme.paddingXS),
-                ],
+            const SizedBox(width: AppTheme.paddingS),
 
-                // Folder/file icon
-                Icon(
-                  node.isDirectory
-                      ? (node.isExpanded
-                            ? PhosphorIconsBold.folderOpen
-                            : PhosphorIconsBold.folder)
-                      : FileIconUtils.getIconForExtension(
-                          node.fileChange?.extension ?? '',
-                        ),
-                  size: AppTheme.iconS,
-                  color: node.isDirectory
-                      ? Theme.of(context).colorScheme.primary
-                      : (node.fileChange?.type.color ??
-                            Theme.of(context).colorScheme.onSurface),
+            // Name
+            Expanded(
+              child: BodySmallLabel(node.name, overflow: TextOverflow.ellipsis),
+            ),
+
+            // File change stats
+            if (!node.isDirectory && node.fileChange != null) ...[
+              const SizedBox(width: AppTheme.paddingS),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(AppTheme.paddingXS),
                 ),
-                const SizedBox(width: AppTheme.paddingS),
-
-                // Name
-                Expanded(
-                  child: BodySmallLabel(
-                    node.name,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-
-                // File change stats
-                if (!node.isDirectory && node.fileChange != null) ...[
-                  const SizedBox(width: AppTheme.paddingS),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(AppTheme.paddingXS),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (node.fileChange!.additions > 0) ...[
-                          LabelSmallLabel(
-                            '+${node.fileChange!.additions}',
-                            color: AppTheme.gitAdded,
-                          ),
-                        ],
-                        if (node.fileChange!.additions > 0 &&
-                            node.fileChange!.deletions > 0)
-                          const SizedBox(width: 2),
-                        if (node.fileChange!.deletions > 0) ...[
-                          LabelSmallLabel(
-                            '-${node.fileChange!.deletions}',
-                            color: AppTheme.gitDeleted,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  // File actions menu
-                  const SizedBox(width: AppTheme.paddingXS),
-                  PopupMenuButton<String>(
-                    icon: const Icon(
-                      PhosphorIconsRegular.dotsThreeVertical,
-                      size: AppTheme.iconXS,
-                    ),
-                    tooltip: AppLocalizations.of(context)!.tooltipFileActions,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: AppTheme.paddingL,
-                      minHeight: AppTheme.paddingL,
-                    ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'view_diff',
-                        child: MenuItemContent(
-                          icon: PhosphorIconsRegular.gitDiff,
-                          label: AppLocalizations.of(context)!.viewDiff,
-                          iconSize: AppTheme.iconS,
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'download',
-                        child: MenuItemContent(
-                          icon: PhosphorIconsRegular.download,
-                          label: AppLocalizations.of(
-                            context,
-                          )!.labelDownloadFile,
-                          iconSize: AppTheme.iconS,
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'open',
-                        child: MenuItemContent(
-                          icon: PhosphorIconsRegular.textbox,
-                          label: AppLocalizations.of(context)!.openInEditor,
-                          iconSize: AppTheme.iconS,
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'open_folder',
-                        child: MenuItemContent(
-                          icon: PhosphorIconsRegular.folderOpen,
-                          label: AppLocalizations.of(
-                            context,
-                          )!.labelDownloadAndOpenFolder,
-                          iconSize: AppTheme.iconS,
-                        ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (node.fileChange!.additions > 0) ...[
+                      LabelSmallLabel(
+                        '+${node.fileChange!.additions}',
+                        color: AppTheme.gitAdded,
                       ),
                     ],
-                    onSelected: (value) async {
-                      final isDeleted =
-                          node.fileChange!.type == FileChangeType.deleted;
-                      switch (value) {
-                        case 'view_diff':
-                          showCommitFileDiffDialog(
-                            context,
-                            commitHash: widget.commitHash,
-                            filePath: node.fullPath,
-                          );
-                          break;
-                        case 'download':
-                          await _downloadFile(
-                            context,
-                            node.fullPath,
-                            isDeleted: isDeleted,
-                          );
-                          break;
-                        case 'open':
-                          await _openInEditor(
-                            context,
-                            node.fullPath,
-                            isDeleted: isDeleted,
-                          );
-                          break;
-                        case 'open_folder':
-                          await _downloadAndOpenFolder(
-                            context,
-                            node.fullPath,
-                            isDeleted: isDeleted,
-                          );
-                          break;
-                      }
-                    },
+                    if (node.fileChange!.additions > 0 &&
+                        node.fileChange!.deletions > 0)
+                      const SizedBox(width: 2),
+                    if (node.fileChange!.deletions > 0) ...[
+                      LabelSmallLabel(
+                        '-${node.fileChange!.deletions}',
+                        color: AppTheme.gitDeleted,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              // File actions menu
+              const SizedBox(width: AppTheme.paddingXS),
+              PopupMenuButton<String>(
+                icon: const Icon(
+                  PhosphorIconsRegular.dotsThreeVertical,
+                  size: AppTheme.iconXS,
+                ),
+                tooltip: AppLocalizations.of(context)!.tooltipFileActions,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: AppTheme.paddingL,
+                  minHeight: AppTheme.paddingL,
+                ),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'view_diff',
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.gitDiff,
+                      label: AppLocalizations.of(context)!.viewDiff,
+                      iconSize: AppTheme.iconS,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'download',
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.download,
+                      label: AppLocalizations.of(context)!.labelDownloadFile,
+                      iconSize: AppTheme.iconS,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'open',
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.textbox,
+                      label: AppLocalizations.of(context)!.openInEditor,
+                      iconSize: AppTheme.iconS,
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'open_folder',
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.folderOpen,
+                      label: AppLocalizations.of(
+                        context,
+                      )!.labelDownloadAndOpenFolder,
+                      iconSize: AppTheme.iconS,
+                    ),
                   ),
                 ],
-              ],
-            ),
-          ),
+                onSelected: (value) async {
+                  final isDeleted =
+                      node.fileChange!.type == FileChangeType.deleted;
+                  switch (value) {
+                    case 'view_diff':
+                      showCommitFileDiffDialog(
+                        context,
+                        commitHash: widget.commitHash,
+                        filePath: node.fullPath,
+                      );
+                      break;
+                    case 'download':
+                      await _downloadFile(
+                        context,
+                        node.fullPath,
+                        isDeleted: isDeleted,
+                      );
+                      break;
+                    case 'open':
+                      await _openInEditor(
+                        context,
+                        node.fullPath,
+                        isDeleted: isDeleted,
+                      );
+                      break;
+                    case 'open_folder':
+                      await _downloadAndOpenFolder(
+                        context,
+                        node.fullPath,
+                        isDeleted: isDeleted,
+                      );
+                      break;
+                  }
+                },
+              ),
+            ],
+          ],
         ),
-
-        // Children (if directory and expanded)
-        if (node.isDirectory && node.isExpanded)
-          ...node.children.map(
-            (child) => _buildTreeNode(context, child, depth + 1),
-          ),
-      ],
+      ),
     );
   }
 

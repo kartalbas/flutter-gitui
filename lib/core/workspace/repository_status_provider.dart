@@ -146,6 +146,7 @@ class RepositoryStatusNotifier
               statusMap['hasUncommittedChanges'] as bool? ?? false,
           remoteCheckedAt: remoteCheckedAt,
           remoteCheckFailure: remoteCheckFailure,
+          remoteUrl: statusMap['remoteUrl'] as String?,
         );
 
         state = {...state, repository.path: status};

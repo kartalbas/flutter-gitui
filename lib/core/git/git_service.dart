@@ -1045,6 +1045,7 @@ class GitService {
 
       int commitsAhead = 0;
       int commitsBehind = 0;
+      String? remoteUrl;
 
       // Only check ahead/behind if there's a remote and current branch
       if (hasRemote && currentBranch != null && currentBranch.isNotEmpty) {
@@ -1053,6 +1054,18 @@ class GitService {
         final remoteName = remoteNameResult.exitCode == 0
             ? remoteNameResult.stdout.toString().trim().split('\n').first
             : 'origin';
+
+        // The URL names the host, and the host names the provider and thus
+        // which account the repository needs - the missing piece when a check
+        // fails for credentials.
+        final remoteUrlResult = await _execute(
+          'remote get-url "$remoteName"',
+          throwOnError: false,
+        );
+        if (remoteUrlResult.exitCode == 0) {
+          final url = remoteUrlResult.stdout.toString().trim();
+          if (url.isNotEmpty) remoteUrl = url;
+        }
 
         // Check if upstream is set, if not try origin/<branch> (logged)
         final upstreamCheckResult = await _execute(
@@ -1105,6 +1118,7 @@ class GitService {
         'commitsAhead': commitsAhead,
         'commitsBehind': commitsBehind,
         'hasUncommittedChanges': hasUncommittedChanges,
+        'remoteUrl': remoteUrl,
       };
     } catch (e) {
       return {'exists': true, 'isValidGit': false, 'error': e.toString()};

@@ -1,3 +1,4 @@
+import '../../git/models/git_remote_identity.dart';
 import 'remote_check_failure.dart';
 
 /// Status of a repository including sync state and health
@@ -48,6 +49,13 @@ class RepositoryStatus {
   /// can resolve, so it has to be told apart from being offline.
   final RemoteCheckFailure remoteCheckFailure;
 
+  /// URL of the remote this repository tracks, as git reports it.
+  ///
+  /// Kept raw so the identity can be derived on demand; a workspace spanning
+  /// several providers otherwise gives no way to tell which account a
+  /// repository needs when its check fails for credentials.
+  final String? remoteUrl;
+
   const RepositoryStatus({
     this.commitsAhead = 0,
     this.commitsBehind = 0,
@@ -60,7 +68,11 @@ class RepositoryStatus {
     this.isGitNotConfigured = false,
     this.remoteCheckedAt,
     this.remoteCheckFailure = RemoteCheckFailure.none,
+    this.remoteUrl,
   });
+
+  /// Where the remote lives, or null for a local-only repository.
+  GitRemoteIdentity? get remoteIdentity => parseRemoteIdentity(remoteUrl);
 
   /// Default status for broken/invalid repositories
   static const RepositoryStatus broken = RepositoryStatus(
@@ -101,6 +113,7 @@ class RepositoryStatus {
     bool? isGitNotConfigured,
     DateTime? remoteCheckedAt,
     RemoteCheckFailure? remoteCheckFailure,
+    String? remoteUrl,
   }) {
     return RepositoryStatus(
       commitsAhead: commitsAhead ?? this.commitsAhead,
@@ -115,6 +128,7 @@ class RepositoryStatus {
       isGitNotConfigured: isGitNotConfigured ?? this.isGitNotConfigured,
       remoteCheckedAt: remoteCheckedAt ?? this.remoteCheckedAt,
       remoteCheckFailure: remoteCheckFailure ?? this.remoteCheckFailure,
+      remoteUrl: remoteUrl ?? this.remoteUrl,
     );
   }
 

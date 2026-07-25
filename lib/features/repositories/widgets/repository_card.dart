@@ -215,6 +215,40 @@ class RepositoryCard extends ConsumerWidget {
             ),
           ],
 
+          // Where the remote lives. With a workspace spanning providers this is
+          // what tells the user which account a repository needs - decisive
+          // when its check failed for missing credentials.
+          if (status.remoteIdentity case final identity?) ...[
+            const SizedBox(height: AppTheme.paddingS),
+            Row(
+              children: [
+                Icon(
+                  PhosphorIconsRegular.cloud,
+                  size: 14,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onSecondaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: AppTheme.paddingXS),
+                Flexible(
+                  child: Tooltip(
+                    message: status.remoteUrl ?? identity.host,
+                    child: BodySmallLabel(
+                      identity.accountHint == null
+                          ? identity.label
+                          : '${identity.label} · ${identity.accountHint}',
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.onSecondaryContainer
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+
           // Description if available
           if (repository.description != null) ...[
             const SizedBox(height: AppTheme.paddingS),

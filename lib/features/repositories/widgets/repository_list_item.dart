@@ -239,6 +239,31 @@ class RepositoryListItem extends ConsumerWidget {
                 const SizedBox(width: AppTheme.paddingM),
               ],
 
+              // Where the remote lives, so a row that needs a sign-in also
+              // says which account it would need.
+              if (status.remoteIdentity case final identity?) ...[
+                Icon(
+                  PhosphorIconsRegular.cloud,
+                  size: AppTheme.iconXS,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: AppTheme.paddingXS),
+                Tooltip(
+                  message: status.remoteUrl ?? identity.host,
+                  child: BodySmallLabel(
+                    identity.accountHint == null
+                        ? identity.label
+                        : '${identity.label} · ${identity.accountHint}',
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.paddingM),
+              ],
+
               Icon(
                 PhosphorIconsRegular.folder,
                 size: AppTheme.iconXS,

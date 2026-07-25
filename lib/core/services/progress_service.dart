@@ -95,11 +95,19 @@ class ProgressNotifier extends StateNotifier<ProgressInfo?> {
   ///
   /// [isAutomatic] marks implicit per-git-command progress, which is
   /// refcounted, non-blocking and yields to an explicitly started operation.
+  ///
+  /// [isBlocking] defaults to blocking for an explicitly started operation and
+  /// non-blocking for automatic progress. Background work the app starts by
+  /// itself - sweeping the workspace, checking for updates - wants both: a name
+  /// and a step count, because an anonymous line cannot say what is running or
+  /// how far it got, but never a modal barrier, because the user did not ask
+  /// for it and must keep working.
   void startOperation(
     String operationName,
     int totalSteps, {
     bool isIndeterminate = false,
     bool isAutomatic = false,
+    bool? isBlocking,
   }) {
     if (isAutomatic) {
       _automaticOperationCount++;
@@ -115,7 +123,7 @@ class ProgressNotifier extends StateNotifier<ProgressInfo?> {
       currentStep: 0,
       totalSteps: totalSteps,
       isIndeterminate: isIndeterminate,
-      isBlocking: !isAutomatic,
+      isBlocking: isBlocking ?? !isAutomatic,
     );
     // Nothing renders yet: an operation that completes before the delay
     // elapses cancels this timer, so fast work never flashes an indicator.

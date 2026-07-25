@@ -7,6 +7,41 @@ import '../components/base_label.dart';
 import '../components/base_card.dart';
 import '../../core/services/progress_service.dart';
 
+/// The caption under the background activity line.
+///
+/// Deliberately small and low-contrast: it has to be readable when looked at
+/// without competing with the content for attention, since it appears for work
+/// the user did not start.
+class _BackgroundProgressLabel extends StatelessWidget {
+  const _BackgroundProgressLabel({required this.progress});
+
+  final ProgressInfo progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final showsCount = !progress.isIndeterminate && progress.totalSteps > 0;
+    final text = showsCount
+        ? '${progress.operationName}… '
+              '${progress.currentStep}/${progress.totalSteps}'
+        : '${progress.operationName}…';
+
+    return Material(
+      color: colorScheme.surfaceContainerHighest,
+      borderRadius: const BorderRadius.vertical(
+        bottom: Radius.circular(AppTheme.radiusS),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.paddingM,
+          vertical: AppTheme.paddingXS,
+        ),
+        child: LabelMediumLabel(text, color: colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
+}
+
 /// Global progress overlay that shows when operations run long enough for
 /// the progress service to surface them
 class ProgressOverlay extends ConsumerWidget {
@@ -22,12 +57,27 @@ class ProgressOverlay extends ConsumerWidget {
 
     // Background git commands must never steal input or attention, so they
     // get the thin activity line along the top edge that browsers and editors
-    // use, instead of a dialog blocking the whole window (#288).
+    // use, instead of a dialog blocking the whole window (#288). Work the app
+    // started by itself also carries a name and, where the total is known, a
+    // count: an anonymous line cannot say what is running or whether it is
+    // progressing at all.
     if (!progress.isBlocking) {
-      return const IgnorePointer(
+      return IgnorePointer(
         child: Align(
           alignment: Alignment.topCenter,
-          child: LinearProgressIndicator(minHeight: 3),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LinearProgressIndicator(
+                minHeight: 3,
+                value: progress.isIndeterminate || progress.totalSteps <= 0
+                    ? null
+                    : progress.progress,
+              ),
+              if (progress.operationName.isNotEmpty)
+                _BackgroundProgressLabel(progress: progress),
+            ],
+          ),
         ),
       );
     }

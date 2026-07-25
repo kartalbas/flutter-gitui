@@ -132,7 +132,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     try {
       await ref
           .read(workspaceRepositoryStatusProvider.notifier)
-          .refreshAll(fetchRemote: true, markLoading: false);
+          .refreshAll(fetchRemote: true);
     } catch (_) {
       // Deliberately silent; see above.
     }

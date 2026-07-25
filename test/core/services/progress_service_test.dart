@@ -181,5 +181,31 @@ void main() {
       notifier.completeOperation();
       expect(notifier.state, isNull);
     });
+
+    test('background work can be named and counted without blocking', () async {
+      // Work the app starts by itself needs both: a name and a count, because
+      // an anonymous line cannot say what runs or how far it got - but never a
+      // modal barrier, because the user did not ask for it.
+      notifier.startOperation('Checking repositories', 16, isBlocking: false);
+      notifier.updateProgress(7);
+
+      await waitPastThreshold();
+
+      final info = notifier.state;
+      expect(info, isNotNull);
+      expect(info!.isBlocking, isFalse);
+      expect(info.operationName, 'Checking repositories');
+      expect(info.currentStep, 7);
+      expect(info.totalSteps, 16);
+
+      notifier.completeOperation();
+      expect(notifier.state, isNull);
+    });
+
+    test('an explicit operation still blocks unless it opts out', () async {
+      notifier.startOperation('Deleting tag', 2);
+      await waitPastThreshold();
+      expect(notifier.state!.isBlocking, isTrue);
+    });
   });
 }

@@ -10,6 +10,7 @@ import 'models/repository_status.dart';
 import 'models/workspace_repository.dart';
 import 'workspace_provider.dart';
 import '../services/logger_service.dart';
+import '../services/progress_service.dart';
 
 /// Provider for repository statuses (cached)
 class RepositoryStatusNotifier
@@ -70,6 +71,18 @@ class RepositoryStatusNotifier
       // explicitly requested sign-in lifts this.
       allowCredentialPrompts: allowPrompts,
     );
+
+    // Only this repository spins, and only while its own check runs. Marking
+    // every card up front, as refreshAll used to, spun the whole dashboard for
+    // work happening on one repository and said nothing about which. The
+    // existing data is kept so the card refreshes in place instead of blanking.
+    final before = state[repository.path];
+    state = {
+      ...state,
+      repository.path: (before ?? RepositoryStatus.unknown).copyWith(
+        isLoading: true,
+      ),
+    };
 
     try {
       final stopwatch = Stopwatch()..start();
@@ -136,6 +149,15 @@ class RepositoryStatusNotifier
         );
 
         state = {...state, repository.path: status};
+      } else {
+        // Nothing came back, so there is nothing to show - but the spinner
+        // must still stop, or this card would keep turning forever.
+        state = {
+          ...state,
+          repository.path: (before ?? RepositoryStatus.unknown).copyWith(
+            isLoading: false,
+          ),
+        };
       }
     } catch (e) {
       Logger.error('Error checking ${repository.displayName}', e);
@@ -151,14 +173,7 @@ class RepositoryStatusNotifier
   /// known one. That costs one network round trip per repository, so the local
   /// refresh that runs on startup and after local operations leaves it off and
   /// the background sweep turns it on.
-  ///
-  /// [markLoading] blanks every card to "analyzing" before the pass. The
-  /// background sweep turns it off so the dashboard does not flicker through a
-  /// loading state on a timer the user did not trigger.
-  Future<void> refreshAll({
-    bool fetchRemote = false,
-    bool markLoading = true,
-  }) async {
+  Future<void> refreshAll({bool fetchRemote = false}) async {
     final repositories = ref.read(workspaceProvider);
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final configLoading = ref.read(configLoadingProvider);
@@ -167,26 +182,39 @@ class RepositoryStatusNotifier
       '[REFRESH_ALL] Starting refresh of ${repositories.length} repositories (gitPath=${gitExecutablePath ?? "null"}, configLoading=$configLoading)',
     );
 
-    // First, set all repositories to loading state immediately
-    if (markLoading) {
-      final loadingStates = <String, RepositoryStatus>{};
-      for (final repo in repositories) {
-        loadingStates[repo.path] = RepositoryStatus.unknown;
-      }
+    // No blanket loading state: refreshStatus marks each repository while its
+    // own check runs, so a card spins for its own work rather than because
+    // something is happening somewhere in the workspace.
 
-      // Update state to show "Analyzing..." in UI
-      state = {...state, ...loadingStates};
-      Logger.debug(
-        'Set ${repositories.length} repositories to analyzing state',
-      );
-    }
+    // A named, non-blocking operation so the activity line can say what is
+    // running and how far it got, without a barrier over work the user did not
+    // start. Only worth announcing when the remote is contacted: a local pass
+    // finishes well inside the show delay and would announce nothing.
+    final progress = fetchRemote && repositories.isNotEmpty
+        ? ref.read(progressProvider.notifier)
+        : null;
+    progress?.startOperation(
+      'Checking repositories',
+      repositories.length,
+      isBlocking: false,
+    );
 
-    // Then refresh all repositories in parallel
+    // Refresh all repositories in parallel
     // Each will update the UI as soon as it completes
     final stopwatch = Stopwatch()..start();
-    await Future.wait(
-      repositories.map((repo) => refreshStatus(repo, fetchRemote: fetchRemote)),
-    );
+    try {
+      await Future.wait(
+        repositories.map(
+          (repo) => refreshStatus(
+            repo,
+            fetchRemote: fetchRemote,
+          ).whenComplete(() => progress?.incrementProgress()),
+        ),
+      );
+    } finally {
+      // The indicator must not outlive the sweep even if a check throws.
+      progress?.completeOperation();
+    }
     stopwatch.stop();
     Logger.info(
       'Analyzed ${repositories.length} repositories in ${stopwatch.elapsedMilliseconds}ms',

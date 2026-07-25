@@ -84,6 +84,40 @@ class RepositoryStatus {
     isGitNotConfigured: true,
   );
 
+  /// A copy with individual fields replaced.
+  ///
+  /// Marking a repository as refreshing has to keep what the card already
+  /// knows - its branch, its counts - so it spins in place instead of blanking
+  /// out and flickering back.
+  RepositoryStatus copyWith({
+    int? commitsAhead,
+    int? commitsBehind,
+    bool? exists,
+    bool? isValidGit,
+    bool? hasUncommittedChanges,
+    String? currentBranch,
+    bool? hasRemote,
+    bool? isLoading,
+    bool? isGitNotConfigured,
+    DateTime? remoteCheckedAt,
+    RemoteCheckFailure? remoteCheckFailure,
+  }) {
+    return RepositoryStatus(
+      commitsAhead: commitsAhead ?? this.commitsAhead,
+      commitsBehind: commitsBehind ?? this.commitsBehind,
+      exists: exists ?? this.exists,
+      isValidGit: isValidGit ?? this.isValidGit,
+      hasUncommittedChanges:
+          hasUncommittedChanges ?? this.hasUncommittedChanges,
+      currentBranch: currentBranch ?? this.currentBranch,
+      hasRemote: hasRemote ?? this.hasRemote,
+      isLoading: isLoading ?? this.isLoading,
+      isGitNotConfigured: isGitNotConfigured ?? this.isGitNotConfigured,
+      remoteCheckedAt: remoteCheckedAt ?? this.remoteCheckedAt,
+      remoteCheckFailure: remoteCheckFailure ?? this.remoteCheckFailure,
+    );
+  }
+
   /// Whether the repository is broken (doesn't exist or invalid git)
   bool get isBroken => !exists || !isValidGit;
 

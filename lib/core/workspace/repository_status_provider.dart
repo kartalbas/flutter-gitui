@@ -59,6 +59,11 @@ class RepositoryStatusNotifier
       onCommandExecuted: (log) {
         ref.read(gitCommandLogProvider.notifier).addLog(log);
       },
+      // Nothing here was requested by the user, so a credential helper must
+      // never open a login window: a repository the app cannot authenticate
+      // for stays unverified instead of interrupting whatever the user is
+      // doing. The Pull/Push/Fetch buttons keep their prompts.
+      allowCredentialPrompts: false,
     );
 
     try {

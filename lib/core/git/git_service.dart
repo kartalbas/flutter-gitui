@@ -44,6 +44,17 @@ class GitService {
   final void Function(GitCommandLog)? onCommandExecuted;
   final List<String>? protectedBranches;
   final void Function(String operationName, bool isComplete)? onProgressUpdate;
+
+  /// Whether a credential helper may open its own login window for these
+  /// commands.
+  ///
+  /// True for anything the user started: being asked to sign in after clicking
+  /// Pull is expected. False for background work, where a helper such as Git
+  /// Credential Manager would otherwise throw a login dialog over whatever the
+  /// user is doing for an operation they never requested. Such a repository
+  /// fails its fetch quietly instead and stays marked unverified.
+  final bool allowCredentialPrompts;
+
   late final Shell _shell;
 
   GitService(
@@ -52,6 +63,7 @@ class GitService {
     this.onCommandExecuted,
     this.protectedBranches,
     this.onProgressUpdate,
+    this.allowCredentialPrompts = true,
   }) {
     _shell = Shell(
       workingDirectory: repoPath,
@@ -94,6 +106,13 @@ class GitService {
         'GIT_TERMINAL_PROMPT': '0',
         'GIT_ASKPASS': '',
         'SSH_ASKPASS': '',
+        // The variables above only cover git's own terminal prompt and SSH. A
+        // credential helper such as Git Credential Manager is a separate
+        // program with its own window, which none of them reach, so a job the
+        // user did not start would pop a login dialog over their work. This
+        // silences older GCM versions; newer ones honour the
+        // credential.interactive=false passed per command below.
+        if (!allowCredentialPrompts) 'GCM_INTERACTIVE': 'never',
         // Same for SSH host-key and password prompts.
         'GIT_SSH_COMMAND':
             'ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new',
@@ -208,8 +227,18 @@ class GitService {
     }
 
     final startTime = DateTime.now();
-    // Use configured git executable path instead of just 'git'
-    final fullCommand = '"$gitExecutablePath" $command';
+    // Use configured git executable path instead of just 'git'.
+    //
+    // Background work additionally forbids the credential helper from going
+    // interactive. The environment blocks git's own terminal prompt and SSH,
+    // but a helper like Git Credential Manager is a separate program with its
+    // own window that those never reach; without this an unrequested fetch
+    // pops a login dialog over the user's work. Config options must precede
+    // the subcommand.
+    final credentialFlag = allowCredentialPrompts
+        ? ''
+        : '-c credential.interactive=false ';
+    final fullCommand = '"$gitExecutablePath" $credentialFlag$command';
 
     // Extract operation name from command for progress display
     final operationName = _getOperationName(command);

@@ -19,6 +19,7 @@ import '../../../core/git/widgets/commit_file_diff_dialog.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/editor_launcher_service.dart';
 import '../../../core/services/notification_service.dart';
+import '../../../shared/widgets/double_tap_tracker.dart';
 import '../providers/commit_diff_provider.dart';
 
 /// Tree node representing a file or directory
@@ -56,6 +57,11 @@ class FileTreePanel extends ConsumerStatefulWidget {
 }
 
 class _FileTreePanelState extends ConsumerState<FileTreePanel> {
+  // Clicking a file has to show its diff on the press. Registering onDoubleTap
+  // on the row would make Flutter withhold that click for 300 ms, so the
+  // double click is recognised from the interval between taps instead.
+  final DoubleTapTracker _tapTracker = DoubleTapTracker();
+
   @override
   Widget build(BuildContext context) {
     final changedFilesAsync = ref.watch(
@@ -223,32 +229,35 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         InkWell(
-          onTap: node.isDirectory
-              ? () {
-                  setState(() {
-                    node.isExpanded = !node.isExpanded;
-                  });
-                }
-              : () {
-                  // A click highlights the file so its diff renders in the
-                  // panel beside this list; the dialog stays reachable via
-                  // double-click and the menu for a focused read.
-                  ref
-                      .read(highlightedCommitFileProvider.notifier)
-                      .state = HighlightedCommitFile(
-                    commitHash: widget.commitHash,
-                    path: node.fullPath,
-                  );
-                },
-          onDoubleTap: node.isDirectory
-              ? null
-              : () {
-                  showCommitFileDiffDialog(
-                    context,
-                    commitHash: widget.commitHash,
-                    filePath: node.fullPath,
-                  );
-                },
+          // No onDoubleTap: registering one makes Flutter withhold every single
+          // tap until the 300 ms double-tap window closes, which is what made
+          // clicking a file feel slow. The tracker reports the double click.
+          onTap: () {
+            final isDoubleTap = _tapTracker.registerTap(node, DateTime.now());
+            if (node.isDirectory) {
+              setState(() {
+                node.isExpanded = !node.isExpanded;
+              });
+              return;
+            }
+            if (isDoubleTap) {
+              showCommitFileDiffDialog(
+                context,
+                commitHash: widget.commitHash,
+                filePath: node.fullPath,
+              );
+              return;
+            }
+            // A click highlights the file so its diff renders in the panel
+            // beside this list; the dialog stays reachable via double-click
+            // and the menu for a focused read.
+            ref
+                .read(highlightedCommitFileProvider.notifier)
+                .state = HighlightedCommitFile(
+              commitHash: widget.commitHash,
+              path: node.fullPath,
+            );
+          },
           child: Container(
             padding: EdgeInsets.only(
               left: depth * AppTheme.paddingM,

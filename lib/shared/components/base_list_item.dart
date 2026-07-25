@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
+import '../widgets/double_tap_tracker.dart';
 import 'base_animated_widgets.dart';
 
 /// Base component for all list item patterns in the app.
@@ -115,6 +116,23 @@ class BaseListItem extends StatefulWidget {
 class _BaseListItemState extends State<BaseListItem> {
   bool _isHovered = false;
 
+  // Rows must react on the press, so the double click is recognised from the
+  // interval between taps rather than through the detector's onDoubleTap,
+  // which would hold every single tap for 300 ms. Each row has its own state
+  // and therefore its own tracker, so `this` identifies the row. See
+  // DoubleTapTracker.
+  final DoubleTapTracker _tapTracker = DoubleTapTracker();
+
+  void _handleTap() {
+    if (!widget.isSelectable) return;
+    final isDoubleTap = _tapTracker.registerTap(this, DateTime.now());
+    if (isDoubleTap && widget.onDoubleTap != null) {
+      widget.onDoubleTap!();
+      return;
+    }
+    widget.onTap?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -180,8 +198,13 @@ class _BaseListItemState extends State<BaseListItem> {
           ? SystemMouseCursors.click
           : SystemMouseCursors.basic,
       child: GestureDetector(
-        onTap: widget.isSelectable ? widget.onTap : null,
-        onDoubleTap: widget.isSelectable ? widget.onDoubleTap : null,
+        // Deliberately no onDoubleTap: registering one makes Flutter withhold
+        // every single tap until the 300 ms double-tap window closes.
+        onTap:
+            widget.isSelectable &&
+                (widget.onTap != null || widget.onDoubleTap != null)
+            ? _handleTap
+            : null,
         onSecondaryTapDown: widget.onSecondaryTap != null
             ? (details) => widget.onSecondaryTap!(details.globalPosition)
             : null,

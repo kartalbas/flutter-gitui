@@ -4,6 +4,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../models/tree_node.dart';
+import 'double_tap_tracker.dart';
 
 /// A base tree item widget that handles common tree item rendering patterns.
 ///
@@ -19,7 +20,7 @@ import '../models/tree_node.dart';
 /// - [trailingWidget] - Widget to show after the name (e.g., status badge, menu)
 /// - [fileIcon] - Custom icon for files (defaults to generic file icon)
 /// - [fileIconColor] - Custom color for the file icon
-class BaseTreeItem extends StatelessWidget {
+class BaseTreeItem extends StatefulWidget {
   /// The tree node to render
   final TreeNodeMixin node;
 
@@ -69,16 +70,46 @@ class BaseTreeItem extends StatelessWidget {
   });
 
   @override
+  State<BaseTreeItem> createState() => _BaseTreeItemState();
+}
+
+class _BaseTreeItemState extends State<BaseTreeItem> {
+  // Rows must react on the press, so the double click is recognised from the
+  // interval between taps instead of through the detector's onDoubleTap, which
+  // would hold every single tap for 300 ms. See DoubleTapTracker.
+  final DoubleTapTracker _tapTracker = DoubleTapTracker();
+
+  void _handleTap() {
+    final isDoubleTap = _tapTracker.registerTap(widget.node, DateTime.now());
+    if (isDoubleTap && widget.onDoubleTap != null) {
+      widget.onDoubleTap!();
+      return;
+    }
+    widget.onTap?.call();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final node = widget.node;
+    final isSelected = widget.isSelected;
+    final depth = widget.depth;
+    final indentPerLevel = widget.indentPerLevel;
+    final leadingWidget = widget.leadingWidget;
+    final trailingWidget = widget.trailingWidget;
+    final fileIcon = widget.fileIcon;
+    final fileIconColor = widget.fileIconColor;
+    final onTap = widget.onTap;
+    final onExpandToggle = widget.onExpandToggle;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        onDoubleTap: onDoubleTap,
+        // Deliberately no onDoubleTap: registering one makes Flutter withhold
+        // every single tap until the 300 ms double-tap window closes.
+        onTap: _handleTap,
         child: Container(
           padding: EdgeInsets.only(
             left: depth * indentPerLevel + AppTheme.paddingS,
@@ -93,7 +124,7 @@ class BaseTreeItem extends StatelessWidget {
             children: [
               // Optional leading widget (e.g., checkbox)
               if (leadingWidget != null) ...[
-                leadingWidget!,
+                leadingWidget,
                 const SizedBox(width: AppTheme.paddingXS),
               ],
 
@@ -150,7 +181,7 @@ class BaseTreeItem extends StatelessWidget {
               // Optional trailing widget (e.g., status badge, menu)
               if (trailingWidget != null) ...[
                 const SizedBox(width: AppTheme.paddingS),
-                trailingWidget!,
+                trailingWidget,
               ],
             ],
           ),

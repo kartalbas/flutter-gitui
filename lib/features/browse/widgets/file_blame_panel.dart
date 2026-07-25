@@ -437,21 +437,58 @@ ${line.summary}
     }
   }
 
-  Widget _buildDetailRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingS),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(width: 60, child: TitleSmallLabel('$label:')),
-          Expanded(
-            child: SelectableText(
-              value,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-            ),
+  /// The label/value pairs of the statistics, as a two-column grid.
+  ///
+  /// The label column sizes itself to the longest label and every row shares
+  /// that width, so the values line up. It used to be a fixed 60 pixels, which
+  /// is narrower than "Total Lines:" even in English: the label wrapped inside
+  /// the word and the top-aligned value ended up beside its first line, reading
+  /// as a superscript. A fixed width could not hold anyway - the same labels are
+  /// longer in every other locale ("Zeilen gesamt:", "Líneas Totales:").
+  Widget _buildStatistics(BuildContext context, FileBlame blame) {
+    final l10n = AppLocalizations.of(context)!;
+    return Table(
+      columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        _buildStatisticRow(context, l10n.totalLines, '${blame.totalLines}'),
+        _buildStatisticRow(
+          context,
+          l10n.authors,
+          '${blame.uniqueAuthors.length}',
+        ),
+        _buildStatisticRow(
+          context,
+          l10n.commitsLabel,
+          '${blame.uniqueCommits.length}',
+        ),
+      ],
+    );
+  }
+
+  TableRow _buildStatisticRow(
+    BuildContext context,
+    String label,
+    String value,
+  ) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingS),
+          child: TitleSmallLabel('$label:'),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+            left: AppTheme.paddingM,
+            top: AppTheme.paddingS,
+            bottom: AppTheme.paddingS,
           ),
-        ],
-      ),
+          child: SelectableText(
+            value,
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+          ),
+        ),
+      ],
     );
   }
 
@@ -465,21 +502,7 @@ ${line.summary}
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow(
-                context,
-                AppLocalizations.of(context)!.totalLines,
-                blame.totalLines.toString(),
-              ),
-              _buildDetailRow(
-                context,
-                AppLocalizations.of(context)!.authors,
-                blame.uniqueAuthors.length.toString(),
-              ),
-              _buildDetailRow(
-                context,
-                AppLocalizations.of(context)!.commitsLabel,
-                blame.uniqueCommits.length.toString(),
-              ),
+              _buildStatistics(context, blame),
               const SizedBox(height: AppTheme.paddingM),
               TitleSmallLabel(AppLocalizations.of(context)!.contributors),
               const SizedBox(height: AppTheme.paddingS),

@@ -13,6 +13,7 @@ import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../components/base_dialog.dart';
+import 'select_hosted_repository_dialog.dart';
 
 /// Dialog for cloning a Git repository
 class CloneRepositoryDialog extends ConsumerStatefulWidget {
@@ -65,6 +66,19 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               enabled: !_isCloning,
               autofocus: true,
               onChanged: (_) => _autoFillPath(),
+            ),
+
+            // Picking beats typing: the URL of a repository on a host the
+            // workspace already uses can be looked up instead of recalled.
+            Align(
+              alignment: Alignment.centerRight,
+              child: BaseButton(
+                label: 'Browse repositories',
+                leadingIcon: PhosphorIconsRegular.cloudArrowDown,
+                variant: ButtonVariant.tertiary,
+                size: ButtonSize.small,
+                onPressed: _isCloning ? null : _selectHostedRepository,
+              ),
             ),
             const SizedBox(height: AppTheme.paddingM),
 
@@ -213,6 +227,20 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
         ),
       ],
     );
+  }
+
+  /// Looks up a repository on a host the workspace already uses and puts its
+  /// URL in the field, so the destination path is derived exactly as it would
+  /// be for a URL typed by hand.
+  Future<void> _selectHostedRepository() async {
+    final selected = await showSelectHostedRepositoryDialog(context);
+    if (selected == null || !mounted) return;
+
+    setState(() {
+      _urlController.text = selected.cloneUrl;
+      _errorMessage = null;
+    });
+    _autoFillPath();
   }
 
   void _autoFillPath() {

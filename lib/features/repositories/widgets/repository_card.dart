@@ -9,6 +9,7 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../core/workspace/models/repository_status.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../core/workspace/repository_status_provider.dart';
 import '../../../core/extensions/date_time_extensions.dart';
@@ -304,29 +305,16 @@ class RepositoryCard extends ConsumerWidget {
 
                 // Nothing outstanding. The remote-tracking refs only move on a
                 // fetch, so claiming to be in sync before one has happened
-                // would report a clean state that was never verified; such a
-                // repository says so instead.
+                // would report a clean state that was never verified. A
+                // repository the check could not reach says why instead, and
+                // the one case the user can resolve offers to do it.
                 if (!status.isBroken &&
                     !status.hasIncoming &&
                     !status.hasOutgoing &&
                     !status.hasUncommittedChanges &&
                     status.exists &&
                     status.isValidGit)
-                  status.isRemoteUnchecked
-                      ? _buildStatusBadge(
-                          context,
-                          PhosphorIconsRegular.clockCountdown,
-                          'Not checked',
-                          Theme.of(context).colorScheme.onSurfaceVariant,
-                          isSelected,
-                        )
-                      : _buildStatusBadge(
-                          context,
-                          PhosphorIconsRegular.checkCircle,
-                          'Up to date',
-                          Theme.of(context).colorScheme.primary,
-                          isSelected,
-                        ),
+                  _buildVerificationBadge(context, ref, status, isSelected),
               ],
             ),
 
@@ -424,6 +412,95 @@ class RepositoryCard extends ConsumerWidget {
             .clearResult(repository.path);
       },
     );
+  }
+
+  /// The badge for a repository with nothing outstanding.
+  ///
+  /// "Up to date" is only claimed once the remote was actually contacted.
+  /// Otherwise the badge names what stopped the check, because a repository
+  /// that silently sits on "not checked" tells the user nothing and offers
+  /// nothing to do. The missing-credentials case is the one they can resolve,
+  /// so it is a button: pressing it fetches that one repository *with* prompts
+  /// allowed, which is legitimate because they asked for it.
+  Widget _buildVerificationBadge(
+    BuildContext context,
+    WidgetRef ref,
+    RepositoryStatus status,
+    bool isSelected,
+  ) {
+    if (status.needsSignIn) {
+      return Tooltip(
+        message: 'This repository needs a sign-in. Click to authenticate.',
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _signIn(context, ref),
+          child: _buildStatusBadge(
+            context,
+            PhosphorIconsRegular.signIn,
+            'Sign-in required',
+            Theme.of(context).colorScheme.tertiary,
+            isSelected,
+          ),
+        ),
+      );
+    }
+
+    if (status.isRemoteUnreachable) {
+      return Tooltip(
+        message: 'The remote could not be reached. It will be retried.',
+        child: _buildStatusBadge(
+          context,
+          PhosphorIconsRegular.cloudSlash,
+          'Unreachable',
+          Theme.of(context).colorScheme.onSurfaceVariant,
+          isSelected,
+        ),
+      );
+    }
+
+    if (status.remoteCheckFailedUnknown) {
+      return Tooltip(
+        message: 'The remote check failed. See the command log for details.',
+        child: _buildStatusBadge(
+          context,
+          PhosphorIconsRegular.warningCircle,
+          'Check failed',
+          Theme.of(context).colorScheme.error,
+          isSelected,
+        ),
+      );
+    }
+
+    if (status.isRemoteUnchecked) {
+      return Tooltip(
+        message: 'Not compared against the remote yet.',
+        child: _buildStatusBadge(
+          context,
+          PhosphorIconsRegular.clockCountdown,
+          'Not checked',
+          Theme.of(context).colorScheme.onSurfaceVariant,
+          isSelected,
+        ),
+      );
+    }
+
+    return _buildStatusBadge(
+      context,
+      PhosphorIconsRegular.checkCircle,
+      'Up to date',
+      Theme.of(context).colorScheme.primary,
+      isSelected,
+    );
+  }
+
+  /// Fetches this one repository with credential prompts allowed.
+  ///
+  /// The background sweep runs without them so it can never interrupt; here the
+  /// user explicitly asked, so the helper's sign-in window is expected.
+  Future<void> _signIn(BuildContext context, WidgetRef ref) async {
+    await ref
+        .read(workspaceRepositoryStatusProvider.notifier)
+        .refreshStatus(repository, fetchRemote: true, allowPrompts: true);
   }
 
   Widget _buildStatusBadge(

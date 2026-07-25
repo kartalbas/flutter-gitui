@@ -171,7 +171,31 @@ class RepositoryListItem extends ConsumerWidget {
                     status.exists &&
                     status.isValidGit) ...[
                   const SizedBox(width: AppTheme.paddingXS),
-                  if (status.isRemoteUnchecked)
+                  if (status.needsSignIn)
+                    _buildCompactBadge(
+                      context,
+                      PhosphorIconsRegular.signIn,
+                      Theme.of(context).colorScheme.tertiary,
+                      isSelected,
+                      label: 'Sign-in required',
+                    )
+                  else if (status.isRemoteUnreachable)
+                    _buildCompactBadge(
+                      context,
+                      PhosphorIconsRegular.cloudSlash,
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                      isSelected,
+                      label: 'Unreachable',
+                    )
+                  else if (status.remoteCheckFailedUnknown)
+                    _buildCompactBadge(
+                      context,
+                      PhosphorIconsRegular.warningCircle,
+                      Theme.of(context).colorScheme.error,
+                      isSelected,
+                      label: 'Check failed',
+                    )
+                  else if (status.isRemoteUnchecked)
                     _buildCompactBadge(
                       context,
                       PhosphorIconsRegular.clockCountdown,

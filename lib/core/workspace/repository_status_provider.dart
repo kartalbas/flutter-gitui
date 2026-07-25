@@ -3,7 +3,9 @@ import 'package:riverpod/legacy.dart';
 
 import '../git/git_service.dart';
 import '../git/git_command_log_provider.dart';
+import '../git/git_exception.dart';
 import '../config/config_providers.dart';
+import 'models/remote_check_failure.dart';
 import 'models/repository_status.dart';
 import 'models/workspace_repository.dart';
 import 'workspace_provider.dart';
@@ -23,9 +25,13 @@ class RepositoryStatusNotifier
   /// known locally, and the result is stamped as verified. Without it the
   /// counts are only as fresh as the last fetch, which is why a repository that
   /// has never been fetched reports as unchecked instead of in sync.
+  /// [allowPrompts] lets the credential helper open its sign-in window. Only
+  /// for a check the user explicitly asked for: the background sweep must never
+  /// interrupt them with a login dialog for work they did not start.
   Future<void> refreshStatus(
     WorkspaceRepository repository, {
     bool fetchRemote = false,
+    bool allowPrompts = false,
   }) async {
     // Get git executable path from config
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
@@ -59,11 +65,10 @@ class RepositoryStatusNotifier
       onCommandExecuted: (log) {
         ref.read(gitCommandLogProvider.notifier).addLog(log);
       },
-      // Nothing here was requested by the user, so a credential helper must
-      // never open a login window: a repository the app cannot authenticate
-      // for stays unverified instead of interrupting whatever the user is
-      // doing. The Pull/Push/Fetch buttons keep their prompts.
-      allowCredentialPrompts: false,
+      // The background sweep must never open a login window for work the user
+      // did not start; such a repository stays unverified and says so. Only an
+      // explicitly requested sign-in lifts this.
+      allowCredentialPrompts: allowPrompts,
     );
 
     try {
@@ -75,20 +80,31 @@ class RepositoryStatusNotifier
       // not fail the whole check: the local state is still worth showing, it
       // simply stays marked unverified.
       DateTime? remoteCheckedAt;
+      var remoteCheckFailure = RemoteCheckFailure.none;
       if (fetchRemote) {
         final fetched = await gitService.fetch();
-        if (fetched.isSuccess) {
-          remoteCheckedAt = DateTime.now();
-        } else {
-          Logger.debug(
-            '[REFRESH] Fetch failed for ${repository.displayName}; '
-            'status stays unverified',
-          );
-        }
+        fetched.when(
+          success: (_) => remoteCheckedAt = DateTime.now(),
+          failure: (message, error, stackTrace) {
+            // Which failure it is decides what the card can offer: only a
+            // missing sign-in is something the user can resolve, and saying so
+            // is the difference between an actionable card and a silent one.
+            remoteCheckFailure = classifyRemoteCheckFailure(
+              error is GitException ? '$message\n${error.stderr}' : message,
+            );
+            Logger.debug(
+              '[REFRESH] Fetch failed for ${repository.displayName}: '
+              '$remoteCheckFailure',
+            );
+          },
+        );
       } else {
-        // Keep an earlier verification: a plain refresh must not downgrade a
-        // repository that was fetched a moment ago back to unchecked.
-        remoteCheckedAt = state[repository.path]?.remoteCheckedAt;
+        // Keep an earlier verification and its reason: a plain refresh must
+        // neither downgrade a repository that was fetched a moment ago back to
+        // unchecked, nor forget that it needs a sign-in.
+        final previous = state[repository.path];
+        remoteCheckedAt = previous?.remoteCheckedAt;
+        remoteCheckFailure = previous?.remoteCheckFailure ?? remoteCheckFailure;
       }
 
       final statusMap = await gitService.getRepositoryStatus(repository.path);
@@ -116,6 +132,7 @@ class RepositoryStatusNotifier
           hasUncommittedChanges:
               statusMap['hasUncommittedChanges'] as bool? ?? false,
           remoteCheckedAt: remoteCheckedAt,
+          remoteCheckFailure: remoteCheckFailure,
         );
 
         state = {...state, repository.path: status};

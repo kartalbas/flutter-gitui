@@ -1,3 +1,5 @@
+import 'remote_check_failure.dart';
+
 /// Status of a repository including sync state and health
 class RepositoryStatus {
   /// Number of commits ahead of remote (unpushed)
@@ -38,6 +40,14 @@ class RepositoryStatus {
   /// latter.
   final DateTime? remoteCheckedAt;
 
+  /// Why the last attempt to reach the remote failed, if it did.
+  ///
+  /// Failing quietly kept the app from interrupting the user, but reporting
+  /// every failure as merely "not checked" hid the reason and left nothing to
+  /// act on. A repository that only needs a sign-in is the one case the user
+  /// can resolve, so it has to be told apart from being offline.
+  final RemoteCheckFailure remoteCheckFailure;
+
   const RepositoryStatus({
     this.commitsAhead = 0,
     this.commitsBehind = 0,
@@ -49,6 +59,7 @@ class RepositoryStatus {
     this.isLoading = false,
     this.isGitNotConfigured = false,
     this.remoteCheckedAt,
+    this.remoteCheckFailure = RemoteCheckFailure.none,
   });
 
   /// Default status for broken/invalid repositories
@@ -76,11 +87,30 @@ class RepositoryStatus {
   /// Whether the repository is broken (doesn't exist or invalid git)
   bool get isBroken => !exists || !isValidGit;
 
-  /// Whether the sync state is unverified: the repository tracks a remote that
-  /// has not been contacted, so the ahead/behind counts cannot be trusted and
-  /// the card must not report being in sync.
-  bool get isRemoteUnchecked =>
+  /// Whether the remote tracks something the app could not verify, for any
+  /// reason: the counts cannot be trusted, so the card must not report sync.
+  bool get isRemoteUnverified =>
       hasRemote && remoteCheckedAt == null && !isBroken && !isGitNotConfigured;
+
+  /// Unverified because the attempt has not happened yet, as opposed to having
+  /// been tried and failed. Only this one is genuinely "not checked".
+  bool get isRemoteUnchecked =>
+      isRemoteUnverified && remoteCheckFailure == RemoteCheckFailure.none;
+
+  /// The remote refused the app because it had no credentials to offer. The
+  /// one failure the user can resolve, so the card offers to sign in.
+  bool get needsSignIn =>
+      isRemoteUnverified &&
+      remoteCheckFailure == RemoteCheckFailure.authenticationRequired;
+
+  /// The remote could not be reached at all - offline, DNS, server down.
+  bool get isRemoteUnreachable =>
+      isRemoteUnverified &&
+      remoteCheckFailure == RemoteCheckFailure.unreachable;
+
+  /// Tried, failed, and the reason did not match a known shape.
+  bool get remoteCheckFailedUnknown =>
+      isRemoteUnverified && remoteCheckFailure == RemoteCheckFailure.failed;
 
   /// Whether there are incoming changes (commits to pull)
   bool get hasIncoming => commitsBehind > 0;

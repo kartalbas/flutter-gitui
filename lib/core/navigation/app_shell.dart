@@ -16,6 +16,7 @@ import '../../shared/widgets/quick_settings_menu.dart';
 import '../../features/repositories/widgets/global_branch_switcher.dart';
 import '../../shared/widgets/language_selector.dart';
 import '../../shared/widgets/progress_overlay.dart';
+import '../../shared/widgets/overflow_action_bar.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_badge.dart';
@@ -85,6 +86,10 @@ class AppShell extends ConsumerStatefulWidget {
   @override
   ConsumerState<AppShell> createState() => _AppShellState();
 }
+
+/// Width the six git actions need to all show as icons.
+const double _gitActionBarWidth =
+    6 * OverflowActionBar.itemExtent + 5 * OverflowActionBar.spacing;
 
 class _AppShellState extends ConsumerState<AppShell> {
   bool _hasCheckedSettings = false;
@@ -396,202 +401,126 @@ class _AppShellState extends ConsumerState<AppShell> {
                               ),
                             ),
                           ),
-                          child: Row(
-                            children: [
-                              // The switcher/action cluster scrolls because
-                              // the git actions are always rendered now
-                              // (#303) and must not overflow the toolbar at
-                              // the minimum window width.
-                              Expanded(
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      // Workspace switcher
-                                      const WorkspaceSwitcher(),
-                                      const SizedBox(width: AppTheme.paddingM),
-                                      // Repository switcher
-                                      const RepositorySwitcher(),
-                                      const SizedBox(width: AppTheme.paddingM),
-                                      // Branch switcher
-                                      const BranchSwitcher(),
-                                      const SizedBox(width: AppTheme.paddingM),
-                                      // Global branch switcher
-                                      const GlobalBranchSwitcher(),
-                                      const SizedBox(width: AppTheme.paddingM),
-                                      // The git actions stay rendered without a
-                                      // target and grey out with a reason, so the
-                                      // toolbar never shows an unexplained gap (#303).
-                                      _buildGitOperationButton(
-                                        context,
-                                        ref,
-                                        PhosphorIconsRegular.gitBranch,
-                                        _gitActionTooltip(
-                                          context,
-                                          gitActionTargets.batchActionBlock,
-                                          enabledLabel: AppLocalizations.of(
-                                            context,
-                                          )!.createBranch,
+                          // Measured, because how much room the git actions may
+                          // claim before collapsing into their overflow menu
+                          // depends on the window width.
+                          child: LayoutBuilder(
+                            builder: (context, constraints) => Row(
+                              children: [
+                                // Only the switchers scroll. The git actions used
+                                // to scroll with them, which at a narrow width
+                                // simply carried them out of sight - nothing
+                                // indicated more existed. They now sit outside
+                                // the scroll area and collapse into an overflow
+                                // menu instead.
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        // Workspace switcher
+                                        const WorkspaceSwitcher(),
+                                        const SizedBox(
+                                          width: AppTheme.paddingM,
                                         ),
-                                        gitActionTargets.batchActionBlock ==
-                                                null
-                                            ? () => _performCreateBranch(ref)
-                                            : null,
-                                      ),
-                                      const SizedBox(width: AppTheme.paddingS),
-                                      _buildGitOperationButton(
-                                        context,
-                                        ref,
-                                        PhosphorIconsRegular.gitPullRequest,
-                                        _gitActionTooltip(
-                                          context,
-                                          gitActionTargets.createPrBlock,
-                                          enabledLabel: AppLocalizations.of(
-                                            context,
-                                          )!.createPr,
-                                          unsupportedSelectionLabel:
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.selectOnlyOneRepoForPr,
+                                        // Repository switcher
+                                        const RepositorySwitcher(),
+                                        const SizedBox(
+                                          width: AppTheme.paddingM,
                                         ),
-                                        gitActionTargets.createPrBlock == null
-                                            ? () => _performCreatePR(ref)
-                                            : null,
-                                      ),
-                                      const SizedBox(width: AppTheme.paddingS),
-                                      _buildGitOperationButton(
-                                        context,
-                                        ref,
-                                        PhosphorIconsRegular.gitMerge,
-                                        _gitActionTooltip(
-                                          context,
-                                          gitActionTargets.mergeBlock,
-                                          enabledLabel: AppLocalizations.of(
-                                            context,
-                                          )!.mergeBranches,
-                                          unsupportedSelectionLabel:
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.mergeCurrentRepositoryOnly,
+                                        // Branch switcher
+                                        const BranchSwitcher(),
+                                        const SizedBox(
+                                          width: AppTheme.paddingM,
                                         ),
-                                        gitActionTargets.mergeBlock == null
-                                            ? () =>
-                                                  _performMergeBranches(context)
-                                            : null,
-                                      ),
-                                      const SizedBox(width: AppTheme.paddingM),
-                                      _buildGitOperationButton(
-                                        context,
-                                        ref,
-                                        PhosphorIconsRegular.arrowClockwise,
-                                        _gitActionTooltip(
-                                          context,
-                                          gitActionTargets.batchActionBlock,
-                                          enabledLabel: AppLocalizations.of(
-                                            context,
-                                          )!.fetch,
-                                        ),
-                                        gitActionTargets.batchActionBlock ==
-                                                null
-                                            ? () => _performFetch(ref)
-                                            : null,
-                                      ),
-                                      const SizedBox(width: AppTheme.paddingS),
-                                      _buildGitOperationButton(
-                                        context,
-                                        ref,
-                                        PhosphorIconsRegular.arrowDown,
-                                        _gitActionTooltip(
-                                          context,
-                                          gitActionTargets.batchActionBlock,
-                                          enabledLabel: AppLocalizations.of(
-                                            context,
-                                          )!.pull,
-                                        ),
-                                        gitActionTargets.batchActionBlock ==
-                                                null
-                                            ? () => _performPull(ref)
-                                            : null,
-                                      ),
-                                      const SizedBox(width: AppTheme.paddingS),
-                                      _buildGitOperationButton(
-                                        context,
-                                        ref,
-                                        PhosphorIconsRegular.arrowUp,
-                                        _gitActionTooltip(
-                                          context,
-                                          gitActionTargets.batchActionBlock,
-                                          enabledLabel: AppLocalizations.of(
-                                            context,
-                                          )!.push,
-                                        ),
-                                        gitActionTargets.batchActionBlock ==
-                                                null
-                                            ? () => _performPush(ref)
-                                            : null,
-                                      ),
-                                    ],
+                                        // Global branch switcher
+                                        const GlobalBranchSwitcher(),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: AppTheme.paddingS),
-                              BaseIconButton(
-                                icon: PhosphorIconsRegular.magnifyingGlass,
-                                tooltip: AppLocalizations.of(
-                                  context,
-                                )!.commandPaletteTooltip,
-                                onPressed: () => _showCommandPalette(context),
-                                size: ButtonSize.small,
-                              ),
-                              const SizedBox(width: AppTheme.paddingS),
-                              BaseIconButton(
-                                icon: PhosphorIconsRegular.terminal,
-                                tooltip: AppLocalizations.of(
-                                  context,
-                                )!.toggleCommandLogTooltip,
-                                onPressed: () {
-                                  ref
-                                      .read(configProvider.notifier)
-                                      .setCommandLogPanelVisible(
-                                        !ref.read(
-                                          commandLogPanelVisibleProvider,
+                                const SizedBox(width: AppTheme.paddingM),
+                                // The git actions stay rendered without a target
+                                // and grey out with a reason, so the toolbar
+                                // never shows an unexplained gap (#303). Capped
+                                // so a narrow window shrinks them into the
+                                // overflow menu rather than starving the
+                                // switchers.
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: (constraints.maxWidth * 0.4)
+                                        .clamp(
+                                          OverflowActionBar.itemExtent,
+                                          _gitActionBarWidth,
                                         ),
-                                      );
-                                },
-                                size: ButtonSize.small,
-                              ),
-                              const SizedBox(width: AppTheme.paddingS),
-                              // Quick settings menu
-                              const QuickSettingsMenu(),
-                              const SizedBox(width: AppTheme.paddingS),
-                              // Quiet, permanent signal that an update is
-                              // ready; the user opens it when they choose.
-                              if (updateAvailable != null) ...[
+                                  ),
+                                  child: OverflowActionBar(
+                                    actions: _buildGitActions(
+                                      context,
+                                      ref,
+                                      gitActionTargets,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
                                 BaseIconButton(
-                                  icon: PhosphorIconsFill.downloadSimple,
-                                  iconColor: Theme.of(
+                                  icon: PhosphorIconsRegular.magnifyingGlass,
+                                  tooltip: AppLocalizations.of(
                                     context,
-                                  ).colorScheme.primary,
-                                  tooltip: AppLocalizations.of(context)!
-                                      .updateReadyTooltip(
-                                        updateAvailable.version,
-                                      ),
+                                  )!.commandPaletteTooltip,
+                                  onPressed: () => _showCommandPalette(context),
+                                  size: ButtonSize.small,
+                                ),
+                                const SizedBox(width: AppTheme.paddingS),
+                                BaseIconButton(
+                                  icon: PhosphorIconsRegular.terminal,
+                                  tooltip: AppLocalizations.of(
+                                    context,
+                                  )!.toggleCommandLogTooltip,
                                   onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (_) => UpdateAvailableDialog(
-                                        updateInfo: updateAvailable,
-                                      ),
-                                    );
+                                    ref
+                                        .read(configProvider.notifier)
+                                        .setCommandLogPanelVisible(
+                                          !ref.read(
+                                            commandLogPanelVisibleProvider,
+                                          ),
+                                        );
                                   },
                                   size: ButtonSize.small,
                                 ),
                                 const SizedBox(width: AppTheme.paddingS),
+                                // Quick settings menu
+                                const QuickSettingsMenu(),
+                                const SizedBox(width: AppTheme.paddingS),
+                                // Quiet, permanent signal that an update is
+                                // ready; the user opens it when they choose.
+                                if (updateAvailable != null) ...[
+                                  BaseIconButton(
+                                    icon: PhosphorIconsFill.downloadSimple,
+                                    iconColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    tooltip: AppLocalizations.of(context)!
+                                        .updateReadyTooltip(
+                                          updateAvailable.version,
+                                        ),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (_) => UpdateAvailableDialog(
+                                          updateInfo: updateAvailable,
+                                        ),
+                                      );
+                                    },
+                                    size: ButtonSize.small,
+                                  ),
+                                  const SizedBox(width: AppTheme.paddingS),
+                                ],
+                                // Language selector
+                                const LanguageSelector(),
                               ],
-                              // Language selector
-                              const LanguageSelector(),
-                            ],
+                            ),
                           ),
                         ),
                         // Warning banner for missing settings
@@ -828,20 +757,88 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   /// Build a git operation button
-  Widget _buildGitOperationButton(
+  /// The toolbar's git actions, in the order they appear.
+  ///
+  /// Built as data rather than as widgets so the bar can decide which of them
+  /// fit as icons and hand the rest to its overflow menu, where each carries
+  /// its name. They stay listed even when unavailable: the tooltip then says
+  /// why, which an omitted button could not (#303).
+  List<ToolbarAction> _buildGitActions(
     BuildContext context,
     WidgetRef ref,
-    IconData icon,
-    String tooltip,
-    VoidCallback? onPressed,
+    GitActionTargets gitActionTargets,
   ) {
-    return BaseIconButton(
-      icon: icon,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      size: ButtonSize.small,
-      variant: ButtonVariant.secondary,
-    );
+    final l10n = AppLocalizations.of(context)!;
+    final batchBlock = gitActionTargets.batchActionBlock;
+
+    return [
+      ToolbarAction(
+        icon: PhosphorIconsRegular.gitBranch,
+        label: l10n.createBranch,
+        tooltip: _gitActionTooltip(
+          context,
+          batchBlock,
+          enabledLabel: l10n.createBranch,
+        ),
+        onPressed: batchBlock == null ? () => _performCreateBranch(ref) : null,
+      ),
+      ToolbarAction(
+        icon: PhosphorIconsRegular.gitPullRequest,
+        label: l10n.createPr,
+        tooltip: _gitActionTooltip(
+          context,
+          gitActionTargets.createPrBlock,
+          enabledLabel: l10n.createPr,
+          unsupportedSelectionLabel: l10n.selectOnlyOneRepoForPr,
+        ),
+        onPressed: gitActionTargets.createPrBlock == null
+            ? () => _performCreatePR(ref)
+            : null,
+      ),
+      ToolbarAction(
+        icon: PhosphorIconsRegular.gitMerge,
+        label: l10n.mergeBranches,
+        tooltip: _gitActionTooltip(
+          context,
+          gitActionTargets.mergeBlock,
+          enabledLabel: l10n.mergeBranches,
+          unsupportedSelectionLabel: l10n.mergeCurrentRepositoryOnly,
+        ),
+        onPressed: gitActionTargets.mergeBlock == null
+            ? () => _performMergeBranches(context)
+            : null,
+      ),
+      ToolbarAction(
+        icon: PhosphorIconsRegular.arrowClockwise,
+        label: l10n.fetch,
+        tooltip: _gitActionTooltip(
+          context,
+          batchBlock,
+          enabledLabel: l10n.fetch,
+        ),
+        onPressed: batchBlock == null ? () => _performFetch(ref) : null,
+      ),
+      ToolbarAction(
+        icon: PhosphorIconsRegular.arrowDown,
+        label: l10n.pull,
+        tooltip: _gitActionTooltip(
+          context,
+          batchBlock,
+          enabledLabel: l10n.pull,
+        ),
+        onPressed: batchBlock == null ? () => _performPull(ref) : null,
+      ),
+      ToolbarAction(
+        icon: PhosphorIconsRegular.arrowUp,
+        label: l10n.push,
+        tooltip: _gitActionTooltip(
+          context,
+          batchBlock,
+          enabledLabel: l10n.push,
+        ),
+        onPressed: batchBlock == null ? () => _performPush(ref) : null,
+      ),
+    ];
   }
 
   /// Resolves the repositories the toolbar git actions act on through

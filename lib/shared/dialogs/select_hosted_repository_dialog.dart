@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -12,12 +13,24 @@ import '../components/base_list_item.dart';
 import '../components/base_text_field.dart';
 import '../theme/app_theme.dart';
 
+/// Moves the highlight through the results while the caret stays in the
+/// search field, so filtering and choosing are one keyboard flow.
+class _MoveHighlightIntent extends Intent {
+  const _MoveHighlightIntent(this.delta);
+
+  final int delta;
+}
+
 /// Picks a repository to clone from the hosts the workspace already uses.
 ///
 /// One tab per host, because each is a separate account seeing a separate set
 /// of repositories: results must not be mixed, and a host that cannot be
 /// listed has to say so in its own tab rather than silently contribute
 /// nothing. With a single host no tab bar is shown.
+///
+/// Fully keyboard operable: the search field takes focus on open, the arrow
+/// keys move through the results without leaving it, Enter takes the
+/// highlighted one and Esc closes.
 class SelectHostedRepositoryDialog extends ConsumerStatefulWidget {
   const SelectHostedRepositoryDialog({super.key});
 
@@ -28,15 +41,21 @@ class SelectHostedRepositoryDialog extends ConsumerStatefulWidget {
 
 class _SelectHostedRepositoryDialogState
     extends ConsumerState<SelectHostedRepositoryDialog>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   TabController? _tabController;
   String _query = '';
+  int _highlight = 0;
   int _sourceCount = 0;
+
+  /// Height of one result row, for scrolling the highlight into view.
+  static const double _rowExtent = 56;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     _tabController?.dispose();
     super.dispose();
   }
@@ -49,7 +68,50 @@ class _SelectHostedRepositoryDialogState
     _sourceCount = count;
     _tabController = count == 0
         ? null
-        : TabController(length: count, vsync: this);
+        : (TabController(length: count, vsync: this)
+            // Each host has its own result set, so the highlight cannot carry
+            // over to a tab where that position means something else.
+            ..addListener(() => setState(() => _highlight = 0)));
+  }
+
+  RepositorySource? _activeSource(List<RepositorySource> sources) {
+    if (sources.isEmpty) return null;
+    if (sources.length == 1) return sources.first;
+    final index = _tabController?.index ?? 0;
+    return sources[index.clamp(0, sources.length - 1)];
+  }
+
+  /// The results the keyboard acts on: those of the tab currently shown.
+  List<HostedRepository> _matches(RepositorySource? source) {
+    if (source == null) return const [];
+    final result = ref.watch(sourceRepositoriesProvider(source)).value;
+    if (result == null || result.hasFailed) return const [];
+    return filterRepositories(result.repositories, _query);
+  }
+
+  void _moveHighlight(int delta, int matchCount) {
+    if (matchCount == 0) return;
+    setState(() {
+      _highlight = (_highlight + delta).clamp(0, matchCount - 1);
+    });
+    if (!_scrollController.hasClients) return;
+    // Keep the highlight in view; without this the arrow keys walk past the
+    // bottom of the list and the selection becomes invisible.
+    final target = _highlight * _rowExtent;
+    final position = _scrollController.position;
+    if (target < position.pixels) {
+      _scrollController.jumpTo(target);
+    } else if (target + _rowExtent >
+        position.pixels + position.viewportDimension) {
+      _scrollController.jumpTo(
+        target + _rowExtent - position.viewportDimension,
+      );
+    }
+  }
+
+  void _confirm(List<HostedRepository> matches) {
+    if (matches.isEmpty) return;
+    Navigator.of(context).pop(matches[_highlight.clamp(0, matches.length - 1)]);
   }
 
   @override
@@ -57,6 +119,10 @@ class _SelectHostedRepositoryDialogState
     final l10n = AppLocalizations.of(context)!;
     final sources = ref.watch(repositorySourcesProvider);
     _syncTabController(sources.length);
+
+    final active = _activeSource(sources);
+    final matches = _matches(active);
+    if (_highlight >= matches.length) _highlight = 0;
 
     return BaseDialog(
       icon: PhosphorIconsRegular.cloudArrowDown,
@@ -84,23 +150,64 @@ class _SelectHostedRepositoryDialogState
                       ],
                     ),
                   const SizedBox(height: AppTheme.paddingM),
-                  BaseTextField(
-                    controller: _searchController,
-                    label: l10n.search,
-                    hintText: 'Filter by name, owner or description',
-                    prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-                    autofocus: true,
-                    onChanged: (value) => setState(() => _query = value),
+                  Shortcuts(
+                    shortcuts: const {
+                      SingleActivator(LogicalKeyboardKey.arrowDown):
+                          _MoveHighlightIntent(1),
+                      SingleActivator(LogicalKeyboardKey.arrowUp):
+                          _MoveHighlightIntent(-1),
+                    },
+                    child: Actions(
+                      actions: {
+                        _MoveHighlightIntent:
+                            CallbackAction<_MoveHighlightIntent>(
+                              onInvoke: (intent) {
+                                _moveHighlight(intent.delta, matches.length);
+                                return null;
+                              },
+                            ),
+                      },
+                      child: BaseTextField(
+                        controller: _searchController,
+                        label: l10n.search,
+                        hintText: 'Filter by name, owner or description',
+                        prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                        autofocus: true,
+                        onChanged: (value) => setState(() {
+                          _query = value;
+                          // A new query is a new result set; the old position
+                          // would point at an unrelated row.
+                          _highlight = 0;
+                        }),
+                        onSubmitted: (_) => _confirm(matches),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: AppTheme.paddingM),
                   Expanded(
                     child: sources.length == 1
-                        ? _SourceResults(source: sources.first, query: _query)
+                        ? _SourceResults(
+                            source: sources.first,
+                            query: _query,
+                            highlight: _highlight,
+                            scrollController: _scrollController,
+                          )
                         : TabBarView(
                             controller: _tabController,
                             children: [
                               for (final source in sources)
-                                _SourceResults(source: source, query: _query),
+                                _SourceResults(
+                                  source: source,
+                                  query: _query,
+                                  // Only the visible tab is the one the
+                                  // keyboard is driving.
+                                  highlight: source == active
+                                      ? _highlight
+                                      : null,
+                                  scrollController: source == active
+                                      ? _scrollController
+                                      : null,
+                                ),
                             ],
                           ),
                   ),
@@ -113,6 +220,11 @@ class _SelectHostedRepositoryDialogState
           variant: ButtonVariant.tertiary,
           onPressed: () => Navigator.of(context).pop(),
         ),
+        BaseButton(
+          label: l10n.ok,
+          leadingIcon: PhosphorIconsRegular.check,
+          onPressed: matches.isEmpty ? null : () => _confirm(matches),
+        ),
       ],
     );
   }
@@ -120,10 +232,20 @@ class _SelectHostedRepositoryDialogState
 
 /// The result list of one host.
 class _SourceResults extends ConsumerWidget {
-  const _SourceResults({required this.source, required this.query});
+  const _SourceResults({
+    required this.source,
+    required this.query,
+    this.highlight,
+    this.scrollController,
+  });
 
   final RepositorySource source;
   final String query;
+
+  /// Index the keyboard has moved to, or null when this tab is not in front.
+  final int? highlight;
+
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -155,10 +277,12 @@ class _SourceResults extends ConsumerWidget {
         }
 
         return ListView.builder(
+          controller: scrollController,
           itemCount: matches.length,
           itemBuilder: (context, index) {
             final repository = matches[index];
             return BaseListItem(
+              isSelected: index == highlight,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.paddingM,
                 vertical: AppTheme.paddingS,
@@ -225,7 +349,8 @@ class _FailureMessage extends ConsumerWidget {
             SourceFailure.authenticationRejected =>
               'The stored sign-in for ${source.host} was refused.',
             SourceFailure.requestFailed =>
-              'Could not reach ${source.host}.${result.detail == null ? '' : '\n${result.detail}'}',
+              'Could not reach ${source.host}.'
+                  '${result.detail == null ? '' : '\n${result.detail}'}',
           }, textAlign: TextAlign.center),
           if (needsSignIn) ...[
             const SizedBox(height: AppTheme.paddingM),

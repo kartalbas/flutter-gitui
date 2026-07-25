@@ -38,6 +38,7 @@ import '../../features/repositories/dialogs/batch_operation_progress_dialog.dart
 import '../../features/repositories/dialogs/create_branch_dialog.dart';
 import '../../features/repositories/dialogs/create_pull_request_dialog.dart';
 import '../../shared/dialogs/merge_branches_dialog.dart';
+import '../../shared/dialogs/clone_repository_dialog.dart';
 import '../git/git_service.dart';
 import '../git/git_platform_service.dart';
 import '../git/models/branch.dart';
@@ -87,9 +88,11 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-/// Width the six git actions need to all show as icons.
+/// Width the seven git actions need to all show as icons.
+const int _gitActionCount = 7;
 const double _gitActionBarWidth =
-    6 * OverflowActionBar.itemExtent + 5 * OverflowActionBar.spacing;
+    _gitActionCount * OverflowActionBar.itemExtent +
+    (_gitActionCount - 1) * OverflowActionBar.spacing;
 
 class _AppShellState extends ConsumerState<AppShell> {
   bool _hasCheckedSettings = false;
@@ -462,6 +465,11 @@ class _AppShellState extends ConsumerState<AppShell> {
                                     ),
                                   ),
                                 ),
+                                // Mirrors the switchers' Expanded on the other
+                                // side, so the git actions stay centred in the
+                                // bar instead of drifting with the width of
+                                // whatever sits left of them.
+                                const Expanded(child: SizedBox.shrink()),
                                 const SizedBox(width: AppTheme.paddingS),
                                 BaseIconButton(
                                   icon: PhosphorIconsRegular.magnifyingGlass,
@@ -772,6 +780,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     final batchBlock = gitActionTargets.batchActionBlock;
 
     return [
+      ToolbarAction(
+        icon: PhosphorIconsRegular.downloadSimple,
+        label: l10n.cloneRepository,
+        tooltip: l10n.cloneRepository,
+        // Cloning brings a repository in rather than acting on one, so unlike
+        // its neighbours it needs no target and is never blocked.
+        onPressed: () => showDialog(
+          context: context,
+          builder: (context) => const CloneRepositoryDialog(),
+        ),
+      ),
       ToolbarAction(
         icon: PhosphorIconsRegular.gitBranch,
         label: l10n.createBranch,

@@ -63,6 +63,7 @@ class BaseDialog extends StatelessWidget {
     this.icon,
     this.maxWidth = AppConstants.defaultDialogWidth,
     this.barrierDismissible = true,
+    this.onSubmit,
   });
 
   /// Dialog title
@@ -85,6 +86,14 @@ class BaseDialog extends StatelessWidget {
 
   /// Allow closing by clicking outside dialog
   final bool barrierDismissible;
+
+  /// The dialog's primary action, triggered by Enter from anywhere inside it.
+  ///
+  /// A dialog that can only be completed with the mouse is unfinished: Esc
+  /// already cancels from anywhere, and Enter has to confirm the same way.
+  /// Left null for a dialog with no single primary action, or one whose fields
+  /// need Enter themselves (a multi-line message).
+  final VoidCallback? onSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -135,13 +144,24 @@ class BaseDialog extends StatelessWidget {
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
-        if (event is KeyDownEvent &&
-            event.logicalKey == LogicalKeyboardKey.escape) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+
+        if (event.logicalKey == LogicalKeyboardKey.escape) {
           if (barrierDismissible) {
             Navigator.of(context).pop();
             return KeyEventResult.handled;
           }
         }
+
+        // Enter confirms from anywhere in the dialog, not only while a single
+        // text field happens to hold focus.
+        if (onSubmit != null &&
+            (event.logicalKey == LogicalKeyboardKey.enter ||
+                event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+          onSubmit!();
+          return KeyEventResult.handled;
+        }
+
         return KeyEventResult.ignored;
       },
       child: LayoutBuilder(

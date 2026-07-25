@@ -47,6 +47,9 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
     return BaseDialog(
       icon: PhosphorIconsRegular.downloadSimple,
       title: AppLocalizations.of(context)!.cloneRepository,
+      // Enter clones, from any field; Esc cancels. The dialog must be
+      // completable without reaching for the mouse.
+      onSubmit: _isCloning ? null : _cloneRepository,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -57,53 +60,36 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
             ),
             const SizedBox(height: AppTheme.paddingL),
 
-            // Repository URL
+            // Repository URL. Looking one up is this field's own action, so it
+            // sits inside it as the trailing icon rather than as a button
+            // floating underneath, detached from what it belongs to.
             BaseTextField(
               controller: _urlController,
               label: AppLocalizations.of(context)!.repositoryUrl,
               hintText: AppLocalizations.of(context)!.repositoryUrlHint,
               prefixIcon: PhosphorIconsRegular.globe,
+              suffixIcon: PhosphorIconsRegular.cloudArrowDown,
+              onSuffixTap: _selectHostedRepository,
+              suffixTooltip: 'Browse repositories',
               enabled: !_isCloning,
               autofocus: true,
               onChanged: (_) => _autoFillPath(),
             ),
-
-            // Picking beats typing: the URL of a repository on a host the
-            // workspace already uses can be looked up instead of recalled.
-            Align(
-              alignment: Alignment.centerRight,
-              child: BaseButton(
-                label: 'Browse repositories',
-                leadingIcon: PhosphorIconsRegular.cloudArrowDown,
-                variant: ButtonVariant.tertiary,
-                size: ButtonSize.small,
-                onPressed: _isCloning ? null : _selectHostedRepository,
-              ),
-            ),
             const SizedBox(height: AppTheme.paddingM),
 
-            // Destination path
+            // Destination path, with the folder picker as its trailing action.
+            // The icon used to be decorative and a separate "Browse" button sat
+            // below it - two affordances for one job.
             BaseTextField(
               controller: _pathController,
               label: AppLocalizations.of(context)!.destinationPath,
               hintText: AppLocalizations.of(context)!.destinationPathHint,
               prefixIcon: PhosphorIconsRegular.folder,
               suffixIcon: kIsWeb ? null : PhosphorIconsRegular.folderOpen,
+              onSuffixTap: kIsWeb ? null : _browsePath,
+              suffixTooltip: AppLocalizations.of(context)!.browse,
               enabled: !_isCloning,
             ),
-            if (!kIsWeb && !_isCloning)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: AppTheme.paddingS),
-                  child: BaseButton(
-                    label: AppLocalizations.of(context)!.browse,
-                    variant: ButtonVariant.tertiary,
-                    leadingIcon: PhosphorIconsRegular.folderOpen,
-                    onPressed: _browsePath,
-                  ),
-                ),
-              ),
             const SizedBox(height: AppTheme.paddingM),
 
             // Branch name (optional)

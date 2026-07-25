@@ -61,6 +61,8 @@ class BaseTextField extends StatefulWidget {
     this.errorText,
     this.prefixIcon,
     this.suffixIcon,
+    this.onSuffixTap,
+    this.suffixTooltip,
     this.variant = TextFieldVariant.outlined,
     this.obscureText = false,
     this.showClearButton = false,
@@ -96,6 +98,18 @@ class BaseTextField extends StatefulWidget {
 
   /// Trailing icon (optional)
   final IconData? suffixIcon;
+
+  /// Makes [suffixIcon] the field's action - a picker, a lookup, a generator.
+  ///
+  /// Material puts an action that belongs to a field inside it as a trailing
+  /// icon. Without this the suffix was decorative only, which forced call sites
+  /// to add a separate button underneath the field: two affordances for one job,
+  /// and one of them detached from the field it belongs to.
+  final VoidCallback? onSuffixTap;
+
+  /// What the trailing action does, for its tooltip. Required in spirit
+  /// whenever [onSuffixTap] is set: an icon-only control has to name itself.
+  final String? suffixTooltip;
 
   /// Visual variant (standard, outlined, filled)
   final TextFieldVariant variant;
@@ -216,8 +230,16 @@ class _BaseTextFieldState extends State<BaseTextField> {
         size: ButtonSize.small,
       );
     } else if (widget.suffixIcon != null) {
-      // Custom suffix icon
-      suffixIconWidget = Icon(widget.suffixIcon, size: 20);
+      // An action that belongs to this field belongs inside it; only a suffix
+      // without a handler stays decorative.
+      suffixIconWidget = widget.onSuffixTap == null
+          ? Icon(widget.suffixIcon, size: 20)
+          : BaseIconButton(
+              icon: widget.suffixIcon!,
+              onPressed: widget.enabled ? widget.onSuffixTap : null,
+              tooltip: widget.suffixTooltip,
+              size: ButtonSize.small,
+            );
     }
 
     // Build InputDecoration based on variant

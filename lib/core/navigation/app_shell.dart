@@ -91,6 +91,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   bool _hasShownConfigLoadWarning = false;
   bool _hasShownGitPathWarning = false;
   bool _whatsNewScheduled = false;
+  bool _startupFetchSweepStarted = false;
   Timer? _autoFetchTimer;
   Duration? _autoFetchPeriod;
 
@@ -114,16 +115,26 @@ class _AppShellState extends ConsumerState<AppShell> {
     _autoFetchTimer?.cancel();
     _autoFetchTimer = period == null
         ? null
-        : Timer.periodic(period, (_) => _autoFetch());
+        : Timer.periodic(period, (_) => _fetchWorkspaceInBackground());
   }
 
-  Future<void> _autoFetch() async {
-    if (ref.read(currentRepositoryPathProvider) == null) return;
+  /// Contacts every workspace repository's remote and refreshes the cards.
+  ///
+  /// The ahead/behind counts come from the local remote-tracking refs, so
+  /// without this sweep a repository that has incoming commits still reports
+  /// zero behind and its card claims to be in sync. Fetching only the active
+  /// repository, as this used to, left every other card unverified.
+  ///
+  /// Runs quietly: an unreachable remote or a repository needing credentials
+  /// must not raise anything the user did not ask for. Those repositories stay
+  /// marked unverified instead of falsely reporting to be in sync.
+  Future<void> _fetchWorkspaceInBackground() async {
     try {
-      await ref.read(gitActionsProvider).fetchRemote();
+      await ref
+          .read(workspaceRepositoryStatusProvider.notifier)
+          .refreshAll(fetchRemote: true, markLoading: false);
     } catch (_) {
-      // A fetch the user did not ask for must stay invisible: an unreachable
-      // remote would otherwise raise the same error every single interval.
+      // Deliberately silent; see above.
     }
   }
 
@@ -152,6 +163,16 @@ class _AppShellState extends ConsumerState<AppShell> {
       // (issue #312). It refreshes the active repository's detailed views and
       // its workspace-list badge; background repositories are no longer watched.
       ref.watch(repositoryWatcherProvider);
+
+      // Verify the cards against the remotes once the configuration is usable.
+      // Until this lands, every repository's sync state is only as fresh as its
+      // last fetch, so the cards report unverified rather than in sync.
+      if (!_startupFetchSweepStarted) {
+        _startupFetchSweepStarted = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _fetchWorkspaceInBackground();
+        });
+      }
 
       // Auto-fetch is a background behavior of the whole app, so it is driven
       // from the shell instead of a screen that may not be open.

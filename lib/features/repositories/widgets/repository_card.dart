@@ -302,20 +302,31 @@ class RepositoryCard extends ConsumerWidget {
                     isSelected,
                   ),
 
-                // Show "Up to date" if no issues
+                // Nothing outstanding. The remote-tracking refs only move on a
+                // fetch, so claiming to be in sync before one has happened
+                // would report a clean state that was never verified; such a
+                // repository says so instead.
                 if (!status.isBroken &&
                     !status.hasIncoming &&
                     !status.hasOutgoing &&
                     !status.hasUncommittedChanges &&
                     status.exists &&
                     status.isValidGit)
-                  _buildStatusBadge(
-                    context,
-                    PhosphorIconsRegular.checkCircle,
-                    'Up to date',
-                    Theme.of(context).colorScheme.primary,
-                    isSelected,
-                  ),
+                  status.isRemoteUnchecked
+                      ? _buildStatusBadge(
+                          context,
+                          PhosphorIconsRegular.clockCountdown,
+                          'Not checked',
+                          Theme.of(context).colorScheme.onSurfaceVariant,
+                          isSelected,
+                        )
+                      : _buildStatusBadge(
+                          context,
+                          PhosphorIconsRegular.checkCircle,
+                          'Up to date',
+                          Theme.of(context).colorScheme.primary,
+                          isSelected,
+                        ),
               ],
             ),
 

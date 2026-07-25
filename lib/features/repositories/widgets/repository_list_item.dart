@@ -161,7 +161,9 @@ class RepositoryListItem extends ConsumerWidget {
                   ),
                 ],
 
-                // Clean status
+                // Clean status. Only claimed once the remote has actually been
+                // contacted: the ahead/behind counts come from the local
+                // remote-tracking refs, which a fetch is what moves.
                 if (!status.isBroken &&
                     !status.hasIncoming &&
                     !status.hasOutgoing &&
@@ -169,13 +171,22 @@ class RepositoryListItem extends ConsumerWidget {
                     status.exists &&
                     status.isValidGit) ...[
                   const SizedBox(width: AppTheme.paddingXS),
-                  _buildCompactBadge(
-                    context,
-                    PhosphorIconsRegular.checkCircle,
-                    Theme.of(context).colorScheme.primary,
-                    isSelected,
-                    label: 'Up to date',
-                  ),
+                  if (status.isRemoteUnchecked)
+                    _buildCompactBadge(
+                      context,
+                      PhosphorIconsRegular.clockCountdown,
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                      isSelected,
+                      label: 'Not checked',
+                    )
+                  else
+                    _buildCompactBadge(
+                      context,
+                      PhosphorIconsRegular.checkCircle,
+                      Theme.of(context).colorScheme.primary,
+                      isSelected,
+                      label: 'Up to date',
+                    ),
                 ],
               ],
             ],

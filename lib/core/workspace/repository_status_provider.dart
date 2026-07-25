@@ -16,8 +16,17 @@ class RepositoryStatusNotifier
 
   RepositoryStatusNotifier(this.ref) : super({});
 
-  /// Refresh status for a single repository
-  Future<void> refreshStatus(WorkspaceRepository repository) async {
+  /// Refresh status for a single repository.
+  ///
+  /// With [fetchRemote] the remote is contacted first, so the ahead/behind
+  /// counts describe the current remote state rather than whatever was last
+  /// known locally, and the result is stamped as verified. Without it the
+  /// counts are only as fresh as the last fetch, which is why a repository that
+  /// has never been fetched reports as unchecked instead of in sync.
+  Future<void> refreshStatus(
+    WorkspaceRepository repository, {
+    bool fetchRemote = false,
+  }) async {
     // Get git executable path from config
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final configLoading = ref.read(configLoadingProvider);
@@ -55,6 +64,28 @@ class RepositoryStatusNotifier
     try {
       final stopwatch = Stopwatch()..start();
       Logger.debug('Checking ${repository.displayName}...');
+
+      // Contacting the remote is what makes the ahead/behind counts describe
+      // now instead of the last fetch. A failure here (offline, no auth) must
+      // not fail the whole check: the local state is still worth showing, it
+      // simply stays marked unverified.
+      DateTime? remoteCheckedAt;
+      if (fetchRemote) {
+        final fetched = await gitService.fetch();
+        if (fetched.isSuccess) {
+          remoteCheckedAt = DateTime.now();
+        } else {
+          Logger.debug(
+            '[REFRESH] Fetch failed for ${repository.displayName}; '
+            'status stays unverified',
+          );
+        }
+      } else {
+        // Keep an earlier verification: a plain refresh must not downgrade a
+        // repository that was fetched a moment ago back to unchecked.
+        remoteCheckedAt = state[repository.path]?.remoteCheckedAt;
+      }
+
       final statusMap = await gitService.getRepositoryStatus(repository.path);
       stopwatch.stop();
 
@@ -79,6 +110,7 @@ class RepositoryStatusNotifier
           commitsBehind: statusMap['commitsBehind'] as int? ?? 0,
           hasUncommittedChanges:
               statusMap['hasUncommittedChanges'] as bool? ?? false,
+          remoteCheckedAt: remoteCheckedAt,
         );
 
         state = {...state, repository.path: status};
@@ -90,8 +122,21 @@ class RepositoryStatusNotifier
     }
   }
 
-  /// Refresh statuses for all repositories
-  Future<void> refreshAll() async {
+  /// Refresh statuses for all repositories.
+  ///
+  /// With [fetchRemote] every repository's remote is contacted first, which is
+  /// what makes the cards report the current remote state instead of the last
+  /// known one. That costs one network round trip per repository, so the local
+  /// refresh that runs on startup and after local operations leaves it off and
+  /// the background sweep turns it on.
+  ///
+  /// [markLoading] blanks every card to "analyzing" before the pass. The
+  /// background sweep turns it off so the dashboard does not flicker through a
+  /// loading state on a timer the user did not trigger.
+  Future<void> refreshAll({
+    bool fetchRemote = false,
+    bool markLoading = true,
+  }) async {
     final repositories = ref.read(workspaceProvider);
     final gitExecutablePath = ref.read(gitExecutablePathProvider);
     final configLoading = ref.read(configLoadingProvider);
@@ -101,19 +146,25 @@ class RepositoryStatusNotifier
     );
 
     // First, set all repositories to loading state immediately
-    final loadingStates = <String, RepositoryStatus>{};
-    for (final repo in repositories) {
-      loadingStates[repo.path] = RepositoryStatus.unknown;
-    }
+    if (markLoading) {
+      final loadingStates = <String, RepositoryStatus>{};
+      for (final repo in repositories) {
+        loadingStates[repo.path] = RepositoryStatus.unknown;
+      }
 
-    // Update state to show "Analyzing..." in UI
-    state = {...state, ...loadingStates};
-    Logger.debug('Set ${repositories.length} repositories to analyzing state');
+      // Update state to show "Analyzing..." in UI
+      state = {...state, ...loadingStates};
+      Logger.debug(
+        'Set ${repositories.length} repositories to analyzing state',
+      );
+    }
 
     // Then refresh all repositories in parallel
     // Each will update the UI as soon as it completes
     final stopwatch = Stopwatch()..start();
-    await Future.wait(repositories.map((repo) => refreshStatus(repo)));
+    await Future.wait(
+      repositories.map((repo) => refreshStatus(repo, fetchRemote: fetchRemote)),
+    );
     stopwatch.stop();
     Logger.info(
       'Analyzed ${repositories.length} repositories in ${stopwatch.elapsedMilliseconds}ms',

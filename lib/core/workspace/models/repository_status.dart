@@ -27,6 +27,17 @@ class RepositoryStatus {
   /// Whether the check never ran because no git executable is configured
   final bool isGitNotConfigured;
 
+  /// When the remote was last contacted for this repository, or null if it
+  /// never was in this session.
+  ///
+  /// The ahead/behind counts come from the local remote-tracking ref, which
+  /// only moves on a fetch. Without one they describe the last known remote
+  /// state, not the current one - so a repository with incoming commits still
+  /// counts as zero behind. This timestamp is what separates "verified in sync"
+  /// from "not checked yet", so the card can stop claiming the former for the
+  /// latter.
+  final DateTime? remoteCheckedAt;
+
   const RepositoryStatus({
     this.commitsAhead = 0,
     this.commitsBehind = 0,
@@ -37,6 +48,7 @@ class RepositoryStatus {
     this.hasRemote = false,
     this.isLoading = false,
     this.isGitNotConfigured = false,
+    this.remoteCheckedAt,
   });
 
   /// Default status for broken/invalid repositories
@@ -63,6 +75,12 @@ class RepositoryStatus {
 
   /// Whether the repository is broken (doesn't exist or invalid git)
   bool get isBroken => !exists || !isValidGit;
+
+  /// Whether the sync state is unverified: the repository tracks a remote that
+  /// has not been contacted, so the ahead/behind counts cannot be trusted and
+  /// the card must not report being in sync.
+  bool get isRemoteUnchecked =>
+      hasRemote && remoteCheckedAt == null && !isBroken && !isGitNotConfigured;
 
   /// Whether there are incoming changes (commits to pull)
   bool get hasIncoming => commitsBehind > 0;

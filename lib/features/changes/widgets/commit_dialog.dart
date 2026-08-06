@@ -84,6 +84,8 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
 
     try {
       final message = _messageController.text.trim();
+      // confirmed-by: the amend checkbox in this dialog is an explicit
+      // opt-in the user just made.
       await ref.read(gitActionsProvider).commit(message, amend: _isAmend);
 
       if (mounted) {

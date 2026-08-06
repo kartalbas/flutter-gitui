@@ -10,6 +10,12 @@
 // here and routes through `confirmDestructive`, so the danger of an action is
 // described in exactly one place and a new action cannot be added without
 // picking a tier.
+//
+// The custom_lint rule `require_confirm_destructive`
+// (lint_rules/flutter_gitui_lint) enforces the routing: when an action is
+// added here, add its method(s) to the rule's destructive set and extend the
+// rule's snapshot of this enum — the rule reports any constant it does not
+// know, so the two cannot drift apart silently.
 
 /// How dangerous a destructive action is, from a barrier against a stray click
 /// (top) to an irreversible change that also affects other people (bottom).

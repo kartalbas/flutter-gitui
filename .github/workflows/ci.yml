@@ -50,6 +50,21 @@ jobs:
       - name: Enforce design-system lint rules
         run: dart run custom_lint --fatal-infos --fatal-warnings
 
+      # The custom_lint gate above can be silenced per line or per file with
+      # an ignore comment; for the data-safety rule that silent escape is not
+      # acceptable. The only sanctioned exception is the reviewable
+      # "// confirmed-by: <where>" marker, so any ignore naming the rule under
+      # lib/ fails the build. Scoped to lib/ on purpose: documentation and this
+      # workflow may name the rule, application code may not silence it.
+      - name: Forbid ignores of require_confirm_destructive
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rnE 'ignore(_for_file)?:.*require_confirm_destructive' lib/; then
+            echo "::error::require_confirm_destructive must not be silenced with ignore comments; use a '// confirmed-by: <where>' marker in the confirming flow instead"
+            exit 1
+          fi
+
   test:
     name: Test
     runs-on: ubuntu-latest

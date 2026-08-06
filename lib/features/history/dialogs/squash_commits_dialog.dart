@@ -120,6 +120,8 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
       final newestCommit = oldestFirst.last;
 
       // Call squash method
+      // confirmed-by: this dialog itself; writing the message and pressing
+      // Squash is the confirmation.
       await ref
           .read(gitActionsProvider)
           .squashCommits(

@@ -36,6 +36,12 @@ This package provides automated enforcement of UI development standards through 
 | `avoid_hardcoded_colors` | `Colors.*` usage | `Theme.of(context).colorScheme` or `AppTheme.*` |
 | `avoid_text_with_style` | `Text()` with a `style` parameter that is not a `copyWith(color:)` chain | `BaseLabel` subclasses (`BodyMediumLabel`, `TitleLargeLabel`, …) |
 
+### Safety Rules
+
+| Rule | Detects | Suggests |
+|------|---------|----------|
+| `require_confirm_destructive` | Calls to destructive `GitService`/`GitActions` methods (the `DestructiveAction` catalogue) with no `confirmDestructive` call in the enclosing function, and any `DestructiveAction` enum constant missing from the rule's snapshot | Route the call through `confirmDestructive`; when the confirmation is a dedicated dialog or lives one call frame up, add a `// confirmed-by: <where>` marker directly above the statement. A marker may only sit in the same user-facing flow as the confirmation it names — the widget or dialog file where the user actually acted — never in a shared helper or service wrapper, which would invisibly exempt every future caller of that wrapper. Bare `// ignore: require_confirm_destructive` is not accepted: CI fails on any ignore naming this rule under `lib/`, so the marker is the only sanctioned exception and `grep -rn "confirmed-by:" lib/` audits all of them. When `DestructiveAction` gains a constant, add its method(s) to the rule's destructive set and update the snapshot. |
+
 ## Installation
 
 1. Add the lint package as a dev dependency in your project's `pubspec.yaml`:

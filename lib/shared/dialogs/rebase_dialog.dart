@@ -469,6 +469,8 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       if (gitService == null) return;
 
       // Throw on failure so the conflict handling in catch actually runs
+      // confirmed-by: this dialog itself; choosing the branch and pressing
+      // Start Rebase is the confirmation.
       (await gitService.rebaseBranch(
         ontoBranch: _selectedBranch!,
         interactive: _interactive,

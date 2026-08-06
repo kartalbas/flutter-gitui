@@ -815,6 +815,8 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 : null,
           );
         } else {
+          // confirmed-by: this dialog itself; choosing the rebase strategy
+          // and pressing the primary action is the confirmation.
           await gitService.rebaseBranch(
             ontoBranch: _sourceBranch!.name,
             interactive: _interactive,
@@ -850,6 +852,8 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
           );
         } else {
           // Rebase target onto source
+          // confirmed-by: this dialog itself; choosing the rebase strategy
+          // and pressing the primary action is the confirmation.
           await gitService!.rebaseBranch(
             ontoBranch: _sourceBranch!.name,
             interactive: _interactive,

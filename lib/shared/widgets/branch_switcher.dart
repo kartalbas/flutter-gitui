@@ -210,6 +210,8 @@ class BranchSwitcher extends ConsumerWidget {
         context.mounted) {
       try {
         final force = result == DeleteBranchResult.forceDelete;
+        // confirmed-by: DeleteBranchDialog above; it collects the force
+        // choice and confirms.
         await ref
             .read(gitActionsProvider)
             .deleteBranch(branch.name, force: force);
@@ -336,6 +338,8 @@ class BranchSwitcher extends ConsumerWidget {
 
     for (final branch in branches) {
       try {
+        // confirmed-by: confirmDestructive(DestructiveAction.deleteLocalBranch)
+        // in _showDeleteAllUnprotectedDialog, this method's only caller.
         await ref
             .read(gitActionsProvider)
             .deleteBranch(branch.name, force: force);

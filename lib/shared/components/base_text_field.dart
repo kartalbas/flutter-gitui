@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -73,6 +74,7 @@ class BaseTextField extends StatefulWidget {
     this.validator,
     this.autofocus = false,
     this.enabled = true,
+    this.escapeClears = true,
   });
 
   /// Text editing controller (optional - will create one if not provided)
@@ -147,6 +149,15 @@ class BaseTextField extends StatefulWidget {
 
   /// Whether field is enabled
   final bool enabled;
+
+  /// Whether Escape in a non-empty field clears it (keeping focus there), so
+  /// an empty field lets Escape bubble on to the innermost dismiss scope.
+  ///
+  /// This is the "clear the text" rung of the Escape ladder and the default.
+  /// Disable it where Escape must always mean leaving the surface — a
+  /// destructive confirmation's token field, where a fleeing user must not
+  /// need a second Escape.
+  final bool escapeClears;
 
   @override
   State<BaseTextField> createState() => _BaseTextFieldState();
@@ -380,29 +391,50 @@ class _BaseTextFieldState extends State<BaseTextField> {
           extentOffset: _controller.text.length,
         );
       },
-      // A FormField, not a plain TextField: the widget always accepted a
-      // validator, but a TextField never runs one, so every dialog's
-      // `formKey.currentState!.validate()` found no fields and waved invalid
-      // input through. TextFormField registers with the enclosing Form, runs
-      // the validator, and shows its message on the field.
-      // ignore: avoid_text_field
-      child: TextFormField(
-        controller: _controller,
-        focusNode: widget.focusNode,
-        decoration: decoration,
-        obscureText: _obscureText,
-        maxLines: widget.maxLines,
-        onChanged: widget.onChanged,
-        onFieldSubmitted: widget.onSubmitted,
-        validator: widget.validator,
-        // Re-validate on every change once the user has touched the field:
-        // the error appears (and clears) at the keystroke that caused it,
-        // instead of going stale until the next submit attempt.
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        autofocus: widget.autofocus,
-        enabled: widget.enabled,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: colorScheme.onSurface,
+      // Escape in a filled field clears it and keeps focus there — correcting
+      // a typo must not throw the keyboard out of the field. An empty field
+      // ignores the key, so it bubbles on to the innermost enclosing dismiss
+      // scope (close the dialog, collapse the search, leave the mode): this is
+      // the "clear the text" rung of the Escape ladder. The watcher node never
+      // takes focus and is not a Tab stop.
+      child: Focus(
+        debugLabel: 'BaseTextField.escapeToClear',
+        canRequestFocus: false,
+        skipTraversal: true,
+        onKeyEvent: (node, event) {
+          if (!widget.escapeClears) return KeyEventResult.ignored;
+          if (event is! KeyDownEvent) return KeyEventResult.ignored;
+          if (event.logicalKey != LogicalKeyboardKey.escape) {
+            return KeyEventResult.ignored;
+          }
+          if (_controller.text.isEmpty) return KeyEventResult.ignored;
+          _clearText();
+          return KeyEventResult.handled;
+        },
+        // A FormField, not a plain TextField: the widget always accepted a
+        // validator, but a TextField never runs one, so every dialog's
+        // `formKey.currentState!.validate()` found no fields and waved invalid
+        // input through. TextFormField registers with the enclosing Form, runs
+        // the validator, and shows its message on the field.
+        // ignore: avoid_text_field
+        child: TextFormField(
+          controller: _controller,
+          focusNode: widget.focusNode,
+          decoration: decoration,
+          obscureText: _obscureText,
+          maxLines: widget.maxLines,
+          onChanged: widget.onChanged,
+          onFieldSubmitted: widget.onSubmitted,
+          validator: widget.validator,
+          // Re-validate on every change once the user has touched the field:
+          // the error appears (and clears) at the keystroke that caused it,
+          // instead of going stale until the next submit attempt.
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          autofocus: widget.autofocus,
+          enabled: widget.enabled,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface,
+          ),
         ),
       ),
     );

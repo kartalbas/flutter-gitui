@@ -30,6 +30,15 @@ class BaseTreeItem extends StatefulWidget {
   /// Whether this item is currently selected
   final bool isSelected;
 
+  /// Whether the tree rendering this row holds keyboard focus.
+  ///
+  /// The tree is a single Tab stop with a roving highlight: while it is
+  /// focused the selected row wears a focus ring on top of its tinted
+  /// background, and while focus lives elsewhere the muted tinted background
+  /// remains alone. Defaults to true so a row outside a focus-aware tree
+  /// keeps the full treatment.
+  final bool containerHasFocus;
+
   /// Callback when the item is tapped
   final VoidCallback? onTap;
 
@@ -59,6 +68,7 @@ class BaseTreeItem extends StatefulWidget {
     required this.node,
     required this.depth,
     this.isSelected = false,
+    this.containerHasFocus = true,
     this.onTap,
     this.onDoubleTap,
     this.onExpandToggle,
@@ -120,6 +130,19 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
           decoration: BoxDecoration(
             color: isSelected ? colorScheme.primaryContainer : null,
           ),
+          // The focus ring, painted in the foreground so it costs no layout:
+          // a decoration border would inset the dense row content by its
+          // width every time focus moves. It appears only while the tree
+          // itself holds keyboard focus; an unfocused selection keeps the
+          // muted tinted background alone.
+          foregroundDecoration: isSelected && widget.containerHasFocus
+              ? BoxDecoration(
+                  border: Border.all(
+                    color: colorScheme.onPrimaryContainer,
+                    width: 2,
+                  ),
+                )
+              : null,
           child: Row(
             children: [
               // Optional leading widget (e.g., checkbox)

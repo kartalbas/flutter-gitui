@@ -210,6 +210,10 @@ class _TypeToConfirmDialogState extends State<_TypeToConfirmDialog> {
             // The floating label is the token itself, so the expected text
             // stays in view while the user types.
             label: widget.token,
+            // Escape must always flee this dialog, never spend its press on
+            // clearing a half-typed token: a user bailing out of a
+            // destructive prompt must not need a second Escape.
+            escapeClears: false,
             errorText: mismatch ? l10n.typeToConfirmMismatch : null,
             onSubmitted: (_) {
               if (_matches) {

@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/tree_node.dart';
+import 'item_navigation_controller.dart';
 
 /// Controller for managing tree view navigation, selection, and scrolling.
 ///
+/// A tree is a list whose rows happen to nest, so the movement semantics —
+/// roving highlight, Home/End, skipping unselectable rows — come from
+/// [ItemNavigationController]; this class adds what is tree-shaped: the
+/// flattened view over expandable nodes, expansion/collapse with lazy child
+/// loading, path-based selection, and scroll-into-view over fixed-height rows.
+///
 /// This controller provides:
-/// - Keyboard navigation (up/down arrows)
+/// - Keyboard navigation (up/down arrows, Home/End)
 /// - Selection management with index-based tracking
 /// - Auto-scrolling to keep selection visible
 /// - Directory expansion/collapse via Space/Enter
@@ -35,15 +42,10 @@ import '../models/tree_node.dart';
 ///   ),
 /// );
 /// ```
-class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
-  /// Focus node for keyboard shortcuts
-  final FocusNode focusNode = FocusNode();
-
+class TreeViewController<T extends TreeNodeMixin>
+    extends ItemNavigationController {
   /// Scroll controller for auto-scrolling to selection
   final ScrollController scrollController = ScrollController();
-
-  /// Currently selected index in the flattened tree
-  int _selectedIndex = -1;
 
   /// Flattened list of visible nodes for efficient navigation
   List<T> _flattenedNodes = [];
@@ -75,8 +77,24 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
     this.onLoadChildren,
   });
 
-  /// Get the currently selected index
-  int get selectedIndex => _selectedIndex;
+  /// The rows come from the flattened tree, not from a count the view feeds in.
+  @override
+  int get itemCount => _flattenedNodes.length;
+
+  /// A directory row cannot hold the highlight when the tree navigates files
+  /// only; the base controller skips it in the direction of travel.
+  @override
+  bool isIndexSelectable(int index) =>
+      !skipDirectories || !_flattenedNodes[index].isDirectory;
+
+  /// Every applied move reports the node, keeps it visible, and anchors focus
+  /// on the tree — the same follow-through the hand-written navigation had.
+  @override
+  void didSelect(int index) {
+    onSelectionChanged?.call(selectedNode);
+    scrollToSelected();
+    requestFocus();
+  }
 
   /// Get the flattened nodes list
   List<T> get flattenedNodes => _flattenedNodes;
@@ -86,14 +104,12 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
 
   /// Get the currently selected node
   T? get selectedNode {
-    if (_selectedIndex >= 0 && _selectedIndex < _flattenedNodes.length) {
-      return _flattenedNodes[_selectedIndex];
+    final index = selectedIndex;
+    if (index >= 0 && index < _flattenedNodes.length) {
+      return _flattenedNodes[index];
     }
     return null;
   }
-
-  /// Check if a given index is selected
-  bool isSelected(int index) => index == _selectedIndex;
 
   /// Keyboard bindings for CallbackShortcuts
   Map<ShortcutActivator, VoidCallback> get keyBindings => {
@@ -116,7 +132,7 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
   /// Set the selected index directly
   void setSelectedIndex(int index) {
     if (index >= -1 && index < _flattenedNodes.length) {
-      _selectedIndex = index;
+      internalSelectedIndex = index;
       onSelectionChanged?.call(selectedNode);
       notifyListeners();
     }
@@ -125,7 +141,7 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
   /// Select a node by its full path
   void selectByPath(String? path) {
     if (path == null) {
-      _selectedIndex = -1;
+      internalSelectedIndex = -1;
       onSelectionChanged?.call(null);
       notifyListeners();
       return;
@@ -133,7 +149,7 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
 
     for (int i = 0; i < _flattenedNodes.length; i++) {
       if (_flattenedNodes[i].fullPath == path) {
-        _selectedIndex = i;
+        internalSelectedIndex = i;
         onSelectionChanged?.call(_flattenedNodes[i]);
         notifyListeners();
         scrollToSelected();
@@ -143,59 +159,15 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
   }
 
   /// Navigate to previous item
-  void navigateUp() {
-    if (_flattenedNodes.isEmpty) return;
-
-    int newIndex = _selectedIndex - 1;
-
-    if (skipDirectories) {
-      // Find previous non-directory
-      while (newIndex >= 0 && _flattenedNodes[newIndex].isDirectory) {
-        newIndex--;
-      }
-    }
-
-    if (newIndex >= 0) {
-      _selectedIndex = newIndex;
-      onSelectionChanged?.call(selectedNode);
-      notifyListeners();
-      scrollToSelected();
-      focusNode.requestFocus();
-    }
-  }
+  void navigateUp() => moveUp();
 
   /// Navigate to next item
-  void navigateDown() {
-    if (_flattenedNodes.isEmpty) return;
-
-    int newIndex = _selectedIndex + 1;
-
-    if (skipDirectories) {
-      // Find next non-directory
-      while (newIndex < _flattenedNodes.length &&
-          _flattenedNodes[newIndex].isDirectory) {
-        newIndex++;
-      }
-    }
-
-    if (newIndex < _flattenedNodes.length) {
-      _selectedIndex = newIndex;
-      onSelectionChanged?.call(selectedNode);
-      notifyListeners();
-      scrollToSelected();
-      focusNode.requestFocus();
-    }
-  }
+  void navigateDown() => moveDown();
 
   /// Toggle the selected node (expand/collapse directory or trigger action)
   void toggleSelectedNode() {
-    if (_flattenedNodes.isEmpty ||
-        _selectedIndex < 0 ||
-        _selectedIndex >= _flattenedNodes.length) {
-      return;
-    }
-
-    final node = _flattenedNodes[_selectedIndex];
+    final node = selectedNode;
+    if (node == null) return;
 
     if (node.isDirectory) {
       // Toggle directory expansion
@@ -221,13 +193,8 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
 
   /// Collapse the selected directory
   void collapseSelected() {
-    if (_flattenedNodes.isEmpty ||
-        _selectedIndex < 0 ||
-        _selectedIndex >= _flattenedNodes.length) {
-      return;
-    }
-
-    final node = _flattenedNodes[_selectedIndex];
+    final node = selectedNode;
+    if (node == null) return;
 
     if (node.isDirectory && node.isExpanded) {
       node.isExpanded = false;
@@ -238,13 +205,8 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
 
   /// Expand the selected directory
   void expandSelected() {
-    if (_flattenedNodes.isEmpty ||
-        _selectedIndex < 0 ||
-        _selectedIndex >= _flattenedNodes.length) {
-      return;
-    }
-
-    final node = _flattenedNodes[_selectedIndex];
+    final node = selectedNode;
+    if (node == null) return;
 
     if (node.isDirectory && !node.isExpanded) {
       // If lazy loading callback is provided and children are empty, load them first
@@ -287,9 +249,10 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
   /// Scroll to keep the selected item visible
   void scrollToSelected() {
     if (!scrollController.hasClients) return;
-    if (_selectedIndex < 0) return;
+    final index = selectedIndex;
+    if (index < 0) return;
 
-    final position = _selectedIndex * itemHeight;
+    final position = index * itemHeight;
     final viewportHeight = scrollController.position.viewportDimension;
     final currentScroll = scrollController.offset;
 
@@ -300,11 +263,6 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
       // Scroll down
       scrollController.jumpTo(position - viewportHeight + itemHeight);
     }
-  }
-
-  /// Request focus on the tree view
-  void requestFocus() {
-    focusNode.requestFocus();
   }
 
   /// Flatten the tree into a list of visible nodes
@@ -341,7 +299,7 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
     _flattenedNodes = _flattenTree(_rootNodes);
 
     if (previous == null) {
-      _selectedIndex = -1;
+      internalSelectedIndex = -1;
       return;
     }
 
@@ -351,7 +309,7 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
       newIndex = anchor == null ? -1 : _indexOfNode(anchor);
     }
 
-    _selectedIndex = newIndex;
+    internalSelectedIndex = newIndex;
     _validateSelection();
 
     if (!identical(selectedNode, previous)) {
@@ -398,58 +356,55 @@ class TreeViewController<T extends TreeNodeMixin> extends ChangeNotifier {
   /// Validate and adjust selection after tree updates
   void _validateSelection() {
     if (_flattenedNodes.isEmpty) {
-      _selectedIndex = -1;
+      internalSelectedIndex = -1;
       return;
     }
 
     // Keep selection within bounds
-    if (_selectedIndex >= _flattenedNodes.length) {
-      _selectedIndex = _flattenedNodes.length - 1;
+    if (internalSelectedIndex >= _flattenedNodes.length) {
+      internalSelectedIndex = _flattenedNodes.length - 1;
     }
 
-    if (_selectedIndex < 0) {
+    if (internalSelectedIndex < 0) {
       // Find first selectable item
       if (skipDirectories) {
-        _selectedIndex = 0;
-        while (_selectedIndex < _flattenedNodes.length &&
-            _flattenedNodes[_selectedIndex].isDirectory) {
-          _selectedIndex++;
+        var index = 0;
+        while (index < _flattenedNodes.length &&
+            _flattenedNodes[index].isDirectory) {
+          index++;
         }
-        if (_selectedIndex >= _flattenedNodes.length) {
-          _selectedIndex = -1;
-        }
+        internalSelectedIndex = index < _flattenedNodes.length ? index : -1;
       } else {
-        _selectedIndex = 0;
+        internalSelectedIndex = 0;
       }
     }
 
     // If current selection is a directory and we skip directories, find nearest file
     if (skipDirectories &&
-        _selectedIndex >= 0 &&
-        _selectedIndex < _flattenedNodes.length &&
-        _flattenedNodes[_selectedIndex].isDirectory) {
+        internalSelectedIndex >= 0 &&
+        internalSelectedIndex < _flattenedNodes.length &&
+        _flattenedNodes[internalSelectedIndex].isDirectory) {
       // Try next
-      int newIndex = _selectedIndex + 1;
+      int newIndex = internalSelectedIndex + 1;
       while (newIndex < _flattenedNodes.length &&
           _flattenedNodes[newIndex].isDirectory) {
         newIndex++;
       }
       if (newIndex < _flattenedNodes.length) {
-        _selectedIndex = newIndex;
+        internalSelectedIndex = newIndex;
       } else {
         // Try previous
-        newIndex = _selectedIndex - 1;
+        newIndex = internalSelectedIndex - 1;
         while (newIndex >= 0 && _flattenedNodes[newIndex].isDirectory) {
           newIndex--;
         }
-        _selectedIndex = newIndex;
+        internalSelectedIndex = newIndex;
       }
     }
   }
 
   @override
   void dispose() {
-    focusNode.dispose();
     scrollController.dispose();
     super.dispose();
   }

@@ -46,6 +46,7 @@ class BaseCard extends StatefulWidget {
     this.isSelected = false,
     this.isMultiSelected = false,
     this.isSelectable = true,
+    this.containerHasFocus = true,
     this.customBorderColor,
     this.customBackgroundColor,
     this.onTap,
@@ -69,6 +70,16 @@ class BaseCard extends StatefulWidget {
 
   /// Whether this card can be selected/tapped
   final bool isSelectable;
+
+  /// Whether the collection rendering this card holds keyboard focus.
+  ///
+  /// A card grid is a single Tab stop with a roving highlight: while it is
+  /// focused the selected card wears its focus ring (tinted background plus
+  /// emphasized border), and while focus lives elsewhere the selection keeps
+  /// the tinted background with the resting outline — still clearly the
+  /// selection, no longer claiming the keyboard. Defaults to true so a card
+  /// outside a focus-aware collection keeps the full treatment.
+  final bool containerHasFocus;
 
   /// Custom border color to override theme colors (optional)
   /// Useful for workspace-specific colors
@@ -113,17 +124,29 @@ class _BaseCardState extends State<BaseCard> {
       backgroundColor = colorScheme.surfaceContainerHigh;
     }
 
-    // Determine border using Material Design 3 outline colors
+    // Determine border using Material Design 3 outline colors. The
+    // emphasized border is the focus ring: it shows its on-container color
+    // only while the card's collection holds keyboard focus. An unfocused
+    // selection keeps the tinted background behind the resting outline color
+    // (at the same width, so the content does not shift when focus moves) —
+    // still clearly the selection, no longer claiming the keyboard.
     BoxBorder? border;
     if (widget.isSelected) {
       // Selected: use onSecondaryContainer for border
       border = Border.all(
-        color: widget.customBorderColor ?? colorScheme.onSecondaryContainer,
+        color: widget.containerHasFocus
+            ? (widget.customBorderColor ?? colorScheme.onSecondaryContainer)
+            : colorScheme.outlineVariant,
         width: 2,
       );
     } else if (widget.isMultiSelected) {
       // Multi-selected: use onTertiaryContainer for border
-      border = Border.all(color: colorScheme.onTertiaryContainer, width: 2);
+      border = Border.all(
+        color: widget.containerHasFocus
+            ? colorScheme.onTertiaryContainer
+            : colorScheme.outlineVariant,
+        width: 2,
+      );
     } else {
       // Normal state: use outline variant
       border = Border.all(color: colorScheme.outlineVariant, width: 1);

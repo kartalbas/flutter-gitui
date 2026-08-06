@@ -4,6 +4,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
 import '../../core/constants/constants.dart';
 import '../../shared/theme/app_theme.dart';
+import '../utils/keyboard_guards.dart';
 import 'base_button.dart';
 import 'base_label.dart';
 
@@ -24,13 +25,16 @@ enum DialogVariant {
 /// Enter inside such a field inserts a newline; a dialog-level Enter-to-submit
 /// handler must let it through or the field becomes impossible to fill.
 /// Single-line fields lose nothing: their Enter has no editing meaning.
-/// (EditableText attaches its focus node to a Focus widget inside its own
-/// subtree, so the editable is found as an ancestor of the focused context.)
-bool focusedEditableKeepsEnter() {
-  final focusContext = FocusManager.instance.primaryFocus?.context;
-  final editable = focusContext?.findAncestorStateOfType<EditableTextState>();
-  return editable != null && editable.widget.maxLines != 1;
-}
+///
+/// The rule itself lives in [focusedEditableOwnsKey]; this asks it about a
+/// plain Enter press for callers that hold no key event of their own.
+bool focusedEditableKeepsEnter() => focusedEditableOwnsKey(
+  const KeyDownEvent(
+    physicalKey: PhysicalKeyboardKey.enter,
+    logicalKey: LogicalKeyboardKey.enter,
+    timeStamp: Duration.zero,
+  ),
+);
 
 /// Base component for all dialog patterns in the app.
 ///

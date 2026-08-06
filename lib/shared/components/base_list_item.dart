@@ -62,6 +62,7 @@ class BaseListItem extends StatefulWidget {
     this.isSelected = false,
     this.isMultiSelected = false,
     this.isSelectable = true,
+    this.containerHasFocus = true,
     this.onTap,
     this.onDoubleTap,
     this.onSecondaryTap,
@@ -96,6 +97,16 @@ class BaseListItem extends StatefulWidget {
 
   /// Whether this item can be selected/tapped
   final bool isSelectable;
+
+  /// Whether the collection rendering this item holds keyboard focus.
+  ///
+  /// A collection is a single Tab stop with a roving highlight, so the
+  /// highlight has two strengths: while the collection is focused the selected
+  /// item wears its focus ring (tinted background plus border), and while
+  /// focus lives elsewhere it keeps only the muted tinted background — still
+  /// clearly the selection, no longer claiming the keyboard. Defaults to true
+  /// so an item outside a focus-aware collection keeps the full treatment.
+  final bool containerHasFocus;
 
   /// Callback when item is tapped
   final VoidCallback? onTap;
@@ -177,14 +188,27 @@ class _BaseListItemState extends State<BaseListItem> {
       backgroundColor = colorScheme.surfaceContainerHighest;
     }
 
-    // Determine border using Material Design 3 outline colors
+    // Determine border using Material Design 3 outline colors. The border is
+    // the focus ring: it shows its on-container color only while the item's
+    // collection holds keyboard focus. An unfocused selection paints the same
+    // border in the background color — invisible, so the muted highlight is
+    // the tinted background alone, and the row does not shift by the border
+    // width when focus moves (a decoration border insets the content).
     BoxBorder? border;
     if (widget.isSelected) {
-      // Selected: use onSecondaryContainer for border
-      border = Border.all(color: colorScheme.onSecondaryContainer, width: 2);
+      border = Border.all(
+        color: widget.containerHasFocus
+            ? colorScheme.onSecondaryContainer
+            : colorScheme.secondaryContainer,
+        width: 2,
+      );
     } else if (widget.isMultiSelected) {
-      // Multi-selected: use onTertiaryContainer for border
-      border = Border.all(color: colorScheme.onTertiaryContainer, width: 2);
+      border = Border.all(
+        color: widget.containerHasFocus
+            ? colorScheme.onTertiaryContainer
+            : colorScheme.tertiaryContainer,
+        width: 2,
+      );
     }
 
     return MouseRegion(

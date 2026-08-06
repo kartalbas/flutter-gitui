@@ -13,6 +13,7 @@ import 'generated/app_localizations.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/components/base_label.dart';
 import 'core/config/app_config.dart';
+import 'core/constants/app_constants.dart';
 import 'core/config/config_providers.dart';
 import 'core/config/config_service.dart';
 import 'core/navigation/app_shell.dart';
@@ -126,13 +127,19 @@ void main() async {
     await windowManager.ensureInitialized();
 
     const windowOptions = WindowOptions(
-      size: Size(1728, 972), // FHD (1920x1080) minus 10%
-      minimumSize: Size(800, 600),
+      size: Size(
+        AppConstants.defaultWindowWidth,
+        AppConstants.defaultWindowHeight,
+      ),
+      minimumSize: Size(
+        AppConstants.minWindowWidth,
+        AppConstants.minWindowHeight,
+      ),
       center: true,
       backgroundColor: Color(0x00000000),
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.normal,
-      title: 'Flutter GitUI',
+      title: AppConstants.appName,
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {

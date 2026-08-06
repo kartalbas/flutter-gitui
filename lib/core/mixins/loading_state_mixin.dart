@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../constants/constants.dart';
-
 /// Mixin for managing loading states in StatefulWidget
 ///
 /// Provides methods to track loading states for different operations
@@ -64,6 +62,10 @@ mixin LoadingStateMixin<T extends StatefulWidget> on State<T> {
     }
   }
 
+  /// How long a loading state stays up at minimum, so a fast operation does
+  /// not flash a spinner for a frame and leave the user wondering what moved.
+  static const Duration defaultMinLoadingDuration = Duration(milliseconds: 500);
+
   /// Execute an operation with a minimum loading duration
   ///
   /// Useful for preventing loading states that flash too quickly.
@@ -73,7 +75,7 @@ mixin LoadingStateMixin<T extends StatefulWidget> on State<T> {
   /// [key] - Optional key to track specific loading states
   Future<R> withLoadingMinDuration<R>(
     Future<R> Function() operation, {
-    Duration minDuration = UIConstants.minLoadingDuration,
+    Duration minDuration = defaultMinLoadingDuration,
     String? key,
   }) async {
     final loadingKey = key ?? 'default';

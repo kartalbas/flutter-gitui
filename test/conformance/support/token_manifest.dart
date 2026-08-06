@@ -33,4 +33,27 @@ const Set<String> conformanceTokenManifest = <String>{
   'TextTheme.labelLarge.fontSize', // M3: 14.0 — conforms
   'TextTheme.labelMedium.fontSize', // M3: 12.0 — conforms
   'TextTheme.labelSmall.fontSize', // M3: 11.0 — conforms
+  // BaseButton vs the Material 3 button oracles (FilledButton /
+  // OutlinedButton / TextButton `defaultStyleOf`, Flutter 3.44.4). Geometry
+  // is measured on the Material box (the visual container), color roles via
+  // `colorRoleName`, typography by mapping the rendered style onto the
+  // three M3 label roles.
+  'BaseButton.shape', // M3: stadium, 20.0 at the 40 dp container — BTN-001
+  'BaseButton.small.containerHeight', // M3: 40.0 — registered BTN-002
+  'BaseButton.small.labelTextStyle', // M3: labelLarge — registered BTN-003
+  'BaseButton.small.iconSize', // M3: 18.0 — registered BTN-004
+  'BaseButton.medium.containerHeight', // M3: 40.0 — conforms
+  'BaseButton.medium.minimumWidth', // M3: 64.0 — conforms
+  'BaseButton.medium.labelTextStyle', // M3: labelLarge — conforms
+  'BaseButton.medium.iconSize', // M3: 18.0 — conforms
+  'BaseButton.large.containerHeight', // M3: 40.0 — registered BTN-005
+  'BaseButton.large.labelTextStyle', // M3: labelLarge — conforms
+  'BaseButton.large.iconSize', // M3: 18.0 — conforms
+  'BaseButton.tertiary.foregroundRole', // M3: primary — conforms
+  'BaseButton.ghost.foregroundRole', // M3: primary — registered BTN-006
+  'BaseButton.disabled.containerColor', // M3: onSurface @ 12% — conforms
+  'BaseButton.disabled.foregroundColor', // M3: onSurface @ 38% — conforms
+  'BaseButton.overlay.pressed', // M3: onPrimary @ 10% — conforms
+  'BaseButton.overlay.hovered', // M3: onPrimary @ 8% — conforms
+  'BaseButton.overlay.focused', // M3: onPrimary @ 10% — conforms
 };

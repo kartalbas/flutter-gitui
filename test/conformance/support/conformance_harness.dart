@@ -85,6 +85,95 @@ ButtonStyle m3FilledButtonDefaults(WidgetTester tester) {
   ).defaultStyleOf(context);
 }
 
+/// Material 3 defaults for a text button, straight from the framework.
+///
+/// Same construction as [m3FilledButtonDefaults]: `defaultStyleOf` returns
+/// the generated `_TextButtonDefaultsM3`
+/// (flutter/lib/src/material/text_button.dart), which encodes the
+/// md.comp.text-button.* tokens against the current Theme and deliberately
+/// ignores app-theme component overrides.
+ButtonStyle m3TextButtonDefaults(WidgetTester tester) {
+  final BuildContext context = tester.element(find.byType(Scaffold));
+  // Constructed only to read its generated defaults, never pumped; the
+  // design-system ban on shipping TextButton in UI code does not apply.
+  // ignore: avoid_text_button
+  return const TextButton(
+    onPressed: null,
+    child: SizedBox.shrink(),
+  ).defaultStyleOf(context);
+}
+
+/// Material 3 defaults for an outlined button, straight from the framework.
+///
+/// Same construction as [m3FilledButtonDefaults]: `defaultStyleOf` returns
+/// the generated `_OutlinedButtonDefaultsM3`
+/// (flutter/lib/src/material/outlined_button.dart), which encodes the
+/// md.comp.outlined-button.* tokens against the current Theme and
+/// deliberately ignores app-theme component overrides.
+ButtonStyle m3OutlinedButtonDefaults(WidgetTester tester) {
+  final BuildContext context = tester.element(find.byType(Scaffold));
+  // Constructed only to read its generated defaults, never pumped; the
+  // design-system ban on shipping OutlinedButton in UI code does not apply.
+  // ignore: avoid_outlined_button
+  return const OutlinedButton(
+    onPressed: null,
+    child: SizedBox.shrink(),
+  ).defaultStyleOf(context);
+}
+
+/// Maps [color] onto the name of the [scheme] role that carries exactly that
+/// value, or an `#AARRGGBB` literal when no role matches (state layers and
+/// disabled colors, which are role colors with a reduced alpha, land here).
+///
+/// Both sides of a conformance comparison go through this function, so a
+/// registered deviation can document a foreground as a stable role name
+/// (`primary`, `onSurface`) instead of a scheme-dependent hex value, and an
+/// alpha-modified color still compares exactly via the quantised literal.
+String colorRoleName(ColorScheme scheme, Color color) {
+  final Map<String, Color> roles = <String, Color>{
+    'primary': scheme.primary,
+    'onPrimary': scheme.onPrimary,
+    'primaryContainer': scheme.primaryContainer,
+    'onPrimaryContainer': scheme.onPrimaryContainer,
+    'secondary': scheme.secondary,
+    'onSecondary': scheme.onSecondary,
+    'secondaryContainer': scheme.secondaryContainer,
+    'onSecondaryContainer': scheme.onSecondaryContainer,
+    'tertiary': scheme.tertiary,
+    'onTertiary': scheme.onTertiary,
+    'tertiaryContainer': scheme.tertiaryContainer,
+    'onTertiaryContainer': scheme.onTertiaryContainer,
+    'error': scheme.error,
+    'onError': scheme.onError,
+    'errorContainer': scheme.errorContainer,
+    'onErrorContainer': scheme.onErrorContainer,
+    'surface': scheme.surface,
+    'onSurface': scheme.onSurface,
+    'surfaceContainerLowest': scheme.surfaceContainerLowest,
+    'surfaceContainerLow': scheme.surfaceContainerLow,
+    'surfaceContainer': scheme.surfaceContainer,
+    'surfaceContainerHigh': scheme.surfaceContainerHigh,
+    'surfaceContainerHighest': scheme.surfaceContainerHighest,
+    'onSurfaceVariant': scheme.onSurfaceVariant,
+    'outline': scheme.outline,
+    'outlineVariant': scheme.outlineVariant,
+    'inverseSurface': scheme.inverseSurface,
+    'onInverseSurface': scheme.onInverseSurface,
+    'inversePrimary': scheme.inversePrimary,
+  };
+  for (final MapEntry<String, Color> role in roles.entries) {
+    if (role.value == color) {
+      return role.key;
+    }
+  }
+  final String hex = color
+      .toARGB32()
+      .toRadixString(16)
+      .padLeft(8, '0')
+      .toUpperCase();
+  return '#$hex';
+}
+
 /// Normalises an oracle [shape] to a corner radius in dp so it can be
 /// compared against a measured BorderRadius. A StadiumBorder is fully
 /// rounded, i.e. half the container height.

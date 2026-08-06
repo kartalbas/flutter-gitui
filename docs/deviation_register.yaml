@@ -123,3 +123,82 @@ deviations:
       Secondary and supporting text one step under the reduced bodyLarge
       (15); keeps the body ramp strictly monotonic (15/13/12).
     registered: 2026-08-06
+
+  # BaseButton (lib/shared/components/base_button.dart). The component maps
+  # its variants onto FilledButton / OutlinedButton / TextButton; the spec
+  # values below are those classes' generated M3 defaults. Corner radius is
+  # documented in dp: the M3 stadium shape equals half the 40 dp reference
+  # container.
+
+  - id: BTN-001
+    component: BaseButton
+    property: shape
+    spec_value: 20.0
+    app_value: 8.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filled_button.dart:645 (_FilledButtonDefaultsM3.shape, StadiumBorder = 20.0 dp at the 40 dp container)"
+    rationale: >
+      The 8 dp control corner is shared with text fields, cards and menus
+      across this desktop app; a stadium pill would be the only fully
+      rounded control on screen and would break the shared corner language.
+    registered: 2026-08-06
+
+  - id: BTN-002
+    component: BaseButton.small
+    property: containerHeight
+    spec_value: 40.0
+    app_value: 32.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filled_button.dart:611 (_FilledButtonDefaultsM3.minimumSize, Size(64.0, 40.0))"
+    rationale: >
+      M3 defines a single button size; dense desktop rows (file lists,
+      banners, tag chips) need a compact visual. The hit area still meets
+      48 dp via the padded tap target, only the painted container shrinks.
+    registered: 2026-08-06
+
+  - id: BTN-003
+    component: BaseButton.small
+    property: labelTextStyle
+    spec_value: labelLarge
+    app_value: labelMedium
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filled_button.dart:544 (_FilledButtonDefaultsM3.textStyle, textTheme.labelLarge)"
+    rationale: >
+      The compact 32 dp container of BTN-002 needs a label one step down
+      the type scale to keep the label-to-container proportion of the
+      stock size; labelLarge inside 32 dp reads cramped.
+    registered: 2026-08-06
+
+  - id: BTN-004
+    component: BaseButton.small
+    property: iconSize
+    spec_value: 18.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filled_button.dart:617 (_FilledButtonDefaultsM3.iconSize, 18.0)"
+    rationale: >
+      Matches the labelMedium step of BTN-003 inside the 32 dp container of
+      BTN-002, and aligns with the app icon scale's AppTheme.iconS (16)
+      used by dense tree and list icons.
+    registered: 2026-08-06
+
+  - id: BTN-005
+    component: BaseButton.large
+    property: containerHeight
+    spec_value: 40.0
+    app_value: 48.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filled_button.dart:611 (_FilledButtonDefaultsM3.minimumSize, Size(64.0, 40.0))"
+    rationale: >
+      Kept for API stability: ButtonSize.large is the hero size for
+      empty-state and onboarding actions, one visible step above the stock
+      40 dp container and exactly the minimum tap target.
+    registered: 2026-08-06
+
+  - id: BTN-006
+    component: BaseButton.ghost
+    property: foregroundRole
+    spec_value: primary
+    app_value: onSurface
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/text_button.dart:518 (_TextButtonDefaultsM3.foregroundColor, colorScheme.primary)"
+    rationale: >
+      Ghost is the chrome-less neutral variant for toolbars and repeated
+      row actions; a primary-colored label would read as a link and would
+      collapse the deliberate distinction from the tertiary variant, which
+      adopts the stock primary-colored M3 text button.
+    registered: 2026-08-06

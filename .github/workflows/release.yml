@@ -28,12 +28,12 @@ jobs:
           # (release/manifests/snap/snapcraft.yaml).
           - platform: linux
             os: ubuntu-22.04
-          # macOS is deliberately absent from the RELEASE matrix while the build
-          # is ad-hoc signed with no hardened runtime: Gatekeeper refuses such an
-          # app with "is damaged and can't be opened", so publishing it would
-          # ship an artifact that cannot start. CI still builds macOS on every
-          # push, so compile breakage is caught; only publishing waits for a
-          # Developer ID certificate and notarisation.
+          # macOS is built by the dedicated build-macos job below, not as a
+          # third leg of this matrix: whether its artifact may be published
+          # depends on signing secrets, and neither a missing certificate nor
+          # a bad day at Apple's notary service is allowed to block the
+          # Windows and Linux release. See that job's comment for the full
+          # behaviour.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -164,11 +164,6 @@ jobs:
               cp assets/icons/app_icon.svg "dist/${NAME}/flutter-gitui.svg"
               (cd dist && tar -czf "${NAME}.tar.gz" -C "${NAME}" .)
               ;;
-            macos)
-              APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)
-              [ -n "$APP" ] || { echo "::error::no .app produced"; exit 1; }
-              ditto -c -k --sequesterRsrc --keepParent "$APP" "dist/${NAME}.zip"
-              ;;
           esac
 
           ls -la dist/
@@ -191,9 +186,229 @@ jobs:
           path: dist/release-notes.md
           retention-days: 30
 
+  # macOS lives outside the build matrix because its outcome is conditional in
+  # a way no matrix leg can express: the publish job must run even when this
+  # job fails, and the artifact may only exist when it can actually launch on
+  # a user's machine. Gatekeeper refuses any app that is not signed with a
+  # Developer ID certificate and notarised, so an unsigned build must never
+  # reach the release assets — publishing an archive that cannot start is the
+  # defect this job replaces (issue #66).
+  #
+  # Behaviour by configuration:
+  #   - All five MACOS_* secrets present: the app is re-signed with the
+  #     Developer ID identity (hardened runtime, secure timestamp), notarised
+  #     with notarytool, stapled, and published like any other platform.
+  #   - No MACOS_* secret present: the app is still built so compile breakage
+  #     surfaces, but nothing is uploaded; a warning annotation on the run
+  #     says so. The published release then simply carries no macOS asset.
+  #   - Some but not all secrets present: the job fails — a half-configured
+  #     credential set is a mistake somebody has to see, not skip over.
+  #
+  # Secret names and how to obtain each: release/README.md.
+  build-macos:
+    name: Build macos
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The changelog generator walks every release tag and the commit
+          # ranges between them; a shallow clone contains neither.
+          fetch-depth: 0
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stamp version into pubspec
+        shell: bash
+        run: |
+          sed -i.bak -E "s/^version: .*/version: ${{ steps.version.outputs.value }}/" pubspec.yaml
+          rm -f pubspec.yaml.bak
+          grep '^version:' pubspec.yaml
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      # Same reasoning as in the build job: assets/changelog.json ships inside
+      # the asset bundle, so it must exist before `flutter build`. The notes
+      # file is discarded here — the linux leg publishes the canonical copy.
+      - name: Generate changelog
+        shell: bash
+        run: |
+          dart run tools/changelog/generate_changelog.dart \
+            --version "${{ steps.version.outputs.value }}" \
+            --asset-out assets/changelog.json \
+            --notes-out dist/release-notes.md
+
+      # No updater build: the macOS archive ships the bare .app and the in-app
+      # update flow has no macOS implementation yet (issue #155), so bundling
+      # the helper would only pretend otherwise.
+      - name: Build macos
+        shell: bash
+        run: |
+          flutter build macos --release \
+            --dart-define=BUILD_COMMIT="${GITHUB_SHA::7}" \
+            --dart-define=BUILD_DATE="$(date -u +%Y-%m-%d)"
+
+      # All five secrets, or none: anything in between is treated as an error
+      # so a typo in one secret name cannot silently degrade the release to
+      # "macOS missing" while everything looks configured.
+      - name: Detect signing configuration
+        id: signing
+        env:
+          HAVE_CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+          HAVE_CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD != '' }}
+          HAVE_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY != '' }}
+          HAVE_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID != '' }}
+          HAVE_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=""
+          [ "$HAVE_CERT_P12" = "true" ]         || missing="$missing MACOS_CERTIFICATE_P12"
+          [ "$HAVE_CERT_PASSWORD" = "true" ]    || missing="$missing MACOS_CERTIFICATE_PASSWORD"
+          [ "$HAVE_NOTARY_KEY" = "true" ]       || missing="$missing MACOS_NOTARY_KEY"
+          [ "$HAVE_NOTARY_KEY_ID" = "true" ]    || missing="$missing MACOS_NOTARY_KEY_ID"
+          [ "$HAVE_NOTARY_ISSUER_ID" = "true" ] || missing="$missing MACOS_NOTARY_ISSUER_ID"
+          set -- $missing
+          count=$#
+          if [ "$count" -eq 0 ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "all signing secrets present; the build will be signed, notarised and published"
+          elif [ "$count" -eq 5 ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=macOS not published — no signing secrets::No MACOS_* signing secrets are configured, so the macOS build was compiled but NOT attached to the release: without a Developer ID signature and notarisation, Gatekeeper refuses the app with 'is damaged and can't be opened'. See release/README.md for the five secrets to add."
+          else
+            echo "::error title=macOS signing half-configured::Missing:${missing}. Either configure all five MACOS_* secrets or remove them all — see release/README.md."
+            exit 1
+          fi
+
+      - name: Sign, notarise and staple
+        if: steps.signing.outputs.available == 'true'
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)
+          [ -n "$APP" ] || { echo "::error::no .app produced"; exit 1; }
+
+          WORK=$(mktemp -d)
+          KEYCHAIN="$WORK/build.keychain"
+          trap 'security delete-keychain "$KEYCHAIN" 2>/dev/null || true; rm -rf "$WORK"' EXIT
+
+          # The certificate goes into a throwaway keychain so nothing touches
+          # the runner's login keychain and the trap disposes of the key
+          # material even on failure.
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > "$WORK/certificate.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$WORK/certificate.p12" -k "$KEYCHAIN" -f pkcs12 \
+            -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN"
+
+          # The identity name is read off the imported certificate instead of
+          # living in a sixth secret that could drift from the .p12.
+          IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN" \
+            | sed -n 's/.*"\(Developer ID Application[^"]*\)".*/\1/p' | head -1)
+          [ -n "$IDENTITY" ] || { echo "::error::MACOS_CERTIFICATE_P12 contains no 'Developer ID Application' identity — notarisation only accepts that certificate type"; exit 1; }
+          echo "signing as: $IDENTITY"
+
+          # Inside out: nested code first, the bundle last. Only the app
+          # itself carries entitlements; frameworks and dylibs must not.
+          for item in "$APP/Contents/Frameworks"/*.framework "$APP/Contents/Frameworks"/*.dylib; do
+            [ -e "$item" ] || continue
+            codesign --force --options runtime --timestamp --sign "$IDENTITY" "$item"
+          done
+          codesign --force --options runtime --timestamp \
+            --entitlements macos/Runner/Release.entitlements \
+            --sign "$IDENTITY" "$APP"
+
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          codesign --display --verbose=2 "$APP" 2>&1 | grep -q 'flags=.*runtime' \
+            || { echo "::error::hardened runtime flag missing after signing"; exit 1; }
+
+          # notarytool's exit code is not a reliable verdict, so the JSON
+          # status is what gates the release; on rejection the notary log
+          # names the offending binaries.
+          echo "$MACOS_NOTARY_KEY" | base64 --decode > "$WORK/notary-key.p8"
+          ditto -c -k --keepParent "$APP" "$WORK/notarize.zip"
+          SUBMISSION=$(xcrun notarytool submit "$WORK/notarize.zip" \
+            --key "$WORK/notary-key.p8" \
+            --key-id "$MACOS_NOTARY_KEY_ID" \
+            --issuer "$MACOS_NOTARY_ISSUER_ID" \
+            --wait --timeout 30m --output-format json)
+          echo "$SUBMISSION"
+          STATUS=$(echo "$SUBMISSION" | jq -r '.status // empty')
+          SUBMISSION_ID=$(echo "$SUBMISSION" | jq -r '.id // empty')
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "::error::notarisation ended with status '${STATUS:-unknown}'"
+            if [ -n "$SUBMISSION_ID" ]; then
+              xcrun notarytool log "$SUBMISSION_ID" \
+                --key "$WORK/notary-key.p8" \
+                --key-id "$MACOS_NOTARY_KEY_ID" \
+                --issuer "$MACOS_NOTARY_ISSUER_ID" || true
+            fi
+            exit 1
+          fi
+
+          # Stapling attaches the ticket so Gatekeeper can verify offline;
+          # spctl is the same assessment a user's machine will run.
+          xcrun stapler staple "$APP"
+          xcrun stapler validate "$APP"
+          spctl --assess --type execute --verbose=2 "$APP"
+
+      # Only a signed, notarised, stapled app is ever packaged: when signing
+      # was skipped there is deliberately no macOS artifact for the publish
+      # job to find, so the release cannot carry an app that will not start.
+      - name: Package artifact
+        if: steps.signing.outputs.available == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          NAME="flutter-gitui-v${{ steps.version.outputs.value }}-macos"
+          mkdir -p dist
+          APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)
+          [ -n "$APP" ] || { echo "::error::no .app produced"; exit 1; }
+          # ditto, not zip: it preserves the bundle metadata the stapled
+          # ticket and signature are validated against.
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "dist/${NAME}.zip"
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        if: steps.signing.outputs.available == 'true'
+        with:
+          name: release-macos
+          path: dist/*.zip
+          retention-days: 30
+
   publish:
     name: Publish GitHub Release
-    needs: build
+    # build-macos is waited for but not required: when it uploaded an archive
+    # the release carries macOS, when it failed or skipped signing the release
+    # ships without it — a macOS problem must never block Windows and Linux.
+    needs: [build, build-macos]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -335,6 +550,11 @@ jobs:
           VERSION="${TAG#v}"
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           CHANGELOG=$(retry gh release view "$TAG" --json body --jq .body)
+          # No latest-macos.json even when a signed macOS archive is attached:
+          # the client resolves a manifest name only on Windows and Linux
+          # (update_service falls back to a never-published latest.json on
+          # macOS) and no updater ships in the macOS archive, so a manifest
+          # would advertise an update nothing can install — issue #155.
           for PLATFORM in windows linux; do
             case "$PLATFORM" in
               windows) FILE="flutter-gitui-v${VERSION}-windows.zip" ;;

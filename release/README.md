@@ -9,11 +9,27 @@ git tag -a v0.5.0 -m "0.5.0"
 git push origin v0.5.0
 ```
 
-The workflow builds Windows and Linux on their own runners, packs a flat archive per platform, derives the pre-release flag from the tag (any version containing `-` is a pre-release), writes a `latest-<platform>.json` manifest carrying the SHA-256 of each archive, and opens a **draft** release with everything attached.
+The workflow builds Windows, Linux and macOS on their own runners, packs a flat archive per platform, derives the pre-release flag from the tag (any version containing `-` is a pre-release), writes a `latest-<platform>.json` manifest carrying the SHA-256 of the Windows and Linux archives, and opens a **draft** release with everything attached.
 
 The draft is the gate: assets of a draft are neither served for download nor returned by the API the client polls, so nothing reaches a user until a human publishes it.
 
-macOS is deliberately absent. It builds on every commit, but is signed ad-hoc without a hardened runtime, so Gatekeeper refuses it — see issue #66.
+macOS is conditional. The release workflow always builds it, but attaches it to the release only when the five `MACOS_*` secrets below are configured: only then can the app be signed with a Developer ID certificate and notarised, and Gatekeeper refuses anything less with "is damaged and can't be opened" (issue #66). Without the secrets the run carries a warning annotation and the release simply ships without a macOS asset — never with one that cannot start. A partially configured secret set (some of the five present) fails the macOS job outright so a typo cannot silently drop the platform. A macOS failure never blocks the Windows and Linux release.
+
+## macOS signing and notarisation secrets
+
+The workflow signs with the hardened runtime and a secure timestamp (`codesign --options runtime --timestamp`), submits to Apple with `xcrun notarytool submit --wait`, and staples the ticket with `xcrun stapler staple`. Notarisation authenticates with an App Store Connect API key rather than an Apple ID with an app-specific password: the key is not tied to any person's account or its two-factor state, can be revoked on its own, and is Apple's recommended mechanism for CI.
+
+All five repository secrets (Settings → Secrets and variables → Actions) must be set; the signing identity itself is read off the certificate, so there is no sixth secret to keep in sync.
+
+| Secret | Content | How to obtain |
+|--------|---------|---------------|
+| `MACOS_CERTIFICATE_P12` | Base64 of a **Developer ID Application** certificate with its private key (`.p12`) | Requires Apple Developer Program membership. Xcode → Settings → Accounts → Manage Certificates → "+" → Developer ID Application (only the Account Holder can create one). Export from Keychain Access as `.p12` with a password, then `base64 -i certificate.p12 \| pbcopy`. No other certificate type passes notarisation. |
+| `MACOS_CERTIFICATE_PASSWORD` | The password chosen when exporting the `.p12` | Chosen at export time. |
+| `MACOS_NOTARY_KEY` | Base64 of an App Store Connect API key (`.p8`) | App Store Connect → Users and Access → Integrations → Team Keys → generate a key with the **Developer** role. The `.p8` downloads exactly once; then `base64 -i AuthKey_<KEYID>.p8 \| pbcopy`. |
+| `MACOS_NOTARY_KEY_ID` | The key's ID | Shown next to the key on the same page (also in the file name, `AuthKey_<KEYID>.p8`). |
+| `MACOS_NOTARY_ISSUER_ID` | The team's issuer ID (a UUID) | Shown at the top of the same Integrations page. |
+
+Even when a macOS archive is published, no `latest-macos.json` update manifest is attached: the in-app update flow has no macOS implementation (the client requests a manifest name only on Windows and Linux, and the archive ships no updater helper), so a manifest would advertise updates nothing can install — see issue #155.
 
 ## What is in here
 

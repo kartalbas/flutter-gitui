@@ -61,7 +61,9 @@ jobs:
 
   build:
     name: Build ${{ matrix.platform }}
-    needs: analyze
+    # Both gates, not just the analyzer: without the test dependency a red suite
+    # still produces release-shaped artifacts for all three platforms.
+    needs: [analyze, test]
     strategy:
       fail-fast: false
       matrix:

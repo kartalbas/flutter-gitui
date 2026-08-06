@@ -1,0 +1,57 @@
+name: CI Retry
+
+# Reruns CI runs that died of infrastructure, exactly once. A run killed by
+# the platform has a signature no real failure has: none of its failed or
+# cancelled jobs executed a step beyond "Set up job" / "Complete job" (during
+# the 2026-08-06 Actions incident, jobs died with zero steps recorded). A real
+# failure always executes a real step and must stay honestly red, so it is
+# never retried.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  actions: write
+
+jobs:
+  retry:
+    name: Retry infrastructure failures once
+    # Only first attempts qualify (run_attempt < 2), so the single automatic
+    # retry can never loop: the retried attempt completes with run_attempt 2
+    # and is filtered out here. Deliberate cancellations (concurrency on
+    # non-push events) conclude as 'cancelled', not 'failure', and are skipped.
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt < 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rerun failed jobs when only infrastructure failed
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          set -euo pipefail
+
+          # true when at least one job failed or was cancelled AND none of
+          # those jobs executed a step beyond "Set up job" / "Complete job" -
+          # the infrastructure signature. Steps of green jobs do not count.
+          infra_only=$(gh api "repos/${REPO}/actions/runs/${RUN_ID}/jobs?per_page=100" --jq '
+            [.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled")]
+            | (length > 0)
+              and ([ .[].steps[]
+                     | select(.name != "Set up job" and .name != "Complete job")
+                     | select(.status == "completed" and .conclusion != "skipped") ]
+                   | length == 0)
+          ')
+
+          if [ "${infra_only}" = "true" ]; then
+            echo "::warning::CI run ${RUN_ID} (${RUN_URL}) failed without any job executing a real step - infrastructure signature. Rerunning its failed jobs once."
+            gh api --method POST "repos/${REPO}/actions/runs/${RUN_ID}/rerun-failed-jobs"
+          else
+            echo "CI run ${RUN_ID} (${RUN_URL}) has a failed job that executed a real step - honest failure, not retrying."
+          fi

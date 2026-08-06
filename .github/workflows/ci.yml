@@ -7,9 +7,16 @@ on:
     branches: [master]
   workflow_dispatch:
 
+# Straight-to-master means every commit is the branch tip for only minutes, so
+# tip-only cancellation (one group per ref) discarded nearly every verdict.
+# Keying push runs by SHA gives each commit its own group, so a push run can
+# never be superseded; non-push events (PRs, manual dispatch) keep latest-wins.
+# Plain `cancel-in-progress: false` would NOT be enough: GitHub keeps only the
+# newest *pending* run per group, so intermediate commits would still lose
+# their verdict, just more quietly.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 env:
   FLUTTER_VERSION: "3.44.4"

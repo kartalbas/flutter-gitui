@@ -7,6 +7,8 @@
 ![Dart](https://img.shields.io/badge/Dart-3.9.2+-0175C2?logo=dart)
 ![License](https://img.shields.io/badge/license-ELv2-blue)
 [![Latest release](https://img.shields.io/github/v/release/kartalbas/flutter-gitui?include_prereleases&label=release)](https://github.com/kartalbas/flutter-gitui/releases)
+[![CI](https://github.com/kartalbas/flutter-gitui/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/kartalbas/flutter-gitui/actions/workflows/ci.yml)
+[![Master health](https://github.com/kartalbas/flutter-gitui/actions/workflows/master-health.yml/badge.svg)](https://github.com/kartalbas/flutter-gitui/actions/workflows/master-health.yml)
 
 Flutter GitUI is a graphical front-end for the Git command line. It drives your
 own installed `git` — every operation is a real git command you could have typed

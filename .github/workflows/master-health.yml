@@ -1,0 +1,158 @@
+name: Master Health
+
+# Daily reconciliation: event-driven workflows cannot react to a push event
+# GitHub dropped - such a commit has no run object at all - so a schedule
+# sweeps every master commit of the last 24 hours and classifies each one as
+# green / code-failure / infra / pending / none. CI verifies the tree, not the
+# diff, so a commit without a run of its own counts as covered when a
+# descendant commit has a green run. The job fails only when the tip has a
+# real code failure; a tip that merely lacks a verdict gets CI dispatched
+# instead.
+
+on:
+  schedule:
+    # Daily, deliberately off the top of the hour - GitHub delays or drops
+    # runs scheduled at busy minutes.
+    - cron: "47 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write # dispatch ci.yml when the tip has no verdict
+  contents: read
+
+jobs:
+  reconcile:
+    name: Reconcile master verdicts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          # Full history so `git rev-list --since` and the ancestry checks
+          # for descendant coverage work.
+          fetch-depth: 0
+
+      - name: Classify every master commit of the last 24 hours
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Shared signature with ci-retry.yml: a failed run whose failed or
+          # cancelled jobs never executed a step beyond "Set up job" /
+          # "Complete job" died of infrastructure, not of the code.
+          INFRA_JQ='
+            [.jobs[] | select(.conclusion == "failure" or .conclusion == "cancelled")]
+            | (length > 0)
+              and ([ .[].steps[]
+                     | select(.name != "Set up job" and .name != "Complete job")
+                     | select(.status == "completed" and .conclusion != "skipped") ]
+                   | length == 0)
+          '
+
+          tip=$(git rev-parse HEAD)
+          commits=$(git rev-list --since="24 hours ago" HEAD)
+          # The tip is always classified, even on a quiet day when the
+          # 24-hour window is empty.
+          if ! grep -qx "${tip}" <<<"${commits}"; then
+            commits=$(printf '%s\n%s' "${tip}" "${commits}")
+          fi
+
+          declare -A class detail
+          greens=()
+
+          for sha in ${commits}; do
+            runs=$(gh api "repos/${REPO}/actions/workflows/ci.yml/runs?head_sha=${sha}&per_page=100" --jq '.workflow_runs')
+
+            if [ "$(jq 'length' <<<"${runs}")" -eq 0 ]; then
+              class[$sha]="none"
+              detail[$sha]="no CI run exists for this commit"
+              continue
+            fi
+
+            green_id=$(jq -r '[.[] | select(.status == "completed" and .conclusion == "success")] | .[0].id // empty' <<<"${runs}")
+            if [ -n "${green_id}" ]; then
+              class[$sha]="green"
+              detail[$sha]="run ${green_id} succeeded"
+              greens+=("${sha}")
+              continue
+            fi
+
+            if jq -e 'any(.[]; .status != "completed")' <<<"${runs}" >/dev/null; then
+              class[$sha]="pending"
+              detail[$sha]="a run is still queued or in progress"
+              continue
+            fi
+
+            failed_id=$(jq -r '[.[] | select(.conclusion == "failure" or .conclusion == "timed_out" or .conclusion == "action_required")] | .[0].id // empty' <<<"${runs}")
+            if [ -n "${failed_id}" ]; then
+              if [ "$(gh api "repos/${REPO}/actions/runs/${failed_id}/jobs?per_page=100" --jq "${INFRA_JQ}")" = "true" ]; then
+                class[$sha]="infra"
+                detail[$sha]="run ${failed_id} failed without executing a real step"
+              else
+                class[$sha]="code-failure"
+                detail[$sha]="run ${failed_id} failed in an executed step"
+              fi
+              continue
+            fi
+
+            if jq -e 'any(.[]; .conclusion == "startup_failure")' <<<"${runs}" >/dev/null; then
+              class[$sha]="code-failure"
+              detail[$sha]="the workflow file itself failed to start"
+              continue
+            fi
+
+            # Only cancelled/skipped runs remain: something started, nothing
+            # delivered a verdict.
+            class[$sha]="infra"
+            detail[$sha]="runs exist but none delivered a verdict (cancelled)"
+          done
+
+          # CI verifies the tree, not the diff: a commit with no run of its
+          # own is covered when any descendant commit has a green run.
+          for sha in ${commits}; do
+            if [ "${class[$sha]}" = "none" ]; then
+              for g in "${greens[@]}"; do
+                if [ "${g}" != "${sha}" ] && git merge-base --is-ancestor "${sha}" "${g}"; then
+                  class[$sha]="covered"
+                  detail[$sha]="no run of its own; tree verified by descendant ${g:0:7}"
+                  break
+                fi
+              done
+            fi
+          done
+
+          {
+            echo "## Master health - last 24 hours"
+            echo ""
+            echo "| Commit | Subject | Verdict | Detail |"
+            echo "|---|---|---|---|"
+            for sha in ${commits}; do
+              subject=$(git log -1 --format=%s "${sha}" | sed 's/|/\\|/g')
+              echo "| \`${sha:0:7}\` | ${subject} | **${class[$sha]}** | ${detail[$sha]} |"
+            done
+          } >>"${GITHUB_STEP_SUMMARY}"
+
+          tip_class="${class[$tip]}"
+          echo "tip ${tip:0:7} is ${tip_class}: ${detail[$tip]}"
+
+          case "${tip_class}" in
+            green)
+              echo "Master tip is verified green."
+              ;;
+            code-failure)
+              echo "::error::Master tip ${tip:0:7} has a real code failure - ${detail[$tip]}"
+              exit 1
+              ;;
+            pending)
+              echo "Tip verdict is still on its way - not dispatching a duplicate run."
+              ;;
+            *)
+              # none or infra: the tip has no verdict at all. That is a
+              # missing signal, not a failure - fetch a verdict instead.
+              echo "::warning::Master tip ${tip:0:7} has no verdict (${tip_class}) - dispatching CI on master."
+              gh api --method POST "repos/${REPO}/actions/workflows/ci.yml/dispatches" -f ref=master
+              ;;
+          esac

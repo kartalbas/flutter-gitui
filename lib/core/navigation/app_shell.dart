@@ -56,6 +56,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/changelog/changelog_dialog.dart';
 import '../../shared/dialogs/update_available_dialog.dart';
 import '../services/update_providers.dart';
+import '../services/update_service.dart';
 import '../../features/about/about_dialog.dart';
 
 /// Provider to track if "What's New" dialog has been checked this session
@@ -93,6 +94,13 @@ const int _gitActionCount = 7;
 const double _gitActionBarWidth =
     _gitActionCount * OverflowActionBar.itemExtent +
     (_gitActionCount - 1) * OverflowActionBar.spacing;
+
+/// Width the utility actions need to all show as icons: command palette,
+/// command log, and the update button when one is pending.
+const int _utilityActionCount = 3;
+const double _utilityActionBarWidth =
+    _utilityActionCount * OverflowActionBar.itemExtent +
+    (_utilityActionCount - 1) * OverflowActionBar.spacing;
 
 class _AppShellState extends ConsumerState<AppShell> {
   bool _hasCheckedSettings = false;
@@ -478,61 +486,36 @@ class _AppShellState extends ConsumerState<AppShell> {
                                 // switchers they operate on.
                                 const Expanded(child: SizedBox.shrink()),
                                 const SizedBox(width: AppTheme.paddingS),
-                                BaseIconButton(
-                                  icon: PhosphorIconsRegular.magnifyingGlass,
-                                  tooltip: AppLocalizations.of(
-                                    context,
-                                  )!.commandPaletteTooltip,
-                                  onPressed: () => _showCommandPalette(context),
-                                  size: ButtonSize.small,
+                                // Capped like the git actions, so the utility
+                                // icons collapse into their own overflow menu
+                                // instead of claiming full width and pushing
+                                // the switchers off the bar (#359). Without a
+                                // cap this group is the only one that never
+                                // yields, and the row overflows.
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: (constraints.maxWidth * 0.25)
+                                        .clamp(
+                                          OverflowActionBar.itemExtent,
+                                          _utilityActionBarWidth,
+                                        ),
+                                  ),
+                                  child: OverflowActionBar(
+                                    actions: _buildUtilityActions(
+                                      context,
+                                      ref,
+                                      updateAvailable,
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(width: AppTheme.paddingS),
-                                BaseIconButton(
-                                  icon: PhosphorIconsRegular.terminal,
-                                  tooltip: AppLocalizations.of(
-                                    context,
-                                  )!.toggleCommandLogTooltip,
-                                  onPressed: () {
-                                    ref
-                                        .read(configProvider.notifier)
-                                        .setCommandLogPanelVisible(
-                                          !ref.read(
-                                            commandLogPanelVisibleProvider,
-                                          ),
-                                        );
-                                  },
-                                  size: ButtonSize.small,
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                // Quick settings menu
+                                // These two stay put: each is a popup menu of
+                                // its own rather than an action with a single
+                                // callback, so neither can be folded into the
+                                // overflow menu above. They are also the
+                                // narrowest controls in the bar.
                                 const QuickSettingsMenu(),
                                 const SizedBox(width: AppTheme.paddingS),
-                                // Quiet, permanent signal that an update is
-                                // ready; the user opens it when they choose.
-                                if (updateAvailable != null) ...[
-                                  BaseIconButton(
-                                    icon: PhosphorIconsFill.downloadSimple,
-                                    iconColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    tooltip: AppLocalizations.of(context)!
-                                        .updateReadyTooltip(
-                                          updateAvailable.version,
-                                        ),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        barrierDismissible: false,
-                                        builder: (_) => UpdateAvailableDialog(
-                                          updateInfo: updateAvailable,
-                                        ),
-                                      );
-                                    },
-                                    size: ButtonSize.small,
-                                  ),
-                                  const SizedBox(width: AppTheme.paddingS),
-                                ],
-                                // Language selector
                                 const LanguageSelector(),
                               ],
                             ),
@@ -769,6 +752,62 @@ class _AppShellState extends ConsumerState<AppShell> {
       case GitActionBlock.unsupportedSelection:
         return unsupportedSelectionLabel ?? enabledLabel;
     }
+  }
+
+  /// The toolbar's utility actions, in the order they appear.
+  ///
+  /// Data rather than widgets for the same reason the git actions are: the bar
+  /// decides which of them fit as icons and hands the rest to its overflow
+  /// menu. Keeping them collapsible is what stops this group from being the
+  /// one that never yields and pushes the switchers off the bar (#359).
+  ///
+  /// The quick settings and language menus are deliberately not here. Each is
+  /// a popup menu of its own rather than an action with a single callback, so
+  /// neither can be represented as a [ToolbarAction].
+  List<ToolbarAction> _buildUtilityActions(
+    BuildContext context,
+    WidgetRef ref,
+    UpdateInfo? updateAvailable,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return [
+      ToolbarAction(
+        icon: PhosphorIconsRegular.magnifyingGlass,
+        label: l10n.commandPaletteTooltip,
+        tooltip: l10n.commandPaletteTooltip,
+        onPressed: () => _showCommandPalette(context),
+      ),
+      ToolbarAction(
+        icon: PhosphorIconsRegular.terminal,
+        label: l10n.toggleCommandLogTooltip,
+        tooltip: l10n.toggleCommandLogTooltip,
+        onPressed: () {
+          ref
+              .read(configProvider.notifier)
+              .setCommandLogPanelVisible(
+                !ref.read(commandLogPanelVisibleProvider),
+              );
+        },
+      ),
+      // A standing signal that an update is ready rather than a command, so it
+      // keeps the primary emphasis it had as a standalone button.
+      if (updateAvailable != null)
+        ToolbarAction(
+          icon: PhosphorIconsFill.downloadSimple,
+          label: l10n.updateReadyTooltip(updateAvailable.version),
+          tooltip: l10n.updateReadyTooltip(updateAvailable.version),
+          variant: ButtonVariant.primary,
+          onPressed: () {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) =>
+                  UpdateAvailableDialog(updateInfo: updateAvailable),
+            );
+          },
+        ),
+    ];
   }
 
   /// Build a git operation button

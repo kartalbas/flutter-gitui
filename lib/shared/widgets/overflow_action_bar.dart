@@ -13,6 +13,7 @@ class ToolbarAction {
     required this.label,
     required this.tooltip,
     required this.onPressed,
+    this.variant = ButtonVariant.secondary,
   });
 
   final IconData icon;
@@ -27,6 +28,11 @@ class ToolbarAction {
   /// Null disables the action; it stays visible either way, because a toolbar
   /// that silently drops what it cannot do explains nothing.
   final VoidCallback? onPressed;
+
+  /// Emphasis of the icon button while the action is visible. Defaults to the
+  /// quiet secondary treatment every ordinary toolbar action uses; an action
+  /// that is a standing signal rather than a command may raise it.
+  final ButtonVariant variant;
 }
 
 /// How many actions fit before the overflow button is needed.
@@ -96,7 +102,7 @@ class OverflowActionBar extends StatelessWidget {
                 tooltip: actions[index].tooltip,
                 onPressed: actions[index].onPressed,
                 size: ButtonSize.small,
-                variant: ButtonVariant.secondary,
+                variant: actions[index].variant,
               ),
             ],
             if (hidden.isNotEmpty) ...[

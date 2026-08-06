@@ -17,6 +17,7 @@ import '../../features/repositories/widgets/global_branch_switcher.dart';
 import '../../shared/widgets/language_selector.dart';
 import '../../shared/widgets/progress_overlay.dart';
 import '../../shared/widgets/overflow_action_bar.dart';
+import '../../shared/widgets/base_focus_region.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_badge.dart';
@@ -269,116 +270,131 @@ class _AppShellState extends ConsumerState<AppShell> {
         ? ref.watch(repositoryStatusByPathProvider(currentRepoPath))
         : null;
 
+    // The host carries the shell's keyboard frame: the four regions below
+    // (rail, toolbar, content, command log) form one Tab cycle in that order,
+    // F6 / Shift+F6 jump between them as panes, and the host's anchor node is
+    // the shortcut anchor and focus of last resort. The anchor replaces the
+    // Focus(autofocus: true) wrapper that used to sit here: as an ancestor it
+    // registered its autofocus before any screen's and always won the race,
+    // so a screen's own claim was silently discarded. The host claims focus
+    // only after the autofocus pipeline settled with nothing focused, and its
+    // node is skipTraversal, so it is never a Tab stop.
     return CallbackShortcuts(
       bindings: _buildShortcuts(),
-      child: Focus(
-        autofocus: true,
+      child: BaseFocusRegionHost(
+        debugLabel: 'AppShell.anchor',
         child: Scaffold(
           body: Stack(
             children: [
               Row(
                 children: [
                   // Navigation Rail
-                  NavigationRail(
-                    extended: isRailExtended,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerLow,
-                    selectedIndex: destination.index,
-                    onDestinationSelected: (index) {
-                      ref.read(navigationDestinationProvider.notifier).state =
-                          AppDestination.values[index];
-                    },
-                    leading: Column(
-                      children: [
-                        const SizedBox(height: AppTheme.paddingM),
-                        // App logo/title - double-tap to show About dialog
-                        GestureDetector(
-                          onDoubleTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) => const AppAboutDialog(),
-                            );
-                          },
-                          child: Column(
-                            children: [
-                              Icon(
-                                PhosphorIconsBold.gitBranch,
-                                size: AppTheme.iconXL,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              if (isRailExtended) ...[
-                                const SizedBox(height: AppTheme.paddingS),
-                                TitleMediumLabel(
-                                  AppLocalizations.of(context)!.appTitle,
+                  BaseFocusRegion(
+                    order: 1,
+                    debugLabel: 'AppShell.railRegion',
+                    child: NavigationRail(
+                      extended: isRailExtended,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerLow,
+                      selectedIndex: destination.index,
+                      onDestinationSelected: (index) {
+                        ref.read(navigationDestinationProvider.notifier).state =
+                            AppDestination.values[index];
+                      },
+                      leading: Column(
+                        children: [
+                          const SizedBox(height: AppTheme.paddingM),
+                          // App logo/title - double-tap to show About dialog
+                          GestureDetector(
+                            onDoubleTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => const AppAboutDialog(),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Icon(
+                                  PhosphorIconsBold.gitBranch,
+                                  size: AppTheme.iconXL,
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
+                                if (isRailExtended) ...[
+                                  const SizedBox(height: AppTheme.paddingS),
+                                  TitleMediumLabel(
+                                    AppLocalizations.of(context)!.appTitle,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: AppTheme.paddingL),
-                      ],
-                    ),
-                    trailing: Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: AppTheme.paddingM,
-                          ),
-                          child: BaseIconButton(
-                            icon: isRailExtended
-                                ? PhosphorIconsRegular.caretLeft
-                                : PhosphorIconsRegular.caretRight,
-                            onPressed: () {
-                              ref
-                                  .read(configProvider.notifier)
-                                  .setNavigationRailExtended(!isRailExtended);
-                            },
-                            tooltip: isRailExtended
-                                ? AppLocalizations.of(context)!.collapse
-                                : AppLocalizations.of(context)!.expand,
+                          const SizedBox(height: AppTheme.paddingL),
+                        ],
+                      ),
+                      trailing: Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppTheme.paddingM,
+                            ),
+                            child: BaseIconButton(
+                              icon: isRailExtended
+                                  ? PhosphorIconsRegular.caretLeft
+                                  : PhosphorIconsRegular.caretRight,
+                              onPressed: () {
+                                ref
+                                    .read(configProvider.notifier)
+                                    .setNavigationRailExtended(!isRailExtended);
+                              },
+                              tooltip: isRailExtended
+                                  ? AppLocalizations.of(context)!.collapse
+                                  : AppLocalizations.of(context)!.expand,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    destinations: AppDestination.values.map((dest) {
-                      // Show badges ONLY for selected repository
-                      int? badgeCount;
-                      if (selectedRepoStatus != null &&
-                          !selectedRepoStatus.isLoading) {
-                        // Only show badges when a repository is selected
-                        if (dest == AppDestination.changes &&
-                            selectedRepoStatus.hasUncommittedChanges) {
-                          // Show actual count of changed files (staged + unstaged)
-                          final allStatuses =
-                              ref.watch(repositoryStatusProvider).value ?? [];
-                          badgeCount = allStatuses.length;
-                          // Don't show badge if count is 0
-                          if (badgeCount == 0) badgeCount = null;
-                        } else if (dest == AppDestination.stashes) {
-                          // Show stash count badge
-                          badgeCount = ref.watch(stashCountProvider);
-                          // Don't show badge if count is 0
-                          if (badgeCount == 0) badgeCount = null;
+                      destinations: AppDestination.values.map((dest) {
+                        // Show badges ONLY for selected repository
+                        int? badgeCount;
+                        if (selectedRepoStatus != null &&
+                            !selectedRepoStatus.isLoading) {
+                          // Only show badges when a repository is selected
+                          if (dest == AppDestination.changes &&
+                              selectedRepoStatus.hasUncommittedChanges) {
+                            // Show actual count of changed files (staged + unstaged)
+                            final allStatuses =
+                                ref.watch(repositoryStatusProvider).value ?? [];
+                            badgeCount = allStatuses.length;
+                            // Don't show badge if count is 0
+                            if (badgeCount == 0) badgeCount = null;
+                          } else if (dest == AppDestination.stashes) {
+                            // Show stash count badge
+                            badgeCount = ref.watch(stashCountProvider);
+                            // Don't show badge if count is 0
+                            if (badgeCount == 0) badgeCount = null;
+                          }
                         }
-                      }
 
-                      return NavigationRailDestination(
-                        icon: _buildIconWithBadge(
-                          context,
-                          Icon(dest.icon),
-                          badgeCount,
-                        ),
-                        selectedIcon: _buildIconWithBadge(
-                          context,
-                          Icon(dest.iconSelected),
-                          badgeCount,
-                        ),
-                        label: BodyMediumLabel(dest.label(context)),
-                      );
-                    }).toList(),
+                        return NavigationRailDestination(
+                          icon: _buildIconWithBadge(
+                            context,
+                            Icon(dest.icon),
+                            badgeCount,
+                          ),
+                          selectedIcon: _buildIconWithBadge(
+                            context,
+                            Icon(dest.iconSelected),
+                            badgeCount,
+                          ),
+                          label: BodyMediumLabel(dest.label(context)),
+                        );
+                      }).toList(),
+                    ),
                   ),
 
                   // Vertical divider
@@ -389,213 +405,248 @@ class _AppShellState extends ConsumerState<AppShell> {
                     child: Column(
                       children: [
                         // Top bar with command log toggle
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppTheme.paddingM,
-                            vertical: AppTheme.paddingS,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerLow,
-                            border: Border(
-                              bottom: BorderSide(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant,
+                        BaseFocusRegion(
+                          order: 2,
+                          debugLabel: 'AppShell.toolbarRegion',
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingM,
+                              vertical: AppTheme.paddingS,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerLow,
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outlineVariant,
+                                ),
                               ),
                             ),
-                          ),
-                          // Measured, because how much room the git actions may
-                          // claim before collapsing into their overflow menu
-                          // depends on the window width.
-                          child: LayoutBuilder(
-                            builder: (context, constraints) => Row(
-                              children: [
-                                // Only the switchers scroll. The git actions used
-                                // to scroll with them, which at a narrow width
-                                // simply carried them out of sight - nothing
-                                // indicated more existed. They now sit outside
-                                // the scroll area and collapse into an overflow
-                                // menu instead.
-                                // The switchers get the width they need before
-                                // anything else claims it. They name the
-                                // workspace, repository and branch every other
-                                // control acts on, and a clipped name says
-                                // nothing, whereas an action that no longer
-                                // fits is still reachable in its overflow
-                                // menu. Half the bar is the ceiling; past that
-                                // they scroll, so they can never squeeze the
-                                // actions out entirely.
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: constraints.maxWidth / 2,
-                                  ),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Row(
-                                      children: [
-                                        // Workspace switcher
-                                        const WorkspaceSwitcher(),
-                                        const SizedBox(
-                                          width: AppTheme.paddingM,
-                                        ),
-                                        // Repository switcher
-                                        const RepositorySwitcher(),
-                                        const SizedBox(
-                                          width: AppTheme.paddingM,
-                                        ),
-                                        // Branch switcher
-                                        const BranchSwitcher(),
-                                        const SizedBox(
-                                          width: AppTheme.paddingM,
-                                        ),
-                                        // Global branch switcher
-                                        const GlobalBranchSwitcher(),
-                                      ],
+                            // Measured, because how much room the git actions may
+                            // claim before collapsing into their overflow menu
+                            // depends on the window width.
+                            child: LayoutBuilder(
+                              builder: (context, constraints) => Row(
+                                children: [
+                                  // Only the switchers scroll. The git actions used
+                                  // to scroll with them, which at a narrow width
+                                  // simply carried them out of sight - nothing
+                                  // indicated more existed. They now sit outside
+                                  // the scroll area and collapse into an overflow
+                                  // menu instead.
+                                  // The switchers get the width they need before
+                                  // anything else claims it. They name the
+                                  // workspace, repository and branch every other
+                                  // control acts on, and a clipped name says
+                                  // nothing, whereas an action that no longer
+                                  // fits is still reachable in its overflow
+                                  // menu. Half the bar is the ceiling; past that
+                                  // they scroll, so they can never squeeze the
+                                  // actions out entirely.
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: constraints.maxWidth / 2,
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppTheme.paddingM),
-                                // The git actions stay rendered without a target
-                                // and grey out with a reason, so the toolbar
-                                // never shows an unexplained gap (#303).
-                                //
-                                // Expanded, so they take exactly what is left
-                                // after the switchers and the controls on the
-                                // right, and hand whatever no longer fits to
-                                // their own overflow menu. A fixed share of the
-                                // bar was the bug: it claimed its width whether
-                                // or not the switchers needed it, so the names
-                                // were clipped while every icon still showed.
-                                // Aligned left so the group stays attached to
-                                // the switchers it operates on.
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: OverflowActionBar(
-                                      actions: _buildGitActions(
-                                        context,
-                                        ref,
-                                        gitActionTargets,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          // Workspace switcher
+                                          const WorkspaceSwitcher(),
+                                          const SizedBox(
+                                            width: AppTheme.paddingM,
+                                          ),
+                                          // Repository switcher
+                                          const RepositorySwitcher(),
+                                          const SizedBox(
+                                            width: AppTheme.paddingM,
+                                          ),
+                                          // Branch switcher
+                                          const BranchSwitcher(),
+                                          const SizedBox(
+                                            width: AppTheme.paddingM,
+                                          ),
+                                          // Global branch switcher
+                                          const GlobalBranchSwitcher(),
+                                        ],
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                // Capped like the git actions, so the utility
-                                // icons collapse into their own overflow menu
-                                // instead of claiming full width and pushing
-                                // the switchers off the bar (#359). Without a
-                                // cap this group is the only one that never
-                                // yields, and the row overflows.
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: (constraints.maxWidth * 0.25)
-                                        .clamp(
-                                          // Never below the overflow button
-                                          // itself, or the bar cannot even
-                                          // draw the menu it collapsed into.
-                                          OverflowActionBar.menuExtent,
-                                          _utilityActionBarWidth,
+                                  const SizedBox(width: AppTheme.paddingM),
+                                  // The git actions stay rendered without a target
+                                  // and grey out with a reason, so the toolbar
+                                  // never shows an unexplained gap (#303).
+                                  //
+                                  // Expanded, so they take exactly what is left
+                                  // after the switchers and the controls on the
+                                  // right, and hand whatever no longer fits to
+                                  // their own overflow menu. A fixed share of the
+                                  // bar was the bug: it claimed its width whether
+                                  // or not the switchers needed it, so the names
+                                  // were clipped while every icon still showed.
+                                  // Aligned left so the group stays attached to
+                                  // the switchers it operates on.
+                                  Expanded(
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: OverflowActionBar(
+                                        actions: _buildGitActions(
+                                          context,
+                                          ref,
+                                          gitActionTargets,
                                         ),
-                                  ),
-                                  child: OverflowActionBar(
-                                    actions: _buildUtilityActions(
-                                      context,
-                                      ref,
-                                      updateAvailable,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                // These two stay put: each is a popup menu of
-                                // its own rather than an action with a single
-                                // callback, so neither can be folded into the
-                                // overflow menu above. They are also the
-                                // narrowest controls in the bar.
-                                const QuickSettingsMenu(),
-                                const SizedBox(width: AppTheme.paddingS),
-                                const LanguageSelector(),
+                                  const SizedBox(width: AppTheme.paddingS),
+                                  // Capped like the git actions, so the utility
+                                  // icons collapse into their own overflow menu
+                                  // instead of claiming full width and pushing
+                                  // the switchers off the bar (#359). Without a
+                                  // cap this group is the only one that never
+                                  // yields, and the row overflows.
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth: (constraints.maxWidth * 0.25)
+                                          .clamp(
+                                            // Never below the overflow button
+                                            // itself, or the bar cannot even
+                                            // draw the menu it collapsed into.
+                                            OverflowActionBar.menuExtent,
+                                            _utilityActionBarWidth,
+                                          ),
+                                    ),
+                                    child: OverflowActionBar(
+                                      actions: _buildUtilityActions(
+                                        context,
+                                        ref,
+                                        updateAvailable,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppTheme.paddingS),
+                                  // These two stay put: each is a popup menu of
+                                  // its own rather than an action with a single
+                                  // callback, so neither can be folded into the
+                                  // overflow menu above. They are also the
+                                  // narrowest controls in the bar.
+                                  const QuickSettingsMenu(),
+                                  const SizedBox(width: AppTheme.paddingS),
+                                  const LanguageSelector(),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // The warning banner and the active screen form the
+                        // content region together: the banner is part of what
+                        // the user is working on, not part of the toolbar, so
+                        // Tab and F6 treat them as one pane.
+                        Expanded(
+                          child: BaseFocusRegion(
+                            order: 3,
+                            debugLabel: 'AppShell.contentRegion',
+                            child: Column(
+                              children: [
+                                // Warning banner for missing settings
+                                if (!allSettingsConfigured)
+                                  Container(
+                                    padding: const EdgeInsets.all(
+                                      AppTheme.paddingM,
+                                    ),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.errorContainer,
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          PhosphorIconsBold.warning,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.error,
+                                        ),
+                                        const SizedBox(
+                                          width: AppTheme.paddingM,
+                                        ),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              TitleMediumLabel(
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.requiredSettingsMissing,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onErrorContainer,
+                                              ),
+                                              const SizedBox(
+                                                height: AppTheme.paddingXS,
+                                              ),
+                                              BodySmallLabel(
+                                                AppLocalizations.of(
+                                                  context,
+                                                )!.pleaseConfigureSettings(
+                                                  missingSettings
+                                                      .map(
+                                                        (
+                                                          s,
+                                                        ) => _requiredSettingLabel(
+                                                          AppLocalizations.of(
+                                                            context,
+                                                          )!,
+                                                          s,
+                                                        ),
+                                                      )
+                                                      .join(', '),
+                                                ),
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onErrorContainer,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (destination !=
+                                            AppDestination.settings)
+                                          BaseButton(
+                                            label: AppLocalizations.of(
+                                              context,
+                                            )!.goToSettings,
+                                            variant: ButtonVariant.danger,
+                                            onPressed: () {
+                                              ref
+                                                  .read(
+                                                    navigationDestinationProvider
+                                                        .notifier,
+                                                  )
+                                                  .state = AppDestination
+                                                  .settings;
+                                            },
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                // Content
+                                Expanded(child: _buildContent(destination)),
                               ],
                             ),
                           ),
                         ),
-                        // Warning banner for missing settings
-                        if (!allSettingsConfigured)
-                          Container(
-                            padding: const EdgeInsets.all(AppTheme.paddingM),
-                            color: Theme.of(context).colorScheme.errorContainer,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  PhosphorIconsBold.warning,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                                const SizedBox(width: AppTheme.paddingM),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TitleMediumLabel(
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.requiredSettingsMissing,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                      ),
-                                      const SizedBox(
-                                        height: AppTheme.paddingXS,
-                                      ),
-                                      BodySmallLabel(
-                                        AppLocalizations.of(
-                                          context,
-                                        )!.pleaseConfigureSettings(
-                                          missingSettings
-                                              .map(
-                                                (s) => _requiredSettingLabel(
-                                                  AppLocalizations.of(context)!,
-                                                  s,
-                                                ),
-                                              )
-                                              .join(', '),
-                                        ),
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (destination != AppDestination.settings)
-                                  BaseButton(
-                                    label: AppLocalizations.of(
-                                      context,
-                                    )!.goToSettings,
-                                    variant: ButtonVariant.danger,
-                                    onPressed: () {
-                                      ref
-                                              .read(
-                                                navigationDestinationProvider
-                                                    .notifier,
-                                              )
-                                              .state =
-                                          AppDestination.settings;
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ),
-                        // Content
-                        Expanded(child: _buildContent(destination)),
                       ],
                     ),
                   ),
 
                   // Command Log Panel
-                  const CommandLogPanel(),
+                  const BaseFocusRegion(
+                    order: 4,
+                    debugLabel: 'AppShell.commandLogRegion',
+                    child: CommandLogPanel(),
+                  ),
                 ],
               ),
 

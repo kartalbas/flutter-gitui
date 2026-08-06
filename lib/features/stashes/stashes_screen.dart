@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
+import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_menu_item.dart';
+import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../core/git/git_providers.dart';
@@ -33,12 +35,52 @@ class StashesScreen extends ConsumerStatefulWidget {
 class _StashesScreenState extends ConsumerState<StashesScreen> {
   final _stashesService = const StashesService();
   final _searchController = TextEditingController();
+  late final ItemNavigationController _listController;
   String _searchQuery = '';
+
+  /// The stashes the list currently shows, in list order, so the keyboard
+  /// activation resolves an index against exactly what the user sees.
+  List<GitStash> _visibleStashes = const [];
+
+  /// One expansion state per stash, owned here so Enter on the highlighted
+  /// row can open and close its details. Keyed by the stash ref; the
+  /// controller holds the expanded flag itself, so it also survives the row
+  /// scrolling out of the list's build window.
+  final Map<String, ExpansibleController> _expansionControllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _listController = ItemNavigationController(onActivate: _toggleStashDetails);
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _listController.dispose();
+    for (final controller in _expansionControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  ExpansibleController _expansionControllerFor(String stashRef) {
+    return _expansionControllers.putIfAbsent(
+      stashRef,
+      ExpansibleController.new,
+    );
+  }
+
+  /// The keyboard activation of a stash row: toggle its details, exactly
+  /// what clicking the row header does.
+  void _toggleStashDetails(int index) {
+    if (index < 0 || index >= _visibleStashes.length) return;
+    final controller = _expansionControllerFor(_visibleStashes[index].ref);
+    if (controller.isExpanded) {
+      controller.collapse();
+    } else {
+      controller.expand();
+    }
   }
 
   @override
@@ -107,12 +149,17 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
       searchQuery: _searchQuery,
     );
 
+    _visibleStashes = filteredStashes;
+    _listController.scheduleInitialHighlight();
+
     return Column(
       children: [
-        // Search bar - always show to match branches/tags screens
+        // Search bar - always show to match branches/tags screens; arrows
+        // hand off to the list while typing continues in the field.
         InlineSearchField(
           controller: _searchController,
           hintText: AppLocalizations.of(context)!.hintTextSearchStashes,
+          navigationController: _listController,
           onChanged: (value) {
             setState(() {
               _searchQuery = value;
@@ -125,16 +172,28 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
           },
         ),
 
-        // Stash list
+        // Stash list: one Tab stop with a roving highlight; Enter toggles
+        // the highlighted stash's details.
         Expanded(
           child: filteredStashes.isEmpty
               ? Center(
                   child: BodyLargeLabel('No stashes match "$_searchQuery"'),
                 )
-              : ListView.builder(
+              : KeyboardNavigableListView(
+                  controller: _listController,
                   itemCount: filteredStashes.length,
-                  itemBuilder: (context, index) {
-                    return StashListTile(stash: filteredStashes[index]);
+                  autofocus: true,
+                  itemBuilder: (context, index, isSelected, containerHasFocus) {
+                    final stash = filteredStashes[index];
+                    return StashListTile(
+                      stash: stash,
+                      isHighlighted: isSelected,
+                      containerHasFocus: containerHasFocus,
+                      expansionController: _expansionControllerFor(stash.ref),
+                      // A pointer toggle moves the highlight to the row it
+                      // acted on, so keyboard and mouse stay in one story.
+                      onExpansionChanged: (_) => _listController.select(index),
+                    );
                   },
                 ),
         ),

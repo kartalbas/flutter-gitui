@@ -17,6 +17,15 @@ class WorkspaceCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback? onDelete;
 
+  /// Whether the grid's roving highlight rests on this card.
+  final bool isHighlighted;
+
+  /// Whether the collection holding this card owns keyboard focus. Only the
+  /// highlighted card wears the focus ring, and only while the collection is
+  /// focused; the selected workspace keeps its tinted background without
+  /// claiming the keyboard.
+  final bool containerHasFocus;
+
   const WorkspaceCard({
     super.key,
     required this.project,
@@ -24,12 +33,17 @@ class WorkspaceCard extends StatelessWidget {
     required this.onTap,
     required this.onEdit,
     this.onDelete,
+    this.isHighlighted = false,
+    this.containerHasFocus = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return BaseCard(
-      isSelected: isSelected,
+      isSelected: isSelected || isHighlighted,
+      // The focus ring belongs to the roving highlight alone; the selected
+      // workspace keeps the muted tinted treatment.
+      containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
       customBorderColor: project.color,
       customBackgroundColor: isSelected

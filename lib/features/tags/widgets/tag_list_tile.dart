@@ -31,6 +31,21 @@ class TagListTile extends ConsumerWidget {
   final bool hasRemotes;
   final Function(bool)? onSelectionChanged;
 
+  /// Whether the list's roving highlight rests on this row.
+  final bool isHighlighted;
+
+  /// Whether the list holding this row owns keyboard focus, so the highlight
+  /// renders as a focus ring rather than the muted resting tint.
+  final bool containerHasFocus;
+
+  /// Expansion state owned by the hosting screen, so the keyboard can toggle
+  /// the details of the highlighted row.
+  final ExpansibleController? expansionController;
+
+  /// Reports a header toggle, letting the screen move its highlight to the
+  /// row the pointer acted on.
+  final ValueChanged<bool>? onExpansionChanged;
+
   const TagListTile({
     super.key,
     required this.tag,
@@ -39,6 +54,10 @@ class TagListTile extends ConsumerWidget {
     this.isLocalOnly = false,
     this.hasRemotes = false,
     this.onSelectionChanged,
+    this.isHighlighted = false,
+    this.containerHasFocus = true,
+    this.expansionController,
+    this.onExpansionChanged,
   });
 
   @override
@@ -50,6 +69,12 @@ class TagListTile extends ConsumerWidget {
       ),
       child: BaseCard(
         padding: EdgeInsets.zero,
+        // The roving highlight wears the primary selection treatment; a
+        // checked tag in selection mode wears the multi-select tint, the
+        // same split the repository cards use.
+        isSelected: isHighlighted,
+        isMultiSelected: selectionMode && isSelected,
+        containerHasFocus: containerHasFocus,
         content: selectionMode
             ? InkWell(
                 onTap: () => onSelectionChanged?.call(!isSelected),
@@ -97,6 +122,8 @@ class TagListTile extends ConsumerWidget {
               )
             : ExpansionTile(
                 key: ValueKey(tag.name),
+                controller: expansionController,
+                onExpansionChanged: onExpansionChanged,
                 initiallyExpanded: false,
                 leading: Icon(
                   tag.isAnnotated

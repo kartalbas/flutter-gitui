@@ -23,10 +23,19 @@ class BranchListTile extends ConsumerWidget {
   final GitBranch branch;
   final bool isLocal;
 
+  /// Whether the list's roving highlight rests on this row.
+  final bool isHighlighted;
+
+  /// Whether the list holding this row owns keyboard focus, so the highlight
+  /// renders as a focus ring rather than the muted resting tint.
+  final bool containerHasFocus;
+
   const BranchListTile({
     super.key,
     required this.branch,
     required this.isLocal,
+    this.isHighlighted = false,
+    this.containerHasFocus = true,
   });
 
   @override
@@ -34,6 +43,8 @@ class BranchListTile extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return BaseListItem(
+      isSelected: isHighlighted,
+      containerHasFocus: containerHasFocus,
       leading: Icon(
         branch.isCurrent
             ? PhosphorIconsBold.gitBranch

@@ -6,7 +6,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 
 import '../../generated/app_localizations.dart';
+import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_menu_item.dart';
@@ -45,9 +47,20 @@ class RepositoriesScreen extends ConsumerStatefulWidget {
 }
 
 class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
+  /// Width one grid card may take, matching the grid delegate below.
+  static const double _cardMaxCrossAxisExtent = 400;
+
   bool _isDragging = false;
   int _lastRepositoryCount = 0;
   bool _hasAssignedRepos = false;
+
+  late final ItemNavigationController _navigationController;
+
+  /// The repositories currently shown (project- and chip-filtered), in
+  /// collection order, so the keyboard activation resolves an index against
+  /// exactly what the user sees. Grid and list render the same order, so one
+  /// controller serves both view modes.
+  List<WorkspaceRepository> _visibleRepositories = const [];
 
   // Filter states
   bool _filterCleanOnly = false;
@@ -57,6 +70,28 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
   void initState() {
     super.initState();
     // Initial trigger will happen in build after repositories are loaded
+    _navigationController = ItemNavigationController(
+      onActivate: _activateRepositoryAt,
+    );
+  }
+
+  @override
+  void dispose() {
+    _navigationController.dispose();
+    super.dispose();
+  }
+
+  /// The keyboard activation of a repository, mirroring what a click does:
+  /// with a multi-selection running it toggles membership, otherwise it
+  /// opens the repository.
+  void _activateRepositoryAt(int index) {
+    if (index < 0 || index >= _visibleRepositories.length) return;
+    final repo = _visibleRepositories[index];
+    if (ref.read(repositoryMultiSelectProvider).isNotEmpty) {
+      ref.read(repositoryMultiSelectProvider.notifier).toggleSelection(repo);
+    } else {
+      _switchToRepository(context, ref, repo);
+    }
   }
 
   List<WorkspaceRepository> _applyFilters(
@@ -131,6 +166,11 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final selectedRepositories = repositories
         .where((r) => selectedPaths.contains(r.path))
         .toList();
+
+    _visibleRepositories = filteredRepositories;
+    if (filteredRepositories.isNotEmpty) {
+      _navigationController.scheduleInitialHighlight();
+    }
 
     // Assign unassigned repositories to default project on first load
     if (!_hasAssignedRepos &&
@@ -457,44 +497,57 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final currentRepoPath = ref.watch(currentRepositoryPathProvider);
     final selectedPaths = ref.watch(repositoryMultiSelectProvider);
 
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 400,
-        childAspectRatio: 1.2,
-        crossAxisSpacing: AppTheme.paddingM,
-        mainAxisSpacing: AppTheme.paddingM,
-      ),
-      itemCount: repositories.length,
-      itemBuilder: (context, index) {
-        final repo = repositories[index];
-        final isSelected =
-            currentRepoPath != null && repo.path == currentRepoPath;
-        final isMultiSelected = selectedPaths.contains(repo.path);
+    // The grid resolves its column count from the width, so the controller
+    // must learn it here for vertical arrows to move by whole rows. Same
+    // formula SliverGridDelegateWithMaxCrossAxisExtent uses.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns =
+            (constraints.maxWidth /
+                    (_cardMaxCrossAxisExtent + AppTheme.paddingM))
+                .ceil();
+        _navigationController.crossAxisCount = columns < 1 ? 1 : columns;
 
-        return RepositoryCard(
-          repository: repo,
-          isSelected: isSelected,
-          isMultiSelected: isMultiSelected,
-          showCheckbox: true, // Always show checkbox for easy multi-select
-          onToggleSelection: () {
-            ref
-                .read(repositoryMultiSelectProvider.notifier)
-                .toggleSelection(repo);
+        return KeyboardNavigableGridView(
+          controller: _navigationController,
+          itemCount: repositories.length,
+          autofocus: true,
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: _cardMaxCrossAxisExtent,
+            childAspectRatio: 1.2,
+            crossAxisSpacing: AppTheme.paddingM,
+            mainAxisSpacing: AppTheme.paddingM,
+          ),
+          itemBuilder: (context, index, isHighlighted, containerHasFocus) {
+            final repo = repositories[index];
+            final isSelected =
+                currentRepoPath != null && repo.path == currentRepoPath;
+            final isMultiSelected = selectedPaths.contains(repo.path);
+
+            return RepositoryCard(
+              repository: repo,
+              isSelected: isSelected,
+              isMultiSelected: isMultiSelected,
+              isHighlighted: isHighlighted,
+              containerHasFocus: containerHasFocus,
+              showCheckbox: true, // Always show checkbox for easy multi-select
+              onToggleSelection: () {
+                ref
+                    .read(repositoryMultiSelectProvider.notifier)
+                    .toggleSelection(repo);
+              },
+              onTap: () {
+                // A click moves the highlight to the card it acted on, so
+                // keyboard and mouse stay in one story.
+                _navigationController.select(index);
+                _activateRepositoryAt(index);
+              },
+              onRemove: () => _confirmRemoveRepository(context, ref, repo),
+              onToggleFavorite: () => _toggleFavorite(ref, repo),
+              onOpenInEditor: () => _openInEditor(context, ref, repo),
+              onEditRemoteUrl: () => _editRemoteUrl(context, ref, repo),
+            );
           },
-          onTap: () {
-            // If multi-select mode is active, toggle selection
-            if (selectedPaths.isNotEmpty) {
-              ref
-                  .read(repositoryMultiSelectProvider.notifier)
-                  .toggleSelection(repo);
-            } else {
-              _switchToRepository(context, ref, repo);
-            }
-          },
-          onRemove: () => _confirmRemoveRepository(context, ref, repo),
-          onToggleFavorite: () => _toggleFavorite(ref, repo),
-          onOpenInEditor: () => _openInEditor(context, ref, repo),
-          onEditRemoteUrl: () => _editRemoteUrl(context, ref, repo),
         );
       },
     );
@@ -508,9 +561,13 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final currentRepoPath = ref.watch(currentRepositoryPathProvider);
     final selectedPaths = ref.watch(repositoryMultiSelectProvider);
 
-    return ListView.builder(
+    _navigationController.crossAxisCount = 1;
+
+    return KeyboardNavigableListView(
+      controller: _navigationController,
       itemCount: repositories.length,
-      itemBuilder: (context, index) {
+      autofocus: true,
+      itemBuilder: (context, index, isHighlighted, containerHasFocus) {
         final repo = repositories[index];
         final isSelected =
             currentRepoPath != null && repo.path == currentRepoPath;
@@ -520,6 +577,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           repository: repo,
           isSelected: isSelected,
           isMultiSelected: isMultiSelected,
+          isHighlighted: isHighlighted,
+          containerHasFocus: containerHasFocus,
           showCheckbox: true, // Always show checkbox for easy multi-select
           onToggleSelection: () {
             ref
@@ -527,14 +586,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                 .toggleSelection(repo);
           },
           onTap: () {
-            // If multi-select mode is active, toggle selection
-            if (selectedPaths.isNotEmpty) {
-              ref
-                  .read(repositoryMultiSelectProvider.notifier)
-                  .toggleSelection(repo);
-            } else {
-              _switchToRepository(context, ref, repo);
-            }
+            // A click moves the highlight to the row it acted on, so
+            // keyboard and mouse stay in one story.
+            _navigationController.select(index);
+            _activateRepositoryAt(index);
           },
           onRemove: () => _confirmRemoveRepository(context, ref, repo),
           onToggleFavorite: () => _toggleFavorite(ref, repo),

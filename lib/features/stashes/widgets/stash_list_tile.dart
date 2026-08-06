@@ -20,7 +20,29 @@ import '../dialogs/stash_diff_dialog.dart';
 class StashListTile extends ConsumerWidget {
   final GitStash stash;
 
-  const StashListTile({super.key, required this.stash});
+  /// Whether the list's roving highlight rests on this row.
+  final bool isHighlighted;
+
+  /// Whether the list holding this row owns keyboard focus, so the highlight
+  /// renders as a focus ring rather than the muted resting tint.
+  final bool containerHasFocus;
+
+  /// Expansion state owned by the hosting screen, so the keyboard can toggle
+  /// the details of the highlighted row.
+  final ExpansibleController? expansionController;
+
+  /// Reports a header toggle, letting the screen move its highlight to the
+  /// row the pointer acted on.
+  final ValueChanged<bool>? onExpansionChanged;
+
+  const StashListTile({
+    super.key,
+    required this.stash,
+    this.isHighlighted = false,
+    this.containerHasFocus = true,
+    this.expansionController,
+    this.onExpansionChanged,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,7 +53,11 @@ class StashListTile extends ConsumerWidget {
       ),
       child: BaseCard(
         padding: EdgeInsets.zero,
+        isSelected: isHighlighted,
+        containerHasFocus: containerHasFocus,
         content: ExpansionTile(
+          controller: expansionController,
+          onExpansionChanged: onExpansionChanged,
           leading: CircleAvatar(
             backgroundColor: stash.isLatest
                 ? context.gitColors.added.withValues(alpha: 0.2)

@@ -172,42 +172,50 @@ class _BaseCardState extends State<BaseCard> {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            child: DefaultTextStyle(
-              style: theme.textTheme.bodyMedium!.copyWith(
-                color: colorScheme.onSurface,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header section
-                  if (widget.header != null) ...[
-                    widget.header!,
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: colorScheme.outlineVariant,
-                    ),
-                  ],
+            // Ink children (list tiles, ink wells) paint their hover, focus
+            // and pressed state layers on the nearest Material. Without one
+            // inside the decorated box those layers land on a Material behind
+            // the card's background and stay invisible — which keyboard
+            // traversal exposes the moment a tile in a card receives focus.
+            child: Material(
+              type: MaterialType.transparency,
+              child: DefaultTextStyle(
+                style: theme.textTheme.bodyMedium!.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header section
+                    if (widget.header != null) ...[
+                      widget.header!,
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: colorScheme.outlineVariant,
+                      ),
+                    ],
 
-                  // Content section (main area)
-                  Flexible(
-                    child: Padding(
-                      padding: widget.padding,
-                      child: widget.content,
+                    // Content section (main area)
+                    Flexible(
+                      child: Padding(
+                        padding: widget.padding,
+                        child: widget.content,
+                      ),
                     ),
-                  ),
 
-                  // Footer section
-                  if (widget.footer != null) ...[
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: colorScheme.outlineVariant,
-                    ),
-                    widget.footer!,
+                    // Footer section
+                    if (widget.footer != null) ...[
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: colorScheme.outlineVariant,
+                      ),
+                      widget.footer!,
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

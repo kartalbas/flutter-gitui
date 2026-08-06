@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
+import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_menu_item.dart';
 import '../../shared/components/base_button.dart';
@@ -21,14 +23,57 @@ import 'widgets/workspaces_empty_state.dart';
 import 'widgets/workspace_card.dart';
 
 /// Workspaces screen - shows all workspaces and allows selection
-class WorkspacesScreen extends ConsumerWidget {
+class WorkspacesScreen extends ConsumerStatefulWidget {
   const WorkspacesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WorkspacesScreen> createState() => _WorkspacesScreenState();
+}
+
+class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
+  /// Width one grid card may take, matching the grid delegate below.
+  static const double _cardMaxCrossAxisExtent = 350;
+
+  late final ItemNavigationController _navigationController;
+
+  /// The workspaces currently shown, in collection order, so the keyboard
+  /// activation resolves an index against exactly what the user sees. Grid
+  /// and list render the same order, so one controller serves both modes.
+  List<Workspace> _visibleProjects = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _navigationController = ItemNavigationController(
+      onActivate: _activateProjectAt,
+    );
+  }
+
+  @override
+  void dispose() {
+    _navigationController.dispose();
+    super.dispose();
+  }
+
+  /// The keyboard activation of a workspace: select it, exactly what a
+  /// click does.
+  void _activateProjectAt(int index) {
+    if (index < 0 || index >= _visibleProjects.length) return;
+    ref
+        .read(selectedProjectProvider.notifier)
+        .selectProject(_visibleProjects[index]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final projects = ref.watch(projectProvider);
     final selectedProject = ref.watch(selectedProjectProvider);
     final hasProjects = projects.isNotEmpty;
+
+    _visibleProjects = projects;
+    if (hasProjects) {
+      _navigationController.scheduleInitialHighlight();
+    }
 
     return Scaffold(
       appBar: StandardAppBar(
@@ -108,28 +153,48 @@ class WorkspacesScreen extends ConsumerWidget {
     List<Workspace> projects,
     Workspace? selectedProject,
   ) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 350,
-        childAspectRatio: 0.95,
-        crossAxisSpacing: AppTheme.paddingL,
-        mainAxisSpacing: AppTheme.paddingL,
-      ),
-      itemCount: projects.length,
-      itemBuilder: (context, index) {
-        final project = projects[index];
-        final isSelected = selectedProject?.id == project.id;
+    // The grid resolves its column count from the width, so the controller
+    // must learn it here for vertical arrows to move by whole rows. Same
+    // formula SliverGridDelegateWithMaxCrossAxisExtent uses.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns =
+            (constraints.maxWidth /
+                    (_cardMaxCrossAxisExtent + AppTheme.paddingL))
+                .ceil();
+        _navigationController.crossAxisCount = columns < 1 ? 1 : columns;
 
-        return WorkspaceCard(
-          project: project,
-          isSelected: isSelected,
-          onTap: () {
-            ref.read(selectedProjectProvider.notifier).selectProject(project);
+        return KeyboardNavigableGridView(
+          controller: _navigationController,
+          itemCount: projects.length,
+          autofocus: true,
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: _cardMaxCrossAxisExtent,
+            childAspectRatio: 0.95,
+            crossAxisSpacing: AppTheme.paddingL,
+            mainAxisSpacing: AppTheme.paddingL,
+          ),
+          itemBuilder: (context, index, isHighlighted, containerHasFocus) {
+            final project = projects[index];
+            final isSelected = selectedProject?.id == project.id;
+
+            return WorkspaceCard(
+              project: project,
+              isSelected: isSelected,
+              isHighlighted: isHighlighted,
+              containerHasFocus: containerHasFocus,
+              onTap: () {
+                // A click moves the highlight to the card it acted on, so
+                // keyboard and mouse stay in one story.
+                _navigationController.select(index);
+                _activateProjectAt(index);
+              },
+              onEdit: () => _editProject(context, ref, project),
+              onDelete: project.id != 'default'
+                  ? () => _deleteProject(context, ref, project)
+                  : null,
+            );
           },
-          onEdit: () => _editProject(context, ref, project),
-          onDelete: project.id != 'default'
-              ? () => _deleteProject(context, ref, project)
-              : null,
         );
       },
     );
@@ -141,17 +206,26 @@ class WorkspacesScreen extends ConsumerWidget {
     List<Workspace> projects,
     Workspace? selectedProject,
   ) {
-    return ListView.builder(
+    _navigationController.crossAxisCount = 1;
+
+    return KeyboardNavigableListView(
+      controller: _navigationController,
       itemCount: projects.length,
-      itemBuilder: (context, index) {
+      autofocus: true,
+      itemBuilder: (context, index, isHighlighted, containerHasFocus) {
         final project = projects[index];
         final isSelected = selectedProject?.id == project.id;
 
         return WorkspaceListItem(
           project: project,
           isSelected: isSelected,
+          isHighlighted: isHighlighted,
+          containerHasFocus: containerHasFocus,
           onTap: () {
-            ref.read(selectedProjectProvider.notifier).selectProject(project);
+            // A click moves the highlight to the row it acted on, so
+            // keyboard and mouse stay in one story.
+            _navigationController.select(index);
+            _activateProjectAt(index);
           },
           onEdit: () => _editProject(context, ref, project),
           onDelete: project.id != 'default'

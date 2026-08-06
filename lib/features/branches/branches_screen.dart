@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
+import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/branch.dart';
+import '../../core/services/services.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/workspace/models/workspace_repository.dart';
@@ -32,17 +35,36 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
   final _branchesService = const BranchesService();
   final _searchController = TextEditingController();
   late TabController _tabController;
+  late final ItemNavigationController _localListController;
+  late final ItemNavigationController _remoteListController;
   String _searchQuery = '';
+
+  /// The branches each tab currently shows, in list order, so the keyboard
+  /// activation resolves an index against exactly what the user sees.
+  List<GitBranch> _visibleLocalBranches = const [];
+  List<GitBranch> _visibleRemoteBranches = const [];
 
   @override
   void initState() {
     super.initState();
+    _localListController = ItemNavigationController(
+      onActivate: (index) => _checkoutBranchAt(_visibleLocalBranches, index),
+    );
+    _remoteListController = ItemNavigationController(
+      onActivate: (index) => _checkoutBranchAt(_visibleRemoteBranches, index),
+    );
     _tabController = TabController(
       length: 2,
       vsync: this,
       animationDuration:
           Duration.zero, // Will be updated in didChangeDependencies
-    );
+    )..addListener(_onTabChanged);
+  }
+
+  /// The search field hands ArrowUp/Down to the tab in front, so a tab
+  /// switch must rebuild the field with the other tab's controller.
+  void _onTabChanged() {
+    setState(() {});
   }
 
   @override
@@ -57,7 +79,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
         vsync: this,
         animationDuration: animDuration,
         initialIndex: oldController.index,
-      );
+      )..addListener(_onTabChanged);
       oldController.dispose();
     }
   }
@@ -66,7 +88,30 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
   void dispose() {
     _searchController.dispose();
     _tabController.dispose();
+    _localListController.dispose();
+    _remoteListController.dispose();
     super.dispose();
+  }
+
+  /// The keyboard activation of a branch row: check the branch out, exactly
+  /// what the row's own checkout affordance does. The current branch has
+  /// nothing to activate.
+  Future<void> _checkoutBranchAt(List<GitBranch> branches, int index) async {
+    if (index < 0 || index >= branches.length) return;
+    final branch = branches[index];
+    if (branch.isCurrent) return;
+    try {
+      // Remote branches must be checked out by their bare name; passing the
+      // remote-qualified ref would detach HEAD instead of creating a local
+      // tracking branch. For local branches this is identical to shortName.
+      await ref
+          .read(gitActionsProvider)
+          .switchBranch(branch.branchNameWithoutRemote);
+    } catch (e) {
+      if (mounted) {
+        NotificationService.showError(context, 'Failed to checkout: $e');
+      }
+    }
   }
 
   @override
@@ -101,10 +146,14 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Inline search field
+            // Inline search field; arrows hand off to the list of the tab
+            // in front while typing continues in the field.
             InlineSearchField(
               controller: _searchController,
               hintText: l10n.searchBranches,
+              navigationController: _tabController.index == 0
+                  ? _localListController
+                  : _remoteListController,
               onChanged: (value) {
                 setState(() {
                   _searchQuery = value;
@@ -167,6 +216,12 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           searchQuery: _searchQuery,
         );
 
+        if (isLocal) {
+          _visibleLocalBranches = filteredBranches;
+        } else {
+          _visibleRemoteBranches = filteredBranches;
+        }
+
         if (filteredBranches.isEmpty) {
           return Center(
             child: Text(
@@ -177,11 +232,24 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           );
         }
 
-        return ListView.builder(
+        final listController = isLocal
+            ? _localListController
+            : _remoteListController;
+        listController.scheduleInitialHighlight();
+
+        // One Tab stop with a roving highlight; arrows, Home/End and Enter
+        // are the collection's keys, scoped to the collection alone.
+        return KeyboardNavigableListView(
+          controller: listController,
           itemCount: filteredBranches.length,
-          itemBuilder: (context, index) {
-            final branch = filteredBranches[index];
-            return BranchListTile(branch: branch, isLocal: isLocal);
+          autofocus: isLocal,
+          itemBuilder: (context, index, isSelected, containerHasFocus) {
+            return BranchListTile(
+              branch: filteredBranches[index],
+              isLocal: isLocal,
+              isHighlighted: isSelected,
+              containerHasFocus: containerHasFocus,
+            );
           },
         );
       },

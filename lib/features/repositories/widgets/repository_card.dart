@@ -30,6 +30,15 @@ class RepositoryCard extends ConsumerWidget {
   final bool isMultiSelected;
   final bool showCheckbox;
 
+  /// Whether the grid's roving highlight rests on this card.
+  final bool isHighlighted;
+
+  /// Whether the collection holding this card owns keyboard focus. Only the
+  /// highlighted card wears the focus ring, and only while the collection is
+  /// focused; the current repository keeps its tinted background without
+  /// claiming the keyboard.
+  final bool containerHasFocus;
+
   const RepositoryCard({
     super.key,
     required this.repository,
@@ -42,6 +51,8 @@ class RepositoryCard extends ConsumerWidget {
     this.isSelected = false,
     this.isMultiSelected = false,
     this.showCheckbox = false,
+    this.isHighlighted = false,
+    this.containerHasFocus = true,
   });
 
   @override
@@ -55,9 +66,12 @@ class RepositoryCard extends ConsumerWidget {
     final isSelectable = isValid && (status.isLoading || !status.isBroken);
 
     return BaseCard(
-      isSelected: isSelected,
+      isSelected: isSelected || isHighlighted,
       isMultiSelected: isMultiSelected,
       isSelectable: isSelectable,
+      // The focus ring belongs to the roving highlight alone; the current
+      // repository keeps the muted tinted treatment.
+      containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
       customBackgroundColor: isSelected
           ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)

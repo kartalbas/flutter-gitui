@@ -35,8 +35,10 @@ class ItemNavigationController extends ChangeNotifier {
        _writeIndex = writeIndex;
 
   /// Items per row. 1 is a list or tree; a grid sets its column count so
-  /// vertical arrows move by whole rows.
-  final int crossAxisCount;
+  /// vertical arrows move by whole rows. Mutable because a responsive grid
+  /// only knows its column count at layout time: the hosting screen updates
+  /// it while building, before the navigable view handles the next key.
+  int crossAxisCount;
 
   /// The highlighted item's action, fired by Enter or Space (and by nothing
   /// else — a collection with no activation semantics leaves it null).
@@ -166,6 +168,22 @@ class ItemNavigationController extends ChangeNotifier {
   /// Focus the collection (its single Tab stop).
   void requestFocus() => focusNode.requestFocus();
 
+  /// Schedules highlighting the first item once the pending frame has built,
+  /// if nothing is highlighted by then.
+  ///
+  /// Screens call this while building a non-empty collection so the roving
+  /// highlight is visible before the first key press and "N arrows then
+  /// Enter" counts from the first item instead of needing an extra arrow to
+  /// enter the collection. Deferred to after the frame because the hosting
+  /// view syncs [itemCount] during its own build, and moving the highlight
+  /// mid-build would notify listeners at a time they cannot react.
+  void scheduleInitialHighlight() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_disposed || itemCount == 0 || selectedIndex >= 0) return;
+      select(0);
+    });
+  }
+
   void _moveBy(int stride) {
     final count = itemCount;
     if (count == 0) return;
@@ -229,8 +247,11 @@ class ItemNavigationController extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _disposed = false;
+
   @override
   void dispose() {
+    _disposed = true;
     focusNode.dispose();
     super.dispose();
   }

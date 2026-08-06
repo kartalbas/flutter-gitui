@@ -29,6 +29,15 @@ class RepositoryListItem extends ConsumerWidget {
   final bool isMultiSelected;
   final bool showCheckbox;
 
+  /// Whether the list's roving highlight rests on this row.
+  final bool isHighlighted;
+
+  /// Whether the collection holding this row owns keyboard focus. Only the
+  /// highlighted row wears the focus ring, and only while the collection is
+  /// focused; the current repository keeps its tinted background without
+  /// claiming the keyboard.
+  final bool containerHasFocus;
+
   const RepositoryListItem({
     super.key,
     required this.repository,
@@ -41,6 +50,8 @@ class RepositoryListItem extends ConsumerWidget {
     this.isSelected = false,
     this.isMultiSelected = false,
     this.showCheckbox = false,
+    this.isHighlighted = false,
+    this.containerHasFocus = true,
   });
 
   @override
@@ -54,9 +65,12 @@ class RepositoryListItem extends ConsumerWidget {
     final isSelectable = isValid && (status.isLoading || !status.isBroken);
 
     return BaseListItem(
-      isSelected: isSelected,
+      isSelected: isSelected || isHighlighted,
       isMultiSelected: isMultiSelected,
       isSelectable: isSelectable,
+      // The focus ring belongs to the roving highlight alone; the current
+      // repository keeps the muted tinted treatment.
+      containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
       leading: (showCheckbox && isSelectable)
           ? Row(

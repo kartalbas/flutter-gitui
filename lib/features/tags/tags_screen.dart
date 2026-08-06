@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
+import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/widgets/base_dismiss_scope.dart';
+import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../shared/components/base_animated_widgets.dart';
@@ -42,11 +45,24 @@ class TagsScreen extends ConsumerStatefulWidget {
 class _TagsScreenState extends ConsumerState<TagsScreen> {
   final _tagsService = const TagsService();
   final _searchController = TextEditingController();
+  late final ItemNavigationController _listController;
 
   String _searchQuery = '';
   TagFilterType _filterType = TagFilterType.all;
   bool _selectionMode = false;
   final Set<String> _selectedTags = {};
+
+  /// The tags the flat list currently shows, in list order, so the keyboard
+  /// activation resolves an index against exactly what the user sees. Empty
+  /// while the grouped view is in front — the keyboard drives the flat list
+  /// only.
+  List<GitTag> _visibleTags = const [];
+
+  /// One expansion state per tag, owned here so Enter on the highlighted row
+  /// can open and close its details. Keyed by the tag name; the controller
+  /// holds the expanded flag itself, so it also survives the row scrolling
+  /// out of the list's build window.
+  final Map<String, ExpansibleController> _expansionControllers = {};
 
   // Advanced filters
   DateRangeFilter _dateFilter = DateRangeFilter.all;
@@ -62,9 +78,52 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
   TagGroupBy _groupBy = TagGroupBy.none;
 
   @override
+  void initState() {
+    super.initState();
+    _listController = ItemNavigationController(onActivate: _activateTagAt);
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
+    _listController.dispose();
+    for (final controller in _expansionControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  ExpansibleController _expansionControllerFor(String tagName) {
+    return _expansionControllers.putIfAbsent(tagName, ExpansibleController.new);
+  }
+
+  /// The keyboard activation of a tag row, mirroring what a click does:
+  /// toggle the tag's checkmark in selection mode, its details otherwise.
+  void _activateTagAt(int index) {
+    if (index < 0 || index >= _visibleTags.length) return;
+    final tag = _visibleTags[index];
+    if (_selectionMode) {
+      setState(() {
+        if (!_selectedTags.remove(tag.name)) {
+          _selectedTags.add(tag.name);
+        }
+      });
+      return;
+    }
+    final controller = _expansionControllerFor(tag.name);
+    if (controller.isExpanded) {
+      controller.collapse();
+    } else {
+      controller.expand();
+    }
+  }
+
+  /// The Escape rung for the selection mode; also what the app bar's X does.
+  void _exitSelectionMode() {
+    setState(() {
+      _selectionMode = false;
+      _selectedTags.clear();
+    });
   }
 
   @override
@@ -79,94 +138,98 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       return _buildNoRepository(context);
     }
 
-    return Scaffold(
-      appBar: _selectionMode
-          ? AppBar(
-              title: Text(
-                AppLocalizations.of(
-                  context,
-                )!.selectedCount(_selectedTags.length),
-              ),
-              leading: BaseIconButton(
-                icon: PhosphorIconsRegular.x,
-                tooltip: AppLocalizations.of(context)!.exitSelection,
-                onPressed: () {
-                  setState(() {
-                    _selectionMode = false;
-                    _selectedTags.clear();
-                  });
-                },
-              ),
-              actions: [
-                BaseIconButton(
-                  icon: PhosphorIconsRegular.checkSquareOffset,
-                  tooltip: AppLocalizations.of(context)!.selectAll,
-                  onPressed: () => _selectAllTags(tagsAsync.value ?? []),
+    // Escape leaves the selection mode — the innermost dismissible surface
+    // of this screen. A filled search field clears itself first (its own
+    // watcher sits closer to the focused field), and with no mode active the
+    // scope is transparent, so Escape is dead when nothing is dismissible.
+    return BaseDismissScope(
+      enabled: _selectionMode,
+      onDismiss: _exitSelectionMode,
+      child: Scaffold(
+        appBar: _selectionMode
+            ? AppBar(
+                title: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.selectedCount(_selectedTags.length),
                 ),
-                BaseIconButton(
-                  icon: PhosphorIconsRegular.square,
-                  tooltip: AppLocalizations.of(context)!.clearSelection,
-                  onPressed: () {
-                    setState(() {
-                      _selectedTags.clear();
-                    });
-                  },
+                leading: BaseIconButton(
+                  icon: PhosphorIconsRegular.x,
+                  tooltip: AppLocalizations.of(context)!.exitSelection,
+                  onPressed: _exitSelectionMode,
                 ),
-              ],
-            )
-          : StandardAppBar(
-              title: AppDestination.tags.label(context),
-              onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
-              moreMenuItems: [
-                // Select Tags action (only show if tags exist)
-                if (tagsAsync.value?.isNotEmpty == true)
-                  PopupMenuItem(
-                    child: MenuItemContent(
-                      icon: PhosphorIconsRegular.checkSquare,
-                      label: AppLocalizations.of(context)!.selectTags,
-                    ),
-                    onTap: () {
+                actions: [
+                  BaseIconButton(
+                    icon: PhosphorIconsRegular.checkSquareOffset,
+                    tooltip: AppLocalizations.of(context)!.selectAll,
+                    onPressed: () => _selectAllTags(tagsAsync.value ?? []),
+                  ),
+                  BaseIconButton(
+                    icon: PhosphorIconsRegular.square,
+                    tooltip: AppLocalizations.of(context)!.clearSelection,
+                    onPressed: () {
                       setState(() {
-                        _selectionMode = true;
+                        _selectedTags.clear();
                       });
                     },
                   ),
-                // Fetch Tags action
-                if (tagsAsync.value?.isNotEmpty == true)
-                  const PopupMenuDivider(),
-                PopupMenuItem(
-                  child: MenuItemContent(
-                    icon: PhosphorIconsRegular.downloadSimple,
-                    label: AppLocalizations.of(context)!.fetchTags,
+                ],
+              )
+            : StandardAppBar(
+                title: AppDestination.tags.label(context),
+                onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
+                moreMenuItems: [
+                  // Select Tags action (only show if tags exist)
+                  if (tagsAsync.value?.isNotEmpty == true)
+                    PopupMenuItem(
+                      child: MenuItemContent(
+                        icon: PhosphorIconsRegular.checkSquare,
+                        label: AppLocalizations.of(context)!.selectTags,
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _selectionMode = true;
+                        });
+                      },
+                    ),
+                  // Fetch Tags action
+                  if (tagsAsync.value?.isNotEmpty == true)
+                    const PopupMenuDivider(),
+                  PopupMenuItem(
+                    child: MenuItemContent(
+                      icon: PhosphorIconsRegular.downloadSimple,
+                      label: AppLocalizations.of(context)!.fetchTags,
+                    ),
+                    onTap: () => _fetchTags(context),
                   ),
-                  onTap: () => _fetchTags(context),
-                ),
-              ],
-            ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: tagsAsync.when(
-                data: (tags) => _buildTagList(
-                  context,
-                  tags,
-                  localOnlyTags,
-                  remoteOnlyTags,
-                  remotes,
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => _buildError(context, error),
+                ],
               ),
-            ),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.all(AppTheme.paddingL),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: tagsAsync.when(
+                  data: (tags) => _buildTagList(
+                    context,
+                    tags,
+                    localOnlyTags,
+                    remoteOnlyTags,
+                    remotes,
+                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => _buildError(context, error),
+                ),
+              ),
+            ],
+          ),
         ),
+        bottomNavigationBar: _selectionMode && _selectedTags.isNotEmpty
+            ? _buildBatchOperationsBar(context)
+            : null,
       ),
-      bottomNavigationBar: _selectionMode && _selectedTags.isNotEmpty
-          ? _buildBatchOperationsBar(context)
-          : null,
     );
   }
 
@@ -241,6 +304,12 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                       hintText: _useRegex
                           ? 'Regex search...'
                           : 'Search tags...',
+                      // Arrows hand off to the flat list while typing
+                      // continues in the field; the grouped view is browsed
+                      // with the pointer, so no handoff there.
+                      navigationController: _groupBy == TagGroupBy.none
+                          ? _listController
+                          : null,
                       onChanged: (value) {
                         setState(() {
                           _searchQuery = value;
@@ -629,18 +698,31 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     final groupedTags = _tagsService.groupTags(tags: tags, groupBy: _groupBy);
 
     if (_groupBy == TagGroupBy.none) {
-      // No grouping - show simple list
-      return ListView.builder(
+      _visibleTags = tags;
+      _listController.scheduleInitialHighlight();
+
+      // No grouping - one Tab stop with a roving highlight; Enter toggles
+      // the highlighted tag's details, or its checkmark in selection mode.
+      return KeyboardNavigableListView(
+        controller: _listController,
         itemCount: tags.length,
-        itemBuilder: (context, index) {
+        autofocus: true,
+        itemBuilder: (context, index, isHighlighted, containerHasFocus) {
           final tag = tags[index];
           return TagListTile(
             tag: tag,
             selectionMode: _selectionMode,
             isSelected: _selectedTags.contains(tag.name),
+            isHighlighted: isHighlighted,
+            containerHasFocus: containerHasFocus,
             isLocalOnly: localOnlyTags.contains(tag.name),
             hasRemotes: remotes.isNotEmpty,
+            expansionController: _expansionControllerFor(tag.name),
+            // A pointer toggle moves the highlight to the row it acted on,
+            // so keyboard and mouse stay in one story.
+            onExpansionChanged: (_) => _listController.select(index),
             onSelectionChanged: (selected) {
+              _listController.select(index);
               setState(() {
                 if (selected) {
                   _selectedTags.add(tag.name);
@@ -654,7 +736,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       );
     }
 
-    // Grouped view with collapsible sections
+    // Grouped view with collapsible sections; the keyboard drives the flat
+    // list only, so nothing is activatable while a grouping is applied.
+    _visibleTags = const [];
     return ListView.builder(
       itemCount: groupedTags.length,
       itemBuilder: (context, groupIndex) {

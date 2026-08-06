@@ -416,7 +416,14 @@ class _AppShellState extends ConsumerState<AppShell> {
                                 // indicated more existed. They now sit outside
                                 // the scroll area and collapse into an overflow
                                 // menu instead.
-                                Expanded(
+                                // Flexible, not Expanded: the switchers take only
+                                // the width they need, so the git actions follow
+                                // them instead of floating at a position the
+                                // window width decides. SingleChildScrollView
+                                // sizes itself to constraints.constrain(child),
+                                // so it still scrolls once the names outgrow the
+                                // room left for them.
+                                Flexible(
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
@@ -465,10 +472,10 @@ class _AppShellState extends ConsumerState<AppShell> {
                                     ),
                                   ),
                                 ),
-                                // Mirrors the switchers' Expanded on the other
-                                // side, so the git actions stay centred in the
-                                // bar instead of drifting with the width of
-                                // whatever sits left of them.
+                                // Absorbs the remaining width so the actions on
+                                // the far right stay pinned to the edge while
+                                // the git actions stay anchored to the
+                                // switchers they operate on.
                                 const Expanded(child: SizedBox.shrink()),
                                 const SizedBox(width: AppTheme.paddingS),
                                 BaseIconButton(

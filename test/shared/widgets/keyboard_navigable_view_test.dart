@@ -211,6 +211,39 @@ void main() {
       expect(copies, 1);
     });
 
+    testWidgets('additionalBindings admit bare Delete and fire it', (
+      tester,
+    ) async {
+      // Delete is not a navigation key, and the editable guard runs before
+      // any binding, so a file tree may claim it bare — the established
+      // desktop behaviour for deleting the focused entry.
+      var deletes = 0;
+      final controller = ItemNavigationController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: KeyboardNavigableListView(
+              controller: controller,
+              itemCount: 3,
+              autofocus: true,
+              additionalBindings: {
+                const SingleActivator(LogicalKeyboardKey.delete): () =>
+                    deletes++,
+              },
+              itemBuilder: (context, index, isSelected, hasFocus) =>
+                  _marker(index, isSelected, hasFocus),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+      expect(deletes, 1);
+    });
+
     testWidgets('additionalBindings reject an unmodified letter key', (
       tester,
     ) async {

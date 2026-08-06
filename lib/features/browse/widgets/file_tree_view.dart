@@ -18,6 +18,7 @@ import '../../../shared/utils/search_parser.dart';
 import '../../../shared/utils/file_icon_utils.dart';
 import '../../../shared/widgets/base_tree_item.dart';
 import '../../../shared/widgets/file_status_badge.dart';
+import '../../../shared/widgets/keyboard_navigable_view.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/file_status.dart';
 import '../../../core/config/config_providers.dart';
@@ -625,8 +626,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Additional keyboard shortcuts for file operations
-    final additionalBindings = <ShortcutActivator, VoidCallback>{
+    // File operation shortcuts, scoped by the navigable view to the tree's
+    // own focus node. Bare Delete is the established desktop behaviour for a
+    // focused file tree; the view consults the editable guard before any
+    // binding fires, so a focused text field always keeps its Delete key.
+    final additionalBindings = <SingleActivator, VoidCallback>{
       // F2 - Rename
       const SingleActivator(LogicalKeyboardKey.f2): () {
         if (_selectedNode != null && !_selectedNode!.isDirectory) {
@@ -665,40 +669,28 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       },
     };
 
-    // Main content widget with keyboard navigation
-    return GestureDetector(
-      onTap: () => _treeController.requestFocus(),
-      child: CallbackShortcuts(
-        bindings: {..._treeController.keyBindings, ...additionalBindings},
-        child: Focus(
-          focusNode: _treeController.focusNode,
+    // The empty state must react to controller updates that arrive without a
+    // setState (search filtering swaps the visible nodes directly on the
+    // controller), so the switch lives under a ListenableBuilder.
+    return ListenableBuilder(
+      listenable: _treeController,
+      builder: (context, _) {
+        if (_treeController.flattenedNodes.isEmpty) {
+          return const Center(child: BodyMediumLabel('No files'));
+        }
+        return KeyboardNavigableTreeView<FileTreeNode>(
+          controller: _treeController,
           autofocus: true,
-          child: ListenableBuilder(
-            listenable: _treeController,
-            builder: (context, _) {
-              final nodes = _treeController.flattenedNodes;
-              if (nodes.isEmpty) {
-                return const Center(child: BodyMediumLabel('No files'));
-              }
-              return ListView.builder(
-                controller: _treeController.scrollController,
-                itemCount: nodes.length,
-                itemBuilder: (context, index) {
-                  final node = nodes[index];
-                  final depth =
-                      node.fullPath.split(Platform.pathSeparator).length -
-                      widget.repositoryPath
-                          .split(Platform.pathSeparator)
-                          .length;
-                  final isSelected = _treeController.isSelected(index);
-
-                  return _buildTreeItem(node, depth, isSelected, index);
-                },
-              );
-            },
-          ),
-        ),
-      ),
+          additionalBindings: additionalBindings,
+          // Rows carry absolute paths, so depth is relative to the
+          // repository root rather than the default separator count.
+          depthOf: (node) =>
+              node.fullPath.split(Platform.pathSeparator).length -
+              widget.repositoryPath.split(Platform.pathSeparator).length,
+          itemBuilder: (context, node, depth, isSelected, containerHasFocus) =>
+              _buildTreeItem(node, depth, isSelected, containerHasFocus),
+        );
+      },
     );
   }
 
@@ -781,27 +773,27 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     FileTreeNode node,
     int depth,
     bool isSelected,
-    int index,
+    bool containerHasFocus,
   ) {
+    // The navigable view's own listener claims keyboard focus on the press;
+    // the tap handlers only have to move the selection.
     return BaseTreeItem(
       node: node,
       depth: depth,
       isSelected: isSelected,
+      containerHasFocus: containerHasFocus,
       onTap: () {
-        _treeController.setSelectedIndex(index);
-        _treeController.requestFocus();
+        _treeController.selectByPath(node.fullPath);
       },
       onDoubleTap: node.isDirectory
           ? () {
-              _treeController.setSelectedIndex(index);
+              _treeController.selectByPath(node.fullPath);
               _treeController.toggleNodeExpansion(node);
-              _treeController.requestFocus();
             }
           : null,
       onExpandToggle: () {
-        _treeController.setSelectedIndex(index);
+        _treeController.selectByPath(node.fullPath);
         _treeController.toggleNodeExpansion(node);
-        _treeController.requestFocus();
       },
       fileIcon: FileIconUtils.getIconForStatus(node.status),
       fileIconColor: node.status?.colorOf(context),

@@ -11,6 +11,7 @@ import '../../../shared/components/base_speed_dial.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/controllers/tree_view_controller.dart';
 import '../../../shared/widgets/base_tree_item.dart';
+import '../../../shared/widgets/keyboard_navigable_view.dart';
 import '../../../shared/widgets/file_status_badge.dart';
 import '../../../core/git/models/file_status.dart';
 import '../../../core/diff/diff_parser.dart';
@@ -90,6 +91,15 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       onSelectionChanged: (node) {
         // Trigger rebuild to update diff panel
         setState(() {});
+      },
+      // Enter/Space on the highlighted file toggles staging; the shared tree
+      // view routes activation here. A partially staged file counts as not
+      // staged, so toggling adds its remaining work tree changes instead of
+      // unstaging the half that is already in the index.
+      onToggleNode: (node) {
+        if (node.fileStatus != null) {
+          widget.onToggleStage?.call(node.fileStatus!, node.isFullyStaged);
+        }
       },
     );
     _buildTree();
@@ -244,21 +254,6 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
     return node?.fileStatus;
   }
 
-  void _toggleSelectedNode() {
-    final node = _treeController.selectedNode;
-    if (node == null) return;
-
-    if (node.isDirectory) {
-      // Toggle directory expansion via controller
-      _treeController.toggleNodeExpansion(node);
-    } else if (node.fileStatus != null) {
-      // Toggle file staging. A partially staged file counts as not staged here,
-      // so toggling adds its remaining work tree changes instead of unstaging
-      // the half that is already in the index.
-      widget.onToggleStage?.call(node.fileStatus!, node.isFullyStaged);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final flattenedNodes = _treeController.flattenedNodes;
@@ -269,141 +264,118 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       );
     }
 
-    return GestureDetector(
-      onTap: () {
-        // Request focus when clicked
-        _treeController.requestFocus();
-      },
-      child: CallbackShortcuts(
-        bindings: {
-          ..._treeController.keyBindings,
-          // Override space/enter to toggle staging instead of just expanding
-          const SingleActivator(LogicalKeyboardKey.space): _toggleSelectedNode,
-          const SingleActivator(LogicalKeyboardKey.enter): _toggleSelectedNode,
-        },
-        child: Focus(
-          focusNode: _treeController.focusNode,
-          autofocus: true,
-          skipTraversal: false,
-          canRequestFocus: true,
-          child: Row(
-            children: [
-              // Left panel: File tree
-              Expanded(
-                flex: 1,
-                child: BasePanel(
-                  title: Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.tree,
-                        size: AppTheme.iconS,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: AppTheme.paddingS),
-                      const TitleSmallLabel('Changed Files'),
-                    ],
-                  ),
-                  padding: EdgeInsets.zero,
-                  content: ListenableBuilder(
-                    listenable: _treeController,
-                    builder: (context, _) {
-                      final nodes = _treeController.flattenedNodes;
-                      return ListView.builder(
-                        controller: _treeController.scrollController,
-                        itemCount: nodes.length,
-                        itemBuilder: (context, index) {
-                          final node = nodes[index];
-                          final depth = node.fullPath.split('/').length - 1;
-                          final isSelected = _treeController.isSelected(index);
-
-                          return _buildTreeItem(node, depth, isSelected, index);
-                        },
-                      );
-                    },
-                  ),
+    return Row(
+      children: [
+        // Left panel: File tree. The navigable view owns key handling on the
+        // tree's own focus node only — never on this Row — so focusable
+        // children in the diff panel beside it keep their arrow keys instead
+        // of having them swallowed by tree navigation.
+        Expanded(
+          flex: 1,
+          child: BasePanel(
+            title: Row(
+              children: [
+                Icon(
+                  PhosphorIconsRegular.tree,
+                  size: AppTheme.iconS,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-              ),
-
-              // Right panel: Diff viewer
-              if (_selectedFile != null)
-                Expanded(
-                  flex: 2,
-                  child: BasePanel(
-                    title: Row(
-                      children: [
-                        Icon(
-                          PhosphorIconsRegular.gitDiff,
-                          size: AppTheme.iconS,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                        Expanded(
-                          child: TitleSmallLabel(
-                            _selectedFile!.path,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Icon(
-                          _selectedFile!.isPartiallyStaged
-                              ? PhosphorIconsBold.minusSquare
-                              : _selectedFile!.isStaged
-                              ? PhosphorIconsBold.checkSquare
-                              : PhosphorIconsRegular.square,
-                          size: AppTheme.iconS,
-                          color: _selectedFile!.isStaged
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: AppTheme.paddingXS),
-                        BodySmallLabel(
-                          _selectedFile!.isPartiallyStaged
-                              ? 'Partially staged'
-                              : _selectedFile!.isStaged
-                              ? 'Staged'
-                              : 'Unstaged',
-                        ),
-                      ],
-                    ),
-                    padding: EdgeInsets.zero,
-                    content: _DiffViewerPanel(
-                      key: ValueKey(
-                        '${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode',
+                const SizedBox(width: AppTheme.paddingS),
+                const TitleSmallLabel('Changed Files'),
+              ],
+            ),
+            padding: EdgeInsets.zero,
+            content: KeyboardNavigableTreeView<GitStatusTreeNode>(
+              controller: _treeController,
+              autofocus: true,
+              itemBuilder:
+                  (context, node, depth, isSelected, containerHasFocus) =>
+                      _buildTreeItem(
+                        node,
+                        depth,
+                        isSelected,
+                        containerHasFocus,
                       ),
-                      filePath: _selectedFile!.path,
-                      // A partially staged file shows its work tree half, because that
-                      // is the part the user can otherwise neither see nor stage here.
-                      staged: _selectedFile!.isFullyStaged,
-                      viewMode: _diffViewMode,
-                      fileStatus: _selectedFile!,
-                      onToggleViewMode: () {
-                        setState(() {
-                          _diffViewMode = _diffViewMode == DiffViewMode.diff
-                              ? DiffViewMode.fullFile
-                              : DiffViewMode.diff;
-                        });
-                      },
-                      onDiscardFile: widget.onDiscardFile != null
-                          ? () => widget.onDiscardFile!(_selectedFile!)
-                          : null,
-                      onToggleStage: widget.onToggleStage != null
-                          ? () => widget.onToggleStage!(
-                              _selectedFile!,
-                              _selectedFile!.isFullyStaged,
-                            )
-                          : null,
-                      onDeleteFile:
-                          _selectedFile!.primaryStatus ==
-                                  FileStatusType.untracked &&
-                              widget.onDeleteFile != null
-                          ? () => widget.onDeleteFile!(_selectedFile!)
-                          : null,
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
         ),
-      ),
+
+        // Right panel: Diff viewer
+        if (_selectedFile != null)
+          Expanded(
+            flex: 2,
+            child: BasePanel(
+              title: Row(
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.gitDiff,
+                    size: AppTheme.iconS,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppTheme.paddingS),
+                  Expanded(
+                    child: TitleSmallLabel(
+                      _selectedFile!.path,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Icon(
+                    _selectedFile!.isPartiallyStaged
+                        ? PhosphorIconsBold.minusSquare
+                        : _selectedFile!.isStaged
+                        ? PhosphorIconsBold.checkSquare
+                        : PhosphorIconsRegular.square,
+                    size: AppTheme.iconS,
+                    color: _selectedFile!.isStaged
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppTheme.paddingXS),
+                  BodySmallLabel(
+                    _selectedFile!.isPartiallyStaged
+                        ? 'Partially staged'
+                        : _selectedFile!.isStaged
+                        ? 'Staged'
+                        : 'Unstaged',
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.zero,
+              content: _DiffViewerPanel(
+                key: ValueKey(
+                  '${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode',
+                ),
+                filePath: _selectedFile!.path,
+                // A partially staged file shows its work tree half, because that
+                // is the part the user can otherwise neither see nor stage here.
+                staged: _selectedFile!.isFullyStaged,
+                viewMode: _diffViewMode,
+                fileStatus: _selectedFile!,
+                onToggleViewMode: () {
+                  setState(() {
+                    _diffViewMode = _diffViewMode == DiffViewMode.diff
+                        ? DiffViewMode.fullFile
+                        : DiffViewMode.diff;
+                  });
+                },
+                onDiscardFile: widget.onDiscardFile != null
+                    ? () => widget.onDiscardFile!(_selectedFile!)
+                    : null,
+                onToggleStage: widget.onToggleStage != null
+                    ? () => widget.onToggleStage!(
+                        _selectedFile!,
+                        _selectedFile!.isFullyStaged,
+                      )
+                    : null,
+                onDeleteFile:
+                    _selectedFile!.primaryStatus == FileStatusType.untracked &&
+                        widget.onDeleteFile != null
+                    ? () => widget.onDeleteFile!(_selectedFile!)
+                    : null,
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -411,7 +383,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
     GitStatusTreeNode node,
     int depth,
     bool isSelected,
-    int index,
+    bool containerHasFocus,
   ) {
     // Get color based on file status
     Color? fileColor;
@@ -424,14 +396,16 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       node: node,
       depth: depth,
       isSelected: isSelected,
+      containerHasFocus: containerHasFocus,
       indentPerLevel: AppTheme.paddingM,
       onTap: () {
+        // The navigable view's own listener claims keyboard focus on the
+        // press; selection only has to follow the tap.
         if (node.isDirectory) {
           _treeController.toggleNodeExpansion(node);
         } else {
-          _treeController.setSelectedIndex(index);
+          _treeController.selectByPath(node.fullPath);
         }
-        _treeController.requestFocus();
       },
       onDoubleTap: (!node.isDirectory && node.fileStatus != null)
           ? () {

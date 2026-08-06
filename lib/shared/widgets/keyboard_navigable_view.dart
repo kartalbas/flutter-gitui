@@ -29,9 +29,8 @@ typedef NavigableTreeItemBuilder<T extends TreeNodeMixin> =
       bool containerHasFocus,
     );
 
-/// Function keys are the only unmodified keys an extra binding may claim:
-/// they can never collide with text input or with the shared navigation
-/// semantics.
+/// Function keys never collide with text input or with the shared navigation
+/// semantics, so an extra binding may always claim them.
 final Set<LogicalKeyboardKey> _functionKeys = <LogicalKeyboardKey>{
   LogicalKeyboardKey.f1,
   LogicalKeyboardKey.f2,
@@ -47,23 +46,37 @@ final Set<LogicalKeyboardKey> _functionKeys = <LogicalKeyboardKey>{
   LogicalKeyboardKey.f12,
 };
 
-bool _bindingsAreModifierOrFunctionKeys(
-  Map<SingleActivator, VoidCallback>? bindings,
-) {
+/// Editing keys an extra binding may claim unmodified. They are not part of
+/// the shared navigation semantics, and a focused editable cannot lose them
+/// either: [_CollectionFocusState._onKeyEvent] consults
+/// [focusedEditableOwnsKey] before any binding runs, and that guard always
+/// keeps Backspace and Delete with an editable. With no editable focused the
+/// keys are genuinely free — and bare Delete on a focused file tree is the
+/// established desktop behaviour (Explorer and Finder both delete on it), so
+/// it must not be exiled to a chord.
+final Set<LogicalKeyboardKey> _editingKeysTheGuardClears = <LogicalKeyboardKey>{
+  LogicalKeyboardKey.delete,
+  LogicalKeyboardKey.backspace,
+};
+
+bool _bindingsAvoidReservedKeys(Map<SingleActivator, VoidCallback>? bindings) {
   if (bindings == null) return true;
   return bindings.keys.every(
     (activator) =>
         activator.control ||
         activator.alt ||
         activator.meta ||
-        _functionKeys.contains(activator.trigger),
+        _functionKeys.contains(activator.trigger) ||
+        _editingKeysTheGuardClears.contains(activator.trigger),
   );
 }
 
 const String _bindingsAssertMessage =
     'additionalBindings may only bind modified (Ctrl/Alt/Meta) or function '
-    'keys. Unmodified keys belong to the shared navigation semantics or to a '
-    'focused editable; binding them here would shadow one or the other.';
+    'keys, plus bare Delete/Backspace, which the editable guard clears before '
+    'any binding runs. Other unmodified keys belong to the shared navigation '
+    'semantics or to a focused editable; binding them here would shadow one '
+    'or the other.';
 
 /// A scrollable list that is one Tab stop with a roving highlight.
 ///
@@ -83,7 +96,7 @@ class KeyboardNavigableListView extends StatefulWidget {
     this.additionalBindings,
     this.padding,
   }) : assert(
-         _bindingsAreModifierOrFunctionKeys(additionalBindings),
+         _bindingsAvoidReservedKeys(additionalBindings),
          _bindingsAssertMessage,
        );
 
@@ -106,8 +119,8 @@ class KeyboardNavigableListView extends StatefulWidget {
   final bool autofocus;
 
   /// Extra shortcuts scoped to the collection, restricted to modified or
-  /// function keys — unmodified keys belong to navigation or a focused
-  /// editable.
+  /// function keys plus bare Delete/Backspace — other unmodified keys belong
+  /// to navigation or a focused editable.
   final Map<SingleActivator, VoidCallback>? additionalBindings;
 
   /// Padding for the scroll view.
@@ -199,7 +212,7 @@ class KeyboardNavigableGridView extends StatefulWidget {
     this.additionalBindings,
     this.padding,
   }) : assert(
-         _bindingsAreModifierOrFunctionKeys(additionalBindings),
+         _bindingsAvoidReservedKeys(additionalBindings),
          _bindingsAssertMessage,
        );
 
@@ -224,7 +237,7 @@ class KeyboardNavigableGridView extends StatefulWidget {
   final bool autofocus;
 
   /// Extra shortcuts scoped to the collection, restricted to modified or
-  /// function keys.
+  /// function keys plus bare Delete/Backspace.
   final Map<SingleActivator, VoidCallback>? additionalBindings;
 
   /// Padding for the scroll view.
@@ -329,7 +342,7 @@ class KeyboardNavigableTreeView<T extends TreeNodeMixin>
     this.additionalBindings,
     this.padding,
   }) : assert(
-         _bindingsAreModifierOrFunctionKeys(additionalBindings),
+         _bindingsAvoidReservedKeys(additionalBindings),
          _bindingsAssertMessage,
        );
 
@@ -348,7 +361,7 @@ class KeyboardNavigableTreeView<T extends TreeNodeMixin>
   final bool autofocus;
 
   /// Extra shortcuts scoped to the collection, restricted to modified or
-  /// function keys.
+  /// function keys plus bare Delete/Backspace.
   final Map<SingleActivator, VoidCallback>? additionalBindings;
 
   /// Padding for the scroll view.

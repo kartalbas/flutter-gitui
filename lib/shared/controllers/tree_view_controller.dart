@@ -87,13 +87,15 @@ class TreeViewController<T extends TreeNodeMixin>
   bool isIndexSelectable(int index) =>
       !skipDirectories || !_flattenedNodes[index].isDirectory;
 
-  /// Every applied move reports the node, keeps it visible, and anchors focus
-  /// on the tree — the same follow-through the hand-written navigation had.
+  /// Every applied move reports the node and keeps it visible. Deliberately
+  /// no focus claim: a keyboard move starts on the tree's own focused node
+  /// anyway, a pointer press is claimed by the navigable view's listener, and
+  /// a move driven from a search field's handoff must leave the caret in the
+  /// field — grabbing focus here would throw the typist out mid-word.
   @override
   void didSelect(int index) {
     onSelectionChanged?.call(selectedNode);
     scrollToSelected();
-    requestFocus();
   }
 
   /// Get the flattened nodes list

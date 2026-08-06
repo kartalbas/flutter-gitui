@@ -30,6 +30,10 @@ class CommitListItem extends ConsumerWidget {
   /// can anchor a context menu on the commit under the cursor.
   final void Function(Offset globalPosition)? onSecondaryTap;
 
+  /// Whether the commit list holds keyboard focus, so the highlighted row
+  /// wears its focus ring only while the keyboard actually lives there.
+  final bool containerHasFocus;
+
   const CommitListItem({
     super.key,
     required this.commit,
@@ -40,6 +44,7 @@ class CommitListItem extends ConsumerWidget {
     this.graphRow,
     this.graphLaneCount = 0,
     this.onSecondaryTap,
+    this.containerHasFocus = true,
   });
 
   @override
@@ -50,6 +55,7 @@ class CommitListItem extends ConsumerWidget {
     final listItem = BaseListItem(
       isSelected: isSelected,
       isMultiSelected: isMultiSelected,
+      containerHasFocus: containerHasFocus,
       onTap: onTap,
       onSecondaryTap: onSecondaryTap,
       // With lanes available the leading slot only reserves their width; the

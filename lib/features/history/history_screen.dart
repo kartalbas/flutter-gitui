@@ -19,7 +19,12 @@ import '../../core/git/git_service.dart';
 import '../../core/git/destructive_action.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/commit.dart';
+import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/dialogs/confirm_destructive.dart';
+import '../../shared/widgets/base_dismiss_scope.dart';
+import '../../shared/widgets/base_focus_region.dart';
+import '../../shared/widgets/keyboard_navigable_view.dart';
+import '../../shared/widgets/search_field_handoff.dart';
 import '../../shared/widgets/widgets.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/services/notification_service.dart';
@@ -54,7 +59,6 @@ class HistoryScreen extends ConsumerStatefulWidget {
 
 class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   final _searchController = TextEditingController();
-  final _scrollController = ScrollController();
   bool _fabIsExpanded = false;
   Timer? _searchDebounce;
 
@@ -62,12 +66,73 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   /// anchor to it even though no cursor position exists.
   final GlobalKey _selectedRowKey = GlobalKey();
 
+  /// The details region, so Enter on a commit row can move focus into it —
+  /// the details already follow the selection, so "open" would be a no-op
+  /// and moving the keyboard there is what gives Enter a job.
+  final GlobalKey<BaseFocusRegionState> _detailsRegionKey =
+      GlobalKey<BaseFocusRegionState>();
+
+  /// The commit list's keyboard semantics, in delegated mode: the selection
+  /// lives in [commitSelectionProvider] — where clicks, context clicks and
+  /// actions already coordinate — so the controller stores no index of its
+  /// own. Every read resolves the provider against the displayed commits and
+  /// every move writes a single selection back, keeping keyboard and mouse
+  /// on the one selection model instead of two that can disagree.
+  late final ItemNavigationController _listController;
+
+  /// What the list is currently showing (the filtered window, or deep-search
+  /// results), refreshed on every build of the commit history: the delegated
+  /// callbacks resolve against exactly what the user sees.
+  List<GitCommit> _displayedCommits = const [];
+  bool _deepMode = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _listController = ItemNavigationController(
+      onActivate: (_) => _detailsRegionKey.currentState?.focusFirstChild(),
+      onTrailingBoundary: _loadNextPageAtEdge,
+      readIndex: _readSelectedIndex,
+      writeIndex: _writeSelectedIndex,
+    );
+  }
+
   @override
   void dispose() {
     _searchDebounce?.cancel();
     _searchController.dispose();
-    _scrollController.dispose();
+    _listController.dispose();
     super.dispose();
+  }
+
+  int _readSelectedIndex() {
+    // Resolved, not raw: a stale selection the screen no longer shows must
+    // not count as a highlight while the view says nothing is selected.
+    final primary = ref
+        .read(commitSelectionProvider)
+        .resolve(_displayedCommits)
+        .primary;
+    if (primary == null) return -1;
+    return _displayedCommits.indexWhere((c) => c.hash == primary.hash);
+  }
+
+  void _writeSelectedIndex(int index) {
+    final notifier = ref.read(commitSelectionProvider.notifier);
+    if (index < 0 || index >= _displayedCommits.length) {
+      notifier.clear();
+      return;
+    }
+    notifier.selectSingle(_displayedCommits[index].hash);
+  }
+
+  /// Pushing down or End past the last loaded row asks for the next page:
+  /// the keyboard's equivalent of reaching the footer and pressing Load
+  /// more. Deep results are a complete answer, so they have no next page.
+  void _loadNextPageAtEdge() {
+    if (_deepMode) return;
+    final window = ref.read(commitWindowProvider).value;
+    if (window == null || !window.hasMore || window.isLoadingMore) return;
+    unawaited(ref.read(commitWindowProvider.notifier).loadMore());
   }
 
   void _applySearch(String query) {
@@ -78,6 +143,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       final searchService = ref.read(historySearchServiceProvider);
       notifier.state = searchService.parseQuery(query);
     }
+  }
+
+  /// The "clear the search" rung of the Escape ladder, and what the clear
+  /// chips do: text, pending debounce and applied filter go together, so the
+  /// field can never look empty while the list is still filtered.
+  void _clearSearch() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    ref.read(historySearchFilterProvider.notifier).state =
+        const HistorySearchFilter.empty();
+    setState(() {});
   }
 
   void _collapseFAB() {
@@ -94,62 +170,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     });
   }
 
-  KeyEventResult _handleKeyEvent(
-    List<GitCommit> commits,
-    FocusNode node,
-    KeyEvent event, {
-    bool deepMode = false,
-  }) {
-    if (event is! KeyDownEvent) return KeyEventResult.ignored;
-
-    // ESC key dismissal for FAB
-    if (event.logicalKey == LogicalKeyboardKey.escape && _fabIsExpanded) {
-      _collapseFAB();
-      return KeyEventResult.handled;
-    }
-
-    // Shift+F10 and the dedicated menu key open the same menu a right-click
-    // does, anchored to the selected row. The menu itself is arrow-key
-    // navigable, which is what makes every entry reachable without a mouse.
-    if (event.logicalKey == LogicalKeyboardKey.contextMenu ||
-        (event.logicalKey == LogicalKeyboardKey.f10 &&
-            HardwareKeyboard.instance.isShiftPressed)) {
-      if (ref.read(commitSelectionProvider).resolve(commits).isEmpty) {
-        return KeyEventResult.ignored;
-      }
-      unawaited(_showCommitContextMenu(commits, _selectedRowMenuPosition()));
-      return KeyEventResult.handled;
-    }
-
-    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      // Stepping past the last loaded row asks for the next page: the
-      // keyboard's equivalent of reaching the footer and pressing Load more.
-      if (!deepMode && commits.isNotEmpty) {
-        final primary = ref
-            .read(commitSelectionProvider)
-            .resolve(commits)
-            .primary;
-        if (primary?.hash == commits.last.hash) {
-          final window = ref.read(commitWindowProvider).value;
-          if (window != null && window.hasMore && !window.isLoadingMore) {
-            unawaited(ref.read(commitWindowProvider.notifier).loadMore());
-          }
-        }
-      }
-      ref.read(commitSelectionProvider.notifier).move(commits, 1);
-      return KeyEventResult.handled;
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      ref.read(commitSelectionProvider.notifier).move(commits, -1);
-      return KeyEventResult.handled;
-    } else if (event.logicalKey == LogicalKeyboardKey.enter &&
-        // Resolved, not raw: a stale selection the screen no longer shows must
-        // not claim the key while the view says nothing is selected.
-        ref.read(commitSelectionProvider).resolve(commits).isNotEmpty) {
-      // Enter key could be used for additional actions in the future
-      return KeyEventResult.handled;
-    }
-
-    return KeyEventResult.ignored;
+  /// Shift+F10 and the dedicated menu key open the same menu a right-click
+  /// does, anchored to the selected row. The menu itself is arrow-key
+  /// navigable, which is what makes every entry reachable without a mouse.
+  void _openContextMenuFromKeyboard(List<GitCommit> commits) {
+    if (ref.read(commitSelectionProvider).resolve(commits).isEmpty) return;
+    unawaited(_showCommitContextMenu(commits, _selectedRowMenuPosition()));
   }
 
   @override
@@ -222,145 +248,181 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       return const NoRepositoryEmptyState();
     }
 
-    return Scaffold(
-      appBar: StandardAppBar(
-        title: AppDestination.history.label(context),
-        onRefresh: () => ref.invalidate(commitHistoryProvider),
-        moreMenuItems: const [],
+    // The Escape ladder, innermost rung first: collapse the expanded speed
+    // dial, then clear the search text, then leave deep-search mode, then
+    // nothing. Each rung is a scope on the key-bubbling path, so the first
+    // enabled one consumes the press and the rest wait for the next. When
+    // the search field itself holds focus its own watcher clears the text
+    // before any of these — correcting a typo stays a field-local gesture.
+    // Clearing the text also empties the applied filter, which resets deep
+    // search as a consequence: the results answered that exact filter.
+    final deepSearchActive = ref.watch(historyDeepSearchProvider).isActive;
+
+    return BaseDismissScope(
+      enabled: deepSearchActive,
+      onDismiss: () => ref.read(historyDeepSearchProvider.notifier).clear(),
+      child: BaseDismissScope(
+        enabled: _searchController.text.isNotEmpty,
+        onDismiss: _clearSearch,
+        child: BaseDismissScope(
+          enabled: _fabIsExpanded,
+          onDismiss: _collapseFAB,
+          child: Scaffold(
+            appBar: StandardAppBar(
+              title: AppDestination.history.label(context),
+              onRefresh: () => ref.invalidate(commitHistoryProvider),
+              moreMenuItems: const [],
+            ),
+            // One ordered traversal root for the screen's regions: search,
+            // list, details, diff, action dial. Nested inside the shell's
+            // content region, the host orders Tab but leaves F6 and the
+            // focus of last resort to the shell.
+            body: BaseFocusRegionHost(
+              debugLabel: 'HistoryScreen.regions',
+              child: Padding(
+                padding: const EdgeInsets.all(AppTheme.paddingL),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    BaseFocusRegion(
+                      order: 1,
+                      debugLabel: 'HistoryScreen.searchRegion',
+                      child: _buildSearchBar(context, searchFilter),
+                    ),
+
+                    // Main content
+                    Expanded(
+                      child: _buildMainContent(
+                        context,
+                        filteredCommitsAsync,
+                        searchFilter,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search bar and filters
-            Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-                border: Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).colorScheme.outlineVariant,
+    );
+  }
+
+  /// Search bar and filters — the screen's first focus region.
+  Widget _buildSearchBar(
+    BuildContext context,
+    HistorySearchFilter searchFilter,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.paddingM),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Search bar row
+          Row(
+            children: [
+              Expanded(
+                // Arrows typed in the field move the commit list's highlight
+                // while the caret stays put, so narrowing and choosing a
+                // commit is one keyboard flow.
+                child: SearchFieldHandoff(
+                  controller: _listController,
+                  child: BaseTextField(
+                    controller: _searchController,
+                    hintText: AppLocalizations.of(
+                      context,
+                    )!.hintTextSearchCommits,
+                    prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                    showClearButton: _searchController.text.isNotEmpty,
+                    onChanged: (query) {
+                      setState(() {}); // Update suffix icon
+                      // Filtering is pure over the loaded window and
+                      // never invokes git, but fuzzy-scoring every
+                      // loaded commit still stutters typing on large
+                      // windows, so bursts are coalesced.
+                      _searchDebounce?.cancel();
+                      if (query.isEmpty) {
+                        // Clearing restores the full history at once.
+                        _applySearch(query);
+                      } else {
+                        _searchDebounce = Timer(
+                          AppConstants.debounceMilliseconds,
+                          () {
+                            if (mounted) _applySearch(query);
+                          },
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
-              child: Column(
-                children: [
-                  // Search bar row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: BaseTextField(
-                          controller: _searchController,
-                          hintText: AppLocalizations.of(
-                            context,
-                          )!.hintTextSearchCommits,
-                          prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-                          showClearButton: _searchController.text.isNotEmpty,
-                          onChanged: (query) {
-                            setState(() {}); // Update suffix icon
-                            // Filtering is pure over the loaded window and
-                            // never invokes git, but fuzzy-scoring every
-                            // loaded commit still stutters typing on large
-                            // windows, so bursts are coalesced.
-                            _searchDebounce?.cancel();
-                            if (query.isEmpty) {
-                              // Clearing restores the full history at once.
-                              _applySearch(query);
-                            } else {
-                              _searchDebounce = Timer(
-                                AppConstants.debounceMilliseconds,
-                                () {
-                                  if (mounted) _applySearch(query);
-                                },
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: AppTheme.paddingM),
-                      // Advanced search button
-                      BaseIconButton(
-                        icon: PhosphorIconsRegular.faders,
-                        tooltip: AppLocalizations.of(context)!.advancedSearch,
-                        onPressed: () => _showAdvancedSearch(context),
-                        variant: ButtonVariant.primary,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppTheme.paddingS),
-
-                  // Quick filter chips
-                  Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.funnel,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: AppTheme.paddingS),
-                      BodySmallLabel(
-                        AppLocalizations.of(context)!.quickFilters,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: AppTheme.paddingS),
-                      Expanded(
-                        child: Wrap(
-                          spacing: AppTheme.paddingS,
-                          children: [
-                            _buildQuickFilter(
-                              AppLocalizations.of(context)!.today,
-                              HistorySearchFilter.today(),
-                            ),
-                            _buildQuickFilter(
-                              AppLocalizations.of(context)!.thisWeek,
-                              HistorySearchFilter.thisWeek(),
-                            ),
-                            _buildQuickFilter(
-                              AppLocalizations.of(context)!.thisMonth,
-                              HistorySearchFilter.thisMonth(),
-                            ),
-                            _buildQuickFilter(
-                              AppLocalizations.of(context)!.last30Days,
-                              HistorySearchFilter.last30Days(),
-                            ),
-                            if (searchFilter.isNotEmpty)
-                              BaseActionChip(
-                                label: AppLocalizations.of(
-                                  context,
-                                )!.clearFilters(searchFilter.activeFilterCount),
-                                icon: PhosphorIconsRegular.x,
-                                onPressed: () {
-                                  _searchController.clear();
-                                  ref
-                                          .read(
-                                            historySearchFilterProvider
-                                                .notifier,
-                                          )
-                                          .state =
-                                      const HistorySearchFilter.empty();
-                                  setState(() {});
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              const SizedBox(width: AppTheme.paddingM),
+              // Advanced search button
+              BaseIconButton(
+                icon: PhosphorIconsRegular.faders,
+                tooltip: AppLocalizations.of(context)!.advancedSearch,
+                onPressed: () => _showAdvancedSearch(context),
+                variant: ButtonVariant.primary,
               ),
-            ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.paddingS),
 
-            // Main content
-            Expanded(
-              child: _buildMainContent(
-                context,
-                filteredCommitsAsync,
-                searchFilter,
+          // Quick filter chips
+          Row(
+            children: [
+              Icon(
+                PhosphorIconsRegular.funnel,
+                size: 16,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: AppTheme.paddingS),
+              BodySmallLabel(
+                AppLocalizations.of(context)!.quickFilters,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppTheme.paddingS),
+              Expanded(
+                child: Wrap(
+                  spacing: AppTheme.paddingS,
+                  children: [
+                    _buildQuickFilter(
+                      AppLocalizations.of(context)!.today,
+                      HistorySearchFilter.today(),
+                    ),
+                    _buildQuickFilter(
+                      AppLocalizations.of(context)!.thisWeek,
+                      HistorySearchFilter.thisWeek(),
+                    ),
+                    _buildQuickFilter(
+                      AppLocalizations.of(context)!.thisMonth,
+                      HistorySearchFilter.thisMonth(),
+                    ),
+                    _buildQuickFilter(
+                      AppLocalizations.of(context)!.last30Days,
+                      HistorySearchFilter.last30Days(),
+                    ),
+                    if (searchFilter.isNotEmpty)
+                      BaseActionChip(
+                        label: AppLocalizations.of(
+                          context,
+                        )!.clearFilters(searchFilter.activeFilterCount),
+                        icon: PhosphorIconsRegular.x,
+                        onPressed: _clearSearch,
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -451,6 +513,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     List<GitCommit> commits, {
     bool deepMode = false,
   }) {
+    // Keep the delegated controller resolving against exactly what this
+    // build displays — the windowed view or deep results — before any key
+    // event can arrive for it.
+    _displayedCommits = commits;
+    _deepMode = deepMode;
+    if (!deepMode && commits.isNotEmpty) {
+      // Highlight the newest commit once the frame is built, so the details
+      // follow immediately and "N arrows then Enter" counts from the first
+      // row. Deep results deliberately keep the selection the user had: the
+      // mode must restore exactly that state when it is left.
+      _listController.scheduleInitialHighlight();
+    }
+
     // One resolution of the selection feeds the highlight, the details panel,
     // the action button and every action, so none of them can act on a commit
     // the user is not looking at.
@@ -517,16 +592,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         ),
     ];
 
-    // Main content widget
-    final contentWidget = Focus(
-      autofocus: true,
-      onKeyEvent: (node, event) =>
-          _handleKeyEvent(commits, node, event, deepMode: deepMode),
-      child: Row(
-        children: [
-          // Commit list (left side)
-          Expanded(
-            flex: 2,
+    // The three columns as focus regions on the screen's ordered Tab walk:
+    // list (2), details (3), diff (4) — the search bar above is 1 and the
+    // speed dial below is 5. Key handling lives on the list's own focus
+    // node inside the navigable view, never on a wrapper spanning the
+    // sibling panels, so a focused control in the details or diff column
+    // keeps its arrow keys.
+    final contentWidget = Row(
+      children: [
+        // Commit list (left side)
+        Expanded(
+          flex: 2,
+          child: BaseFocusRegion(
+            order: 2,
+            debugLabel: 'HistoryScreen.listRegion',
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -590,10 +669,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             .watch(currentBranchProvider)
                             .value;
 
-                        // Built once outside the item builder so the null
-                        // check promotes; the footer is the last row and the
-                        // one place that says whether the list ends because
-                        // the history does or the loaded window does.
+                        // The footer is the trailing row and the one place
+                        // that says whether the list ends because the
+                        // history does or the loaded window does. Its
+                        // keyboard equivalent is the trailing boundary:
+                        // pushing past the last row pages through the same
+                        // loadMore the button invokes.
                         final footer =
                             (!deepMode && window != null && window.canExtend)
                             ? HistoryListFooter(
@@ -614,27 +695,40 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                     : null,
                               )
                             : null;
-                        return ListView.builder(
-                          controller: _scrollController,
-                          itemCount: commits.length + (footer == null ? 0 : 1),
-                          itemBuilder: (context, index) {
-                            if (footer != null && index == commits.length) {
-                              return footer;
-                            }
+                        return KeyboardNavigableListView(
+                          controller: _listController,
+                          itemCount: commits.length,
+                          autofocus: true,
+                          trailing: footer,
+                          // Shift+F10 and the dedicated menu key open the
+                          // same menu a right-click does, anchored to the
+                          // selected row; the menu itself is arrow-key
+                          // navigable.
+                          additionalBindings: {
+                            const SingleActivator(
+                              LogicalKeyboardKey.f10,
+                              shift: true,
+                            ): () =>
+                                _openContextMenuFromKeyboard(commits),
+                            const SingleActivator(
+                              LogicalKeyboardKey.contextMenu,
+                            ): () =>
+                                _openContextMenuFromKeyboard(commits),
+                          },
+                          itemBuilder: (context, index, isHighlighted, hasFocus) {
                             final commit = commits[index];
-                            final isPrimary =
-                                selection.primary?.hash == commit.hash;
 
                             return CommitListItem(
                               // The key follows the primary row so the
-                              // keyboard path can anchor the context menu to
-                              // its on-screen position.
-                              key: isPrimary ? _selectedRowKey : null,
+                              // keyboard path can anchor the context
+                              // menu to its on-screen position.
+                              key: isHighlighted ? _selectedRowKey : null,
                               commit: commit,
-                              isSelected: isPrimary,
+                              isSelected: isHighlighted,
                               isMultiSelected: selectedHashes.contains(
                                 commit.hash,
                               ),
+                              containerHasFocus: hasFocus,
                               currentBranch: currentBranch,
                               graphRow: graph?.rowFor(commit.hash),
                               graphLaneCount: graph?.laneCount ?? 0,
@@ -666,12 +760,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               ),
             ),
           ),
+        ),
 
-          // Metadata and changed files share the middle column so the right
-          // column can hold the highlighted file's diff in place - seeing a
-          // commit's changes no longer requires opening a dialog per file.
-          Expanded(
-            flex: 2,
+        // Metadata and changed files share the middle column so the right
+        // column can hold the highlighted file's diff in place - seeing a
+        // commit's changes no longer requires opening a dialog per file.
+        Expanded(
+          flex: 2,
+          child: BaseFocusRegion(
+            key: _detailsRegionKey,
+            order: 3,
+            debugLabel: 'HistoryScreen.detailsRegion',
             child: Container(
               decoration: BoxDecoration(
                 border: Border(
@@ -697,20 +796,32 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     ),
             ),
           ),
+        ),
 
-          // The highlighted file's diff (right side)
-          Expanded(
-            flex: 3,
+        // The highlighted file's diff (right side)
+        Expanded(
+          flex: 3,
+          child: BaseFocusRegion(
+            order: 4,
+            debugLabel: 'HistoryScreen.diffRegion',
             child: selection.primary == null
                 ? _buildNoCommitSelected(context)
                 : CommitDiffPanel(commitHash: selection.primary!.hash),
           ),
-        ],
-      ),
+        ),
+      ],
     );
 
     // Wrap with Stack and FAB if we have actions
     if (fabActions.isEmpty) {
+      // The dial can disappear underneath its expanded flag (the selection
+      // was cleared); reset the flag so the ladder's dial rung never eats an
+      // Escape for a surface that is no longer on screen.
+      if (_fabIsExpanded) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _collapseFAB();
+        });
+      }
       return contentWidget;
     }
 
@@ -730,12 +841,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         child: Stack(
           children: [
             contentWidget,
-            // Draggable Speed Dial FAB (ESC key handled internally)
-            BaseSpeedDial(
-              actions: fabActions,
-              isExpanded: _fabIsExpanded,
-              onToggle: _toggleFAB,
-              onCollapse: _collapseFAB,
+            // The action dial is the screen's action bar: last region on the
+            // Tab walk. Escape while the dial itself holds focus is handled
+            // inside it; from anywhere else the dial rung of the screen's
+            // dismiss ladder collapses it.
+            BaseFocusRegion(
+              order: 5,
+              debugLabel: 'HistoryScreen.actionsRegion',
+              child: BaseSpeedDial(
+                actions: fabActions,
+                isExpanded: _fabIsExpanded,
+                onToggle: _toggleFAB,
+                onCollapse: _collapseFAB,
+              ),
             ),
           ],
         ),
@@ -753,12 +871,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final offerDeepSearch =
         searchFilter.supportsDeepSearch && (window?.hasMore ?? false);
     return NoSearchResultsState(
-      onClearFilters: () {
-        _searchController.clear();
-        ref.read(historySearchFilterProvider.notifier).state =
-            const HistorySearchFilter.empty();
-        setState(() {});
-      },
+      onClearFilters: _clearSearch,
       onSearchAllHistory: offerDeepSearch ? () => _startDeepSearch() : null,
     );
   }

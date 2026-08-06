@@ -30,7 +30,9 @@ typedef NavigableTreeItemBuilder<T extends TreeNodeMixin> =
     );
 
 /// Function keys never collide with text input or with the shared navigation
-/// semantics, so an extra binding may always claim them.
+/// semantics, so an extra binding may always claim them. The dedicated menu
+/// key behaves like one: no editable interprets it and navigation never maps
+/// it, so a collection may bind its context menu to it bare.
 final Set<LogicalKeyboardKey> _functionKeys = <LogicalKeyboardKey>{
   LogicalKeyboardKey.f1,
   LogicalKeyboardKey.f2,
@@ -44,6 +46,7 @@ final Set<LogicalKeyboardKey> _functionKeys = <LogicalKeyboardKey>{
   LogicalKeyboardKey.f10,
   LogicalKeyboardKey.f11,
   LogicalKeyboardKey.f12,
+  LogicalKeyboardKey.contextMenu,
 };
 
 /// Editing keys an extra binding may claim unmodified. They are not part of
@@ -72,11 +75,11 @@ bool _bindingsAvoidReservedKeys(Map<SingleActivator, VoidCallback>? bindings) {
 }
 
 const String _bindingsAssertMessage =
-    'additionalBindings may only bind modified (Ctrl/Alt/Meta) or function '
-    'keys, plus bare Delete/Backspace, which the editable guard clears before '
-    'any binding runs. Other unmodified keys belong to the shared navigation '
-    'semantics or to a focused editable; binding them here would shadow one '
-    'or the other.';
+    'additionalBindings may only bind modified (Ctrl/Alt/Meta), function or '
+    'menu keys, plus bare Delete/Backspace, which the editable guard clears '
+    'before any binding runs. Other unmodified keys belong to the shared '
+    'navigation semantics or to a focused editable; binding them here would '
+    'shadow one or the other.';
 
 /// A scrollable list that is one Tab stop with a roving highlight.
 ///
@@ -95,6 +98,7 @@ class KeyboardNavigableListView extends StatefulWidget {
     this.autofocus = false,
     this.additionalBindings,
     this.padding,
+    this.trailing,
   }) : assert(
          _bindingsAvoidReservedKeys(additionalBindings),
          _bindingsAssertMessage,
@@ -125,6 +129,12 @@ class KeyboardNavigableListView extends StatefulWidget {
 
   /// Padding for the scroll view.
   final EdgeInsetsGeometry? padding;
+
+  /// One extra row rendered after the items, scrolling with them but outside
+  /// the navigation: the highlight never rests on it and [itemCount] does not
+  /// include it. This is where a windowed list puts its load-more footer —
+  /// the row's own controls stay ordinary focusable widgets.
+  final Widget? trailing;
 
   @override
   State<KeyboardNavigableListView> createState() =>
@@ -181,14 +191,19 @@ class _KeyboardNavigableListViewState extends State<KeyboardNavigableListView> {
         builder: (context, _) => ListView.builder(
           controller: _scrollController,
           padding: widget.padding,
-          itemExtent: widget.itemExtent,
-          itemCount: widget.itemCount,
-          itemBuilder: (context, index) => widget.itemBuilder(
-            context,
-            index,
-            widget.controller.isSelected(index),
-            hasFocus,
-          ),
+          // A trailing row of a different height would break the fixed-extent
+          // contract, so the extent only applies to the pure-items case.
+          itemExtent: widget.trailing == null ? widget.itemExtent : null,
+          itemCount: widget.itemCount + (widget.trailing == null ? 0 : 1),
+          itemBuilder: (context, index) {
+            if (index == widget.itemCount) return widget.trailing!;
+            return widget.itemBuilder(
+              context,
+              index,
+              widget.controller.isSelected(index),
+              hasFocus,
+            );
+          },
         ),
       ),
     );
@@ -528,6 +543,29 @@ class _CollectionFocus extends StatefulWidget {
 
 class _CollectionFocusState extends State<_CollectionFocus> {
   bool _hasFocus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autofocus) {
+      // A collection fed by async providers mounts frames after its surface
+      // settled, by which time a focus-of-last-resort anchor (the region
+      // host's skip-traversal node) may already hold focus — and a plain
+      // autofocus is then silently discarded. The anchor is by definition
+      // the weakest possible claim, so the collection may displace it; a
+      // real control the user focused (skipTraversal false) is never
+      // stolen from.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final current = FocusManager.instance.primaryFocus;
+        if (current == null ||
+            current is FocusScopeNode ||
+            current.skipTraversal) {
+          widget.controller.requestFocus();
+        }
+      });
+    }
+  }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyUpEvent) return KeyEventResult.ignored;

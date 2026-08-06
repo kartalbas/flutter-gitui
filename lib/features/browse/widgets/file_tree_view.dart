@@ -227,6 +227,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   /// Get the currently selected node for keyboard shortcuts
   FileTreeNode? get _selectedNode => _treeController.selectedNode;
 
+  /// The tree's navigation semantics, exposed so the browse screen can hand
+  /// them to its search field: ArrowUp/Down typed there move the tree's
+  /// highlight while the caret stays in the field.
+  TreeViewController<FileTreeNode> get treeController => _treeController;
+
   @override
   void didUpdateWidget(FileTreeView oldWidget) {
     super.didUpdateWidget(oldWidget);

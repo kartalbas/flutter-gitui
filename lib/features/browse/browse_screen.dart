@@ -13,6 +13,9 @@ import '../../shared/components/base_menu_item.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_speed_dial.dart';
 import '../../shared/utils/search_parser.dart';
+import '../../shared/widgets/base_dismiss_scope.dart';
+import '../../shared/widgets/base_focus_region.dart';
+import '../../shared/widgets/search_field_handoff.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/config/app_config.dart';
 import '../../core/navigation/navigation_item.dart';
@@ -56,6 +59,24 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   void _toggleFAB() {
     setState(() {
       _fabIsExpanded = !_fabIsExpanded;
+    });
+  }
+
+  /// The "clear the search" rung of the Escape ladder, also what the field's
+  /// clear button does: empty the text and show the unfiltered tree again.
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // The tree mounts after the toolbar's first build, so the search field's
+    // handoff to the tree's controller can only attach on the next frame;
+    // rebuild once so it does not wait for the first keystroke.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
     });
   }
 
@@ -105,106 +126,154 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(title: Text(AppDestination.browse.label(context))),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Toolbar
-            _buildToolbar(context),
-            const SizedBox(height: AppTheme.paddingM),
-            // Main content
-            Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  // Collapse FAB when scrolling starts
-                  if (notification is ScrollStartNotification &&
-                      _fabIsExpanded) {
-                    _collapseFAB();
-                  }
-                  return false; // Allow notification to continue bubbling
-                },
-                child: GestureDetector(
-                  // Tap-outside dismissal
-                  onTap: _collapseFAB,
-                  behavior: HitTestBehavior.translucent,
-                  child: Stack(
-                    children: [
-                      Row(
-                        children: [
-                          // Left: File tree view (resizable)
-                          SizedBox(
-                            width: treeViewWidth,
-                            child: FileTreeView(
-                              key: _treeViewKey,
-                              repositoryPath: repositoryPath,
-                              searchQuery: _searchController.text,
-                              searchMode: _searchMode,
-                              showHidden: showHidden,
-                              showIgnored: showIgnored,
-                            ),
-                          ),
-
-                          // Resizable divider
-                          MouseRegion(
-                            cursor: SystemMouseCursors.resizeColumn,
-                            child: GestureDetector(
-                              onHorizontalDragUpdate: (details) {
-                                final newWidth =
-                                    (treeViewWidth + details.delta.dx).clamp(
-                                      _minTreeViewWidth,
-                                      _maxTreeViewWidth,
-                                    );
-                                ref
-                                        .read(_browseTreeWidthProvider.notifier)
-                                        .state =
-                                    newWidth;
-                              },
-                              child: Container(
-                                width: 8,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surface.withValues(alpha: 0),
-                                child: Center(
-                                  child: Container(
-                                    width: 1,
-                                    color: Theme.of(context).dividerColor,
+    // The Escape ladder, innermost rung first: collapse the expanded speed
+    // dial, then clear the search text, then nothing — browse has no mode
+    // beyond its filter. When the field itself holds focus its own watcher
+    // clears the text before either rung.
+    return BaseDismissScope(
+      enabled: _searchController.text.isNotEmpty,
+      onDismiss: _clearSearch,
+      child: BaseDismissScope(
+        enabled: _fabIsExpanded,
+        onDismiss: _collapseFAB,
+        child: Scaffold(
+          appBar: AppBar(title: Text(AppDestination.browse.label(context))),
+          // The screen's ordered focus regions: toolbar with the search
+          // field (1), tree (2), viewer pane (3), action dial (4). Nested
+          // inside the shell's content region, so F6 and the focus of last
+          // resort stay with the shell.
+          body: BaseFocusRegionHost(
+            debugLabel: 'BrowseScreen.regions',
+            child: Padding(
+              padding: const EdgeInsets.all(AppTheme.paddingL),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Toolbar
+                  BaseFocusRegion(
+                    order: 1,
+                    debugLabel: 'BrowseScreen.toolbarRegion',
+                    child: _buildToolbar(context),
+                  ),
+                  const SizedBox(height: AppTheme.paddingM),
+                  // Main content
+                  Expanded(
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) {
+                        // Collapse FAB when scrolling starts
+                        if (notification is ScrollStartNotification &&
+                            _fabIsExpanded) {
+                          _collapseFAB();
+                        }
+                        return false; // Allow notification to continue bubbling
+                      },
+                      child: GestureDetector(
+                        // Tap-outside dismissal
+                        onTap: _collapseFAB,
+                        behavior: HitTestBehavior.translucent,
+                        child: Stack(
+                          children: [
+                            Row(
+                              children: [
+                                // Left: File tree view (resizable)
+                                BaseFocusRegion(
+                                  order: 2,
+                                  debugLabel: 'BrowseScreen.treeRegion',
+                                  child: SizedBox(
+                                    width: treeViewWidth,
+                                    child: FileTreeView(
+                                      key: _treeViewKey,
+                                      repositoryPath: repositoryPath,
+                                      searchQuery: _searchController.text,
+                                      searchMode: _searchMode,
+                                      showHidden: showHidden,
+                                      showIgnored: showIgnored,
+                                    ),
                                   ),
                                 ),
+
+                                // Resizable divider
+                                MouseRegion(
+                                  cursor: SystemMouseCursors.resizeColumn,
+                                  child: GestureDetector(
+                                    onHorizontalDragUpdate: (details) {
+                                      final newWidth =
+                                          (treeViewWidth + details.delta.dx)
+                                              .clamp(
+                                                _minTreeViewWidth,
+                                                _maxTreeViewWidth,
+                                              );
+                                      ref
+                                              .read(
+                                                _browseTreeWidthProvider
+                                                    .notifier,
+                                              )
+                                              .state =
+                                          newWidth;
+                                    },
+                                    child: Container(
+                                      width: 8,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surface
+                                          .withValues(alpha: 0),
+                                      child: Center(
+                                        child: Container(
+                                          width: 1,
+                                          color: Theme.of(context).dividerColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Right: File history, preview, or blame
+                                Expanded(
+                                  child: BaseFocusRegion(
+                                    order: 3,
+                                    debugLabel: 'BrowseScreen.viewerRegion',
+                                    child:
+                                        shouldClearSelection ||
+                                            selectedFile == null
+                                        ? const BrowseNoFileSelectedState()
+                                        : viewMode == BrowseViewMode.history
+                                        ? FileHistoryPanel(
+                                            filePath: selectedFile,
+                                          )
+                                        : viewMode == BrowseViewMode.blame
+                                        ? FileBlamePanel(filePath: selectedFile)
+                                        : FilePreviewPanel(
+                                            filePath: selectedFile,
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // Draggable Speed Dial FAB for file operations —
+                            // the screen's action bar, last on the Tab walk.
+                            BaseFocusRegion(
+                              order: 4,
+                              debugLabel: 'BrowseScreen.actionsRegion',
+                              child: BaseSpeedDial(
+                                actions:
+                                    (_treeViewKey.currentState
+                                            as FileTreeViewState?)
+                                        ?.fabActions ??
+                                    [],
+                                isExpanded: _fabIsExpanded,
+                                onToggle: _toggleFAB,
+                                onCollapse: _collapseFAB,
                               ),
                             ),
-                          ),
-
-                          // Right: File history, preview, or blame
-                          Expanded(
-                            child: shouldClearSelection || selectedFile == null
-                                ? const BrowseNoFileSelectedState()
-                                : viewMode == BrowseViewMode.history
-                                ? FileHistoryPanel(filePath: selectedFile)
-                                : viewMode == BrowseViewMode.blame
-                                ? FileBlamePanel(filePath: selectedFile)
-                                : FilePreviewPanel(filePath: selectedFile),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      // Draggable Speed Dial FAB for file operations
-                      BaseSpeedDial(
-                        actions:
-                            (_treeViewKey.currentState as FileTreeViewState?)
-                                ?.fabActions ??
-                            [],
-                        isExpanded: _fabIsExpanded,
-                        onToggle: _toggleFAB,
-                        onCollapse: _collapseFAB,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -215,6 +284,26 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     final showHidden = ref.watch(showHiddenFilesProvider);
     final showIgnored = ref.watch(showIgnoredFilesProvider);
 
+    // The tree's controller, once the tree has mounted (initState schedules
+    // the one rebuild that picks it up). With it in hand, arrows typed in
+    // the search field move the tree's highlight while the caret stays put.
+    final treeController =
+        (_treeViewKey.currentState as FileTreeViewState?)?.treeController;
+
+    Widget searchField = BaseTextField(
+      controller: _searchController,
+      hintText: SearchParser.getHelpText(_searchMode),
+      prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+      showClearButton: _searchController.text.isNotEmpty,
+      onChanged: (_) => setState(() {}),
+    );
+    if (treeController != null) {
+      searchField = SearchFieldHandoff(
+        controller: treeController,
+        child: searchField,
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.all(AppTheme.paddingS),
       decoration: BoxDecoration(
@@ -223,15 +312,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       child: Row(
         children: [
           // Search field
-          Expanded(
-            child: BaseTextField(
-              controller: _searchController,
-              hintText: SearchParser.getHelpText(_searchMode),
-              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-              showClearButton: _searchController.text.isNotEmpty,
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
+          Expanded(child: searchField),
 
           const SizedBox(width: AppTheme.paddingS),
 

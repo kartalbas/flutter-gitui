@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -11,15 +10,10 @@ import '../components/base_dialog.dart';
 import '../components/base_label.dart';
 import '../components/base_list_item.dart';
 import '../components/base_text_field.dart';
+import '../controllers/item_navigation_controller.dart';
 import '../theme/app_theme.dart';
-
-/// Moves the highlight through the results while the caret stays in the
-/// search field, so filtering and choosing are one keyboard flow.
-class _MoveHighlightIntent extends Intent {
-  const _MoveHighlightIntent(this.delta);
-
-  final int delta;
-}
+import '../widgets/keyboard_navigable_view.dart';
+import '../widgets/search_field_handoff.dart';
 
 /// Picks a repository to clone from the hosts the workspace already uses.
 ///
@@ -29,8 +23,9 @@ class _MoveHighlightIntent extends Intent {
 /// nothing. With a single host no tab bar is shown.
 ///
 /// Fully keyboard operable: the search field takes focus on open, the arrow
-/// keys move through the results without leaving it, Enter takes the
-/// highlighted one and Esc closes.
+/// keys move through the results without leaving it (the [SearchFieldHandoff]
+/// pattern this dialog originally proved by hand), Enter takes the
+/// highlighted one, and Esc clears a filled filter first, then closes.
 class SelectHostedRepositoryDialog extends ConsumerStatefulWidget {
   const SelectHostedRepositoryDialog({super.key});
 
@@ -43,19 +38,30 @@ class _SelectHostedRepositoryDialogState
     extends ConsumerState<SelectHostedRepositoryDialog>
     with TickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
   TabController? _tabController;
   String _query = '';
-  int _highlight = 0;
   int _sourceCount = 0;
 
-  /// Height of one result row, for scrolling the highlight into view.
-  static const double _rowExtent = 56;
+  /// The visible tab's result list on the shared navigation semantics:
+  /// arrows rove its highlight (from the field via the handoff, or from the
+  /// list as its own Tab stop) and activation confirms the highlighted
+  /// repository.
+  late final ItemNavigationController _listController;
+
+  /// The matches of the visible tab, refreshed every build, so activation
+  /// resolves an index against exactly what the user sees.
+  List<HostedRepository> _activeMatches = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _listController = ItemNavigationController(onActivate: _confirmIndex);
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
-    _scrollController.dispose();
+    _listController.dispose();
     _tabController?.dispose();
     super.dispose();
   }
@@ -69,9 +75,18 @@ class _SelectHostedRepositoryDialogState
     _tabController = count == 0
         ? null
         : (TabController(length: count, vsync: this)
-            // Each host has its own result set, so the highlight cannot carry
-            // over to a tab where that position means something else.
-            ..addListener(() => setState(() => _highlight = 0)));
+            // Each host has its own result set, so the highlight cannot
+            // carry over to a tab where that position means something else.
+            ..addListener(_resetHighlight));
+  }
+
+  /// Restarts the highlight at the first row of a fresh result set — a new
+  /// query or another tab. Cleared now, re-claimed after the frame in which
+  /// the view has synced the new item count.
+  void _resetHighlight() {
+    _listController.select(-1);
+    _listController.scheduleInitialHighlight();
+    setState(() {});
   }
 
   RepositorySource? _activeSource(List<RepositorySource> sources) {
@@ -89,29 +104,20 @@ class _SelectHostedRepositoryDialogState
     return filterRepositories(result.repositories, _query);
   }
 
-  void _moveHighlight(int delta, int matchCount) {
-    if (matchCount == 0) return;
-    setState(() {
-      _highlight = (_highlight + delta).clamp(0, matchCount - 1);
-    });
-    if (!_scrollController.hasClients) return;
-    // Keep the highlight in view; without this the arrow keys walk past the
-    // bottom of the list and the selection becomes invisible.
-    final target = _highlight * _rowExtent;
-    final position = _scrollController.position;
-    if (target < position.pixels) {
-      _scrollController.jumpTo(target);
-    } else if (target + _rowExtent >
-        position.pixels + position.viewportDimension) {
-      _scrollController.jumpTo(
-        target + _rowExtent - position.viewportDimension,
-      );
-    }
+  void _confirmIndex(int index) {
+    if (index < 0 || index >= _activeMatches.length) return;
+    Navigator.of(context).pop(_activeMatches[index]);
   }
 
+  /// Enter from anywhere in the dialog and the OK button confirm the
+  /// highlighted match, falling back to the first one while nothing is
+  /// highlighted yet.
   void _confirm(List<HostedRepository> matches) {
     if (matches.isEmpty) return;
-    Navigator.of(context).pop(matches[_highlight.clamp(0, matches.length - 1)]);
+    final index = _listController.selectedIndex;
+    Navigator.of(
+      context,
+    ).pop(matches[index < 0 ? 0 : index.clamp(0, matches.length - 1)]);
   }
 
   @override
@@ -122,7 +128,12 @@ class _SelectHostedRepositoryDialogState
 
     final active = _activeSource(sources);
     final matches = _matches(active);
-    if (_highlight >= matches.length) _highlight = 0;
+    _activeMatches = matches;
+    if (matches.isNotEmpty) {
+      // The first match is highlighted from the start, so Enter without any
+      // arrow key takes it — the picker's whole point.
+      _listController.scheduleInitialHighlight();
+    }
 
     return BaseDialog(
       icon: PhosphorIconsRegular.cloudArrowDown,
@@ -152,36 +163,24 @@ class _SelectHostedRepositoryDialogState
                       ],
                     ),
                   const SizedBox(height: AppTheme.paddingM),
-                  Shortcuts(
-                    shortcuts: const {
-                      SingleActivator(LogicalKeyboardKey.arrowDown):
-                          _MoveHighlightIntent(1),
-                      SingleActivator(LogicalKeyboardKey.arrowUp):
-                          _MoveHighlightIntent(-1),
-                    },
-                    child: Actions(
-                      actions: {
-                        _MoveHighlightIntent:
-                            CallbackAction<_MoveHighlightIntent>(
-                              onInvoke: (intent) {
-                                _moveHighlight(intent.delta, matches.length);
-                                return null;
-                              },
-                            ),
+                  // Arrows typed in the field move the list's highlight and
+                  // Enter takes the highlighted repository while the caret
+                  // stays in the field — the shared handoff, replacing the
+                  // raw Shortcuts/Actions pair this dialog grew up with.
+                  SearchFieldHandoff(
+                    controller: _listController,
+                    child: BaseTextField(
+                      controller: _searchController,
+                      label: l10n.search,
+                      hintText: 'Filter by name, owner or description',
+                      prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                      autofocus: true,
+                      onChanged: (value) {
+                        _query = value;
+                        // A new query is a new result set; the old position
+                        // would point at an unrelated row.
+                        _resetHighlight();
                       },
-                      child: BaseTextField(
-                        controller: _searchController,
-                        label: l10n.search,
-                        hintText: 'Filter by name, owner or description',
-                        prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-                        autofocus: true,
-                        onChanged: (value) => setState(() {
-                          _query = value;
-                          // A new query is a new result set; the old position
-                          // would point at an unrelated row.
-                          _highlight = 0;
-                        }),
-                      ),
                     ),
                   ),
                   const SizedBox(height: AppTheme.paddingM),
@@ -190,8 +189,7 @@ class _SelectHostedRepositoryDialogState
                         ? _SourceResults(
                             source: sources.first,
                             query: _query,
-                            highlight: _highlight,
-                            scrollController: _scrollController,
+                            navigationController: _listController,
                           )
                         : TabBarView(
                             controller: _tabController,
@@ -202,11 +200,8 @@ class _SelectHostedRepositoryDialogState
                                   query: _query,
                                   // Only the visible tab is the one the
                                   // keyboard is driving.
-                                  highlight: source == active
-                                      ? _highlight
-                                      : null,
-                                  scrollController: source == active
-                                      ? _scrollController
+                                  navigationController: source == active
+                                      ? _listController
                                       : null,
                                 ),
                             ],
@@ -236,17 +231,54 @@ class _SourceResults extends ConsumerWidget {
   const _SourceResults({
     required this.source,
     required this.query,
-    this.highlight,
-    this.scrollController,
+    this.navigationController,
   });
 
   final RepositorySource source;
   final String query;
 
-  /// Index the keyboard has moved to, or null when this tab is not in front.
-  final int? highlight;
+  /// Height of one result row, for keeping the highlight scrolled into view.
+  static const double _rowExtent = 56;
 
-  final ScrollController? scrollController;
+  /// The dialog's navigation semantics, or null when this tab is not in
+  /// front — only the visible tab is the one the keyboard drives.
+  final ItemNavigationController? navigationController;
+
+  Widget _buildRow(
+    BuildContext context,
+    HostedRepository repository, {
+    required bool isSelected,
+    required bool containerHasFocus,
+  }) {
+    return BaseListItem(
+      isSelected: isSelected,
+      containerHasFocus: containerHasFocus,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppTheme.paddingM,
+        vertical: AppTheme.paddingS,
+      ),
+      leading: Icon(
+        repository.isPrivate
+            ? PhosphorIconsRegular.lock
+            : PhosphorIconsRegular.bookOpen,
+        size: AppTheme.iconS,
+      ),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BodyMediumLabel(repository.fullName, overflow: TextOverflow.ellipsis),
+          if (repository.description case final description?)
+            BodySmallLabel(
+              description,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+        ],
+      ),
+      onTap: () => Navigator.of(context).pop(repository),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -277,42 +309,35 @@ class _SourceResults extends ConsumerWidget {
           );
         }
 
-        return ListView.builder(
-          controller: scrollController,
+        // A background tab renders plainly; the visible one is a navigable
+        // collection — one Tab stop with the roving highlight the field's
+        // handoff drives, kept scrolled into view by the fixed row extent.
+        final controller = navigationController;
+        if (controller == null) {
+          return ListView.builder(
+            itemCount: matches.length,
+            itemBuilder: (context, index) => _buildRow(
+              context,
+              matches[index],
+              isSelected: false,
+              containerHasFocus: false,
+            ),
+          );
+        }
+
+        return KeyboardNavigableListView(
+          controller: controller,
           itemCount: matches.length,
-          itemBuilder: (context, index) {
-            final repository = matches[index];
-            return BaseListItem(
-              isSelected: index == highlight,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.paddingM,
-                vertical: AppTheme.paddingS,
+          itemExtent: _rowExtent,
+          itemBuilder: (context, index, isSelected, containerHasFocus) =>
+              _buildRow(
+                context,
+                matches[index],
+                isSelected: isSelected,
+                // The highlight follows the caret in the search field, so it
+                // keeps its full strength while the field drives it.
+                containerHasFocus: true,
               ),
-              leading: Icon(
-                repository.isPrivate
-                    ? PhosphorIconsRegular.lock
-                    : PhosphorIconsRegular.bookOpen,
-                size: AppTheme.iconS,
-              ),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  BodyMediumLabel(
-                    repository.fullName,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (repository.description case final description?)
-                    BodySmallLabel(
-                      description,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
-              ),
-              onTap: () => Navigator.of(context).pop(repository),
-            );
-          },
         );
       },
     );

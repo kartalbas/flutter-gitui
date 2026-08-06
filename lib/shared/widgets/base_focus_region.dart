@@ -30,6 +30,13 @@ import 'package:flutter/widgets.dart';
 /// Deliberately built on [FocusTraversalGroup]s, not [FocusScope]s: a scope
 /// would confine Tab to whichever region holds focus, while the regions are
 /// meant to be stops on one shared Tab cycle.
+///
+/// Hosts nest: a split-view screen declares its own host (search → list →
+/// details → action bar) inside the shell's content region. A nested host
+/// detects its ancestor and steps back to ordering only — its regions still
+/// register with it, keeping them out of the shell's F6 cycle, but F6 itself
+/// bubbles on so panes always means the outermost host's panes, and the
+/// focus-of-last-resort claim stays with the outermost host alone.
 class BaseFocusRegionHost extends StatefulWidget {
   const BaseFocusRegionHost({super.key, this.debugLabel, required this.child});
 
@@ -49,11 +56,20 @@ class _BaseFocusRegionHostState extends State<BaseFocusRegionHost> {
     skipTraversal: true,
   );
   final OrderedTraversalPolicy _policy = OrderedTraversalPolicy();
-  final List<_BaseFocusRegionState> _regions = <_BaseFocusRegionState>[];
+  final List<BaseFocusRegionState> _regions = <BaseFocusRegionState>[];
+
+  /// Whether this host sits inside another host. A nested host orders its
+  /// regions but neither handles F6 (pane cycling belongs to the outermost
+  /// host) nor claims the focus of last resort (there can be only one).
+  bool _nested = false;
+  bool _claimScheduled = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _nested = _BaseFocusRegionHostScope.maybeOf(context) != null;
+    if (_nested || _claimScheduled) return;
+    _claimScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Pending autofocus requests (a screen's, possibly registered as late
       // as the first layout pass) are applied in a microtask after this
@@ -75,18 +91,18 @@ class _BaseFocusRegionHostState extends State<BaseFocusRegionHost> {
     super.dispose();
   }
 
-  void _register(_BaseFocusRegionState region) {
+  void _register(BaseFocusRegionState region) {
     _regions.add(region);
   }
 
-  void _unregister(_BaseFocusRegionState region) {
+  void _unregister(BaseFocusRegionState region) {
     _regions.remove(region);
   }
 
   /// Moves focus into the next (or previous) region that has anything
   /// focusable. Returns false when no region does, so the key can bubble on.
   bool _cycle({required bool backward}) {
-    final regions = List<_BaseFocusRegionState>.of(_regions)
+    final regions = List<BaseFocusRegionState>.of(_regions)
       ..sort((a, b) => a.widget.order.compareTo(b.widget.order));
     if (regions.isEmpty) return false;
 
@@ -104,12 +120,15 @@ class _BaseFocusRegionHostState extends State<BaseFocusRegionHost> {
     for (var offset = 1; offset <= regions.length; offset++) {
       var target = (index + step * offset) % regions.length;
       if (target < 0) target += regions.length;
-      if (regions[target]._focusFirstChild()) return true;
+      if (regions[target].focusFirstChild()) return true;
     }
     return false;
   }
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    // A nested host lets F6 bubble to the outermost host: pane cycling is
+    // one gesture over the whole surface, not one per nesting level.
+    if (_nested) return KeyEventResult.ignored;
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     if (event.logicalKey != LogicalKeyboardKey.f6) {
       return KeyEventResult.ignored;
@@ -134,8 +153,8 @@ class _BaseFocusRegionHostState extends State<BaseFocusRegionHost> {
   }
 }
 
-/// Lets regions find their host without threading a reference through every
-/// intermediate widget.
+/// Lets regions find their host — and a nested host find its ancestor —
+/// without threading a reference through every intermediate widget.
 class _BaseFocusRegionHostScope extends InheritedWidget {
   const _BaseFocusRegionHostScope({required this.host, required super.child});
 
@@ -179,10 +198,13 @@ class BaseFocusRegion extends StatefulWidget {
   final Widget child;
 
   @override
-  State<BaseFocusRegion> createState() => _BaseFocusRegionState();
+  State<BaseFocusRegion> createState() => BaseFocusRegionState();
 }
 
-class _BaseFocusRegionState extends State<BaseFocusRegion> {
+/// Public so a screen holding a `GlobalKey<BaseFocusRegionState>` can hand
+/// focus to a region programmatically — history's Enter on a commit row moves
+/// focus into the details region through [focusFirstChild].
+class BaseFocusRegionState extends State<BaseFocusRegion> {
   /// Marks the region's subtree in the focus tree so the host can tell which
   /// region holds focus and hand focus to a region's first control. Never
   /// focusable and never a Tab stop itself.
@@ -224,7 +246,7 @@ class _BaseFocusRegionState extends State<BaseFocusRegion> {
 
   /// Focuses the region's first control in reading order — the same order Tab
   /// uses inside the region. Returns false when nothing here can take focus.
-  bool _focusFirstChild() {
+  bool focusFirstChild() {
     final candidates = _marker.traversalDescendants.toList();
     if (candidates.isEmpty) return false;
     _policy.sortDescendants(candidates, candidates.first).first.requestFocus();

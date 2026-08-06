@@ -554,23 +554,24 @@ The palette works for most common colorblindness types:
 // File status indicator
 Icon(
   PhosphorIconsRegular.file,
-  color: _getStatusColor(file.status),
+  color: _getStatusColor(context, file.status),
 )
 
-Color _getStatusColor(FileChangeType status) {
+Color _getStatusColor(BuildContext context, FileChangeType status) {
+  final colors = context.gitColors;
   switch (status) {
     case FileChangeType.added:
-      return AppTheme.gitAdded;      // Green
+      return colors.added;      // Green
     case FileChangeType.modified:
-      return AppTheme.gitModified;   // Orange
+      return colors.modified;   // Orange
     case FileChangeType.deleted:
-      return AppTheme.gitDeleted;    // Red
+      return colors.deleted;    // Red
     case FileChangeType.renamed:
-      return AppTheme.gitRenamed;    // Blue
+      return colors.renamed;    // Blue
     case FileChangeType.untracked:
-      return AppTheme.gitUntracked;  // Grey
+      return colors.untracked;  // Grey
     case FileChangeType.conflicted:
-      return AppTheme.gitConflict;   // Pink
+      return colors.conflict;   // Pink
   }
 }
 
@@ -578,8 +579,8 @@ Color _getStatusColor(FileChangeType status) {
 Icon(
   PhosphorIconsRegular.gitBranch,
   color: branch.isLocal
-      ? AppTheme.branchLocal   // Green
-      : AppTheme.branchRemote  // Blue
+      ? context.gitColors.branchLocal   // Green
+      : context.gitColors.branchRemote  // Blue
 )
 ```
 
@@ -804,8 +805,8 @@ class BranchListTile extends StatelessWidget {
             ? PhosphorIconsRegular.folder
             : PhosphorIconsRegular.cloud,
         color: branch.isLocal
-            ? AppTheme.branchLocal
-            : AppTheme.branchRemote,
+            ? context.gitColors.branchLocal
+            : context.gitColors.branchRemote,
       ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

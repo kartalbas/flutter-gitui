@@ -276,7 +276,7 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                         size: AppTheme.iconS,
                         color: isFailure
                             ? colorScheme.error
-                            : AppTheme.gitAdded,
+                            : context.gitColors.added,
                       ),
                     ),
                     const SizedBox(width: AppTheme.paddingS),

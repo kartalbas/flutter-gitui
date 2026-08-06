@@ -330,7 +330,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                   context,
                 )!.repositoryClonedSuccess(clonedPath),
               ),
-              backgroundColor: AppTheme.gitAdded,
+              backgroundColor: context.gitColors.added,
             ),
           );
         } else if (mounted) {

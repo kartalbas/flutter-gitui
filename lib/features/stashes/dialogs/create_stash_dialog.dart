@@ -146,7 +146,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                     title: BodyMediumLabel(file.path),
                     subtitle: LabelMediumLabel(
                       file.primaryStatus.displayName,
-                      color: file.primaryStatus.color,
+                      color: file.primaryStatus.colorOf(context),
                     ),
                     dense: true,
                     contentPadding: const EdgeInsets.symmetric(

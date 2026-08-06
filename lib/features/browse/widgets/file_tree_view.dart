@@ -804,11 +804,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
         _treeController.requestFocus();
       },
       fileIcon: FileIconUtils.getIconForStatus(node.status),
-      fileIconColor: node.status?.color,
+      fileIconColor: node.status?.colorOf(context),
       trailingWidget: node.status != null
           ? FileStatusBadge(
               code: node.status!.code,
-              color: node.status!.color,
+              color: node.status!.colorOf(context),
               isSelected: isSelected,
             )
           : null,

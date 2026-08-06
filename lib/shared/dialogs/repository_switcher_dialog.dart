@@ -217,7 +217,7 @@ class _RepositorySwitcherDialogState
               repo.displayName,
             ),
           ),
-          backgroundColor: AppTheme.gitAdded,
+          backgroundColor: context.gitColors.added,
           duration: const Duration(seconds: 1),
         ),
       );

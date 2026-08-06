@@ -13,25 +13,26 @@ enum FileChangeType {
   unmerged, // U - Unmerged
   unknown; // X - Unknown
 
-  /// Color for this change type
-  Color get color {
+  /// Colour for this change type, resolved against the active theme.
+  Color colorOf(BuildContext context) {
+    final colors = context.gitColors;
     switch (this) {
       case FileChangeType.added:
-        return AppTheme.gitAdded;
+        return colors.added;
       case FileChangeType.modified:
-        return AppTheme.gitModified;
+        return colors.modified;
       case FileChangeType.deleted:
-        return AppTheme.gitDeleted;
+        return colors.deleted;
       case FileChangeType.renamed:
-        return AppTheme.gitRenamed;
+        return colors.renamed;
       case FileChangeType.copied:
-        return AppTheme.gitRenamed;
+        return colors.renamed;
       case FileChangeType.typeChanged:
-        return AppTheme.gitModified;
+        return colors.modified;
       case FileChangeType.unmerged:
-        return AppTheme.gitConflict;
+        return colors.conflict;
       case FileChangeType.unknown:
-        return AppTheme.gitUntracked;
+        return colors.untracked;
     }
   }
 }

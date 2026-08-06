@@ -18,7 +18,7 @@ class ChangesCleanState extends StatelessWidget {
           Icon(
             PhosphorIconsRegular.checkCircle,
             size: 64,
-            color: AppTheme.gitAdded,
+            color: context.gitColors.added,
           ),
           const SizedBox(height: AppTheme.paddingL),
           TitleLargeLabel(AppLocalizations.of(context)!.workingDirectoryClean),

@@ -254,7 +254,7 @@ class _InitializeRepositoryDialogState
                   context,
                 )!.repositoryInitializedSuccess(path),
               ),
-              backgroundColor: AppTheme.gitAdded,
+              backgroundColor: context.gitColors.added,
             ),
           );
         } else if (mounted) {

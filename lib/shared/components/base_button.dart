@@ -198,8 +198,10 @@ class BaseButton extends StatelessWidget {
           borderColor = null;
           break;
         case ButtonVariant.success:
-          backgroundColor = AppTheme.gitAdded;
-          foregroundColor = colorScheme.onPrimary;
+          backgroundColor = context.gitColors.added;
+          foregroundColor = GitSemanticColors.foregroundOn(
+            context.gitColors.added,
+          );
           borderColor = null;
           break;
         case ButtonVariant.dangerSecondary:
@@ -398,8 +400,10 @@ class BaseIconButton extends StatelessWidget {
           borderColor = null;
           break;
         case ButtonVariant.success:
-          backgroundColor = AppTheme.gitAdded;
-          foregroundColor = colorScheme.onPrimary;
+          backgroundColor = context.gitColors.added;
+          foregroundColor = GitSemanticColors.foregroundOn(
+            context.gitColors.added,
+          );
           borderColor = null;
           break;
         case ButtonVariant.dangerSecondary:

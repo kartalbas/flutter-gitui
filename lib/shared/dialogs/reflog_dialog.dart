@@ -181,7 +181,7 @@ class ReflogDialog extends ConsumerWidget {
   Color _getActionColor(String actionType, BuildContext context) {
     switch (actionType) {
       case 'Commit':
-        return AppTheme.gitAdded;
+        return context.gitColors.added;
       case 'Checkout':
         return Theme.of(context).colorScheme.primary;
       case 'Merge':
@@ -189,7 +189,7 @@ class ReflogDialog extends ConsumerWidget {
       case 'Rebase':
         return Theme.of(context).colorScheme.secondary;
       case 'Reset':
-        return AppTheme.gitDeleted;
+        return context.gitColors.deleted;
       case 'Pull':
         return Theme.of(context).colorScheme.primary;
       case 'Cherry-pick':

@@ -43,7 +43,7 @@ class _ConflictResolutionScreenState
               Icon(
                 PhosphorIconsRegular.checkCircle,
                 size: 64,
-                color: AppTheme.gitAdded,
+                color: context.gitColors.added,
               ),
               const SizedBox(height: AppTheme.paddingL),
               TitleLargeLabel(
@@ -154,8 +154,8 @@ class _ConflictResolutionScreenState
                       ? PhosphorIconsRegular.checkCircle
                       : PhosphorIconsRegular.fileText,
                   color: conflict.isResolved
-                      ? AppTheme.gitAdded
-                      : AppTheme.gitModified,
+                      ? context.gitColors.added
+                      : context.gitColors.modified,
                 ),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,9 +176,9 @@ class _ConflictResolutionScreenState
                   ],
                 ),
                 trailing: conflict.isResolved
-                    ? const Icon(
+                    ? Icon(
                         PhosphorIconsRegular.check,
-                        color: AppTheme.gitAdded,
+                        color: context.gitColors.added,
                       )
                     : null,
                 onTap: () {
@@ -217,7 +217,7 @@ class _ConflictResolutionScreenState
               if (conflict.isResolved) ...[
                 Icon(
                   PhosphorIconsRegular.checkCircle,
-                  color: AppTheme.gitAdded,
+                  color: context.gitColors.added,
                 ),
                 const SizedBox(width: AppTheme.paddingS),
                 LabelMediumLabel(AppLocalizations.of(context)!.resolved),
@@ -424,7 +424,7 @@ class _ConflictResolutionScreenState
             Icon(
               PhosphorIconsRegular.checkCircle,
               size: 64,
-              color: AppTheme.gitAdded,
+              color: context.gitColors.added,
             ),
             const SizedBox(height: AppTheme.paddingL),
             HeadlineMediumLabel(
@@ -461,16 +461,16 @@ class _ConflictResolutionScreenState
     return Container(
       padding: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
-        color: AppTheme.gitAdded.withValues(alpha: 0.1),
+        color: context.gitColors.added.withValues(alpha: 0.1),
         border: Border(
           top: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             PhosphorIconsRegular.checkCircle,
-            color: AppTheme.gitAdded,
+            color: context.gitColors.added,
           ),
           const SizedBox(width: AppTheme.paddingM),
           Expanded(

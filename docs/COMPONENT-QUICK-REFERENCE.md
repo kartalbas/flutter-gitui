@@ -520,19 +520,22 @@ Wrap(
 
 ### Git Semantic Colors
 
+Brightness-aware: each role resolves to a light or dark value matching the
+active theme (see `GitSemanticColors` in `lib/shared/theme/git_semantic_colors.dart`).
+
 ```dart
-AppTheme.gitAdded      // #4CAF50 - Green (added files)
-AppTheme.gitModified   // #FF9800 - Orange (modified files)
-AppTheme.gitDeleted    // #F44336 - Red (deleted files)
-AppTheme.gitRenamed    // #2196F3 - Blue (renamed files)
-AppTheme.gitUntracked  // #9E9E9E - Grey (untracked files)
-AppTheme.gitConflict   // #E91E63 - Pink (merge conflicts)
+context.gitColors.added      // Green (added files)
+context.gitColors.modified   // Orange (modified files)
+context.gitColors.deleted    // Red (deleted files)
+context.gitColors.renamed    // Blue (renamed files)
+context.gitColors.untracked  // Grey (untracked files)
+context.gitColors.conflict   // Pink (merge conflicts)
 
 // Branch colors
-AppTheme.branchLocal   // #4CAF50 - Green (local branches)
-AppTheme.branchRemote  // #2196F3 - Blue (remote branches)
-AppTheme.branchTag     // #FF9800 - Orange (tags)
-AppTheme.branchStash   // #9C27B0 - Purple (stashes)
+context.gitColors.branchLocal   // Green (local branches)
+context.gitColors.branchRemote  // Blue (remote branches)
+context.gitColors.branchTag     // Orange (tags)
+context.gitColors.branchStash   // Purple (stashes)
 ```
 
 ### Examples
@@ -552,8 +555,8 @@ Icon(PhosphorIconsRegular.folder, size: AppTheme.iconM)
 Icon(PhosphorIconsRegular.gitBranch)  // Don't specify size, use default 24px
 
 // Colors
-color: AppTheme.gitModified
-backgroundColor: AppTheme.gitAdded
+color: context.gitColors.modified
+backgroundColor: context.gitColors.added
 ```
 
 ---

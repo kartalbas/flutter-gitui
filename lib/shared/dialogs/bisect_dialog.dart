@@ -302,7 +302,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                       AppLocalizations.of(
                         context,
                       )!.goodCommits(state.goodCommits.length),
-                      color: AppTheme.gitAdded,
+                      color: context.gitColors.added,
                     ),
                     ...state.goodCommits.map(
                       (hash) => BodySmallLabel('  $hash'),
@@ -314,7 +314,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                       AppLocalizations.of(
                         context,
                       )!.badCommits(state.badCommits.length),
-                      color: AppTheme.gitDeleted,
+                      color: context.gitColors.deleted,
                     ),
                     ...state.badCommits.map(
                       (hash) => BodySmallLabel('  $hash'),
@@ -337,7 +337,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           Icon(
             PhosphorIconsRegular.checkCircle,
             size: 64,
-            color: AppTheme.gitAdded,
+            color: context.gitColors.added,
           ),
           const SizedBox(height: AppTheme.paddingL),
           TitleLargeLabel(AppLocalizations.of(context)!.bisectComplete),
@@ -347,7 +347,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
-              color: AppTheme.gitDeleted.withValues(alpha: 0.1),
+              color: context.gitColors.deleted.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: SelectableText(
@@ -436,7 +436,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.bisectStarted),
-            backgroundColor: AppTheme.gitAdded,
+            backgroundColor: context.gitColors.added,
           ),
         );
       }
@@ -486,7 +486,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 context,
               )!.markedAs(step.displayName, step.displayName),
             ),
-            backgroundColor: AppTheme.gitAdded,
+            backgroundColor: context.gitColors.added,
           ),
         );
       }
@@ -521,7 +521,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.bisectReset),
-            backgroundColor: AppTheme.gitAdded,
+            backgroundColor: context.gitColors.added,
           ),
         );
       }

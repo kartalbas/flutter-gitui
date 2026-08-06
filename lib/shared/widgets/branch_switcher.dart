@@ -465,12 +465,14 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppTheme.gitAdded.withValues(alpha: 0.2),
+                              color: context.gitColors.added.withValues(
+                                alpha: 0.2,
+                              ),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: BodySmallLabel(
                               'merged',
-                              color: AppTheme.gitAdded,
+                              color: context.gitColors.added,
                             ),
                           )
                         else

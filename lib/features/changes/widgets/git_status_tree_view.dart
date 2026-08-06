@@ -416,7 +416,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
     Color? fileColor;
     if (node.fileStatus != null) {
       final statusType = node.fileStatus!.primaryStatus;
-      fileColor = statusType.color;
+      fileColor = statusType.colorOf(context);
     }
 
     return BaseTreeItem(
@@ -454,7 +454,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       trailingWidget: (!node.isDirectory && node.fileStatus != null)
           ? FileStatusBadge(
               code: node.fileStatus!.primaryStatus.code,
-              color: node.fileStatus!.primaryStatus.color,
+              color: node.fileStatus!.primaryStatus.colorOf(context),
               isSelected: isSelected,
             )
           : null,

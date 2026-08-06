@@ -10,9 +10,13 @@ import '../models/commit_graph.dart';
 /// row's lane segments meet the neighboring rows' edge to edge; a painter
 /// confined to the leading widget would leave a gap at every divider.
 class CommitGraphRowPainter extends CustomPainter {
-  const CommitGraphRowPainter({required this.row});
+  const CommitGraphRowPainter({required this.row, required this.laneColors});
 
   final CommitGraphRow row;
+
+  /// Theme-resolved lane cycle (GitSemanticColors.laneColors); the painter
+  /// cannot reach the theme itself, so the widget passes it in.
+  final List<Color> laneColors;
 
   static const double _laneWidth = 12.0;
 
@@ -36,9 +40,8 @@ class CommitGraphRowPainter extends CustomPainter {
       AppTheme.paddingL +
       _laneWidth * (lane.clamp(0, _maxRenderedLanes - 1) + 0.5);
 
-  static Color _laneColor(int colorIndex) =>
-      AppTheme.commitGraphLaneColors[colorIndex %
-          AppTheme.commitGraphLaneColors.length];
+  Color _laneColor(int colorIndex) =>
+      laneColors[colorIndex % laneColors.length];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -92,5 +95,6 @@ class CommitGraphRowPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CommitGraphRowPainter oldDelegate) =>
-      !identical(oldDelegate.row, row);
+      !identical(oldDelegate.row, row) ||
+      !identical(oldDelegate.laneColors, laneColors);
 }

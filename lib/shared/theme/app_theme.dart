@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/config/app_config.dart';
+import 'git_semantic_colors.dart';
+
+export 'git_semantic_colors.dart';
 
 /// Application theme configuration
 class AppTheme {
@@ -45,7 +48,10 @@ class AppTheme {
 
     // Apply animation speed overrides and consistent text styling
     return theme.copyWith(
-      extensions: [AnimationSpeedExtension(speed: animationSpeed)],
+      extensions: [
+        AnimationSpeedExtension(speed: animationSpeed),
+        GitSemanticColors.light,
+      ],
       popupMenuTheme: PopupMenuThemeData(
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
@@ -132,7 +138,10 @@ class AppTheme {
 
     // Apply animation speed overrides and consistent text styling
     return theme.copyWith(
-      extensions: [AnimationSpeedExtension(speed: animationSpeed)],
+      extensions: [
+        AnimationSpeedExtension(speed: animationSpeed),
+        GitSemanticColors.dark,
+      ],
       popupMenuTheme: PopupMenuThemeData(
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
@@ -466,36 +475,6 @@ class AppTheme {
   /// Navigation rail width
   static const double navigationRailWidth = 72.0;
   static const double navigationRailWidthExpanded = 256.0;
-
-  /// Git status colors
-  static const Color gitAdded = Color(0xFF4CAF50); // Green
-  static const Color gitModified = Color(0xFFFF9800); // Orange
-  static const Color gitDeleted = Color(0xFFF44336); // Red
-  static const Color gitRenamed = Color(0xFF2196F3); // Blue
-  static const Color gitUntracked = Color(0xFF9E9E9E); // Grey
-  static const Color gitConflict = Color(0xFFE91E63); // Pink
-
-  /// Branch colors
-  static const Color branchLocal = Color(0xFF4CAF50); // Green
-  static const Color branchRemote = Color(0xFF2196F3); // Blue
-  static const Color branchTag = Color(0xFFFF9800); // Orange
-  static const Color branchStash = Color(0xFF9C27B0); // Purple
-
-  /// Commit graph lane colors
-  ///
-  /// The history graph cycles through these per branch lane. Mid-tone hues
-  /// are chosen so a two-pixel line stays readable on both the light and the
-  /// dark surface, which no single colorScheme role guarantees.
-  static const List<Color> commitGraphLaneColors = [
-    Color(0xFF2196F3), // Blue
-    Color(0xFF4CAF50), // Green
-    Color(0xFFFF9800), // Orange
-    Color(0xFFAB47BC), // Purple
-    Color(0xFF26C6DA), // Cyan
-    Color(0xFFEC407A), // Pink
-    Color(0xFF9CCC65), // Light green
-    Color(0xFF5C6BC0), // Indigo
-  ];
 
   // ============================================
   // Animation Durations

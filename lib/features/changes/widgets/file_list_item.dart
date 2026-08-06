@@ -57,10 +57,13 @@ class FileListItem extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: status.color.withValues(alpha: 0.2),
+                  color: status.colorOf(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppTheme.paddingXS),
                 ),
-                child: LabelSmallLabel(status.displayName, color: status.color),
+                child: LabelSmallLabel(
+                  status.displayName,
+                  color: status.colorOf(context),
+                ),
               ),
 
               // Old path for renames
@@ -111,10 +114,10 @@ class FileListItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.2),
+        color: status.colorOf(context).withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Icon(icon, size: AppTheme.iconS, color: status.color),
+      child: Icon(icon, size: AppTheme.iconS, color: status.colorOf(context)),
     );
   }
 

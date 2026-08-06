@@ -904,7 +904,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                           _sourceBranch!.name,
                         ),
                 ),
-                backgroundColor: AppTheme.gitAdded,
+                backgroundColor: context.gitColors.added,
               ),
             );
           }

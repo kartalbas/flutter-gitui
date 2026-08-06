@@ -299,7 +299,7 @@ class CreateBranchDialogState extends State<CreateBranchDialog> {
                   )
                 : Icon(
                     PhosphorIconsRegular.checkCircle,
-                    color: AppTheme.gitAdded,
+                    color: context.gitColors.added,
                   ),
       ),
     );

@@ -271,13 +271,13 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
 
     switch (line.type) {
       case DiffLineType.addition:
-        backgroundColor = AppTheme.gitAdded.withValues(alpha: 0.12);
-        textColor = AppTheme.gitAdded;
+        backgroundColor = context.gitColors.added.withValues(alpha: 0.12);
+        textColor = context.gitColors.added;
         prefix = '+';
         break;
       case DiffLineType.deletion:
-        backgroundColor = AppTheme.gitDeleted.withValues(alpha: 0.12);
-        textColor = AppTheme.gitDeleted;
+        backgroundColor = context.gitColors.deleted.withValues(alpha: 0.12);
+        textColor = context.gitColors.deleted;
         prefix = '-';
         break;
       case DiffLineType.header:

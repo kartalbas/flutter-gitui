@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'git_semantic_colors.dart';
+
 /// Typography extensions for consistent text styling across the app
 ///
 /// Usage:
@@ -140,8 +142,8 @@ extension SemanticTextStyles on BuildContext {
   TextStyle get filePath => body.muted(this);
 
   /// Status styles
-  TextStyle get success => body.colored(const Color(0xFF4CAF50));
-  TextStyle get warning => body.colored(const Color(0xFFFF9800));
+  TextStyle get success => body.colored(gitColors.added);
+  TextStyle get warning => body.colored(gitColors.modified);
   TextStyle get danger => body.error(this);
   TextStyle get info => body.primary(this);
 }

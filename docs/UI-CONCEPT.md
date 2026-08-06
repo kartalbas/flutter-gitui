@@ -553,9 +553,9 @@ color: Theme.of(context).colorScheme.error,
 color: Theme.of(context).colorScheme.onError,
 
 // Git-specific colors (OK to use)
-color: AppTheme.gitAdded,     // Green - for added files
-color: AppTheme.gitModified,  // Orange - for modified files
-color: AppTheme.gitDeleted,   // Red - for deleted files
+color: context.gitColors.added,     // Green - for added files
+color: context.gitColors.modified,  // Orange - for modified files
+color: context.gitColors.deleted,   // Red - for deleted files
 
 // Opacity for states (MD3 standard)
 color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),  // Hover
@@ -739,11 +739,11 @@ What element needs color?
 │  ├─ Secondary actions → colorScheme.secondary
 │  └─ Errors, warnings → colorScheme.error
 └─ GIT-SPECIFIC (semantic colors)
-   ├─ Added files → AppTheme.gitAdded
-   ├─ Modified files → AppTheme.gitModified
-   ├─ Deleted files → AppTheme.gitDeleted
-   ├─ Renamed files → AppTheme.gitRenamed
-   └─ Conflicts → AppTheme.gitConflict
+   ├─ Added files → context.gitColors.added
+   ├─ Modified files → context.gitColors.modified
+   ├─ Deleted files → context.gitColors.deleted
+   ├─ Renamed files → context.gitColors.renamed
+   └─ Conflicts → context.gitColors.conflict
 ```
 
 ---
@@ -775,7 +775,7 @@ Use this checklist for code reviews and new feature development:
 ### 5.4 Colors
 - [ ] Uses `Theme.of(context).colorScheme.*` for all colors
 - [ ] No `Colors.white`, `Colors.blue`, or other `Colors.*`
-- [ ] Git-specific colors (AppTheme.git*) only for semantic use
+- [ ] Git-specific colors (context.gitColors.*) only for semantic use
 - [ ] Opacity values follow MD3: 0.08, 0.12, 0.16, 0.38
 
 ### 5.5 Spacing

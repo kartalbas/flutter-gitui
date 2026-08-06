@@ -470,7 +470,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             content: Text(
               AppLocalizations.of(context)!.rebaseStartedSuccessfully,
             ),
-            backgroundColor: AppTheme.gitAdded,
+            backgroundColor: context.gitColors.added,
           ),
         );
       }
@@ -487,7 +487,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   context,
                 )!.rebaseStartedConflictNeedsResolution,
               ),
-              backgroundColor: AppTheme.gitModified,
+              backgroundColor: context.gitColors.modified,
             ),
           );
         } else {
@@ -523,7 +523,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.rebaseContinued),
-            backgroundColor: AppTheme.gitAdded,
+            backgroundColor: context.gitColors.added,
           ),
         );
       }
@@ -558,7 +558,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.commitSkipped),
-            backgroundColor: AppTheme.gitModified,
+            backgroundColor: context.gitColors.modified,
           ),
         );
       }
@@ -592,7 +592,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.rebaseAborted),
-            backgroundColor: AppTheme.gitDeleted,
+            backgroundColor: context.gitColors.deleted,
           ),
         );
       }

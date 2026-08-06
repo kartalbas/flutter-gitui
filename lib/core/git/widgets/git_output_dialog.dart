@@ -270,7 +270,9 @@ ${widget.result.fullOutput}
         _buildDetailChip(
           AppLocalizations.of(context)!.exitCode,
           widget.result.exitCode.toString(),
-          widget.result.isSuccess ? AppTheme.gitAdded : AppTheme.gitDeleted,
+          widget.result.isSuccess
+              ? context.gitColors.added
+              : context.gitColors.deleted,
         ),
         const SizedBox(width: AppTheme.paddingS),
         _buildDetailChip(
@@ -338,7 +340,7 @@ ${widget.result.fullOutput}
         border: Border.all(
           color: result.isSuccess
               ? Theme.of(context).colorScheme.outline
-              : AppTheme.gitDeleted.withValues(alpha: 0.3),
+              : context.gitColors.deleted.withValues(alpha: 0.3),
         ),
       ),
       child: SingleChildScrollView(
@@ -347,7 +349,7 @@ ${widget.result.fullOutput}
           children: [
             // STDOUT
             if (result.stdout.isNotEmpty) ...[
-              LabelSmallLabel('STDOUT', color: AppTheme.gitAdded),
+              LabelSmallLabel('STDOUT', color: context.gitColors.added),
               const SizedBox(height: AppTheme.paddingS),
               BodySmallLabel(
                 result.stdout,
@@ -359,9 +361,9 @@ ${widget.result.fullOutput}
             if (result.stderr.isNotEmpty) ...[
               if (result.stdout.isNotEmpty)
                 const SizedBox(height: AppTheme.paddingM),
-              LabelSmallLabel('STDERR', color: AppTheme.gitDeleted),
+              LabelSmallLabel('STDERR', color: context.gitColors.deleted),
               const SizedBox(height: AppTheme.paddingS),
-              BodySmallLabel(result.stderr, color: AppTheme.gitDeleted),
+              BodySmallLabel(result.stderr, color: context.gitColors.deleted),
             ],
           ],
         ),

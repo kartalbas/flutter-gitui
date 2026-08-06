@@ -371,7 +371,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                     ref.read(currentBranchProvider).value ?? 'unknown',
                   ),
                 ),
-                backgroundColor: AppTheme.gitAdded,
+                backgroundColor: context.gitColors.added,
               ),
             );
           }

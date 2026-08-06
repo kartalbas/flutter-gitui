@@ -77,16 +77,26 @@ Text(
 
 ### Git Status Colors
 
-Our semantic git colors (green, orange, red, blue) are designed with sufficient contrast for both light and dark themes:
+Git semantic colours are brightness-aware: `GitSemanticColors` (a `ThemeExtension`
+registered by `AppTheme`) carries a light and a dark value per role, derived so that the
+worst-case contrast across all selectable schemes and every surface the app paints them on
+is at least 4.5:1 for text and 3:1 for the commit-graph lanes.
+`test/conformance/a11y/git_colors_contrast_test.dart` enforces this in CI.
 
 ```dart
-// All git colors meet 3:1 contrast ratio
-AppTheme.gitAdded      // Green - #4CAF50
-AppTheme.gitModified   // Orange - #FF9800
-AppTheme.gitDeleted    // Red - #F44336
-AppTheme.gitRenamed    // Blue - #2196F3
-AppTheme.gitConflict   // Pink - #E91E63
+// Access via the BuildContext extension; never hardcode a git colour.
+Icon(PhosphorIconsRegular.plus, color: context.gitColors.added)
+BodySmallLabel('Modified', color: context.gitColors.modified)
 ```
+
+| Role | Light | Dark |
+|---|---|---|
+| added | `#006318` | `#59BC5B` |
+| modified | `#7D4800` | `#FF9800` |
+| deleted | `#A70007` | `#FF8272` |
+| renamed | `#005794` | `#58ACFF` |
+| untracked | `#555656` | `#A8A8A8` |
+| conflict | `#A40040` | `#FF7E98` |
 
 These colors work for most types of colorblindness (see [Colorblind Considerations](#colorblind-considerations)).
 
@@ -244,14 +254,14 @@ Row(
       label: '5 files modified',
       child: Badge(
         label: '5',
-        backgroundColor: AppTheme.gitModified,
+        backgroundColor: context.gitColors.modified,
       ),
     ),
     Semantics(
       label: '2 files added',
       child: Badge(
         label: '2',
-        backgroundColor: AppTheme.gitAdded,
+        backgroundColor: context.gitColors.added,
       ),
     ),
   ],
@@ -270,7 +280,7 @@ Semantics(
 // Meaningful icons - provide label
 Semantics(
   label: 'Error: Failed to fetch',
-  child: Icon(PhosphorIconsRegular.warning, color: AppTheme.gitDeleted),
+  child: Icon(PhosphorIconsRegular.warning, color: context.gitColors.deleted),
 )
 ```
 
@@ -577,9 +587,9 @@ Never rely on color alone. Always pair color with an icon or text label:
 // ✅ DO - Color + Icon + Text
 Row(
   children: [
-    Icon(PhosphorIconsRegular.plus, color: AppTheme.gitAdded),
+    Icon(PhosphorIconsRegular.plus, color: context.gitColors.added),
     SizedBox(width: AppTheme.paddingXS),
-    BodySmallLabel('Added', color: AppTheme.gitAdded),
+    BodySmallLabel('Added', color: context.gitColors.added),
   ],
 )
 
@@ -588,7 +598,7 @@ Container(
   width: 8,
   height: 8,
   decoration: BoxDecoration(
-    color: AppTheme.gitAdded, // No context without icon/text
+    color: context.gitColors.added, // No context without icon/text
     shape: BoxShape.circle,
   ),
 )

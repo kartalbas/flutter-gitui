@@ -95,7 +95,7 @@ class BranchListTile extends ConsumerWidget {
                       ? colorScheme.error
                       : branch.isBehind
                       ? colorScheme.secondary
-                      : AppTheme.gitAdded,
+                      : context.gitColors.added,
                 ),
               ],
             ),

@@ -61,7 +61,7 @@ class TagListTile extends ConsumerWidget {
                         tag.isAnnotated
                             ? PhosphorIconsBold.tag
                             : PhosphorIconsRegular.tag,
-                        color: tag.isAnnotated ? AppTheme.gitAdded : null,
+                        color: tag.isAnnotated ? context.gitColors.added : null,
                       ),
                       const SizedBox(width: AppTheme.paddingM),
                       Expanded(
@@ -102,7 +102,7 @@ class TagListTile extends ConsumerWidget {
                   tag.isAnnotated
                       ? PhosphorIconsBold.tag
                       : PhosphorIconsRegular.tag,
-                  color: tag.isAnnotated ? AppTheme.gitAdded : null,
+                  color: tag.isAnnotated ? context.gitColors.added : null,
                 ),
                 title: Row(
                   children: [

@@ -230,7 +230,12 @@ class CommitListItem extends ConsumerWidget {
         listItem,
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(painter: CommitGraphRowPainter(row: row)),
+            child: CustomPaint(
+              painter: CommitGraphRowPainter(
+                row: row,
+                laneColors: context.gitColors.laneColors,
+              ),
+            ),
           ),
         ),
       ],

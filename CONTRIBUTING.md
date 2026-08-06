@@ -111,11 +111,11 @@ Icon(icon, size: AppTheme.iconL)             // 24px
 
 **Git Semantic Colors:**
 ```dart
-AppTheme.gitAdded      // Green - added files
-AppTheme.gitModified   // Orange - modified files
-AppTheme.gitDeleted    // Red - deleted files
-AppTheme.gitRenamed    // Blue - renamed files
-AppTheme.gitConflict   // Pink - merge conflicts
+context.gitColors.added      // Green - added files
+context.gitColors.modified   // Orange - modified files
+context.gitColors.deleted    // Red - deleted files
+context.gitColors.renamed    // Blue - renamed files
+context.gitColors.conflict   // Pink - merge conflicts
 ```
 
 ---
@@ -396,7 +396,7 @@ color: Colors.white
 backgroundColor: Theme.of(context).colorScheme.error
 color: Theme.of(context).colorScheme.onPrimary
 // Or for git-specific colors:
-backgroundColor: AppTheme.gitDeleted
+backgroundColor: context.gitColors.deleted
 ```
 
 ### ❌ Bypassing Base* Components

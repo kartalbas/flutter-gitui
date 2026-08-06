@@ -236,14 +236,14 @@ class _BatchOperationProgressDialogState
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: _failureCount == 0
-                    ? AppTheme.gitAdded.withValues(alpha: 0.1)
+                    ? context.gitColors.added.withValues(alpha: 0.1)
                     : Theme.of(
                         context,
                       ).colorScheme.secondary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 border: Border.all(
                   color: _failureCount == 0
-                      ? AppTheme.gitAdded
+                      ? context.gitColors.added
                       : Theme.of(context).colorScheme.secondary,
                 ),
               ),
@@ -254,7 +254,7 @@ class _BatchOperationProgressDialogState
                         ? PhosphorIconsBold.checkCircle
                         : PhosphorIconsBold.warningCircle,
                     color: _failureCount == 0
-                        ? AppTheme.gitAdded
+                        ? context.gitColors.added
                         : Theme.of(context).colorScheme.secondary,
                   ),
                   const SizedBox(width: AppTheme.paddingM),
@@ -339,7 +339,7 @@ class _BatchOperationProgressDialogState
                               : PhosphorIconsBold.xCircle,
                           size: AppTheme.paddingM,
                           color: progress.success == true
-                              ? AppTheme.gitAdded
+                              ? context.gitColors.added
                               : Theme.of(context).colorScheme.error,
                         )
                       : null,
@@ -398,7 +398,7 @@ class _BatchOperationProgressDialogState
           : PhosphorIconsRegular.xCircle,
       size: AppTheme.paddingM,
       color: progress.success == true
-          ? AppTheme.gitAdded
+          ? context.gitColors.added
           : Theme.of(context).colorScheme.error,
     );
   }

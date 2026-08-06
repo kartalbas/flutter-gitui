@@ -134,21 +134,21 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                           context,
                           PhosphorIconsRegular.plusCircle,
                           stats.addedFiles.toString(),
-                          AppTheme.gitAdded,
+                          context.gitColors.added,
                         ),
                         const SizedBox(width: AppTheme.paddingM),
                         _buildStatChip(
                           context,
                           PhosphorIconsRegular.pencilSimple,
                           stats.modifiedFiles.toString(),
-                          AppTheme.gitModified,
+                          context.gitColors.modified,
                         ),
                         const SizedBox(width: AppTheme.paddingM),
                         _buildStatChip(
                           context,
                           PhosphorIconsRegular.minusCircle,
                           stats.deletedFiles.toString(),
-                          AppTheme.gitDeleted,
+                          context.gitColors.deleted,
                         ),
                       ],
                     ),
@@ -161,12 +161,12 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                         const Spacer(),
                         BodySmallLabel(
                           '+${stats.totalAdditions}',
-                          color: AppTheme.gitAdded,
+                          color: context.gitColors.added,
                         ),
                         const SizedBox(width: AppTheme.paddingXS),
                         BodySmallLabel(
                           '-${stats.totalDeletions}',
-                          color: AppTheme.gitDeleted,
+                          color: context.gitColors.deleted,
                         ),
                       ],
                     ),
@@ -335,7 +335,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
               size: AppTheme.iconS,
               color: node.isDirectory
                   ? Theme.of(context).colorScheme.primary
-                  : (node.fileChange?.type.color ??
+                  : (node.fileChange?.type.colorOf(context) ??
                         Theme.of(context).colorScheme.onSurface),
             ),
             const SizedBox(width: AppTheme.paddingS),
@@ -360,7 +360,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     if (node.fileChange!.additions > 0) ...[
                       LabelSmallLabel(
                         '+${node.fileChange!.additions}',
-                        color: AppTheme.gitAdded,
+                        color: context.gitColors.added,
                       ),
                     ],
                     if (node.fileChange!.additions > 0 &&
@@ -369,7 +369,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     if (node.fileChange!.deletions > 0) ...[
                       LabelSmallLabel(
                         '-${node.fileChange!.deletions}',
-                        color: AppTheme.gitDeleted,
+                        color: context.gitColors.deleted,
                       ),
                     ],
                   ],

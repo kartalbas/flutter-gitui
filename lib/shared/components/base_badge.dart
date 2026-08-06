@@ -127,12 +127,12 @@ class BaseBadge extends StatelessWidget {
         foregroundColor = colorScheme.primary;
         break;
       case BadgeVariant.success:
-        backgroundColor = AppTheme.gitAdded.withValues(alpha: 0.15);
-        foregroundColor = AppTheme.gitAdded;
+        backgroundColor = context.gitColors.added.withValues(alpha: 0.15);
+        foregroundColor = context.gitColors.added;
         break;
       case BadgeVariant.warning:
-        backgroundColor = AppTheme.gitModified.withValues(alpha: 0.15);
-        foregroundColor = AppTheme.gitModified;
+        backgroundColor = context.gitColors.modified.withValues(alpha: 0.15);
+        foregroundColor = context.gitColors.modified;
         break;
       case BadgeVariant.danger:
         backgroundColor = colorScheme.error.withValues(alpha: 0.15);
@@ -231,12 +231,16 @@ class BaseNumericBadge extends StatelessWidget {
         foregroundColor = colorScheme.onPrimary;
         break;
       case BadgeVariant.success:
-        backgroundColor = AppTheme.gitAdded;
-        foregroundColor = colorScheme.onPrimary;
+        backgroundColor = context.gitColors.added;
+        foregroundColor = GitSemanticColors.foregroundOn(
+          context.gitColors.added,
+        );
         break;
       case BadgeVariant.warning:
-        backgroundColor = AppTheme.gitModified;
-        foregroundColor = colorScheme.onPrimary;
+        backgroundColor = context.gitColors.modified;
+        foregroundColor = GitSemanticColors.foregroundOn(
+          context.gitColors.modified,
+        );
         break;
       case BadgeVariant.danger:
         backgroundColor = colorScheme.error;
@@ -321,12 +325,16 @@ class BaseIconBadge extends StatelessWidget {
         foregroundColor = colorScheme.onPrimary;
         break;
       case BadgeVariant.success:
-        backgroundColor = AppTheme.gitAdded;
-        foregroundColor = colorScheme.onPrimary;
+        backgroundColor = context.gitColors.added;
+        foregroundColor = GitSemanticColors.foregroundOn(
+          context.gitColors.added,
+        );
         break;
       case BadgeVariant.warning:
-        backgroundColor = AppTheme.gitModified;
-        foregroundColor = colorScheme.onPrimary;
+        backgroundColor = context.gitColors.modified;
+        foregroundColor = GitSemanticColors.foregroundOn(
+          context.gitColors.modified,
+        );
         break;
       case BadgeVariant.danger:
         backgroundColor = colorScheme.error;
@@ -393,10 +401,10 @@ class BaseDotBadge extends StatelessWidget {
         color = colorScheme.primary;
         break;
       case BadgeVariant.success:
-        color = AppTheme.gitAdded;
+        color = context.gitColors.added;
         break;
       case BadgeVariant.warning:
-        color = AppTheme.gitModified;
+        color = context.gitColors.modified;
         break;
       case BadgeVariant.danger:
         color = colorScheme.error;

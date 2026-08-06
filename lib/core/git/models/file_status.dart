@@ -39,29 +39,31 @@ enum FileStatusType {
     }
   }
 
-  /// Color for this status
-  Color get color {
+  /// Colour for this status, resolved against the active theme so light and
+  /// dark mode each get their contrast-conformant value.
+  Color colorOf(BuildContext context) {
+    final colors = context.gitColors;
     switch (this) {
       case FileStatusType.added:
-        return AppTheme.gitAdded;
+        return colors.added;
       case FileStatusType.modified:
-        return AppTheme.gitModified;
+        return colors.modified;
       case FileStatusType.deleted:
-        return AppTheme.gitDeleted;
+        return colors.deleted;
       case FileStatusType.renamed:
-        return AppTheme.gitRenamed;
+        return colors.renamed;
       case FileStatusType.copied:
-        return AppTheme.gitRenamed;
+        return colors.renamed;
       case FileStatusType.untracked:
-        return AppTheme.gitUntracked;
+        return colors.untracked;
       case FileStatusType.ignored:
-        return AppTheme.gitUntracked;
+        return colors.untracked;
       case FileStatusType.unmerged:
-        // Conflicts must stand out; reuse the delete colour rather than adding a
-        // token the theme does not define yet.
-        return AppTheme.gitDeleted;
+        // Conflicts must stand out; the delete colour is the strongest signal
+        // the palette carries for a file that blocks the commit.
+        return colors.deleted;
       case FileStatusType.unchanged:
-        return AppTheme.gitUntracked;
+        return colors.untracked;
     }
   }
 

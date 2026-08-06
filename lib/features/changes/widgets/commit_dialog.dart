@@ -187,7 +187,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                         children: [
                           FileStatusBadge(
                             code: file.indexStatus.code,
-                            color: file.indexStatus.color,
+                            color: file.indexStatus.colorOf(context),
                           ),
                           const SizedBox(width: AppTheme.paddingS),
                           Expanded(

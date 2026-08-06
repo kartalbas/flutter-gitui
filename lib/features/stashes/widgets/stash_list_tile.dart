@@ -34,12 +34,12 @@ class StashListTile extends ConsumerWidget {
         content: ExpansionTile(
           leading: CircleAvatar(
             backgroundColor: stash.isLatest
-                ? AppTheme.gitAdded.withValues(alpha: 0.2)
+                ? context.gitColors.added.withValues(alpha: 0.2)
                 : Theme.of(context).colorScheme.surfaceContainerHighest,
             child: TitleSmallLabel(
               stash.index.toString(),
               color: stash.isLatest
-                  ? AppTheme.gitAdded
+                  ? context.gitColors.added
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),

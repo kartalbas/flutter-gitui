@@ -473,7 +473,7 @@ class RepositoryCard extends ConsumerWidget {
       return Tooltip(
         message: 'This repository needs a sign-in. Click to authenticate.',
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           onTap: () => _signIn(context, ref),
           child: _buildStatusBadge(
             context,
@@ -560,7 +560,7 @@ class RepositoryCard extends ConsumerWidget {
         color: isSelected
             ? color.withValues(alpha: 0.2)
             : color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
         border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(

@@ -32,7 +32,7 @@ class TagSyncBanner extends StatelessWidget {
       margin: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(
           color: Theme.of(context).colorScheme.primary.withAlpha(77),
         ),

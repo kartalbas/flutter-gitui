@@ -131,7 +131,9 @@ class ChangelogDialog extends HookConsumerWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusL,
+                                ),
                               ),
                               child: LabelSmallLabel(
                                 'LATEST',
@@ -282,7 +284,7 @@ class ChangelogDialog extends HookConsumerWidget {
                               context,
                             ).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(
-                              AppTheme.paddingM,
+                              AppTheme.radiusXL,
                             ),
                           ),
                           child: BodyMediumLabel(

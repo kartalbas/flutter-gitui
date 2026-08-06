@@ -193,7 +193,7 @@ class TagListTile extends ConsumerWidget {
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(AppTheme.radiusS),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -265,7 +265,7 @@ class TagListTile extends ConsumerWidget {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: SelectableText(
                 tag.message!,

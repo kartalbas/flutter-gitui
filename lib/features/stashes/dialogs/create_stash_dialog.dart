@@ -134,7 +134,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                 border: Border.all(
                   color: Theme.of(context).colorScheme.outline,
                 ),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppTheme.radiusS),
               ),
               child: ListView.builder(
                 shrinkWrap: true,

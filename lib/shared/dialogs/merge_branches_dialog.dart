@@ -98,7 +98,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                       color: Theme.of(
                         context,
                       ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppTheme.paddingS),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
                     child: BodyMediumLabel(
                       AppLocalizations.of(context)!.noOtherBranchesAvailable,
@@ -176,7 +176,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                             context,
                                           ).colorScheme.primaryContainer,
                                           borderRadius: BorderRadius.circular(
-                                            3,
+                                            AppTheme.radiusS,
                                           ),
                                         ),
                                         child: LabelSmallLabel(
@@ -314,7 +314,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                             context,
                                           ).colorScheme.primaryContainer,
                                           borderRadius: BorderRadius.circular(
-                                            3,
+                                            AppTheme.radiusS,
                                           ),
                                         ),
                                         child: LabelSmallLabel(
@@ -663,7 +663,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.paddingS),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [
@@ -701,7 +701,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(AppTheme.paddingS),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Row(
                   children: [

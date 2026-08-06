@@ -156,7 +156,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [
@@ -179,7 +179,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [
@@ -231,7 +231,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 color: Theme.of(
                   context,
                 ).colorScheme.errorContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,7 +269,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             color: state.hasConflicts
                 ? Theme.of(context).colorScheme.errorContainer
                 : Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,7 +308,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           LinearProgressIndicator(
             value: state.progress,
             minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(AppTheme.radiusS),
           ),
         if (state.progress != null) const SizedBox(height: AppTheme.paddingL),
 
@@ -319,7 +319,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
           child: Row(
             children: [
@@ -339,7 +339,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: BodyMediumLabel(state.currentCommit!),
           ),
@@ -354,7 +354,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               color: Theme.of(
                 context,
               ).colorScheme.errorContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

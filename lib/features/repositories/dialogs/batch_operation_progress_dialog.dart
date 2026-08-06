@@ -211,7 +211,7 @@ class _BatchOperationProgressDialogState
                   // that for the whole run.
                   value: progress,
                   minHeight: AppTheme.paddingS,
-                  borderRadius: BorderRadius.circular(AppTheme.paddingXS),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
               ),
               const SizedBox(width: AppTheme.paddingM),

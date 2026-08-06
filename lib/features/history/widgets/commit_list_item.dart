@@ -106,7 +106,7 @@ class CommitListItem extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
                     border: Border.all(
                       color: Theme.of(
                         context,

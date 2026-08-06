@@ -55,7 +55,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: Row(
               children: [
@@ -96,7 +96,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: SingleChildScrollView(
@@ -131,7 +131,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: theme.colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [

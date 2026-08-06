@@ -1248,9 +1248,7 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                         Material(
                           color: Theme.of(context).colorScheme.surface,
                           elevation: AppTheme.elevationLevel2,
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.paddingXS,
-                          ),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusS),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal:

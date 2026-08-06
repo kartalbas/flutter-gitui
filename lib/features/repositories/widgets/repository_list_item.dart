@@ -470,7 +470,7 @@ class RepositoryListItem extends ConsumerWidget {
         color: isSelected
             ? color.withValues(alpha: 0.3)
             : color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
       ),
       child: Row(

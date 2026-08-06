@@ -196,9 +196,9 @@ class LanguageSelector extends ConsumerWidget {
       );
     }
 
-    // For language flags, show the SVG flag with circular shape
+    // For language flags, show the SVG flag with softly rounded corners
     return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(AppTheme.radiusXS),
       child: SizedBox(
         width: 20,
         height: 20,
@@ -222,7 +222,7 @@ class LanguageSelector extends ConsumerWidget {
           color: isSelected
               ? Theme.of(context).colorScheme.primaryContainer
               : Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(14),
+          shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
         child: Icon(
@@ -248,12 +248,9 @@ class LanguageSelector extends ConsumerWidget {
                 ).colorScheme.outlineVariant.withValues(alpha: 0.3),
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(14),
+        shape: BoxShape.circle,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(13),
-        child: CountryFlag.fromCountryCode(option.countryCode!),
-      ),
+      child: ClipOval(child: CountryFlag.fromCountryCode(option.countryCode!)),
     );
   }
 }

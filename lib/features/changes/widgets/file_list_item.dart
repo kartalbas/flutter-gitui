@@ -58,7 +58,7 @@ class FileListItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: status.colorOf(context).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppTheme.paddingXS),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
                 child: LabelSmallLabel(
                   status.displayName,
@@ -115,7 +115,7 @@ class FileListItem extends StatelessWidget {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: status.colorOf(context).withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
       ),
       child: Icon(icon, size: AppTheme.iconS, color: status.colorOf(context)),
     );

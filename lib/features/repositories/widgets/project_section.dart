@@ -78,7 +78,7 @@ class ProjectSection extends ConsumerWidget {
                     color: isUnassigned
                         ? Theme.of(context).colorScheme.outline
                         : project!.color,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusXS),
                   ),
                 ),
                 const SizedBox(width: AppTheme.paddingM),

@@ -49,7 +49,7 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                 padding: const EdgeInsets.all(AppTheme.paddingL),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +93,7 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                   padding: const EdgeInsets.all(AppTheme.paddingM),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     border: Border.all(
                       color: Theme.of(context).colorScheme.outlineVariant,
                     ),
@@ -129,7 +129,7 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                     color: Theme.of(
                       context,
                     ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusM),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +260,9 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                                       : Theme.of(
                                           context,
                                         ).colorScheme.secondaryContainer,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusL,
+                                  ),
                                   border: Border.all(
                                     color: isTag
                                         ? Theme.of(context).colorScheme.tertiary

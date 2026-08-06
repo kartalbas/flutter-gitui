@@ -135,7 +135,7 @@ class BaseDropdownItem<T> {
                 color:
                     badgeColor ??
                     Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(AppTheme.radiusS),
               ),
               child: MenuItemLabel(
                 badgeText,

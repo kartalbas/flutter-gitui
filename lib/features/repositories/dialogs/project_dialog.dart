@@ -205,7 +205,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
                               height: AppTheme.iconS,
                               decoration: BoxDecoration(
                                 color: _selectedColor,
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusXS,
+                                ),
                               ),
                             ),
                             const SizedBox(width: AppTheme.paddingS),

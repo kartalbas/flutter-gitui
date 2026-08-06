@@ -149,7 +149,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [
@@ -215,7 +215,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,7 +252,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
           child: BodyMediumLabel(state.currentCommit ?? 'Unknown'),
         ),
@@ -306,7 +306,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -363,7 +363,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: context.gitColors.deleted.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: SelectableText(
               state.foundCommit ?? 'Unknown',

@@ -75,7 +75,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                       color: Theme.of(
                         context,
                       ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
                     child: BodyMediumLabel(
                       AppLocalizations.of(context)!.noOtherBranchesAvailable,
@@ -227,7 +227,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [
@@ -255,7 +255,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                 padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Row(
                   children: [

@@ -91,7 +91,7 @@ class FileHistoryPanel extends ConsumerWidget {
       padding: EdgeInsets.zero,
       content: InkWell(
         onTap: () => _viewCommitDiff(context, commit),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.paddingM),
           child: Column(
@@ -108,7 +108,7 @@ class FileHistoryPanel extends ConsumerWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusS),
                     ),
                     child: BodySmallLabel(
                       commit.shortHash,

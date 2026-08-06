@@ -451,6 +451,7 @@ class AppTheme {
   static const double paddingXL = 32.0;
 
   /// Common border radius
+  static const double radiusXS = 2.0;
   static const double radiusS = 4.0;
   static const double radiusM = 8.0;
   static const double radiusL = 12.0;

@@ -32,6 +32,7 @@ This package provides automated enforcement of UI development standards through 
 | Rule | Detects | Suggests |
 |------|---------|----------|
 | `avoid_hardcoded_spacing` | Whole-number literals `4`/`8`/`16`/`24`/`32` in `SizedBox`/`EdgeInsets` constructors | `AppTheme.paddingXS/S/M/L/XL` |
+| `avoid_hardcoded_radius` | Numeric literals or non-radius `AppTheme.*` constants inside `BorderRadius`/`Radius` constructors | `AppTheme.radiusXS/S/M/L/XL` |
 | `avoid_hardcoded_colors` | `Colors.*` usage | `Theme.of(context).colorScheme` or `AppTheme.*` |
 | `avoid_text_with_style` | `Text()` with a `style` parameter that is not a `copyWith(color:)` chain | `BaseLabel` subclasses (`BodyMediumLabel`, `TitleLargeLabel`, …) |
 

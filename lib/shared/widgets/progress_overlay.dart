@@ -140,7 +140,7 @@ class ProgressOverlay extends ConsumerWidget {
                       LinearProgressIndicator(
                         value: progress.progress,
                         minHeight: 8,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusS),
                       ),
                       const SizedBox(height: AppTheme.paddingM),
                       // Progress text
@@ -158,7 +158,7 @@ class ProgressOverlay extends ConsumerWidget {
                     ] else ...[
                       LinearProgressIndicator(
                         minHeight: 8,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusS),
                       ),
                     ],
 

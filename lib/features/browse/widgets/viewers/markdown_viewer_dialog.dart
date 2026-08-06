@@ -126,7 +126,7 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
                 ),
                 codeblockDecoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppTheme.paddingS),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
               ),
             ),

@@ -468,7 +468,9 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
                               color: context.gitColors.added.withValues(
                                 alpha: 0.2,
                               ),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusS,
+                              ),
                             ),
                             child: BodySmallLabel(
                               'merged',
@@ -483,7 +485,9 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
                             ),
                             decoration: BoxDecoration(
                               color: colorScheme.error.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusS,
+                              ),
                             ),
                             child: BodySmallLabel(
                               'unmerged',

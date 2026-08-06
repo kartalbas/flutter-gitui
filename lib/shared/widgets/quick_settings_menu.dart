@@ -246,7 +246,7 @@ class QuickSettingsMenu extends ConsumerWidget {
             height: 20,
             decoration: BoxDecoration(
               color: _getColorForScheme(scheme),
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(AppTheme.radiusS),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant,
                 width: 1,

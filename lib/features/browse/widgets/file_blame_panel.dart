@@ -238,7 +238,7 @@ class FileBlamePanel extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
                 child: LabelSmallLabel(
                   line.shortHash,

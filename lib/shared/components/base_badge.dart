@@ -212,6 +212,11 @@ class BaseNumericBadge extends StatelessWidget {
   /// Maximum count to show (displays "{maxCount}+" for larger numbers)
   final int maxCount;
 
+  /// The badge is a pill: the corner radius is half the minimum size, so
+  /// the shape stays fully rounded however wide the count grows. This is
+  /// geometry derived from the badge size, not a design-token radius.
+  static const double _minSize = 20.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -255,11 +260,14 @@ class BaseNumericBadge extends StatelessWidget {
     final displayText = count > maxCount ? '$maxCount+' : count.toString();
 
     return Container(
-      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+      constraints: const BoxConstraints(
+        minWidth: _minSize,
+        minHeight: _minSize,
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(_minSize / 2),
       ),
       child: Center(
         // ignore: avoid_text_with_style

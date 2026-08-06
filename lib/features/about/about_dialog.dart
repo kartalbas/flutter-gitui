@@ -44,7 +44,7 @@ class AppAboutDialog extends HookConsumerWidget {
                     height: 80,
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXL),
                     ),
                     child: Icon(
                       Icons.commit,

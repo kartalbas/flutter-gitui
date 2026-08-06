@@ -98,7 +98,7 @@ class ReflogDialog extends ConsumerWidget {
           padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
           child: Row(
             children: [
@@ -143,7 +143,7 @@ class ReflogDialog extends ConsumerWidget {
             entry.actionType,
             context,
           ).withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
         child: BodySmallLabel(
           entry.actionType,

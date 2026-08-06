@@ -239,7 +239,7 @@ class _ConflictResolutionScreenState
                     margin: const EdgeInsets.only(bottom: AppTheme.paddingM),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
                     child: Row(
                       children: [
@@ -318,7 +318,7 @@ class _ConflictResolutionScreenState
                     color: Theme.of(
                       context,
                     ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     border: Border.all(
                       color: Theme.of(context).colorScheme.outline,
                     ),

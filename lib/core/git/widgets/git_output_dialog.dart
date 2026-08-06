@@ -240,7 +240,7 @@ ${widget.result.fullOutput}
       padding: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppTheme.paddingS),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
       child: Row(
@@ -337,7 +337,7 @@ ${widget.result.fullOutput}
       padding: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppTheme.paddingS),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(
           color: result.isSuccess
               ? Theme.of(context).colorScheme.outline

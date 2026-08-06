@@ -66,7 +66,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Row(
                   children: [
@@ -199,7 +199,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                   ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
                   ),
                   child: LabelMediumLabel(commit.shortHash),
                 ),

@@ -352,7 +352,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(AppTheme.paddingXS),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

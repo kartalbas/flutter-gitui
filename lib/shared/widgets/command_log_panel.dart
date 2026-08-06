@@ -95,7 +95,7 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppTheme.radiusL),
             ),
             child: LabelMediumLabel(
               logCount.toString(),

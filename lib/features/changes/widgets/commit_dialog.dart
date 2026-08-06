@@ -137,7 +137,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
               padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               child: Row(
                 children: [
@@ -261,7 +261,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                 color: Theme.of(
                   context,
                 ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 border: Border.all(
                   color: Theme.of(
                     context,

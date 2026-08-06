@@ -75,7 +75,7 @@ class AnimationSection extends ConsumerWidget {
           padding: const EdgeInsets.all(AppTheme.paddingS),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(AppTheme.paddingS),
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
           child: Row(
             children: [

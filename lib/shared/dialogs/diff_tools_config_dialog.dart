@@ -129,7 +129,7 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.paddingS),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
             child: Row(
               children: [
@@ -232,7 +232,7 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                     color: Theme.of(
                       context,
                     ).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,

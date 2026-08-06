@@ -163,7 +163,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                 padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Row(
                   children: [

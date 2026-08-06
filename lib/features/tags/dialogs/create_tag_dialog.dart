@@ -86,7 +86,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

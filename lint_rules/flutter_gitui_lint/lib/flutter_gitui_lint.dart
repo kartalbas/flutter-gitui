@@ -18,6 +18,7 @@ import 'src/lints/avoid_action_chip.dart';
 import 'src/lints/avoid_choice_chip.dart';
 import 'src/lints/avoid_badge.dart';
 import 'src/lints/avoid_hardcoded_spacing.dart';
+import 'src/lints/avoid_hardcoded_radius.dart';
 import 'src/lints/avoid_hardcoded_colors.dart';
 import 'src/lints/avoid_text_with_style.dart';
 import 'src/lints/avoid_null_color_in_copy_with.dart';
@@ -62,6 +63,7 @@ class _FlutterGitUILint extends PluginBase {
 
     // Theme lints
     AvoidHardcodedSpacing(),
+    AvoidHardcodedRadius(),
     AvoidHardcodedColors(),
 
     // Typography lints

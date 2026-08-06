@@ -37,7 +37,6 @@ import '../../core/services/logger_service.dart';
 import 'dialogs/advanced_search_dialog.dart';
 import 'dialogs/squash_commits_dialog.dart';
 import 'dialogs/reset_mode_dialog.dart';
-import 'dialogs/force_push_dialog.dart';
 import 'dialogs/create_branch_from_commit_dialog.dart';
 import 'dialogs/compare_commits_dialog.dart';
 import '../../shared/widgets/standard_app_bar.dart';
@@ -1104,14 +1103,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     if (!mounted || !context.mounted) return;
 
     // Force push overwrites remote history and can destroy work that is not
-    // the user's own, so it always confirms: a remote-tier destructive action
-    // no setting can silence.
-    final shouldForcePush = await showDialog<bool>(
+    // the user's own: the strongest tier. The gate only enables once the
+    // user has retyped the upstream ref that is about to be overwritten.
+    final shouldForcePush = await confirmDestructive(
       context: context,
-      builder: (context) => const ForcePushDialog(),
+      ref: ref,
+      action: DestructiveAction.forcePush,
+      icon: PhosphorIconsRegular.warningCircle,
+      title: l10n.forcePush,
+      message:
+          '${l10n.forcePushConfirmMessage(upstream)}\n\n'
+          '• ${l10n.forcePushOnlyIfAlone}\n'
+          '• ${l10n.forcePushOthersNeedReset}\n'
+          '• ${l10n.forcePushCannotBeEasilyUndone}',
+      confirmLabel: l10n.forcePush,
+      confirmationToken: upstream,
     );
 
-    if (shouldForcePush != true || !context.mounted) return;
+    if (!shouldForcePush || !context.mounted) return;
 
     // The tracked remote need not be named "origin", and the upstream branch
     // need not share the local branch's name, so push an explicit refspec.

@@ -1,5 +1,10 @@
 {
   "@@locale": "tr",
+  "typeToConfirmInstruction": "Onaylamak için aşağıya \"{token}\" yazın.",
+  "typeToConfirmMismatch": "Metin eşleşmiyor.",
+  "forcePushConfirmMessage": "Zorla push ile uzak sunucudaki \"{target}\" üzerine yazmak üzeresiniz. Yalnızca uzak sunucuda bulunan commit'ler herkes için kaybolur.",
+  "deleteRemoteBranchConfirmMessage": "Bu işlem, \"{remoteName}\" uzak sunucusundaki \"{branchName}\" dalını, birleştirilmemiş commit'ler dahil olmak üzere herkes için siler.\n\nBu işlem geri alınamaz.",
+  "deleteTagsFromRemoteConfirmMessage": "{count, plural, =1{Bu işlem {count} etiketi \"{remoteName}\" uzak sunucusundan herkes için siler.} other{Bu işlem {count} etiketi \"{remoteName}\" uzak sunucusundan herkes için siler.}}\n\nBu işlem geri alınamaz.",
   "appTitle": "Flutter GitUI",
   "workspaces": "Çalışma Alanları",
   "repositories": "Depolar",

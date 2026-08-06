@@ -1,5 +1,10 @@
 {
   "@@locale": "de",
+  "typeToConfirmInstruction": "Geben Sie zur Bestätigung unten \"{token}\" ein.",
+  "typeToConfirmMismatch": "Die Eingabe stimmt nicht überein.",
+  "forcePushConfirmMessage": "Sie sind dabei, per Force Push \"{target}\" auf dem Remote zu überschreiben. Commits, die nur auf dem Remote existieren, gehen für alle verloren.",
+  "deleteRemoteBranchConfirmMessage": "Dies löscht den Branch \"{branchName}\" auf dem Remote \"{remoteName}\" für alle, einschließlich nicht gemergter Commits.\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
+  "deleteTagsFromRemoteConfirmMessage": "{count, plural, =1{Dies löscht {count} Tag vom Remote \"{remoteName}\" für alle.} other{Dies löscht {count} Tags vom Remote \"{remoteName}\" für alle.}}\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
   "appTitle": "Flutter GitUI",
   "workspaces": "Arbeitsbereiche",
   "repositories": "Repositories",

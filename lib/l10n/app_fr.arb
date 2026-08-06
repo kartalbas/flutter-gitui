@@ -1,5 +1,10 @@
 {
   "@@locale": "fr",
+  "typeToConfirmInstruction": "Pour confirmer, saisissez \"{token}\" ci-dessous.",
+  "typeToConfirmMismatch": "Le texte ne correspond pas.",
+  "forcePushConfirmMessage": "Vous êtes sur le point de faire un push forcé et d'écraser \"{target}\" sur le distant. Les commits qui n'existent que sur le distant seront perdus pour tout le monde.",
+  "deleteRemoteBranchConfirmMessage": "Cela supprime la branche \"{branchName}\" sur le distant \"{remoteName}\" pour tout le monde, y compris les commits non fusionnés.\n\nCette action ne peut pas être annulée.",
+  "deleteTagsFromRemoteConfirmMessage": "{count, plural, =1{Cela supprime {count} tag du distant \"{remoteName}\" pour tout le monde.} other{Cela supprime {count} tags du distant \"{remoteName}\" pour tout le monde.}}\n\nCette action ne peut pas être annulée.",
   "appTitle": "Flutter GitUI",
   "workspaces": "Espaces de travail",
   "repositories": "Dépôts",

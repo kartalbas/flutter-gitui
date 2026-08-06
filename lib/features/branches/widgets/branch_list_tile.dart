@@ -9,8 +9,10 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/dialogs/confirm_destructive.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/branch.dart';
+import '../../../core/git/destructive_action.dart';
 import '../../../core/services/services.dart';
 import '../dialogs/rename_branch_dialog.dart';
 import '../dialogs/merge_branch_dialog.dart';
@@ -237,6 +239,42 @@ class BranchListTile extends ConsumerWidget {
   }
 
   Future<void> _deleteBranch(BuildContext context, WidgetRef ref) async {
+    // Deleting a remote branch destroys the ref on the server for everyone,
+    // so it goes through the remote-tier gate — the user retypes the branch
+    // name before the confirm enables. Protected branches (local or remote)
+    // still get the dialog's explanatory refusal below.
+    if (!isLocal && !branch.isProtected) {
+      final remoteName = branch.remoteName;
+      if (remoteName == null) return;
+
+      final l10n = AppLocalizations.of(context)!;
+      final confirmed = await confirmDestructive(
+        context: context,
+        ref: ref,
+        action: DestructiveAction.deleteRemoteBranch,
+        icon: PhosphorIconsRegular.warning,
+        title: l10n.deleteBranchDialog,
+        message: l10n.deleteRemoteBranchConfirmMessage(
+          branch.branchNameWithoutRemote,
+          remoteName,
+        ),
+        confirmLabel: l10n.delete,
+        confirmationToken: branch.branchNameWithoutRemote,
+      );
+      if (!confirmed || !context.mounted) return;
+
+      try {
+        await ref
+            .read(gitActionsProvider)
+            .deleteRemoteBranch(remoteName, branch.branchNameWithoutRemote);
+      } catch (e) {
+        if (context.mounted) {
+          NotificationService.showError(context, 'Failed to delete: $e');
+        }
+      }
+      return;
+    }
+
     final result = await showDialog<DeleteBranchResult>(
       context: context,
       builder: (context) => DeleteBranchDialog(branch: branch),
@@ -247,19 +285,9 @@ class BranchListTile extends ConsumerWidget {
         context.mounted) {
       try {
         final force = result == DeleteBranchResult.forceDelete;
-
-        if (isLocal) {
-          await ref
-              .read(gitActionsProvider)
-              .deleteBranch(branch.shortName, force: force);
-        } else {
-          final remoteName = branch.remoteName;
-          if (remoteName != null) {
-            await ref
-                .read(gitActionsProvider)
-                .deleteRemoteBranch(remoteName, branch.branchNameWithoutRemote);
-          }
-        }
+        await ref
+            .read(gitActionsProvider)
+            .deleteBranch(branch.shortName, force: force);
       } catch (e) {
         if (context.mounted) {
           NotificationService.showError(context, 'Failed to delete: $e');

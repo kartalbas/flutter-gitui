@@ -502,6 +502,9 @@ class TagListTile extends ConsumerWidget {
           ? l10n.dialogContentDeleteTagRemote(tag.name)
           : l10n.dialogContentDeleteTagLocal(tag.name),
       confirmLabel: l10n.delete,
+      // For the remote tier the gate makes the user retype the tag's name
+      // before the confirm enables; the recoverable local tier ignores it.
+      confirmationToken: tag.name,
     );
 
     if (confirmed && context.mounted) {

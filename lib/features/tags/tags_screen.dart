@@ -10,7 +10,9 @@ import '../../shared/components/base_animated_widgets.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_menu_item.dart';
+import '../../shared/dialogs/confirm_destructive.dart';
 import '../../core/git/git_providers.dart';
+import '../../core/git/destructive_action.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/tag.dart';
 import '../../core/navigation/navigation_item.dart';
@@ -911,6 +913,27 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                 builder: (context) => SelectRemoteDialog(remotes: remotes),
               );
         if (remoteName == null || !context.mounted) return;
+
+        // The remote leg is remote-permanent: it always confirms, and the
+        // gate only enables once the user has typed the remote's name. The
+        // remote is the token because no single tag identifies a bulk
+        // delete — the one name every removed ref shares is where the
+        // shared, irreversible loss happens.
+        final l10n = AppLocalizations.of(context)!;
+        final confirmed = await confirmDestructive(
+          context: context,
+          ref: ref,
+          action: DestructiveAction.deleteRemoteTag,
+          icon: PhosphorIconsRegular.warningCircle,
+          title: l10n.deleteTagsDialog,
+          message: l10n.deleteTagsFromRemoteConfirmMessage(
+            _selectedTags.length,
+            remoteName,
+          ),
+          confirmLabel: l10n.delete,
+          confirmationToken: remoteName,
+        );
+        if (!confirmed || !context.mounted) return;
       }
 
       // Use batch operation to delete all selected tags at once

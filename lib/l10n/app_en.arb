@@ -1,5 +1,51 @@
 {
   "@@locale": "en",
+  "typeToConfirmInstruction": "To confirm, type \"{token}\" below.",
+  "@typeToConfirmInstruction": {
+    "description": "Instruction above the type-to-confirm field naming the exact token to retype",
+    "placeholders": {
+      "token": {
+        "type": "String"
+      }
+    }
+  },
+  "typeToConfirmMismatch": "This does not match.",
+  "@typeToConfirmMismatch": {
+    "description": "Inline field error while the typed text is not a prefix of the confirmation token"
+  },
+  "forcePushConfirmMessage": "You are about to force push and overwrite \"{target}\" on the remote. Commits that exist only on the remote will be lost for everyone.",
+  "@forcePushConfirmMessage": {
+    "description": "Body of the force-push confirmation naming the upstream ref that will be overwritten",
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteRemoteBranchConfirmMessage": "This deletes branch \"{branchName}\" on remote \"{remoteName}\" for everyone, including any unmerged commits.\n\nThis action cannot be undone.",
+  "@deleteRemoteBranchConfirmMessage": {
+    "description": "Body of the remote branch delete confirmation",
+    "placeholders": {
+      "branchName": {
+        "type": "String"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteTagsFromRemoteConfirmMessage": "{count, plural, =1{This deletes {count} tag from remote \"{remoteName}\" for everyone.} other{This deletes {count} tags from remote \"{remoteName}\" for everyone.}}\n\nThis action cannot be undone.",
+  "@deleteTagsFromRemoteConfirmMessage": {
+    "description": "Body of the bulk remote tag delete confirmation",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "remoteName": {
+        "type": "String"
+      }
+    }
+  },
   "appTitle": "Flutter GitUI",
   "workspaces": "Workspaces",
   "allWorkspaces": "All Workspaces",

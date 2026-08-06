@@ -600,8 +600,27 @@ class GitCommands {
       descriptionKey: 'commandPullWithRebaseDesc',
       icon: PhosphorIconsRegular.arrowDown,
       category: CommandCategory.remotes,
-      onExecute: (context, ref) {
-        ref.read(gitActionsProvider).pullRemote(rebase: true);
+      // Unlike the plain pull above, --rebase replays local commits onto the
+      // fetched upstream and therefore rewrites history, so it asks first like
+      // every other rebase entry point. The tier is silenceable, so a user who
+      // has turned confirmations off keeps the one-step behaviour.
+      onExecute: (context, ref) async {
+        final l10n = AppLocalizations.of(context);
+        if (l10n == null) return;
+
+        final confirmed = await confirmDestructive(
+          context: context,
+          ref: ref,
+          action: DestructiveAction.rebase,
+          icon: PhosphorIconsRegular.arrowDown,
+          title: l10n.commandPullWithRebase,
+          message: l10n.rebaseWarning,
+          confirmLabel: l10n.rebase,
+        );
+
+        if (confirmed) {
+          ref.read(gitActionsProvider).pullRemote(rebase: true);
+        }
       },
     ),
     GitCommand(

@@ -9,19 +9,7 @@ import '../../core/diff/diff_parser.dart';
 import '../theme/app_theme.dart';
 import 'base_label.dart';
 import 'base_card.dart';
-
-/// Action for the Speed Dial FAB
-class DiffViewerAction {
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  const DiffViewerAction({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  });
-}
+import 'base_speed_dial.dart';
 
 enum DiffViewMode {
   diff, // Show only changes (default)
@@ -38,7 +26,7 @@ class BaseDiffViewer extends StatefulWidget {
   final String? filePath; // File path for display
   final DiffViewMode viewMode; // View mode controlled by parent
   final VoidCallback? onToggleViewMode; // Callback to toggle view mode
-  final List<DiffViewerAction>
+  final List<SpeedDialAction>
   additionalActions; // Additional actions for the FAB
   final String fontFamily; // Font family for code display
   final AppFontSize fontSize; // Font size for code display
@@ -114,10 +102,10 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
         : _buildDiffView(context);
 
     // Wrap in Stack with Speed Dial FAB if we have any actions
-    final allActions = <DiffViewerAction>[
+    final allActions = <SpeedDialAction>[
       // Toggle view mode action (if available)
       if (widget.onToggleViewMode != null && canShowFullFile)
-        DiffViewerAction(
+        SpeedDialAction(
           icon: widget.viewMode == DiffViewMode.diff
               ? PhosphorIconsRegular.file
               : PhosphorIconsRegular.gitDiff,
@@ -149,7 +137,7 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
             children: [
               contentWidget,
               // Draggable Speed Dial FAB (now controlled by parent, ESC key handled internally)
-              _DraggableSpeedDial(
+              BaseSpeedDial(
                 actions: allActions,
                 isExpanded: _fabIsExpanded,
                 onToggle: _toggleFAB,
@@ -423,147 +411,6 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Draggable Speed Dial FAB for diff viewer actions
-class _DraggableSpeedDial extends StatefulWidget {
-  final List<DiffViewerAction> actions;
-  final bool isExpanded; // Controlled by parent
-  final VoidCallback onToggle; // Callback to toggle expansion
-  final VoidCallback onCollapse; // Callback to collapse (for actions)
-
-  const _DraggableSpeedDial({
-    required this.actions,
-    required this.isExpanded,
-    required this.onToggle,
-    required this.onCollapse,
-  });
-
-  @override
-  State<_DraggableSpeedDial> createState() => _DraggableSpeedDialState();
-}
-
-class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
-  Offset _position = const Offset(
-    AppTheme.paddingM,
-    AppTheme.paddingM,
-  ); // Default position (from bottom-right)
-  final FocusNode _focusNode = FocusNode();
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      right: _position.dx,
-      bottom: _position.dy,
-      child: Focus(
-        focusNode: _focusNode,
-        onKeyEvent: (node, event) {
-          // ESC key dismissal
-          if (event is KeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.escape &&
-              widget.isExpanded) {
-            widget.onCollapse();
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
-        },
-        child: GestureDetector(
-          onPanUpdate: (details) {
-            setState(() {
-              // Update position by subtracting delta (since we're using right/bottom positioning)
-              _position = Offset(
-                (_position.dx - details.delta.dx).clamp(
-                  AppTheme.paddingM,
-                  MediaQuery.of(context).size.width - 80,
-                ),
-                (_position.dy - details.delta.dy).clamp(
-                  AppTheme.paddingM,
-                  MediaQuery.of(context).size.height - 80,
-                ),
-              );
-            });
-          },
-          onTap: () {
-            // Request focus when tapped so ESC key works
-            _focusNode.requestFocus();
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Expanded action buttons
-              if (widget.isExpanded)
-                ...widget.actions.map(
-                  (action) => Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: AppTheme.paddingS + AppTheme.paddingXS,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Label
-                        Material(
-                          color: Theme.of(context).colorScheme.surface,
-                          elevation: AppTheme.elevationLevel2,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal:
-                                  AppTheme.paddingS + AppTheme.paddingXS,
-                              vertical: AppTheme.paddingS,
-                            ),
-                            child: BodySmallLabel(action.label),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: AppTheme.paddingS + AppTheme.paddingXS,
-                        ),
-                        // Action button
-                        FloatingActionButton.small(
-                          heroTag: action.label,
-                          onPressed: () {
-                            action.onPressed();
-                            // Collapse after action
-                            widget.onCollapse();
-                          },
-                          child: Icon(action.icon),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              // Main FAB
-              FloatingActionButton(
-                heroTag: 'main_fab',
-                onPressed: () {
-                  widget.onToggle();
-                  // Request focus so ESC key works
-                  _focusNode.requestFocus();
-                },
-                child: AnimatedRotation(
-                  turns: widget.isExpanded
-                      ? 0.125
-                      : 0, // 45 degrees when expanded
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    widget.isExpanded
-                        ? PhosphorIconsRegular.x
-                        : PhosphorIconsRegular.list,
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

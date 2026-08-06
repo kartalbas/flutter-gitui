@@ -11,7 +11,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
-import '../../../shared/components/base_diff_viewer.dart';
+import '../../../shared/components/base_speed_dial.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/controllers/tree_view_controller.dart';
 import '../../../shared/utils/search_parser.dart';
@@ -520,16 +520,16 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
   }
 
   // Expose FAB actions for BrowseScreen to render at screen level
-  List<DiffViewerAction> get fabActions {
+  List<SpeedDialAction> get fabActions {
     if (!mounted) return [];
 
     final l10n = AppLocalizations.of(context)!;
-    final actions = <DiffViewerAction>[];
+    final actions = <SpeedDialAction>[];
 
     if (_selectedNode != null && !_selectedNode!.isDirectory) {
       // Open in Editor (only for files)
       actions.add(
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.pencil,
           label: l10n.openInEditor,
           onPressed: () => _openInEditor(_selectedNode!.fullPath),
@@ -538,7 +538,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Rename (F2)
       actions.add(
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.textbox,
           label: l10n.rename,
           onPressed: () => _renameFile(context, _selectedNode!.fullPath),
@@ -547,7 +547,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Copy (Ctrl+C)
       actions.add(
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.copy,
           label: l10n.copyFile,
           onPressed: () => _copyFile(context, _selectedNode!.fullPath),
@@ -557,7 +557,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       // Paste (Ctrl+V) - only show if we have something copied
       if (_copiedFilePath != null) {
         actions.add(
-          DiffViewerAction(
+          SpeedDialAction(
             icon: PhosphorIconsRegular.clipboard,
             label: l10n.paste,
             onPressed: () => _pasteFile(context, _selectedNode!.fullPath),
@@ -567,7 +567,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Delete (Del)
       actions.add(
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.trash,
           label: l10n.delete,
           onPressed: () => _deleteFile(context, _selectedNode!.fullPath),
@@ -576,7 +576,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Copy Path
       actions.add(
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.path,
           label: l10n.labelCopyPath,
           onPressed: () => _copyPath(_selectedNode!.fullPath),
@@ -585,7 +585,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Reveal in Explorer
       actions.add(
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.folderOpen,
           label: l10n.labelRevealInExplorer,
           onPressed: () => _revealInExplorer(_selectedNode!.fullPath),

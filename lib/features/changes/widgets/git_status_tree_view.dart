@@ -7,6 +7,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_diff_viewer.dart';
+import '../../../shared/components/base_speed_dial.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/controllers/tree_view_controller.dart';
 import '../../../shared/widgets/base_tree_item.dart';
@@ -550,10 +551,10 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
         final diffTool = ref.watch(selectedDiffToolProvider);
 
         // Build additional actions for the FAB
-        final additionalActions = <DiffViewerAction>[
+        final additionalActions = <SpeedDialAction>[
           // Stage/Unstage action
           if (widget.onToggleStage != null)
-            DiffViewerAction(
+            SpeedDialAction(
               icon: widget.staged
                   ? PhosphorIconsRegular.minus
                   : PhosphorIconsRegular.plus,
@@ -563,7 +564,7 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
           // Discard changes action (for modified/deleted files)
           if (widget.onDiscardFile != null &&
               widget.fileStatus.primaryStatus != FileStatusType.untracked)
-            DiffViewerAction(
+            SpeedDialAction(
               icon: PhosphorIconsRegular.arrowCounterClockwise,
               label: l10n.discardChangesQuestion,
               onPressed: widget.onDiscardFile!,
@@ -571,13 +572,13 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
           // Delete file action (for untracked files)
           if (widget.onDeleteFile != null &&
               widget.fileStatus.primaryStatus == FileStatusType.untracked)
-            DiffViewerAction(
+            SpeedDialAction(
               icon: PhosphorIconsRegular.trash,
               label: l10n.delete,
               onPressed: widget.onDeleteFile!,
             ),
           // Copy all content action
-          DiffViewerAction(
+          SpeedDialAction(
             icon: PhosphorIconsRegular.copy,
             label: l10n.labelCopyAll,
             onPressed: () async {
@@ -592,7 +593,7 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
           ),
           // Open in external tool action (if available)
           if (diffTool != null)
-            DiffViewerAction(
+            SpeedDialAction(
               icon: PhosphorIconsRegular.arrowSquareOut,
               label: l10n.labelOpenInExternalTool,
               onPressed: () async {
@@ -624,7 +625,7 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
               },
             ),
           // Blame action (show who changed each line)
-          DiffViewerAction(
+          SpeedDialAction(
             icon: PhosphorIconsRegular.userList,
             label: l10n.blame,
             onPressed: () {

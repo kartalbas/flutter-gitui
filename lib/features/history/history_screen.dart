@@ -11,8 +11,8 @@ import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_filter_chip.dart';
 import '../../shared/components/base_button.dart';
-import '../../shared/components/base_diff_viewer.dart';
 import '../../shared/components/base_menu_item.dart';
+import '../../shared/components/base_speed_dial.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/git_service.dart';
@@ -387,38 +387,38 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         : null;
 
     // Build FAB actions based on selection
-    final fabActions = <DiffViewerAction>[
+    final fabActions = <SpeedDialAction>[
       // Squash Commits (requires 2+ commits)
       if (selectedCount >= 2)
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.arrowsInLineVertical,
           label: l10n.squashCommits,
           onPressed: () => _showSquashDialog(context, selection),
         ),
       // Cherry-pick (requires 1+ commits)
       if (selectedCount > 0)
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.arrowBendDownRight,
           label: l10n.cherryPick,
           onPressed: () => _performCherryPick(context, selection),
         ),
       // Revert (requires exactly 1 commit)
       if (selectedCount == 1)
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.arrowCounterClockwise,
           label: l10n.revert,
           onPressed: () => _performRevert(context, selection),
         ),
       // Reset to Here (requires exactly 1 commit)
       if (selectedCount == 1)
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.arrowCounterClockwise,
           label: l10n.resetToHere,
           onPressed: () => _performReset(context, selection),
         ),
       // Create Tag (requires exactly 1 commit)
       if (selectedCount == 1)
-        DiffViewerAction(
+        SpeedDialAction(
           icon: PhosphorIconsRegular.tag,
           label: l10n.createTag,
           onPressed: () {
@@ -601,7 +601,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           children: [
             contentWidget,
             // Draggable Speed Dial FAB (ESC key handled internally)
-            _DraggableSpeedDial(
+            BaseSpeedDial(
               actions: fabActions,
               isExpanded: _fabIsExpanded,
               onToggle: _toggleFAB,
@@ -1169,145 +1169,4 @@ enum _CommitContextAction {
   squash,
   revert,
   reset,
-}
-
-/// Draggable Speed Dial FAB for history actions
-class _DraggableSpeedDial extends StatefulWidget {
-  final List<DiffViewerAction> actions;
-  final bool isExpanded; // Controlled by parent
-  final VoidCallback onToggle; // Callback to toggle expansion
-  final VoidCallback onCollapse; // Callback to collapse (for actions)
-
-  const _DraggableSpeedDial({
-    required this.actions,
-    required this.isExpanded,
-    required this.onToggle,
-    required this.onCollapse,
-  });
-
-  @override
-  State<_DraggableSpeedDial> createState() => _DraggableSpeedDialState();
-}
-
-class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
-  Offset _position = const Offset(
-    AppTheme.paddingM,
-    AppTheme.paddingM,
-  ); // Default position (from bottom-right)
-  final FocusNode _focusNode = FocusNode();
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      right: _position.dx,
-      bottom: _position.dy,
-      child: Focus(
-        focusNode: _focusNode,
-        onKeyEvent: (node, event) {
-          // ESC key dismissal
-          if (event is KeyDownEvent &&
-              event.logicalKey == LogicalKeyboardKey.escape &&
-              widget.isExpanded) {
-            widget.onCollapse();
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
-        },
-        child: GestureDetector(
-          onPanUpdate: (details) {
-            setState(() {
-              // Update position by subtracting delta (since we're using right/bottom positioning)
-              _position = Offset(
-                (_position.dx - details.delta.dx).clamp(
-                  AppTheme.paddingM,
-                  MediaQuery.of(context).size.width - 80,
-                ),
-                (_position.dy - details.delta.dy).clamp(
-                  AppTheme.paddingM,
-                  MediaQuery.of(context).size.height - 80,
-                ),
-              );
-            });
-          },
-          onTap: () {
-            // Request focus when tapped so ESC key works
-            _focusNode.requestFocus();
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // Expanded action buttons
-              if (widget.isExpanded)
-                ...widget.actions.map(
-                  (action) => Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: AppTheme.paddingS + AppTheme.paddingXS,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Label
-                        Material(
-                          color: Theme.of(context).colorScheme.surface,
-                          elevation: AppTheme.elevationLevel2,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal:
-                                  AppTheme.paddingS + AppTheme.paddingXS,
-                              vertical: AppTheme.paddingS,
-                            ),
-                            child: BodySmallLabel(action.label),
-                          ),
-                        ),
-                        const SizedBox(
-                          width: AppTheme.paddingS + AppTheme.paddingXS,
-                        ),
-                        // Action button
-                        FloatingActionButton.small(
-                          heroTag: action.label,
-                          onPressed: () {
-                            action.onPressed();
-                            // Collapse after action
-                            widget.onCollapse();
-                          },
-                          child: Icon(action.icon),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              // Main FAB
-              FloatingActionButton(
-                heroTag: 'main_fab',
-                onPressed: () {
-                  widget.onToggle();
-                  // Request focus so ESC key works
-                  _focusNode.requestFocus();
-                },
-                child: AnimatedRotation(
-                  turns: widget.isExpanded
-                      ? 0.125
-                      : 0, // 45 degrees when expanded
-                  duration: const Duration(milliseconds: 200),
-                  child: Icon(
-                    widget.isExpanded
-                        ? PhosphorIconsRegular.x
-                        : PhosphorIconsRegular.list,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

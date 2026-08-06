@@ -195,6 +195,7 @@ class _BatchOperationProgressDialogState
           : PhosphorIconsRegular.warningCircle,
       variant: DialogVariant.normal,
       barrierDismissible: !_isRunning,
+      onSubmit: _isRunning ? null : () => Navigator.of(context).pop(_results),
       maxWidth: 600,
       content: Column(
         mainAxisSize: MainAxisSize.min,

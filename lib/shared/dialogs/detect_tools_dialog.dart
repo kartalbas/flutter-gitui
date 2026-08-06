@@ -176,6 +176,18 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
     return BaseDialog(
       title: l10n.detectTools,
       icon: PhosphorIconsRegular.magnifyingGlass,
+      onSubmit:
+          (_selectedGit != null ||
+              _selectedDiffTool != null ||
+              _selectedTextEditor != null)
+          ? () {
+              Navigator.of(context).pop({
+                'git': _selectedGit,
+                'diffTool': _selectedDiffTool,
+                'textEditor': _selectedTextEditor,
+              });
+            }
+          : null,
       content: _isDetecting
           ? const Center(
               child: Padding(

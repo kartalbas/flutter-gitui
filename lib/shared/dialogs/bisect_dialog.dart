@@ -32,6 +32,21 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
     return BaseDialog(
       icon: PhosphorIconsRegular.gitBranch,
       title: AppLocalizations.of(context)!.gitBisect,
+      // While a bisect runs, Good/Bad/Skip are peers with no single primary,
+      // so Enter stays inert in that state.
+      onSubmit: bisectStateAsync.when(
+        data: (state) {
+          if (state.isCompleted) return () => Navigator.of(context).pop();
+          if (state.isActive) return null;
+          return (_selectedGoodCommit != null &&
+                  _selectedBadCommit != null &&
+                  !_isStarting)
+              ? _startBisect
+              : null;
+        },
+        loading: () => null,
+        error: (_, _) => null,
+      ),
       content: bisectStateAsync.when(
         data: (state) {
           if (state.isCompleted) {

@@ -21,6 +21,7 @@ class CheckoutTagDialog extends StatelessWidget {
       title: loc.checkoutTagDialog,
       icon: PhosphorIconsRegular.gitBranch,
       variant: DialogVariant.confirmation,
+      onSubmit: () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(confirmMessage),
       actions: [
         BaseButton(

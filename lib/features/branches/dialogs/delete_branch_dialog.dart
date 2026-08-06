@@ -38,6 +38,7 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
         title: l10n.deleteBranchDialog,
         icon: PhosphorIconsRegular.lock,
         variant: DialogVariant.normal,
+        onSubmit: () => Navigator.of(context).pop(),
         content: BodyMediumLabel(
           'Cannot delete protected branch "${branch.shortName}". This branch is protected from deletion.',
         ),

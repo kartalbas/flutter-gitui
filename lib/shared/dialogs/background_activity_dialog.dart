@@ -51,6 +51,7 @@ class BackgroundActivityDialog extends ConsumerWidget {
     return BaseDialog(
       icon: PhosphorIconsRegular.pulse,
       title: 'Background activity',
+      onSubmit: () => Navigator.of(context).pop(),
       content: SizedBox(
         width: 520,
         child: Column(

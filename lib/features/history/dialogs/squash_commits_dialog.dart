@@ -160,6 +160,9 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
       icon: PhosphorIconsRegular.arrowsInLineVertical,
       variant: DialogVariant.normal,
       maxWidth: AppConstants.maxDialogWidth,
+      // The message field is multiline, so Enter inside it writes a newline;
+      // Enter anywhere else squashes.
+      onSubmit: _areConsecutive ? _squash : null,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

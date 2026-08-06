@@ -245,6 +245,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
               context,
             )!.dialogTitleWebBrowserLimitation,
             icon: PhosphorIconsRegular.globe,
+            onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(
               AppLocalizations.of(
                 context,
@@ -291,6 +292,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           title: AppLocalizations.of(context)!.stageAllAndCommit,
           icon: PhosphorIconsRegular.warningCircle,
           variant: DialogVariant.confirmation,
+          onSubmit: () => Navigator.of(context).pop(true),
           content: BodyMediumLabel(
             AppLocalizations.of(context)!.dialogContentStageAllAndCommit(
               unstagedFiles.length,
@@ -401,6 +403,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           title: AppLocalizations.of(
             context,
           )!.dialogTitleWindowsReservedFilename,
+          onSubmit: () => Navigator.of(dialogContext).pop(),
           content: SingleChildScrollView(
             child: Text(
               WindowsFilenameValidator.getErrorMessage(
@@ -437,6 +440,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         icon: PhosphorIconsRegular.plus,
         title: AppLocalizations.of(context)!.stageAllChangesQuestion,
         variant: DialogVariant.confirmation,
+        onSubmit: () => Navigator.of(context).pop(true),
         content: BodyMediumLabel(
           AppLocalizations.of(context)!.dialogContentStageAllFiles(
             unstagedFiles.length,
@@ -477,6 +481,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         icon: PhosphorIconsRegular.minus,
         title: AppLocalizations.of(context)!.unstageAllChangesQuestion,
         variant: DialogVariant.confirmation,
+        onSubmit: () => Navigator.of(context).pop(true),
         content: BodyMediumLabel(
           'Unstage all ${stagedFiles.length} staged file${stagedFiles.length == 1 ? '' : 's'}?',
         ),

@@ -34,6 +34,20 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
     return BaseDialog(
       icon: PhosphorIconsRegular.gitBranch,
       title: AppLocalizations.of(context)!.rebaseBranch,
+      // Idle: Enter starts the rebase once a target is chosen. Conflicts:
+      // Enter continues (the labeled primary). Otherwise Enter is inert.
+      onSubmit: rebaseStateAsync.when(
+        data: (state) {
+          if (!state.isActive) {
+            return (_selectedBranch != null && !_isRebasing)
+                ? _startRebase
+                : null;
+          }
+          return state.hasConflicts ? _continueRebase : null;
+        },
+        loading: () => null,
+        error: (_, _) => null,
+      ),
       content: rebaseStateAsync.when(
         data: (state) {
           if (state.isActive) {

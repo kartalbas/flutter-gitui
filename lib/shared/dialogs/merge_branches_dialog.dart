@@ -62,6 +62,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
     return BaseDialog(
       icon: PhosphorIconsRegular.gitMerge,
       title: AppLocalizations.of(context)!.mergeBranches,
+      // Enter merges once both branches are chosen; Esc cancels.
+      onSubmit: _isMerging || _sourceBranch == null || _targetBranch == null
+          ? null
+          : _mergeBranches,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -134,6 +138,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                         Expanded(
                           child: BaseDropdown<GitBranch>(
                             initialValue: _sourceBranch,
+                            autofocus: true,
                             labelText: AppLocalizations.of(
                               context,
                             )!.sourceBranch,

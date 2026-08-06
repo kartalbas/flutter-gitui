@@ -49,6 +49,17 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
       icon: PhosphorIconsRegular.floppyDisk,
       variant: DialogVariant.normal,
       maxWidth: 600,
+      // The message field is multiline; Enter inside it writes a newline,
+      // Enter anywhere else stashes.
+      onSubmit: _selectedFiles.isEmpty && !_stashAllFiles
+          ? null
+          : () => Navigator.of(context).pop({
+              'message': _messageController.text.trim(),
+              'includeUntracked': _includeUntracked,
+              'keepIndex': _keepIndex,
+              'stashAllFiles': _stashAllFiles,
+              'selectedFiles': _selectedFiles.toList(),
+            }),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

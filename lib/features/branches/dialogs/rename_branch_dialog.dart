@@ -43,6 +43,7 @@ class _RenameBranchDialogState extends State<RenameBranchDialog> {
         title: l10n.renameBranch(widget.branch.shortName),
         icon: PhosphorIconsRegular.lock,
         variant: DialogVariant.normal,
+        onSubmit: () => Navigator.of(context).pop(),
         content: const Text(
           'Cannot rename protected branch. This branch is protected from being renamed.',
         ),
@@ -53,6 +54,11 @@ class _RenameBranchDialogState extends State<RenameBranchDialog> {
       title: l10n.renameBranch(widget.branch.shortName),
       icon: PhosphorIconsRegular.pencil,
       variant: DialogVariant.normal,
+      onSubmit: () {
+        if (_formKey.currentState!.validate()) {
+          Navigator.of(context).pop(_controller.text.trim());
+        }
+      },
       content: Form(
         key: _formKey,
         child: BaseTextField(

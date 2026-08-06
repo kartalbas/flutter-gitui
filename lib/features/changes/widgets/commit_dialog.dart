@@ -123,6 +123,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
     return BaseDialog(
       title: AppLocalizations.of(context)!.commitChanges,
       icon: PhosphorIconsRegular.gitCommit,
+      // The message field is multiline, so Enter inside it writes a newline;
+      // Enter anywhere else commits. _commit validates the form itself.
+      onSubmit: _isCommitting ? null : _commit,
       content: Form(
         key: _formKey,
         child: Column(
@@ -222,11 +225,6 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   )!.messageCommitMessageRequired;
                 }
                 return null;
-              },
-              onSubmitted: (_) {
-                if (_formKey.currentState!.validate()) {
-                  _commit();
-                }
               },
             ),
 

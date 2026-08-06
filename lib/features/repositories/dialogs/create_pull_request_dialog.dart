@@ -138,6 +138,9 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
     return BaseDialog(
       title: l10n.createPullRequestDialogTitle,
       icon: PhosphorIconsBold.gitPullRequest,
+      // The description field is multiline; Enter inside it writes a newline,
+      // Enter anywhere else creates. _handleCreate validates the form itself.
+      onSubmit: _handleCreate,
       content: Form(
         key: _formKey,
         child: Column(

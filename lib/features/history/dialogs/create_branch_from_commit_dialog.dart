@@ -43,6 +43,7 @@ class _CreateBranchFromCommitDialogState
     return BaseDialog(
       title: l10n.createBranchFromCommit,
       icon: PhosphorIconsRegular.gitBranch,
+      onSubmit: _createBranch,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,7 +98,6 @@ class _CreateBranchFromCommitDialogState
                 _errorMessage = null;
               });
             },
-            onSubmitted: (_) => _createBranch(),
           ),
           const SizedBox(height: AppTheme.paddingM),
 

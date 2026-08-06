@@ -44,6 +44,7 @@ class _InitializeRepositoryDialogState
     return BaseDialog(
       icon: PhosphorIconsRegular.plus,
       title: AppLocalizations.of(context)!.initializeRepository,
+      onSubmit: _isInitializing ? null : _initializeRepository,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

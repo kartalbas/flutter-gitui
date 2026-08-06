@@ -45,6 +45,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       icon: PhosphorIconsRegular.downloadSimple,
       variant: DialogVariant.normal,
       maxWidth: 600,
+      onSubmit: _isDownloading ? null : _downloadAndInstall,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,6 +287,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         builder: (context) => BaseDialog(
           title: l10n.updateOperationRunningTitle,
           icon: PhosphorIconsRegular.warningCircle,
+          onSubmit: () => Navigator.of(context).pop(),
           content: BodyMediumLabel(l10n.updateOperationRunningBody),
           actions: [
             BaseButton(

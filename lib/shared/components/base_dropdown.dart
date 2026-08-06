@@ -18,6 +18,11 @@ class BaseDropdown<T> extends StatelessWidget {
   final bool isExpanded;
   final bool isDense;
 
+  /// Focus this dropdown when the dialog opens, so the keyboard lands on the
+  /// dialog's first field (Space/Enter opens the menu, arrows pick a value).
+  final bool autofocus;
+  final FocusNode? focusNode;
+
   const BaseDropdown({
     super.key,
     this.initialValue,
@@ -29,12 +34,16 @@ class BaseDropdown<T> extends StatelessWidget {
     this.validator,
     this.isExpanded = true,
     this.isDense = true,
+    this.autofocus = false,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
       isExpanded: isExpanded,
+      autofocus: autofocus,
+      focusNode: focusNode,
       initialValue: initialValue,
       decoration: InputDecoration(
         labelText: labelText,

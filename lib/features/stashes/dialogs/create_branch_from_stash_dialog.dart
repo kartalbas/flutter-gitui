@@ -45,6 +45,7 @@ class _CreateBranchFromStashDialogState
       title: l10n.createBranchFromStash,
       icon: PhosphorIconsRegular.gitBranch,
       variant: DialogVariant.normal,
+      onSubmit: () => Navigator.of(context).pop(_branchNameController.text),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

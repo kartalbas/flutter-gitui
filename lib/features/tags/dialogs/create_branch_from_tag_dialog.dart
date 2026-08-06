@@ -43,6 +43,7 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
     return BaseDialog(
       title: l10n.createBranchFromTag,
       icon: PhosphorIconsRegular.gitBranch,
+      onSubmit: _createBranch,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -19,6 +19,19 @@ enum DialogVariant {
   destructive,
 }
 
+/// Whether the widget holding primary focus is a multiline editable text.
+///
+/// Enter inside such a field inserts a newline; a dialog-level Enter-to-submit
+/// handler must let it through or the field becomes impossible to fill.
+/// Single-line fields lose nothing: their Enter has no editing meaning.
+/// (EditableText attaches its focus node to a Focus widget inside its own
+/// subtree, so the editable is found as an ancestor of the focused context.)
+bool focusedEditableKeepsEnter() {
+  final focusContext = FocusManager.instance.primaryFocus?.context;
+  final editable = focusContext?.findAncestorStateOfType<EditableTextState>();
+  return editable != null && editable.widget.maxLines != 1;
+}
+
 /// Base component for all dialog patterns in the app.
 ///
 /// Provides 3 variants:
@@ -91,8 +104,11 @@ class BaseDialog extends StatelessWidget {
   ///
   /// A dialog that can only be completed with the mouse is unfinished: Esc
   /// already cancels from anywhere, and Enter has to confirm the same way.
-  /// Left null for a dialog with no single primary action, or one whose fields
-  /// need Enter themselves (a multi-line message).
+  /// A multiline field keeps its Enter (it inserts a newline there); every
+  /// other focus position submits. Left null for a dialog with no single
+  /// primary action — or deliberately for one whose affirmative action
+  /// destroys something, where Enter must never wave the loss through
+  /// (see [showDestructiveDialog]).
   final VoidCallback? onSubmit;
 
   @override
@@ -141,8 +157,7 @@ class BaseDialog extends StatelessWidget {
       }
     }
 
-    return Focus(
-      autofocus: true,
+    return _DialogFocus(
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
 
@@ -154,8 +169,11 @@ class BaseDialog extends StatelessWidget {
         }
 
         // Enter confirms from anywhere in the dialog, not only while a single
-        // text field happens to hold focus.
+        // text field happens to hold focus. The exception is a multiline
+        // editable: Enter inserts a newline there, and hijacking it would
+        // make the field impossible to fill.
         if (onSubmit != null &&
+            !focusedEditableKeepsEnter() &&
             (event.logicalKey == LogicalKeyboardKey.enter ||
                 event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
           onSubmit!();
@@ -257,9 +275,66 @@ class BaseDialog extends StatelessWidget {
   }
 }
 
+/// The dialog's keyboard host.
+///
+/// It must hold focus for Esc/Enter to arrive, but it must not steal it: an
+/// eager `Focus(autofocus: true)` wrapper registers before any descendant and
+/// wins the autofocus race, which silently defeated `autofocus: true` on the
+/// first field of every dialog (the focus manager discards later autofocus
+/// requests once the scope has a focused child). So the wrapper claims focus
+/// only after the autofocus pipeline settled and nothing inside the dialog
+/// took it; key events from a focused field still bubble up to this node.
+class _DialogFocus extends StatefulWidget {
+  const _DialogFocus({required this.onKeyEvent, required this.child});
+
+  final KeyEventResult Function(FocusNode, KeyEvent) onKeyEvent;
+  final Widget child;
+
+  @override
+  State<_DialogFocus> createState() => _DialogFocusState();
+}
+
+class _DialogFocusState extends State<_DialogFocus> {
+  final FocusNode _node = FocusNode(debugLabel: 'BaseDialog');
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Pending autofocus requests (a field's, queued in its own post-frame
+      // callback) are applied in a microtask after this frame's callbacks;
+      // decide on the next frame, after they ran, and make sure that frame
+      // actually comes.
+      WidgetsBinding.instance.scheduleFrame();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (FocusScope.of(context).focusedChild == null) {
+          _node.requestFocus();
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _node.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      focusNode: _node,
+      onKeyEvent: widget.onKeyEvent,
+      child: widget.child,
+    );
+  }
+}
+
 /// Helper function for confirmation dialogs
 ///
 /// Returns true if confirmed, false if cancelled or dismissed.
+/// Enter confirms, Esc cancels.
 ///
 /// Example usage:
 /// ```dart
@@ -287,6 +362,8 @@ Future<bool> showConfirmationDialog({
       title: title,
       content: Text(message),
       variant: DialogVariant.confirmation,
+      // Enter confirms: a confirmation prompt's whole job is a quick yes.
+      onSubmit: () => Navigator.of(context).pop(true),
       actions: [
         BaseButton(
           label: cancelText ?? l10n.cancel,
@@ -337,6 +414,10 @@ Future<bool> showDestructiveDialog({
       title: title,
       content: Text(message),
       variant: DialogVariant.destructive,
+      // Deliberately no onSubmit: Enter must never trigger a destructive
+      // action, or the key repeat of the keystroke that opened this prompt
+      // destroys data. Esc cancels from anywhere; the red button stays
+      // reachable with Tab + Enter/Space, which is the deliberate two-step.
       actions: [
         BaseButton(
           label: cancelText ?? l10n.cancel,

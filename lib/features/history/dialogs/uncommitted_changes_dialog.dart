@@ -22,6 +22,7 @@ class UncommittedChangesDialog extends StatelessWidget {
       icon: PhosphorIconsRegular.warning,
       variant: DialogVariant.confirmation,
       maxWidth: 400,
+      onSubmit: () => Navigator.pop(context, true),
       content: BodyMediumLabel(
         l10n.youHaveUncommittedChanges(changeCount, pluralForm),
       ),

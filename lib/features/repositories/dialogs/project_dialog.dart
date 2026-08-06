@@ -75,6 +75,9 @@ class _ProjectDialogState extends State<ProjectDialog> {
           ? l10n.projectDialogEditTitle
           : l10n.projectDialogCreateTitle,
       icon: PhosphorIconsBold.folder,
+      // The description field is multiline; Enter inside it writes a newline,
+      // Enter anywhere else saves. _handleSave validates the form itself.
+      onSubmit: _handleSave,
       content: Form(
         key: _formKey,
         child: Column(

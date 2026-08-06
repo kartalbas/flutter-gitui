@@ -933,11 +933,13 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
           return BaseDialog(
             title: AppLocalizations.of(context)!.dialogTitleRenameFile,
             icon: PhosphorIconsRegular.pencilSimple,
+            onSubmit: () => Navigator.pop(context, controller.text),
+            // Enter submits via the dialog's onSubmit; a second field-level
+            // submit path would pop twice.
             content: BaseTextField(
               controller: controller,
               autofocus: true,
               label: AppLocalizations.of(context)!.dialogLabelNewName,
-              onSubmitted: (value) => Navigator.pop(context, value),
             ),
             actions: [
               BaseButton(

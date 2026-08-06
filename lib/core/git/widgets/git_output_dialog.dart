@@ -154,6 +154,7 @@ ${widget.result.fullOutput}
           ? DialogVariant.normal
           : DialogVariant.destructive,
       barrierDismissible: true,
+      onSubmit: () => Navigator.of(context).pop(),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

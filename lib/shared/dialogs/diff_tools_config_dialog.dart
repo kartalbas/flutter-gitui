@@ -47,6 +47,7 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
     return BaseDialog(
       icon: PhosphorIconsRegular.gear,
       title: AppLocalizations.of(context)!.configureDiffMergeTools,
+      onSubmit: _hasChanges ? _saveSettings : null,
       content: availableToolsAsync.when(
         data: (tools) {
           if (tools.isEmpty) {

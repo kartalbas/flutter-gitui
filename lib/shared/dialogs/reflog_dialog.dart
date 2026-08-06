@@ -23,6 +23,7 @@ class ReflogDialog extends ConsumerWidget {
     return BaseDialog(
       icon: PhosphorIconsRegular.clockCounterClockwise,
       title: AppLocalizations.of(context)!.gitReflog,
+      onSubmit: () => Navigator.of(context).pop(),
       content: reflogAsync.when(
         data: (entries) {
           if (entries.isEmpty) {

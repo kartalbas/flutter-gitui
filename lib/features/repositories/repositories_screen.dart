@@ -553,6 +553,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           dialog: BaseDialog(
             title: AppLocalizations.of(context)!.webBrowserLimitation,
             icon: PhosphorIconsRegular.globe,
+            onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(
               AppLocalizations.of(
                 context,

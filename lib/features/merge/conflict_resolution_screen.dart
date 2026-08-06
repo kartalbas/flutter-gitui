@@ -540,6 +540,7 @@ class _ConflictResolutionScreenState
       builder: (context) => BaseDialog(
         icon: PhosphorIconsRegular.gitMerge,
         title: AppLocalizations.of(context)!.dialogTitleContinueMerge,
+        onSubmit: () => Navigator.of(context).pop(true),
         content: BodyMediumLabel(
           AppLocalizations.of(context)!.dialogContentContinueMerge,
         ),

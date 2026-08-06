@@ -26,6 +26,9 @@ class BranchSwitchErrorDialog extends StatelessWidget {
       icon: PhosphorIconsRegular.xCircle,
       variant: DialogVariant.destructive,
       maxWidth: 400,
+      // Red styling for attention only; the single action is OK, so Enter
+      // dismisses like any informational dialog.
+      onSubmit: () => Navigator.pop(context),
       content: BodyMediumLabel(l10n.failedToSwitchToBranch(branchName, error)),
       actions: [
         BaseButton(

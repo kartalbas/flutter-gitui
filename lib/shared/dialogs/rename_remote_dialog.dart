@@ -40,6 +40,11 @@ class _RenameRemoteDialogState extends State<RenameRemoteDialog> {
       title: l10n.renameRemote(widget.remote.name),
       icon: PhosphorIconsRegular.textAa,
       variant: DialogVariant.normal,
+      onSubmit: () {
+        if (_formKey.currentState!.validate()) {
+          Navigator.of(context).pop(_controller.text);
+        }
+      },
       content: Form(
         key: _formKey,
         child: BaseTextField(

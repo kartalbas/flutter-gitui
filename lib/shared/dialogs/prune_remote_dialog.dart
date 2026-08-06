@@ -20,6 +20,7 @@ class PruneRemoteDialog extends StatelessWidget {
       title: l10n.pruneRemote(remote.name),
       icon: PhosphorIconsRegular.broom,
       variant: DialogVariant.confirmation,
+      onSubmit: () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(l10n.pruneRemoteConfirm(remote.name)),
       actions: [
         BaseButton(

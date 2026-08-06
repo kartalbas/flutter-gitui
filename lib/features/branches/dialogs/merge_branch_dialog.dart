@@ -26,6 +26,7 @@ class MergeBranchDialog extends ConsumerWidget {
       title: l10n.mergeBranchDialog,
       icon: PhosphorIconsRegular.gitMerge,
       variant: DialogVariant.confirmation,
+      onSubmit: () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(
         l10n.mergeBranchConfirm(branch.shortName, targetBranch),
       ),

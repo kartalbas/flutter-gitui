@@ -40,6 +40,11 @@ class _EditRemoteUrlDialogState extends State<EditRemoteUrlDialog> {
       title: l10n.editRemoteUrl(widget.remote.name),
       icon: PhosphorIconsRegular.link,
       variant: DialogVariant.normal,
+      onSubmit: () {
+        if (_formKey.currentState!.validate()) {
+          Navigator.of(context).pop(_controller.text);
+        }
+      },
       content: Form(
         key: _formKey,
         child: BaseTextField(

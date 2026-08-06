@@ -51,6 +51,9 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     return BaseDialog(
       icon: PhosphorIconsRegular.tag,
       title: AppLocalizations.of(context)!.createTag,
+      // The message field is multiline; Enter inside it writes a newline,
+      // Enter anywhere else creates. _createTag validates the form itself.
+      onSubmit: _isCreating ? null : _createTag,
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(

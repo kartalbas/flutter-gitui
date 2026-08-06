@@ -68,6 +68,13 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
       title: loc.createTagDialog,
       icon: PhosphorIconsRegular.tag,
       variant: DialogVariant.normal,
+      // The message field is multiline; Enter inside it writes a newline,
+      // Enter anywhere else creates the tag.
+      onSubmit: () => Navigator.of(context).pop({
+        'name': _tagNameController.text,
+        'message': _messageController.text,
+        'annotated': _isAnnotated,
+      }),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -72,6 +72,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
       icon: PhosphorIconsBold.magnifyingGlass,
       title: AppLocalizations.of(context)!.advancedSearch,
       maxWidth: 800,
+      onSubmit: _applySearch,
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

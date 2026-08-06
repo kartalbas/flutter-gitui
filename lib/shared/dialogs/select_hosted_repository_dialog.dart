@@ -127,6 +127,8 @@ class _SelectHostedRepositoryDialogState
     return BaseDialog(
       icon: PhosphorIconsRegular.cloudArrowDown,
       title: 'Select repository',
+      // Enter confirms the highlighted match from anywhere in the dialog.
+      onSubmit: matches.isEmpty ? null : () => _confirm(matches),
       content: SizedBox(
         width: 640,
         height: 460,
@@ -179,7 +181,6 @@ class _SelectHostedRepositoryDialogState
                           // would point at an unrelated row.
                           _highlight = 0;
                         }),
-                        onSubmitted: (_) => _confirm(matches),
                       ),
                     ),
                   ),

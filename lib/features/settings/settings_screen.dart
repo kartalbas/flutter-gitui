@@ -135,6 +135,7 @@ class SettingsScreen extends ConsumerWidget {
               context: context,
               builder: (dialogContext) => BaseDialog(
                 title: l10n.invalidGitExecutable,
+                onSubmit: () => Navigator.of(dialogContext).pop(),
                 content: BodyMediumLabel(
                   l10n.invalidGitExecutableMessage(
                     selectedPath,
@@ -159,6 +160,7 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             builder: (dialogContext) => BaseDialog(
               title: l10n.executionFailed,
+              onSubmit: () => Navigator.of(dialogContext).pop(),
               content: BodyMediumLabel(
                 l10n.executionFailedMessage(
                   selectedPath,
@@ -182,6 +184,7 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             builder: (dialogContext) => BaseDialog(
               title: l10n.validationError,
+              onSubmit: () => Navigator.of(dialogContext).pop(),
               content: BodyMediumLabel(
                 l10n.validationErrorMessage(selectedPath, e.toString()),
               ),
@@ -260,6 +263,12 @@ class SettingsScreen extends ConsumerWidget {
             context: context,
             builder: (dialogContext) => BaseDialog(
               title: l10n.unknownTextEditor,
+              onSubmit: () async {
+                Navigator.of(dialogContext).pop();
+                await ref
+                    .read(configProvider.notifier)
+                    .setTextEditor(selectedPath, version: version);
+              },
               content: BodyMediumLabel(l10n.unknownTextEditorMessage(fileName)),
               actions: [
                 BaseButton(
@@ -536,6 +545,7 @@ class SettingsScreen extends ConsumerWidget {
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultUserName,
         icon: PhosphorIconsRegular.user,
+        onSubmit: () => Navigator.of(dialogContext).pop(controller.text.trim()),
         content: BaseTextField(
           controller: controller,
           autofocus: true,
@@ -584,6 +594,7 @@ class SettingsScreen extends ConsumerWidget {
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultUserEmail,
         icon: PhosphorIconsRegular.at,
+        onSubmit: () => Navigator.of(dialogContext).pop(controller.text.trim()),
         content: BaseTextField(
           controller: controller,
           autofocus: true,
@@ -637,6 +648,12 @@ class SettingsScreen extends ConsumerWidget {
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultCommitLimit,
         icon: PhosphorIconsRegular.listNumbers,
+        onSubmit: () {
+          final value = int.tryParse(controller.text);
+          if (value != null && value > 0) {
+            Navigator.of(dialogContext).pop(value);
+          }
+        },
         content: BaseTextField(
           controller: controller,
           autofocus: true,

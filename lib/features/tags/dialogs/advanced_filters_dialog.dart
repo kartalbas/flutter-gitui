@@ -70,6 +70,13 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
       icon: PhosphorIconsRegular.funnel,
       variant: DialogVariant.normal,
       maxWidth: 500,
+      onSubmit: () => Navigator.of(context).pop({
+        'dateFilter': _dateFilter,
+        'customDateStart': _customDateStart,
+        'customDateEnd': _customDateEnd,
+        'authorFilter': _authorFilter,
+        'useRegex': _useRegex,
+      }),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

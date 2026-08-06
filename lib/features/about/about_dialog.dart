@@ -29,6 +29,7 @@ class AppAboutDialog extends HookConsumerWidget {
       title: 'About Flutter GitUI',
       icon: Icons.info_outline,
       variant: DialogVariant.normal,
+      onSubmit: () => Navigator.of(context).pop(),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

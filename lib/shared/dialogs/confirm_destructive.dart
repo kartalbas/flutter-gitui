@@ -48,6 +48,12 @@ Future<bool> confirmDestructive({
       variant: destructive
           ? DialogVariant.destructive
           : DialogVariant.confirmation,
+      // Enter confirms the recoverable tiers only. The permanent and remote
+      // tiers keep Enter dead so the key repeat of the keystroke that
+      // triggered the action cannot also wave its confirmation through
+      // (tier 3 additionally gets type-to-confirm in #308, which occupies
+      // Enter with a text field anyway). Esc cancels either way.
+      onSubmit: destructive ? null : () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(message),
       actions: [
         BaseButton(

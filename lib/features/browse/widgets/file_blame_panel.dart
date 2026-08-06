@@ -497,6 +497,7 @@ ${line.summary}
       context: context,
       builder: (context) => BaseDialog(
         title: AppLocalizations.of(context)!.blameStatistics,
+        onSubmit: () => Navigator.pop(context),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

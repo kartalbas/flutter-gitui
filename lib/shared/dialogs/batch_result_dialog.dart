@@ -35,6 +35,10 @@ class BatchResultDialog extends StatelessWidget {
       title: isSuccess ? 'Operation Successful' : 'Operation Failed',
       icon: icon,
       variant: isSuccess ? DialogVariant.normal : DialogVariant.destructive,
+      onSubmit: () {
+        onDismiss();
+        Navigator.of(context).pop();
+      },
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

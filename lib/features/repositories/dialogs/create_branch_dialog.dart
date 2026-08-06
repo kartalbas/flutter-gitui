@@ -182,6 +182,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
       icon: PhosphorIconsRegular.gitBranch,
       variant: DialogVariant.normal,
       maxWidth: 600,
+      onSubmit: _createBranch,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +256,6 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
             label: l10n.branchNameLabel,
             hintText: l10n.branchNameHint,
             autofocus: true,
-            onSubmitted: (_) => _createBranch(),
           ),
 
           const SizedBox(height: AppTheme.paddingM),

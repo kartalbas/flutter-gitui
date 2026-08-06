@@ -729,6 +729,7 @@ class GitCommands {
           dialog: BaseDialog(
             title: l10n.cherryPickCommitDialog,
             icon: PhosphorIconsRegular.arrowBendDownRight,
+            onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.cherryPickCommitInstructions),
             actions: [
               BaseButton(
@@ -755,6 +756,7 @@ class GitCommands {
           dialog: BaseDialog(
             title: l10n.revertCommitDialog,
             icon: PhosphorIconsRegular.arrowCounterClockwise,
+            onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.revertCommitInstructions),
             actions: [
               BaseButton(
@@ -781,6 +783,7 @@ class GitCommands {
           dialog: BaseDialog(
             title: l10n.resetToCommitDialog,
             icon: PhosphorIconsRegular.arrowCounterClockwise,
+            onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.resetToCommitInstructions),
             actions: [
               BaseButton(

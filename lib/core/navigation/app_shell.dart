@@ -89,12 +89,6 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-/// Width the seven git actions need to all show as icons.
-const int _gitActionCount = 7;
-const double _gitActionBarWidth =
-    _gitActionCount * OverflowActionBar.itemExtent +
-    (_gitActionCount - 1) * OverflowActionBar.spacing;
-
 /// Width the utility actions need to all show as icons: command palette,
 /// command log, and the update button when one is pending.
 const int _utilityActionCount = 3;
@@ -424,14 +418,19 @@ class _AppShellState extends ConsumerState<AppShell> {
                                 // indicated more existed. They now sit outside
                                 // the scroll area and collapse into an overflow
                                 // menu instead.
-                                // Flexible, not Expanded: the switchers take only
-                                // the width they need, so the git actions follow
-                                // them instead of floating at a position the
-                                // window width decides. SingleChildScrollView
-                                // sizes itself to constraints.constrain(child),
-                                // so it still scrolls once the names outgrow the
-                                // room left for them.
-                                Flexible(
+                                // The switchers get the width they need before
+                                // anything else claims it. They name the
+                                // workspace, repository and branch every other
+                                // control acts on, and a clipped name says
+                                // nothing, whereas an action that no longer
+                                // fits is still reachable in its overflow
+                                // menu. Half the bar is the ceiling; past that
+                                // they scroll, so they can never squeeze the
+                                // actions out entirely.
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: constraints.maxWidth / 2,
+                                  ),
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
                                     child: Row(
@@ -460,31 +459,29 @@ class _AppShellState extends ConsumerState<AppShell> {
                                 const SizedBox(width: AppTheme.paddingM),
                                 // The git actions stay rendered without a target
                                 // and grey out with a reason, so the toolbar
-                                // never shows an unexplained gap (#303). Capped
-                                // so a narrow window shrinks them into the
-                                // overflow menu rather than starving the
-                                // switchers.
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: (constraints.maxWidth * 0.4)
-                                        .clamp(
-                                          OverflowActionBar.itemExtent,
-                                          _gitActionBarWidth,
-                                        ),
-                                  ),
-                                  child: OverflowActionBar(
-                                    actions: _buildGitActions(
-                                      context,
-                                      ref,
-                                      gitActionTargets,
+                                // never shows an unexplained gap (#303).
+                                //
+                                // Expanded, so they take exactly what is left
+                                // after the switchers and the controls on the
+                                // right, and hand whatever no longer fits to
+                                // their own overflow menu. A fixed share of the
+                                // bar was the bug: it claimed its width whether
+                                // or not the switchers needed it, so the names
+                                // were clipped while every icon still showed.
+                                // Aligned left so the group stays attached to
+                                // the switchers it operates on.
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: OverflowActionBar(
+                                      actions: _buildGitActions(
+                                        context,
+                                        ref,
+                                        gitActionTargets,
+                                      ),
                                     ),
                                   ),
                                 ),
-                                // Absorbs the remaining width so the actions on
-                                // the far right stay pinned to the edge while
-                                // the git actions stay anchored to the
-                                // switchers they operate on.
-                                const Expanded(child: SizedBox.shrink()),
                                 const SizedBox(width: AppTheme.paddingS),
                                 // Capped like the git actions, so the utility
                                 // icons collapse into their own overflow menu
@@ -496,7 +493,10 @@ class _AppShellState extends ConsumerState<AppShell> {
                                   constraints: BoxConstraints(
                                     maxWidth: (constraints.maxWidth * 0.25)
                                         .clamp(
-                                          OverflowActionBar.itemExtent,
+                                          // Never below the overflow button
+                                          // itself, or the bar cannot even
+                                          // draw the menu it collapsed into.
+                                          OverflowActionBar.menuExtent,
                                           _utilityActionBarWidth,
                                         ),
                                   ),

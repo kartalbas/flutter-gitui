@@ -49,6 +49,7 @@ int visibleActionCount({
   required int actionCount,
   double itemExtent = OverflowActionBar.itemExtent,
   double spacing = OverflowActionBar.spacing,
+  double menuExtent = OverflowActionBar.menuExtent,
 }) {
   if (actionCount <= 0) return 0;
 
@@ -57,9 +58,10 @@ int visibleActionCount({
   if (widthForAll <= availableWidth) return actionCount;
 
   // Otherwise every shown item is followed by a gap, and the overflow button
-  // closes the row.
+  // closes the row. It is wider than an action, so reserving one item extent
+  // for it overestimates by the difference and the row overflows its parent.
   final perItem = itemExtent + spacing;
-  final fitting = ((availableWidth - itemExtent) / perItem).floor();
+  final fitting = ((availableWidth - menuExtent) / perItem).floor();
   return fitting.clamp(0, actionCount - 1);
 }
 
@@ -75,6 +77,13 @@ class OverflowActionBar extends StatelessWidget {
 
   /// Width of one [BaseIconButton] at [ButtonSize.small].
   static const double itemExtent = 32;
+
+  /// Width of the overflow button. A [PopupMenuButton] carries its own tap
+  /// target, so it is wider than an action and needs its own reservation --
+  /// treating it as one [itemExtent] overestimates the room by the difference
+  /// and overflows the row. Pinned by
+  /// `test/shared/widgets/overflow_action_bar_extent_test.dart`.
+  static const double menuExtent = 48;
 
   static const double spacing = AppTheme.paddingS;
 

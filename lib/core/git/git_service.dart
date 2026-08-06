@@ -6,6 +6,7 @@ import 'package:process_run/shell.dart';
 import '../services/discarding_sink.dart';
 import '../services/shell_service.dart';
 import '../utils/result.dart';
+import 'git_cancellation.dart';
 import 'git_exception.dart';
 import 'models/file_status.dart';
 import 'models/commit.dart';
@@ -65,7 +66,17 @@ class GitService {
     this.onProgressUpdate,
     this.allowCredentialPrompts = true,
   }) {
-    _shell = Shell(
+    _shell = _createShell();
+  }
+
+  /// Builds a Shell configured for this repository.
+  ///
+  /// One long-lived instance serves ordinary commands; a cancellable command
+  /// gets its own instance from the same factory, so that killing it kills
+  /// exactly that command's process and never an unrelated one sharing the
+  /// long-lived shell.
+  Shell _createShell() {
+    return Shell(
       workingDirectory: repoPath,
       throwOnError: false, // We'll handle errors ourselves
       verbose:
@@ -127,6 +138,11 @@ class GitService {
   /// stalled connection hangs the operation forever.
   static const Duration _localTimeout = Duration(seconds: 60);
   static const Duration _networkTimeout = Duration(minutes: 10);
+
+  /// A whole-history search (--grep or -S over every commit) can
+  /// legitimately outlive the local bound on a large repository, and it is
+  /// cancellable, so a longer leash is safe.
+  static const Duration _deepSearchTimeout = Duration(minutes: 5);
 
   static const Set<String> _networkCommands = {
     'clone',
@@ -205,6 +221,8 @@ class GitService {
   Future<ProcessResult> _execute(
     String command, {
     bool throwOnError = true,
+    GitCancellationToken? cancellationToken,
+    Duration? timeout,
   }) async {
     // Ensure git executable is configured
     if (gitExecutablePath == null || gitExecutablePath!.isEmpty) {
@@ -240,6 +258,17 @@ class GitService {
         : '-c credential.interactive=false ';
     final fullCommand = '"$gitExecutablePath" $credentialFlag$command';
 
+    // A cancellable command runs on its own shell so that cancelling kills
+    // exactly this process; the shared shell may be running anything.
+    if (cancellationToken != null && cancellationToken.isCancelled) {
+      throw GitException(
+        'Git command cancelled: $command',
+        stderr: 'The operation was abandoned before it started.',
+      );
+    }
+    final shell = cancellationToken == null ? _shell : _createShell();
+    cancellationToken?.onCancel(() => shell.kill(ProcessSignal.sigkill));
+
     // Extract operation name from command for progress display
     final operationName = _getOperationName(command);
 
@@ -249,13 +278,13 @@ class GitService {
         onProgressUpdate!(operationName, false);
       }
 
-      final timeout = _timeoutFor(command);
-      final results = await _shell
+      final effectiveTimeout = timeout ?? _timeoutFor(command);
+      final results = await shell
           .run(fullCommand)
           .timeout(
-            timeout,
+            effectiveTimeout,
             onTimeout: () => throw GitException(
-              'Git command timed out after ${timeout.inSeconds}s: $operationName',
+              'Git command timed out after ${effectiveTimeout.inSeconds}s: $operationName',
               stderr:
                   'The command did not finish in time. If this was a network '
                   'operation, check connectivity and your credentials.',
@@ -720,6 +749,8 @@ class GitService {
     String? until,
     bool allMatch = false,
     bool topoOrder = false,
+    List<String> startPoints = const [],
+    GitCancellationToken? cancellationToken,
   }) async {
     return runCatchingAsync(() async {
       final args = StringBuffer('log');
@@ -771,15 +802,90 @@ class GitService {
         args.write(' ${_quoteArg(branch)}');
       }
 
+      // Cursor continuation: walk from these commits instead of HEAD. The
+      // caller passes the window's boundary parents, which makes a page cost
+      // one bounded walk however deep the window already is, where --skip=N
+      // re-walks N commits first on every page.
+      for (final startPoint in startPoints) {
+        args.write(' ${_quoteArg(startPoint)}');
+      }
+
       // Add file path
       if (filePath != null) {
         args.write(' -- ${_quoteArg(filePath)}');
       }
 
-      final result = await _execute(args.toString(), throwOnError: false);
+      final result = await _execute(
+        args.toString(),
+        throwOnError: false,
+        cancellationToken: cancellationToken,
+      );
       final output = result.stdout.toString();
 
       return LogParser.parse(output);
+    });
+  }
+
+  /// Searches the entire reachable history with the query pushed down to git.
+  ///
+  /// The deliberate, slower counterpart to the in-memory filter over the
+  /// loaded window: one bounded `git log` walk over all of history, with the
+  /// match evaluated by git itself. [pickaxe] switches from message matching
+  /// (`--grep`) to changed-content matching (`-S`), which is slower still.
+  /// `-S` is case-sensitive by design (git offers no ignore-case for it).
+  ///
+  /// Returns [Result.Success] with at most [limit] commits, newest first.
+  Future<Result<List<GitCommit>>> searchLog({
+    String? query,
+    String? author,
+    String? since,
+    String? until,
+    bool useRegex = false,
+    bool caseSensitive = false,
+    bool pickaxe = false,
+    int limit = 1000,
+    GitCancellationToken? cancellationToken,
+  }) async {
+    return runCatchingAsync(() async {
+      final args = StringBuffer('log');
+      args.write(
+        ' --format="${LogParser.gitLogFormat}${LogParser.commitSeparator}"',
+      );
+      args.write(' -n $limit');
+      if (!caseSensitive) {
+        args.write(' --regexp-ignore-case');
+      }
+      if (pickaxe) {
+        if (query != null && query.isNotEmpty) {
+          args.write(' -S${_quoteArg(query)}');
+          if (useRegex) {
+            args.write(' --pickaxe-regex');
+          }
+        }
+      } else {
+        // The query is user text, not a pattern, unless the filter says so.
+        args.write(useRegex ? ' --extended-regexp' : ' --fixed-strings');
+        if (query != null && query.isNotEmpty) {
+          args.write(' --grep=${_quoteArg(query)}');
+        }
+      }
+      if (author != null && author.isNotEmpty) {
+        args.write(' --author=${_quoteArg(author)}');
+      }
+      if (since != null && since.isNotEmpty) {
+        args.write(' --since="$since"');
+      }
+      if (until != null && until.isNotEmpty) {
+        args.write(' --until="$until"');
+      }
+
+      final result = await _execute(
+        args.toString(),
+        throwOnError: false,
+        cancellationToken: cancellationToken,
+        timeout: _deepSearchTimeout,
+      );
+      return LogParser.parse(result.stdout.toString());
     });
   }
 

@@ -31,6 +31,9 @@ import 'widgets/commit_diff_panel.dart';
 import 'widgets/history_empty_states.dart';
 import 'providers/history_search_provider.dart';
 import 'providers/commit_selection_provider.dart';
+import 'providers/history_deep_search_provider.dart';
+import 'widgets/deep_search_states.dart';
+import 'widgets/history_list_footer.dart';
 import 'services/commit_action_runner.dart';
 import 'models/history_search_filter.dart';
 import '../../core/services/logger_service.dart';
@@ -94,8 +97,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   KeyEventResult _handleKeyEvent(
     List<GitCommit> commits,
     FocusNode node,
-    KeyEvent event,
-  ) {
+    KeyEvent event, {
+    bool deepMode = false,
+  }) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
 
     // ESC key dismissal for FAB
@@ -118,6 +122,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     }
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      // Stepping past the last loaded row asks for the next page: the
+      // keyboard's equivalent of reaching the footer and pressing Load more.
+      if (!deepMode && commits.isNotEmpty) {
+        final primary = ref
+            .read(commitSelectionProvider)
+            .resolve(commits)
+            .primary;
+        if (primary?.hash == commits.last.hash) {
+          final window = ref.read(commitWindowProvider).value;
+          if (window != null && window.hasMore && !window.isLoadingMore) {
+            unawaited(ref.read(commitWindowProvider.notifier).loadMore());
+          }
+        }
+      }
       ref.read(commitSelectionProvider.notifier).move(commits, 1);
       return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
@@ -335,18 +353,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
             // Main content
             Expanded(
-              child: filteredCommitsAsync.when(
-                data: (commits) {
-                  if (commits.isEmpty) {
-                    return searchFilter.isNotEmpty
-                        ? _buildNoSearchResults(context)
-                        : _buildNoCommits(context);
-                  }
-
-                  return _buildCommitHistory(context, commits);
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => _buildError(context, error),
+              child: _buildMainContent(
+                context,
+                filteredCommitsAsync,
+                searchFilter,
               ),
             ),
           ],
@@ -363,7 +373,84 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return HistoryErrorState(error: error);
   }
 
-  Widget _buildCommitHistory(BuildContext context, List<GitCommit> commits) {
+  /// Chooses between deep-search mode and the ordinary windowed view.
+  ///
+  /// Deep search replaces the *display* only: the window, the filter and the
+  /// selection machinery underneath stay untouched, so leaving the mode
+  /// restores exactly what the user had.
+  Widget _buildMainContent(
+    BuildContext context,
+    AsyncValue<List<GitCommit>> filteredCommitsAsync,
+    HistorySearchFilter searchFilter,
+  ) {
+    final deepSearch = ref.watch(historyDeepSearchProvider);
+    switch (deepSearch.status) {
+      case DeepSearchStatus.running:
+        return DeepSearchRunningState(
+          onCancel: () => ref.read(historyDeepSearchProvider.notifier).clear(),
+        );
+      case DeepSearchStatus.failed:
+        return DeepSearchFailedState(
+          error: deepSearch.error ?? '',
+          onBack: () => ref.read(historyDeepSearchProvider.notifier).clear(),
+        );
+      case DeepSearchStatus.results:
+        return Column(
+          children: [
+            DeepSearchResultsBanner(
+              matchCount: deepSearch.results.length,
+              capped: deepSearch.capped,
+              cappedLimit: AppConstants.deepSearchResultLimit,
+              onBack: () =>
+                  ref.read(historyDeepSearchProvider.notifier).clear(),
+              onSearchChanges:
+                  (!deepSearch.pickaxe &&
+                      (deepSearch.filter?.query?.isNotEmpty ?? false))
+                  ? () => _startDeepSearch(pickaxe: true)
+                  : null,
+            ),
+            Expanded(
+              child: deepSearch.results.isEmpty
+                  ? const DeepSearchNoResultsState()
+                  : _buildCommitHistory(
+                      context,
+                      deepSearch.results,
+                      deepMode: true,
+                    ),
+            ),
+          ],
+        );
+      case DeepSearchStatus.idle:
+        return filteredCommitsAsync.when(
+          data: (commits) {
+            if (commits.isEmpty) {
+              return searchFilter.isNotEmpty
+                  ? _buildNoSearchResults(context)
+                  : _buildNoCommits(context);
+            }
+            return _buildCommitHistory(context, commits);
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => _buildError(context, error),
+        );
+    }
+  }
+
+  /// Runs the whole-history search for the filter currently in effect.
+  void _startDeepSearch({bool pickaxe = false}) {
+    final filter = ref.read(historySearchFilterProvider);
+    unawaited(
+      ref
+          .read(historyDeepSearchProvider.notifier)
+          .run(filter, pickaxe: pickaxe),
+    );
+  }
+
+  Widget _buildCommitHistory(
+    BuildContext context,
+    List<GitCommit> commits, {
+    bool deepMode = false,
+  }) {
     // One resolution of the selection feeds the highlight, the details panel,
     // the action button and every action, so none of them can act on a commit
     // the user is not looking at.
@@ -375,14 +462,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     // A search only covers the loaded window, so the header reports "matched
     // X of Y loaded" instead of implying the whole history was searched.
     final searchFilter = ref.watch(historySearchFilterProvider);
-    final loadedCount =
-        ref.watch(commitWindowProvider).value?.length ?? commits.length;
+    final window = ref.watch(commitWindowProvider).value;
+    final loadedCount = window?.commits.length ?? commits.length;
 
     // Lanes are positions in the exact row sequence the graph pass walked.
     // The in-memory filter only ever removes rows, so an unchanged length
     // means the displayed list is the window itself; anything narrower falls
     // back to the plain dot instead of drawing lanes to missing neighbors.
-    final graph = commits.length == loadedCount
+    // Deep results are scattered matches, not the window, so lanes would lie.
+    final graph = !deepMode && commits.length == loadedCount
         ? ref.watch(commitGraphProvider).value
         : null;
 
@@ -432,7 +520,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     // Main content widget
     final contentWidget = Focus(
       autofocus: true,
-      onKeyEvent: (node, event) => _handleKeyEvent(commits, node, event),
+      onKeyEvent: (node, event) =>
+          _handleKeyEvent(commits, node, event, deepMode: deepMode),
       child: Row(
         children: [
           // Commit list (left side)
@@ -475,6 +564,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                 )
                               : l10n.commitsCount(commits.length),
                         ),
+                        if (!deepMode &&
+                            searchFilter.isNotEmpty &&
+                            searchFilter.supportsDeepSearch &&
+                            (window?.hasMore ?? false)) ...[
+                          const Spacer(),
+                          BaseButton(
+                            label: l10n.historySearchAllHistory,
+                            variant: ButtonVariant.tertiary,
+                            size: ButtonSize.small,
+                            leadingIcon:
+                                PhosphorIconsRegular.listMagnifyingGlass,
+                            onPressed: () => _startDeepSearch(),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -487,10 +590,37 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             .watch(currentBranchProvider)
                             .value;
 
+                        // Built once outside the item builder so the null
+                        // check promotes; the footer is the last row and the
+                        // one place that says whether the list ends because
+                        // the history does or the loaded window does.
+                        final footer =
+                            (!deepMode && window != null && window.canExtend)
+                            ? HistoryListFooter(
+                                loadedCount: loadedCount,
+                                hasMore: window.hasMore,
+                                isLoadingMore: window.isLoadingMore,
+                                loadMoreError: window.loadMoreError,
+                                pageSize: ref.read(defaultCommitLimitProvider),
+                                searchActive: searchFilter.isNotEmpty,
+                                onLoadMore: () => unawaited(
+                                  ref
+                                      .read(commitWindowProvider.notifier)
+                                      .loadMore(),
+                                ),
+                                onSearchAllHistory:
+                                    searchFilter.supportsDeepSearch
+                                    ? () => _startDeepSearch()
+                                    : null,
+                              )
+                            : null;
                         return ListView.builder(
                           controller: _scrollController,
-                          itemCount: commits.length,
+                          itemCount: commits.length + (footer == null ? 0 : 1),
                           itemBuilder: (context, index) {
+                            if (footer != null && index == commits.length) {
+                              return footer;
+                            }
                             final commit = commits[index];
                             final isPrimary =
                                 selection.primary?.hash == commit.hash;
@@ -618,6 +748,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   }
 
   Widget _buildNoSearchResults(BuildContext context) {
+    final searchFilter = ref.read(historySearchFilterProvider);
+    final window = ref.watch(commitWindowProvider).value;
+    final offerDeepSearch =
+        searchFilter.supportsDeepSearch && (window?.hasMore ?? false);
     return NoSearchResultsState(
       onClearFilters: () {
         _searchController.clear();
@@ -625,6 +759,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             const HistorySearchFilter.empty();
         setState(() {});
       },
+      onSearchAllHistory: offerDeepSearch ? () => _startDeepSearch() : null,
     );
   }
 

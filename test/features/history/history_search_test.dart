@@ -10,73 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/git_providers.dart';
-import 'package:flutter_gitui/core/git/git_service.dart';
 import 'package:flutter_gitui/core/git/models/commit.dart';
 import 'package:flutter_gitui/core/utils/result.dart';
 import 'package:flutter_gitui/features/history/models/history_search_filter.dart';
 import 'package:flutter_gitui/features/history/providers/history_search_provider.dart';
 import 'package:flutter_gitui/features/history/services/history_search_service.dart';
 
-GitCommit commit(
-  String hash, {
-  String subject = 's',
-  String author = 'a',
-  DateTime? date,
-}) {
-  final when = date ?? DateTime.utc(2026);
-  return GitCommit(
-    hash: hash,
-    shortHash: hash,
-    author: author,
-    authorEmail: '$author@example.com',
-    authorDate: when,
-    committer: author,
-    committerEmail: '$author@example.com',
-    committerDate: when,
-    subject: subject,
-    body: '',
-    parents: const [],
-    refs: const [],
-  );
-}
-
-typedef ScriptedGetLog =
-    Future<Result<List<GitCommit>>> Function({
-      int? limit,
-      String? branch,
-      String? filePath,
-    });
-
-/// A [GitService] whose getLog is scripted, so no test ever shells out.
-class ScriptedGitService extends GitService {
-  ScriptedGitService(this.onGetLog) : super('.');
-
-  final ScriptedGetLog onGetLog;
-
-  /// Recorded rather than scripted: the ordering flag matters to the lane
-  /// renderer, not to which commits a scripted answer returns.
-  bool? lastTopoOrder;
-
-  @override
-  Future<Result<List<GitCommit>>> getLog({
-    int? limit,
-    String? branch,
-    String? filePath,
-    String? grepMessage,
-    String? author,
-    String? since,
-    String? until,
-    bool allMatch = false,
-    bool topoOrder = false,
-  }) {
-    lastTopoOrder = topoOrder;
-    return onGetLog(limit: limit, branch: branch, filePath: filePath);
-  }
-}
-
-List<String> hashesOf(List<GitCommit> commits) => [
-  for (final c in commits) c.hash,
-];
+import 'support/scripted_git_service.dart';
 
 void main() {
   group('filtering is a pure function over the window', () {
@@ -169,7 +109,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           gitServiceProvider.overrideWith(
-            (ref) => ScriptedGitService(({limit, branch, filePath}) async {
+            (ref) => ScriptedGitService(({
+              limit,
+              branch,
+              filePath,
+              startPoints = const <String>[],
+            }) async {
               gitCalls++;
               return const Success(<GitCommit>[]);
             }),
@@ -205,7 +150,12 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             gitServiceProvider.overrideWith(
-              (ref) => ScriptedGitService(({limit, branch, filePath}) async {
+              (ref) => ScriptedGitService(({
+                limit,
+                branch,
+                filePath,
+                startPoints = const <String>[],
+              }) async {
                 seenLimit = limit;
                 seenBranch = branch;
                 seenFilePath = filePath;
@@ -237,7 +187,12 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           gitServiceProvider.overrideWith(
-            (ref) => ScriptedGitService(({limit, branch, filePath}) async {
+            (ref) => ScriptedGitService(({
+              limit,
+              branch,
+              filePath,
+              startPoints = const <String>[],
+            }) async {
               seenLimit = limit;
               seenBranch = branch;
               return Success(tagged);
@@ -259,7 +214,8 @@ void main() {
 
     test('the scoped window is loaded in topological order', () async {
       final service = ScriptedGitService(
-        ({limit, branch, filePath}) async => Success([commit('ccc')]),
+        ({limit, branch, filePath, startPoints = const <String>[]}) async =>
+            Success([commit('ccc')]),
       );
       final container = ProviderContainer(
         overrides: [
@@ -288,6 +244,11 @@ void main() {
           retry: (retryCount, error) => null,
           overrides: [
             gitServiceProvider.overrideWith((ref) => null),
+            // The window notifier reads the page size on every build; without
+            // this override it would instantiate the real ConfigNotifier,
+            // whose async config load outlives the container and throws on
+            // teardown.
+            defaultCommitLimitProvider.overrideWith((ref) => 42),
             commitHistoryProvider.overrideWith(
               (ref) => throw Exception('fatal: not a git repository'),
             ),
@@ -317,8 +278,12 @@ void main() {
           overrides: [
             gitServiceProvider.overrideWith(
               (ref) => ScriptedGitService(
-                ({limit, branch, filePath}) async =>
-                    const Failure('fatal: bad revision'),
+                ({
+                  limit,
+                  branch,
+                  filePath,
+                  startPoints = const <String>[],
+                }) async => const Failure('fatal: bad revision'),
               ),
             ),
             defaultCommitLimitProvider.overrideWith((ref) => 42),
@@ -342,6 +307,9 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           gitServiceProvider.overrideWith((ref) => null),
+          // See above: the window notifier reads the page size on every
+          // build, so the config layer must be stubbed out here too.
+          defaultCommitLimitProvider.overrideWith((ref) => 42),
           commitHistoryProvider.overrideWith((ref) {
             loads++;
             return loads == 1

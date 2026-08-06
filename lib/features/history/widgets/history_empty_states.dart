@@ -92,7 +92,15 @@ class NoCommitSelectedState extends StatelessWidget {
 class NoSearchResultsState extends StatelessWidget {
   final VoidCallback onClearFilters;
 
-  const NoSearchResultsState({super.key, required this.onClearFilters});
+  /// Non-null when the search only covered a partial window and widening it
+  /// to the entire history is possible; renders the explicit offer to do so.
+  final VoidCallback? onSearchAllHistory;
+
+  const NoSearchResultsState({
+    super.key,
+    required this.onClearFilters,
+    this.onSearchAllHistory,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +121,13 @@ class NoSearchResultsState extends StatelessWidget {
             l10n.emptyStateTryAdjustingSearchCriteria,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
+          if (onSearchAllHistory != null) ...[
+            const SizedBox(height: AppTheme.paddingS),
+            BodySmallLabel(
+              l10n.historySearchCoversLoadedOnly,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ],
           const SizedBox(height: AppTheme.paddingM),
           BaseButton(
             label: l10n.clearFiltersAction,
@@ -120,6 +135,15 @@ class NoSearchResultsState extends StatelessWidget {
             leadingIcon: PhosphorIconsRegular.x,
             onPressed: onClearFilters,
           ),
+          if (onSearchAllHistory != null) ...[
+            const SizedBox(height: AppTheme.paddingS),
+            BaseButton(
+              label: l10n.historySearchAllHistory,
+              variant: ButtonVariant.secondary,
+              leadingIcon: PhosphorIconsRegular.listMagnifyingGlass,
+              onPressed: onSearchAllHistory,
+            ),
+          ],
         ],
       ),
     );

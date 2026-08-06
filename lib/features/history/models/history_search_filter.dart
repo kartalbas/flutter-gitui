@@ -102,6 +102,16 @@ class HistorySearchFilter extends Equatable {
       (branch != null && branch!.isNotEmpty) ||
       (tags != null && tags!.isNotEmpty);
 
+  /// True when the filter carries something git itself can evaluate over the
+  /// entire history - message text, an author, or a date range. Hash prefixes
+  /// and tags are resolved against the window and the refs and need no deep
+  /// walk, so they do not qualify.
+  bool get supportsDeepSearch =>
+      (query != null && query!.isNotEmpty) ||
+      (author != null && author!.isNotEmpty) ||
+      fromDate != null ||
+      toDate != null;
+
   /// Count of active filters
   int get activeFilterCount {
     int count = 0;

@@ -26,6 +26,11 @@ class AppConstants {
   // Debouncing & timing
   static const Duration debounceMilliseconds = Duration(milliseconds: 300);
 
+  /// Upper bound on matches a whole-history search returns. Bounds both the
+  /// git process output and the widget count; the results banner says when
+  /// the cap was hit.
+  static const int deepSearchResultLimit = 1000;
+
   // Private constructor to prevent instantiation
   AppConstants._();
 }

@@ -115,6 +115,12 @@ class GitRepositoryWatcher {
   /// root may itself be spelled with either separator, so both are normalized
   /// to forward slashes before matching. Static and pure so the cross-platform
   /// behavior can be pinned by a test.
+  ///
+  /// Accepted consequence: commits and fetches that arrive from outside the
+  /// app land in exactly these ignored directories, so the watcher never
+  /// reloads the history for them - the app-bar Refresh is the way to pick
+  /// them up. This is a deliberate trade against the background CPU cost
+  /// those directories generate, not an oversight.
   static bool shouldIgnorePath(String path) {
     final normalized = path.replaceAll('\\', '/');
 

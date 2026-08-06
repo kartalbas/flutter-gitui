@@ -3542,6 +3542,76 @@
       }
     }
   },
+  "historyLoadMoreCommits": "Load {count} older commits",
+  "@historyLoadMoreCommits": {
+    "description": "Footer button that extends the loaded history window by one page",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyLoadingMoreCommits": "Loading older commits...",
+  "historyLoadedCount": "{count} commits loaded",
+  "@historyLoadedCount": {
+    "description": "Caption under the load-more button naming the current window size",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyBeginningOfHistory": "Beginning of history - all {count} commits loaded",
+  "@historyBeginningOfHistory": {
+    "description": "Footer marker shown when the loaded window reaches the root commit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyLoadMoreFailed": "Loading older commits failed: {error}",
+  "@historyLoadMoreFailed": {
+    "description": "Inline footer error when extending the window failed; shown with a retry",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "historySearchAllHistory": "Search entire history",
+  "historySearchCoversLoadedOnly": "The search covered only the loaded commits.",
+  "historySearchingAllHistory": "Searching the entire history...",
+  "historyDeepSearchMatches": "{count} matches in the entire history",
+  "@historyDeepSearchMatches": {
+    "description": "Banner over whole-history search results",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyDeepSearchCapped": "only the first {count} matches are shown",
+  "@historyDeepSearchCapped": {
+    "description": "Appended to the banner when the result cap was hit",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyDeepSearchBack": "Back to loaded history",
+  "historyDeepSearchInChanges": "Search changed content",
+  "historyDeepSearchNoMatches": "No commits in the entire history match this search.",
+  "historyDeepSearchFailed": "Searching the entire history failed: {error}",
+  "@historyDeepSearchFailed": {
+    "description": "Error state of a failed whole-history search",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "accessed": "Accessed:",
   "edit": "Edit",
   "pullFromRemote": "Pull from remote",

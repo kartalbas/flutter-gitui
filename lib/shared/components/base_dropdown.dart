@@ -214,7 +214,7 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
           showWhenUnlinked: false,
           offset: Offset(0, size.height + 4),
           child: Material(
-            elevation: 8,
+            elevation: AppTheme.elevationLevel2,
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
             child: _SearchableDropdownOverlay<T>(
               items: widget.items,

@@ -1247,7 +1247,7 @@ class _DraggableSpeedDialState extends State<_DraggableSpeedDial> {
                         // Label
                         Material(
                           color: Theme.of(context).colorScheme.surface,
-                          elevation: 4,
+                          elevation: AppTheme.elevationLevel2,
                           borderRadius: BorderRadius.circular(
                             AppTheme.paddingXS,
                           ),

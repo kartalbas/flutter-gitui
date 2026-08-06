@@ -3,11 +3,12 @@ import '../../shared/theme/app_theme.dart';
 
 /// Base component for all card patterns in the app.
 ///
-/// Provides unified selection behavior with elevation and borders:
-/// - Normal state (elevation: 2, no border)
-/// - Hover state (elevation: 4, no border)
-/// - Multi-selected state (elevation: 4, secondary border 2px)
-/// - Selected state (elevation: 8, primary border 3px)
+/// Renders flat (no shadow elevation) and communicates state through
+/// Material 3 tonal surfaces and outline borders:
+/// - Normal state (surfaceContainerHigh, 1px outlineVariant border)
+/// - Hover state (surfaceContainerHighest, 1px outlineVariant border)
+/// - Multi-selected state (tertiaryContainer, 2px onTertiaryContainer border)
+/// - Selected state (secondaryContainer, 2px onSecondaryContainer border)
 ///
 /// Example usage:
 /// ```dart

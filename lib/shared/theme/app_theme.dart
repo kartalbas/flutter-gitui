@@ -456,6 +456,21 @@ class AppTheme {
   static const double radiusL = 12.0;
   static const double radiusXL = 16.0;
 
+  /// Material 3 elevation levels.
+  ///
+  /// The six-level ladder from the M3 spec (0, 1, 3, 6, 8, 12 dp), matching
+  /// Flutter's M3 component defaults: the navigation rail rests at level 0,
+  /// cards at level 1, menus and popup menus at level 2, and dialogs at
+  /// level 3. Levels 4 and 5 are reserved by the spec for transient surfaces
+  /// that must sit above a dialog. Never write a raw elevation literal —
+  /// pick the level that matches the surface's role.
+  static const double elevationLevel0 = 0.0; // Flat: rails, resting app bars
+  static const double elevationLevel1 = 1.0; // Resting cards and panels
+  static const double elevationLevel2 = 3.0; // Menus and dropdown overlays
+  static const double elevationLevel3 = 6.0; // Dialogs, floating action buttons
+  static const double elevationLevel4 = 8.0; // Above-dialog transient surfaces
+  static const double elevationLevel5 = 12.0; // Highest transient surfaces
+
   /// Icon sizes — the single icon scale for the app.
   ///
   /// `iconL` (24) is the Material 3 default icon size (icon buttons,

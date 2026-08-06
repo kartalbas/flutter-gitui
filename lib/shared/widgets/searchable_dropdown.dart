@@ -134,7 +134,7 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
           showWhenUnlinked: false,
           offset: Offset(0.0, size.height + 4.0),
           child: Material(
-            elevation: 4.0,
+            elevation: AppTheme.elevationLevel2,
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 200),

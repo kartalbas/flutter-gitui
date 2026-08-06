@@ -37,7 +37,7 @@ class BasePanel extends StatefulWidget {
     this.footer,
     this.isCollapsible = false,
     this.initiallyExpanded = true,
-    this.elevation = 2,
+    this.elevation = AppTheme.elevationLevel1,
     this.hasBorder = false,
     this.padding = const EdgeInsets.all(AppTheme.paddingL),
   });

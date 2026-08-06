@@ -80,16 +80,22 @@ class _RepositorySwitcherDialogState
           ),
           const SizedBox(height: AppTheme.paddingM),
 
-          // Repository list
-          Expanded(
+          // Repository list needs a bounded height: BaseDialog wraps the
+          // content in a SingleChildScrollView, so a flex child would sit in
+          // an unbounded Column and throw. The cap lets the dialog grow with
+          // its content up to 400 and scroll beyond that.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 400),
             child: filteredRepos.isEmpty
                 ? Center(
+                    heightFactor: 2,
                     child: BodyLargeLabel(
                       AppLocalizations.of(context)!.noRepositoriesFound,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   )
                 : ListView.builder(
+                    shrinkWrap: true,
                     itemCount: filteredRepos.length,
                     itemBuilder: (context, index) {
                       final repo = filteredRepos[index];

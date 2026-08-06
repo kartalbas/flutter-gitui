@@ -298,10 +298,14 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         ),
         const SizedBox(height: AppTheme.paddingL),
 
-        // History
+        // History needs a bounded height: BaseDialog wraps the content in a
+        // SingleChildScrollView, so a flex child would sit in an unbounded
+        // Column and throw. The cap keeps the secondary list compact; its own
+        // scroll view handles longer histories.
         TitleSmallLabel(AppLocalizations.of(context)!.bisectHistory),
         const SizedBox(height: AppTheme.paddingS),
-        Expanded(
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 200),
           child: Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(

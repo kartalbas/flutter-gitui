@@ -86,7 +86,16 @@ class BaseDialog extends StatelessWidget {
   /// Dialog title
   final String title;
 
-  /// Dialog content (scrollable if long)
+  /// Dialog content (scrollable if long).
+  ///
+  /// The content is wrapped in a [SingleChildScrollView], which hands it
+  /// unbounded height. A [Column] passed here must therefore not contain an
+  /// [Expanded], [Spacer] or tight [Flexible] child - a scroll view leaves no
+  /// "remaining space" to distribute, so such a child is a RenderFlex error,
+  /// not a layout. Give an inner list a bounded height instead (for example a
+  /// [ConstrainedBox] with `maxHeight` around a shrink-wrapped list), so the
+  /// dialog grows with its content up to the cap and scrolls beyond it.
+  /// [build] asserts the direct-child case in debug builds.
   final Widget content;
 
   /// Action buttons (bottom) - typically Cancel and Confirm buttons
@@ -117,6 +126,39 @@ class BaseDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Turn the runtime RenderFlex error into an immediate, named one: the
+    // content sits in a scroll view, so a flex child of a content Column can
+    // never get the remaining space it asks for. This mirrors RenderFlex's
+    // own condition (a tight flex child always throws under unbounded
+    // height; a loose Flexible only when the Column wants MainAxisSize.max),
+    // so a legal loose Flexible in a min Column stays allowed. Only direct
+    // children are checkable here; the doc on [content] covers the rest.
+    assert(() {
+      final inner = content;
+      if (inner is Flex && inner.direction == Axis.vertical) {
+        for (final child in inner.children) {
+          final alwaysThrows =
+              child is Spacer ||
+              (child is Flexible && child.fit == FlexFit.tight);
+          final throwsInMaxColumn =
+              child is Flexible &&
+              child.fit == FlexFit.loose &&
+              inner.mainAxisSize == MainAxisSize.max;
+          if (alwaysThrows || throwsInMaxColumn) {
+            throw FlutterError(
+              'BaseDialog content must not contain an unbounded flex child.\n'
+              'BaseDialog scrolls its content, so the content Column has '
+              'unbounded height and a ${child.runtimeType} inside it is a '
+              'RenderFlex error, not a layout. Give the child a bounded '
+              'height instead, e.g. a ConstrainedBox(maxHeight: ...) around '
+              'a shrink-wrapped list.',
+            );
+          }
+        }
+      }
+      return true;
+    }());
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
@@ -243,17 +285,18 @@ class BaseDialog extends StatelessWidget {
                     // Content section (scrollable if long)
                     Flexible(child: SingleChildScrollView(child: content)),
 
-                    // Actions section
+                    // Actions section. A Wrap, not a Row: a Row overflows
+                    // when the buttons outgrow the dialog width (the update
+                    // dialog's three actions did); wrapping onto a second
+                    // end-aligned run is the M3 fallback for that case and
+                    // renders identically while one line fits.
                     if (actions != null && actions!.isNotEmpty) ...{
                       SizedBox(height: AppTheme.paddingXL),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          for (int i = 0; i < actions!.length; i++) ...{
-                            if (i > 0) SizedBox(width: AppTheme.paddingM),
-                            actions![i],
-                          },
-                        ],
+                      Wrap(
+                        alignment: WrapAlignment.end,
+                        spacing: AppTheme.paddingM,
+                        runSpacing: AppTheme.paddingS,
+                        children: actions!,
                       ),
                     },
                   ],

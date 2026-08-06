@@ -392,7 +392,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           ),
         ],
 
-        const Spacer(),
+        // A fixed gap, not a Spacer: BaseDialog scrolls its content, so the
+        // Column has unbounded height and a flex child (Spacer builds an
+        // Expanded) throws instead of spacing.
+        const SizedBox(height: AppTheme.paddingL),
 
         // Instructions
         if (!state.hasConflicts) ...[

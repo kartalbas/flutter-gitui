@@ -116,9 +116,14 @@ class ReflogDialog extends ConsumerWidget {
         ),
         const SizedBox(height: AppTheme.paddingM),
 
-        // Reflog list
-        Expanded(
+        // The list needs a bounded height: BaseDialog wraps the content in a
+        // SingleChildScrollView, so a flex child would sit in an unbounded
+        // Column and throw. The cap lets the dialog grow with its content up
+        // to 400 and scroll beyond that.
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 400),
           child: ListView.separated(
+            shrinkWrap: true,
             itemCount: entries.length,
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {

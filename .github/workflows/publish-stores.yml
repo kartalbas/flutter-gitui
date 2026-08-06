@@ -1,0 +1,339 @@
+name: Publish Stores
+
+# Publishes the package-store channels — winget and the Snap Store — from a
+# release that is already public on GitHub. Deliberately a separate workflow
+# from release.yml, triggered by the release being published rather than by
+# the tag push: a draft's assets are not served, both submissions pin URLs and
+# digests of the published assets, and the build-macos rule ("credentials may
+# gate publishing, never the release") holds structurally — by the time this
+# workflow starts, the release is out, so nothing here can break it.
+#
+# Each store skips cleanly and visibly when its credential is absent: the run
+# carries an annotation naming the missing secret, and a maintainer without
+# any secrets still gets the untouched Windows and Linux release. Secret names
+# and how to obtain each: release/README.md.
+#
+# workflow_dispatch exists so either channel can be re-run for a tag whose
+# publish-time run failed or was skipped, without republishing the release.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published release tag to submit (with leading v), e.g. v1.0.0"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  winget:
+    name: winget manifest
+    # wingetcreate is a Windows-only tool; nothing else here needs Windows.
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The manifest templates must come from the tagged commit, so a
+          # dispatch re-run for an old tag fills that tag's templates rather
+          # than whatever master looks like today. On the release event
+          # github.ref already is the tag.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Determine release
+        id: release
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ github.event.release.tag_name }}"
+          fi
+          VERSION="${TAG#v}"
+          # Same rule release.yml derives the pre-release flag from: any
+          # version containing '-' is a pre-release. Reading it off the tag
+          # keeps the event path and the dispatch path identical.
+          case "$VERSION" in
+            *-*) PRERELEASE=true ;;
+            *) PRERELEASE=false ;;
+          esac
+          {
+            echo "tag=${TAG}"
+            echo "version=${VERSION}"
+            echo "prerelease=${PRERELEASE}"
+          } >> "$GITHUB_OUTPUT"
+
+      # winget has no channel concept: whatever version a manifest carries is
+      # what `winget install` gives everyone, so pre-releases stay out (the
+      # ecosystem convention for previews is a separate *.Preview package
+      # identifier, which this project does not publish). For stable releases
+      # the manifests are prepared even without the token — the same shape as
+      # build-macos, which always builds and only withholds publishing — so a
+      # maintainer can take them from the run's artifacts and submit by hand.
+      - name: Decide what to do
+        id: decide
+        env:
+          HAVE_TOKEN: ${{ secrets.WINGET_TOKEN != '' }}
+          PRERELEASE: ${{ steps.release.outputs.prerelease }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          PREPARE=false
+          SUBMIT=false
+          if [ "$PRERELEASE" = "true" ]; then
+            echo "::notice title=winget skipped — pre-release::${TAG} is a pre-release and winget has no pre-release channel, so no manifest was prepared or submitted."
+          elif [ "$HAVE_TOKEN" != "true" ]; then
+            PREPARE=true
+            echo "::warning title=winget not submitted — no token::WINGET_TOKEN is not configured, so the winget manifests for ${TAG} were prepared as a run artifact but no pull request was opened against microsoft/winget-pkgs. See release/README.md."
+          else
+            PREPARE=true
+            SUBMIT=true
+          fi
+          {
+            echo "prepare=${PREPARE}"
+            echo "submit=${SUBMIT}"
+          } >> "$GITHUB_OUTPUT"
+
+      # The installer URL and the digest pinned beside it have to describe the
+      # same bytes. Hashing anything built here could not guarantee that, so
+      # both values come from latest-windows.json — the manifest the release
+      # itself carries, written from the very archive it sits next to.
+      - name: Fill manifests from the published release
+        if: steps.decide.outputs.prepare == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          retry() {
+            local attempt=1 delay=15
+            while true; do
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -ge 5 ]; then
+                echo "::error::'$*' failed after ${attempt} attempts" >&2
+                return 1
+              fi
+              echo "'$*' failed (attempt ${attempt}), retrying in ${delay}s" >&2
+              sleep "$delay"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+          mkdir -p dist/winget
+          retry gh release download "$TAG" --pattern latest-windows.json --dir dist
+          FILE=$(jq -r '.windows.fileName // empty' dist/latest-windows.json)
+          # winget validates the digest case-insensitively but publishes it
+          # upper-case.
+          SHA256=$(jq -r '.windows.sha256 // empty' dist/latest-windows.json | tr '[:lower:]' '[:upper:]')
+          if [ -z "$FILE" ] || [ -z "$SHA256" ]; then
+            echo "::error::latest-windows.json of ${TAG} carries no windows fileName and sha256"
+            exit 1
+          fi
+          URL=$(retry gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" \
+            --jq ".assets[] | select(.name == \"${FILE}\") | .browser_download_url")
+          if [ -z "$URL" ]; then
+            echo "::error::release ${TAG} publishes no ${FILE} asset"
+            exit 1
+          fi
+          echo "installer: ${URL}"
+          echo "sha256: ${SHA256}"
+          for f in release/manifests/winget/*.yaml; do
+            sed -e "s|\${VERSION}|${VERSION}|g" \
+                -e "s|\${DOWNLOAD_URL}|${URL}|g" \
+                -e "s|\${SHA256}|${SHA256}|g" \
+                "$f" > "dist/winget/$(basename "$f")"
+          done
+          ls -la dist/winget/
+
+      # Visible even when nothing is submitted: these are the exact files a
+      # maintainer would hand to `wingetcreate submit` or paste into a manual
+      # winget-pkgs pull request.
+      - uses: actions/upload-artifact@v4
+        if: steps.decide.outputs.prepare == 'true'
+        with:
+          name: winget-manifests
+          path: dist/winget/
+          retention-days: 30
+
+      # `wingetcreate submit` rather than `wingetcreate update`: update
+      # regenerates the latest upstream manifest and requires the package to
+      # already exist in winget-pkgs, while submit takes this repository's own
+      # reviewed templates exactly as filled above and works for the first
+      # submission and every later one alike. It validates the manifests,
+      # forks microsoft/winget-pkgs under the token's account, pushes a branch
+      # and opens the pull request.
+      - name: Submit to winget-pkgs
+        if: steps.decide.outputs.submit == 'true'
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 5 --retry-delay 5 https://aka.ms/wingetcreate/latest -o wingetcreate.exe
+          ./wingetcreate.exe submit --token "$WINGET_TOKEN" dist/winget
+
+  snap:
+    name: Snap package
+    # ubuntu-latest rather than the pinned 22.04 of the build workflow:
+    # nothing is compiled here. The snap repacks the published Linux archive,
+    # whose glibc floor was already enforced when it was built, and snapcraft
+    # runs inside its own container regardless of the runner image.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      # The same container the retired local pipeline used
+      # (release/docker/Dockerfile.snap-build was FROM this image).
+      SNAPCRAFT_IMAGE: ghcr.io/canonical/snapcraft:8_core24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # snapcraft.yaml and the desktop file must come from the tagged
+          # commit for the same reason the winget templates must.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Determine release
+        id: release
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ github.event.release.tag_name }}"
+          fi
+          VERSION="${TAG#v}"
+          # Channels are the pre-release mechanism winget lacks: an alpha goes
+          # to edge, where only somebody who asked for edge receives it, and a
+          # stable version goes to stable. Nothing needs to be skipped here.
+          case "$VERSION" in
+            *-*) CHANNEL=edge ;;
+            *) CHANNEL=stable ;;
+          esac
+          {
+            echo "tag=${TAG}"
+            echo "version=${VERSION}"
+            echo "channel=${CHANNEL}"
+          } >> "$GITHUB_OUTPUT"
+
+      # Same shape as build-macos: the snap is always built, so a broken
+      # snapcraft.yaml surfaces on every release, and only the store upload is
+      # conditional on the credential.
+      - name: Detect store credential
+        id: store
+        env:
+          HAVE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS != '' }}
+          CHANNEL: ${{ steps.release.outputs.channel }}
+        run: |
+          set -euo pipefail
+          if [ "$HAVE_CREDENTIALS" = "true" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "credential present; the snap will be uploaded to the ${CHANNEL} channel"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Snap not uploaded — no store credential::SNAPCRAFT_STORE_CREDENTIALS is not configured, so the snap was built and attached to this run as an artifact but not uploaded to the Snap Store. See release/README.md."
+          fi
+
+      # The snap must carry the same bytes users download from the release
+      # page, so the input is the published archive itself — verified against
+      # the digest in latest-linux.json rather than trusted blindly.
+      - name: Download the published Linux archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          retry() {
+            local attempt=1 delay=15
+            while true; do
+              if "$@"; then
+                return 0
+              fi
+              if [ "$attempt" -ge 5 ]; then
+                echo "::error::'$*' failed after ${attempt} attempts" >&2
+                return 1
+              fi
+              echo "'$*' failed (attempt ${attempt}), retrying in ${delay}s" >&2
+              sleep "$delay"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+          mkdir -p dist
+          FILE="flutter-gitui-v${VERSION}-linux.tar.gz"
+          retry gh release download "$TAG" --pattern "$FILE" --pattern latest-linux.json --dir dist
+          EXPECTED=$(jq -r '.linux.sha256 // empty' dist/latest-linux.json)
+          if [ -z "$EXPECTED" ]; then
+            echo "::error::latest-linux.json of ${TAG} carries no sha256"
+            exit 1
+          fi
+          echo "${EXPECTED}  dist/${FILE}" | sha256sum -c -
+
+      - name: Prepare snap source tree
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p snapbuild/bundle snapbuild/snap snapbuild/assets/icons
+          tar -xzf "dist/flutter-gitui-v${VERSION}-linux.tar.gz" -C snapbuild/bundle
+          # Not shipped inside the snap: $SNAP is a read-only squashfs, so the
+          # in-app updater could never replace a file (a snap updates through
+          # the store), and the desktop entry comes from snapd rather than
+          # from the archive's install script.
+          rm -f snapbuild/bundle/updater snapbuild/bundle/install-desktop-entry.sh
+          sed -e "s|\${VERSION}|${VERSION}|g" \
+            release/manifests/snap/snapcraft.yaml > snapbuild/snap/snapcraft.yaml
+          cp release/manifests/snap/flutter-gitui.desktop snapbuild/
+          cp assets/icons/app_icon.svg snapbuild/assets/icons/
+          find snapbuild -maxdepth 2 | sort
+
+      # snapcraft detects that it is running inside a container and builds
+      # destructively against the mounted project; the mount point is /project,
+      # which is why snapcraft.yaml's override-build may reference /project as
+      # an absolute path.
+      - name: Build snap
+        id: build
+        run: |
+          set -euo pipefail
+          docker run --rm -v "${PWD}/snapbuild:/project" -w /project "$SNAPCRAFT_IMAGE"
+          SNAP_FILE=$(find snapbuild -maxdepth 1 -name '*.snap' | head -1)
+          if [ -z "$SNAP_FILE" ]; then
+            echo "::error::snapcraft produced no .snap file"
+            exit 1
+          fi
+          echo "built: ${SNAP_FILE}"
+          echo "file=$(basename "$SNAP_FILE")" >> "$GITHUB_OUTPUT"
+
+      # Attached even when the upload is skipped, so a run without the
+      # credential still leaves an installable snap to test by hand
+      # (`snap install --dangerous`).
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snap-package
+          path: snapbuild/*.snap
+          retention-days: 30
+
+      # The credential is forwarded into the container by name (-e without a
+      # value), so it never appears in the container's argv.
+      - name: Upload to the Snap Store
+        if: steps.store.outputs.available == 'true'
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+          CHANNEL: ${{ steps.release.outputs.channel }}
+          SNAP_FILE: ${{ steps.build.outputs.file }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -e SNAPCRAFT_STORE_CREDENTIALS \
+            -v "${PWD}/snapbuild:/build" \
+            -w /build \
+            "$SNAPCRAFT_IMAGE" \
+            upload --release="$CHANNEL" "/build/${SNAP_FILE}"

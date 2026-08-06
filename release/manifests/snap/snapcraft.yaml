@@ -16,10 +16,10 @@ base: core22
 confinement: classic
 grade: stable
 icon: assets/icons/app_icon.svg
-license: Proprietary
-website: https://github.com/simetrix/flutter-gitui
-source-code: https://github.com/simetrix/flutter-gitui
-issues: https://github.com/simetrix/flutter-gitui/issues
+license: Elastic-2.0
+website: https://github.com/kartalbas/flutter-gitui
+source-code: https://github.com/kartalbas/flutter-gitui
+issues: https://github.com/kartalbas/flutter-gitui/issues
 contact: kartalbas@gmail.com
 
 architectures:
@@ -51,11 +51,16 @@ parts:
     # No organize: the executable is linked with RPATH $ORIGIN/lib and the
     # embedder resolves data/ relative to itself, so the bundle's flat layout
     # has to survive into the snap root.
+    #
+    # craftctl and CRAFT_PART_INSTALL, not the snapcraftctl interface: a
+    # core22 base is built by craft-parts, which no longer provides
+    # snapcraftctl. /project is the mount point publish-stores.yml gives the
+    # snapcraft container.
     override-build: |
       # Run default dump plugin behavior
-      snapcraftctl build
+      craftctl default
 
       # Copy desktop file and icon from project root
-      mkdir -p $SNAPCRAFT_PART_INSTALL/meta/gui
-      cp /project/flutter-gitui.desktop $SNAPCRAFT_PART_INSTALL/meta/gui/
-      cp /project/assets/icons/app_icon.svg $SNAPCRAFT_PART_INSTALL/meta/gui/
+      mkdir -p $CRAFT_PART_INSTALL/meta/gui
+      cp /project/flutter-gitui.desktop $CRAFT_PART_INSTALL/meta/gui/
+      cp /project/assets/icons/app_icon.svg $CRAFT_PART_INSTALL/meta/gui/

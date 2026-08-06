@@ -1,6 +1,6 @@
 # Release
 
-Releases are produced by `.github/workflows/release.yml`, triggered by pushing a tag of the form `v*.*.*`. Nothing in this directory builds or publishes the application any more; what remains is either consumed by that workflow, shipped alongside the application, or waiting for the package channels to move to CI.
+Releases are produced by `.github/workflows/release.yml`, triggered by pushing a tag of the form `v*.*.*`. Publishing the release then triggers `.github/workflows/publish-stores.yml`, which carries the two package-store channels (winget and the Snap Store). Nothing in this directory builds or publishes the application any more; what remains is either consumed by those workflows or shipped alongside the application.
 
 ## How a release happens
 
@@ -12,6 +12,8 @@ git push origin v0.5.0
 The workflow builds Windows, Linux and macOS on their own runners, packs a flat archive per platform, derives the pre-release flag from the tag (any version containing `-` is a pre-release), writes a `latest-<platform>.json` manifest carrying the SHA-256 of the Windows and Linux archives, and opens a **draft** release with everything attached.
 
 The draft is the gate: assets of a draft are neither served for download nor returned by the API the client polls, so nothing reaches a user until a human publishes it.
+
+Publishing the draft is also what starts the package-store workflow (`publish-stores.yml`, trigger `release: published`). It deliberately runs *after* the release rather than inside it: both store submissions pin the URL and digest of published assets, which a draft does not serve, and a store failure can then never touch the release itself — by the time the workflow starts, the release is out. Either channel can be re-run for a tag on its own via the workflow's manual dispatch.
 
 macOS is conditional. The release workflow always builds it, but attaches it to the release only when the five `MACOS_*` secrets below are configured: only then can the app be signed with a Developer ID certificate and notarised, and Gatekeeper refuses anything less with "is damaged and can't be opened" (issue #66). Without the secrets the run carries a warning annotation and the release simply ships without a macOS asset — never with one that cannot start. A partially configured secret set (some of the five present) fails the macOS job outright so a typo cannot silently drop the platform. A macOS failure never blocks the Windows and Linux release.
 
@@ -31,24 +33,48 @@ All five repository secrets (Settings → Secrets and variables → Actions) mus
 
 Even when a macOS archive is published, no `latest-macos.json` update manifest is attached: the in-app update flow has no macOS implementation (the client requests a manifest name only on Windows and Linux, and the archive ships no updater helper), so a manifest would advertise updates nothing can install — see issue #155.
 
+## Package stores: winget and Snap
+
+`publish-stores.yml` follows the same rule as the macOS job: a missing credential skips the publishing visibly (a warning annotation on the run names the missing secret), never fails anything, and never publishes something broken. Each store is a job of its own, so one can be re-run without the other.
+
+**winget** fills the templates under `manifests/winget/` with the version, installer URL and SHA-256 taken from the release's own `latest-windows.json` — the URL and the digest pinned beside it therefore describe the same bytes by construction — and submits them with Microsoft's `wingetcreate submit`, which validates the manifests, forks `microsoft/winget-pkgs` under the token's account and opens the pull request. Pre-releases are skipped entirely (a notice annotation says so): winget has no channel concept, so whatever version a manifest carries is what `winget install` gives everyone. For a stable release without the token, the filled manifests are still attached to the run as the `winget-manifests` artifact, ready for a manual submission.
+
+**Snap** downloads the published Linux archive, verifies it against the digest in `latest-linux.json`, repacks it with `manifests/snap/snapcraft.yaml` inside the `ghcr.io/canonical/snapcraft:8_core24` container, and uploads it with `snapcraft upload`. The archive's `updater` helper and `install-desktop-entry.sh` are stripped first: `$SNAP` is a read-only squashfs, so the in-app updater could never replace a file, and the desktop entry comes from snapd. A pre-release goes to the `edge` channel, a stable version to `stable` — channels are the pre-release mechanism winget lacks. The snap is always built (so a broken `snapcraft.yaml` surfaces on every release) and attached to the run as the `snap-package` artifact; only the store upload needs the credential.
+
+| Secret | Content | How to obtain |
+|--------|---------|---------------|
+| `WINGET_TOKEN` | A GitHub personal access token (classic) with the `public_repo` scope | GitHub → Settings → Developer settings → Personal access tokens (classic). `wingetcreate` uses it to fork `microsoft/winget-pkgs` into the token owner's account and open the pull request from there, so it belongs to the maintainer's own account, not to a bot without winget-pkgs history. |
+| `SNAPCRAFT_STORE_CREDENTIALS` | An exported Snapcraft store login | With the snap name registered (`snapcraft register flutter-gitui`, once): `snapcraft export-login --snaps=flutter-gitui --acls package_access,package_push,package_update,package_release exported.txt`, then paste the file's contents into the secret. The credential that used to sit in the local `.env` must be **rotated, not reused** (issue #283): revoke it under <https://login.ubuntu.com/> and export a fresh one for CI. |
+
+Two things gate the *first* submission to each store, independent of CI:
+
+- **Do not configure `WINGET_TOKEN` before issues #298/#299 are resolved.** A winget package identifier is effectively permanent: `winget-pkgs` has no rename, so publishing `FlutterGitUI.FlutterGitUI` now and renaming to gitopset under `simetrixch` later means a brand-new identifier whose users' `winget upgrade` silently stops finding versions, plus abandoned manifests whose installer URLs die with the old repository (a fresh repository gets no redirect). The workflow is ready; adding the secret after the move/rename is the entire switch-on.
+- **Classic confinement needs Canonical's approval once.** The snap declares `confinement: classic` (it must run arbitrary user git and diff tools), which the Snap Store only accepts for names that were granted classic confinement after a request on the snapcraft forum. Until that grant exists, the store rejects the release step of the upload. The same consideration as winget applies to the name: the grant is per snap name, so effort spent on `flutter-gitui` is repeated for `gitopset`.
+
+### Store installs and the in-app updater
+
+The in-app updater polls this repository's releases and installs over the running installation. A store-managed install must update through its store instead, and today the client does not know the difference:
+
+- **Snap:** the app files live in a read-only squashfs. The update check still sees a newer GitHub release and offers it; on accept, the download succeeds and the install then fails against the read-only filesystem. Meanwhile snapd refreshes the snap on its own schedule. The offer is a broken promise every release.
+- **winget:** the zip is extracted under `%LOCALAPPDATA%\Microsoft\WinGet\Packages\...`, which is user-writable — the in-app update *succeeds*, and from then on winget's recorded version disagrees with what is on disk: `winget upgrade` will re-install its own idea of the latest version over the newer files, and `winget uninstall` complains about a modified package.
+
+The fix belongs in the client, not in this pipeline: suppress the in-app update offer when running store-managed (the `SNAP` environment variable for snaps; an executable path under `WinGet\Packages` for winget) and point at the store instead. That is a follow-up issue against `lib/core/services/update_service.dart`.
+
 ## What is in here
 
 | Path | Purpose |
 |------|---------|
 | `docker/Dockerfile.linux-base` | Pins the Flutter image so the glibc floor of a Linux build cannot drift. Both workflows cite it by name. |
 | `docker/Dockerfile.linux-build` | Carries the `objdump` gate that fails a build requiring glibc above the core22 floor of 2.35. Mirrored as a step in both workflows. |
-| `docker/Dockerfile.snap-build` | Snap build container. Not yet wired into CI. |
-| `manifests/snap/` | Snap packaging. Declares the `core22` base that fixes the glibc floor. |
-| `manifests/winget/` | winget package templates. |
+| `manifests/snap/` | Snap packaging, consumed by `publish-stores.yml`. Declares the `core22` base that fixes the glibc floor. |
+| `manifests/winget/` | winget manifest templates, filled from the published release and submitted by `publish-stores.yml`. |
 | `shared/changelog-generator.ps1` | Regenerates `assets/changelog.json`. Not yet part of the tagged build, which is why the bundled changelog can trail the shipped version. |
-| `shared/update-winget-manifest.ps1` | Fills a winget manifest from a **published** release: it reads the platform manifest asset for a tag and takes the file name and digest from it, so the installer URL and its hash describe the same bytes. Fails loudly on an unpublished release. |
-| `shared/build-snap.ps1` | Builds the snap. Not yet wired into CI. |
-| `updater/` | A small standalone program the application launches to replace its own files during an update. Not currently built by any pipeline — see issue #270. |
-
-Moving the changelog, snap and winget steps into CI is tracked in issues #282 and #283.
+| `updater/` | A small standalone program the application launches to replace its own files during an update. Built by `release.yml` and shipped inside the Windows and Linux archives; stripped from the snap, which updates through the store. |
 
 ## Not here any more
 
 The PowerShell orchestrators that used to build and publish from a developer machine are gone; CI is the only path. Two pipelines producing the same artifact by different rules had already caused one defect, where a winget manifest paired the digest of a locally built archive with the URL of a CI-built one, under names that could never match.
+
+`shared/update-winget-manifest.ps1`, `shared/build-snap.ps1` and `docker/Dockerfile.snap-build` followed for the same reason once `publish-stores.yml` took over the package channels (issue #283): the workflow carries the winget script's fill-from-the-published-release logic and runs the same snapcraft container the Dockerfile pointed at, so keeping the local variants would have re-created exactly the two-pipeline situation the defect came from.
 
 Icon synchronisation moved to `tools/sync-icons.ps1`, since it is a maintenance task whose output is committed like any other change rather than a step in a release.

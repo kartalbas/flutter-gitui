@@ -2,13 +2,19 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
+/// Flags `Text(style: ...)` and points at the typographic `BaseLabel`
+/// subclasses, which bind a Material 3 text-theme role instead of an ad-hoc
+/// style.
+///
+/// A `style:` that is only a `copyWith(color: ...)` chain over a theme style is
+/// allowed, since it recolours a role rather than replacing it.
 class AvoidTextWithStyle extends DartLintRule {
   const AvoidTextWithStyle() : super(code: _code);
 
   static const _code = LintCode(
     name: 'avoid_text_with_style',
     problemMessage:
-        'Avoid using Text widget with custom TextStyle. Use BaseLabel components (e.g., BaseLabel.body, BaseLabel.heading) instead.',
+        'Avoid using the Text widget with a custom TextStyle. Use a BaseLabel subclass (e.g., BodyMediumLabel, TitleLargeLabel, LabelSmallLabel) instead.',
   );
 
   @override

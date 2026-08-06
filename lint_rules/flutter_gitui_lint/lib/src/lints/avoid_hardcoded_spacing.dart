@@ -2,13 +2,19 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
+/// Flags the whole-number spacing literals {4, 8, 16, 24, 32} passed to a
+/// `SizedBox` or `EdgeInsets` constructor and points at the matching
+/// `AppTheme.paddingXS/S/M/L/XL` constants.
+///
+/// Fractional doubles are ignored on purpose: they are deliberate optical
+/// adjustments with no token counterpart.
 class AvoidHardcodedSpacing extends DartLintRule {
   const AvoidHardcodedSpacing() : super(code: _code);
 
   static const _code = LintCode(
     name: 'avoid_hardcoded_spacing',
     problemMessage:
-        'Avoid hardcoded spacing values. Use AppTheme spacing constants (e.g., AppTheme.spacing8, AppTheme.spacing16) instead.',
+        'Avoid hardcoded spacing values. Use the AppTheme padding constants (AppTheme.paddingXS/S/M/L/XL = 4/8/16/24/32) instead.',
   );
 
   static const _commonSpacingValues = {4, 8, 16, 24, 32};

@@ -19,10 +19,9 @@ class AvoidDialog extends DartLintRule {
     // Get the file path from the resolver
     final filePath = resolver.source.uri.path;
 
-    // Allow Dialog usage in base dialog implementations and changelog dialog
+    // Allow Dialog usage in the base dialog implementations only
     if (filePath.contains('base_dialog.dart') ||
-        filePath.contains('base_viewer_dialog.dart') ||
-        filePath.contains('changelog_dialog.dart')) {
+        filePath.contains('base_viewer_dialog.dart')) {
       return;
     }
 

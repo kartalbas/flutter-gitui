@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
+import 'base_dialog.dart' show focusedEditableKeepsEnter;
 import '../../shared/theme/app_theme.dart';
 import 'base_button.dart';
 import 'base_label.dart';
@@ -49,6 +50,7 @@ class BaseViewerDialog extends StatelessWidget {
     this.actions,
     this.footer,
     this.barrierDismissible = true,
+    this.onSubmit,
     this.widthFactor = 0.9,
     this.heightFactor = 0.9,
     this.backgroundColor,
@@ -83,6 +85,11 @@ class BaseViewerDialog extends StatelessWidget {
   /// Allow closing by clicking outside dialog
   final bool barrierDismissible;
 
+  /// The dialog's primary action, triggered by Enter from anywhere inside it
+  /// (same contract as [BaseDialog.onSubmit], including the multiline-field
+  /// exception). For a pure viewer this is typically "close".
+  final VoidCallback? onSubmit;
+
   /// Width as factor of screen width (default 0.9)
   final double widthFactor;
 
@@ -106,13 +113,25 @@ class BaseViewerDialog extends StatelessWidget {
     return Focus(
       autofocus: true,
       onKeyEvent: (node, event) {
-        if (event is KeyDownEvent &&
-            event.logicalKey == LogicalKeyboardKey.escape) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+
+        if (event.logicalKey == LogicalKeyboardKey.escape) {
           if (barrierDismissible) {
             Navigator.of(context).pop();
             return KeyEventResult.handled;
           }
         }
+
+        // Same contract as BaseDialog: Enter fires the primary action from
+        // anywhere, except inside a multiline editable.
+        if (onSubmit != null &&
+            !focusedEditableKeepsEnter() &&
+            (event.logicalKey == LogicalKeyboardKey.enter ||
+                event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+          onSubmit!();
+          return KeyEventResult.handled;
+        }
+
         return KeyEventResult.ignored;
       },
       child: Dialog(

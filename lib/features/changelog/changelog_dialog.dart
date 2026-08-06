@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_viewer_dialog.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../core/models/changelog_release.dart';
 import '../../core/services/changelog_service.dart';
 import '../../core/services/version_service.dart';
 import '../../core/services/logger_service.dart';
@@ -20,139 +23,80 @@ class ChangelogDialog extends HookConsumerWidget {
     final changelogAsync = ref.watch(changelogDataProvider);
     final currentIndex = useState(initialIndex);
     final dontShowAgain = useState(false);
-    final initialDontShowAgain = useState(false); // Track persisted state
-    final screenSize = MediaQuery.of(context).size;
+    final touched = useState(false); // User toggled the checkbox themselves
     final versionService = ref.watch(versionServiceProvider);
 
-    // Load the current value of disable_whats_new_dialog from config
+    // Initialize the checkbox from the persisted setting. The load is async,
+    // so adopt the stored value only while the user has not touched the
+    // checkbox yet, and never after the dialog was dismissed.
     useEffect(() {
       versionService.isWhatsNewDialogDisabled().then((isDisabled) {
-        // The dialog can be dismissed before the config read returns; the hook
-        // notifiers are disposed with it and must not be written afterwards
         if (!context.mounted) return;
-        // The load is async, so the user may already have ticked the checkbox;
-        // adopt the persisted value only while it is still untouched
-        if (dontShowAgain.value == initialDontShowAgain.value) {
-          dontShowAgain.value = isDisabled;
-        }
-        initialDontShowAgain.value = isDisabled; // Save persisted state
+        if (!touched.value) dontShowAgain.value = isDisabled;
       });
       return null;
     }, []);
 
-    // Every close path has to persist the checkbox, not just the Close button
-    Future<void> closeDialog(BuildContext dialogContext) async {
-      if (dontShowAgain.value != initialDontShowAgain.value) {
-        if (dontShowAgain.value) {
-          await versionService.disableWhatsNewDialog();
-        } else {
-          await versionService.enableWhatsNewDialog();
-        }
-      }
-      if (dialogContext.mounted) {
-        Navigator.of(dialogContext).pop();
+    // Persisting on toggle (instead of on close) makes every close path -
+    // Esc, Enter, the X, the barrier and the Close button - equally safe:
+    // there is no pending state a dismissal could lose.
+    Future<void> setDontShowAgain(bool value) async {
+      touched.value = true;
+      dontShowAgain.value = value;
+      if (value) {
+        await versionService.disableWhatsNewDialog();
+      } else {
+        await versionService.enableWhatsNewDialog();
       }
     }
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusL),
-      ),
-      child: SizedBox(
-        width: screenSize.width * 0.75,
-        height: screenSize.height * 0.85,
-        child: changelogAsync.when(
+    final releases =
+        changelogAsync.value?.releases ?? const <ChangelogRelease>[];
+    final index = releases.isEmpty
+        ? 0
+        : currentIndex.value.clamp(0, releases.length - 1);
+    final hasOlder = index < releases.length - 1;
+    final hasNewer = index > 0;
+
+    return CallbackShortcuts(
+      // The version pager is this dialog's list; the arrow keys drive it.
+      bindings: <ShortcutActivator, VoidCallback>{
+        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+          if (hasOlder) currentIndex.value = index + 1;
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+          if (hasNewer) currentIndex.value = index - 1;
+        },
+      },
+      child: BaseViewerDialog(
+        icon: Icons.history,
+        title: 'Release History',
+        widthFactor: 0.75,
+        heightFactor: 0.85,
+        // Reading is this dialog's only job, so closing is its primary
+        // action: Enter, Esc and the X all do the same thing.
+        onSubmit: () => Navigator.of(context).pop(),
+        content: changelogAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingL),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: AppTheme.paddingM),
-                TitleLargeLabel('Failed to load changelog'),
-                const SizedBox(height: AppTheme.paddingS),
-                BodyMediumLabel(error.toString(), textAlign: TextAlign.center),
-                const SizedBox(height: AppTheme.paddingL),
-                BaseButton(
-                  label: 'Close',
-                  variant: ButtonVariant.primary,
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
+          error: (error, stack) => _StatusPane(
+            icon: Icons.error_outline,
+            iconColor: Theme.of(context).colorScheme.error,
+            title: 'Failed to load changelog',
+            detail: error.toString(),
           ),
           data: (changelogData) {
             if (changelogData.releases.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.all(AppTheme.paddingL),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.history,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: AppTheme.paddingM),
-                    TitleMediumLabel(
-                      'No release history available',
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: AppTheme.paddingL),
-                    BaseButton(
-                      label: 'Close',
-                      variant: ButtonVariant.primary,
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
+              return _StatusPane(
+                icon: Icons.history,
+                iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                title: 'No release history available',
               );
             }
 
-            final release = changelogData.releases[currentIndex.value];
-            final hasPrevious =
-                currentIndex.value < changelogData.releases.length - 1;
-            final hasNext = currentIndex.value > 0;
+            final release = changelogData.releases[index];
 
             return Column(
               children: [
-                // Dialog title bar with close button
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.history,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 12),
-                      TitleLargeLabel('Release History'),
-                      const Spacer(),
-                      BaseIconButton(
-                        onPressed: () => closeDialog(context),
-                        icon: Icons.close,
-                        tooltip: 'Close',
-                      ),
-                    ],
-                  ),
-                ),
-
                 // Version header
                 Container(
                   width: double.infinity,
@@ -178,7 +122,7 @@ class ChangelogDialog extends HookConsumerWidget {
                             'Version ${release.version}',
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          if (currentIndex.value == 0) ...[
+                          if (index == 0) ...[
                             const SizedBox(width: AppTheme.paddingS),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -265,127 +209,118 @@ class ChangelogDialog extends HookConsumerWidget {
                     ),
                   ),
                 ),
-
-                // Bottom action bar with navigation
-                Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    border: Border(
-                      top: BorderSide(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      // "Don't show again" checkbox (left side)
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: dontShowAgain.value,
-                              onChanged: (value) =>
-                                  dontShowAgain.value = value ?? false,
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            Flexible(
-                              child: BodySmallLabel(
-                                "Don't show on startup",
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Navigation controls (center)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Jump to oldest button (leftmost)
-                          BaseIconButton(
-                            onPressed: hasPrevious
-                                ? () => currentIndex.value =
-                                      changelogData.releases.length - 1
-                                : null,
-                            icon: Icons.first_page,
-                            tooltip: 'Oldest version',
-                            variant: ButtonVariant.primary,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          // Older button (left arrow)
-                          BaseIconButton(
-                            onPressed: hasPrevious
-                                ? () => currentIndex.value++
-                                : null,
-                            icon: Icons.chevron_left,
-                            tooltip: 'Older version',
-                            variant: ButtonVariant.primary,
-                          ),
-                          const SizedBox(width: AppTheme.paddingM),
-                          // Counter
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingM,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.paddingM,
-                              ),
-                            ),
-                            child: BodyMediumLabel(
-                              '${currentIndex.value + 1} of ${changelogData.releases.length}',
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                          const SizedBox(width: AppTheme.paddingM),
-                          // Newer button (right arrow)
-                          BaseIconButton(
-                            onPressed: hasNext
-                                ? () => currentIndex.value--
-                                : null,
-                            icon: Icons.chevron_right,
-                            tooltip: 'Newer version',
-                            variant: ButtonVariant.primary,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          // Jump to latest button (rightmost)
-                          BaseIconButton(
-                            onPressed: hasNext
-                                ? () => currentIndex.value = 0
-                                : null,
-                            icon: Icons.last_page,
-                            tooltip: 'Latest version',
-                            variant: ButtonVariant.primary,
-                          ),
-                          const SizedBox(width: AppTheme.paddingL),
-                          // Close button
-                          BaseButton(
-                            label: 'Close',
-                            variant: ButtonVariant.primary,
-                            onPressed: () => closeDialog(context),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               ],
             );
           },
         ),
+        footer: releases.isEmpty
+            ? null
+            : Container(
+                padding: const EdgeInsets.all(AppTheme.paddingM),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  border: Border(
+                    top: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    // "Don't show again" checkbox (left side)
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: dontShowAgain.value,
+                            onChanged: (value) =>
+                                setDontShowAgain(value ?? false),
+                          ),
+                          const SizedBox(width: AppTheme.paddingS),
+                          Flexible(
+                            child: BodySmallLabel(
+                              "Don't show on startup",
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Navigation controls (center)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        BaseIconButton(
+                          onPressed: hasOlder
+                              ? () => currentIndex.value = releases.length - 1
+                              : null,
+                          icon: Icons.first_page,
+                          tooltip: 'Oldest version',
+                          variant: ButtonVariant.primary,
+                        ),
+                        const SizedBox(width: AppTheme.paddingS),
+                        BaseIconButton(
+                          onPressed: hasOlder
+                              ? () => currentIndex.value = index + 1
+                              : null,
+                          icon: Icons.chevron_left,
+                          tooltip: 'Older version',
+                          variant: ButtonVariant.primary,
+                        ),
+                        const SizedBox(width: AppTheme.paddingM),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppTheme.paddingM,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.paddingM,
+                            ),
+                          ),
+                          child: BodyMediumLabel(
+                            '${index + 1} of ${releases.length}',
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        const SizedBox(width: AppTheme.paddingM),
+                        BaseIconButton(
+                          onPressed: hasNewer
+                              ? () => currentIndex.value = index - 1
+                              : null,
+                          icon: Icons.chevron_right,
+                          tooltip: 'Newer version',
+                          variant: ButtonVariant.primary,
+                        ),
+                        const SizedBox(width: AppTheme.paddingS),
+                        BaseIconButton(
+                          onPressed: hasNewer
+                              ? () => currentIndex.value = 0
+                              : null,
+                          icon: Icons.last_page,
+                          tooltip: 'Latest version',
+                          variant: ButtonVariant.primary,
+                        ),
+                        const SizedBox(width: AppTheme.paddingL),
+                        BaseButton(
+                          label: 'Close',
+                          variant: ButtonVariant.primary,
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -401,9 +336,10 @@ class ChangelogDialog extends HookConsumerWidget {
 
   /// Show the changelog dialog
   static Future<void> show(BuildContext context, {int initialIndex = 0}) async {
+    // Dismissable from every path: the checkbox persists on toggle, so a
+    // barrier click or Esc cannot lose anything.
     await showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (_) => ChangelogDialog(initialIndex: initialIndex),
     );
   }
@@ -465,7 +401,6 @@ class ChangelogDialog extends HookConsumerWidget {
     Logger.info('[ChangelogDialog] Showing dialog now');
     await showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (_) => const ChangelogDialog(initialIndex: 0),
     );
 
@@ -486,5 +421,41 @@ class ChangelogDialog extends HookConsumerWidget {
     }
 
     Logger.info('[ChangelogDialog] showIfNeeded completed');
+  }
+}
+
+/// Loading-adjacent panes (error, empty history). Closing goes through the
+/// header X, Esc or Enter - a pane-level Close button would be a second
+/// affordance for the same job.
+class _StatusPane extends StatelessWidget {
+  const _StatusPane({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.detail,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String? detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppTheme.paddingL),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 64, color: iconColor),
+          const SizedBox(height: AppTheme.paddingM),
+          TitleLargeLabel(title),
+          if (detail != null) ...[
+            const SizedBox(height: AppTheme.paddingS),
+            BodyMediumLabel(detail!, textAlign: TextAlign.center),
+          ],
+        ],
+      ),
+    );
   }
 }

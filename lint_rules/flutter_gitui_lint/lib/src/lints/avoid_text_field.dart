@@ -91,7 +91,9 @@ class AvoidTextField extends DartLintRule {
           if (iconExpr is InstanceCreationExpression) {
             final iconType = iconExpr.staticType?.element?.name;
             // BaseTextField only accepts IconData, not Widgets like Row
-            if (iconType == 'Row' || iconType == 'Column' || iconType == 'Stack') {
+            if (iconType == 'Row' ||
+                iconType == 'Column' ||
+                iconType == 'Stack') {
               return true;
             }
           }

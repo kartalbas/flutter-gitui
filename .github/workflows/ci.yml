@@ -34,12 +34,21 @@ jobs:
       # was formatted with. Keeping it enforced stops future diffs from mixing
       # real changes with reformatting noise.
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: dart format --output=none --set-exit-if-changed lib test lint_rules
 
-      # Scoped to the application sources on purpose: the lint_rules/ package
-      # does not compile against analyzer 8.x and is analyzed by its own job.
+      # lint_rules/ resolves as a member of the root pub workspace, sharing one
+      # analyzer with the app, so the plugin package is analyzed here together
+      # with the application sources.
       - name: Analyze application code
-        run: flutter analyze lib test
+        run: flutter analyze lib test lint_rules
+
+      # Blocking design-system gate: executes the avoid_* rules from
+      # lint_rules/flutter_gitui_lint. `flutter analyze` never runs custom_lint
+      # plugins, so without this step the rules are IDE-only advice. The flags
+      # are explicit -- they match today's defaults, so an upstream default flip
+      # cannot silently soften the gate.
+      - name: Enforce design-system lint rules
+        run: dart run custom_lint --fatal-infos --fatal-warnings
 
   test:
     name: Test

@@ -31,44 +31,44 @@ PluginBase createPlugin() => _FlutterGitUILint();
 class _FlutterGitUILint extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) => [
-        // Button lints
-        AvoidFilledButton(),
-        AvoidTextButton(),
-        AvoidElevatedButton(),
-        AvoidOutlinedButton(),
-        AvoidIconButton(),
+    // Button lints
+    AvoidFilledButton(),
+    AvoidTextButton(),
+    AvoidElevatedButton(),
+    AvoidOutlinedButton(),
+    AvoidIconButton(),
 
-        // List lints
-        AvoidListTile(),
+    // List lints
+    AvoidListTile(),
 
-        // Form lints
-        AvoidTextField(),
-        AvoidDropdownButtonFormField(),
+    // Form lints
+    AvoidTextField(),
+    AvoidDropdownButtonFormField(),
 
-        // Dialog lints
-        AvoidSimpleDialog(),
-        AvoidAlertDialog(),
-        AvoidDialog(),
+    // Dialog lints
+    AvoidSimpleDialog(),
+    AvoidAlertDialog(),
+    AvoidDialog(),
 
-        // Card lints
-        AvoidCard(),
+    // Card lints
+    AvoidCard(),
 
-        // Chip/Badge lints
-        AvoidChip(),
-        AvoidFilterChip(),
-        AvoidActionChip(),
-        AvoidChoiceChip(),
-        AvoidBadge(),
+    // Chip/Badge lints
+    AvoidChip(),
+    AvoidFilterChip(),
+    AvoidActionChip(),
+    AvoidChoiceChip(),
+    AvoidBadge(),
 
-        // Theme lints
-        AvoidHardcodedSpacing(),
-        AvoidHardcodedColors(),
+    // Theme lints
+    AvoidHardcodedSpacing(),
+    AvoidHardcodedColors(),
 
-        // Typography lints
-        AvoidTextWithStyle(),
-        AvoidNullColorInCopyWith(),
+    // Typography lints
+    AvoidTextWithStyle(),
+    AvoidNullColorInCopyWith(),
 
-        // Logging lints
-        AvoidPrint(),
-      ];
+    // Logging lints
+    AvoidPrint(),
+  ];
 }

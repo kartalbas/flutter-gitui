@@ -456,21 +456,18 @@ class AppTheme {
   static const double radiusL = 12.0;
   static const double radiusXL = 16.0;
 
-  /// Icon sizes
-  static const double iconXS = 12.0;
-  static const double iconS = 16.0;
-  static const double iconM = 20.0;
-  static const double iconL = 24.0;
-  static const double iconXL = 32.0;
-
-  /// Standardized icon sizes for UX consistency
-  /// Use these for new components to ensure visual hierarchy
-  static const double iconSizeSmall = 16.0; // Tab icons, inline indicators
-  static const double iconSizeDefault =
-      24.0; // Buttons (use default, don't specify)
-  static const double iconSizeLarge = 32.0; // Headers, emphasis
-  static const double iconSizeXL = 48.0; // Empty states
-  static const double iconSizeXXL = 64.0; // Drag overlays, splash screens
+  /// Icon sizes — the single icon scale for the app.
+  ///
+  /// `iconL` (24) is the Material 3 default icon size (icon buttons,
+  /// navigation, app bars). `iconXS` (12) is reserved for non-interactive
+  /// inline indicators in dense list rows and must not be used on tappable
+  /// controls. Sizes above 32 are expressed as multiples of the scale,
+  /// e.g. `iconXL * 2` (64) for empty-state artwork.
+  static const double iconXS = 12.0; // Non-interactive inline indicators
+  static const double iconS = 16.0; // Dense tree/list icons, small buttons
+  static const double iconM = 20.0; // Compact toolbar and secondary icons
+  static const double iconL = 24.0; // M3 default icon size (buttons, nav)
+  static const double iconXL = 32.0; // Headers, emphasis, empty states
 
   /// Navigation rail width
   static const double navigationRailWidth = 72.0;
@@ -480,10 +477,17 @@ class AppTheme {
   // Animation Durations
   // ============================================
 
-  /// Base animation durations (before speed multiplier applied)
-  static const Duration _baseAnimationFast = Duration(milliseconds: 150);
-  static const Duration _baseAnimationNormal = Duration(milliseconds: 250);
-  static const Duration _baseAnimationSlow = Duration(milliseconds: 350);
+  /// Base animation durations (before speed multiplier applied).
+  ///
+  /// These are the Material 3 duration tokens short3 / medium1 / medium3
+  /// (see [Durations] in the Flutter SDK). Never use raw [Duration]
+  /// constants for animations — always route timing through
+  /// [getQuickAnimation] / [getStandardAnimation] / [getSlowAnimation]
+  /// (or the `BuildContext` extension) so the user's animation-speed
+  /// setting is respected.
+  static const Duration _baseAnimationFast = Durations.short3; // 150 ms
+  static const Duration _baseAnimationNormal = Durations.medium1; // 250 ms
+  static const Duration _baseAnimationSlow = Durations.medium3; // 350 ms
 
   /// Get animation duration based on speed setting
   ///

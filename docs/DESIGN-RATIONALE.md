@@ -207,7 +207,7 @@ This creates noticeable but not jarring differences.
 
 Material Design's 4dp grid ensures touch targets meet minimum size requirements:
 - Minimum touch target: 48x48dp (12 units)
-- Icon buttons: 40x40dp (10 units) - `AppTheme.iconSizeDefault`
+- Icon buttons: 40x40dp (10 units) with a 24px icon - `AppTheme.iconL`
 - Small buttons: 32x32dp (8 units) - `ButtonSize.small`
 
 ### Usage Guidelines

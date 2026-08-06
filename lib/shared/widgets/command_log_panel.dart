@@ -163,7 +163,7 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
         children: [
           Icon(
             PhosphorIconsRegular.terminal,
-            size: 64,
+            size: AppTheme.iconXL * 2,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
@@ -186,7 +186,7 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
         children: [
           Icon(
             PhosphorIconsRegular.magnifyingGlass,
-            size: AppTheme.iconSizeXL,
+            size: AppTheme.iconXL * 2,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),

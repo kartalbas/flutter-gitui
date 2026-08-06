@@ -515,8 +515,9 @@ Wrap(
 | `iconM` | 20px | Standard icons in lists |
 | `iconL` | 24px | Default button icons (DON'T specify, use default) |
 | `iconXL` | 32px | Headers, emphasis |
-| `iconSizeXL` | 48px | Empty states, large icons |
-| `iconSizeXXL` | 64px | Drag overlays, splash screens |
+
+Sizes above 32px are expressed as multiples of the scale, e.g.
+`AppTheme.iconXL * 2` (64px) for empty-state artwork and drag overlays.
 
 ### Git Semantic Colors
 
@@ -724,7 +725,7 @@ Center(
   child: Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      Icon(icon, size: AppTheme.iconSizeXL),
+      Icon(icon, size: AppTheme.iconXL * 2),
       const SizedBox(height: AppTheme.paddingL),
       TitleLargeLabel(title),
       const SizedBox(height: AppTheme.paddingS),

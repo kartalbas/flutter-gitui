@@ -18,9 +18,6 @@ class AppConstants {
 
   // Debouncing & timing
   static const Duration debounceMilliseconds = Duration(milliseconds: 300);
-  static const Duration shortDelay = Duration(milliseconds: 100);
-  static const Duration mediumDelay = Duration(milliseconds: 300);
-  static const Duration longDelay = Duration(milliseconds: 500);
 
   // Pagination
   static const int defaultPageSize = 50;

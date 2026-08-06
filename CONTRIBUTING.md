@@ -250,7 +250,7 @@ Center(
     children: [
       Icon(
         PhosphorIconsRegular.fileX,
-        size: AppTheme.iconSizeXL,  // 48px
+        size: AppTheme.iconXL * 2,  // 64px
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       const SizedBox(height: AppTheme.paddingL),

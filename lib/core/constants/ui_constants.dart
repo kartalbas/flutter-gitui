@@ -5,13 +5,6 @@ class UIConstants {
   static const double compactListItemHeight = 48.0;
   static const double commitListItemHeight = 64.0;
 
-  // Icon sizes
-  static const double iconSizeXLarge = 64.0;
-  static const double iconSizeLarge = 32.0;
-  static const double iconSizeMedium = 24.0;
-  static const double iconSizeSmall = 16.0;
-  static const double iconSizeXSmall = 12.0;
-
   // Panel dimensions
   static const double minPanelWidth = 200.0;
   static const double maxPanelWidth = 800.0;
@@ -26,11 +19,6 @@ class UIConstants {
   // Diff viewer
   static const double diffLineHeight = 20.0;
   static const double diffGutterWidth = 60.0;
-
-  // Animations
-  static const Duration shortAnimationDuration = Duration(milliseconds: 150);
-  static const Duration mediumAnimationDuration = Duration(milliseconds: 300);
-  static const Duration longAnimationDuration = Duration(milliseconds: 500);
 
   // Loading indicators
   static const Duration minLoadingDuration = Duration(milliseconds: 500);

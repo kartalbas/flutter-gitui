@@ -679,7 +679,7 @@ class BranchesErrorState extends StatelessWidget {
         children: [
           Icon(
             PhosphorIconsRegular.warningCircle,
-            size: AppTheme.iconSizeXL,
+            size: AppTheme.iconXL * 2,
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
@@ -720,7 +720,7 @@ class ChangesErrorState extends StatelessWidget {
           children: [
             Icon(
               PhosphorIconsRegular.warningCircle,
-              size: AppTheme.iconSizeXL,
+              size: AppTheme.iconXL * 2,
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: AppTheme.paddingL),
@@ -794,7 +794,7 @@ class RepositoriesErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmptyStateWidget(
       icon: PhosphorIconsRegular.warningCircle,
-      iconSize: AppTheme.iconSizeXL,
+      iconSize: AppTheme.iconXL * 2,
       title: 'Failed to Load Repositories',
       message: errorMessage,
       actionLabel: 'Retry',

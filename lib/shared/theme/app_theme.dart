@@ -210,56 +210,174 @@ class AppTheme {
     }
   }
 
-  /// Get discrete font size adjustments (in pixels, not multipliers)
-  /// Uses standard optical sizes that fonts are designed for
-  static Map<String, double> _getFontSizeAdjustments(AppFontSize fontSize) {
-    switch (fontSize) {
-      case AppFontSize.tiny:
-        return {
-          'display': 48.0, // -9px from standard 57
-          'headline': 28.0, // -4px from standard 32
-          'title': 18.0, // -4px from standard 22
-          'body': 13.0, // -3px from standard 16
-          'label': 10.0, // -1px from standard 11
-        };
-      case AppFontSize.small:
-        return {
-          'display': 52.0, // -5px from standard 57
-          'headline': 30.0, // -2px from standard 32
-          'title': 20.0, // -2px from standard 22
-          'body': 14.0, // -2px from standard 16
-          'label': 11.0, // standard
-        };
-      case AppFontSize.medium:
-        return {
-          'display': 57.0, // Material Design 3 standard
-          'headline': 32.0, // Material Design 3 standard
-          'title': 22.0, // Material Design 3 standard
-          'body': 16.0, // Material Design 3 standard
-          'label': 11.0, // Material Design 3 standard
-        };
-      case AppFontSize.large:
-        return {
-          'display': 64.0, // +7px from standard 57
-          'headline': 36.0, // +4px from standard 32
-          'title': 24.0, // +2px from standard 22
-          'body': 18.0, // +2px from standard 16
-          'label': 12.0, // +1px from standard 11
-        };
+  /// Scale factor applied to every text role's `medium` size for a user
+  /// font-size setting.
+  ///
+  /// The tiny/small/large columns of the type scale derive from the medium
+  /// column by one rule - multiply by the factor and round to the nearest
+  /// whole logical pixel - instead of hand-picked per-role values. The
+  /// factors are chosen so that after rounding every role keeps a distinct
+  /// size per setting and no two settings collapse to the same pixel size
+  /// for any role.
+  static const Map<AppFontSize, double> _fontSizeFactor = {
+    AppFontSize.tiny: 0.85,
+    AppFontSize.small: 0.92,
+    AppFontSize.medium: 1.0,
+    AppFontSize.large: 1.10,
+  };
+
+  /// Font features shared by every proportional text style.
+  static const List<FontFeature> _textFontFeatures = [
+    FontFeature.enable('kern'), // Kerning for better spacing
+    FontFeature.enable('liga'), // Standard ligatures
+    FontFeature.enable('clig'), // Contextual ligatures
+  ];
+
+  /// Font features for monospace (code) text styles.
+  static const List<FontFeature> _monoFontFeatures = [
+    FontFeature.enable('kern'), // Kerning
+    FontFeature.enable('liga'), // Ligatures for coding fonts
+    FontFeature.enable('clig'), // Contextual ligatures
+    FontFeature.enable('zero'), // Slashed zero for better distinction
+  ];
+
+  /// Build the app's [TextTheme] from a Google Fonts base theme.
+  ///
+  /// This is the single place that defines the app's type scale: all 15
+  /// Material 3 text roles with distinct sizes, plus the letter spacing and
+  /// line height of the Material 3 2021 English-like type ramp
+  /// (`Typography.englishLike2021`).
+  ///
+  /// `size` is the font size at [AppFontSize.medium] in logical pixels.
+  /// Display, headline, title and body sizes are deliberately tuned below
+  /// the phone-first Material 3 defaults for this dense desktop app; every
+  /// deviation is recorded in docs/deviation_register.yaml with the M3 value
+  /// noted inline below. The other settings derive from medium via
+  /// [_fontSizeFactor].
+  ///
+  /// `tracking` (letter spacing in logical pixels) and `height` (line height
+  /// as a multiple of the font size) are carried unchanged from the M3 ramp.
+  /// They must be set explicitly: the Google Fonts base theme supplies only
+  /// font family and color - its letterSpacing and height are always null -
+  /// so relying on it would drop the M3 metrics.
+  static TextTheme _buildTextTheme(
+    TextTheme baseTheme,
+    AppFontSize fontSize,
+    List<FontFeature> fontFeatures,
+  ) {
+    final factor = _fontSizeFactor[fontSize]!;
+
+    TextStyle? role(
+      TextStyle? style, {
+      required double size,
+      required double tracking,
+      required double height,
+    }) {
+      if (style == null) return null;
+      return style.copyWith(
+        fontSize: (size * factor).roundToDouble(),
+        letterSpacing: tracking,
+        height: height,
+        fontFeatures: fontFeatures,
+      );
     }
+
+    return TextTheme(
+      displayLarge: role(
+        baseTheme.displayLarge,
+        size: 45, // M3: 57
+        tracking: -0.25,
+        height: 1.12,
+      ),
+      displayMedium: role(
+        baseTheme.displayMedium,
+        size: 36, // M3: 45
+        tracking: 0.0,
+        height: 1.16,
+      ),
+      displaySmall: role(
+        baseTheme.displaySmall,
+        size: 32, // M3: 36
+        tracking: 0.0,
+        height: 1.22,
+      ),
+      headlineLarge: role(
+        baseTheme.headlineLarge,
+        size: 28, // M3: 32
+        tracking: 0.0,
+        height: 1.25,
+      ),
+      headlineMedium: role(
+        baseTheme.headlineMedium,
+        size: 24, // M3: 28
+        tracking: 0.0,
+        height: 1.29,
+      ),
+      headlineSmall: role(
+        baseTheme.headlineSmall,
+        size: 22, // M3: 24
+        tracking: 0.0,
+        height: 1.33,
+      ),
+      titleLarge: role(
+        baseTheme.titleLarge,
+        size: 20, // M3: 22
+        tracking: 0.0,
+        height: 1.27,
+      ),
+      titleMedium: role(
+        baseTheme.titleMedium,
+        size: 16,
+        tracking: 0.15,
+        height: 1.50,
+      ),
+      titleSmall: role(
+        baseTheme.titleSmall,
+        size: 14,
+        tracking: 0.1,
+        height: 1.43,
+      ),
+      bodyLarge: role(
+        baseTheme.bodyLarge,
+        size: 15, // M3: 16
+        tracking: 0.5,
+        height: 1.50,
+      ),
+      bodyMedium: role(
+        baseTheme.bodyMedium,
+        size: 13, // M3: 14
+        tracking: 0.25,
+        height: 1.43,
+      ),
+      bodySmall: role(
+        baseTheme.bodySmall,
+        size: 12,
+        tracking: 0.4,
+        height: 1.33,
+      ),
+      labelLarge: role(
+        baseTheme.labelLarge,
+        size: 14,
+        tracking: 0.1,
+        height: 1.43,
+      ),
+      labelMedium: role(
+        baseTheme.labelMedium,
+        size: 12,
+        tracking: 0.5,
+        height: 1.33,
+      ),
+      labelSmall: role(
+        baseTheme.labelSmall,
+        size: 11,
+        tracking: 0.5,
+        height: 1.45,
+      ),
+    );
   }
 
   /// Get text theme with custom font family and size
   static TextTheme _getTextTheme(String fontFamily, AppFontSize fontSize) {
-    final sizeMap = _getFontSizeAdjustments(fontSize);
-
-    // Font features for enhanced rendering
-    final fontFeatures = <FontFeature>[
-      const FontFeature.enable('kern'), // Enable kerning for better spacing
-      const FontFeature.enable('liga'), // Enable ligatures
-      const FontFeature.enable('clig'), // Enable contextual ligatures
-    ];
-
     // Get the base text theme from Google Fonts
     TextTheme baseTheme;
     try {
@@ -268,130 +386,15 @@ class AppTheme {
       // Fallback to Inter if specified font family is not available
       baseTheme = GoogleFonts.interTextTheme();
     }
-
-    // Helper to apply discrete font sizes and enhanced rendering
-    TextStyle? applyEnhancements(
-      TextStyle? style,
-      String category,
-      double defaultSize,
-    ) {
-      if (style == null) return null;
-
-      return style.copyWith(
-        fontSize: sizeMap[category] ?? defaultSize,
-        letterSpacing: style.letterSpacing ?? 0.0,
-        height: style.height ?? 1.4, // Improved line height for readability
-        fontFeatures: fontFeatures, // Apply font features
-      );
-    }
-
-    return TextTheme(
-      displayLarge: applyEnhancements(baseTheme.displayLarge, 'display', 57),
-      displayMedium: applyEnhancements(baseTheme.displayMedium, 'display', 45),
-      displaySmall: applyEnhancements(baseTheme.displaySmall, 'display', 36),
-      headlineLarge: applyEnhancements(baseTheme.headlineLarge, 'headline', 32),
-      headlineMedium: applyEnhancements(
-        baseTheme.headlineMedium,
-        'headline',
-        28,
-      ),
-      headlineSmall: applyEnhancements(baseTheme.headlineSmall, 'headline', 24),
-      titleLarge: applyEnhancements(baseTheme.titleLarge, 'title', 22),
-      titleMedium: applyEnhancements(baseTheme.titleMedium, 'title', 16),
-      titleSmall: applyEnhancements(baseTheme.titleSmall, 'title', 14),
-      bodyLarge: applyEnhancements(baseTheme.bodyLarge, 'body', 16),
-      bodyMedium: applyEnhancements(baseTheme.bodyMedium, 'body', 14),
-      bodySmall: applyEnhancements(baseTheme.bodySmall, 'body', 12),
-      labelLarge: applyEnhancements(baseTheme.labelLarge, 'label', 14),
-      labelMedium: applyEnhancements(baseTheme.labelMedium, 'label', 12),
-      labelSmall: applyEnhancements(baseTheme.labelSmall, 'label', 11),
-    );
-  }
-
-  /// Apply enhanced rendering properties to text theme
-  /// Note: Currently unused but kept for potential future enhancements
-  // ignore: unused_element
-  static TextTheme _applyEnhancedRendering(
-    TextTheme theme,
-    List<FontFeature> fontFeatures,
-  ) {
-    TextStyle? enhance(TextStyle? style) {
-      if (style == null) return null;
-      return style.copyWith(
-        letterSpacing: style.letterSpacing ?? 0.0,
-        height: style.height ?? 1.4, // Improved line height for readability
-        fontFeatures: fontFeatures, // Apply font features
-      );
-    }
-
-    return TextTheme(
-      displayLarge: enhance(theme.displayLarge),
-      displayMedium: enhance(theme.displayMedium),
-      displaySmall: enhance(theme.displaySmall),
-      headlineLarge: enhance(theme.headlineLarge),
-      headlineMedium: enhance(theme.headlineMedium),
-      headlineSmall: enhance(theme.headlineSmall),
-      titleLarge: enhance(theme.titleLarge),
-      titleMedium: enhance(theme.titleMedium),
-      titleSmall: enhance(theme.titleSmall),
-      bodyLarge: enhance(theme.bodyLarge),
-      bodyMedium: enhance(theme.bodyMedium),
-      bodySmall: enhance(theme.bodySmall),
-      labelLarge: enhance(theme.labelLarge),
-      labelMedium: enhance(theme.labelMedium),
-      labelSmall: enhance(theme.labelSmall),
-    );
+    return _buildTextTheme(baseTheme, fontSize, _textFontFeatures);
   }
 
   /// Monospace text theme for code (JetBrains Mono)
   static TextTheme monoTextTheme({AppFontSize fontSize = AppFontSize.medium}) {
-    // Font features for monospace fonts
-    final fontFeatures = <FontFeature>[
-      const FontFeature.enable('kern'), // Enable kerning
-      const FontFeature.enable('liga'), // Enable ligatures for coding fonts
-      const FontFeature.enable('clig'), // Contextual ligatures
-      const FontFeature.enable('zero'), // Slashed zero for better distinction
-    ];
-
-    final baseTheme = GoogleFonts.jetBrainsMonoTextTheme();
-    final sizeMap = _getFontSizeAdjustments(fontSize);
-
-    // Helper to apply discrete font sizes and enhanced rendering
-    TextStyle? applyEnhancements(
-      TextStyle? style,
-      String category,
-      double defaultSize,
-    ) {
-      if (style == null) return null;
-
-      return style.copyWith(
-        fontSize: sizeMap[category] ?? defaultSize,
-        letterSpacing: style.letterSpacing ?? 0.0,
-        height: style.height ?? 1.5, // Slightly taller line height for code
-        fontFeatures: fontFeatures, // Apply font features
-      );
-    }
-
-    return TextTheme(
-      displayLarge: applyEnhancements(baseTheme.displayLarge, 'display', 57),
-      displayMedium: applyEnhancements(baseTheme.displayMedium, 'display', 45),
-      displaySmall: applyEnhancements(baseTheme.displaySmall, 'display', 36),
-      headlineLarge: applyEnhancements(baseTheme.headlineLarge, 'headline', 32),
-      headlineMedium: applyEnhancements(
-        baseTheme.headlineMedium,
-        'headline',
-        28,
-      ),
-      headlineSmall: applyEnhancements(baseTheme.headlineSmall, 'headline', 24),
-      titleLarge: applyEnhancements(baseTheme.titleLarge, 'title', 22),
-      titleMedium: applyEnhancements(baseTheme.titleMedium, 'title', 16),
-      titleSmall: applyEnhancements(baseTheme.titleSmall, 'title', 14),
-      bodyLarge: applyEnhancements(baseTheme.bodyLarge, 'body', 16),
-      bodyMedium: applyEnhancements(baseTheme.bodyMedium, 'body', 14),
-      bodySmall: applyEnhancements(baseTheme.bodySmall, 'body', 12),
-      labelLarge: applyEnhancements(baseTheme.labelLarge, 'label', 14),
-      labelMedium: applyEnhancements(baseTheme.labelMedium, 'label', 12),
-      labelSmall: applyEnhancements(baseTheme.labelSmall, 'label', 11),
+    return _buildTextTheme(
+      GoogleFonts.jetBrainsMonoTextTheme(),
+      fontSize,
+      _monoFontFeatures,
     );
   }
 

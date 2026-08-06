@@ -1,0 +1,125 @@
+# Deviation register
+#
+# Every place where this app intentionally departs from the Material 3
+# specification is recorded here, with the spec value, the app value, the
+# reason, and the exact location of the spec value in the Flutter SDK sources
+# (pinned to the SDK version the app builds with).
+#
+# The register is normative and executable. Conformance tests assert "spec
+# value OR registered deviation", so an unregistered mismatch fails, and a
+# registered entry whose value has come back into line also fails, as stale.
+# Neither the code nor this file can drift silently.
+#
+# Type scale note: the sizes below are the `AppFontSize.medium` (default)
+# values. The tiny/small/large user settings derive from medium by a single
+# rule (x0.85 / x0.92 / x1.10, rounded to whole logical pixels) in
+# lib/shared/theme/app_theme.dart (_fontSizeFactor). A user-selectable font
+# size is an accessibility feature on top of the scale, not a deviation.
+# Roles not listed here (titleMedium, titleSmall, bodySmall, labelLarge,
+# labelMedium, labelSmall) use the M3 sizes unchanged, and every role keeps the
+# M3 letterSpacing and height ratio.
+
+version: 1
+
+deviations:
+  - id: TYPE-001
+    component: TextTheme.displayLarge
+    property: fontSize
+    spec_value: 57.0
+    app_value: 45.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2097 (Typography.englishLike2021)"
+    rationale: >
+      The M3 display sizes are tuned for phone hero surfaces. On a dense
+      desktop Git client a 57 px display line dwarfs the rows around it;
+      45 px keeps the display role clearly dominant while staying
+      proportionate to desktop reading distance.
+    registered: 2026-08-06
+
+  - id: TYPE-002
+    component: TextTheme.displayMedium
+    property: fontSize
+    spec_value: 45.0
+    app_value: 36.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2098 (Typography.englishLike2021)"
+    rationale: >
+      Desktop-density tuning; keeps the display ramp monotonic (45/36/32)
+      under the reduced displayLarge.
+    registered: 2026-08-06
+
+  - id: TYPE-003
+    component: TextTheme.displaySmall
+    property: fontSize
+    spec_value: 36.0
+    app_value: 32.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2099 (Typography.englishLike2021)"
+    rationale: >
+      Desktop-density tuning; keeps the display ramp monotonic (45/36/32)
+      under the reduced displayLarge.
+    registered: 2026-08-06
+
+  - id: TYPE-004
+    component: TextTheme.headlineLarge
+    property: fontSize
+    spec_value: 32.0
+    app_value: 28.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2100 (Typography.englishLike2021)"
+    rationale: >
+      Desktop-density tuning: headlines top screen sections that sit much
+      closer together than on a phone; 28/24/22 preserves the headline
+      hierarchy without consuming vertical space.
+    registered: 2026-08-06
+
+  - id: TYPE-005
+    component: TextTheme.headlineMedium
+    property: fontSize
+    spec_value: 28.0
+    app_value: 24.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2101 (Typography.englishLike2021)"
+    rationale: >
+      Desktop-density tuning; see TYPE-004.
+    registered: 2026-08-06
+
+  - id: TYPE-006
+    component: TextTheme.headlineSmall
+    property: fontSize
+    spec_value: 24.0
+    app_value: 22.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2102 (Typography.englishLike2021)"
+    rationale: >
+      Desktop-density tuning; see TYPE-004.
+    registered: 2026-08-06
+
+  - id: TYPE-007
+    component: TextTheme.titleLarge
+    property: fontSize
+    spec_value: 22.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2103 (Typography.englishLike2021)"
+    rationale: >
+      Dialog and card titles at 22 px crowd desktop dialogs that open in
+      quick succession; 20 px keeps titleLarge visually distinct from
+      headlineSmall (22) above it in this app's ramp.
+    registered: 2026-08-06
+
+  - id: TYPE-008
+    component: TextTheme.bodyLarge
+    property: fontSize
+    spec_value: 16.0
+    app_value: 15.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2109 (Typography.englishLike2021)"
+    rationale: >
+      Primary reading size for a data-dense desktop tool at typical desktop
+      viewing distance; 15 px keeps list rows compact while staying above
+      the 13 px secondary text.
+    registered: 2026-08-06
+
+  - id: TYPE-009
+    component: TextTheme.bodyMedium
+    property: fontSize
+    spec_value: 14.0
+    app_value: 13.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/typography.dart:2110 (Typography.englishLike2021)"
+    rationale: >
+      Secondary and supporting text one step under the reduced bodyLarge
+      (15); keeps the body ramp strictly monotonic (15/13/12).
+    registered: 2026-08-06

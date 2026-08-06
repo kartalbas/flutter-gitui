@@ -132,7 +132,14 @@ class BaseTextField extends StatefulWidget {
   /// Callback when field is submitted (Enter key)
   final ValueChanged<String>? onSubmitted;
 
-  /// Validator function
+  /// Validator function.
+  ///
+  /// The field registers with an enclosing [Form], so
+  /// `formKey.currentState!.validate()` runs this validator, shows its message
+  /// inline on the field, and returns false while the input is invalid — the
+  /// contract every dialog's primary action and Enter handler rely on. After
+  /// the first user edit the field also re-validates live on every change, so
+  /// an error appears (and clears) at the keystroke that caused it.
   final String? Function(String?)? validator;
 
   /// Whether to autofocus this field
@@ -373,15 +380,25 @@ class _BaseTextFieldState extends State<BaseTextField> {
           extentOffset: _controller.text.length,
         );
       },
+      // A FormField, not a plain TextField: the widget always accepted a
+      // validator, but a TextField never runs one, so every dialog's
+      // `formKey.currentState!.validate()` found no fields and waved invalid
+      // input through. TextFormField registers with the enclosing Form, runs
+      // the validator, and shows its message on the field.
       // ignore: avoid_text_field
-      child: TextField(
+      child: TextFormField(
         controller: _controller,
         focusNode: widget.focusNode,
         decoration: decoration,
         obscureText: _obscureText,
         maxLines: widget.maxLines,
         onChanged: widget.onChanged,
-        onSubmitted: widget.onSubmitted,
+        onFieldSubmitted: widget.onSubmitted,
+        validator: widget.validator,
+        // Re-validate on every change once the user has touched the field:
+        // the error appears (and clears) at the keystroke that caused it,
+        // instead of going stale until the next submit attempt.
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         autofocus: widget.autofocus,
         enabled: widget.enabled,
         style: theme.textTheme.bodyMedium?.copyWith(

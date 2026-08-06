@@ -45,8 +45,19 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
   @override
   void dispose() {
     // Whatever closes this dialog - commit, cancel, escape - takes the text
-    // with it, so the registration must not outlive the field.
-    _unsavedInput?.unregister(UnsavedInputKind.commitMessage);
+    // with it, so the registration must not outlive the field. Deferred to
+    // after the frame: dispose runs while the tree is being finalized, and
+    // notifying a provider's listeners during that phase trips riverpod's
+    // build-phase assert. The mounted guard covers app teardown, where the
+    // notifier dies in the same frame as this dialog.
+    final unsavedInput = _unsavedInput;
+    if (unsavedInput != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (unsavedInput.mounted) {
+          unsavedInput.unregister(UnsavedInputKind.commitMessage);
+        }
+      });
+    }
     _messageController.dispose();
     super.dispose();
   }

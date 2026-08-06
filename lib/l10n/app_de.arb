@@ -1141,9 +1141,9 @@
   "describeWork": "Beschreiben Sie, woran Sie gearbeitet haben...",
   "stashAllFilesToggle": "Umschalten, um bestimmte Dateien auszuwählen",
   "keepStagedChangesSubtitle": "Änderungen im Index nach dem Stashen behalten",
-  "createTagDialog": "Tag erstellen",
-  "createNewTagAtHead": "Einen neuen Tag am aktuellen HEAD erstellen",
-  "releaseNotesHint": "Release-Notizen oder Beschreibung...",
+  "useRecentTagAsTemplate": "Vorhandenen Tag als Vorlage verwenden",
+  "selectTagTemplate": "Tag-Vorlage auswählen...",
+  "noTemplate": "Keine Vorlage",
   "deleteTagsDialog": "Tags löschen?",
   "deleteTagsConfirm": "{count, plural, =1{{count} Tag} other{{count} Tags}} löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.",
   "@deleteTagsConfirm": {

@@ -1141,9 +1141,9 @@
   "describeWork": "Décrivez ce sur quoi vous travailliez...",
   "stashAllFilesToggle": "Basculer pour sélectionner des fichiers spécifiques",
   "keepStagedChangesSubtitle": "Conserver les modifications dans l'index après le stash",
-  "createTagDialog": "Créer un tag",
-  "createNewTagAtHead": "Créer un nouveau tag au HEAD actuel",
-  "releaseNotesHint": "Notes de version ou description...",
+  "useRecentTagAsTemplate": "Utiliser un tag récent comme modèle",
+  "selectTagTemplate": "Sélectionner un modèle de tag...",
+  "noTemplate": "Aucun modèle",
   "deleteTagsDialog": "Supprimer les tags?",
   "deleteTagsConfirm": "Supprimer {count, plural, =1{{count} tag} other{{count} tags}}?\n\nCette action ne peut pas être annulée.\n\nTags à supprimer:\n{tagList}{ellipsis}",
   "@deleteTagsConfirm": {

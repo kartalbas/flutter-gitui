@@ -9,11 +9,21 @@ import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/commit.dart';
+import '../../core/git/models/tag.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 
-/// Dialog for creating a new Git tag
+/// The app's single create-tag dialog.
+///
+/// Both entry points share it: the command palette opens it without a target
+/// (the dropdown defaults to HEAD) and the history screen preselects the
+/// chosen commit through [initialCommit]. The target is a plain revision
+/// string, so no caller needs a particular model type to open the dialog.
+/// The dialog validates its form, creates the tag through the actions layer
+/// (which surfaces git failures and refreshes the tag providers), and pops
+/// `true` on success.
 class CreateTagDialog extends ConsumerStatefulWidget {
+  /// Revision to preselect as the tag target; defaults to HEAD.
   final String? initialCommit;
 
   const CreateTagDialog({super.key, this.initialCommit});
@@ -44,13 +54,44 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     super.dispose();
   }
 
+  /// Prefill name and message from an existing tag, so a release tag can be
+  /// derived from the previous one instead of retyped.
+  void _applyTemplate(GitTag template) {
+    setState(() {
+      _tagNameController.text = template.name;
+      if (template.isAnnotated && template.message != null) {
+        _messageController.text = template.message!;
+        _isAnnotated = true;
+      }
+    });
+  }
+
+  /// Last 10 tags, newest first, offered as prefill templates.
+  List<GitTag> _recentTags(AsyncValue<List<GitTag>> tagsAsync) {
+    final sorted =
+        tagsAsync.whenData((tags) {
+          final sortedTags = List<GitTag>.from(tags);
+          sortedTags.sort((a, b) {
+            if (a.date == null && b.date == null) return 0;
+            if (a.date == null) return 1;
+            if (b.date == null) return -1;
+            return b.date!.compareTo(a.date!);
+          });
+          return sortedTags;
+        }).value ??
+        [];
+    return sorted.take(10).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final commitsAsync = ref.watch(commitHistoryProvider);
+    final recentTags = _recentTags(ref.watch(tagsProvider));
 
     return BaseDialog(
       icon: PhosphorIconsRegular.tag,
-      title: AppLocalizations.of(context)!.createTag,
+      title: l10n.createTag,
       // The message field is multiline; Enter inside it writes a newline,
       // Enter anywhere else creates. _createTag validates the form itself.
       onSubmit: _isCreating ? null : _createTag,
@@ -73,29 +114,62 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                     const Icon(PhosphorIconsRegular.info, size: 20),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: BodySmallLabel(
-                        AppLocalizations.of(
-                          context,
-                        )!.createTagDialogDescription,
-                      ),
+                      child: BodySmallLabel(l10n.createTagDialogDescription),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: AppTheme.paddingL),
 
+              // Template selector: prefill from a recent tag
+              if (recentTags.isNotEmpty) ...[
+                BaseDropdown<GitTag?>(
+                  labelText: l10n.useRecentTagAsTemplate,
+                  hintText: l10n.selectTagTemplate,
+                  prefixIcon: PhosphorIconsRegular.tag,
+                  items: [
+                    BaseDropdownItem<GitTag?>.simple(
+                      value: null,
+                      label: l10n.noTemplate,
+                      icon: PhosphorIconsRegular.x,
+                    ),
+                    ...recentTags.map(
+                      (tag) => BaseDropdownItem<GitTag?>.withBadge(
+                        value: tag,
+                        label: tag.name,
+                        icon: tag.isAnnotated
+                            ? PhosphorIconsBold.tag
+                            : PhosphorIconsRegular.tag,
+                        badgeText: tag.isAnnotated ? l10n.annotated : null,
+                      ),
+                    ),
+                  ],
+                  onChanged: (tag) {
+                    if (tag != null) {
+                      _applyTemplate(tag);
+                    } else {
+                      setState(() {
+                        _tagNameController.clear();
+                        _messageController.clear();
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: AppTheme.paddingM),
+              ],
+
               // Tag name
               BaseTextField(
                 controller: _tagNameController,
-                label: AppLocalizations.of(context)!.tagName,
-                hintText: AppLocalizations.of(context)!.tagNameHint,
+                label: l10n.tagName,
+                hintText: l10n.tagNameHint,
                 prefixIcon: PhosphorIconsRegular.tag,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.enterTagName;
+                    return l10n.enterTagName;
                   }
                   if (value.contains(' ')) {
-                    return AppLocalizations.of(context)!.tagNameNoSpaces;
+                    return l10n.tagNameNoSpaces;
                   }
                   return null;
                 },
@@ -104,25 +178,19 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
               const SizedBox(height: AppTheme.paddingM),
 
               // Target commit
-              TitleSmallLabel(AppLocalizations.of(context)!.targetCommit),
+              TitleSmallLabel(l10n.targetCommit),
               const SizedBox(height: AppTheme.paddingS),
               commitsAsync.when(
                 data: (commits) => _buildCommitDropdown(commits),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) => BodyMediumLabel(
-                  AppLocalizations.of(context)!.errorLoadingCommits,
-                ),
+                error: (_, _) => BodyMediumLabel(l10n.errorLoadingCommits),
               ),
               const SizedBox(height: AppTheme.paddingL),
 
               // Annotated tag option
               SwitchListTile(
-                title: BodyMediumLabel(
-                  AppLocalizations.of(context)!.annotatedTag,
-                ),
-                subtitle: BodySmallLabel(
-                  AppLocalizations.of(context)!.includeMessageWithTag,
-                ),
+                title: BodyMediumLabel(l10n.annotatedTag),
+                subtitle: BodySmallLabel(l10n.includeMessageWithTag),
                 value: _isAnnotated,
                 onChanged: (value) {
                   setState(() => _isAnnotated = value);
@@ -134,21 +202,15 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
               if (_isAnnotated) ...[
                 BaseTextField(
                   controller: _messageController,
-                  label: AppLocalizations.of(context)!.message,
-                  hintText: AppLocalizations.of(
-                    context,
-                  )!.releaseNotesPlaceholder,
+                  label: l10n.message,
+                  hintText: l10n.releaseNotesPlaceholder,
                   maxLines: 3,
-                  validator: _isAnnotated
-                      ? (value) {
-                          if (value == null || value.isEmpty) {
-                            return AppLocalizations.of(
-                              context,
-                            )!.enterTagMessage;
-                          }
-                          return null;
-                        }
-                      : null,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return l10n.enterTagMessage;
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: AppTheme.paddingM),
               ],
@@ -158,12 +220,12 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
       ),
       actions: [
         BaseButton(
-          label: AppLocalizations.of(context)!.cancel,
+          label: l10n.cancel,
           variant: ButtonVariant.tertiary,
           onPressed: _isCreating ? null : () => Navigator.of(context).pop(),
         ),
         BaseButton(
-          label: AppLocalizations.of(context)!.createTag,
+          label: l10n.createTag,
           variant: ButtonVariant.primary,
           isLoading: _isCreating,
           onPressed: _isCreating ? null : _createTag,
@@ -172,9 +234,71 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     );
   }
 
+  String _shortHash(String hash) =>
+      hash.length > 7 ? hash.substring(0, 7) : hash;
+
+  Widget _hashChip(BuildContext context, String shortHash) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppTheme.radiusS),
+      ),
+      child: LabelMediumLabel(shortHash),
+    );
+  }
+
+  BaseDropdownItem<String> _commitItem(GitCommit commit) {
+    return BaseDropdownItem<String>(
+      value: commit.hash,
+      builder: (context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _hashChip(context, commit.shortHash),
+          const SizedBox(width: AppTheme.paddingS),
+          Flexible(
+            fit: FlexFit.loose,
+            child: BodyMediumLabel(
+              commit.message,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCommitDropdown(List<GitCommit> commits) {
+    final listed = commits.take(50).toList();
+
+    // DropdownButtonFormField asserts that its value matches exactly one
+    // item, so a preselected revision outside the listed window must still
+    // get an item: the full history is searched first, and a revision the
+    // provider does not know at all falls back to a bare hash entry.
+    final selected = _selectedCommit;
+    BaseDropdownItem<String>? bareSelectedItem;
+    if (selected != null &&
+        selected != 'HEAD' &&
+        !listed.any((commit) => commit.hash == selected)) {
+      final known = commits
+          .where((commit) => commit.hash == selected)
+          .firstOrNull;
+      if (known != null) {
+        listed.insert(0, known);
+      } else {
+        bareSelectedItem = BaseDropdownItem<String>(
+          value: selected,
+          builder: (context) => Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [_hashChip(context, _shortHash(selected))],
+          ),
+        );
+      }
+    }
+
     return BaseDropdown<String>(
-      initialValue: _selectedCommit,
+      initialValue: selected,
       items: [
         BaseDropdownItem<String>(
           value: 'HEAD',
@@ -186,36 +310,8 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
             ],
           ),
         ),
-        ...commits.take(50).map((commit) {
-          return BaseDropdownItem<String>(
-            value: commit.hash,
-            builder: (context) => Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                  ),
-                  child: LabelMediumLabel(commit.shortHash),
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: BodyMediumLabel(
-                    commit.message,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
+        ?bareSelectedItem,
+        ...listed.map(_commitItem),
       ],
       onChanged: (value) {
         setState(() => _selectedCommit = value);
@@ -229,25 +325,22 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     setState(() => _isCreating = true);
 
     try {
-      final gitService = ref.read(gitServiceProvider);
-      if (gitService == null) return;
-
+      final actions = ref.read(gitActionsProvider);
       final tagName = _tagNameController.text.trim();
       final message = _messageController.text.trim();
       final commit = _selectedCommit ?? 'HEAD';
 
+      // The actions layer unwraps the git result (a failed `git tag` becomes
+      // the exception caught below) and refreshes every tag provider.
       if (_isAnnotated) {
-        await gitService.createAnnotatedTag(
+        await actions.createAnnotatedTag(
           tagName,
           message: message,
           commitHash: commit,
         );
       } else {
-        await gitService.createLightweightTag(tagName, commitHash: commit);
+        await actions.createLightweightTag(tagName, commitHash: commit);
       }
-
-      // Refresh tags
-      ref.invalidate(tagsProvider);
 
       if (mounted) {
         Navigator.of(context).pop(true);

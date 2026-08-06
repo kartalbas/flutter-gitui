@@ -25,7 +25,7 @@ import '../../core/navigation/navigation_item.dart';
 import '../../core/services/notification_service.dart';
 import 'widgets/commit_list_item.dart';
 import 'widgets/commit_details_panel.dart';
-import '../tags/dialogs/create_tag_dialog.dart';
+import '../../shared/dialogs/create_tag_dialog.dart';
 import 'widgets/file_tree_panel.dart';
 import 'widgets/commit_diff_panel.dart';
 import 'widgets/history_empty_states.dart';
@@ -940,34 +940,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     BuildContext context,
     GitCommit commit,
   ) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (context) => CreateTagDialog(
-        commitHash: commit.hash,
-        commitMessage: commit.subject,
-      ),
-    );
-
-    if (result == null || result['name'] == null || !context.mounted) return;
-    final tagName = result['name'] as String;
-    if (tagName.isEmpty) return;
-
-    final l10n = AppLocalizations.of(context)!;
-    await _runCommitAction(
-      context,
-      invoke: () => result['annotated'] == true
-          ? ref
-                .read(gitActionsProvider)
-                .createAnnotatedTag(
-                  tagName,
-                  message: result['message'] as String,
-                  commitHash: commit.hash,
-                )
-          : ref
-                .read(gitActionsProvider)
-                .createLightweightTag(tagName, commitHash: commit.hash),
-      describeFailure: l10n.tagCreatedError,
-    );
+    // The shared dialog validates its form, creates the tag through the
+    // actions layer and refreshes the tag providers itself; the commit only
+    // preselects the dialog's target revision.
+    await showCreateTagDialog(context, initialCommit: commit.hash);
   }
 
   /// The one sequence behind every commit action on this screen.

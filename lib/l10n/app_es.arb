@@ -1141,9 +1141,9 @@
   "describeWork": "Describa en qué estaba trabajando",
   "stashAllFilesToggle": "Stash de todos los archivos",
   "keepStagedChangesSubtitle": "Mantener cambios en el índice después del stash",
-  "createTagDialog": "Crear etiqueta",
-  "createNewTagAtHead": "Crear nueva etiqueta en HEAD",
-  "releaseNotesHint": "Notas de versión...",
+  "useRecentTagAsTemplate": "Usar etiqueta reciente como plantilla",
+  "selectTagTemplate": "Seleccionar una plantilla de etiqueta...",
+  "noTemplate": "Sin plantilla",
   "deleteTagsDialog": "¿Eliminar etiquetas?",
   "deleteTagsConfirm": "¿Eliminar {count, plural, =1{{count} etiqueta} other{{count} etiquetas}}?\n\nEsta acción no se puede deshacer.\n\nEtiquetas a eliminar:\n{tagList}{ellipsis}",
   "@deleteTagsConfirm": {

@@ -1221,9 +1221,9 @@
   "describeWork": "Describe what you were working on...",
   "stashAllFilesToggle": "Toggle to select specific files",
   "keepStagedChangesSubtitle": "Keep changes in the index after stashing",
-  "createTagDialog": "Create Tag",
-  "createNewTagAtHead": "Create a new tag at the current HEAD",
-  "releaseNotesHint": "Release notes or description...",
+  "useRecentTagAsTemplate": "Use recent tag as template",
+  "selectTagTemplate": "Select a tag template...",
+  "noTemplate": "No template",
   "deleteTagsDialog": "Delete Tags?",
   "deleteTagsConfirm": "Delete {count, plural, =1{{count} tag} other{{count} tags}}?\n\nThis action cannot be undone.\n\nTags to delete:\n{tagList}{ellipsis}",
   "@deleteTagsConfirm": {

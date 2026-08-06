@@ -1,0 +1,20 @@
+# Tag declarations for `flutter test`. Declaring tags here makes the runner
+# reject unknown tags and lets classes of tests be included or excluded:
+#
+#   flutter test --exclude-tags golden     # skip golden rendering tests
+#   flutter test --tags golden             # goldens only (Linux baselines)
+#   flutter test --tags a11y-extended      # extended accessibility sweeps
+#
+# golden:
+#   Pixel-comparison tests under test/conformance/goldens/. Each golden test
+#   is ALSO guarded with `skip: !Platform.isLinux` in code, because baselines
+#   are rasterised on the Linux CI runner and other OSes shape text
+#   differently. The tag exists so CI and developers can select or exclude
+#   them explicitly regardless of platform.
+#
+# a11y-extended:
+#   Long-running accessibility sweeps (contrast, tap targets) that are opt-in
+#   locally but intended to run in CI.
+tags:
+  golden:
+  a11y-extended:

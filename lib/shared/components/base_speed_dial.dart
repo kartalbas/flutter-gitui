@@ -127,7 +127,14 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
                         ),
                         // Action button
                         FloatingActionButton.small(
-                          heroTag: action.label,
+                          // No hero: these buttons never survive a route
+                          // change, so the animation is meaningless, and a tag
+                          // is a liability. Flutter throws when two heroes in
+                          // one route share a tag, and the previous tag was
+                          // the action's localized label -- a constraint
+                          // invisible from the call site, which a translation
+                          // could break without touching this file.
+                          heroTag: null,
                           onPressed: () {
                             action.onPressed();
                             // Collapse after action
@@ -141,7 +148,10 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
                 ),
               // Main FAB
               FloatingActionButton(
-                heroTag: 'main_fab',
+                // Same reasoning, and here the tag was a shared string
+                // literal: two dials on one route -- a screen's own and the
+                // one inside an open diff viewer -- would have collided.
+                heroTag: null,
                 onPressed: () {
                   widget.onToggle();
                   // Request focus so ESC key works

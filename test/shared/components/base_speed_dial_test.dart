@@ -104,4 +104,70 @@ void main() {
     expect(collapseCount, 1);
     expect(toggleCount, 0);
   });
+
+  // Flutter throws when two heroes in one route share a tag. The buttons here
+  // carried the action's localized label as their tag, and the main button a
+  // shared string literal, so both collisions were reachable without anyone
+  // touching this widget: a translation could make two labels equal, and a
+  // screen showing its own dial while a diff viewer is open would have had two
+  // main buttons on one route.
+  // A duplicate hero tag is only detected while a route transition builds its
+  // flight manifest, so these tests must actually navigate. Asserting on a
+  // freshly pumped tree would pass whether or not the tags are unique, which
+  // is worse than having no test at all.
+  Future<void> pushARoute(WidgetTester tester) async {
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(
+      MaterialPageRoute<void>(builder: (_) => const Scaffold(body: SizedBox())),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('two actions with the same label survive a route transition', (
+    tester,
+  ) async {
+    await _pumpDial(
+      tester,
+      actions: [
+        SpeedDialAction(icon: Icons.copy, label: 'Copy', onPressed: () {}),
+        SpeedDialAction(icon: Icons.share, label: 'Copy', onPressed: () {}),
+      ],
+      isExpanded: true,
+    );
+
+    await pushARoute(tester);
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('two dials on one route survive a route transition', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Stack(
+            children: [
+              BaseSpeedDial(
+                actions: actions,
+                isExpanded: true,
+                onToggle: () {},
+                onCollapse: () {},
+              ),
+              BaseSpeedDial(
+                actions: actions,
+                isExpanded: true,
+                onToggle: () {},
+                onCollapse: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await pushARoute(tester);
+
+    expect(tester.takeException(), isNull);
+  });
 }

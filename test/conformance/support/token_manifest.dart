@@ -56,4 +56,22 @@ const Set<String> conformanceTokenManifest = <String>{
   'BaseButton.overlay.pressed', // M3: onPrimary @ 10% — conforms
   'BaseButton.overlay.hovered', // M3: onPrimary @ 8% — conforms
   'BaseButton.overlay.focused', // M3: onPrimary @ 10% — conforms
+  // BaseIconButton vs the Material 3 icon button oracle. IconButton exposes
+  // no public `defaultStyleOf` seam (harness note, conformance_harness.dart),
+  // so the oracle values are constants pinned from the generated
+  // _IconButtonDefaultsM3 (Flutter 3.44.4 icon_button.dart) with source
+  // citations in the suite.
+  'BaseIconButton.shape', // M3: stadium, 20.0 at the 40 dp container — ICO-001
+  'BaseIconButton.small.containerSize', // M3: 40.0 — registered ICO-002
+  'BaseIconButton.small.iconSize', // M3: 24.0 — registered ICO-003
+  'BaseIconButton.medium.containerSize', // M3: 40.0 — conforms
+  'BaseIconButton.medium.iconSize', // M3: 24.0 — registered ICO-004
+  'BaseIconButton.large.containerSize', // M3: 40.0 — registered ICO-005
+  'BaseIconButton.large.iconSize', // M3: 24.0 — conforms
+  'BaseIconButton.standard.foregroundRole', // M3: onSurfaceVariant — conforms
+  'BaseIconButton.disabled.containerColor', // M3: onSurface @ 12% — conforms
+  'BaseIconButton.disabled.foregroundColor', // M3: onSurface @ 38% — conforms
+  'BaseIconButton.overlay.pressed', // M3: onSurfaceVariant @ 10% — conforms
+  'BaseIconButton.overlay.hovered', // M3: onSurfaceVariant @ 8% — conforms
+  'BaseIconButton.overlay.focused', // M3: onSurfaceVariant @ 10% — conforms
 };

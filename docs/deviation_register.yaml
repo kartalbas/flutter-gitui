@@ -202,3 +202,74 @@ deviations:
       collapse the deliberate distinction from the tertiary variant, which
       adopts the stock primary-colored M3 text button.
     registered: 2026-08-06
+
+  # BaseIconButton (lib/shared/components/base_button.dart). The component
+  # maps its variants onto IconButton / IconButton.filled /
+  # IconButton.outlined; the spec values below are the generated
+  # _IconButtonDefaultsM3 defaults. IconButton exposes no public
+  # defaultStyleOf seam, so the conformance suite pins them as cited
+  # constants. Corner radius is documented in dp: the M3 stadium shape
+  # equals half the 40 dp reference container.
+
+  - id: ICO-001
+    component: BaseIconButton
+    property: shape
+    spec_value: 20.0
+    app_value: 8.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/icon_button.dart:1146 (_IconButtonDefaultsM3.shape, StadiumBorder = 20.0 dp at the 40 dp container)"
+    rationale: >
+      The 8 dp control corner is shared with buttons (BTN-001), text
+      fields, cards and menus across this desktop app; a stadium pill
+      would break the shared corner language.
+    registered: 2026-08-06
+
+  - id: ICO-002
+    component: BaseIconButton.small
+    property: containerSize
+    spec_value: 40.0
+    app_value: 32.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/icon_button.dart:1128 (_IconButtonDefaultsM3.minimumSize, Size(40.0, 40.0))"
+    rationale: >
+      M3 defines a single icon button size; dense desktop rows (file
+      lists, toolbars, banners) need a compact visual. The hit area still
+      meets 48 dp via the padded tap target, only the painted container
+      shrinks.
+    registered: 2026-08-06
+
+  - id: ICO-003
+    component: BaseIconButton.small
+    property: iconSize
+    spec_value: 24.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/icon_button.dart:1138 (_IconButtonDefaultsM3.iconSize, 24.0)"
+    rationale: >
+      A 24 dp glyph does not fit the 32 dp container of ICO-002 with the
+      M3 8 dp padding; 16 dp keeps the glyph-to-container proportion of
+      the stock size and aligns with AppTheme.iconS (16) used by dense
+      tree and list icons.
+    registered: 2026-08-06
+
+  - id: ICO-004
+    component: BaseIconButton.medium
+    property: iconSize
+    spec_value: 24.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/icon_button.dart:1138 (_IconButtonDefaultsM3.iconSize, 24.0)"
+    rationale: >
+      Desktop-density tuning consistent with the register's type-scale
+      reductions: 20 dp (AppTheme.iconM, the compact toolbar icon step)
+      keeps the default icon button glyph proportionate inside the stock
+      40 dp container at desktop viewing distance.
+    registered: 2026-08-06
+
+  - id: ICO-005
+    component: BaseIconButton.large
+    property: containerSize
+    spec_value: 40.0
+    app_value: 48.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/icon_button.dart:1128 (_IconButtonDefaultsM3.minimumSize, Size(40.0, 40.0))"
+    rationale: >
+      Kept for API stability: ButtonSize.large is the prominent size, one
+      visible step above the stock 40 dp container and exactly the
+      minimum tap target, carrying the conforming 24 dp M3 glyph.
+    registered: 2026-08-06

@@ -4,7 +4,7 @@
 // targets cannot be hand-rolled twice. Building the wrapper ON the real
 // Material buttons is the point of the component, so the bans are lifted for
 // this file only (precedent: base_dialog.dart, base_text_field.dart).
-// ignore_for_file: avoid_filled_button, avoid_outlined_button, avoid_text_button
+// ignore_for_file: avoid_filled_button, avoid_outlined_button, avoid_text_button, avoid_icon_button
 
 import 'package:flutter/material.dart';
 import '../../shared/theme/app_theme.dart';
@@ -154,22 +154,6 @@ class BaseButton extends StatelessWidget {
 
   /// Whether button should expand to full width
   final bool fullWidth;
-
-  /// The Material button class a variant renders through.
-  _MaterialBase get _base {
-    switch (variant) {
-      case ButtonVariant.primary:
-      case ButtonVariant.danger:
-      case ButtonVariant.success:
-        return _MaterialBase.filled;
-      case ButtonVariant.secondary:
-      case ButtonVariant.dangerSecondary:
-        return _MaterialBase.outlined;
-      case ButtonVariant.tertiary:
-      case ButtonVariant.ghost:
-        return _MaterialBase.text;
-    }
-  }
 
   /// The variant's colors, expressed through the concrete class's
   /// `styleFrom` so the state layers derive from the right foreground with
@@ -345,7 +329,7 @@ class BaseButton extends StatelessWidget {
 
     final Widget child = _content(context, iconSize);
 
-    final Widget button = switch (_base) {
+    final Widget button = switch (_baseOf(variant)) {
       _MaterialBase.filled => FilledButton(
         onPressed: effectiveOnPressed,
         style: style,
@@ -370,18 +354,66 @@ class BaseButton extends StatelessWidget {
   }
 }
 
-/// The three Material button classes BaseButton variants map onto.
+/// The three Material button families the variants map onto: filled is
+/// FilledButton / IconButton.filled, outlined is OutlinedButton /
+/// IconButton.outlined, text is TextButton / the standard IconButton.
 enum _MaterialBase { filled, outlined, text }
 
-/// Icon-only button variant for compact spaces
+/// The Material button family a variant renders through, shared by
+/// [BaseButton] and [BaseIconButton] so the two components can never map the
+/// same variant onto different emphasis levels.
+_MaterialBase _baseOf(ButtonVariant variant) {
+  switch (variant) {
+    case ButtonVariant.primary:
+    case ButtonVariant.danger:
+    case ButtonVariant.success:
+      return _MaterialBase.filled;
+    case ButtonVariant.secondary:
+    case ButtonVariant.dangerSecondary:
+      return _MaterialBase.outlined;
+    case ButtonVariant.tertiary:
+    case ButtonVariant.ghost:
+      return _MaterialBase.text;
+  }
+}
+
+/// Icon-only button component for compact spaces.
+///
+/// Built on the Material 3 icon button constructors — [IconButton],
+/// [IconButton.filled] and [IconButton.outlined] — so every icon action is
+/// keyboard-operable out of the box: Tab reaches it, a focus state layer
+/// marks it, and Enter and Space activate it. Divergences from the M3
+/// defaults are registered in docs/deviation_register.yaml
+/// (ICO-001..ICO-005) and asserted by
+/// test/conformance/components/base_icon_button_conformance_test.dart.
 ///
 /// ## Size Standards
-/// - **Small**: 32x32px button, 16px icon
-/// - **Medium**: 40x40px button, 20px icon (default)
-/// - **Large**: 48x48px button, 24px icon
+/// Sizes describe the visual container; every size sits inside a >= 48 dp
+/// hit area via the padded tap target, so a compact button never shrinks
+/// the touch target.
+/// - **Small**: 32 dp container (ICO-002), 16 dp icon (ICO-003) — dense
+///   rows and toolbars
+/// - **Medium**: 40 dp container, 20 dp icon (ICO-004) (default)
+/// - **Large**: 48 dp container (ICO-005), 24 dp icon
+///
+/// All sizes share the 8 dp control corner (ICO-001) instead of the M3
+/// stadium shape.
+///
+/// ## Variant Standards
+/// - **Primary**: filled, primary/onPrimary - for affirmative icon actions
+/// - **Secondary**: outlined, stock onSurfaceVariant icon with the outline
+///   border - for emphasized toolbar actions
+/// - **Tertiary / Ghost**: the standard chrome-less M3 icon button with the
+///   stock onSurfaceVariant icon - for toolbars and repeated row actions
+/// - **Danger**: filled, error/onError - for destructive icon actions
+/// - **Success**: filled with the git semantic green - for positive actions
+/// - **DangerSecondary**: outlined with error icon and border - the border
+///   falls back to the M3 disabled treatment so the error tint never
+///   survives into disabled
 ///
 /// ## Usage Guidelines
-/// - Always provide a tooltip for accessibility
+/// - Always provide a tooltip: it is the hover name of the action and the
+///   semantic label the labeled-tap-target guideline requires
 /// - Use ghost variant (default) for toolbar buttons
 /// - Use danger variant for destructive icon actions
 /// - Use primary variant for affirmative icon actions
@@ -441,110 +473,154 @@ class BaseIconButton extends StatelessWidget {
   /// tint must never survive into the disabled treatment.
   final Color? iconColor;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isEffectivelyDisabled = isDisabled || onPressed == null;
-
-    // Get size-specific values
-    final double buttonSize;
-    final double iconSize;
-
-    switch (size) {
-      case ButtonSize.small:
-        buttonSize = 32;
-        iconSize = 16;
-        break;
-      case ButtonSize.medium:
-        buttonSize = 40;
-        iconSize = 20;
-        break;
-      case ButtonSize.large:
-        buttonSize = 48;
-        iconSize = 24;
-        break;
-    }
-
-    // Get variant-specific colors
-    Color backgroundColor;
-    Color foregroundColor;
-    Color? borderColor;
-
-    if (isEffectivelyDisabled) {
-      backgroundColor = colorScheme.surfaceContainerHighest;
-      foregroundColor = colorScheme.onSurface.withValues(alpha: 0.38);
-      borderColor = null;
-    } else {
-      switch (variant) {
-        case ButtonVariant.primary:
-          backgroundColor = colorScheme.primary;
-          foregroundColor = colorScheme.onPrimary;
-          borderColor = null;
-          break;
-        case ButtonVariant.secondary:
-          backgroundColor = colorScheme.surface.withValues(alpha: 0);
-          foregroundColor = colorScheme.secondary;
-          borderColor = colorScheme.secondary;
-          break;
-        case ButtonVariant.tertiary:
-          backgroundColor = colorScheme.surface.withValues(alpha: 0);
-          foregroundColor = colorScheme.onSurface;
-          borderColor = null;
-          break;
-        case ButtonVariant.danger:
-          backgroundColor = colorScheme.error;
-          foregroundColor = colorScheme.onError;
-          borderColor = null;
-          break;
-        case ButtonVariant.ghost:
-          backgroundColor = colorScheme.surface.withValues(alpha: 0);
-          foregroundColor = colorScheme.onSurface;
-          borderColor = null;
-          break;
-        case ButtonVariant.success:
-          backgroundColor = context.gitColors.added;
-          foregroundColor = GitSemanticColors.foregroundOn(
-            context.gitColors.added,
-          );
-          borderColor = null;
-          break;
-        case ButtonVariant.dangerSecondary:
-          backgroundColor = colorScheme.surface.withValues(alpha: 0);
-          foregroundColor = colorScheme.error;
-          borderColor = colorScheme.error;
-          break;
-      }
-    }
-
-    final effectiveIconColor = isEffectivelyDisabled
-        ? foregroundColor
-        : iconColor ?? foregroundColor;
-
-    final button = Material(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      child: InkWell(
-        onTap: isEffectivelyDisabled ? null : onPressed,
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-        child: Container(
-          width: buttonSize,
-          height: buttonSize,
-          decoration: BoxDecoration(
-            border: borderColor != null
-                ? Border.all(color: borderColor, width: 2)
-                : null,
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-          ),
-          child: Icon(icon, size: iconSize, color: effectiveIconColor),
-        ),
-      ),
+  /// The variant's colors, expressed through [IconButton.styleFrom] so the
+  /// state layers derive from the right foreground with the M3 opacities
+  /// (pressed/focused 10%, hovered 8%).
+  ///
+  /// Every variant shares the M3 disabled treatment (onSurface at 38% for
+  /// the foreground, at 12% for filled containers and outlined borders), so
+  /// no semantic tint survives into disabled.
+  ButtonStyle _variantStyle(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color disabledForeground = colorScheme.onSurface.withValues(
+      alpha: 0.38,
+    );
+    final Color disabledContainer = colorScheme.onSurface.withValues(
+      alpha: 0.12,
     );
 
-    if (tooltip != null) {
-      return Tooltip(message: tooltip!, child: button);
+    switch (variant) {
+      case ButtonVariant.primary:
+        return IconButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          disabledBackgroundColor: disabledContainer,
+          disabledForegroundColor: disabledForeground,
+        );
+      case ButtonVariant.danger:
+        return IconButton.styleFrom(
+          backgroundColor: colorScheme.error,
+          foregroundColor: colorScheme.onError,
+          disabledBackgroundColor: disabledContainer,
+          disabledForegroundColor: disabledForeground,
+        );
+      case ButtonVariant.success:
+        final Color added = context.gitColors.added;
+        return IconButton.styleFrom(
+          backgroundColor: added,
+          foregroundColor: GitSemanticColors.foregroundOn(added),
+          disabledBackgroundColor: disabledContainer,
+          disabledForegroundColor: disabledForeground,
+        );
+      case ButtonVariant.secondary:
+        // The border is deliberately not pinned: the M3 default side of the
+        // outlined icon button already does the right thing per state
+        // (outline enabled, onSurface at 12% disabled).
+        return IconButton.styleFrom(
+          foregroundColor: colorScheme.onSurfaceVariant,
+          disabledForegroundColor: disabledForeground,
+        );
+      case ButtonVariant.dangerSecondary:
+        return IconButton.styleFrom(
+          foregroundColor: colorScheme.error,
+          disabledForegroundColor: disabledForeground,
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+            if (states.contains(WidgetState.disabled)) {
+              return BorderSide(color: disabledContainer);
+            }
+            return BorderSide(color: colorScheme.error);
+          }),
+        );
+      case ButtonVariant.tertiary:
+      case ButtonVariant.ghost:
+        // The stock standard icon button: chrome-less, onSurfaceVariant.
+        // Both variants collapse onto it because an icon-only control has
+        // no label to carry the text button's tertiary emphasis.
+        return IconButton.styleFrom(
+          foregroundColor: colorScheme.onSurfaceVariant,
+          disabledForegroundColor: disabledForeground,
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isEffectivelyDisabled = isDisabled || onPressed == null;
+    final VoidCallback? effectiveOnPressed = isEffectivelyDisabled
+        ? null
+        : onPressed;
+
+    // Per-size metrics. Medium is the stock M3 container; small and large
+    // are the registered desktop sizes (ICO-002..ICO-005). The container is
+    // the glyph plus the stock 8 dp padding, clamped up by the minimum size,
+    // so 16+16 = 32 exactly and 20/24 sit centered in 40/48.
+    final (double containerSize, double iconSize) = switch (size) {
+      // ICO-002 container, ICO-003 icon.
+      ButtonSize.small => (32.0, AppTheme.iconS),
+      // ICO-004 icon.
+      ButtonSize.medium => (40.0, AppTheme.iconM),
+      // ICO-005 container.
+      ButtonSize.large => (48.0, AppTheme.iconL),
+    };
+
+    // Every measured property is pinned at the widget so conformance stays
+    // deterministic regardless of icon-button sub-themes or the ambient
+    // IconTheme. The padded tap target plus standard density guarantee the
+    // >= 48 dp hit area around every container size.
+    ButtonStyle style = ButtonStyle(
+      iconSize: WidgetStatePropertyAll<double>(iconSize),
+      minimumSize: WidgetStatePropertyAll<Size>(Size.square(containerSize)),
+      padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
+        EdgeInsets.all(AppTheme.paddingS),
+      ),
+      // ICO-001: the shared 8 dp control corner instead of the M3 stadium.
+      shape: WidgetStatePropertyAll<OutlinedBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        ),
+      ),
+      visualDensity: VisualDensity.standard,
+      tapTargetSize: MaterialTapTargetSize.padded,
+    ).merge(_variantStyle(context));
+
+    if (iconColor != null) {
+      // The override recolors the glyph only: the state layers keep
+      // deriving from the variant foreground, and the disabled treatment
+      // always wins over the override.
+      final Color disabledForeground = Theme.of(
+        context,
+      ).colorScheme.onSurface.withValues(alpha: 0.38);
+      style = style.copyWith(
+        iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
+            return disabledForeground;
+          }
+          return iconColor;
+        }),
+      );
     }
 
-    return button;
+    // The icon carries no size or color: the style's IconTheme applies both.
+    return switch (_baseOf(variant)) {
+      _MaterialBase.filled => IconButton.filled(
+        onPressed: effectiveOnPressed,
+        icon: Icon(icon),
+        tooltip: tooltip,
+        style: style,
+      ),
+      _MaterialBase.outlined => IconButton.outlined(
+        onPressed: effectiveOnPressed,
+        icon: Icon(icon),
+        tooltip: tooltip,
+        style: style,
+      ),
+      _MaterialBase.text => IconButton(
+        onPressed: effectiveOnPressed,
+        icon: Icon(icon),
+        tooltip: tooltip,
+        style: style,
+      ),
+    };
   }
 }

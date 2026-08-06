@@ -4,9 +4,10 @@ name: Publish Stores
 # release that is already public on GitHub. Deliberately a separate workflow
 # from release.yml, triggered by the release being published rather than by
 # the tag push: a draft's assets are not served, both submissions pin URLs and
-# digests of the published assets, and the build-macos rule ("credentials may
-# gate publishing, never the release") holds structurally — by the time this
-# workflow starts, the release is out, so nothing here can break it.
+# digests of the published assets, and the shared rule ("a missing credential
+# degrades its own channel visibly, never the release") holds structurally —
+# by the time this workflow starts, the release is out, so nothing here can
+# break it.
 #
 # Each store skips cleanly and visibly when its credential is absent: the run
 # carries an annotation naming the missing secret, and a maintainer without
@@ -73,8 +74,9 @@ jobs:
       # ecosystem convention for previews is a separate *.Preview package
       # identifier, which this project does not publish). For stable releases
       # the manifests are prepared even without the token — the same shape as
-      # build-macos, which always builds and only withholds publishing — so a
-      # maintainer can take them from the run's artifacts and submit by hand.
+      # build-macos, where missing credentials change the form of what ships,
+      # never whether the job builds — so a maintainer can take them from the
+      # run's artifacts and submit by hand.
       - name: Decide what to do
         id: decide
         env:

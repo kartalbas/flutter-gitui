@@ -29,11 +29,11 @@ jobs:
           - platform: linux
             os: ubuntu-22.04
           # macOS is built by the dedicated build-macos job below, not as a
-          # third leg of this matrix: whether its artifact may be published
-          # depends on signing secrets, and neither a missing certificate nor
-          # a bad day at Apple's notary service is allowed to block the
-          # Windows and Linux release. See that job's comment for the full
-          # behaviour.
+          # third leg of this matrix: the form of its artifact depends on
+          # signing secrets (signed and notarised with them, unsigned without),
+          # and neither a missing certificate nor a bad day at Apple's notary
+          # service is allowed to block the Windows and Linux release. See
+          # that job's comment for the full behaviour.
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -188,19 +188,23 @@ jobs:
 
   # macOS lives outside the build matrix because its outcome is conditional in
   # a way no matrix leg can express: the publish job must run even when this
-  # job fails, and the artifact may only exist when it can actually launch on
-  # a user's machine. Gatekeeper refuses any app that is not signed with a
-  # Developer ID certificate and notarised, so an unsigned build must never
-  # reach the release assets — publishing an archive that cannot start is the
-  # defect this job replaces (issue #66).
+  # job fails, and what gets packaged depends on the signing secrets.
+  # Gatekeeper blocks any app that is not signed with a Developer ID
+  # certificate and notarised until the user explicitly allows it, so the two
+  # configurations ship deliberately different archives (issue #66, revised
+  # by #365).
   #
   # Behaviour by configuration:
   #   - All five MACOS_* secrets present: the app is re-signed with the
   #     Developer ID identity (hardened runtime, secure timestamp), notarised
   #     with notarytool, stapled, and published like any other platform.
-  #   - No MACOS_* secret present: the app is still built so compile breakage
-  #     surfaces, but nothing is uploaded; a warning annotation on the run
-  #     says so. The published release then simply carries no macOS asset.
+  #   - No MACOS_* secret present: the ad-hoc-signed build is published
+  #     anyway — owner decision in issue #365: one-time Gatekeeper friction
+  #     beats having no macOS download at all. The archive is named
+  #     *-macos-unsigned.zip so nobody mistakes it for a notarised build,
+  #     ships a README.txt walking the user through the "Open Anyway" step
+  #     under System Settings → Privacy & Security, and the run carries a
+  #     warning annotation saying the build went out unsigned.
   #   - Some but not all secrets present: the job fails — a half-configured
   #     credential set is a mistake somebody has to see, not skip over.
   #
@@ -289,7 +293,7 @@ jobs:
             echo "all signing secrets present; the build will be signed, notarised and published"
           elif [ "$count" -eq 5 ]; then
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=macOS not published — no signing secrets::No MACOS_* signing secrets are configured, so the macOS build was compiled but NOT attached to the release: without a Developer ID signature and notarisation, Gatekeeper refuses the app with 'is damaged and can't be opened'. See release/README.md for the five secrets to add."
+            echo "::warning title=macOS published unsigned — no signing secrets::No MACOS_* signing secrets are configured, so the macOS build was attached to the release UNSIGNED — no Developer ID signature, no notarisation. Gatekeeper will block its first launch ('is damaged and can't be opened') until the user allows it under System Settings → Privacy & Security; the archive's README.txt documents that step. See release/README.md for the five secrets that enable signing."
           else
             echo "::error title=macOS signing half-configured::Missing:${missing}. Either configure all five MACOS_* secrets or remove them all — see release/README.md."
             exit 1
@@ -378,9 +382,8 @@ jobs:
           xcrun stapler validate "$APP"
           spctl --assess --type execute --verbose=2 "$APP"
 
-      # Only a signed, notarised, stapled app is ever packaged: when signing
-      # was skipped there is deliberately no macOS artifact for the publish
-      # job to find, so the release cannot carry an app that will not start.
+      # Signed path: the archive is the bare stapled .app and nothing else,
+      # so what ships is exactly what notarisation validated.
       - name: Package artifact
         if: steps.signing.outputs.available == 'true'
         shell: bash
@@ -395,8 +398,36 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent "$APP" "dist/${NAME}.zip"
           ls -la dist/
 
+      # Unsigned path (issue #365): the ad-hoc-signed app is published anyway.
+      # The guidance for getting past Gatekeeper lives in a README.txt right
+      # next to the .app, because the moment it is needed is right after
+      # "is damaged and can't be opened" — the extracted archive is what the
+      # user is looking at then, not the release page. The release notes stay
+      # untouched on purpose: their body is generated identically on every
+      # platform leg and mirrored verbatim into the Windows and Linux update
+      # manifests, so a macOS-only caveat there would surface in the in-app
+      # changelog of platforms it does not concern.
+      - name: Package unsigned artifact
+        if: steps.signing.outputs.available == 'false'
+        shell: bash
+        run: |
+          set -euo pipefail
+          NAME="flutter-gitui-v${{ steps.version.outputs.value }}-macos-unsigned"
+          mkdir -p dist
+          APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)
+          [ -n "$APP" ] || { echo "::error::no .app produced"; exit 1; }
+          STAGE=$(mktemp -d)
+          # ditto, not cp: it preserves the bundle metadata and the symlink
+          # structure inside the frameworks, same as the signed path.
+          ditto "$APP" "$STAGE/$(basename "$APP")"
+          cp release/macos/README-unsigned.txt "$STAGE/README.txt"
+          ditto -c -k --sequesterRsrc "$STAGE" "dist/${NAME}.zip"
+          ls -la dist/
+
+      # No condition: when the job got this far, the detect step succeeded and
+      # exactly one of the two packaging steps above has run, so dist/ carries
+      # exactly one archive — signed or unsigned.
       - uses: actions/upload-artifact@v4
-        if: steps.signing.outputs.available == 'true'
         with:
           name: release-macos
           path: dist/*.zip
@@ -405,8 +436,9 @@ jobs:
   publish:
     name: Publish GitHub Release
     # build-macos is waited for but not required: when it uploaded an archive
-    # the release carries macOS, when it failed or skipped signing the release
-    # ships without it — a macOS problem must never block Windows and Linux.
+    # (signed or unsigned) the release carries macOS, when it failed the
+    # release ships without it — a macOS problem must never block Windows
+    # and Linux.
     needs: [build, build-macos]
     if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-latest
@@ -550,11 +582,12 @@ jobs:
           VERSION="${TAG#v}"
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           CHANGELOG=$(retry gh release view "$TAG" --json body --jq .body)
-          # No latest-macos.json even when a signed macOS archive is attached:
-          # the client resolves a manifest name only on Windows and Linux
-          # (update_service falls back to a never-published latest.json on
-          # macOS) and no updater ships in the macOS archive, so a manifest
-          # would advertise an update nothing can install — issue #155.
+          # No latest-macos.json even when a macOS archive — signed or
+          # unsigned — is attached: the client resolves a manifest name only
+          # on Windows and Linux (update_service falls back to a
+          # never-published latest.json on macOS) and no updater ships in the
+          # macOS archive, so a manifest would advertise an update nothing
+          # can install — issue #155.
           for PLATFORM in windows linux; do
             case "$PLATFORM" in
               windows) FILE="flutter-gitui-v${VERSION}-windows.zip" ;;

@@ -256,9 +256,11 @@ jobs:
             --asset-out assets/changelog.json \
             --notes-out dist/release-notes.md
 
-      # No updater build: the macOS archive ships the bare .app and the in-app
-      # update flow has no macOS implementation yet (issue #155), so bundling
-      # the helper would only pretend otherwise.
+      # No updater build: the macOS archive ships the bare .app because the
+      # in-app update flow stops short of macOS by construction, not by
+      # oversight — UpdateService.installUpdate branches on Windows and Linux
+      # and throws on anything else (lib/core/services/update_service.dart).
+      # Bundling the helper would only pretend otherwise.
       - name: Build macos
         shell: bash
         run: |
@@ -427,10 +429,16 @@ jobs:
       # No condition: when the job got this far, the detect step succeeded and
       # exactly one of the two packaging steps above has run, so dist/ carries
       # exactly one archive — signed or unsigned.
+      #
+      # if-no-files-found: error rather than the default 'warn', because the
+      # default is what would turn a macOS packaging hole into a green run that
+      # quietly ships no macOS build. This project has no Mac to test the job
+      # on, so the one thing it must never do is fail quietly.
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
           path: dist/*.zip
+          if-no-files-found: error
           retention-days: 30
 
   publish:
@@ -480,6 +488,34 @@ jobs:
             echo "tag=${TAG}"
             echo "prerelease=${PRERELEASE}"
           } >> "$GITHUB_OUTPUT"
+
+      # A failed build-macos is allowed to let the release through — that is the
+      # deliberate trade-off above. What must not pass is a build-macos that
+      # reported success and still delivered no archive. Windows and Linux
+      # cannot go missing unnoticed, because the manifest step below hard-fails
+      # on an absent archive; macOS publishes no manifest, so without this check
+      # it is the one platform that can vanish from a green release. That is
+      # precisely the defect class of issue #155, and it is checked here rather
+      # than trusted, since nobody on this project can run the macOS job by hand.
+      - name: Verify the macOS archive arrived
+        if: needs.build-macos.result == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.meta.outputs.tag }}"
+          VERSION="${VERSION#v}"
+          SIGNED="flutter-gitui-v${VERSION}-macos.zip"
+          UNSIGNED="flutter-gitui-v${VERSION}-macos-unsigned.zip"
+          found=0
+          if [ -f "dist/$SIGNED" ]; then found=$((found + 1)); fi
+          if [ -f "dist/$UNSIGNED" ]; then found=$((found + 1)); fi
+          # Exactly one, never both: the two are mutually exclusive packaging
+          # paths, so two archives would mean the signed and unsigned steps both
+          # ran and nobody could say which one the release actually carries.
+          if [ "$found" -ne 1 ]; then
+            echo "::error::build-macos succeeded but dist/ holds ${found} macOS archives; expected exactly one of ${SIGNED} or ${UNSIGNED}"
+            exit 1
+          fi
 
       # Everything from here on talks to the GitHub API, where a few minutes of
       # upstream trouble would otherwise throw away a finished build, so each
@@ -583,11 +619,17 @@ jobs:
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           CHANGELOG=$(retry gh release view "$TAG" --json body --jq .body)
           # No latest-macos.json even when a macOS archive — signed or
-          # unsigned — is attached: the client resolves a manifest name only
-          # on Windows and Linux (update_service falls back to a
-          # never-published latest.json on macOS) and no updater ships in the
-          # macOS archive, so a manifest would advertise an update nothing
-          # can install — issue #155.
+          # unsigned — is attached, and that is settled rather than pending
+          # (issue #155). Nothing would read it: UpdateService._manifestFileName
+          # resolves a name only for Windows and Linux, and its macOS fallback
+          # is 'latest.json', an asset no release carries. Nothing could act on
+          # it either — checkForUpdates rejects any other platform outright, and
+          # installUpdate throws there, so the macOS archive deliberately ships
+          # no updater helper. Publishing the manifest anyway would add a file
+          # no code path fetches whose only effect is to arm a half-built update
+          # flow the day somebody changes that fallback. macOS users update by
+          # downloading the next release; the client tells them so instead of
+          # failing silently.
           for PLATFORM in windows linux; do
             case "$PLATFORM" in
               windows) FILE="flutter-gitui-v${VERSION}-windows.zip" ;;

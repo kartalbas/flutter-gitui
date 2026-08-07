@@ -144,7 +144,7 @@ icon in file managers.
 |----------|--------|
 | Windows | Built and published. Primary development platform. |
 | Linux | Built and published. |
-| macOS | Builds on every commit, but not published: the app is signed ad-hoc without a hardened runtime, so Gatekeeper refuses to open it. Publishing waits on a Developer ID certificate and notarisation. |
+| macOS | Built and published, currently **unsigned**: the release carries `flutter-gitui-v<version>-macos-unsigned.zip`. Without an Apple Developer ID signature and notarisation, Gatekeeper blocks the first launch until you allow the app once under System Settings → Privacy & Security; the `README.txt` inside the archive walks through it. In-app updates are not available on macOS — update by downloading the next release. |
 
 Known limitations of the current alpha are listed in the release notes.
 

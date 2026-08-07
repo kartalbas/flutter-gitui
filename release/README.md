@@ -33,7 +33,16 @@ All five repository secrets (Settings → Secrets and variables → Actions) mus
 | `MACOS_NOTARY_KEY_ID` | The key's ID | Shown next to the key on the same page (also in the file name, `AuthKey_<KEYID>.p8`). |
 | `MACOS_NOTARY_ISSUER_ID` | The team's issuer ID (a UUID) | Shown at the top of the same Integrations page. |
 
-Even when a macOS archive is published, no `latest-macos.json` update manifest is attached: the in-app update flow has no macOS implementation (the client requests a manifest name only on Windows and Linux, and the archive ships no updater helper), so a manifest would advertise updates nothing can install — see issue #155.
+### Why macOS gets no update manifest
+
+Even when a macOS archive is published, no `latest-macos.json` is attached. This is a settled decision (issue #155), not an outstanding gap, and it follows from what the client actually does — `lib/core/services/update_service.dart`:
+
+- `_manifestFileName` resolves a manifest name for Windows and Linux only; its fallback on every other platform is `latest.json`, which no release carries. A published `latest-macos.json` would therefore be fetched by nothing.
+- `checkForUpdates` rejects any platform other than Windows and Linux outright, and `installUpdate` throws there as well. Even a correctly shaped manifest could not lead to an installed update, which is also why the macOS archive ships no `updater` helper.
+
+So the manifest would be a file no code path reads, whose only lasting effect is to arm a half-built update flow the day somebody changes that fallback. The important part is that its absence is **not** silent: a macOS client asking for `latest.json` finds no such asset and gets a phrased error naming the releases page ("publishes no update information for this platform"), rather than the "you are up to date" that the original defect produced. macOS users update by downloading the next release.
+
+The release workflow verifies that a `build-macos` job which reported success really did deliver exactly one archive. macOS is the only platform with no manifest to be caught by — the manifest step hard-fails on a missing Windows or Linux archive — so without that check it would be the one platform able to disappear from a green release unnoticed.
 
 ## Package stores: winget and Snap
 

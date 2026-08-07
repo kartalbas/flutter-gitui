@@ -118,11 +118,56 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     }
   }
 
+  /// Leaves the keyboard nothing to resolve while no flat list is built.
+  ///
+  /// Building the flat list is what keeps [_visibleTags] and the controller's
+  /// item count in step with what the user sees, so every state that replaces
+  /// that list — no tags at all, nothing matching the search, the grouped view
+  /// — has to clear both by hand. Without it the previous list stays
+  /// addressable and Enter activates a row that is no longer on screen:
+  /// silently expanding a hidden tag, or checking one in selection mode.
+  void _detachKeyboardNavigation() {
+    _visibleTags = const [];
+    _listController.itemCount = 0;
+  }
+
+  /// The Escape rung for the search text; also what the field's X does.
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
+  /// Enters the multi-select mode, the way the overflow menu's entry does.
+  void _enterSelectionMode() {
+    setState(() {
+      _selectionMode = true;
+    });
+    _reclaimListFocus();
+  }
+
   /// The Escape rung for the selection mode; also what the app bar's X does.
   void _exitSelectionMode() {
     setState(() {
       _selectionMode = false;
       _selectedTags.clear();
+    });
+    _reclaimListFocus();
+  }
+
+  /// Puts the keyboard back on the tag list after the selection mode toggled.
+  ///
+  /// Both switches replace the whole app bar, so the control that operated
+  /// them — the overflow menu's entry, the mode's X button — is unmounted with
+  /// it and has no focus to hand back. Focus then falls to the enclosing route
+  /// scope and the screen goes keyboard-dead until the user tabs back in. The
+  /// list is the screen's one navigable stop, so it is where the keyboard
+  /// belongs; the request is deferred because the new app bar has not been
+  /// built yet at the moment the mode flips.
+  void _reclaimListFocus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _listController.requestFocus();
     });
   }
 
@@ -138,97 +183,100 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       return _buildNoRepository(context);
     }
 
-    // Escape leaves the selection mode — the innermost dismissible surface
-    // of this screen. A filled search field clears itself first (its own
-    // watcher sits closer to the focused field), and with no mode active the
-    // scope is transparent, so Escape is dead when nothing is dismissible.
+    // The Escape ladder, innermost rung first: clear the search text, then
+    // leave the selection mode, then nothing — a disabled scope is
+    // transparent, so Escape is dead when neither is active. A filled field
+    // that holds focus still clears itself before either rung (its own
+    // watcher sits closer to the caret); the search rung here is what makes
+    // Escape clear the filter from the list too, where the keyboard actually
+    // lives, exactly as on the browse and history screens.
     return BaseDismissScope(
       enabled: _selectionMode,
       onDismiss: _exitSelectionMode,
-      child: Scaffold(
-        appBar: _selectionMode
-            ? AppBar(
-                title: Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.selectedCount(_selectedTags.length),
-                ),
-                leading: BaseIconButton(
-                  icon: PhosphorIconsRegular.x,
-                  tooltip: AppLocalizations.of(context)!.exitSelection,
-                  onPressed: _exitSelectionMode,
-                ),
-                actions: [
-                  BaseIconButton(
-                    icon: PhosphorIconsRegular.checkSquareOffset,
-                    tooltip: AppLocalizations.of(context)!.selectAll,
-                    onPressed: () => _selectAllTags(tagsAsync.value ?? []),
+      child: BaseDismissScope(
+        enabled: _searchQuery.isNotEmpty,
+        onDismiss: _clearSearch,
+        child: Scaffold(
+          appBar: _selectionMode
+              ? AppBar(
+                  title: Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.selectedCount(_selectedTags.length),
                   ),
-                  BaseIconButton(
-                    icon: PhosphorIconsRegular.square,
-                    tooltip: AppLocalizations.of(context)!.clearSelection,
-                    onPressed: () {
-                      setState(() {
-                        _selectedTags.clear();
-                      });
-                    },
+                  leading: BaseIconButton(
+                    icon: PhosphorIconsRegular.x,
+                    tooltip: AppLocalizations.of(context)!.exitSelection,
+                    onPressed: _exitSelectionMode,
                   ),
-                ],
-              )
-            : StandardAppBar(
-                title: AppDestination.tags.label(context),
-                onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
-                moreMenuItems: [
-                  // Select Tags action (only show if tags exist)
-                  if (tagsAsync.value?.isNotEmpty == true)
-                    PopupMenuItem(
-                      child: MenuItemContent(
-                        icon: PhosphorIconsRegular.checkSquare,
-                        label: AppLocalizations.of(context)!.selectTags,
-                      ),
-                      onTap: () {
+                  actions: [
+                    BaseIconButton(
+                      icon: PhosphorIconsRegular.checkSquareOffset,
+                      tooltip: AppLocalizations.of(context)!.selectAll,
+                      onPressed: () => _selectAllTags(tagsAsync.value ?? []),
+                    ),
+                    BaseIconButton(
+                      icon: PhosphorIconsRegular.square,
+                      tooltip: AppLocalizations.of(context)!.clearSelection,
+                      onPressed: () {
                         setState(() {
-                          _selectionMode = true;
+                          _selectedTags.clear();
                         });
                       },
                     ),
-                  // Fetch Tags action
-                  if (tagsAsync.value?.isNotEmpty == true)
-                    const PopupMenuDivider(),
-                  PopupMenuItem(
-                    child: MenuItemContent(
-                      icon: PhosphorIconsRegular.downloadSimple,
-                      label: AppLocalizations.of(context)!.fetchTags,
+                  ],
+                )
+              : StandardAppBar(
+                  title: AppDestination.tags.label(context),
+                  onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
+                  moreMenuItems: [
+                    // Select Tags action (only show if tags exist)
+                    if (tagsAsync.value?.isNotEmpty == true)
+                      PopupMenuItem(
+                        onTap: _enterSelectionMode,
+                        child: MenuItemContent(
+                          icon: PhosphorIconsRegular.checkSquare,
+                          label: AppLocalizations.of(context)!.selectTags,
+                        ),
+                      ),
+                    // Fetch Tags action
+                    if (tagsAsync.value?.isNotEmpty == true)
+                      const PopupMenuDivider(),
+                    PopupMenuItem(
+                      child: MenuItemContent(
+                        icon: PhosphorIconsRegular.downloadSimple,
+                        label: AppLocalizations.of(context)!.fetchTags,
+                      ),
+                      onTap: () => _fetchTags(context),
                     ),
-                    onTap: () => _fetchTags(context),
-                  ),
-                ],
-              ),
-        body: Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingL),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: tagsAsync.when(
-                  data: (tags) => _buildTagList(
-                    context,
-                    tags,
-                    localOnlyTags,
-                    remoteOnlyTags,
-                    remotes,
-                  ),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (error, stack) => _buildError(context, error),
+                  ],
                 ),
-              ),
-            ],
+          body: Padding(
+            padding: const EdgeInsets.all(AppTheme.paddingL),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: tagsAsync.when(
+                    data: (tags) => _buildTagList(
+                      context,
+                      tags,
+                      localOnlyTags,
+                      remoteOnlyTags,
+                      remotes,
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => _buildError(context, error),
+                  ),
+                ),
+              ],
+            ),
           ),
+          bottomNavigationBar: _selectionMode && _selectedTags.isNotEmpty
+              ? _buildBatchOperationsBar(context)
+              : null,
         ),
-        bottomNavigationBar: _selectionMode && _selectedTags.isNotEmpty
-            ? _buildBatchOperationsBar(context)
-            : null,
       ),
     );
   }
@@ -676,7 +724,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
         // Tag list
         Expanded(
           child: filteredAndSortedTags.isEmpty
-              ? Center(child: BodyLargeLabel('No tags match your search'))
+              ? _buildNoMatchState()
               : _buildGroupedTagList(
                   filteredAndSortedTags,
                   localOnlyTags,
@@ -685,6 +733,12 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
         ),
       ],
     );
+  }
+
+  /// Shown when the filters and the search leave no tag standing.
+  Widget _buildNoMatchState() {
+    _detachKeyboardNavigation();
+    return Center(child: BodyLargeLabel('No tags match your search'));
   }
 
   /// Build grouped tag list with collapsible group headers
@@ -736,7 +790,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
     // Grouped view with collapsible sections; the keyboard drives the flat
     // list only, so nothing is activatable while a grouping is applied.
-    _visibleTags = const [];
+    _detachKeyboardNavigation();
     return ListView.builder(
       itemCount: groupedTags.length,
       itemBuilder: (context, groupIndex) {
@@ -778,6 +832,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    _detachKeyboardNavigation();
     return const TagsEmptyState();
   }
 

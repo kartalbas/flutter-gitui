@@ -137,9 +137,14 @@ deviations:
     app_value: 8.0
     spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filled_button.dart:645 (_FilledButtonDefaultsM3.shape, StadiumBorder = 20.0 dp at the 40 dp container)"
     rationale: >
-      The 8 dp control corner is shared with text fields, cards and menus
-      across this desktop app; a stadium pill would be the only fully
-      rounded control on screen and would break the shared corner language.
+      This desktop app uses a graded corner scale rather than one radius:
+      8 dp on the small pressable controls (buttons and chips), 12 dp on the
+      surfaces that hold them (cards and panels), and the 4 dp that M3's own
+      OutlineInputBorder gives text fields. A stadium pill would be the only
+      fully rounded control on any screen, and it reads as a mobile call to
+      action next to a dense toolbar. The earlier wording here claimed the
+      8 dp corner was shared with text fields; it is not, and their 4 dp is
+      the SDK default they provably match (FIELD family).
     registered: 2026-08-06
 
   - id: BTN-002

@@ -388,7 +388,7 @@ BaseCard(
 BaseTextField(
   label: 'Commit Message',
   hintText: 'Enter a descriptive commit message',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   maxLines: 3,
   prefixIcon: PhosphorIconsRegular.chatText,
   validator: (value) {

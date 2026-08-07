@@ -4,6 +4,7 @@ import '../../shared/theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import '../widgets/double_tap_tracker.dart';
 import 'base_animated_widgets.dart';
+import 'base_menu_item.dart';
 
 /// Base component for all list item patterns in the app.
 ///
@@ -33,25 +34,16 @@ import 'base_animated_widgets.dart';
 ///   ),
 ///   badge: Badge(label: Text('5')),
 ///   contextMenuItems: [
-///     PopupMenuItem(
-///       child: Row(
-///         children: [
-///           Icon(PhosphorIconsRegular.pencil),
-///           SizedBox(width: 8),
-///           BodyMediumLabel('Edit'),
-///         ],
-///       ),
-///       onTap: () => _edit(),
+///     MenuAction(
+///       label: 'Edit',
+///       icon: PhosphorIconsRegular.pencil,
+///       onPressed: () => _edit(),
 ///     ),
-///     PopupMenuItem(
-///       child: Row(
-///         children: [
-///           Icon(PhosphorIconsRegular.trash),
-///           SizedBox(width: 8),
-///           BodyMediumLabel('Delete'),
-///         ],
-///       ),
-///       onTap: () => _delete(),
+///     MenuAction(
+///       label: 'Delete',
+///       icon: PhosphorIconsRegular.trash,
+///       role: MenuActionRole.destructive,
+///       onPressed: () => _delete(),
 ///     ),
 ///   ],
 ///   isSelected: true,
@@ -99,10 +91,19 @@ class BaseListItem extends StatefulWidget {
   /// Badge/status indicator (optional)
   final Widget? badge;
 
-  /// Context menu items for three-dot menu (optional)
-  /// If provided, automatically adds a PopupMenuButton with these items
-  /// Combined with existing trailing widget if both are present
-  final List<PopupMenuEntry<dynamic>>? contextMenuItems;
+  /// The entries of the row's three-dot menu, as data (optional).
+  ///
+  /// When this is non-empty the row grows its own overflow button, combined
+  /// with [trailing] if that is present too.
+  ///
+  /// The entries are [MenuEntry] data rather than Material `PopupMenuEntry`
+  /// widgets. That is the whole point of the type: the widget form welded
+  /// Material's menu *classes* into this component's public signature, where
+  /// one design language rejects them at compile time and another accepts them
+  /// and renders Material rows inside its own menu — see [MenuEntry] for the
+  /// measurement. What a skin needs is the label, the glyph, the callback and
+  /// the role, and that is exactly what this carries.
+  final List<MenuEntry>? contextMenuItems;
 
   /// Whether this item is currently selected (primary selection)
   final bool isSelected;
@@ -165,12 +166,17 @@ class _BaseListItemState extends State<BaseListItem> {
 
     // Build effective trailing widget (combine trailing + context menu if needed)
     Widget? effectiveTrailing = widget.trailing;
-    if (widget.contextMenuItems != null &&
-        widget.contextMenuItems!.isNotEmpty) {
-      final menuButton = BasePopupMenuButton(
+    final List<MenuEntry>? menuEntries = widget.contextMenuItems;
+    if (menuEntries != null && menuEntries.isNotEmpty) {
+      // The menu carries the position of the chosen entry as its value and
+      // dispatches through `onSelected`, so the callback runs once the menu
+      // route has completed rather than in the middle of closing it — which
+      // matters here, because most of these callbacks open a dialog.
+      final menuButton = BasePopupMenuButton<int>(
         icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
         tooltip: l10n.moreActions,
-        itemBuilder: (context) => widget.contextMenuItems!,
+        itemBuilder: (context) => materialMenuEntries(context, menuEntries),
+        onSelected: (int index) => dispatchMenuEntry(menuEntries, index),
       );
 
       // Combine with existing trailing if present

@@ -5,16 +5,34 @@ import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
 import 'base_button.dart';
 
-/// Text field visual variants
+/// How loudly a text field asserts itself on the surface it sits on.
+///
+/// The values name the field's *role*, not the class that happens to draw it
+/// today. The previous names — `standard`, `outlined`, `filled` — were the
+/// Material border classes read out loud (`UnderlineInputBorder`,
+/// `OutlineInputBorder`, and `filled: true`), so a design language that has no
+/// such classes had nothing to map: Apple's HIG and Fluent 2 each give a text
+/// field exactly one appearance, and asking either of them for "the
+/// OutlineInputBorder one" is a question with no answer. Asking instead for
+/// "the one that recedes", "the ordinary form field" or "the one that carries
+/// the most weight" is a question every design language can answer, even when
+/// its answer is that all three look alike.
 enum TextFieldVariant {
-  /// Underline only (minimal)
-  standard,
+  /// The field recedes into what surrounds it: it marks the writing line and
+  /// nothing else. For dense rows and inline edits where a full box would be
+  /// more chrome than content. Material 3 draws it as an underline.
+  minimal,
 
-  /// Border all around (default)
-  outlined,
+  /// The ordinary form field, and the default: the input draws a complete
+  /// boundary around itself so it reads as one editable unit among labels and
+  /// buttons. Material 3 draws it as an outlined box.
+  bordered,
 
-  /// Filled background (prominent)
-  filled,
+  /// The field is the most prominent thing on its surface, because typing in
+  /// it *is* the task — a search bar, a command palette, a filter box.
+  /// Material 3 draws it as a filled box, which its own guidance calls the
+  /// higher-emphasis of the two field types.
+  emphasized,
 }
 
 /// Base component for all text input patterns in the app.
@@ -54,7 +72,7 @@ enum TextFieldVariant {
 ///   hintText: 'Search repositories...',
 ///   prefixIcon: PhosphorIconsRegular.magnifyingGlass,
 ///   showClearButton: true,
-///   variant: TextFieldVariant.filled,
+///   variant: TextFieldVariant.emphasized,
 /// )
 /// ```
 class BaseTextField extends StatefulWidget {
@@ -71,7 +89,7 @@ class BaseTextField extends StatefulWidget {
     this.suffixIcon,
     this.onSuffixTap,
     this.suffixTooltip,
-    this.variant = TextFieldVariant.outlined,
+    this.variant = TextFieldVariant.bordered,
     this.obscureText = false,
     this.showClearButton = false,
     this.showPasswordToggle = false,
@@ -136,7 +154,7 @@ class BaseTextField extends StatefulWidget {
   /// whenever [onSuffixTap] is set: an icon-only control has to name itself.
   final String? suffixTooltip;
 
-  /// Visual variant (standard, outlined, filled)
+  /// How loudly the field asserts itself; see [TextFieldVariant].
   final TextFieldVariant variant;
 
   /// Whether text should be obscured (for passwords)
@@ -350,19 +368,19 @@ class _BaseTextFieldState extends State<BaseTextField> {
     );
 
     final InputDecoration decoration = switch (widget.variant) {
-      TextFieldVariant.standard => commonDecoration.copyWith(
+      TextFieldVariant.minimal => commonDecoration.copyWith(
         border: const UnderlineInputBorder(),
       ),
-      TextFieldVariant.outlined => commonDecoration.copyWith(
+      TextFieldVariant.bordered => commonDecoration.copyWith(
         border: outlinedShape,
       ),
-      // The filled variant is the app's search/inline field: a filled box with
-      // no active indicator (FIELD-003) and all four corners rounded
-      // (FIELD-002). A border with `BorderSide.none` makes InputDecorator
-      // return it unchanged for every state (input_decorator.dart:2266), so
-      // the states that must stay visible are spelled out here — and only
-      // those.
-      TextFieldVariant.filled => commonDecoration.copyWith(
+      // The emphasized variant is the app's search/inline field, and Material
+      // draws it as a filled box with no active indicator (FIELD-003) and all
+      // four corners rounded (FIELD-002). A border with `BorderSide.none`
+      // makes InputDecorator return it unchanged for every state
+      // (input_decorator.dart:2266), so the states that must stay visible are
+      // spelled out here — and only those.
+      TextFieldVariant.emphasized => commonDecoration.copyWith(
         filled: true,
         border: filledShape,
         disabledBorder: filledShape,

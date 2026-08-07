@@ -375,7 +375,7 @@ BodyMediumLabel(
 // Basic text field
 BaseTextField(
   label: 'Repository Name',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   hintText: 'Enter repository name',
   controller: nameController,
 )
@@ -383,7 +383,7 @@ BaseTextField(
 // With validation
 BaseTextField(
   label: 'Email',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   keyboardType: TextInputType.emailAddress,
   validator: (value) {
     if (value == null || value.isEmpty) {
@@ -399,7 +399,7 @@ BaseTextField(
 // Password field
 BaseTextField(
   label: 'Password',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   obscureText: true,
   suffixIcon: Icon(PhosphorIconsRegular.eye),
 )
@@ -407,7 +407,7 @@ BaseTextField(
 // Multi-line text field
 BaseTextField(
   label: 'Commit Message',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   maxLines: 5,
   hintText: 'Describe your changes...',
 )
@@ -415,7 +415,7 @@ BaseTextField(
 // With prefix icon
 BaseTextField(
   label: 'Search',
-  variant: TextFieldVariant.filled,
+  variant: TextFieldVariant.emphasized,
   prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
   hintText: 'Search repositories...',
 )
@@ -423,7 +423,7 @@ BaseTextField(
 // Read-only field
 BaseTextField(
   label: 'Commit Hash',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   initialValue: 'a3f4b2c7d8e9f0a1',
   readOnly: true,
 )
@@ -433,7 +433,7 @@ final focusNode = FocusNode();
 
 BaseTextField(
   label: 'Username',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   focusNode: focusNode,
 )
 
@@ -687,12 +687,12 @@ Column(
   children: [
     BaseTextField(
       label: 'Field 1',
-      variant: TextFieldVariant.outlined,
+      variant: TextFieldVariant.bordered,
     ),
     const SizedBox(height: AppTheme.paddingM),
     BaseTextField(
       label: 'Field 2',
-      variant: TextFieldVariant.outlined,
+      variant: TextFieldVariant.bordered,
     ),
     const SizedBox(height: AppTheme.paddingL),
     Row(

@@ -1,11 +1,20 @@
 /// Material 3 conformance suite for the chip family
 /// (lib/shared/components/base_filter_chip.dart): BaseFilterChip,
-/// BaseChoiceChip and BaseActionChip.
+/// BaseChoiceGroup and BaseActionChip.
 ///
 /// Each of the three is measured against the SDK class it is built on —
 /// `FilterChip`, `ChoiceChip` and `ActionChip` — pumped through
 /// [pumpConformance] and read with the same probes, so fonts, device pixel
 /// ratio and visual density are identical on both sides and cancel out.
+///
+/// The single-choice component is a *group* now, so its oracle comparison is
+/// made through a group holding exactly one option: the group is what the app
+/// constructs, the chip inside it is what Material draws, and one option is
+/// what makes the two directly comparable to a lone `ChoiceChip`. The token
+/// ids stay `BaseChoiceChip.*` — that is the name the checked-in
+/// `test/conformance/support/token_manifest.dart` and the CHIP-003 entry in
+/// `docs/deviation_register.yaml` give this element, and `expectConformant`
+/// rejects any token those files do not list.
 ///
 /// A chip paints its container as an `Ink` with a `ShapeDecoration`
 /// (Flutter 3.44.4 packages/flutter/lib/src/material/chip.dart:1432-1438), so
@@ -64,11 +73,17 @@ Widget _baseFilterChip({bool selected = false, bool icon = false}) {
   );
 }
 
+/// A single-option [BaseChoiceGroup], which is how the app's single-choice
+/// component now renders one chip. `selected: null` is the group's
+/// "nothing chosen yet" state and is what makes the unselected case
+/// expressible without a second option changing the geometry being measured.
 Widget _baseChoiceChip({bool selected = false}) {
-  return BaseChoiceChip(
-    label: _label,
-    selected: selected,
-    onSelected: (bool value) {},
+  return BaseChoiceGroup<int>(
+    options: const <ChoiceOption<int>>[
+      ChoiceOption<int>(value: 0, label: _label),
+    ],
+    selected: selected ? 0 : null,
+    onSelected: (int value) {},
   );
 }
 
@@ -441,7 +456,7 @@ void main() {
     });
   });
 
-  group('BaseChoiceChip', () {
+  group('BaseChoiceGroup, measured on the chip Material draws per option', () {
     testWidgets('corner radius', (WidgetTester tester) async {
       await pumpConformance(tester, _oracleChoiceChip());
       final double expected =
@@ -519,6 +534,64 @@ void main() {
       // builds.
       await pumpConformance(tester, _baseChoiceChip());
       expect(find.byType(ChoiceChip), findsOneWidget);
+    });
+
+    testWidgets('it renders one chip per option', (WidgetTester tester) async {
+      // The group is the component; the chips are what Material makes of it.
+      // This is the assertion that fails if the group ever stops rendering the
+      // options it was given, which the per-option measurements above cannot
+      // see because they only ever pump one option.
+      await pumpConformance(
+        tester,
+        BaseChoiceGroup<int>(
+          options: const <ChoiceOption<int>>[
+            ChoiceOption<int>(value: 0, label: 'one'),
+            ChoiceOption<int>(value: 1, label: 'two'),
+            ChoiceOption<int>(value: 2, label: 'three'),
+          ],
+          selected: 1,
+          onSelected: (int value) {},
+        ),
+      );
+      expect(find.byType(ChoiceChip), findsNWidgets(3));
+      expect(
+        tester
+            .widgetList<ChoiceChip>(find.byType(ChoiceChip))
+            .map((ChoiceChip chip) => chip.selected)
+            .toList(),
+        <bool>[false, true, false],
+        reason: 'exactly the option whose value equals `selected` is chosen',
+      );
+    });
+
+    testWidgets('re-choosing the chosen option reports nothing', (
+      WidgetTester tester,
+    ) async {
+      // A chip reports the state it would flip to, so tapping the chosen
+      // option arrives as `false`. "Exactly one" is what the group promises,
+      // and there is no gesture that would restore the choice afterwards, so
+      // the group must swallow that report rather than pass on a de-selection
+      // its callers would each have to filter out again.
+      final List<int> chosen = <int>[];
+      await pumpConformance(
+        tester,
+        BaseChoiceGroup<int>(
+          options: const <ChoiceOption<int>>[
+            ChoiceOption<int>(value: 0, label: 'one'),
+            ChoiceOption<int>(value: 1, label: 'two'),
+          ],
+          selected: 0,
+          onSelected: chosen.add,
+        ),
+      );
+
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+      expect(chosen, isEmpty);
+
+      await tester.tap(find.text('two'));
+      await tester.pumpAndSettle();
+      expect(chosen, <int>[1]);
     });
   });
 

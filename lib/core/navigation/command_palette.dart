@@ -177,7 +177,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                     focusNode: _focusNode,
                     hintText: l10n.hintTextCommandPalette,
                     prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-                    variant: TextFieldVariant.filled,
+                    variant: TextFieldVariant.emphasized,
                     onSubmitted: (_) {
                       if (_filteredCommands.isNotEmpty) {
                         _executeCommand(_filteredCommands[_selectedIndex]);

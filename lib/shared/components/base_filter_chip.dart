@@ -109,38 +109,124 @@ class BaseFilterChip extends StatelessWidget {
   }
 }
 
-/// Choice chip for single-selection scenarios (radio button style)
+/// One of the mutually exclusive choices a [BaseChoiceGroup] offers.
+///
+/// Data, not a widget, because the group is what gets rendered and each design
+/// language renders it out of its own parts: Material 3 builds a row of choice
+/// chips (or a `SegmentedButton`), Apple's HIG a
+/// `CupertinoSlidingSegmentedControl`, Fluent 2 a `RadioGroup` of radio
+/// buttons. None of those can be assembled out of ready-made per-option
+/// widgets belonging to a different language.
+@immutable
+class ChoiceOption<T> {
+  const ChoiceOption({required this.value, required this.label, this.icon});
+
+  /// What choosing this option means, handed back to
+  /// [BaseChoiceGroup.onSelected] and compared against
+  /// [BaseChoiceGroup.selected].
+  final T value;
+
+  /// The option's text, and its accessible name.
+  final String label;
+
+  /// An optional leading glyph. [IconData] is language-neutral — Flutter's
+  /// Material, Cupertino and Fluent libraries all take it.
+  final IconData? icon;
+}
+
+/// A group of mutually exclusive choices: pick exactly one.
+///
+/// **The group is the component, not the individual choice.** That is a
+/// deliberate correction of the earlier `BaseChoiceChip`, and the one
+/// pattern-level change the skin viability spike found. A single choice chip
+/// is a Material idea with no counterpart anywhere else: the iOS HIG answers
+/// "pick one of a few" with one segmented control and Fluent 2 with one radio
+/// group, and neither has a widget for "one segment on its own" that a caller
+/// could place in a `Wrap` of its own making. A component that renders one
+/// chip therefore has nothing to hand another design language, while a
+/// component that renders the whole group has the complete question —
+/// the options, and which of them is chosen — and can answer it in any
+/// language.
+///
+/// Material 3 renders the group as a row of `ChoiceChip`s, which is the
+/// rendering the app already shipped and the one the conformance suite
+/// measures; the chips are an implementation detail of this component and no
+/// longer constructible from outside it.
 ///
 /// Example usage:
 /// ```dart
-/// BaseChoiceChip(
-///   label: 'Feature',
-///   selected: selectedPrefix == BranchPrefix.feature,
-///   onSelected: (selected) {
-///     if (selected) setState(() => selectedPrefix = BranchPrefix.feature);
-///   },
+/// BaseChoiceGroup<BranchPrefix>(
+///   options: [
+///     ChoiceOption(value: BranchPrefix.feature, label: 'feature'),
+///     ChoiceOption(value: BranchPrefix.hotfix, label: 'hotfix'),
+///   ],
+///   selected: _selectedPrefix,
+///   onSelected: (prefix) => setState(() => _selectedPrefix = prefix),
 /// )
 /// ```
-class BaseChoiceChip extends StatelessWidget {
-  const BaseChoiceChip({
+class BaseChoiceGroup<T> extends StatelessWidget {
+  const BaseChoiceGroup({
     super.key,
-    required this.label,
+    required this.options,
     required this.selected,
     required this.onSelected,
-    this.icon,
   });
 
-  /// Label text for the choice chip
+  /// The choices on offer, in the order they are shown.
+  final List<ChoiceOption<T>> options;
+
+  /// The value that is currently chosen.
+  ///
+  /// Nullable, and a value matching none of the [options] is equally legal:
+  /// both mean "nothing has been chosen yet", which is a real state for a form
+  /// that starts blank. The group then renders every option unselected rather
+  /// than inventing a default the caller did not ask for.
+  final T? selected;
+
+  /// Called with the value of the option the user chose.
+  ///
+  /// It fires only on a choice, never on a de-selection: re-tapping the chosen
+  /// option in a single-choice group is a no-op, because "exactly one" is what
+  /// the group promises and there is no second gesture that could restore it.
+  final ValueChanged<T> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppTheme.paddingS,
+      runSpacing: AppTheme.paddingS,
+      children: <Widget>[
+        for (final ChoiceOption<T> option in options)
+          _ChoiceChip(
+            label: option.label,
+            icon: option.icon,
+            selected: option.value == selected,
+            onSelected: () => onSelected(option.value),
+          ),
+      ],
+    );
+  }
+}
+
+/// Material 3's rendering of one option of a [BaseChoiceGroup].
+///
+/// Private on purpose: a lone choice chip is exactly what R3 of the skin spike
+/// removed from the public surface, so the only way to get one is to ask for a
+/// group. The conformance suite still measures it under the token prefix
+/// `BaseChoiceChip.*`, because that is the name the checked-in token manifest
+/// and the CHIP-003 register entry use for this element.
+class _ChoiceChip extends StatelessWidget {
+  const _ChoiceChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onSelected,
+  });
+
   final String label;
-
-  /// Whether this choice is currently selected
-  final bool selected;
-
-  /// Callback when selection state changes
-  final ValueChanged<bool> onSelected;
-
-  /// Optional leading icon
   final IconData? icon;
+  final bool selected;
+  final VoidCallback onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -149,12 +235,17 @@ class BaseChoiceChip extends StatelessWidget {
     // ChoiceChip, not FilterChip: single-select is what M3 calls a choice
     // chip, and a skin that maps our components onto another design language
     // has to be told which of the two this is. The `avoid_choice_chip` rule
-    // points every call site at this component, which is the one place the
-    // wrapped widget is allowed to appear.
+    // points every call site at BaseChoiceGroup, which reaches the wrapped
+    // widget only through here — the one place it is allowed to appear.
     // ignore: avoid_choice_chip
     return ChoiceChip(
       selected: selected,
-      onSelected: onSelected,
+      // A chip reports the state it would flip to, so re-tapping the chosen
+      // option arrives here as `false`. A single-choice group has no "none"
+      // state to flip to, so that report is dropped rather than passed on.
+      onSelected: (bool isNowSelected) {
+        if (isNowSelected) onSelected();
+      },
       label: _chipLabel(label),
       avatar: _chipAvatar(icon),
       // Same selection treatment as BaseFilterChip: container and outline

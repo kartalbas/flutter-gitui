@@ -217,23 +217,22 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
           TitleSmallLabel(l10n.branchPrefixLabel),
           const SizedBox(height: AppTheme.paddingS),
 
-          Wrap(
-            spacing: AppTheme.paddingS,
-            runSpacing: AppTheme.paddingS,
-            children: BranchPrefix.values.map((prefix) {
-              final isSelected = _selectedPrefix == prefix;
-              return BaseChoiceChip(
-                label: _getPrefixLabel(l10n, prefix),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() {
-                      _selectedPrefix = prefix;
-                    });
-                  }
-                },
-              );
-            }).toList(),
+          // One group, not a hand-assembled row of chips: picking a prefix is
+          // a single-choice question, and the group is the unit every design
+          // language has an answer for (see BaseChoiceGroup). The wrapping row
+          // and its spacing now belong to the component, so every such
+          // question lays out the same way.
+          BaseChoiceGroup<BranchPrefix>(
+            options: BranchPrefix.values
+                .map(
+                  (prefix) => ChoiceOption<BranchPrefix>(
+                    value: prefix,
+                    label: _getPrefixLabel(l10n, prefix),
+                  ),
+                )
+                .toList(),
+            selected: _selectedPrefix,
+            onSelected: (prefix) => setState(() => _selectedPrefix = prefix),
           ),
 
           const SizedBox(height: AppTheme.paddingM),

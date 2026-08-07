@@ -136,7 +136,7 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
             child: BaseTextField(
               hintText: l10n.search,
               prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-              variant: TextFieldVariant.filled,
+              variant: TextFieldVariant.emphasized,
               showClearButton: true,
               onChanged: (value) => setState(() => _query = value),
             ),

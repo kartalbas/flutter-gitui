@@ -1,12 +1,23 @@
 /// Material 3 conformance suite for BaseTextField
 /// (lib/shared/components/base_text_field.dart).
 ///
-/// `TextFieldVariant` names Material's own border classes — `UnderlineInput
-/// Border` for `standard`, `OutlineInputBorder` for `outlined` and `filled` —
-/// so the ruler is the SDK widget those names point at: a real `TextField`
-/// pumped through [pumpConformance] and read with the same probes as
-/// BaseTextField. Fonts, device pixel ratio and visual density are therefore
-/// identical on both sides and cancel out of every comparison.
+/// `TextFieldVariant` names the role a field plays — `minimal`, `bordered`,
+/// `emphasized` — rather than the Material class that draws it, so this suite
+/// is what pins each role to a Material rendering: `minimal` to an
+/// `UnderlineInputBorder`, `bordered` to an `OutlineInputBorder` and
+/// `emphasized` to a filled box. The ruler is therefore the SDK widget in that
+/// same configuration: a real `TextField` pumped through [pumpConformance] and
+/// read with the same probes as BaseTextField. Fonts, device pixel ratio and
+/// visual density are identical on both sides and cancel out of every
+/// comparison.
+///
+/// The token ids for the emphasized role are still spelled
+/// `BaseTextField.filled.*`. A token id names the *measured Material
+/// property*, and the property being measured really is the fill, the fill's
+/// bottom corner and the filled box's active indicator; the ids also have to
+/// keep matching `test/conformance/support/token_manifest.dart` and the
+/// `FIELD-002` / `FIELD-003` entries in `docs/deviation_register.yaml`
+/// verbatim, or `expectConformant` rejects them as unlisted.
 ///
 /// Neither `InputDecorator` nor `TextField` exposes a defaults seam
 /// (`defaultStyleOf` exists only on `ButtonStyleButton`), and the border for
@@ -72,7 +83,7 @@ Widget _baseField({
   String? helper,
   String? error,
   bool enabled = true,
-  TextFieldVariant variant = TextFieldVariant.outlined,
+  TextFieldVariant variant = TextFieldVariant.bordered,
   IconData? prefixIcon,
 }) {
   return SizedBox(
@@ -428,7 +439,7 @@ void main() {
     });
   });
 
-  group('filled variant', () {
+  group('the emphasized variant, which Material renders as a filled box', () {
     testWidgets('fill color', (WidgetTester tester) async {
       await pumpConformance(tester, _oracleField(filled: true));
       ColorScheme scheme = _theme(tester).colorScheme;
@@ -439,7 +450,7 @@ void main() {
 
       await pumpConformance(
         tester,
-        _baseField(variant: TextFieldVariant.filled),
+        _baseField(variant: TextFieldVariant.emphasized),
       );
       scheme = _theme(tester).colorScheme;
 
@@ -463,7 +474,7 @@ void main() {
 
       await pumpConformance(
         tester,
-        _baseField(variant: TextFieldVariant.filled),
+        _baseField(variant: TextFieldVariant.emphasized),
       );
 
       expectConformant(
@@ -480,7 +491,7 @@ void main() {
 
       await pumpConformance(
         tester,
-        _baseField(variant: TextFieldVariant.filled),
+        _baseField(variant: TextFieldVariant.emphasized),
       );
 
       expectConformant(
@@ -493,7 +504,7 @@ void main() {
     });
   });
 
-  group('the standard variant delegates the same way', () {
+  group('the minimal variant delegates the same way', () {
     testWidgets('its outline follows the M3 state resolution too', (
       WidgetTester tester,
     ) async {
@@ -506,7 +517,7 @@ void main() {
 
       await pumpConformance(
         tester,
-        _baseField(variant: TextFieldVariant.standard),
+        _baseField(variant: TextFieldVariant.minimal),
       );
       expect(_side(tester, _base()), expected);
     });

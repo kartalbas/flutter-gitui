@@ -147,7 +147,7 @@ BaseListItem(
   trailing: /* optional actions */,
   isSelected: true,        // Primary selection (current item)
   isMultiSelected: true,   // Secondary selection (batch ops)
-  contextMenuItems: [/* popup menu */],
+  contextMenuItems: [/* MenuAction data, never Material menu widgets */],
   onTap: () => /* action */,
 )
 ```

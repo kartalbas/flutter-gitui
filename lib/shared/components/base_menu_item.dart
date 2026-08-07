@@ -1,5 +1,163 @@
 import 'package:flutter/material.dart';
 
+/// One entry in a menu, expressed as data rather than as a widget.
+///
+/// A menu is one of the places where the three design languages disagree not
+/// about styling but about *type*. Fluent 2's `MenuFlyout` takes
+/// `List<MenuFlyoutItemBase>`, which is not even a `Widget`, so no cast or
+/// adapter reaches it from a `List<PopupMenuEntry>` — handing it Material menu
+/// entries fails to compile, which is the harmless failure. Cupertino's
+/// `CupertinoContextMenu.actions` is typed `List<Widget>` and `PopupMenuEntry`
+/// **is** a `Widget`, so the same list compiles cleanly there and then renders
+/// Material rows, Material ink and Material typography inside an iOS menu,
+/// without any of `CupertinoContextMenuAction`'s dividers, destructive
+/// treatment or dismissal behaviour. That is the failure that ships.
+///
+/// The lesson is the one `DialogAction` was created for
+/// (lib/shared/components/base_dialog.dart): a `Widget`-typed parameter is
+/// exactly what lets the wrong design language through the type system
+/// unnoticed. So a menu entry here carries only language-neutral data — a
+/// string, a glyph, a callback, a role and a flag — and the mapping onto
+/// Material's `PopupMenuEntry` happens in exactly one place,
+/// [materialMenuEntries].
+///
+/// The type is sealed so that place can switch over it exhaustively: adding a
+/// third kind of entry becomes a compile error there rather than an entry that
+/// silently renders as nothing.
+sealed class MenuEntry {
+  const MenuEntry();
+}
+
+/// A rule drawn between two groups of actions, carrying no action of its own.
+///
+/// It is a separate kind of entry rather than a flag on [MenuAction] because
+/// it is not one: a separator has no label, no glyph and nothing to invoke,
+/// and every design language draws it with its own dedicated element
+/// (`PopupMenuDivider`, `MenuFlyoutSeparator`, the divider Cupertino puts
+/// between context-menu actions by construction).
+final class MenuSeparator extends MenuEntry {
+  const MenuSeparator();
+}
+
+/// What an action in a menu *means*, from which each design language derives
+/// its own emphasis.
+///
+/// The role is what the call site declares, not a colour and not a variant,
+/// for the same reason `DialogActionRole` exists: Material tints a destructive
+/// entry with `error`, Fluent 2 gives it its own critical style, and Cupertino
+/// expresses it on the action itself
+/// (`CupertinoContextMenuAction.isDestructiveAction`). A call site that named
+/// a colour would have made Material's choice on behalf of all three.
+enum MenuActionRole {
+  /// An ordinary entry: open, rename, copy, check out, push.
+  normal,
+
+  /// An entry that destroys something the user cannot get back by repeating
+  /// the gesture: delete, drop, discard, force-delete.
+  destructive,
+}
+
+/// One invokable entry in a menu.
+///
+/// Everything on it survives a change of design language: a `String`, an
+/// [IconData] (which Flutter's Material, Cupertino and Fluent libraries all
+/// accept), a callback, a role and a flag. Nothing here names a Material
+/// class, a colour or a size.
+final class MenuAction extends MenuEntry {
+  const MenuAction({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.role = MenuActionRole.normal,
+    this.enabled = true,
+  });
+
+  /// The entry's text, and its accessible name.
+  final String label;
+
+  /// The entry's leading glyph. Required rather than optional because every
+  /// menu in this app is icon-led and a single glyphless row inside an
+  /// otherwise aligned column reads as a rendering fault; which *glyph* is
+  /// right per design language stays a skin's decision.
+  final IconData icon;
+
+  /// What the entry does. Null disables it, exactly as on a button, so a call
+  /// site that already computes `condition ? callback : null` needs no
+  /// rewriting.
+  final VoidCallback? onPressed;
+
+  /// What the entry means. See [MenuActionRole].
+  final MenuActionRole role;
+
+  /// Whether the entry may be invoked right now. Distinct from a null
+  /// [onPressed] only in how it reads at the call site: an entry that is
+  /// present but temporarily unavailable says so, and stays in the menu with
+  /// its reason visible rather than disappearing from it.
+  final bool enabled;
+
+  /// The resolved answer to "can the user invoke this now".
+  bool get isEnabled => enabled && onPressed != null;
+}
+
+/// Renders [entries] the Material 3 way, as the `PopupMenuEntry` list a
+/// [PopupMenuButton] wants.
+///
+/// This is the single place where the language-neutral data of [MenuEntry]
+/// becomes Material widgets, which is what makes the rest of the app free of
+/// them. Each [MenuAction] is given its own index as the menu's value, so the
+/// button dispatches by position and no call site has to invent string keys
+/// for its entries; [dispatchMenuEntry] is the matching half.
+List<PopupMenuEntry<int>> materialMenuEntries(
+  BuildContext context,
+  List<MenuEntry> entries,
+) {
+  final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  final List<PopupMenuEntry<int>> rendered = <PopupMenuEntry<int>>[];
+
+  for (int index = 0; index < entries.length; index++) {
+    final MenuEntry entry = entries[index];
+    switch (entry) {
+      case MenuSeparator():
+        rendered.add(const PopupMenuDivider());
+      case MenuAction():
+        // The destructive tint is dropped while the entry is unavailable, so
+        // the disabled treatment `PopupMenuItem` resolves for its label
+        // (onSurface at 38%, popup_menu.dart:1847-1852) is the one that shows.
+        // A spelled-out `error` would paint straight over it and a disabled
+        // destructive entry would look exactly like an invokable one.
+        final bool emphasiseAsDestructive =
+            entry.role == MenuActionRole.destructive && entry.isEnabled;
+        rendered.add(
+          PopupMenuItem<int>(
+            value: index,
+            enabled: entry.isEnabled,
+            child: MenuItemContent(
+              icon: entry.icon,
+              label: entry.label,
+              iconColor: emphasiseAsDestructive ? colorScheme.error : null,
+              labelColor: emphasiseAsDestructive ? colorScheme.error : null,
+            ),
+          ),
+        );
+    }
+  }
+
+  return rendered;
+}
+
+/// Invokes the entry [materialMenuEntries] gave the index [index].
+///
+/// The index addresses the original [entries] list, separators included, so
+/// the two functions stay in step without either of them holding state. A
+/// separator carries no callback and can never be selected, so it is simply
+/// ignored here rather than treated as an error.
+void dispatchMenuEntry(List<MenuEntry> entries, int index) {
+  final MenuEntry entry = entries[index];
+  if (entry is MenuAction) {
+    entry.onPressed?.call();
+  }
+}
+
 /// The colour a menu item's own label should use when the caller names none.
 ///
 /// It is the colour the enclosing menu item already published through its

@@ -124,52 +124,39 @@ class BranchListTile extends ConsumerWidget {
           : null,
       contextMenuItems: [
         if (isLocal && !branch.isCurrent)
-          PopupMenuItem(
-            value: 'checkout',
-            child: MenuItemContent(
-              icon: PhosphorIconsRegular.arrowRight,
-              label: AppLocalizations.of(context)!.checkout,
-            ),
-            onTap: () => _checkoutBranch(context, ref),
+          MenuAction(
+            label: AppLocalizations.of(context)!.checkout,
+            icon: PhosphorIconsRegular.arrowRight,
+            onPressed: () => _checkoutBranch(context, ref),
           ),
         if (isLocal && !branch.isProtected)
-          PopupMenuItem(
-            value: 'rename',
-            child: MenuItemContent(
-              icon: PhosphorIconsRegular.pencil,
-              label: AppLocalizations.of(context)!.rename,
-            ),
-            onTap: () => _renameBranch(context, ref),
+          MenuAction(
+            label: AppLocalizations.of(context)!.rename,
+            icon: PhosphorIconsRegular.pencil,
+            onPressed: () => _renameBranch(context, ref),
           ),
         if (isLocal && !branch.isCurrent)
-          PopupMenuItem(
-            value: 'merge',
-            child: MenuItemContent(
-              icon: PhosphorIconsRegular.gitMerge,
-              label: AppLocalizations.of(context)!.mergeIntoCurrent,
-            ),
-            onTap: () => _mergeBranch(context, ref),
+          MenuAction(
+            label: AppLocalizations.of(context)!.mergeIntoCurrent,
+            icon: PhosphorIconsRegular.gitMerge,
+            onPressed: () => _mergeBranch(context, ref),
           ),
         // Checkout option for remote branches
         if (!isLocal)
-          PopupMenuItem(
-            value: 'checkout',
-            child: MenuItemContent(
-              icon: PhosphorIconsRegular.arrowRight,
-              label: AppLocalizations.of(context)!.checkout,
-            ),
-            onTap: () => _checkoutBranch(context, ref),
+          MenuAction(
+            label: AppLocalizations.of(context)!.checkout,
+            icon: PhosphorIconsRegular.arrowRight,
+            onPressed: () => _checkoutBranch(context, ref),
           ),
         if (!branch.isCurrent && !branch.isProtected)
-          PopupMenuItem(
-            value: 'delete',
-            child: MenuItemContent(
-              icon: PhosphorIconsRegular.trash,
-              label: 'Delete',
-              iconColor: colorScheme.error,
-              labelColor: colorScheme.error,
-            ),
-            onTap: () => _deleteBranch(context, ref),
+          // The red tint the entry used to spell out is now derived from the
+          // role, so the Material rendering can keep it and another design
+          // language can express "destructive" its own way.
+          MenuAction(
+            label: 'Delete',
+            icon: PhosphorIconsRegular.trash,
+            role: MenuActionRole.destructive,
+            onPressed: () => _deleteBranch(context, ref),
           ),
       ],
     );

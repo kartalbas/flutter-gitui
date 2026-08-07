@@ -333,7 +333,9 @@ List<GoldenScene> _fieldScenes() {
       name: 'base_text_field_affordances',
       build: (BuildContext context) => _matrix(
         context,
-        columnHeaders: const <String>['outlined'],
+        // The default variant, named as the enum now names it: these rows are
+        // about the affordances inside the field, not about the variant.
+        columnHeaders: const <String>['bordered'],
         rowHeaders: const <String>[
           'prefix icon',
           'suffix action',
@@ -664,27 +666,26 @@ List<GoldenScene> _displayScenes() {
               ),
             ]),
           ),
+          // The single-choice component is a group, so the scene shows a group
+          // rather than three loose chips in states that could never coexist:
+          // only one option of a group is ever chosen, and the baseline has to
+          // show what the app can actually render.
           _captioned(
             context,
-            'choice chip',
-            _row(<Widget>[
-              BaseChoiceChip(
-                label: 'feature',
-                selected: false,
-                onSelected: (bool _) {},
-              ),
-              BaseChoiceChip(
-                label: 'feature',
-                selected: true,
-                onSelected: (bool _) {},
-              ),
-              BaseChoiceChip(
-                label: 'hotfix',
-                selected: true,
-                icon: PhosphorIconsRegular.warning,
-                onSelected: (bool _) {},
-              ),
-            ]),
+            'choice group',
+            BaseChoiceGroup<String>(
+              options: const <ChoiceOption<String>>[
+                ChoiceOption<String>(value: 'feature', label: 'feature'),
+                ChoiceOption<String>(value: 'release', label: 'release'),
+                ChoiceOption<String>(
+                  value: 'hotfix',
+                  label: 'hotfix',
+                  icon: PhosphorIconsRegular.warning,
+                ),
+              ],
+              selected: 'release',
+              onSelected: (String _) {},
+            ),
           ),
           _captioned(
             context,

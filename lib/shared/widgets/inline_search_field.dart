@@ -53,7 +53,7 @@ class InlineSearchField extends StatelessWidget {
       hintText: hintText,
       prefixIcon: PhosphorIconsRegular.magnifyingGlass,
       showClearButton: true,
-      variant: TextFieldVariant.outlined,
+      variant: TextFieldVariant.bordered,
       onChanged: (value) {
         onChanged(value);
         if (value.isEmpty) {

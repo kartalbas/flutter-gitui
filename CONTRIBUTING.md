@@ -55,7 +55,7 @@ BaseListItem(
 // ✅ Forms
 BaseTextField(
   label: 'Username',
-  variant: TextFieldVariant.outlined,
+  variant: TextFieldVariant.bordered,
   validator: (value) => ...,
 )
 
@@ -206,7 +206,7 @@ Column(
   children: [
     BaseTextField(
       label: 'Repository Name',
-      variant: TextFieldVariant.outlined,
+      variant: TextFieldVariant.bordered,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Name is required';
@@ -217,7 +217,7 @@ Column(
     const SizedBox(height: AppTheme.paddingM),
     BaseTextField(
       label: 'Description',
-      variant: TextFieldVariant.outlined,
+      variant: TextFieldVariant.bordered,
       maxLines: 3,
     ),
     const SizedBox(height: AppTheme.paddingL),

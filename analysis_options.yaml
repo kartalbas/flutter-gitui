@@ -22,6 +22,17 @@ analyzer:
     # It is analyzed on its own terms by the CI step that resolves it first,
     # so excluding it here hides nothing.
     - release/updater/**
+    # The throwaway #249 viability spike (spike/skin_lab/FINDINGS.md). It is a
+    # separate workspace member that deliberately imports the raw Material,
+    # Cupertino and fluent_ui widget classes this project's design-system lint
+    # bans app-wide - delegating to those canonical widgets IS the experiment,
+    # so the bans would measure the wrong thing. It carries its own
+    # analysis_options.yaml and is analysed on its own terms
+    # (`cd spike/skin_lab && flutter analyze && flutter test`), so excluding it
+    # here hides nothing. It is not reachable from lib/: the
+    # depend_on_referenced_packages gate below makes an import of
+    # package:skin_lab a hard error in the blocking analysis step.
+    - spike/**
   errors:
     # Workspace-isolation gate (#383, prerequisite for the #249 skin
     # packages): pub workspace resolution makes every workspace member

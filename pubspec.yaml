@@ -11,6 +11,12 @@ environment:
 # independently, so the plugin resolves as a member of this workspace.
 workspace:
   - lint_rules/flutter_gitui_lint
+  # Throwaway viability spike for #249 (see spike/skin_lab/FINDINGS.md). It is
+  # a workspace member so `fluent_ui` resolves against this Flutter/Dart SDK
+  # and these shared transitive versions without ever entering this package's
+  # `dependencies`. The workspace-isolation gate below
+  # (depend_on_referenced_packages: error) keeps lib/ unable to import it.
+  - spike/skin_lab
 
 dependencies:
   flutter:

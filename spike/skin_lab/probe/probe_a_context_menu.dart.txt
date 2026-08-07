@@ -1,0 +1,60 @@
+PROBE A - `List<PopupMenuEntry<dynamic>>` against the other two languages
+=========================================================================
+
+Subject: `BaseListItem.contextMenuItems`
+         (lib/shared/components/base_list_item.dart:105, sha 744d5192)
+
+    final List<PopupMenuEntry<dynamic>>? contextMenuItems;
+
+Kept as a .txt rather than a .dart so the spike package stays analysable. Both
+halves were run for real with `flutter analyze` inside spike/skin_lab on
+2026-08-06; the recorded outputs are verbatim.
+
+
+HALF 1 - Fluent: hard compile error
+-----------------------------------
+
+    import 'package:fluent_ui/fluent_ui.dart' as fluent;
+    import 'package:flutter/material.dart';
+
+    Widget probeA(List<PopupMenuEntry<dynamic>> contextMenuItems) {
+      return fluent.MenuFlyout(items: contextMenuItems);
+    }
+
+    error - The argument type 'List<PopupMenuEntry<dynamic>>' can't be assigned
+            to the parameter type 'List<MenuFlyoutItemBase>'.
+            - lib\_probe_a_tmp.dart:7:35 - argument_type_not_assignable
+
+`MenuFlyoutItemBase` is not a Widget subtype at all - it is a Fluent model
+class with a `build(BuildContext)` of its own. There is no cast, no adapter and
+no covariance that gets from one to the other. A Fluent skin cannot consume
+this parameter, full stop.
+
+
+HALF 2 - Cupertino: NO compile error, which is worse
+----------------------------------------------------
+
+    import 'package:flutter/cupertino.dart';
+    import 'package:flutter/material.dart';
+
+    Widget probeACupertino(List<PopupMenuEntry<dynamic>> contextMenuItems) {
+      return CupertinoContextMenu(
+        actions: contextMenuItems,
+        child: const SizedBox(),
+      );
+    }
+
+    No issues found! (ran in 1.7s)
+
+`CupertinoContextMenu.actions` is typed `List<Widget>`, and `PopupMenuEntry` IS
+a Widget, so this compiles cleanly - and then renders Material `PopupMenuItem`s
+inside an iOS context menu: Material ink, Material typography, Material 48 dp
+rows, none of the `CupertinoContextMenuAction` divider/press/destructive
+treatment, and none of the sheet dismissal behaviour those actions drive.
+
+That is the sharper half of the probe. A compile error is a bug you cannot
+ship; a Material widget silently rendering inside a Cupertino menu is a spec
+violation that ships and looks almost right. Any replacement type for this
+parameter therefore has to be a DATA type (label, icon, callback, destructive
+flag, enabled flag, separator), not a Widget type - because a Widget-typed
+parameter is exactly what lets the wrong language through the type system.

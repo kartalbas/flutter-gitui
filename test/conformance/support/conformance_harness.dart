@@ -130,14 +130,24 @@ ButtonStyle m3OutlinedButtonDefaults(WidgetTester tester) {
 }
 
 /// Maps [color] onto the name of the [scheme] role that carries exactly that
-/// value, or an `#AARRGGBB` literal when no role matches (state layers and
-/// disabled colors, which are role colors with a reduced alpha, land here).
+/// value, `role @ NN%` when it is a role color at a reduced opacity (the shape
+/// every M3 disabled and state-layer color has), or an `#AARRGGBB` literal
+/// when neither matches.
 ///
 /// Both sides of a conformance comparison go through this function, so a
 /// registered deviation can document a foreground as a stable role name
-/// (`primary`, `onSurface`) instead of a scheme-dependent hex value, and an
-/// alpha-modified color still compares exactly via the quantised literal.
+/// (`primary`, `onSurface @ 12%`) instead of a scheme-dependent hex value.
+///
+/// Colors are compared through [Color.toARGB32] rather than `==`: a color
+/// read back out of a `Paint` has been quantised to eight bits per channel,
+/// so comparing the floating-point components against a scheme role would
+/// report a spurious mismatch for a color that paints identically.
 String colorRoleName(ColorScheme scheme, Color color) {
+  // A fully transparent color carries no role: every role matches it at 0%,
+  // so naming one would be arbitrary. It is its own descriptor.
+  if (color.a == 0) {
+    return 'transparent';
+  }
   final Map<String, Color> roles = <String, Color>{
     'primary': scheme.primary,
     'onPrimary': scheme.onPrimary,
@@ -170,8 +180,37 @@ String colorRoleName(ColorScheme scheme, Color color) {
     'inversePrimary': scheme.inversePrimary,
   };
   for (final MapEntry<String, Color> role in roles.entries) {
-    if (role.value == color) {
+    if (role.value.toARGB32() == color.toARGB32()) {
       return role.key;
+    }
+  }
+  // A translucent color is often a role at a reduced opacity — M3 spells its
+  // disabled and state-layer values exactly that way ("onSurface at 12%").
+  // Naming it that way keeps a register entry readable and stable across color
+  // schemes, where the raw hex would be neither.
+  //
+  // Two guards keep that name honest. A role name is only used when exactly
+  // ONE role carries the opaque color, since picking whichever came first out
+  // of several would attach an arbitrary name. And pure black or pure white at
+  // a reduced alpha is never named at all: those are the framework's own ink
+  // constants (`ThemeData.focusColor`, `hoverColor` and `splashColor` are all
+  // black or white with an alpha), and a scheme whose `onSecondary` happens to
+  // be black would otherwise turn "the focus highlight" into "onSecondary at
+  // 12%", which is a different statement about a color that only coincides.
+  final int alpha = (color.a * 255).round();
+  final int opaque = color.withValues(alpha: 1.0).toARGB32();
+  const int black = 0xFF000000;
+  const int white = 0xFFFFFFFF;
+  if (alpha != 0xFF && opaque != black && opaque != white) {
+    final List<String> matches = roles.entries
+        .where(
+          (MapEntry<String, Color> role) =>
+              role.value.withValues(alpha: 1.0).toARGB32() == opaque,
+        )
+        .map((MapEntry<String, Color> role) => role.key)
+        .toList();
+    if (matches.length == 1) {
+      return '${matches.single} @ ${(alpha * 100 / 255).round()}%';
     }
   }
   final String hex = color
@@ -211,6 +250,32 @@ Future<TestGesture> hoverOver(WidgetTester tester, Finder finder) async {
   await gesture.moveTo(tester.getCenter(finder));
   await tester.pumpAndSettle();
   return gesture;
+}
+
+/// Moves a mouse pointer over [finder], evaluates [measure] while it is there
+/// and takes the pointer away again.
+///
+/// A conformance test hovers twice — once on the oracle, once on the Base
+/// component — and the two runs share one mouse device, so the pointer of the
+/// first hover has to be gone before the second one is added. [hoverOver]
+/// keeps its pointer until teardown and is therefore only usable once per
+/// test; this is the two-sided form.
+Future<T> whileHovering<T>(
+  WidgetTester tester,
+  Finder finder,
+  T Function() measure,
+) async {
+  final TestGesture gesture = await tester.createGesture(
+    kind: PointerDeviceKind.mouse,
+  );
+  await gesture.addPointer(location: Offset.zero);
+  await tester.pump();
+  await gesture.moveTo(tester.getCenter(finder));
+  await tester.pumpAndSettle();
+  final T measured = measure();
+  await gesture.removePointer();
+  await tester.pumpAndSettle();
+  return measured;
 }
 
 /// Presses [finder] and holds, pumping long enough for the pressed state
@@ -353,6 +418,185 @@ String describeStateLayer(WidgetTester tester, List<Color> colors) {
     tester.element(find.byType(Scaffold)),
   ).colorScheme;
   return colors.map((Color color) => colorRoleName(scheme, color)).join(' + ');
+}
+
+/// Replays every render object under [finder] onto a recording canvas and
+/// returns the calls it made, so a painted-only property (a border, a corner
+/// radius, a fill) can be *measured* instead of merely asserted.
+///
+/// Input components need this because their visual container is drawn by
+/// `InputDecorator`'s border painter rather than exposed as widget state: the
+/// SDK resolves the border for the current widget state deep inside
+/// `_InputDecoratorState`, so reading the widget's `decoration` would compare
+/// what each side *asked for* (null on the oracle) instead of what both sides
+/// actually render.
+List<RecordedInvocation> _recordPaint(WidgetTester tester, Finder finder) {
+  final List<RecordedInvocation> recorded = <RecordedInvocation>[];
+  for (final Element element in finder.evaluate()) {
+    final RenderObject? renderObject = element.renderObject;
+    if (renderObject == null) {
+      continue;
+    }
+    final TestRecordingCanvas canvas = TestRecordingCanvas();
+    final TestRecordingPaintingContext context = TestRecordingPaintingContext(
+      canvas,
+    );
+    renderObject.paint(context, Offset.zero);
+    recorded.addAll(canvas.invocations);
+  }
+  return recorded;
+}
+
+/// Every stroked outline painted under [finder], as the [BorderSide] it was
+/// drawn with — `BorderSide.toPaint()` is exactly how a Material border turns
+/// its color and width into a stroke, so reading them back reconstructs the
+/// side. A side of `BorderSide.none` means "painted nothing visible".
+List<BorderSide> paintedBorderSides(WidgetTester tester, Finder finder) {
+  final List<BorderSide> sides = <BorderSide>[];
+  for (final RecordedInvocation recorded in _recordPaint(tester, finder)) {
+    final Invocation invocation = recorded.invocation;
+    if (!invocation.isMethod) {
+      continue;
+    }
+    for (final Object? argument in invocation.positionalArguments) {
+      if (argument is Paint && argument.style == PaintingStyle.stroke) {
+        sides.add(
+          BorderSide(color: argument.color, width: argument.strokeWidth),
+        );
+      }
+    }
+  }
+  return sides;
+}
+
+/// Every filled area painted under [finder], as the color it was filled with,
+/// in paint order. An `InputDecorator` paints its container fill from the same
+/// painter that draws its border, so this is the only place a filled field's
+/// resolved fill color can be read.
+List<Color> paintedFillColors(WidgetTester tester, Finder finder) {
+  final List<Color> colors = <Color>[];
+  for (final RecordedInvocation recorded in _recordPaint(tester, finder)) {
+    final Invocation invocation = recorded.invocation;
+    if (!invocation.isMethod) {
+      continue;
+    }
+    for (final Object? argument in invocation.positionalArguments) {
+      if (argument is Paint && argument.style == PaintingStyle.fill) {
+        colors.add(argument.color);
+      }
+    }
+  }
+  return colors;
+}
+
+/// Every rounded rectangle painted under [finder], in paint order. The corner
+/// radii of a component whose shape is decided by the SDK — an
+/// `InputDecorator`'s border, for instance — can only be read here.
+List<RRect> paintedRRects(WidgetTester tester, Finder finder) {
+  final List<RRect> rects = <RRect>[];
+  for (final RecordedInvocation recorded in _recordPaint(tester, finder)) {
+    final Invocation invocation = recorded.invocation;
+    if (!invocation.isMethod || invocation.memberName != #drawRRect) {
+      continue;
+    }
+    for (final Object? argument in invocation.positionalArguments) {
+      if (argument is RRect) {
+        rects.add(argument);
+      }
+    }
+  }
+  return rects;
+}
+
+/// The `CustomPaint` that draws an `InputDecorator`'s border, i.e. the visual
+/// container of every input component.
+///
+/// It is matched by its painter type rather than by position: a field with an
+/// icon button in its suffix slot contains several `CustomPaint`s, and the
+/// first one in tree order is not necessarily the border.
+Finder inputBorderPainter(Finder field) {
+  return find.descendant(
+    of: field,
+    matching: find.byWidgetPredicate(
+      (Widget widget) =>
+          widget is CustomPaint &&
+          widget.foregroundPainter.runtimeType.toString() ==
+              '_InputBorderPainter',
+      description: "InputDecorator's border painter",
+    ),
+  );
+}
+
+/// The size of an input component's visual container — the bordered box,
+/// without the helper/error line an `InputDecorator` renders underneath it.
+Size inputContainerSize(WidgetTester tester, Finder field) {
+  return tester.getSize(inputBorderPainter(field));
+}
+
+/// The border an input component paints right now, as the [BorderSide] it was
+/// drawn with, or [BorderSide.none] when it paints no outline at all.
+BorderSide inputBorderSide(WidgetTester tester, Finder field) {
+  final List<BorderSide> sides = paintedBorderSides(
+    tester,
+    inputBorderPainter(field),
+  );
+  return sides.isEmpty ? BorderSide.none : sides.first;
+}
+
+/// The corner radius of an input component's container.
+///
+/// The radius is read off the painted rounded rectangle and corrected back to
+/// the container's own corner: a stroked border paints its path along the
+/// centre of the stroke, so the painted rectangle is inset by half the border
+/// width on every side, and a 1 dp border therefore paints a 4 dp corner as
+/// 3.5. Undoing that inset makes an outlined field and a filled one — whose
+/// shape is painted as a fill, with no inset at all — directly comparable.
+double inputCornerRadius(WidgetTester tester, Finder field) {
+  final Finder painter = inputBorderPainter(field);
+  final List<RRect> rects = paintedRRects(tester, painter);
+  if (rects.isEmpty) {
+    fail('The input component under $field painted no rounded rectangle.');
+  }
+  final double inset =
+      (tester.getSize(painter).height - rects.first.height) / 2;
+  return rects.first.tlRadiusX + inset;
+}
+
+/// The bottom corner radius of an input component's container, corrected the
+/// same way as [inputCornerRadius]. Material 3's filled field rounds only its
+/// top corners, so the bottom pair is what distinguishes the two shapes.
+double inputBottomCornerRadius(WidgetTester tester, Finder field) {
+  final Finder painter = inputBorderPainter(field);
+  final List<RRect> rects = paintedRRects(tester, painter);
+  if (rects.isEmpty) {
+    fail('The input component under $field painted no rounded rectangle.');
+  }
+  final double inset =
+      (tester.getSize(painter).height - rects.first.height) / 2;
+  return rects.first.blRadiusX + inset;
+}
+
+/// Renders a border as a stable descriptor — `role width dp`, or `none` — so a
+/// component's outline in one state can be compared and registered as a single
+/// value instead of as two loosely coupled ones.
+String describeBorderSide(ColorScheme scheme, BorderSide side) {
+  if (side.style == BorderStyle.none || side.width == 0) {
+    return 'none';
+  }
+  return '${colorRoleName(scheme, side.color)} ${side.width} dp';
+}
+
+/// The size an icon really renders at: its own, or the one its enclosing
+/// [IconTheme] hands down.
+///
+/// Both sides of a comparison go through this, so an explicitly sized icon
+/// (what the Base components pass) and a theme-sized one (what the SDK
+/// components rely on) are described the same way. Measuring the icon's
+/// layout box instead would report the 48 dp minimum-touch box that
+/// `InputDecorator` wraps a prefix icon in, not the glyph.
+double effectiveIconSize(WidgetTester tester, Finder finder) {
+  final Icon icon = tester.widget<Icon>(finder);
+  return icon.size ?? IconTheme.of(tester.element(finder)).size!;
 }
 
 /// All fifteen Material 3 text roles of [textTheme], keyed by role name, in

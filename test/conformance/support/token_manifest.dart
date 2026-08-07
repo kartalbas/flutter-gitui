@@ -121,4 +121,76 @@ const Set<String> conformanceTokenManifest = <String>{
   'BasePanel.header.overlay.hovered', // M3: hoverColor ink — conforms
   'BasePanel.header.overlay.pressed', // M3: splash + highlight — conforms
   'BasePanel.header.overlay.focused', // M3: focusColor ink — conforms
+  // BaseTextField vs the Material 3 text-field oracle: a real `TextField`
+  // carrying an `OutlineInputBorder`, pumped through the same harness. There
+  // is no defaults seam for InputDecorator either — the border for the current
+  // state is resolved inside the private `_InputDecoratorState` — so the
+  // container, its outline and its corners are read out of the paint stream.
+  'BaseTextField.shape', // M3: 4.0 — conforms
+  'BaseTextField.containerHeight', // M3: 55.0 (>= 48 dp) — conforms
+  'BaseTextField.contentPadding.start', // M3: 16.0 — conforms
+  'BaseTextField.contentPadding.top', // M3: 16.0 — conforms
+  'BaseTextField.enabled.border', // M3: outline 1 dp — conforms
+  'BaseTextField.hovered.border', // M3: onSurface 1 dp — conforms
+  'BaseTextField.focused.border', // M3: primary 2 dp — conforms
+  'BaseTextField.error.border', // M3: error 1 dp — conforms
+  'BaseTextField.disabled.border', // M3: onSurface @ 12% 1 dp — conforms
+  'BaseTextField.inputTextStyle', // M3: bodyLarge — conforms
+  'BaseTextField.labelTextStyle', // M3: theme label style — conforms
+  'BaseTextField.hintTextStyle', // M3: theme hint style — conforms
+  'BaseTextField.hintColor', // M3: theme hint color — conforms
+  'BaseTextField.helperTextStyle', // M3: bodySmall — conforms
+  'BaseTextField.errorTextStyle', // M3: bodySmall on error — conforms
+  'BaseTextField.prefixIcon.size', // M3: 24.0 — registered FIELD-001
+  'BaseTextField.filled.fillColor', // M3: surfaceContainerHighest — conforms
+  'BaseTextField.filled.bottomCornerRadius', // M3: 0.0 — registered FIELD-002
+  'BaseTextField.filled.activeIndicator', // M3: onSurfaceVariant — FIELD-003
+  // BaseDropdown vs `DropdownButtonFormField` with an `OutlineInputBorder`,
+  // the same M3 component it is built on, pumped through the same harness.
+  'BaseDropdown.shape', // M3: 4.0 — conforms
+  'BaseDropdown.containerHeight', // M3: 56.0 — conforms
+  'BaseDropdown.contentPadding.start', // M3: 16.0 — conforms
+  'BaseDropdown.enabled.border', // M3: outline 1 dp — conforms
+  'BaseDropdown.focused.border', // M3: primary 2 dp — conforms
+  'BaseDropdown.labelTextStyle', // M3: theme label style — conforms
+  'BaseDropdown.valueTextStyle', // M3: titleMedium — conforms
+  'BaseDropdown.prefixIcon.size', // M3: 24.0 — registered DROP-001
+  // BaseDateField vs the same text-field oracle as BaseTextField: a picked
+  // date is a text field's value, and the component is an `InputDecorator`
+  // around it.
+  'BaseDateField.shape', // M3: 4.0 — conforms
+  'BaseDateField.containerHeight', // M3: 55.0 — conforms
+  'BaseDateField.contentPadding.start', // M3: 16.0 — conforms
+  'BaseDateField.enabled.border', // M3: outline 1 dp — conforms
+  'BaseDateField.hovered.border', // M3: onSurface 1 dp — conforms
+  'BaseDateField.focused.border', // M3: primary 2 dp — conforms
+  'BaseDateField.valueTextStyle', // M3: bodyLarge — conforms
+  'BaseDateField.labelTextStyle', // M3: theme label style — conforms
+  'BaseDateField.suffixIcon.size', // M3: 24.0 — registered DATE-001
+  // BaseFilterChip / BaseChoiceChip / BaseActionChip vs `FilterChip`,
+  // `ChoiceChip` and `ActionChip`, each pumped through the same harness.
+  'BaseFilterChip.shape', // M3: 8.0 — conforms
+  'BaseFilterChip.containerHeight', // M3: 48.0 — conforms
+  'BaseFilterChip.labelTextStyle', // M3: labelLarge — conforms
+  'BaseFilterChip.unselected.labelColor', // M3: onSurfaceVariant — conforms
+  'BaseFilterChip.selected.labelColor', // M3: the chip's own role — conforms
+  'BaseFilterChip.labelInset', // M3: 17.0 — conforms
+  'BaseFilterChip.avatar.size', // M3: 18.0 — conforms
+  'BaseFilterChip.avatarGap', // M3: 9.0 — conforms
+  'BaseFilterChip.unselected.border', // M3: outlineVariant 1 dp — conforms
+  'BaseFilterChip.selected.border', // M3: transparent — registered CHIP-001
+  'BaseFilterChip.unselected.containerColor', // M3: transparent — conforms
+  'BaseFilterChip.selected.containerColor', // M3: secondaryContainer — conforms
+  'BaseFilterChip.selected.widthDelta', // M3: +20.0 (checkmark) — CHIP-002
+  'BaseFilterChip.overlay.hovered', // M3: hoverColor ink — conforms
+  'BaseFilterChip.overlay.pressed', // M3: splash + highlight ink — conforms
+  'BaseFilterChip.overlay.focused', // M3: focusColor ink — conforms
+  'BaseChoiceChip.shape', // M3: 8.0 — conforms
+  'BaseChoiceChip.containerHeight', // M3: 48.0 — conforms
+  'BaseChoiceChip.labelTextStyle', // M3: labelLarge — conforms
+  'BaseChoiceChip.selected.border', // M3: transparent — registered CHIP-003
+  'BaseActionChip.shape', // M3: 8.0 — conforms
+  'BaseActionChip.containerHeight', // M3: 48.0 — conforms
+  'BaseActionChip.labelTextStyle', // M3: labelLarge — conforms
+  'BaseActionChip.labelColor', // M3: onSurface — conforms
 };

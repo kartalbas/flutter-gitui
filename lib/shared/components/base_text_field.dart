@@ -21,6 +21,12 @@ enum TextFieldVariant {
 ///
 /// Provides unified text input behavior with variants and validation.
 ///
+/// Geometry, outline colors per state, typography and the disabled and error
+/// treatments are asserted against a real SDK `TextField` by
+/// test/conformance/components/base_text_field_conformance_test.dart; the three
+/// deliberate divergences are registered as FIELD-001..FIELD-003 in
+/// docs/deviation_register.yaml.
+///
 /// Example usage:
 /// ```dart
 /// BaseTextField(
@@ -182,28 +188,31 @@ class BaseTextField extends StatefulWidget {
 
 class _BaseTextFieldState extends State<BaseTextField> {
   late TextEditingController _controller;
+
+  /// Whether [_controller] was created here rather than handed in.
+  ///
+  /// Ownership has to be tracked separately from `widget.controller == null`:
+  /// a caller that swaps a controller in later leaves this state holding an
+  /// internally created controller that `widget.controller == null` no longer
+  /// describes, and disposing on that test alone would leak the one we made
+  /// (or, the other way round, dispose one the caller still uses).
+  bool _ownsController = false;
   bool _obscureText = false;
   bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        widget.controller ?? TextEditingController(text: widget.initialValue);
+    _adoptController();
     _obscureText = widget.obscureText;
-    _hasText = _controller.text.isNotEmpty;
-    _controller.addListener(_onTextChanged);
   }
 
   @override
   void didUpdateWidget(BaseTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      _controller.removeListener(_onTextChanged);
-      _controller =
-          widget.controller ?? TextEditingController(text: widget.initialValue);
-      _controller.addListener(_onTextChanged);
-      _hasText = _controller.text.isNotEmpty;
+      _releaseController();
+      _adoptController();
     }
     if (widget.obscureText != oldWidget.obscureText) {
       _obscureText = widget.obscureText;
@@ -212,11 +221,27 @@ class _BaseTextFieldState extends State<BaseTextField> {
 
   @override
   void dispose() {
+    _releaseController();
+    super.dispose();
+  }
+
+  /// Takes the caller's controller, or creates one seeded with
+  /// [BaseTextField.initialValue] and remembers that this state owns it.
+  void _adoptController() {
+    _ownsController = widget.controller == null;
+    _controller =
+        widget.controller ?? TextEditingController(text: widget.initialValue);
+    _hasText = _controller.text.isNotEmpty;
+    _controller.addListener(_onTextChanged);
+  }
+
+  /// Detaches from the current controller, disposing it only when this state
+  /// created it.
+  void _releaseController() {
     _controller.removeListener(_onTextChanged);
-    if (widget.controller == null) {
+    if (_ownsController) {
       _controller.dispose();
     }
-    super.dispose();
   }
 
   void _onTextChanged() {
@@ -270,7 +295,7 @@ class _BaseTextFieldState extends State<BaseTextField> {
       // An action that belongs to this field belongs inside it; only a suffix
       // without a handler stays decorative.
       suffixIconWidget = widget.onSuffixTap == null
-          ? Icon(widget.suffixIcon, size: 20)
+          ? Icon(widget.suffixIcon, size: AppTheme.iconM)
           : BaseIconButton(
               icon: widget.suffixIcon!,
               onPressed: widget.enabled ? widget.onSuffixTap : null,
@@ -279,128 +304,68 @@ class _BaseTextFieldState extends State<BaseTextField> {
             );
     }
 
-    // Build InputDecoration based on variant
-    InputDecoration decoration;
-
-    // Hint style - make it more subtle and distinct from input text
-    final hintStyle = theme.textTheme.bodyMedium?.copyWith(
-      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+    // The decoration only decides the border *shape* per variant. The side —
+    // its color and width in every state: enabled, hovered, focused, error and
+    // disabled — is resolved by InputDecorator from the Material 3 defaults
+    // (_InputDecoratorDefaultsM3.outlineBorder, Flutter 3.44.4
+    // packages/flutter/lib/src/material/input_decorator.dart:5995), which it
+    // does for any border whose side is not BorderSide.none
+    // (input_decorator.dart:2266-2283). Hand-writing enabledBorder /
+    // errorBorder / disabledBorder here is what used to freeze the field at
+    // one color per state: it painted the error outline at the 2 dp weight M3
+    // reserves for focus, the disabled outline at `outline` 38% instead of
+    // `onSurface` 12%, and dropped the hover indication altogether, because a
+    // spelled-out enabledBorder also wins in the hovered state.
+    final OutlineInputBorder outlinedShape = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppTheme.radiusS),
+    );
+    final OutlineInputBorder filledShape = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppTheme.radiusS),
+      borderSide: BorderSide.none,
     );
 
-    switch (widget.variant) {
-      case TextFieldVariant.standard:
-        decoration = InputDecoration(
-          labelText: widget.label,
-          hintText: widget.hintText,
-          hintStyle: hintStyle,
-          helperText: widget.helperText,
-          errorText: widget.errorText,
-          prefixIcon: widget.prefixIcon != null
-              ? Icon(widget.prefixIcon, size: 20)
-              : null,
-          suffixIcon: suffixIconWidget,
-          border: const UnderlineInputBorder(),
-          enabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: colorScheme.outline, width: 1),
-          ),
-          focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: colorScheme.primary, width: 2),
-          ),
-          errorBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: colorScheme.error, width: 2),
-          ),
-          focusedErrorBorder: UnderlineInputBorder(
-            borderSide: BorderSide(color: colorScheme.error, width: 2),
-          ),
-          disabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: colorScheme.outline.withValues(alpha: 0.38),
-              width: 1,
-            ),
-          ),
-        );
-        break;
+    final InputDecoration commonDecoration = InputDecoration(
+      labelText: widget.label,
+      hintText: widget.hintText,
+      helperText: widget.helperText,
+      errorText: widget.errorText,
+      prefixIcon: widget.prefixIcon != null
+          ? Icon(widget.prefixIcon, size: AppTheme.iconM)
+          : null,
+      suffixIcon: suffixIconWidget,
+    );
 
-      case TextFieldVariant.outlined:
-        decoration = InputDecoration(
-          labelText: widget.label,
-          hintText: widget.hintText,
-          hintStyle: hintStyle,
-          helperText: widget.helperText,
-          errorText: widget.errorText,
-          prefixIcon: widget.prefixIcon != null
-              ? Icon(widget.prefixIcon, size: 20)
-              : null,
-          suffixIcon: suffixIconWidget,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.outline, width: 1),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.primary, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.error, width: 2),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.error, width: 2),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(
-              color: colorScheme.outline.withValues(alpha: 0.38),
-              width: 1,
-            ),
-          ),
-        );
-        break;
-
-      case TextFieldVariant.filled:
-        decoration = InputDecoration(
-          labelText: widget.label,
-          hintText: widget.hintText,
-          hintStyle: hintStyle,
-          helperText: widget.helperText,
-          errorText: widget.errorText,
-          prefixIcon: widget.prefixIcon != null
-              ? Icon(widget.prefixIcon, size: 20)
-              : null,
-          suffixIcon: suffixIconWidget,
-          filled: true,
-          fillColor: colorScheme.surfaceContainerHighest,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.primary, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.error, width: 2),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide(color: colorScheme.error, width: 2),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            borderSide: BorderSide.none,
-          ),
-        );
-        break;
-    }
+    final InputDecoration decoration = switch (widget.variant) {
+      TextFieldVariant.standard => commonDecoration.copyWith(
+        border: const UnderlineInputBorder(),
+      ),
+      TextFieldVariant.outlined => commonDecoration.copyWith(
+        border: outlinedShape,
+      ),
+      // The filled variant is the app's search/inline field: a filled box with
+      // no active indicator (FIELD-003) and all four corners rounded
+      // (FIELD-002). A border with `BorderSide.none` makes InputDecorator
+      // return it unchanged for every state (input_decorator.dart:2266), so
+      // the states that must stay visible are spelled out here — and only
+      // those.
+      TextFieldVariant.filled => commonDecoration.copyWith(
+        filled: true,
+        border: filledShape,
+        disabledBorder: filledShape,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
+          borderSide: BorderSide(color: colorScheme.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
+          borderSide: BorderSide(color: colorScheme.error, width: 2),
+        ),
+      ),
+    };
 
     return GestureDetector(
       onDoubleTap: () {
@@ -451,9 +416,12 @@ class _BaseTextFieldState extends State<BaseTextField> {
           autovalidateMode: AutovalidateMode.onUserInteraction,
           autofocus: widget.autofocus,
           enabled: widget.enabled,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface,
-          ),
+          // No `style`: the Material 3 input text role is bodyLarge
+          // (text_field.dart:1893, _m3InputStyle) and the SDK also derives the
+          // disabled treatment from it — bodyLarge at 38% opacity
+          // (text_field.dart:1886-1890). Overriding the style with bodyMedium
+          // shrank the text a user types to the size of supporting text and
+          // replaced that disabled treatment with a flat color.
         ),
       ),
     );

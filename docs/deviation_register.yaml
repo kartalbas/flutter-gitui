@@ -404,3 +404,140 @@ deviations:
       the toolbars and rails it has to line up with. Same argument as
       CARD-002.
     registered: 2026-08-07
+
+  # The input components (BaseTextField, BaseDropdown, BaseDateField,
+  # lib/shared/components/). All three render through `InputDecorator`, so all
+  # three are measured against the SDK widget that owns it — a real `TextField`
+  # or `DropdownButtonFormField` carrying an `OutlineInputBorder` — pumped
+  # through the same conformance harness and read with the same probes.
+
+  - id: FIELD-001
+    component: BaseTextField
+    property: prefixIcon.size
+    spec_value: 24.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/input_decorator.dart:2448 (icon size for a non-dense decoration, 24.0)"
+    rationale: >
+      A field's leading glyph is an adornment that names the field, not a
+      control: at the M3 24 dp it is taller than the 15 dp line of text it
+      introduces and pulls the eye away from the value. 20 dp is the app's
+      compact icon step (AppTheme.iconM), already registered as the default
+      icon-button glyph in ICO-004, so every leading glyph in a desktop form —
+      field, dropdown and date field — sits on one size instead of three.
+    registered: 2026-08-07
+
+  - id: FIELD-002
+    component: BaseTextField
+    property: filled.bottomCornerRadius
+    spec_value: 0.0
+    app_value: 4.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/input_border.dart:155-158 (UnderlineInputBorder.borderRadius, top corners only)"
+    rationale: >
+      Material 3's filled field rounds only its top corners because its bottom
+      edge is the active indicator, a line the shape has to run into. The
+      filled variant here has no indicator (FIELD-003), so a square bottom edge
+      would read as a box that has been cut off rather than as a field. All
+      four corners at the shared 4 dp control corner keep it a self-contained
+      surface — which is what its one job needs, since it is the app's inline
+      search box: a rounded, chrome-less field that sits inside toolbars,
+      overlays and dropdown popovers rather than in a form.
+    registered: 2026-08-07
+
+  - id: FIELD-003
+    component: BaseTextField
+    property: filled.activeIndicator
+    spec_value: onSurfaceVariant 1.0 dp
+    app_value: none
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/input_decorator.dart:5991 (_InputDecoratorDefaultsM3.activeIndicatorBorder, resting)"
+    rationale: >
+      The active indicator is M3's affordance for a filled field standing in a
+      form, where a row of underlines marks the fields apart from the text
+      around them. The filled variant is not used that way here: it is the
+      inline search box inside a toolbar or a dropdown popover, where the fill
+      alone already separates it from its surroundings and a single dark line
+      under it reads as a divider between two toolbar regions. The two states
+      that must stay visible do stay visible — focus draws the full `primary`
+      outline at 2 dp and an error draws it in `error` — so the field is never
+      without a state indication, only without a resting one.
+    registered: 2026-08-07
+
+  - id: DROP-001
+    component: BaseDropdown
+    property: prefixIcon.size
+    spec_value: 24.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/input_decorator.dart:2448 (icon size for a non-dense decoration, 24.0)"
+    rationale: >
+      Same argument as FIELD-001, and the same value: a dropdown stands next to
+      a BaseTextField in every dialog that uses one, so their leading glyphs
+      have to be the same size or the form reads as two different controls.
+    registered: 2026-08-07
+
+  - id: DATE-001
+    component: BaseDateField
+    property: suffixIcon.size
+    spec_value: 24.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/input_decorator.dart:2448 (icon size for a non-dense decoration, 24.0)"
+    rationale: >
+      Same argument and value as FIELD-001, applied to the trailing slot: the
+      calendar glyph marks the field as pickable and has to match the leading
+      glyphs of the fields it is stacked with. It also has to match the clear
+      button that replaces it once a date is set, which is a
+      BaseIconButton(small) carrying a 16 dp glyph inside a 32 dp container —
+      a 24 dp calendar would make the field's trailing slot jump on the first
+      pick.
+    registered: 2026-08-07
+
+  # The chip family (lib/shared/components/base_filter_chip.dart), measured
+  # against `FilterChip`, `ChoiceChip` and `ActionChip` pumped through the same
+  # conformance harness. Both entries below describe one decision: a filter bar
+  # marks a selected chip with color, never with a checkmark.
+
+  - id: CHIP-001
+    component: BaseFilterChip
+    property: selected.border
+    spec_value: transparent 1.0 dp
+    app_value: secondary 1.0 dp
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filter_chip.dart:386-390 (_FilterChipDefaultsM3.side, transparent while selected)"
+    rationale: >
+      M3 drops the outline of a selected chip because its checkmark already
+      says "selected". With the checkmark gone (CHIP-002) the container tint
+      would be the only signal left, and a tonal fill alone is a weak one on a
+      desktop toolbar seen at arm's length — and no signal at all for a user
+      who cannot separate the two tints. Turning the outline that is already
+      there from `outlineVariant` to `secondary` adds a second, non-colour-only
+      cue (the outline gains contrast against the fill) at zero layout cost,
+      because the width stays at the M3 1 dp.
+    registered: 2026-08-07
+
+  - id: CHIP-002
+    component: BaseFilterChip
+    property: selected.widthDelta
+    spec_value: 20.0
+    app_value: 0.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/filter_chip.dart:313 (_FilterChipDefaultsM3 showCheckmark: true)"
+    rationale: >
+      The M3 checkmark slides in front of the label and makes the chip 20 dp
+      wider. This app's filter bars hold six to ten chips in one wrapping row
+      above a list, and toggling one filter would then reflow the whole row and
+      move every chip after it — including the one the pointer is over, so a
+      second click lands on a different filter. Keeping one width per chip
+      makes the row stable under repeated toggling, which is how filters are
+      actually used here. The property is measured as the width selection adds,
+      because the checkmark is painted by the chip's render object rather than
+      built as a widget.
+    registered: 2026-08-07
+
+  - id: CHIP-003
+    component: BaseChoiceChip
+    property: selected.border
+    spec_value: transparent 1.0 dp
+    app_value: secondary 1.0 dp
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/choice_chip.dart:353-357 (_ChoiceChipDefaultsM3.side, transparent while selected)"
+    rationale: >
+      The single-select chip carries the same selection treatment as the
+      multi-select one — see CHIP-001 — because the two appear side by side in
+      the same dialogs and a user must not have to learn two ways of reading
+      "this one is on".
+    registered: 2026-08-07

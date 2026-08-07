@@ -1,11 +1,47 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
-import 'base_menu_item.dart';
+
+/// The Material 3 chip shape shared by every chip in the app: the 8 dp corner
+/// the token database gives all three chip classes (Flutter 3.44.4
+/// packages/flutter/lib/src/material/chip.dart:2495), which is also the app's
+/// control corner for buttons (BTN-001) and the `chipRadius` the theme
+/// configures in lib/shared/theme/app_theme.dart:41.
+final RoundedRectangleBorder _chipShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.circular(AppTheme.radiusM),
+);
+
+/// The Material 3 chip icon size (Flutter 3.44.4
+/// packages/flutter/lib/src/material/chip.dart:2540, `iconTheme.size`).
+const double _chipIconSize = 18.0;
+
+/// The leading glyph of a chip. Its color is left to the chip's own icon
+/// theme, so selected and unselected resolve exactly as M3 specifies.
+Widget? _chipAvatar(IconData? icon) {
+  return icon == null ? null : Icon(icon, size: _chipIconSize);
+}
+
+/// The label of a chip, as a plain [Text].
+///
+/// A chip owns its label typography: it wraps the label in a `DefaultTextStyle`
+/// built from the resolved chip label style (chip.dart:1445-1451), which is
+/// labelLarge in the role the chip's state calls for — `onSecondaryContainer`
+/// while selected, `onSurfaceVariant` otherwise (filter_chip.dart:331-337).
+/// Wrapping the text in one of the app's `Base*Label` components would replace
+/// that with a fixed role and a fixed color and silently drop the per-state
+/// pairing, which is the one thing a chip label must not lose.
+Widget _chipLabel(String text) => Text(text);
 
 /// Standardized filter chip component for consistent filtering UI across the app.
 ///
 /// Provides a unified design for filter controls with proper theming and accessibility.
+///
+/// Geometry, typography, state layers and the selection treatment are asserted
+/// against the SDK's own `FilterChip` by
+/// test/conformance/components/base_filter_chip_conformance_test.dart;
+/// the two deliberate divergences — a selected outline that turns `secondary`
+/// instead of transparent, and no checkmark — are registered as CHIP-001 and
+/// CHIP-002 in docs/deviation_register.yaml.
 ///
 /// Example usage:
 /// ```dart
@@ -47,8 +83,7 @@ class BaseFilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     // Build label with optional count
     final String displayLabel = showCount && count != null
@@ -58,42 +93,18 @@ class BaseFilterChip extends StatelessWidget {
     return FilterChip(
       selected: selected,
       onSelected: onSelected,
-      label: MenuItemLabel(
-        displayLabel,
-        color: selected
-            ? colorScheme.onSecondaryContainer
-            : colorScheme.onSurfaceVariant,
-        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-      ),
-      avatar: icon != null
-          ? Icon(
-              icon,
-              size: 16, // Standardized icon size for filter chips
-              color: selected
-                  ? colorScheme.onSecondaryContainer
-                  : colorScheme.onSurfaceVariant,
-            )
-          : null,
-      backgroundColor: colorScheme.surface,
-      selectedColor: colorScheme.secondaryContainer,
-      checkmarkColor: colorScheme.onSecondaryContainer,
-      side: BorderSide(
-        color: selected ? colorScheme.secondary : colorScheme.outlineVariant,
-        width: selected ? 2 : 1,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingS,
-        vertical: 2,
-      ),
-      labelPadding: icon != null
-          ? const EdgeInsets.only(right: AppTheme.paddingS)
-          : const EdgeInsets.symmetric(horizontal: AppTheme.paddingS),
-      showCheckmark: false, // We use color/border to indicate selection
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
+      label: _chipLabel(displayLabel),
+      avatar: _chipAvatar(icon),
+      // A selected chip is marked by its container and by an outline that
+      // turns `secondary`, rather than by the M3 checkmark (CHIP-001,
+      // CHIP-002). The outline keeps its 1 dp width so selecting a chip costs
+      // no width at all and a filter bar never reflows on a toggle.
+      // Everything else — container colors, the unselected outline, padding,
+      // label padding, density and the padded tap target — is left to the
+      // Material 3 defaults.
+      side: selected ? BorderSide(color: colorScheme.secondary) : null,
+      shape: _chipShape,
+      showCheckmark: false,
     );
   }
 }
@@ -133,48 +144,24 @@ class BaseChoiceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return FilterChip(
+    // ChoiceChip, not FilterChip: single-select is what M3 calls a choice
+    // chip, and a skin that maps our components onto another design language
+    // has to be told which of the two this is. The `avoid_choice_chip` rule
+    // points every call site at this component, which is the one place the
+    // wrapped widget is allowed to appear.
+    // ignore: avoid_choice_chip
+    return ChoiceChip(
       selected: selected,
       onSelected: onSelected,
-      label: MenuItemLabel(
-        label,
-        color: selected
-            ? colorScheme.onSecondaryContainer
-            : colorScheme.onSurfaceVariant,
-        fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
-      ),
-      avatar: icon != null
-          ? Icon(
-              icon,
-              size: 16,
-              color: selected
-                  ? colorScheme.onSecondaryContainer
-                  : colorScheme.onSurfaceVariant,
-            )
-          : null,
-      backgroundColor: colorScheme.surface,
-      selectedColor: colorScheme.secondaryContainer,
-      checkmarkColor: colorScheme.onSecondaryContainer,
-      side: BorderSide(
-        color: selected ? colorScheme.secondary : colorScheme.outlineVariant,
-        width: selected ? 2 : 1,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingS,
-        vertical: 2,
-      ),
-      labelPadding: icon != null
-          ? const EdgeInsets.only(right: AppTheme.paddingS)
-          : const EdgeInsets.symmetric(horizontal: AppTheme.paddingS),
+      label: _chipLabel(label),
+      avatar: _chipAvatar(icon),
+      // Same selection treatment as BaseFilterChip: container and outline
+      // instead of the M3 checkmark (CHIP-003).
+      side: selected ? BorderSide(color: colorScheme.secondary) : null,
+      shape: _chipShape,
       showCheckmark: false,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
     );
   }
 }
@@ -208,33 +195,11 @@ class BaseActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return ActionChip(
       onPressed: onPressed,
-      label: MenuItemLabel(label, color: colorScheme.onSurfaceVariant),
-      avatar: icon != null
-          ? Icon(
-              icon,
-              size: 16, // Standardized icon size
-              color: colorScheme.onSurfaceVariant,
-            )
-          : null,
-      backgroundColor: colorScheme.surface,
-      side: BorderSide(color: colorScheme.outlineVariant, width: 1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingS,
-        vertical: 2,
-      ),
-      labelPadding: icon != null
-          ? const EdgeInsets.only(right: AppTheme.paddingS)
-          : const EdgeInsets.symmetric(horizontal: AppTheme.paddingS),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
+      label: _chipLabel(label),
+      avatar: _chipAvatar(icon),
+      shape: _chipShape,
     );
   }
 }

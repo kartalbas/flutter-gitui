@@ -6,7 +6,13 @@ import 'base_menu_item.dart';
 import 'base_label.dart';
 import 'base_text_field.dart';
 
-/// Base dropdown component for consistent dropdown styling across the app
+/// Base dropdown component for consistent dropdown styling across the app.
+///
+/// Geometry, outline colors per state and typography are asserted against a
+/// real SDK `DropdownButtonFormField` by
+/// test/conformance/components/base_dropdown_conformance_test.dart; the single
+/// deliberate divergence is registered as DROP-001 in
+/// docs/deviation_register.yaml.
 class BaseDropdown<T> extends StatelessWidget {
   final T? initialValue;
   final String? labelText;
@@ -16,7 +22,6 @@ class BaseDropdown<T> extends StatelessWidget {
   final void Function(T?)? onChanged;
   final String? Function(T?)? validator;
   final bool isExpanded;
-  final bool isDense;
 
   /// Focus this dropdown when the dialog opens, so the keyboard lands on the
   /// dialog's first field (Space/Enter opens the menu, arrows pick a value).
@@ -33,7 +38,6 @@ class BaseDropdown<T> extends StatelessWidget {
     this.onChanged,
     this.validator,
     this.isExpanded = true,
-    this.isDense = true,
     this.autofocus = false,
     this.focusNode,
   });
@@ -48,15 +52,19 @@ class BaseDropdown<T> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
+        // Shape only: the content padding and the minimum height are the
+        // Material 3 defaults for an outlined field
+        // (EdgeInsetsDirectional.fromSTEB(12, 20, 12, 12) plus the border's
+        // 4 dp gap padding, Flutter 3.44.4
+        // packages/flutter/lib/src/material/input_decorator.dart:2629-2635,
+        // floored at kMinInteractiveDimension by :1331). The dropdown used to
+        // set `isDense` and its own padding, which shrank it to 40 dp — below
+        // the minimum interactive dimension, and 15 dp shorter than a
+        // BaseTextField standing next to it in the same dialog.
         border: const OutlineInputBorder(),
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: AppTheme.iconS)
+            ? Icon(prefixIcon, size: AppTheme.iconM)
             : null,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.paddingM,
-          vertical: AppTheme.paddingS,
-        ),
-        isDense: isDense,
       ),
       items: items.map((item) {
         return DropdownMenuItem(

@@ -289,10 +289,19 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                         'Esc',
                         l10n.commandPaletteHintClose,
                       ),
-                      const Spacer(),
-                      BodySmallLabel(
-                        l10n.commandPaletteCommandsAvailable(
-                          GitCommands.all.length,
+                      const SizedBox(width: AppTheme.paddingM),
+                      // The sheet is capped at Material 3's 640px, so at the
+                      // 800x600 minimum window the trailing count is the child
+                      // that yields: it takes whatever width the key hints
+                      // leave over and ellipsizes instead of overflowing.
+                      Expanded(
+                        child: BodySmallLabel(
+                          l10n.commandPaletteCommandsAvailable(
+                            GitCommands.all.length,
+                          ),
+                          textAlign: TextAlign.end,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],

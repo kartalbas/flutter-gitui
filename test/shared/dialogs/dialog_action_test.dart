@@ -247,9 +247,13 @@ void main() {
   });
 
   testWidgets('several destructive actions are allowed', (tester) async {
-    // Delete and force-delete are both destructive and genuinely coexist (the
-    // branch switcher's bulk delete does exactly this), so the one-affirmative
-    // rule must not be a one-emphatic-action rule.
+    // Delete and force-delete are both destructive, so the one-affirmative
+    // rule must not be a one-emphatic-action rule: two destructive actions
+    // stay expressible. Whether a given dialog *should* offer both is a
+    // separate question, and the bulk branch delete answered it with no (see
+    // BulkDeleteBranchesDialog, where force became an opt-in beside the one
+    // delete) - but a language that draws a destructive action its own way
+    // still has to cope with a pair.
     await _pumpActions(tester, [
       _action('Delete', DialogActionRole.destructive),
       _action('Force delete', DialogActionRole.destructive),

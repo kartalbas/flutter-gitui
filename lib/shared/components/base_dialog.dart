@@ -436,8 +436,31 @@ class BaseDialog extends StatelessWidget {
 
                     SizedBox(height: AppTheme.paddingM),
 
-                    // Content section (scrollable if long)
-                    Flexible(child: SingleChildScrollView(child: content)),
+                    // Content section (scrollable if long).
+                    //
+                    // The content is its own traversal group, and that is a
+                    // correctness fix rather than a tidiness one. Tab's
+                    // default policy sorts the ring by where the controls
+                    // currently *are*, and it scrolls the control it moves to
+                    // into view - so as soon as a dialog's content scrolls,
+                    // the rows that scrolled off the top acquire smaller
+                    // global y coordinates than the title row's close button
+                    // and get sorted in front of it. The ring then wraps from
+                    // the last action into the middle of the list instead of
+                    // back to the close button, and the rows near the top are
+                    // visited twice per cycle. Measured on the bulk branch
+                    // delete at 10 branches: Close, b0..b9, force, Cancel,
+                    // Delete, b0, b1, b2, Close - 17 stops for 14 controls.
+                    // A group is sorted among its siblings by the group's own
+                    // rect, which is this Flexible's box and does not move
+                    // when the content inside scrolls, so the title row and
+                    // the action row keep their places and the content keeps
+                    // its internal reading order.
+                    Flexible(
+                      child: FocusTraversalGroup(
+                        child: SingleChildScrollView(child: content),
+                      ),
+                    ),
 
                     // Actions section. A Wrap, not a Row: a Row overflows
                     // when the buttons outgrow the dialog width (the update

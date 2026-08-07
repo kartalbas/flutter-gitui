@@ -104,6 +104,7 @@ import 'package:flutter_gitui/shared/dialogs/repository_switcher_dialog.dart';
 import 'package:flutter_gitui/shared/dialogs/select_hosted_repository_dialog.dart';
 import 'package:flutter_gitui/shared/dialogs/unified_diff_dialog.dart';
 import 'package:flutter_gitui/shared/dialogs/update_available_dialog.dart';
+import 'package:flutter_gitui/shared/widgets/branch_switcher.dart';
 
 // --- What Enter must do ------------------------------------------------------
 
@@ -288,6 +289,27 @@ const _feature = GitBranch(
   isRemote: false,
   isCurrent: false,
 );
+
+/// The branch list the bulk-delete case is populated with: long enough that
+/// the dialog's own 300 dp list really scrolls.
+///
+/// The count is the point of the fixture, not an arbitrary number. About
+/// seven dense rows fit in that box, so a two-branch fixture pins the dialog
+/// in the one state it has when there is nothing worth bulk-deleting, and the
+/// traversal ring is then trivially correct. Tab's default policy re-sorts the
+/// ring from the current geometry on every press, so the failure this fixture
+/// has to be able to see - rows scrolled above the title row overtaking it and
+/// being visited twice per cycle - only exists once the list scrolls.
+List<GitBranch> _bulkDeleteBranches() => [
+  for (var index = 0; index < 12; index++)
+    GitBranch(
+      name: 'feature/work-$index',
+      fullName: 'refs/heads/feature/work-$index',
+      isLocal: true,
+      isRemote: false,
+      isCurrent: false,
+    ),
+];
 
 GitCommit _commit(
   String hash,
@@ -718,6 +740,26 @@ List<DialogCase> dialogPopulation() => <DialogCase>[
     overrides: [fileBlameProvider.overrideWith((ref, path) async => null)],
   ),
   DialogCase(
+    name: 'BulkDeleteBranchesDialog',
+    source: 'lib/shared/widgets/branch_switcher.dart',
+    open: (context, ref) => _show(
+      context,
+      BulkDeleteBranchesDialog(
+        branches: _bulkDeleteBranches(),
+        // Every other row merged, so the list carries both pills and the
+        // selection keeps unmerged branches in it - which is what puts the
+        // force opt-in on screen.
+        deletableWithoutForce: {
+          for (var index = 0; index < 12; index += 2) 'feature/work-$index',
+        },
+      ),
+    ),
+    // The most destructive prompt in the app: Enter must stay dead so the key
+    // repeat of the keystroke that opened it can never delete a set of
+    // branches (#397). Cancel is the way out, and no action is affirmative.
+    enter: EnterExpectation.withheldSoEnterCannotDestroy,
+  ),
+  DialogCase(
     name: 'SelectHostedRepositoryDialog',
     source: 'lib/shared/dialogs/select_hosted_repository_dialog.dart',
     open: (context, ref) =>
@@ -1138,11 +1180,6 @@ const Map<String, DialogExclusion> dialogSourceExclusions = {
     DialogExclusionKind.inlineInASurface,
     'Inline prompts of the workspaces screen; covered by '
     'test/features/workspaces/workspaces_keyboard_test.dart.',
-  ),
-  'lib/shared/widgets/branch_switcher.dart': DialogExclusion(
-    DialogExclusionKind.inlineInASurface,
-    'A private bulk-delete dialog built inside the branch switcher widget, '
-    'reachable only through that widget.',
   ),
 };
 

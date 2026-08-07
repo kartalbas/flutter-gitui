@@ -1295,8 +1295,6 @@
   "discardAllChangesHard": "discard all changes",
   "pushRejected": "Push Rejected",
   "pushRejectedHistoryRewritten": "Your push was rejected because you've rewritten history (e.g., by squashing commits).",
-  "needToForcePushChanges": "To push these changes, you need to force push.",
-  "forcePushWarningOverwriteRemote": "Warning: Force pushing will overwrite the remote history!",
   "forcePushOnlyIfAlone": "Only do this if you're working alone or have coordinated with your team",
   "forcePushOthersNeedReset": "Others will need to reset their local branches",
   "forcePushCannotBeEasilyUndone": "This cannot be easily undone",

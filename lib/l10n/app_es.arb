@@ -1215,8 +1215,6 @@
   "discardAllChangesHard": "Descartar todos los cambios (hard reset)",
   "pushRejected": "Push rechazado",
   "pushRejectedHistoryRewritten": "Push rechazado: El historial ha sido reescrito",
-  "needToForcePushChanges": "Necesita hacer force push de los cambios",
-  "forcePushWarningOverwriteRemote": "Advertencia: El force push sobrescribirá el historial remoto",
   "forcePushOnlyIfAlone": "Solo haga force push si está seguro de que nadie más está trabajando en esta rama",
   "forcePushOthersNeedReset": "Otros colaboradores necesitarán hacer reset de sus ramas locales",
   "forcePushCannotBeEasilyUndone": "El force push no se puede deshacer fácilmente",

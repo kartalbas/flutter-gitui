@@ -1215,8 +1215,6 @@
   "discardAllChangesHard": "alle Änderungen verwerfen",
   "pushRejected": "Push abgelehnt",
   "pushRejectedHistoryRewritten": "Ihr Push wurde abgelehnt, weil Sie den Verlauf umgeschrieben haben (z.B. durch Rebase oder Amend).",
-  "needToForcePushChanges": "Um diese Änderungen zu pushen, müssen Sie Force Push verwenden.",
-  "forcePushWarningOverwriteRemote": "Warnung: Force Push überschreibt den Remote-Verlauf!",
   "forcePushOnlyIfAlone": "Tun Sie dies nur, wenn Sie alleine arbeiten oder sich mit Ihrem Team abgestimmt haben",
   "forcePushOthersNeedReset": "Andere müssen ihre lokalen Branches zurücksetzen",
   "forcePushCannotBeEasilyUndone": "Dies kann nicht einfach rückgängig gemacht werden",

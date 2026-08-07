@@ -407,8 +407,6 @@
   "discardAllChangesHard": "scarta tutte le modifiche",
   "pushRejected": "Push Rifiutato",
   "pushRejectedHistoryRewritten": "Il tuo push è stato rifiutato perché hai riscritto la cronologia (es., comprimendo i commit).",
-  "needToForcePushChanges": "Per pushare queste modifiche, devi eseguire un force push.",
-  "forcePushWarningOverwriteRemote": "Attenzione: Il force push sovrascriverà la cronologia remota!",
   "forcePushOnlyIfAlone": "Fallo solo se stai lavorando da solo o hai coordinato con il tuo team",
   "forcePushOthersNeedReset": "Gli altri dovranno resettare i loro branch locali",
   "forcePushCannotBeEasilyUndone": "Questa azione non può essere annullata facilmente",

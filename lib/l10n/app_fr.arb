@@ -1215,8 +1215,6 @@
   "discardAllChangesHard": "abandonner toutes les modifications",
   "pushRejected": "Push refusé",
   "pushRejectedHistoryRewritten": "Push refusé car l'historique a été réécrit",
-  "needToForcePushChanges": "Pour pousser ces modifications, vous devez faire un push forcé.",
-  "forcePushWarningOverwriteRemote": "Attention: Le push forcé écrasera l'historique distant!",
   "forcePushOnlyIfAlone": "Faites cela uniquement si vous travaillez seul ou si vous êtes coordonné avec l'équipe",
   "forcePushOthersNeedReset": "Les autres devront réinitialiser leurs branches locales",
   "forcePushCannotBeEasilyUndone": "Cela ne peut pas être facilement annulé",

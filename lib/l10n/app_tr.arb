@@ -604,8 +604,6 @@
   "discardAllChangesHard": "Tüm değişiklikleri at",
   "pushRejected": "Push Reddedildi",
   "pushRejectedHistoryRewritten": "Push reddedildi çünkü uzak geçmişi yeniden yazılmış",
-  "needToForcePushChanges": "Değişikliklerinizi push etmek için zorla push yapmanız gerekir",
-  "forcePushWarningOverwriteRemote": "Zorla push uzaktaki değişikliklerin üzerine yazacaktır",
   "forcePushOnlyIfAlone": "Sadece bu dalda yalnız çalıştığınızdan eminseniz zorla push yapın",
   "forcePushOthersNeedReset": "Zorla push yaptıktan sonra başkaları kendi kopyalarını sıfırlamalıdır",
   "forcePushCannotBeEasilyUndone": "Zorla push kolayca geri alınamaz",

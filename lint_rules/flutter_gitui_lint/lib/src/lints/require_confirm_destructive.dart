@@ -68,7 +68,7 @@ class RequireConfirmDestructive extends DartLintRule {
     // newCommit tier
     'revertCommit', 'cherryPickCommit',
     // reflogRecoverable tier
-    'resetToCommit', 'resetToReflog', 'amendCommit', 'squashCommits',
+    'resetToCommit', 'amendCommit', 'squashCommits',
     'rebaseBranch', 'deleteBranch', 'deleteTag', 'deleteTags',
     // permanent tier
     'discardFile', 'discardFiles', 'discardAll',

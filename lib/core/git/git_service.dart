@@ -2554,35 +2554,6 @@ class GitService {
     });
   }
 
-  /// Reset HEAD to a specific reflog entry
-  ///
-  /// [selector] - The reflog selector (e.g., HEAD@{2})
-  /// [mode] - Reset mode (soft, mixed, or hard)
-  Future<Result<void>> resetToReflog(
-    String selector, {
-    ResetMode mode = ResetMode.mixed,
-  }) async {
-    return runCatchingAsync(() async {
-      final parts = ['reset'];
-
-      switch (mode) {
-        case ResetMode.soft:
-          parts.add('--soft');
-          break;
-        case ResetMode.mixed:
-          parts.add('--mixed');
-          break;
-        case ResetMode.hard:
-          parts.add('--hard');
-          break;
-      }
-
-      parts.add(selector);
-
-      await _execute(parts.join(' '));
-    });
-  }
-
   // ============================================
   // Bisect
   // ============================================
@@ -2929,15 +2900,5 @@ class GitService {
       await _execute('reset --soft $head', throwOnError: false);
       rethrow;
     }
-  }
-
-  // ============================================
-  // Utility
-  // ============================================
-
-  /// Execute any Git command (for advanced operations)
-  Future<String> executeCommand(String command) async {
-    final result = await _execute(command);
-    return result.stdout.toString();
   }
 }

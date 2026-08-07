@@ -198,21 +198,81 @@ jobs:
   #   - All five MACOS_* secrets present: the app is re-signed with the
   #     Developer ID identity (hardened runtime, secure timestamp), notarised
   #     with notarytool, stapled, and published like any other platform.
-  #   - No MACOS_* secret present: the ad-hoc-signed build is published
-  #     anyway — owner decision in issue #365: one-time Gatekeeper friction
-  #     beats having no macOS download at all. The archive is named
-  #     *-macos-unsigned.zip so nobody mistakes it for a notarised build,
-  #     ships a README.txt walking the user through the "Open Anyway" step
-  #     under System Settings → Privacy & Security, and the run carries a
-  #     warning annotation saying the build went out unsigned.
+  #   - No MACOS_* secret present: the build is re-signed ad-hoc *without* the
+  #     hardened runtime and published anyway — owner decision in issue #365:
+  #     one-time Gatekeeper friction beats having no macOS download at all.
+  #     The archive is named *-macos-unsigned.zip so nobody mistakes it for a
+  #     notarised build, ships a README.txt walking the user through the "Open
+  #     Anyway" step under System Settings → Privacy & Security, and the run
+  #     carries a warning annotation saying the build went out unsigned.
+  #     Dropping the hardened runtime is issue #421: the owner's Mac could not
+  #     start the downloaded build at all, and the hardened runtime is the one
+  #     thing this path applies that it has no use for — it is required by
+  #     notarisation, which this path does not perform, and everything it does
+  #     beyond that is restrict the process. Why it is dropped, and how the
+  #     job now measures rather than asserts that, is at "Package unsigned
+  #     artifact" and "Smoke-launch the packaged app" below.
   #   - Some but not all secrets present: the job fails — a half-configured
   #     credential set is a mistake somebody has to see, not skip over.
+  #
+  # Whichever path ran, two steps open the finished archive on the runner
+  # before it is uploaded. "Verify the packaged signature" checks that the
+  # signature is *valid over the packaged bytes* and that the hardened runtime
+  # is present on the signed artifact and absent on the unsigned one;
+  # "Smoke-launch the packaged app" then actually executes the bundle out of
+  # that archive. Together they are what keeps the macOS path honest on a
+  # project whose owner is the only person who can launch its output — and the
+  # launch step is the only end-to-end evidence this repository can produce
+  # without a Mac of its own.
   #
   # Secret names and how to obtain each: release/README.md.
   build-macos:
     name: Build macos
     runs-on: macos-latest
     steps:
+      # Deliberately the first step of the job, ahead of the checkout and the
+      # build: it reads nothing but the repository secrets, so nothing it needs
+      # exists later that does not exist here. Two things follow from the
+      # position. A half-configured secret set — somebody's typo in a secret
+      # name — fails the job within seconds instead of after a full macOS
+      # build; and every step below can name the path the run is on, which is
+      # what lets the signature gate at the end of the job report *which*
+      # packaging path produced a wrong artifact rather than just that
+      # something is wrong.
+      #
+      # All five secrets, or none: anything in between is treated as an error
+      # so a typo in one secret name cannot silently degrade the release to
+      # "macOS missing" while everything looks configured.
+      - name: Detect signing configuration
+        id: signing
+        env:
+          HAVE_CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
+          HAVE_CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD != '' }}
+          HAVE_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY != '' }}
+          HAVE_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID != '' }}
+          HAVE_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=""
+          [ "$HAVE_CERT_P12" = "true" ]         || missing="$missing MACOS_CERTIFICATE_P12"
+          [ "$HAVE_CERT_PASSWORD" = "true" ]    || missing="$missing MACOS_CERTIFICATE_PASSWORD"
+          [ "$HAVE_NOTARY_KEY" = "true" ]       || missing="$missing MACOS_NOTARY_KEY"
+          [ "$HAVE_NOTARY_KEY_ID" = "true" ]    || missing="$missing MACOS_NOTARY_KEY_ID"
+          [ "$HAVE_NOTARY_ISSUER_ID" = "true" ] || missing="$missing MACOS_NOTARY_ISSUER_ID"
+          set -- $missing
+          count=$#
+          if [ "$count" -eq 0 ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "all signing secrets present; the build will be signed, notarised and published"
+          elif [ "$count" -eq 5 ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=macOS published unsigned — no signing secrets::No MACOS_* signing secrets are configured, so the macOS build was attached to the release UNSIGNED — no Developer ID signature, no notarisation. Gatekeeper will block its first launch ('is damaged and can't be opened') until the user allows it under System Settings → Privacy & Security; the archive's README.txt documents that step. See release/README.md for the five secrets that enable signing."
+          else
+            echo "::error title=macOS signing half-configured::Missing:${missing}. Either configure all five MACOS_* secrets or remove them all — see release/README.md."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
         with:
           # The changelog generator walks every release tag and the commit
@@ -271,39 +331,6 @@ jobs:
           flutter build macos --release \
             --dart-define=BUILD_COMMIT="${GITHUB_SHA::7}" \
             --dart-define=BUILD_DATE="$(date -u +%Y-%m-%d)"
-
-      # All five secrets, or none: anything in between is treated as an error
-      # so a typo in one secret name cannot silently degrade the release to
-      # "macOS missing" while everything looks configured.
-      - name: Detect signing configuration
-        id: signing
-        env:
-          HAVE_CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 != '' }}
-          HAVE_CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD != '' }}
-          HAVE_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY != '' }}
-          HAVE_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID != '' }}
-          HAVE_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID != '' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          missing=""
-          [ "$HAVE_CERT_P12" = "true" ]         || missing="$missing MACOS_CERTIFICATE_P12"
-          [ "$HAVE_CERT_PASSWORD" = "true" ]    || missing="$missing MACOS_CERTIFICATE_PASSWORD"
-          [ "$HAVE_NOTARY_KEY" = "true" ]       || missing="$missing MACOS_NOTARY_KEY"
-          [ "$HAVE_NOTARY_KEY_ID" = "true" ]    || missing="$missing MACOS_NOTARY_KEY_ID"
-          [ "$HAVE_NOTARY_ISSUER_ID" = "true" ] || missing="$missing MACOS_NOTARY_ISSUER_ID"
-          set -- $missing
-          count=$#
-          if [ "$count" -eq 0 ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-            echo "all signing secrets present; the build will be signed, notarised and published"
-          elif [ "$count" -eq 5 ]; then
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::warning title=macOS published unsigned — no signing secrets::No MACOS_* signing secrets are configured, so the macOS build was attached to the release UNSIGNED — no Developer ID signature, no notarisation. Gatekeeper will block its first launch ('is damaged and can't be opened') until the user allows it under System Settings → Privacy & Security; the archive's README.txt documents that step. See release/README.md for the five secrets that enable signing."
-          else
-            echo "::error title=macOS signing half-configured::Missing:${missing}. Either configure all five MACOS_* secrets or remove them all — see release/README.md."
-            exit 1
-          fi
 
       - name: Sign, notarise and staple
         if: steps.signing.outputs.available == 'true'
@@ -423,12 +450,394 @@ jobs:
           APP=$(find build/macos/Build/Products/Release -maxdepth 1 -name '*.app' | head -1)
           [ -n "$APP" ] || { echo "::error::no .app produced"; exit 1; }
           STAGE=$(mktemp -d)
+          STAGED_APP="$STAGE/$(basename "$APP")"
           # ditto, not cp: it preserves the bundle metadata and the symlink
           # structure inside the frameworks, same as the signed path.
-          ditto "$APP" "$STAGE/$(basename "$APP")"
+          ditto "$APP" "$STAGED_APP"
+
+          # Issue #421 — the change that is meant to make this artifact start
+          # at all. The build signs ad-hoc (CODE_SIGN_IDENTITY = "-") while the
+          # Release configuration sets ENABLE_HARDENED_RUNTIME = YES
+          # (macos/Runner.xcodeproj/project.pbxproj:633), so the bundle leaves
+          # the compiler carrying a protection Apple documents as the companion
+          # of a real Developer ID signature, on a path that has no such
+          # signature. The hardened runtime is applied by the kernel at exec
+          # (AMFI), not by Gatekeeper: enabling it opts the process into
+          # library validation, restricted DYLD_* handling, no unsigned
+          # executable memory and no debugger attach — see Apple, "Hardened
+          # Runtime" (developer.apple.com/documentation/security/hardened_runtime)
+          # and the notarisation requirement in "Notarizing macOS software
+          # before distribution". None of that is consulted by the quarantine
+          # attribute, and none of it is bought back by anything on this path,
+          # because notarisation — the one thing that requires the flag — is
+          # exactly what this path does not do.
+          #
+          # Honesty about the causal claim, because this project owns no Mac:
+          # what is *observed* in #421 is that the downloaded build does not
+          # start. That the hardened-runtime/ad-hoc pairing is what ends it is
+          # the leading explanation, not a verified fact — ad-hoc plus
+          # `--options runtime` is a combination codesign accepts and Xcode's
+          # own "Sign to Run Locally" can produce, and whether AMFI's library
+          # validation treats two *absent* team identifiers as a match is not
+          # something that can be settled from Windows. So the flag is dropped
+          # on the argument that it can only ever restrict this process and can
+          # never help it, and "Smoke-launch the packaged app" below turns the
+          # rest into a measurement taken on every run: it executes the bundle
+          # that is about to ship, and it executes a control copy re-signed
+          # *with* --options runtime, so the run log says which of the two
+          # explanations is true on the runner's macOS instead of leaving the
+          # question open in a comment.
+          #
+          # Re-signing here, rather than building a second time with the flag
+          # off, was chosen for two reasons. Both paths keep sharing one set of
+          # compiled bytes, so the archive published unsigned is the same build
+          # that would have been notarised had the secrets been present; and
+          # the change stays inside this job's own shell, where the very next
+          # step re-opens the archive and checks it. The alternative means
+          # editing the Xcode project in CI before the build — `flutter build
+          # macos` has no flag that forwards a build setting to xcodebuild — and
+          # a sed against project.pbxproj is a mechanism this project cannot
+          # test, on a file Flutter rewrites on template upgrades.
+          #
+          # Only the bundle itself is re-signed. The hardened runtime is a
+          # property of the running process, taken from the main executable's
+          # signature, so clearing it on the nested frameworks would change
+          # nothing; re-sealing the bundle regenerates CodeResources over
+          # nested code that is already ad-hoc signed and stays valid. The
+          # entitlements file the build used is passed again explicitly,
+          # because codesign carries nothing across a re-sign that is not
+          # asked for (--preserve-metadata) and this step must change exactly
+          # one thing about the artifact. Dropping App Sandbox = false here
+          # would sandbox the git subprocesses and break the application.
+          codesign --force --sign - \
+            --entitlements macos/Runner/Release.entitlements "$STAGED_APP"
+
+          # Re-sealing a bundle is the one genuinely destructive thing this
+          # step does, so it is checked here, at the point where it could
+          # break, and again on the extracted archive two steps down. `codesign
+          # --display` cannot stand in for this: displaying reads the signature
+          # blob, verifying hashes the sealed contents against it — two
+          # different operations, as Apple's TN2206 ("macOS Code Signing In
+          # Depth") sets out, which is why it prescribes `--verify --deep
+          # --strict` for validation and `-d` for inspection. A re-seal that
+          # missed a nested framework, or a resource that moved under the seal,
+          # still prints a perfectly good `flags=0x2(adhoc)` line while
+          # Gatekeeper's deep verification on the user's Mac rejects it — and
+          # "Open Anyway" cannot approve an invalid signature, so that failure
+          # is not even recoverable by the archive's README.
+          codesign --verify --deep --strict --verbose=2 "$STAGED_APP" || {
+            echo "::error title=Ad-hoc re-sign left an invalid signature::codesign --verify --deep --strict rejected the staged bundle immediately after the ad-hoc re-sign in 'Package unsigned artifact'. The seal over the bundle's contents does not match what is on disk, so the artifact would be refused by Gatekeeper as damaged on every Mac, with no 'Open Anyway' available. Check whether anything writes into the bundle after the codesign call above, and whether the nested code under Contents/Frameworks still carries the signatures the build gave it."
+            exit 1
+          }
+
           cp release/macos/README-unsigned.txt "$STAGE/README.txt"
           ditto -c -k --sequesterRsrc "$STAGE" "dist/${NAME}.zip"
           ls -la dist/
+
+      # The signature gate for issue #421. This project owns no Mac, but this
+      # job runs on one: the artifact can be examined on the very machine that
+      # produced it, so the claims made about it are checked here instead of
+      # being written into a document nobody re-reads. It runs unconditionally
+      # and picks the archive by path, so neither of the two packaging paths can
+      # be released without passing it.
+      #
+      # It inspects the packaged .zip rather than build/macos/…, because the
+      # archive is what a user downloads and packaging is itself a step that can
+      # lose or alter a signature — verifying the input to the step that could
+      # break it proves nothing.
+      #
+      # Four properties are asserted, and none of them is redundant:
+      #   - both: the signature must be VALID over the packaged bytes. This is
+      #     the first check and the one the others depend on, because
+      #     `codesign --display` reads the signature blob and hashes nothing:
+      #     a bundle whose seal no longer matches its contents still prints a
+      #     flawless flags=… line. Apple's TN2206 keeps the two apart for that
+      #     reason — `--verify --deep --strict` validates, `-d` inspects. Note
+      #     what this catches that nothing else here does: anything that writes
+      #     into the bundle after it was signed (a LICENSE copied in, a strip,
+      #     a version stamped into the binary — the Windows and Linux legs do
+      #     the first of those, so it is a plausible next edit). A modified
+      #     main executable is killed at exec on every Mac and a broken
+      #     resource seal reads as "damaged"; neither is recoverable by the
+      #     user, and neither shows up in the flags. `stapler validate` on the
+      #     signed path does not cover it either: it matches the ticket against
+      #     the signature's cdhash, so an untouched signature over touched
+      #     content still validates.
+      #   - both: a signature must be there at all. An artifact whose signature
+      #     was stripped rather than replaced also has no hardened runtime flag
+      #     and would sail through a naive check, while being unlaunchable on
+      #     Apple Silicon, where an unsigned binary cannot execute. The unsigned
+      #     path therefore requires an ad-hoc signature, the signed path a
+      #     Developer ID authority and a stapled ticket that survived packaging.
+      #   - unsigned: the hardened runtime flag must be ABSENT (issue #421).
+      #   - signed: the hardened runtime flag must be PRESENT, or Apple's notary
+      #     service would not have accepted the submission.
+      #
+      # The runtime bit is read numerically (CS_RUNTIME = 0x10000 of the code
+      # directory flags codesign prints as flags=0x10000(runtime)) rather than
+      # by grepping for the word, so no future flag whose name happens to
+      # contain "runtime" can decide this gate by accident.
+      #
+      # `spctl --assess` is printed for the log only, and that is the one check
+      # here deliberately left unasserted: on the unsigned path it is *expected*
+      # to reject, and the wording of that rejection differs between macOS
+      # versions, so asserting a verdict would fail on an OS bump rather than on
+      # a defect. Launching the app is not skipped, only separated — it is the
+      # next step, where its own reasoning lives.
+      #
+      # The extracted bundle is left in RUNNER_TEMP and its path exported, so
+      # the launch step runs the same unpacked copy this step just vouched for
+      # rather than unpacking a second one.
+      - name: Verify the packaged signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.value }}"
+          if [ "${{ steps.signing.outputs.available }}" = "true" ]; then
+            PATH_NAME="signed (Developer ID, notarised, stapled)"
+            ARCHIVE="dist/flutter-gitui-v${VERSION}-macos.zip"
+            WANT_RUNTIME=1
+          else
+            PATH_NAME="unsigned (ad-hoc signature, direct download)"
+            ARCHIVE="dist/flutter-gitui-v${VERSION}-macos-unsigned.zip"
+            WANT_RUNTIME=0
+          fi
+
+          if [ ! -f "$ARCHIVE" ]; then
+            echo "::error title=macOS archive missing before verification::The run took the ${PATH_NAME} path, which must produce ${ARCHIVE}, and that file does not exist. The packaging step for this path did not run or wrote a different name."
+            exit 1
+          fi
+
+          WORK="$RUNNER_TEMP/macos-verify"
+          rm -rf "$WORK"
+          mkdir -p "$WORK"
+          ditto -x -k "$ARCHIVE" "$WORK"
+          # Depth two: the signed archive carries the bundle at its root, the
+          # unsigned one carries it beside the README.
+          APP=$(find "$WORK" -maxdepth 2 -name '*.app' | head -1)
+          if [ -z "$APP" ]; then
+            echo "::error title=macOS archive contains no app bundle::${ARCHIVE} (${PATH_NAME} path) unpacks without a .app in it, so there is nothing to verify and nothing to ship."
+            exit 1
+          fi
+
+          # First, and on both paths: is the signature valid over these bytes?
+          # Everything below reads what the signature *claims*; this is the only
+          # check that confirms the claim is true of the packaged contents.
+          # --verify is an exit-code API and involves no Gatekeeper policy
+          # wording, so unlike spctl it cannot drift with the OS version, and it
+          # validates ad-hoc signatures perfectly well — it tests integrity, not
+          # trust.
+          codesign --verify --deep --strict --verbose=2 "$APP" || {
+            echo "::error title=macOS artifact has an invalid signature::codesign --verify --deep --strict rejected the bundle extracted from ${ARCHIVE} (${PATH_NAME} path). The signature does not match the bytes that were packaged, so the seal was broken after signing or the archive did not round-trip the bundle intact. On a user's Mac this is not the one-time Gatekeeper prompt the archive's README.txt describes: an invalid signature cannot be approved with 'Open Anyway' at all, and a modified main executable is terminated at exec. Look for anything that writes into the bundle after it is signed, and for a packaging step that does not go through ditto."
+            exit 1
+          }
+
+          DESCRIPTION=$(codesign --display --verbose=2 "$APP" 2>&1 || true)
+          echo "$DESCRIPTION"
+          # At least one hex digit, so a truncated "flags=0x" falls into the
+          # "no signature" branch below with a message instead of blowing up in
+          # the arithmetic that follows.
+          FLAGS=$(sed -n 's/.*flags=\(0x[0-9a-fA-F][0-9a-fA-F]*\).*/\1/p' <<< "$DESCRIPTION" | head -1)
+          if [ -z "$FLAGS" ]; then
+            echo "::error title=macOS artifact carries no code signature::codesign reported no code directory flags for the ${PATH_NAME} artifact in ${ARCHIVE}. The packaged bundle is unsigned rather than merely un-notarised, and macOS on Apple Silicon refuses to execute a binary with no signature at all."
+            exit 1
+          fi
+          if [ $((FLAGS & 0x10000)) -ne 0 ]; then HAS_RUNTIME=1; else HAS_RUNTIME=0; fi
+          echo "path: ${PATH_NAME} | archive: ${ARCHIVE} | code directory flags: ${FLAGS} | hardened runtime: ${HAS_RUNTIME}"
+
+          if [ "$WANT_RUNTIME" -eq 0 ] && [ "$HAS_RUNTIME" -eq 1 ]; then
+            echo "::error title=Unsigned macOS artifact still carries the hardened runtime::${ARCHIVE} was produced on the ${PATH_NAME} path and its signature still has the hardened runtime set (flags=${FLAGS}). That flag is applied by AMFI at exec and is required only by notarisation, which this path does not perform, so on an ad-hoc signature it can restrict this process and never help it — and it is the leading suspect in issue #421, where the downloaded build does not start on the owner's Mac at all. The ad-hoc re-sign in 'Package unsigned artifact' did not take effect: check that its codesign call ran and that no later step re-signed the bundle with --options runtime."
+            exit 1
+          fi
+          if [ "$WANT_RUNTIME" -eq 1 ] && [ "$HAS_RUNTIME" -eq 0 ]; then
+            echo "::error title=Signed macOS artifact lost the hardened runtime::${ARCHIVE} was produced on the ${PATH_NAME} path and its signature does not have the hardened runtime set (flags=${FLAGS}). Apple's notary service requires it, and 'Sign, notarise and staple' already asserted the flag on the bundle in build/macos/, so it was lost between that assertion and the archive — the most likely cause is a re-sign or a repack that did not go through ditto."
+            exit 1
+          fi
+
+          if [ "$WANT_RUNTIME" -eq 0 ]; then
+            grep -q '^Signature=adhoc' <<< "$DESCRIPTION" || {
+              echo "::error title=Unsigned macOS artifact is not ad-hoc signed::${ARCHIVE} (${PATH_NAME} path) has code directory flags ${FLAGS} but codesign does not report 'Signature=adhoc'. The unsigned path must ship an ad-hoc signed bundle: Apple Silicon executes nothing that is unsigned, so a stripped signature is a harder failure than a missing notarisation."
+              exit 1
+            }
+          else
+            grep -q '^Authority=Developer ID Application' <<< "$DESCRIPTION" || {
+              echo "::error title=Signed macOS artifact lost its Developer ID authority::${ARCHIVE} (${PATH_NAME} path) does not report an 'Authority=Developer ID Application' line, so the archive does not carry the signature the signing step applied — packaging replaced or damaged it."
+              exit 1
+            }
+            # The ticket is stapled into the bundle before packaging; validating
+            # the extracted copy is what proves ditto carried it into the zip.
+            xcrun stapler validate "$APP" || {
+              echo "::error title=Notarisation ticket did not survive packaging::${ARCHIVE} (${PATH_NAME} path) unpacks to a bundle without a valid stapled ticket, so Gatekeeper on a machine that is offline or behind a proxy would refuse it even though notarisation succeeded."
+              exit 1
+            }
+          fi
+
+          # Informational only, for the run log — see the note above on why no
+          # verdict is asserted here.
+          echo "spctl assessment (not a gate):"
+          spctl --assess --type execute --verbose=2 "$APP" 2>&1 || true
+
+          # Handed to the launch step so it runs this very copy.
+          {
+            echo "VERIFIED_APP=$APP"
+            echo "VERIFIED_ARCHIVE=$ARCHIVE"
+            echo "VERIFIED_PATH_NAME=$PATH_NAME"
+            echo "VERIFIED_WANT_RUNTIME=$WANT_RUNTIME"
+          } >> "$GITHUB_ENV"
+
+      # The end-to-end check, and the answer to the only question that matters
+      # in issue #421: does the thing in the archive start?
+      #
+      # An earlier revision of this job declined to launch anything, on the
+      # grounds that the failure "needs a quarantined bundle on a machine other
+      # than the one that signed it". That reason was wrong, and it contradicted
+      # the diagnosis standing right next to it. The two mechanisms are separate
+      # subsystems. `com.apple.quarantine` drives *Gatekeeper*, a user-space
+      # assessment whose outcome is a dialog and an "Open Anyway" button. The
+      # hardened runtime is `CS_RUNTIME` in the code directory, applied by AMFI
+      # at exec and by dyld at load time; nothing in that path consults the
+      # quarantine attribute, and its outcome is a dead process, not a dialog.
+      # So if the hardened runtime is what ends the app, this runner reproduces
+      # it exactly — and this step is then the regression test for the change
+      # two steps up: it fails on the old artifact and passes on the new one.
+      # If it is *not* what ends the app, that has to be found out too, which is
+      # what the control below is for.
+      #
+      # Quarantine is deliberately NOT set on the copy under test. Doing so
+      # would test Gatekeeper's verdict, which on the unsigned path is expected
+      # to be a rejection — that is exactly the one-time hurdle the archive's
+      # README.txt walks the user through, not a defect to gate on.
+      #
+      # Two bundles are run, both out of the extracted archive:
+      #   1. the bundle that is about to ship. This is the gate.
+      #   2. a control copy re-signed with --options runtime, i.e. the artifact
+      #      as it was before the fix. This is not a gate, it is the experiment:
+      #      control killed + shipping copy alive means the hardened runtime is
+      #      what stopped the owner's Mac and the fix removes it; both alive
+      #      means the hardened runtime was never the cause of #421 and the real
+      #      one is still out there. The second outcome raises a warning
+      #      annotation rather than passing quietly, because a green run that
+      #      quietly means "we still don't know why the download won't start" is
+      #      the failure mode this whole job exists to prevent.
+      #
+      # The gate is deliberately narrow: it fires on SIGKILL (128+9=137) or on
+      # dyld's and AMFI's code-signing refusals in the process output, and on
+      # nothing else. A headless runner has no window server, so this app may
+      # well fail for reasons that have nothing to do with signing — exiting
+      # non-zero, aborting on a failed WindowServer connection, or hanging until
+      # the timeout. None of those is a defect in the artifact and none of them
+      # fails this step. Only the kernel refusing to run the code does, and no
+      # ordinary application failure produces that.
+      - name: Smoke-launch the packaged app
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="$VERIFIED_APP"
+          LOGS="$RUNNER_TEMP/macos-launch"
+          rm -rf "$LOGS"
+          mkdir -p "$LOGS"
+
+          # dyld's and AMFI's wording when they refuse to run code. Kept to the
+          # phrases that only the loader emits, so ordinary application output
+          # cannot trip the gate.
+          REFUSAL='library load disallowed|not valid for use in process|different Team IDs|Library Validation|code signature invalid'
+
+          LAUNCH_STATUS=0
+          LAUNCH_ALIVE=0
+
+          launch_bundle() {
+            bundle="$1"
+            log="$2"
+            exe_name=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$bundle/Contents/Info.plist" 2>/dev/null || true)
+            if [ -n "$exe_name" ] && [ -x "$bundle/Contents/MacOS/$exe_name" ]; then
+              exe="$bundle/Contents/MacOS/$exe_name"
+            else
+              exe=$(find "$bundle/Contents/MacOS" -maxdepth 1 -type f -perm -u+x 2>/dev/null | head -1)
+            fi
+            if [ -z "$exe" ]; then
+              echo "::error title=macOS bundle has no executable::${bundle} carries nothing executable under Contents/MacOS, so it cannot start on any Mac."
+              exit 1
+            fi
+            echo "launching $exe"
+            : > "$log"
+            set +e
+            "$exe" > "$log" 2>&1 &
+            pid=$!
+            # Polled rather than one long sleep: a process AMFI refuses is gone
+            # within milliseconds of exec, so the case this check exists for
+            # costs a second and only a healthy app waits out the window.
+            LAUNCH_ALIVE=0
+            waited=0
+            while [ "$waited" -lt 20 ]; do
+              kill -0 "$pid" 2>/dev/null || break
+              sleep 1
+              waited=$((waited + 1))
+            done
+            if kill -0 "$pid" 2>/dev/null; then
+              LAUNCH_ALIVE=1
+              LAUNCH_STATUS=0
+              kill -9 "$pid" 2>/dev/null
+              wait "$pid" 2>/dev/null
+            else
+              wait "$pid" 2>/dev/null
+              LAUNCH_STATUS=$?
+            fi
+            set -e
+            echo "  alive after ${waited}s: ${LAUNCH_ALIVE} | exit status: ${LAUNCH_STATUS}"
+            echo "  --- process output ---"
+            sed 's/^/  | /' "$log" || true
+            echo "  ----------------------"
+          }
+
+          echo "=== the bundle that is about to ship (${VERIFIED_PATH_NAME}) ==="
+          launch_bundle "$APP" "$LOGS/ship.log"
+          SHIP_STATUS=$LAUNCH_STATUS
+          SHIP_ALIVE=$LAUNCH_ALIVE
+          SHIP_REFUSED=0
+          if [ "$SHIP_STATUS" -eq 137 ] || grep -Eqi "$REFUSAL" "$LOGS/ship.log"; then
+            SHIP_REFUSED=1
+          fi
+
+          # The control only makes sense where the fix applies: on the signed
+          # path the hardened runtime is required and present by design.
+          CONTROL_RAN=0
+          CONTROL_REFUSED=0
+          if [ "$VERIFIED_WANT_RUNTIME" -eq 0 ]; then
+            CONTROL_DIR="$RUNNER_TEMP/macos-control"
+            rm -rf "$CONTROL_DIR"
+            mkdir -p "$CONTROL_DIR"
+            CONTROL="$CONTROL_DIR/$(basename "$APP")"
+            # Building the control must never fail the release: it is a
+            # diagnostic about an artifact that has already passed its gates,
+            # so a copy or a re-sign that goes wrong here costs the experiment,
+            # not the build.
+            if ditto "$APP" "$CONTROL" \
+               && codesign --force --options runtime --sign - \
+                    --entitlements macos/Runner/Release.entitlements "$CONTROL"; then
+              CONTROL_RAN=1
+              echo "=== control: the same bundle re-signed WITH the hardened runtime (the pre-fix artifact) ==="
+              launch_bundle "$CONTROL" "$LOGS/control.log"
+              if [ "$LAUNCH_STATUS" -eq 137 ] || grep -Eqi "$REFUSAL" "$LOGS/control.log"; then
+                CONTROL_REFUSED=1
+              fi
+            else
+              echo "::warning title=The macOS control experiment could not be built::Re-signing a throwaway copy of the packaged app with --options runtime failed, so this run cannot say whether the hardened runtime is what stops the unsigned build on a user's Mac. The shipping artifact itself was verified and launched normally; only the comparison is missing."
+            fi
+          fi
+
+          if [ "$SHIP_REFUSED" -eq 1 ]; then
+            echo "::error title=The packaged macOS app is refused at launch::The bundle in ${VERIFIED_ARCHIVE} (${VERIFIED_PATH_NAME} path) was started on the runner that built it and the system refused to run it — exit status ${SHIP_STATUS}, with the loader's code-signing refusal in its output above. This is the failure of issue #421 reaching the artifact again, and allowing the app under Privacy and Security does not repair it, because being blocked was never the problem. Do not ship this archive. The process output printed above names the binary that was refused."
+            exit 1
+          fi
+          echo "the shipping bundle was not refused by the system (alive after the wait: ${SHIP_ALIVE}, exit status ${SHIP_STATUS})"
+
+          if [ "$CONTROL_RAN" -eq 1 ]; then
+            if [ "$CONTROL_REFUSED" -eq 1 ]; then
+              echo "issue #421 reproduced and fixed on this runner: the control copy carrying the hardened runtime was refused at launch, the shipping copy without it was not. Dropping the flag in 'Package unsigned artifact' is what makes this download start."
+            else
+              echo "::warning title=The hardened runtime may not be what stops the unsigned macOS build::On this runner the control copy — the same bundle re-signed WITH the hardened runtime, i.e. the artifact exactly as issue #421 described it — started just as the shipping copy did. Dropping the flag is still correct, since the unsigned path never needs it and it can only restrict the process, but it is then not the explanation for the owner's Mac refusing to start the download. If the next release still does not start on his machine, do not treat it as a new problem: reopen issue #421 with the crash report and look elsewhere, at Gatekeeper's assessment of an ad-hoc signature and at the quarantine path, rather than at this flag."
+            fi
+          fi
 
       # No condition: when the job got this far, the detect step succeeded and
       # exactly one of the two packaging steps above has run, so dist/ carries

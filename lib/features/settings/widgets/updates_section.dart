@@ -110,6 +110,15 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     final report = await checkForUpdates(ref);
     if (!mounted) return;
 
+    // The button that starts this is not built for a managed installation, so
+    // reaching here means something else called it. Saying "up to date" would
+    // be a claim no check was ever made to support (#364).
+    final suppressedBy = report.suppressedBy;
+    if (suppressedBy != null) {
+      Logger.info('Manual update check suppressed: ${suppressedBy.manager}');
+      return;
+    }
+
     final failureMessage = report.failureMessage;
     if (failureMessage != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -154,6 +163,11 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     final l10n = AppLocalizations.of(context)!;
     final updates = ref.watch(updatesConfigProvider);
     final isChecking = ref.watch(checkingForUpdatesProvider);
+    // A package manager owning this installation removes the whole update
+    // section's subject: there is no check to schedule, nothing to download in
+    // the background and no result to report, so those controls give way to the
+    // one thing that is true here -- who does deliver new versions (#364).
+    final managedInstall = ref.watch(managedInstallProvider);
 
     return SettingsSection(
       title: l10n.updates,
@@ -182,83 +196,103 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
         const Divider(),
 
-        // How often the app may look for updates on its own
-        BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.arrowsClockwise),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BodyMediumLabel(l10n.updateCheckFrequency),
-              BodySmallLabel(_frequencyLabel(l10n, updates.checkFrequency)),
-            ],
-          ),
-          trailing: DropdownButton<UpdateCheckFrequency>(
-            value: updates.checkFrequency,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
+        if (managedInstall != null)
+          // Naming the manager and the reason is the whole point of keeping
+          // "suppressed" apart from "up to date": without it the section would
+          // simply be missing its controls, which reads as a defect.
+          BaseListItem(
+            leading: const Icon(PhosphorIconsRegular.storefront),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BodyMediumLabel(
+                  'Updates are managed by ${managedInstall.manager}',
+                ),
+                BodySmallLabel(managedInstall.explanation),
+              ],
             ),
-            items: UpdateCheckFrequency.values.map((frequency) {
-              return DropdownMenuItem(
-                value: frequency,
-                child: BodyMediumLabel(_frequencyLabel(l10n, frequency)),
-              );
-            }).toList(),
+          )
+        else ...[
+          // How often the app may look for updates on its own
+          BaseListItem(
+            leading: const Icon(PhosphorIconsRegular.arrowsClockwise),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BodyMediumLabel(l10n.updateCheckFrequency),
+                BodySmallLabel(_frequencyLabel(l10n, updates.checkFrequency)),
+              ],
+            ),
+            trailing: DropdownButton<UpdateCheckFrequency>(
+              value: updates.checkFrequency,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+              items: UpdateCheckFrequency.values.map((frequency) {
+                return DropdownMenuItem(
+                  value: frequency,
+                  child: BodyMediumLabel(_frequencyLabel(l10n, frequency)),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  ref
+                      .read(configProvider.notifier)
+                      .setUpdateCheckFrequency(value);
+                }
+              },
+            ),
+          ),
+
+          // Background download of a found update; installing stays manual
+          SwitchListTile(
+            secondary: const Icon(PhosphorIconsRegular.cloudArrowDown),
+            title: Text(l10n.autoDownloadUpdates),
+            subtitle: Text(l10n.autoDownloadUpdatesDescription),
+            value: updates.autoDownload,
             onChanged: (value) {
-              if (value != null) {
-                ref
-                    .read(configProvider.notifier)
-                    .setUpdateCheckFrequency(value);
-              }
+              ref.read(configProvider.notifier).setUpdateAutoDownload(value);
             },
           ),
-        ),
 
-        // Background download of a found update; installing stays manual
-        SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.cloudArrowDown),
-          title: Text(l10n.autoDownloadUpdates),
-          subtitle: Text(l10n.autoDownloadUpdatesDescription),
-          value: updates.autoDownload,
-          onChanged: (value) {
-            ref.read(configProvider.notifier).setUpdateAutoDownload(value);
-          },
-        ),
-
-        // When the last check ran and what it concluded; a failed background
-        // check surfaces here and in the log instead of in a popup.
-        BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.clock),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              BodyMediumLabel(l10n.lastUpdateCheck),
-              BodySmallLabel(_lastCheckSummary(l10n, updates)),
-              if (updates.lastCheckOutcome == UpdateCheckOutcome.failed &&
-                  updates.lastCheckDetail != null)
-                BodySmallLabel(
-                  updates.lastCheckDetail!,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-            ],
+          // When the last check ran and what it concluded; a failed background
+          // check surfaces here and in the log instead of in a popup.
+          BaseListItem(
+            leading: const Icon(PhosphorIconsRegular.clock),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BodyMediumLabel(l10n.lastUpdateCheck),
+                BodySmallLabel(_lastCheckSummary(l10n, updates)),
+                if (updates.lastCheckOutcome == UpdateCheckOutcome.failed &&
+                    updates.lastCheckDetail != null)
+                  BodySmallLabel(
+                    updates.lastCheckDetail!,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+              ],
+            ),
           ),
-        ),
 
-        const Divider(),
+          const Divider(),
 
-        // Check for Updates button
-        Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
-          child: BaseButton(
-            label: isChecking ? l10n.checkingForUpdates : l10n.checkForUpdates,
-            variant: ButtonVariant.primary,
-            leadingIcon: isChecking
-                ? null
-                : PhosphorIconsRegular.arrowsClockwise,
-            isLoading: isChecking,
-            onPressed: isChecking ? null : _checkForUpdates,
-            fullWidth: true,
+          // Check for Updates button
+          Padding(
+            padding: const EdgeInsets.all(AppTheme.paddingM),
+            child: BaseButton(
+              label: isChecking
+                  ? l10n.checkingForUpdates
+                  : l10n.checkForUpdates,
+              variant: ButtonVariant.primary,
+              leadingIcon: isChecking
+                  ? null
+                  : PhosphorIconsRegular.arrowsClockwise,
+              isLoading: isChecking,
+              onPressed: isChecking ? null : _checkForUpdates,
+              fullWidth: true,
+            ),
           ),
-        ),
+        ],
 
         // View Changelog button
         Padding(

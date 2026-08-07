@@ -1,10 +1,22 @@
 import 'package:riverpod/legacy.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../config/config_providers.dart';
+import 'managed_install.dart';
 import 'update_check_policy.dart';
 import 'update_service.dart';
 import 'logger_service.dart';
+
+/// The package manager that owns this installation, null when the application
+/// owns it and may update itself.
+///
+/// Exposed as a provider so every surface asks the one question in the one
+/// place, and so a widget test can stage a snap or a winget install by
+/// overriding it instead of needing either to be real.
+final managedInstallProvider = Provider<ManagedInstall?>(
+  (ref) => ManagedInstallDetector.detectCurrentProcess(),
+);
 
 /// Provider for available update information
 /// Null if no update is available or check hasn't been performed
@@ -43,7 +55,16 @@ class UpdateCheckReport {
   final UpdateInfo? update;
   final String? failureMessage;
 
-  const UpdateCheckReport({this.update, this.failureMessage});
+  /// Set when no check was made because this package manager owns the
+  /// installation. Kept apart from "nothing to offer" so a caller can explain
+  /// the absence of an update instead of claiming the build is current.
+  final ManagedInstall? suppressedBy;
+
+  const UpdateCheckReport({
+    this.update,
+    this.failureMessage,
+    this.suppressedBy,
+  });
 }
 
 /// Load dismissed update version from shared preferences
@@ -78,6 +99,9 @@ Future<void> dismissUpdateVersion(dynamic ref, String version) async {
 /// goes to the log, to Settings via the persisted outcome and into the
 /// returned report - this function opens no surface of its own.
 /// This function can be called with any Ref type (ProviderRef or WidgetRef).
+///
+/// An installation a package manager owns makes no check at all and reports
+/// that as [UpdateCheckReport.suppressedBy] rather than as "up to date" (#364).
 Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
   try {
     ref.read(checkingForUpdatesProvider.notifier).state = true;
@@ -85,17 +109,27 @@ Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
     // unwrapOr(null) collapsed "the check failed" into "no update available":
     // an offline or server error was logged as being up to date. Throwing
     // instead lets the catch record the real error.
-    final updateInfo = (await UpdateService.checkForUpdates()).unwrap();
+    final checkResult = (await UpdateService.checkForUpdates()).unwrap();
+
+    // A package manager owns this installation, so no check was made and none
+    // will be. Nothing is recorded either: the last-check line in Settings
+    // describes checks, and there was no check to describe (#364).
+    if (checkResult case UpdateCheckSuppressed(:final install)) {
+      Logger.info('Update check suppressed: managed by ${install.manager}');
+      ref.read(updateAvailableProvider.notifier).state = null;
+      return UpdateCheckReport(suppressedBy: install);
+    }
 
     // Check if this version was dismissed
     final dismissedVersion = ref.read(dismissedUpdateVersionProvider);
 
-    if (updateInfo == null) {
+    if (checkResult is! UpdateAvailable) {
       Logger.info('No updates available');
       ref.read(updateAvailableProvider.notifier).state = null;
       await _recordCheck(ref, UpdateCheckOutcome.upToDate, null);
       return const UpdateCheckReport();
     }
+    final updateInfo = checkResult.info;
 
     if (dismissedVersion == updateInfo.version) {
       // The user said no to this version; the quiet indicator stays hidden,

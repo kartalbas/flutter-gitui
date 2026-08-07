@@ -337,6 +337,20 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
     });
 
     try {
+      // Last line of defence: every path that opens this dialog is closed for
+      // an installation a package manager owns, but installing into one is the
+      // failure that corrupts it silently -- winget keeps recording the old
+      // version and overwrites the files again on its next upgrade -- so it is
+      // refused here too rather than trusted to stay unreachable (#364).
+      final managed = ref.read(managedInstallProvider);
+      if (managed != null) {
+        setState(() {
+          _errorMessage = managed.explanation;
+          _isDownloading = false;
+        });
+        return;
+      }
+
       // A download staged in the background for exactly this version skips
       // the transfer; its digest was already verified against the manifest.
       final staged = ref.read(readyUpdateProvider);

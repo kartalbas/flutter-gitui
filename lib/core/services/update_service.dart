@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:path/path.dart' as path;
 import 'logger_service.dart';
+import 'managed_install.dart';
 import '../utils/result.dart';
 
 /// Update information model
@@ -56,6 +57,37 @@ class UpdateInfo {
   }
 }
 
+/// What a single update check concluded.
+///
+/// "Nothing to install" is not one fact but two, and the caller has to be able
+/// to tell them apart. An installation that is merely current will be offered
+/// the next release as soon as it appears; an installation a package manager
+/// owns never will, and a screen that says nothing about it leaves the user
+/// looking for an update button that is not there. Collapsing both into a bare
+/// null would throw that difference away at the one place it is known.
+sealed class UpdateCheckResult {
+  const UpdateCheckResult();
+}
+
+/// No release newer than the running build is published on its channel.
+final class UpToDate extends UpdateCheckResult {
+  const UpToDate();
+}
+
+/// A newer release is published, and this installation may install it itself.
+final class UpdateAvailable extends UpdateCheckResult {
+  final UpdateInfo info;
+
+  const UpdateAvailable(this.info);
+}
+
+/// No check was made at all, because [install] owns this installation.
+final class UpdateCheckSuppressed extends UpdateCheckResult {
+  final ManagedInstall install;
+
+  const UpdateCheckSuppressed(this.install);
+}
+
 /// A failed update check, already phrased for the person who started it.
 ///
 /// The transport error behind it belongs in the log: a SocketException naming
@@ -101,9 +133,23 @@ class UpdateService {
   }
 
   /// Check for updates
-  /// Returns Result\<UpdateInfo?\> - Success(UpdateInfo) if update available, Success(null) if up-to-date, Failure on error
-  static Future<Result<UpdateInfo?>> checkForUpdates() async {
-    final result = await runCatchingAsync(() async {
+  /// Returns Result\<UpdateCheckResult\> - UpdateAvailable when a newer release
+  /// can be installed, UpToDate when none is, UpdateCheckSuppressed when a
+  /// package manager owns this installation, Failure on error
+  static Future<Result<UpdateCheckResult>> checkForUpdates() async {
+    // A package manager that owns this installation also owns the update path,
+    // and the answer never changes while the process runs. Deciding it here,
+    // before anything else, means such an installation makes no request at all
+    // rather than downloading a release it must not install (#364).
+    final managed = ManagedInstallDetector.detectCurrentProcess();
+    if (managed != null) {
+      Logger.info(
+        'Update check suppressed: ${managed.manager} manages this installation',
+      );
+      return Success(UpdateCheckSuppressed(managed));
+    }
+
+    final result = await runCatchingAsync<UpdateCheckResult>(() async {
       Logger.info('Checking for updates...');
 
       // Get current version
@@ -167,7 +213,7 @@ class UpdateService {
           );
         }
         Logger.info('✓ No published release for this channel');
-        return null;
+        return const UpToDate();
       }
 
       // Manifest and archive are both read from this one release, so the
@@ -277,18 +323,20 @@ class UpdateService {
         Logger.info('Download URL: $downloadUrl');
         Logger.info('File size: $fileSize bytes');
 
-        return UpdateInfo(
-          version: latestVersion,
-          downloadUrl: downloadUrl,
-          changelog: changelog,
-          releaseDate: DateTime.parse(manifestData['releaseDate'] as String),
-          fileSize: fileSize,
-          platform: platform,
-          sha256: sha256Digest,
+        return UpdateAvailable(
+          UpdateInfo(
+            version: latestVersion,
+            downloadUrl: downloadUrl,
+            changelog: changelog,
+            releaseDate: DateTime.parse(manifestData['releaseDate'] as String),
+            fileSize: fileSize,
+            platform: platform,
+            sha256: sha256Digest,
+          ),
         );
       } else {
         Logger.info('✓ App is up to date ($fullVersion >= $latestVersion)');
-        return null;
+        return const UpToDate();
       }
     });
 
@@ -296,7 +344,10 @@ class UpdateService {
     // for a transport error is a line naming a host and an OS errno. Replace
     // it with the sentence for this failure mode, and log the original here so
     // the diagnosis the message points at is actually in the log.
-    if (result case Failure<UpdateInfo?>(:final error, :final stackTrace)) {
+    if (result case Failure<UpdateCheckResult>(
+      :final error,
+      :final stackTrace,
+    )) {
       Logger.error('Update check failed', error, stackTrace);
       return Failure(
         _checkFailureMessage(error),

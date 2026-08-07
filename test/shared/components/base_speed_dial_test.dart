@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/shared/components/base_speed_dial.dart';
+import 'package:flutter_gitui/shared/theme/app_theme.dart';
 
 Future<void> _pumpDial(
   WidgetTester tester, {
@@ -138,6 +139,59 @@ void main() {
     await pushARoute(tester);
 
     expect(tester.takeException(), isNull);
+  });
+
+  // The drag clamp derives from the dial's rendered size plus the standard
+  // AppTheme.paddingM edge margin, so the whole dial stays visible however
+  // far it is dragged toward any screen edge.
+  testWidgets('dragging far past the top-left keeps the whole collapsed dial '
+      'inside the viewport with the standard margin', (tester) async {
+    await _pumpDial(tester, actions: actions, isExpanded: false);
+
+    await tester.drag(
+      find.byType(FloatingActionButton),
+      const Offset(-10000, -10000),
+    );
+    await tester.pump();
+
+    final fabRect = tester.getRect(find.byType(FloatingActionButton));
+    expect(fabRect.left, AppTheme.paddingM);
+    expect(fabRect.top, AppTheme.paddingM);
+  });
+
+  testWidgets('dragging far past the bottom-right keeps the standard margin '
+      'to those edges', (tester) async {
+    await _pumpDial(tester, actions: actions, isExpanded: false);
+
+    await tester.drag(
+      find.byType(FloatingActionButton),
+      const Offset(10000, 10000),
+    );
+    await tester.pump();
+
+    final viewport = tester.getSize(find.byType(Scaffold));
+    final fabRect = tester.getRect(find.byType(FloatingActionButton));
+    expect(fabRect.right, viewport.width - AppTheme.paddingM);
+    expect(fabRect.bottom, viewport.height - AppTheme.paddingM);
+  });
+
+  testWidgets('dragging the expanded dial keeps every action and label on '
+      'screen', (tester) async {
+    await _pumpDial(tester, actions: actions, isExpanded: true);
+
+    // Drag from the main FAB (the last button in the column).
+    await tester.drag(
+      find.byType(FloatingActionButton).last,
+      const Offset(-10000, -10000),
+    );
+    await tester.pump();
+
+    final viewport = tester.getSize(find.byType(Scaffold));
+    final dialRect = tester.getRect(find.byType(BaseSpeedDial));
+    expect(dialRect.left, AppTheme.paddingM);
+    expect(dialRect.top, AppTheme.paddingM);
+    expect(dialRect.right, lessThanOrEqualTo(viewport.width));
+    expect(dialRect.bottom, lessThanOrEqualTo(viewport.height));
   });
 
   testWidgets('two dials on one route survive a route transition', (

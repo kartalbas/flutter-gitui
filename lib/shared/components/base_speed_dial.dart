@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
@@ -45,6 +47,11 @@ class BaseSpeedDial extends StatefulWidget {
 }
 
 class _BaseSpeedDialState extends State<BaseSpeedDial> {
+  /// Footprint of the collapsed dial: the Material 3 standard FAB diameter.
+  /// Only a fallback for the drag clamp while the dial has no render size
+  /// yet; once laid out, the clamp uses the real rendered size.
+  static const double _collapsedDialSize = 56.0;
+
   Offset _position = const Offset(
     AppTheme.paddingM,
     AppTheme.paddingM,
@@ -76,16 +83,30 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
         },
         child: GestureDetector(
           onPanUpdate: (details) {
+            // Clamp so the whole dial, measured at its real rendered size,
+            // keeps the standard edge margin on every side of the viewport.
+            // math.max guards the upper bounds: on a viewport smaller than
+            // the dial they would drop below the lower bound and clamp()
+            // would throw.
+            final viewport = MediaQuery.of(context).size;
+            final dialSize =
+                context.size ?? const Size.square(_collapsedDialSize);
             setState(() {
               // Update position by subtracting delta (since we're using right/bottom positioning)
               _position = Offset(
                 (_position.dx - details.delta.dx).clamp(
                   AppTheme.paddingM,
-                  MediaQuery.of(context).size.width - 80,
+                  math.max(
+                    AppTheme.paddingM,
+                    viewport.width - dialSize.width - AppTheme.paddingM,
+                  ),
                 ),
                 (_position.dy - details.delta.dy).clamp(
                   AppTheme.paddingM,
-                  MediaQuery.of(context).size.height - 80,
+                  math.max(
+                    AppTheme.paddingM,
+                    viewport.height - dialSize.height - AppTheme.paddingM,
+                  ),
                 ),
               );
             });

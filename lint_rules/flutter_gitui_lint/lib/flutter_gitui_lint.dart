@@ -23,6 +23,7 @@ import 'src/lints/avoid_hardcoded_colors.dart';
 import 'src/lints/avoid_text_with_style.dart';
 import 'src/lints/avoid_null_color_in_copy_with.dart';
 import 'src/lints/avoid_print.dart';
+import 'src/lints/avoid_raw_shortcuts.dart';
 import 'src/lints/require_confirm_destructive.dart';
 
 /// Flutter GitUI custom lint rules
@@ -73,6 +74,9 @@ class _FlutterGitUILint extends PluginBase {
 
     // Logging lints
     AvoidPrint(),
+
+    // Keyboard lints
+    AvoidRawShortcuts(),
 
     // Safety lints
     RequireConfirmDestructive(),

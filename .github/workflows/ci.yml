@@ -72,6 +72,19 @@ jobs:
             exit 1
           fi
 
+      # Same reasoning for the keyboard gate: the only sanctioned escape from
+      # avoid_raw_shortcuts is the reviewable "// sanctioned-shortcuts:
+      # <reason>" marker plus the rule's sanctioned-files snapshot, so any
+      # ignore naming the rule under lib/ fails the build.
+      - name: Forbid ignores of avoid_raw_shortcuts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rnE 'ignore(_for_file)?:.*avoid_raw_shortcuts' lib/; then
+            echo "::error::avoid_raw_shortcuts must not be silenced with ignore comments; use a '// sanctioned-shortcuts: <reason>' marker plus the rule's sanctioned-files snapshot instead"
+            exit 1
+          fi
+
   test:
     name: Test
     runs-on: ubuntu-latest

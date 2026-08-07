@@ -36,6 +36,12 @@ This package provides automated enforcement of UI development standards through 
 | `avoid_hardcoded_colors` | `Colors.*` usage | `Theme.of(context).colorScheme` or `AppTheme.*` |
 | `avoid_text_with_style` | `Text()` with a `style` parameter that is not a `copyWith(color:)` chain | `BaseLabel` subclasses (`BodyMediumLabel`, `TitleLargeLabel`, …) |
 
+### Keyboard Rules
+
+| Rule | Detects | Suggests |
+|------|---------|----------|
+| `avoid_raw_shortcuts` | `Shortcuts(...)` or `CallbackShortcuts(...)` constructed outside `lib/shared/` | Route keys through the shared keyboard layer — `additionalBindings` on the `KeyboardNavigable*` views, `onSubmit` on `BaseDialog`/`BaseViewerDialog`, `BaseDismissScope` — or extend that layer. All of it consults `focusedEditableOwnsKey`, the guard a raw shortcut widget bypasses. A genuinely global surface (today only the app shell's Ctrl/Meta chord map) is sanctioned by a two-place act: a `// sanctioned-shortcuts: <reason>` marker directly above the construction **and** an entry in the rule's sanctioned-files snapshot; either half alone still fails. Bare `// ignore: avoid_raw_shortcuts` is not accepted: CI fails on any ignore naming this rule under `lib/`, and `grep -rn "sanctioned-shortcuts:" lib/` audits every exception. |
+
 ### Safety Rules
 
 | Rule | Detects | Suggests |

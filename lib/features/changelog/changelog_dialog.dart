@@ -8,6 +8,7 @@ import '../../shared/components/base_button.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_viewer_dialog.dart';
 import '../../shared/theme/app_theme.dart';
+import '../../shared/utils/keyboard_guards.dart';
 import '../../core/models/changelog_release.dart';
 import '../../core/services/changelog_service.dart';
 import '../../core/services/version_service.dart';
@@ -58,16 +59,42 @@ class ChangelogDialog extends HookConsumerWidget {
     final hasOlder = index < releases.length - 1;
     final hasNewer = index > 0;
 
-    return CallbackShortcuts(
-      // The version pager is this dialog's list; the arrow keys drive it.
-      bindings: <ShortcutActivator, VoidCallback>{
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
-          if (hasOlder) currentIndex.value = index + 1;
-        },
-        const SingleActivator(LogicalKeyboardKey.arrowRight): () {
-          if (hasNewer) currentIndex.value = index - 1;
-        },
-      },
+    // The version pager is this dialog's list; the arrow keys drive it. A
+    // raw CallbackShortcuts used to sit here and fired unconditionally, so
+    // paging shadowed the selection caret of the selectable release body -
+    // exactly the drift avoid_raw_shortcuts now bans (#382). The handler
+    // follows the shared keyboard contract instead: it yields every key a
+    // focused editable interprets (focusedEditableOwnsKey - the selectable
+    // markdown is an editable in the guard's sense), leaves modified chords
+    // to the shell, and only then pages.
+    KeyEventResult handlePagerKey(FocusNode node, KeyEvent event) {
+      if (event is KeyUpEvent) return KeyEventResult.ignored;
+      if (focusedEditableOwnsKey(event)) return KeyEventResult.ignored;
+      final keyboard = HardwareKeyboard.instance;
+      if (keyboard.isControlPressed ||
+          keyboard.isAltPressed ||
+          keyboard.isMetaPressed) {
+        return KeyEventResult.ignored;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+        if (hasOlder) currentIndex.value = index + 1;
+        return KeyEventResult.handled;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        if (hasNewer) currentIndex.value = index - 1;
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    }
+
+    // Mirrors what CallbackShortcuts builds internally: a non-focusable,
+    // traversal-invisible node that only observes keys bubbling up from the
+    // dialog - never a Tab stop, never a focus claim.
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      includeSemantics: false,
+      onKeyEvent: handlePagerKey,
       child: BaseViewerDialog(
         icon: Icons.history,
         title: 'Release History',

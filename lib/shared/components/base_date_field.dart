@@ -130,7 +130,21 @@ class _BaseDateFieldState extends State<BaseDateField> {
   }
 }
 
-/// Show date picker with proper theme for dark mode support
+/// Shows the SDK date picker under the app's own theme, with the picker's
+/// text and label colours stated explicitly so both brightnesses read
+/// correctly.
+///
+/// Every override it applies is *layered onto* what the app already
+/// configured rather than substituted for it. `ThemeData.copyWith` and
+/// `TextTheme.copyWith` both replace the slot they are handed, so a freshly
+/// built `InputDecorationTheme` — or a bare `TextStyle(color: …)` in a text
+/// role — discards everything the app configured there: the input decorator's
+/// corner radius (`inputDecoratorRadius`), its fill, the body-sized label and
+/// hint of [AppTheme], and the family, size, tracking and line height of the
+/// two body roles. The picker's manual-entry field then renders on the
+/// framework defaults for anything not spelled out inline, which is the
+/// defect #400 records — the same one #399 fixed a level up, where
+/// `AppTheme._layerOn` is the equivalent merge for the button sub-themes.
 Future<DateTime?> showThemedDatePicker({
   required BuildContext context,
   required DateTime initialDate,
@@ -143,26 +157,30 @@ Future<DateTime?> showThemedDatePicker({
     firstDate: firstDate,
     lastDate: lastDate,
     builder: (context, child) {
+      final theme = Theme.of(context);
+      final colorScheme = theme.colorScheme;
+      final inputTheme = theme.inputDecorationTheme;
+      final textTheme = theme.textTheme;
+
       return Theme(
-        data: Theme.of(context).copyWith(
-          inputDecorationTheme: InputDecorationTheme(
-            labelStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
+        data: theme.copyWith(
+          inputDecorationTheme: inputTheme.copyWith(
+            labelStyle: _withColor(
+              inputTheme.labelStyle,
+              colorScheme.onSurface,
             ),
-            hintStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            hintStyle: _withColor(
+              inputTheme.hintStyle,
+              colorScheme.onSurfaceVariant,
             ),
-            floatingLabelStyle: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
+            floatingLabelStyle: _withColor(
+              inputTheme.floatingLabelStyle,
+              colorScheme.primary,
             ),
           ),
-          textTheme: Theme.of(context).textTheme.copyWith(
-            bodyLarge: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-            bodyMedium: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+          textTheme: textTheme.copyWith(
+            bodyLarge: _withColor(textTheme.bodyLarge, colorScheme.onSurface),
+            bodyMedium: _withColor(textTheme.bodyMedium, colorScheme.onSurface),
           ),
         ),
         child: child!,
@@ -170,3 +188,10 @@ Future<DateTime?> showThemedDatePicker({
     },
   );
 }
+
+/// [base] recoloured to [color], keeping every other property it carries.
+///
+/// The bare fallback applies only where the theme configured nothing at all —
+/// the one case in which there is no configuration left to preserve.
+TextStyle _withColor(TextStyle? base, Color color) =>
+    base?.copyWith(color: color) ?? TextStyle(color: color);

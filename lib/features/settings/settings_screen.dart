@@ -52,36 +52,57 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
-        children: [
-          GitConfigSection(
-            onSelectGitExecutable: () => _selectGitExecutable(context, ref),
-            onSelectTextEditor: () => _selectTextEditor(context, ref),
-            onDetectTools: () => _detectTools(context, ref),
-            onSelectDiffTool: () => _selectDiffTool(context, ref),
-            onSelectMergeTool: () => _selectMergeTool(context, ref),
-            onEditUserName: () => _editUserName(context, ref),
-            onEditUserEmail: () => _editUserEmail(context, ref),
+      // Deliberately not a ListView: a lazy list destroys the focus nodes of
+      // every section scrolled out of the viewport, and the traversal policy
+      // only sees nodes that are currently built. Tabbing to the bottom of the
+      // form therefore trapped the keyboard there - Tab cycled between the last
+      // two sections and never returned to Git Configuration. The form is a
+      // fixed handful of sections, so building all of them keeps every control
+      // in one complete Tab cycle; the policy scrolls the focused control into
+      // view on its own.
+      //
+      // The form is its own traversal group so the app bar keeps a fixed place
+      // in the Tab cycle. Reading order sorts by on-screen position, and a
+      // scrolled form moves its controls past the app bar's fixed rect, which
+      // made the overflow button surface in the middle of the sequence; as a
+      // group the form is sorted as one block that always sits below the bar.
+      body: FocusTraversalGroup(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppTheme.paddingL),
+          child: Column(
+            // A Column centers its children, while the ListView it replaces
+            // stretched every section card to the full width.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GitConfigSection(
+                onSelectGitExecutable: () => _selectGitExecutable(context, ref),
+                onSelectTextEditor: () => _selectTextEditor(context, ref),
+                onDetectTools: () => _detectTools(context, ref),
+                onSelectDiffTool: () => _selectDiffTool(context, ref),
+                onSelectMergeTool: () => _selectMergeTool(context, ref),
+                onEditUserName: () => _editUserName(context, ref),
+                onEditUserEmail: () => _editUserEmail(context, ref),
+              ),
+              const SizedBox(height: AppTheme.paddingXL),
+              ThemeSection(
+                getColorSchemeName: (scheme) =>
+                    _getColorSchemeName(context, scheme),
+                getFontSizeName: (size) => _getFontSizeName(context, size),
+              ),
+              const SizedBox(height: AppTheme.paddingXL),
+              const AnimationSection(),
+              const SizedBox(height: AppTheme.paddingXL),
+              HistorySection(
+                onEditCommitHistoryLimit: () =>
+                    _editCommitHistoryLimit(context, ref),
+              ),
+              const SizedBox(height: AppTheme.paddingXL),
+              const UpdatesSection(),
+              const SizedBox(height: AppTheme.paddingXL),
+              const ConfigAndLogsSection(),
+            ],
           ),
-          const SizedBox(height: AppTheme.paddingXL),
-          ThemeSection(
-            getColorSchemeName: (scheme) =>
-                _getColorSchemeName(context, scheme),
-            getFontSizeName: (size) => _getFontSizeName(context, size),
-          ),
-          const SizedBox(height: AppTheme.paddingXL),
-          const AnimationSection(),
-          const SizedBox(height: AppTheme.paddingXL),
-          HistorySection(
-            onEditCommitHistoryLimit: () =>
-                _editCommitHistoryLimit(context, ref),
-          ),
-          const SizedBox(height: AppTheme.paddingXL),
-          const UpdatesSection(),
-          const SizedBox(height: AppTheme.paddingXL),
-          const ConfigAndLogsSection(),
-        ],
+        ),
       ),
     );
   }
@@ -538,16 +559,22 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _editUserName(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
     final git = ref.read(gitConfigProvider);
-    final controller = TextEditingController(text: git.defaultUserName ?? '');
+    // The field owns its controller. One created here would have to outlive
+    // the dialog's exit transition, and disposing it once showDialog's future
+    // completes - which is when that transition starts - rebuilt the outgoing
+    // dialog against a disposed controller. The typed text arrives through
+    // onChanged instead.
+    var name = git.defaultUserName ?? '';
 
     final result = await showDialog<String>(
       context: context,
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultUserName,
         icon: PhosphorIconsRegular.user,
-        onSubmit: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+        onSubmit: () => Navigator.of(dialogContext).pop(name.trim()),
         content: BaseTextField(
-          controller: controller,
+          initialValue: name,
+          onChanged: (value) => name = value,
           autofocus: true,
           label: l10n.userName,
           hintText: l10n.userNameHint,
@@ -568,16 +595,13 @@ class SettingsScreen extends ConsumerWidget {
             variant: ButtonVariant.tertiary,
           ),
           BaseButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text.trim()),
+            onPressed: () => Navigator.of(dialogContext).pop(name.trim()),
             label: l10n.save,
             variant: ButtonVariant.primary,
           ),
         ],
       ),
     );
-
-    controller.dispose();
 
     if (result != null && result.isNotEmpty) {
       await ref.read(configProvider.notifier).setDefaultUserName(result);
@@ -587,16 +611,18 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _editUserEmail(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
     final git = ref.read(gitConfigProvider);
-    final controller = TextEditingController(text: git.defaultUserEmail ?? '');
+    // See _editUserName: the field owns its controller so nothing outlives it.
+    var email = git.defaultUserEmail ?? '';
 
     final result = await showDialog<String>(
       context: context,
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultUserEmail,
         icon: PhosphorIconsRegular.at,
-        onSubmit: () => Navigator.of(dialogContext).pop(controller.text.trim()),
+        onSubmit: () => Navigator.of(dialogContext).pop(email.trim()),
         content: BaseTextField(
-          controller: controller,
+          initialValue: email,
+          onChanged: (value) => email = value,
           autofocus: true,
           label: l10n.email,
           hintText: l10n.emailHint,
@@ -617,16 +643,13 @@ class SettingsScreen extends ConsumerWidget {
             variant: ButtonVariant.tertiary,
           ),
           BaseButton(
-            onPressed: () =>
-                Navigator.of(dialogContext).pop(controller.text.trim()),
+            onPressed: () => Navigator.of(dialogContext).pop(email.trim()),
             label: l10n.save,
             variant: ButtonVariant.primary,
           ),
         ],
       ),
     );
-
-    controller.dispose();
 
     if (result != null && result.isNotEmpty) {
       await ref.read(configProvider.notifier).setDefaultUserEmail(result);
@@ -639,9 +662,8 @@ class SettingsScreen extends ConsumerWidget {
   ) async {
     final l10n = AppLocalizations.of(context)!;
     final history = ref.read(historyConfigProvider);
-    final controller = TextEditingController(
-      text: history.defaultCommitLimit.toString(),
-    );
+    // See _editUserName: the field owns its controller so nothing outlives it.
+    var limit = history.defaultCommitLimit.toString();
 
     final result = await showDialog<int>(
       context: context,
@@ -649,13 +671,14 @@ class SettingsScreen extends ConsumerWidget {
         title: l10n.defaultCommitLimit,
         icon: PhosphorIconsRegular.listNumbers,
         onSubmit: () {
-          final value = int.tryParse(controller.text);
+          final value = int.tryParse(limit);
           if (value != null && value > 0) {
             Navigator.of(dialogContext).pop(value);
           }
         },
         content: BaseTextField(
-          controller: controller,
+          initialValue: limit,
+          onChanged: (value) => limit = value,
           autofocus: true,
           label: l10n.commits,
           hintText: l10n.commitsHint,
@@ -669,7 +692,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           BaseButton(
             onPressed: () {
-              final value = int.tryParse(controller.text);
+              final value = int.tryParse(limit);
               if (value != null && value > 0) {
                 Navigator.of(dialogContext).pop(value);
               }
@@ -680,8 +703,6 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
-
-    controller.dispose();
 
     if (result != null) {
       await ref.read(configProvider.notifier).setDefaultCommitLimit(result);

@@ -37,6 +37,10 @@ class HistorySection extends ConsumerWidget {
           ),
           trailing: BaseIconButton(
             icon: PhosphorIconsRegular.pencil,
+            // Every icon-only control names its action, for the tooltip a
+            // pointer user reads and for the label a keyboard or screen-reader
+            // user hears when Tab lands here.
+            tooltip: l10n.edit,
             onPressed: onEditCommitHistoryLimit,
           ),
         ),

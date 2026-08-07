@@ -55,6 +55,7 @@ class BaseTextField extends StatefulWidget {
   const BaseTextField({
     super.key,
     this.controller,
+    this.initialValue,
     this.focusNode,
     this.label,
     this.hintText,
@@ -75,10 +76,26 @@ class BaseTextField extends StatefulWidget {
     this.autofocus = false,
     this.enabled = true,
     this.escapeClears = true,
-  });
+  }) : assert(
+         controller == null || initialValue == null,
+         'Pass either a controller or an initialValue, not both: the '
+         'controller already carries the text the field starts with.',
+       );
 
   /// Text editing controller (optional - will create one if not provided)
   final TextEditingController? controller;
+
+  /// The text the field starts with, for a caller that keeps no controller.
+  ///
+  /// A dialog that only needs the final text does not want to own a
+  /// controller: the controller has to outlive the route's exit transition,
+  /// and disposing it when `showDialog`'s future completes - which is when
+  /// that transition *starts* - rebuilt the outgoing dialog against a disposed
+  /// controller ("A TextEditingController was used after being disposed").
+  /// Seed the field with [initialValue] and read the text back through
+  /// [onChanged] instead; the internally created controller then lives and
+  /// dies with the field.
+  final String? initialValue;
 
   /// Focus node for controlling focus (optional)
   final FocusNode? focusNode;
@@ -171,7 +188,8 @@ class _BaseTextFieldState extends State<BaseTextField> {
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? TextEditingController();
+    _controller =
+        widget.controller ?? TextEditingController(text: widget.initialValue);
     _obscureText = widget.obscureText;
     _hasText = _controller.text.isNotEmpty;
     _controller.addListener(_onTextChanged);
@@ -182,7 +200,8 @@ class _BaseTextFieldState extends State<BaseTextField> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       _controller.removeListener(_onTextChanged);
-      _controller = widget.controller ?? TextEditingController();
+      _controller =
+          widget.controller ?? TextEditingController(text: widget.initialValue);
       _controller.addListener(_onTextChanged);
       _hasText = _controller.text.isNotEmpty;
     }

@@ -23,12 +23,60 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Logical surface every conformance test renders into.
 const Size kConformanceSurface = Size(1280, 800);
+
+/// The user's choices as this suite pins them, chosen so that
+/// `chrome.wrapRoot` resolves to exactly the theme `AppTheme.lightTheme()` and
+/// `AppTheme.darkTheme()` build from their own defaults.
+///
+/// Seed 0 is `AppColorScheme.deepPurple`, the scale of 1.0 is
+/// `AppFontSize.medium`, the animation scale of 1.0 is
+/// `AppAnimationSpeed.normal`, and the two families are the two the application
+/// ships with. Pinning them is what keeps a measurement a measurement: a
+/// difference between two runs of this suite is then the component's doing and
+/// never the machine's.
+SkinRequest _conformanceRequest(Brightness brightness) => SkinRequest(
+  brightness: brightness,
+  accentSeed: 0,
+  textScale: 1,
+  animationScale: 1,
+  monoFamily: 'JetBrains Mono',
+  uiFamily: 'Inter',
+);
+
+/// Installs the skin over a conformance root, the way `main.dart` installs it
+/// over the application: beneath the single `MaterialApp` and above whatever it
+/// builds.
+///
+/// It became necessary with P2. A `Base*` component that renders through a
+/// contract member reaches its design language through `SkinScope`, so a
+/// harness without one fails the component under measurement on a missing
+/// scope instead of measuring it - and the un-migrated components are measured
+/// exactly as before, because `chrome.wrapRoot` installs the theme this file
+/// already asked `AppTheme` for.
+Widget underSkin(Widget child, Brightness brightness) => SkinScope.install(
+  skin: const MaterialSkin(),
+  request: _conformanceRequest(brightness),
+  // The application's own dialog keyboard contract. The suite measures dialogs
+  // too, and Escape/Enter are what the user can do rather than what a skin
+  // draws, so the host that owns them travels with the scope here exactly as it
+  // does in `main.dart`.
+  dialogKeyboardHost: (BuildContext context, DialogSpec spec, Widget surface) =>
+      DialogKeyboardHost(
+        barrierDismissible: spec.barrierDismissible,
+        onSubmit: spec.onSubmit,
+        child: surface,
+      ),
+  app: ContentPort(child),
+);
 
 /// Pumps [child] under the app's real theme inside a MaterialApp + Scaffold.
 Future<void> pumpConformance(
@@ -59,6 +107,8 @@ Future<void> pumpConformance(
       theme: brightness == Brightness.light
           ? AppTheme.lightTheme()
           : AppTheme.darkTheme(),
+      builder: (BuildContext context, Widget? built) =>
+          underSkin(built ?? const SizedBox.shrink(), brightness),
       home: Scaffold(body: Center(child: child)),
     ),
   );
@@ -106,6 +156,8 @@ Future<void> pumpConformanceDialog(
       theme: brightness == Brightness.light
           ? AppTheme.lightTheme()
           : AppTheme.darkTheme(),
+      builder: (BuildContext context, Widget? built) =>
+          underSkin(built ?? const SizedBox.shrink(), brightness),
       home: Scaffold(
         body: Builder(
           builder: (BuildContext context) => Center(

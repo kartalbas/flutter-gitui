@@ -1,8 +1,10 @@
 name: gitui_skin_material
 description: >-
-  The Material 3 skin for Flutter GitUI (#249). Today it holds only the
-  Material conformance suite and this skin's deviation register; the skin
-  implementation itself arrives with P2. Nothing depends on it yet.
+  The Material 3 skin for Flutter GitUI (#249): every contract member rendered
+  through Material's own canonical widgets, extracted from the `Base*`
+  components that already delegated to them. It also holds this design
+  language's conformance suite and its deviation register, because both were
+  always one skin's measurements. Nothing depends on it yet.
 publish_to: 'none'
 version: 0.0.0
 
@@ -22,6 +24,47 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # The contract this package implements. The ONLY package dependency `lib/`
+  # has besides Flutter itself, and the direction matters: a skin depends on
+  # the contract and never the other way round, and never on the application.
+  gitui_skin_api:
+    path: ../gitui_skin_api
+
+  # The glyph set this skin decided on. Its Dart code is never imported - the
+  # package declares `class PhosphorIconData extends IconData` and `IconData`
+  # is final in current Flutter, so importing it fails to compile on every
+  # platform - but the dependency has to be declared for the font assets the
+  # codepoints in `src/material_glyphs.dart` name to resolve.
+  phosphor_flutter: ^2.1.0
+
+  # Date formatting. A date field renders a moment as text, and which text
+  # that is is a skin decision - the extracted field writes the one ISO form
+  # that is not a locale convention, exactly as the application's own did.
+  intl: ^0.20.2
+
+  # The two pictorial surfaces, and the reason they are third-party rather
+  # than composed: `surfaces.markdown` owns a `MarkdownStyleSheet` and
+  # `surfaces.imageViewer` owns a zoom and pan gesture arena, and both were
+  # already these two packages inside the application. They cross into the
+  # skin with the bodies that used them - `markdown_viewer_dialog.dart` and
+  # `image_viewer_dialog.dart` - because that is where the style sheet and the
+  # scale decisions belong once the application may not construct them.
+  flutter_markdown_plus: ^1.0.12
+  photo_view: ^0.15.0
+
+  # The theme factory `chrome.wrapRoot` builds from - the application's own
+  # `FlexThemeData` factory, moved here with `app_theme.dart`'s bodies. The
+  # same package was already a dev dependency for the conformance suite; the
+  # runtime edge is new with the extraction.
+  flex_color_scheme: ^8.4.0
+
+  # The type ramp's font resolution: the interface family and the monospace
+  # family are the USER's choices, carried across the contract as names, and
+  # this is how the skin turns a name into a bundled font. Same story as
+  # flex_color_scheme - the suite already depended on it, the skin now does
+  # too.
+  google_fonts: ^8.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -33,9 +76,9 @@ dev_dependencies:
     path: ../..
 
   # Direct imports of the conformance suite, declared here rather than relied
-  # on transitively for the same reason.
-  flex_color_scheme: ^8.4.0              # Theme factory the theme suite reads
-  google_fonts: ^8.2.0                   # Bundled fonts the harness pins
+  # on transitively for the same reason. flex_color_scheme and google_fonts
+  # moved up into `dependencies` with the P2 extraction - the skin itself now
+  # builds the theme and resolves the fonts the suite measures.
   yaml: ^3.1.3                           # Parses this package's register
 
   # The design-system lint gate. The conformance suite instantiates the raw

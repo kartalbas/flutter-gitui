@@ -107,6 +107,25 @@ dependencies:
   phosphor_flutter: ^2.1.0               # Beautiful icon set
   flutter_svg: ^2.3.0                   # SVG rendering for country flags
 
+  # The skin contract and the three packages that implement or measure it
+  # (#249, P2). They moved out of `dev_dependencies` in the commit that gave
+  # `lib/main.dart` its `SkinRegistry.register` lines: from P2 on the
+  # application genuinely renders through a skin, so the edge `lib/` needs is a
+  # runtime one. The workspace-isolation gate
+  # (`depend_on_referenced_packages: error`, #383) still holds everything else
+  # out, and `test/dependency_isolation_gate_test.dart` now pins this
+  # arrangement instead of its opposite.
+  gitui_skin_api:
+    path: packages/gitui_skin_api
+  # The blueprint is a dependency and not a dev dependency for the same reason:
+  # `main.dart` registers it, guarded by `kDebugMode`, so that the settings
+  # picker can offer the instrument to a developer and no user ever sees it.
+  gitui_skin_blueprint:
+    path: packages/gitui_skin_blueprint
+  # The skin the application ships. `main.dart` is the only file that names it.
+  gitui_skin_material:
+    path: packages/gitui_skin_material
+
   # Utilities
   freezed_annotation: ^3.1.0             # Immutable models
   json_annotation: ^4.9.0                # JSON serialization
@@ -129,19 +148,6 @@ dev_dependencies:
   custom_lint: ^0.8.1
   flutter_gitui_lint:
     path: lint_rules/flutter_gitui_lint
-
-  # The skin contract and the instrument that falsifies it (#249, P1). They are
-  # DEV dependencies on purpose, and the distinction is the whole isolation
-  # gate: `test/skin/pump_under_skin.dart` has to construct a BlueprintSkin to
-  # run the zero-and-extremes sweep over the real screens, while `lib/` must
-  # still be unable to name either package before P2. `depend_on_referenced_
-  # packages` at error severity (analysis_options.yaml, #383) is what enforces
-  # that asymmetry; at P2 the two move into `dependencies:` in the same commit
-  # that gives main.dart its `SkinRegistry.register` line.
-  gitui_skin_api:
-    path: packages/gitui_skin_api
-  gitui_skin_blueprint:
-    path: packages/gitui_skin_blueprint
 
   # Code Generation
   build_runner: ^2.15.1

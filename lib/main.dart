@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_blueprint/gitui_skin_blueprint.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -11,6 +14,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import 'generated/app_localizations.dart';
 import 'shared/theme/app_theme.dart';
+import 'shared/components/base_dialog.dart';
 import 'shared/components/base_label.dart';
 import 'core/config/app_config.dart';
 import 'core/constants/app_constants.dart';
@@ -29,6 +33,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  registerSkins();
 
   // Initialize logger FIRST so we can see all startup logs
   await Logger.init();
@@ -162,6 +168,173 @@ void main() async {
   );
 }
 
+/// The design language the application renders under.
+///
+/// An id rather than a class, because that is what a saved preference, a test
+/// parameterisation and a bug report all name, and because the settings picker
+/// that will let a user change it (P6) resolves exactly this way. It is the one
+/// place outside [registerSkins] where the application says which language it
+/// is in.
+const String kShippingSkinId = 'material';
+
+/// Adds this build's design languages to the registry (#249, P2).
+///
+/// This is the whole of what "plugin" can mean on a desktop AOT build with no
+/// dynamic code loading: one pubspec dependency and one `register()` call.
+/// Nothing else in the application learns either package's name - every other
+/// file reaches the active language through `SkinScope`, which is the property
+/// the blueprint exists to falsify.
+///
+/// The blueprint registers only in debug. It is an instrument, not a look: a
+/// user who selected it would find the application drawn in blue outlines on
+/// white paper, which is exactly what makes it useful to a developer measuring
+/// where design still leaks out of the skin and into `lib/`.
+///
+/// Public, and idempotent, because [FlutterGitUIApp] can be booted without
+/// going through [main] - a test that pumps the real application root does
+/// exactly that - and an application root whose skin is not registered fails on
+/// the first frame. `SkinRegistry.register` returns early for a skin EQUAL to
+/// the one already under that id, so calling this from both places costs
+/// nothing however often it happens.
+void registerSkins() {
+  MaterialSkin.register();
+  if (kDebugMode) {
+    BlueprintSkin.register();
+  }
+}
+
+/// The user's configuration, as the data a skin resolves a look from.
+///
+/// Every value crosses as a *question* rather than as an answer: a seed index
+/// rather than a `Color`, a multiplier rather than a `Duration`, a family name
+/// rather than a `TextStyle`. That is the spine rule seen from the application's
+/// side - there is no design value here for `lib/` to hold, only the user's
+/// choices for the skin to interpret.
+SkinRequest _skinRequest({
+  required Brightness brightness,
+  required AppColorScheme colorScheme,
+  required AppFontSize fontSize,
+  required AppAnimationSpeed animationSpeed,
+  required String uiFamily,
+  required String monoFamily,
+}) => SkinRequest(
+  brightness: brightness,
+  // The seed is the enum's declaration index and nothing more. What a skin
+  // makes of it - a Material tonal palette, the host system accent, a fixed
+  // AppKit blue - is the skin's answer to the question "which colour is this
+  // application's own".
+  accentSeed: colorScheme.index,
+  textScale: _kTextScale[fontSize]!,
+  animationScale: _kAnimationScale[animationSpeed]!,
+  monoFamily: monoFamily,
+  uiFamily: uiFamily,
+);
+
+/// The multiplier each font-size setting means, matching `AppTheme`'s own
+/// `_fontSizeFactor` exactly so the skin's ramp resolves to the sizes the
+/// application has always rendered.
+const Map<AppFontSize, double> _kTextScale = <AppFontSize, double>{
+  AppFontSize.tiny: 0.85,
+  AppFontSize.small: 0.92,
+  AppFontSize.medium: 1.0,
+  AppFontSize.large: 1.10,
+};
+
+/// Which brightness the user's [themeMode] resolves to right now.
+///
+/// The same rule `MaterialApp` applies to its own `theme`/`darkTheme` pair
+/// (Flutter 3.44.4 packages/flutter/lib/src/material/app.dart,
+/// `_MaterialAppState._materialBuilder`): the mode decides, and `system` is
+/// answered by the platform.
+///
+/// It is answered here rather than read back off `Theme.of(context).brightness`
+/// - which looks like the more honest source and is not. `MaterialApp` puts an
+/// `AnimatedTheme` above this builder, so during a light/dark switch the theme
+/// resolved here is the *lerping* one, and `ThemeData.lerp` picks `brightness`
+/// as a step at the halfway point rather than blending it. Reading it back
+/// therefore holds the request at the old brightness for the first half of the
+/// transition and flips it in one frame, which is a hard cut in the middle of
+/// what the user experiences as a dissolve. Deriving it from the mode makes the
+/// request change on the frame the user asked for it, and the skin's own
+/// `AnimatedTheme` (see `chrome.wrapRoot`) does the dissolving.
+Brightness _brightnessFor(BuildContext context, ThemeMode themeMode) =>
+    switch (themeMode) {
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+    };
+
+/// Re-publishes the application's own `ThemeExtension`s below the skin.
+///
+/// **A bridge with a known end date, not a design.** `chrome.wrapRoot` installs
+/// the skin's `ThemeData`, and a `ThemeData` carries its extensions with it, so
+/// everything the application attached to its own theme stops existing for
+/// every widget below the scope. Two extensions are attached today and both are
+/// still read by widgets that P2 could not migrate:
+///
+///  * `AnimationSpeedExtension` - the user's Settings -> Animation choice, read
+///    by `base_animated_widgets.dart` (every `BasePopupMenuButton`'s open
+///    duration), `base_switcher.dart` (the toolbar pickers suppress splash,
+///    highlight and hover ink entirely at "none"), `branch_switcher.dart` (the
+///    branch menu) and `branches_screen.dart` (the tab controller). Dropping it
+///    silently turns reduced motion back on for all four, which is an
+///    accessibility setting failing quietly rather than a look changing.
+///  * `GitSemanticColors` - inert either way, because `context.gitColors` falls
+///    back to exactly the per-brightness palette `AppTheme` attaches. It is
+///    carried anyway rather than argued about: the rule is that the seam does
+///    not eat what the application published, and a rule with one exception in
+///    it is a rule nobody can apply.
+///
+/// Each of the four readers goes away with the member that owns its motion -
+/// `overlays.presentMenu` for the two menus, `chrome.shell` for the pickers,
+/// `surfaces.tabs` for the tab set - at which point the application holds no
+/// motion value at all and this widget goes with them.
+///
+/// **The list is asked of [AppTheme.themeExtensions] rather than read off the
+/// ambient theme with `Theme.of(context).extensions`, and the difference is
+/// visible on screen.** Reading the theme here makes this builder depend on it,
+/// and `MaterialApp` re-runs the builder on every tick of its own theme lerp -
+/// so the skin's root treatment would be handed a freshly built `ThemeData`
+/// sixty times a second. `ThemeData` equality cannot see through the
+/// `WidgetStateProperty` closures the chip sub-theme carries, so every one of
+/// those looks like a new target and restarts the skin's cross-fade from where
+/// it had got to. Measured: the light-to-dark dissolve turned into a
+/// decelerating ramp that took roughly twice as long to arrive. Asking the
+/// configuration instead leaves this builder with no dependency on the theme at
+/// all, so it runs once per settings change and the cross-fade runs once.
+class _ApplicationThemeExtensions extends StatelessWidget {
+  const _ApplicationThemeExtensions({
+    required this.extensions,
+    required this.child,
+  });
+
+  /// What the application root attached to its own theme.
+  final Iterable<ThemeExtension<dynamic>> extensions;
+
+  /// The application, below the skin's root treatment.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Theme(
+    // `Theme.of` here is the skin's theme, so this adds the extensions to it
+    // and changes nothing else about it: same colour scheme, same type ramp,
+    // same sub-themes, same icon theme.
+    data: Theme.of(context).copyWith(extensions: extensions),
+    child: child,
+  );
+}
+
+/// The multiplier each animation-speed setting means, matching
+/// `AppTheme.getAnimationDuration`. Zero is "no motion", which a skin honours
+/// by resolving every motion role to nothing.
+const Map<AppAnimationSpeed, double> _kAnimationScale =
+    <AppAnimationSpeed, double>{
+      AppAnimationSpeed.none: 0.0,
+      AppAnimationSpeed.fast: 0.7,
+      AppAnimationSpeed.normal: 1.0,
+      AppAnimationSpeed.slow: 1.5,
+    };
+
 class FlutterGitUIApp extends ConsumerStatefulWidget {
   final AppConfig initialConfig;
 
@@ -221,6 +394,7 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
     final fontSize = ref.watch(fontSizeProvider);
     final localeCode = ref.watch(localeProvider);
     final animationSpeed = ref.watch(uiConfigProvider).animationSpeed;
+    final previewFontFamily = ref.watch(uiConfigProvider).previewFontFamily;
 
     return MaterialApp(
       navigatorKey: navigatorKey,
@@ -273,11 +447,57 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
             break;
         }
 
-        return MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
-          child: child!,
+        // The skin is installed BENEATH the single application root and above
+        // the navigator, which is where SKIN-CONTRACT.md §2.7 puts it: the one
+        // `WidgetsApp` stays exactly here and the design language wraps under
+        // it. `SkinScope.install` is what plants the skin-painted fence, makes
+        // the skin reachable from every widget below, and calls
+        // `chrome.wrapRoot` - so from this line on the running application's
+        // theme, its type ramp and its glyph treatment come out of a package
+        // that `lib/` names in exactly one file.
+        // One answer, used twice: the request the skin resolves its look from
+        // and the palette the application's own extensions carry have to be
+        // talking about the same brightness, or a theme switch would recolour
+        // the surfaces and leave the git colours behind.
+        final Brightness brightness = _brightnessFor(context, themeMode);
+
+        return SkinScope.install(
+          skin: SkinRegistry.byId(kShippingSkinId),
+          request: _skinRequest(
+            brightness: brightness,
+            colorScheme: colorScheme,
+            fontSize: fontSize,
+            animationSpeed: animationSpeed,
+            uiFamily: fontFamily,
+            monoFamily: previewFontFamily,
+          ),
+          // The application's own dialog keyboard contract, installed once
+          // here so it travels with the envelope into every route a skin
+          // pushes. Escape cancels and Enter submits are WHAT THE USER CAN DO,
+          // so no skin may weaken them - and making the host a required
+          // argument of the one installation point is what stops it being
+          // dropped by forgetting to opt in.
+          dialogKeyboardHost:
+              (BuildContext context, DialogSpec spec, Widget surface) =>
+                  DialogKeyboardHost(
+                    barrierDismissible: spec.barrierDismissible,
+                    onSubmit: spec.onSubmit,
+                    child: surface,
+                  ),
+          app: ContentPort(
+            _ApplicationThemeExtensions(
+              extensions: AppTheme.themeExtensions(
+                brightness: brightness,
+                animationSpeed: animationSpeed,
+              ),
+              child: MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(textScaleFactor)),
+                child: child!,
+              ),
+            ),
+          ),
         );
       },
       home: const AppShell(),

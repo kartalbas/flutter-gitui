@@ -155,43 +155,65 @@ void main() {
     );
   });
 
-  test('the skin packages stay out of the application dependencies', () {
+  test('main.dart is the only file in lib/ that names a skin package', () {
+    // The inverse of what this test asserted before P2, and deliberately so.
+    // Until P2 the skin packages were dev dependencies and the absence of the
+    // edge was the guarantee; from P2 the application genuinely renders
+    // through a skin, so the edge has to exist and the guarantee moves to
+    // where it belongs - `main.dart` registers the languages and installs the
+    // scope, and NOTHING ELSE in lib/ learns a skin package's name. That is
+    // the property SKIN-CONTRACT.md §2.1 calls "what the contract guarantees",
+    // and it is what a fourth skin would otherwise quietly break.
     final YamlMap pubspec =
         loadYaml(
               File(_resolveFromPackageRoot('pubspec.yaml')).readAsStringSync(),
             )
             as YamlMap;
     final Object? dependencies = pubspec['dependencies'];
-    final Object? devDependencies = pubspec['dev_dependencies'];
 
     for (final String package in <String>[
       'gitui_skin_api',
       'gitui_skin_blueprint',
+      'gitui_skin_material',
     ]) {
       expect(
         dependencies is YamlMap ? dependencies.containsKey(package) : false,
-        isFalse,
-        reason:
-            '$package is in the application\'s `dependencies`, which makes it '
-            'importable from lib/. Nothing in lib/ calls a skin before P2 of '
-            '#249, and the absence of that edge is what makes the statement '
-            'enforced rather than merely true today. When P2 lands - when '
-            'main.dart genuinely carries a SkinRegistry.register line - move '
-            'it and delete this test in the same commit, because from that '
-            'day it is asserting the opposite of what the design wants.',
-      );
-      expect(
-        devDependencies is YamlMap
-            ? devDependencies.containsKey(package)
-            : false,
         isTrue,
         reason:
-            '$package has to be a dev dependency: test/skin/pump_under_skin.'
-            'dart constructs the skin to run the zero-and-extremes sweep over '
-            'the real screens, and a harness that cannot build the skin it '
-            'names reports a green sweep that measured nothing.',
+            '$package has to be in the application\'s `dependencies` from P2 '
+            'on: lib/main.dart registers the design languages and installs '
+            'SkinScope over the application, and lib/shared/components/ '
+            'renders through the contract. A dev dependency would leave those '
+            'imports failing `depend_on_referenced_packages` at error '
+            'severity, which is the workspace-isolation gate above.',
       );
     }
+
+    // The two SKIN packages - not the contract, which every component names -
+    // may be written in exactly one file. `gitui_skin_api` is deliberately
+    // absent from this list: reaching the active language through `SkinScope`
+    // is what every façade is supposed to do.
+    final List<_Directive> offenders =
+        _directivesUnder(Directory(_resolveFromPackageRoot('lib')))
+            .where(
+              (_Directive d) =>
+                  d.uri.startsWith('package:gitui_skin_material/') ||
+                  d.uri.startsWith('package:gitui_skin_blueprint/'),
+            )
+            .where((_Directive d) => d.file != 'lib/main.dart')
+            .toList();
+
+    expect(
+      offenders,
+      isEmpty,
+      reason:
+          'A file other than lib/main.dart names a skin package. "Plugin" on '
+          'a desktop AOT build reduces to one pubspec dependency and one '
+          'register() call, and the property that actually matters is that no '
+          'other file changes per skin - so a second file naming a design '
+          'language is the leak, whatever it uses it for. '
+          'Offending directives:\n${_describe(offenders)}',
+    );
   });
 
   for (final _DesignLanguageFreePackage entry in _kDesignLanguageFreePackages) {

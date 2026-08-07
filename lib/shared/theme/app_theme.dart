@@ -60,10 +60,10 @@ class AppTheme {
 
     // Apply animation speed overrides and consistent text styling
     return theme.copyWith(
-      extensions: [
-        AnimationSpeedExtension(speed: animationSpeed),
-        GitSemanticColors.light,
-      ],
+      extensions: themeExtensions(
+        brightness: Brightness.light,
+        animationSpeed: animationSpeed,
+      ),
       textTheme: _brightnessCorrectedTextTheme(theme),
       chipTheme: _stateAwareChipTheme(theme),
       popupMenuTheme: layeredPopupMenuTheme(theme),
@@ -167,10 +167,10 @@ class AppTheme {
 
     // Apply animation speed overrides and consistent text styling
     return theme.copyWith(
-      extensions: [
-        AnimationSpeedExtension(speed: animationSpeed),
-        GitSemanticColors.dark,
-      ],
+      extensions: themeExtensions(
+        brightness: Brightness.dark,
+        animationSpeed: animationSpeed,
+      ),
       textTheme: _brightnessCorrectedTextTheme(theme),
       chipTheme: _stateAwareChipTheme(theme),
       popupMenuTheme: layeredPopupMenuTheme(theme),
@@ -786,6 +786,28 @@ class AppTheme {
   static Duration getSlowAnimation(AppAnimationSpeed speed) {
     return getAnimationDuration(speed, baseSpeed: _baseAnimationSlow);
   }
+
+  /// Everything this application attaches to its own [ThemeData] as a
+  /// `ThemeExtension`, for one brightness and one motion preference.
+  ///
+  /// Named rather than written inline in the two factories because there is now
+  /// a second reader. `chrome.wrapRoot` installs the skin's own `ThemeData`
+  /// below the application root, and a `ThemeData` carries its extensions - so
+  /// everything attached here stops existing for every widget below the skin
+  /// scope unless the application puts it back. `lib/main.dart` does exactly
+  /// that (`_ApplicationThemeExtensions`), and it has to attach the SAME list:
+  /// a bridge that enumerated the extensions a second time would go stale the
+  /// day a third one is added, silently, in the direction that loses a user
+  /// setting rather than the direction that shows up.
+  static List<ThemeExtension<dynamic>> themeExtensions({
+    required Brightness brightness,
+    required AppAnimationSpeed animationSpeed,
+  }) => <ThemeExtension<dynamic>>[
+    AnimationSpeedExtension(speed: animationSpeed),
+    brightness == Brightness.dark
+        ? GitSemanticColors.dark
+        : GitSemanticColors.light,
+  ];
 
   /// Get page transition builder based on animation speed
   static PageTransitionsBuilder _getPageTransition(AppAnimationSpeed speed) {

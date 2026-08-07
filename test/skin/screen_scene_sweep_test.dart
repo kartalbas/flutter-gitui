@@ -14,7 +14,7 @@
 // scene that hangs or throws is worth less than nothing: it removes a screen
 // from the instrument's field of view without anybody noticing.
 //
-// That is why the sweep asserts three separate things per scene rather than
+// That is why the sweep asserts four separate things per scene rather than
 // just "it did not throw":
 //
 //   * **It rendered without an exception.** A layout overflow is an exception
@@ -27,6 +27,11 @@
 //     leaked. The expected texts are what tell the two apart.
 //   * **It is still there after the schedule.** A screen that threw its
 //     content away mid-settle would satisfy the first two on an early frame.
+//   * **The skin draws as much of it as the register says.** The first three
+//     are satisfied identically by a screen that renders through the contract
+//     and by one that draws Material by hand, so on their own they made a
+//     blueprint run green while it was still measuring Material. See
+//     [kContractRenderedPerScene].
 //
 // ## Why every scene is pumped at one brightness and one width
 //
@@ -52,6 +57,7 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
 // flutter_riverpod does not re-export the Override type an override list is
 // typed with.
 import 'package:riverpod/misc.dart' show Override;
@@ -105,6 +111,20 @@ void main() {
               'with nothing on it has nothing that could have leaked.',
         );
       }
+
+      // How much of this screen the skin actually draws; see
+      // [kContractRenderedPerScene] for why an exact number and not a floor.
+      expect(
+        contractRenderedComponents(),
+        kContractRenderedPerScene[scene.name],
+        reason:
+            'The ${scene.name} scene renders a different number of components '
+            'through the contract than kContractRenderedPerScene records. If '
+            'it went UP, a migration landed and the register is what makes '
+            'that visible - update the number in the same commit. If it went '
+            'DOWN, a component stopped reaching its skin and this screen went '
+            'back to drawing Material by hand.',
+      );
 
       // Take the screen down the way the application takes one down: the
       // screen is replaced while the ProviderScope goes on living, because
@@ -179,6 +199,66 @@ void main() {
     timeout: const Timeout(Duration(seconds: 60)),
   );
 }
+
+/// How many components each scene renders through a contract member.
+///
+/// ## What this register is for, and why every number is zero today
+///
+/// The sweep's own claim - "the number of screens that survive the sweep is the
+/// progress bar" - was not true of the thing #249 is actually judged on. A
+/// screen survives the sweep identically whether it renders through the
+/// contract or draws Material by hand, so the whole population went green under
+/// `--dart-define=SKIN=blueprint` while producing a widget tree indistinguishable
+/// from the Material one: a design language that draws in blue outlines on white
+/// paper changed nothing, because nothing on any screen asked it anything. A P3
+/// that migrated nothing therefore looked exactly like a P3 that migrated
+/// everything, which is the one comparison the instrument exists to make.
+///
+/// This is that comparison, written down. Every entry is the number of
+/// application widgets in that scene that reach their skin - one per
+/// `SkinScope.render`, which is the single fence every migrated `Base*`
+/// component plants. **All twelve are zero, and that is the honest statement of
+/// where P2 left the programme**: the seam is installed at the application root
+/// and in every test root, one component (`BaseDateField`) renders through it,
+/// and its four call sites are in two dialogs that no screen scene reaches.
+///
+/// Asserted as an exact number rather than a floor, in both directions. A drop
+/// is a regression - a component stopped reaching its skin. A rise is a
+/// migration, and it has to fail here so that the number is updated in the
+/// commit that earned it; a floor of zero would let the register go stale and
+/// silently stop measuring, which is how the sweep got here in the first place.
+const Map<String, int> kContractRenderedPerScene = <String, int>{
+  'shell': 0,
+  'workspaces': 0,
+  'repositories': 0,
+  'changes': 0,
+  'history': 0,
+  'browse': 0,
+  'branches': 0,
+  'stashes': 0,
+  'tags': 0,
+  'settings': 0,
+  'merge_conflicts': 0,
+};
+
+/// How many application widgets currently on screen render through a contract
+/// member.
+///
+/// It counts `SkinPainted` fences BELOW the application's own content boundary,
+/// which is exactly the population in question: `SkinScope.install` plants one
+/// fence above the boundary for the root treatment, and every `SkinScope.render`
+/// - the one door application code has - plants one below it. Counting widgets
+/// rather than reading a list is what makes the measurement independent of which
+/// skin the run was parameterised with: the fences are planted by application
+/// code, so Material and the blueprint produce the same number and a difference
+/// between the two runs would itself be a defect.
+int contractRenderedComponents() => find
+    .descendant(
+      of: find.byType(ContentPortBoundary),
+      matching: find.byType(SkinPainted),
+    )
+    .evaluate()
+    .length;
 
 /// Gets [scene] onto the screen, by whichever of the two routes it declared,
 /// and reports the first framework exception seen on the way.

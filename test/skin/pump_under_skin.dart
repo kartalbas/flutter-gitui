@@ -62,6 +62,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:gitui_skin_blueprint/gitui_skin_blueprint.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 import 'package:google_fonts/google_fonts.dart';
 // flutter_riverpod does not re-export the Override type an override list is
 // typed with.
@@ -285,7 +286,7 @@ Widget _root({
       final Widget app = appBuilder == null
           ? (child ?? const SizedBox.shrink())
           : appBuilder(context, child);
-      return _installSkin(app, brightness);
+      return installSkinUnderTest(app, brightness: brightness);
     },
     routes: routes,
     home: home,
@@ -294,26 +295,48 @@ Widget _root({
 
 /// Installs the selected skin over the application.
 ///
-/// Under Material this is a no-op: the Material skin arrives as a package at
-/// P2, and installing a scope with no implementation behind it would be the
-/// pretence this file exists to refuse. Under the blueprint it is the real
-/// thing - the fence, the scope, the application's own dialog keyboard host,
-/// and `chrome.wrapRoot` with its ink defaults.
-Widget _installSkin(Widget app, Brightness brightness) {
-  if (kSkinUnderTest != kBlueprintSkinId) return app;
+/// Both skins are the real thing from P2 on - the fence, the scope, the
+/// application's own dialog keyboard host, and `chrome.wrapRoot`. Under
+/// Material that root treatment installs the theme `AppTheme` used to build,
+/// extracted; under the blueprint it installs the ink `DefaultTextStyle` and
+/// `IconTheme` that turn the SDK's own fallbacks into leak detectors.
+///
+/// The Material branch is no longer a no-op, and that is what P2 changed: a
+/// `Base*` component that renders through a contract member reaches its skin
+/// through this scope, so a harness without one would fail every test that
+/// pumps a migrated component rather than measuring it.
+/// Public because a handful of suites build their own application root for a
+/// reason this file cannot serve - the two dialog sweeps derive their host from
+/// a population and insert a key listener at a measured depth, the shell tests
+/// pump a bare `MaterialApp` on purpose. They still have to install the skin,
+/// or every migrated `Base*` component they render fails on a missing scope
+/// rather than being measured, so the composition lives here in one place and
+/// they call it instead of writing a second one.
+Widget installSkinUnderTest(
+  Widget app, {
+  Brightness brightness = Brightness.light,
+}) {
+  _refuseASkinThatDoesNotExist();
   return SkinScope.install(
-    skin: BlueprintSkin(distance: _distance),
+    skin: kSkinUnderTest == kBlueprintSkinId
+        ? BlueprintSkin(distance: _distance)
+        : const MaterialSkin(),
     request: SkinRequest(
       brightness: brightness,
       // The accent seed, the two families and the two scales come from the
       // user's configuration in a running application. A sweep pins them, so
       // that a difference between two runs is the skin's doing and not the
-      // machine's.
+      // machine's - and under Material they are pinned at exactly the values
+      // `AppTheme.lightTheme()` / `darkTheme()` default to, so the extracted
+      // theme resolves to the one the un-migrated half of the tree is still
+      // measured against.
       accentSeed: 0,
       textScale: 1,
       animationScale: 1,
-      monoFamily: 'monospace',
-      uiFamily: 'sans-serif',
+      monoFamily: kSkinUnderTest == kBlueprintSkinId
+          ? 'monospace'
+          : 'JetBrains Mono',
+      uiFamily: kSkinUnderTest == kBlueprintSkinId ? 'sans-serif' : 'Inter',
     ),
     // The application's own keyboard contract, wired in here rather than
     // stubbed: Escape cancels and Enter submits are what the user can do, and

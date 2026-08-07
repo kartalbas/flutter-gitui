@@ -9,6 +9,22 @@ import 'package:flutter_gitui/core/config/app_config.dart';
 
 void main() {
   testWidgets('App boots past the splash screen', (WidgetTester tester) async {
+    // The application root reaches its design language through `SkinScope`,
+    // which it installs from the registry - so booting it without the
+    // registration `main()` does would fail on the first frame with an
+    // unregistered id rather than on anything this test is about.
+    //
+    // Called twice deliberately. Every test that boots the real root has to
+    // register, `main()` registers too, and neither can know whether the other
+    // already did - so a second registration of an already-registered language
+    // must be a no-op. It was not: the blueprint's `register()` takes a
+    // distance, so it allocates, and the registry recognised a repeat by
+    // identity - which made the second call throw "Two different skins are
+    // registered as blueprint" and blamed the wiring for the harness. Removing
+    // one of these two lines removes the guard.
+    registerSkins();
+    registerSkins();
+
     await tester.pumpWidget(
       ProviderScope(child: FlutterGitUIApp(initialConfig: AppConfig.defaults)),
     );

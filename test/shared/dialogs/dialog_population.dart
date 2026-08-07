@@ -21,6 +21,8 @@ import 'package:flutter_test/flutter_test.dart';
 // The Override type moved out of the main entrypoint in Riverpod 3.
 import 'package:riverpod/misc.dart' show Override;
 
+import '../../skin/pump_under_skin.dart';
+
 import 'package:flutter_gitui/core/config/app_config.dart';
 import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/diff/diff_providers.dart';
@@ -1257,9 +1259,15 @@ Widget dialogHostApp({
     child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: appBuilder == null
-          ? null
-          : (context, child) => appBuilder(context, child!),
+      // The skin is installed here, beneath the one application root and above
+      // the navigator, exactly as `main.dart` installs it - so a dialog opened
+      // by this host reaches the same design language, in the same place, as
+      // one opened by the running application. The caller's own builder runs
+      // FIRST and the skin wraps its result, which keeps the keyboard sweep's
+      // listener at the depth it was placed at relative to the navigator.
+      builder: (context, child) => installSkinUnderTest(
+        appBuilder == null ? child! : appBuilder(context, child!),
+      ),
       home: Scaffold(
         body: Consumer(
           builder: (context, ref, _) => Column(

@@ -192,8 +192,36 @@ final class BlueprintSkin implements Skin {
   /// The whole of what "plugin" can mean on a desktop AOT build with no
   /// dynamic code loading: one pubspec dependency and one call. Nothing else
   /// in the application learns this package's name.
+  ///
+  /// Calling it twice with the same [distance] is a no-op, which it can only be
+  /// because of [operator ==] below: the argument makes this a runtime
+  /// construction, so there is no canonicalised instance for the registry to
+  /// recognise by identity.
   static void register({int distance = _environmentDistance}) =>
       SkinRegistry.register(BlueprintSkin(distance: distance));
+
+  /// Two instruments are the same instrument when they are configured the
+  /// same, and the registry needs this to be true.
+  ///
+  /// `SkinRegistry.register` refuses two DIFFERENT skins under one id, and it
+  /// asks the skin which it is. Without value equality, `BlueprintSkin.register()`
+  /// - which allocates, because its distance is a parameter - would report a
+  /// collision against itself the second time the application registered its
+  /// languages, and an application boots its root from `main()` and from every
+  /// test that pumps the real root. Two instruments configured DIFFERENTLY
+  /// still collide, and that is right: "the blueprint at distance 0" and "the
+  /// blueprint at distance 64" are the two halves of the zero-and-extremes
+  /// sweep and must never both answer to one id in one build.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BlueprintSkin &&
+          other.distance == distance &&
+          other.chaos == chaos &&
+          other.seed == seed;
+
+  @override
+  int get hashCode => Object.hash(distance, chaos, seed);
 }
 
 /// Which of T5's two families an instrument belongs to.

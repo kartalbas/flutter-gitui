@@ -22,13 +22,24 @@ abstract final class SkinRegistry {
 
   /// Adds [skin] to this build's list.
   ///
-  /// Registering two skins under one id throws rather than silently replacing:
-  /// the id is how a saved preference, a test parameterisation and a bug
-  /// report all name the same design language, so a collision is a defect in
-  /// the wiring, not a preference about precedence.
+  /// Registering two DIFFERENT skins under one id throws rather than silently
+  /// replacing: the id is how a saved preference, a test parameterisation and
+  /// a bug report all name the same design language, so a collision is a
+  /// defect in the wiring, not a preference about precedence.
+  ///
+  /// Registering the same skin again is a no-op, and "the same" is `==` rather
+  /// than `identical`. A skin is a value object - a name and seven facets over
+  /// its own configuration - so identity is what it says about itself, not
+  /// which allocation it came from. The distinction is not academic: an
+  /// application registers its languages from `main()` and again from any test
+  /// that boots the root without going through `main()`, and a skin whose
+  /// `register()` takes a parameter (the blueprint's distance) cannot hand over
+  /// a canonicalised `const` instance, so an identity check turned the second
+  /// call into "two different skins are registered as blueprint" - a wiring
+  /// error reported against wiring that is correct.
   static void register(Skin skin) {
     final Skin? existing = _byId[skin.id];
-    if (existing != null && !identical(existing, skin)) {
+    if (existing != null && existing != skin) {
       throw StateError(
         'Two different skins are registered as "${skin.id}". A skin id is how '
         'a saved setting, a test and a bug report all name one design '

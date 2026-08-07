@@ -70,7 +70,19 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Update tab animation duration based on theme settings
+    // Update tab animation duration based on theme settings.
+    //
+    // #249 P2: one of the four readers of a motion value still left in the
+    // application (the others are `base_animated_widgets.dart`,
+    // `base_switcher.dart` and `branch_switcher.dart`). The skin owns the
+    // theme now, and a `ThemeData` carries its extensions, so the
+    // `AnimationSpeedExtension` this reads survives only because `main.dart`
+    // re-publishes the application's own extensions below the scope - see
+    // `_ApplicationThemeExtensions` there for why that bridge exists and when
+    // it goes. What closes THIS reader is the member rather than the value: a
+    // `TabController`'s duration cannot come from `SkinMotion`, which returns
+    // widgets, so it takes the tab set itself becoming `surfaces.tabs` with
+    // the controller moving with it.
     final animDuration = context.standardAnimation;
     if (_tabController.animationDuration != animDuration) {
       final oldController = _tabController;

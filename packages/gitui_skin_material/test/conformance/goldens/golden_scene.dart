@@ -46,6 +46,8 @@ import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../support/conformance_harness.dart';
+
 /// Drives a scene into a non-resting state (hovered, focused, pressed) after
 /// it has been pumped. Returning normally means the state is on screen and
 /// the frame may be captured.
@@ -171,6 +173,14 @@ Future<Finder> pumpGoldenScene(
       theme: brightness == Brightness.light
           ? AppTheme.lightTheme()
           : AppTheme.darkTheme(),
+      // The skin, installed where `main.dart` installs it: beneath the single
+      // application root and above everything it builds. A `Base*` component
+      // that renders through a contract member reaches its design language
+      // here, and `chrome.wrapRoot` installs the theme this file already asked
+      // `AppTheme` for - so a baseline is unchanged by the installation itself
+      // and moves only where a component's own rendering moved.
+      builder: (BuildContext context, Widget? built) =>
+          underSkin(built ?? const SizedBox.shrink(), brightness),
       home: Scaffold(
         body: Center(
           child: RepaintBoundary(

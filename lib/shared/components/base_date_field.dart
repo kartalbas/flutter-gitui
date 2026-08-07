@@ -1,31 +1,27 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:intl/intl.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
 
-import '../theme/app_theme.dart';
-import 'base_label.dart';
-import 'base_button.dart';
 import '../../generated/app_localizations.dart';
 
-/// A Material 3 outlined text field whose value is picked from the date
-/// picker instead of typed.
+/// The application's way of asking the user to name a moment.
 ///
-/// It is measured against the same oracle as [BaseTextField] — a real SDK
-/// `TextField` with an `OutlineInputBorder` — by
-/// packages/gitui_skin_material/test/conformance/components/base_date_field_conformance_test.dart,
-/// because it is the same M3 component: an `InputDecorator` around a value.
+/// **This is a façade** (#249, §2.11): the constructor is exactly the one 4
+/// call sites already write, and the body is one delegation to
+/// `controls.dateField`. Everything the field used to draw itself — the
+/// `InputDecorator` around a value, the `MouseRegion` and
+/// `FocusableActionDetector` that feed it `isHovering` and `isFocused` rather
+/// than an `InkWell` that would paint a second highlight over both, the
+/// `ActivateIntent`/`ButtonActivateIntent` pair that makes Enter and Space open
+/// the picker, the `yyyy-MM-dd` rendering and the picker itself — moved into
+/// the Material skin, verbatim, together with the comments recording why each
+/// one is the way it is.
 ///
-/// It therefore speaks the text field's state language rather than a button's:
-/// hover darkens the outline to `onSurface` and focus draws it in `primary` at
-/// 2 dp (input_decorator.dart:5995), both driven by [InputDecorator.isHovering]
-/// and [InputDecorator.isFocused]. That is why the tap surface is a
-/// [FocusableActionDetector] and not an `InkWell` — an ink layer would paint a
-/// hover and focus highlight *on top of* those two, which is the "never two
-/// affordances for one job" defect the design system forbids, and before the
-/// outline shape was passed down it painted them as a square behind the
-/// rounded field.
-class BaseDateField extends StatefulWidget {
+/// What stays here is the two things that are the application's and not a
+/// design language's: *what* is being asked for ([label], [firstDate],
+/// [lastDate]) and *what the field says while nothing is named* — the hint is
+/// this application's own translated sentence, so it crosses the contract as a
+/// string rather than being invented by the skin.
+class BaseDateField extends StatelessWidget {
   final String label;
   final DateTime? value;
   final ValueChanged<DateTime?> onChanged;
@@ -42,156 +38,34 @@ class BaseDateField extends StatefulWidget {
   });
 
   @override
-  State<BaseDateField> createState() => _BaseDateFieldState();
-}
-
-class _BaseDateFieldState extends State<BaseDateField> {
-  bool _isFocused = false;
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final dateFormat = DateFormat('yyyy-MM-dd');
-    final dateValue = widget.value;
-
-    // Hover is tracked with a MouseRegion and focus with `onFocusChange`
-    // rather than with FocusableActionDetector's two highlight callbacks:
-    // those are gated on the focus *highlight mode* and stay silent while the
-    // app is in touch mode, whereas a text field shows its focused outline
-    // however it was reached — including by a mouse click — and darkens its
-    // outline whenever the pointer is over it.
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (PointerEnterEvent event) => setState(() => _isHovering = true),
-      onExit: (PointerExitEvent event) => setState(() => _isHovering = false),
-      child: FocusableActionDetector(
-        onFocusChange: (bool value) => setState(() => _isFocused = value),
-        // Enter and Space must open the picker: the field is a Tab stop, and a
-        // control a keyboard user can reach but not operate is an unfinished
-        // control. Both intents are bound because the framework's default
-        // shortcuts send ActivateIntent for Space and ButtonActivateIntent for
-        // Enter on some platforms.
-        actions: <Type, Action<Intent>>{
-          ActivateIntent: CallbackAction<ActivateIntent>(
-            onInvoke: (ActivateIntent intent) => _selectDate(context),
-          ),
-          ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
-            onInvoke: (ButtonActivateIntent intent) => _selectDate(context),
-          ),
-        },
-        child: GestureDetector(
-          onTap: () => _selectDate(context),
-          child: InputDecorator(
-            decoration: InputDecoration(
-              labelText: widget.label,
-              // The empty field shows the M3 hint, not a value-styled
-              // placeholder: "no date yet" is not a value.
-              hintText: AppLocalizations.of(context)!.selectDate,
-              border: const OutlineInputBorder(),
-              suffixIcon: dateValue != null
-                  ? BaseIconButton(
-                      icon: PhosphorIconsRegular.x,
-                      onPressed: () => widget.onChanged(null),
-                      tooltip: AppLocalizations.of(context)!.clear,
-                      size: ButtonSize.small,
-                    )
-                  : const Icon(
-                      PhosphorIconsRegular.calendar,
-                      size: AppTheme.iconM,
-                    ),
-            ),
-            isEmpty: dateValue == null,
-            isFocused: _isFocused,
-            isHovering: _isHovering,
-            // The value slot always carries a line of input-role text, empty
-            // or not, so the field keeps one height whether or not a date is
-            // set.
-            child: BodyLargeLabel(
-              dateValue == null ? '' : dateFormat.format(dateValue),
-            ),
-          ),
-        ),
+  Widget build(BuildContext context) => SkinScope.render(context, (
+    Skin skin,
+    BuildContext inner,
+  ) {
+    return skin.controls.dateField(
+      inner,
+      DateFieldSpec(
+        value: value,
+        onChanged: onChanged,
+        label: label,
+        first: firstDate,
+        last: lastDate,
+        hint: AppLocalizations.of(inner)!.selectDate,
       ),
+      // No controller and no focus node: this component never offered the
+      // caller either, so there is nothing for the application to hold on to
+      // and the skin owns the field's whole editing state.
+      const FieldHandles(),
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final date = await showThemedDatePicker(
-      context: context,
-      initialDate: widget.value ?? DateTime.now(),
-      firstDate: widget.firstDate ?? DateTime(2000),
-      lastDate:
-          widget.lastDate ?? DateTime.now().add(const Duration(days: 365)),
-    );
-
-    if (date != null) {
-      widget.onChanged(date);
-    }
-  }
+  });
 }
 
-/// Shows the SDK date picker under the app's own theme, with the picker's
-/// text and label colours stated explicitly so both brightnesses read
-/// correctly.
-///
-/// Every override it applies is *layered onto* what the app already
-/// configured rather than substituted for it. `ThemeData.copyWith` and
-/// `TextTheme.copyWith` both replace the slot they are handed, so a freshly
-/// built `InputDecorationTheme` — or a bare `TextStyle(color: …)` in a text
-/// role — discards everything the app configured there: the input decorator's
-/// corner radius (`inputDecoratorRadius`), its fill, the body-sized label and
-/// hint of [AppTheme], and the family, size, tracking and line height of the
-/// two body roles. The picker's manual-entry field then renders on the
-/// framework defaults for anything not spelled out inline, which is the
-/// defect #400 records — the same one #399 fixed a level up, where
-/// `AppTheme._layerOn` is the equivalent merge for the button sub-themes.
-Future<DateTime?> showThemedDatePicker({
-  required BuildContext context,
-  required DateTime initialDate,
-  required DateTime firstDate,
-  required DateTime lastDate,
-}) {
-  return showDatePicker(
-    context: context,
-    initialDate: initialDate,
-    firstDate: firstDate,
-    lastDate: lastDate,
-    builder: (context, child) {
-      final theme = Theme.of(context);
-      final colorScheme = theme.colorScheme;
-      final inputTheme = theme.inputDecorationTheme;
-      final textTheme = theme.textTheme;
-
-      return Theme(
-        data: theme.copyWith(
-          inputDecorationTheme: inputTheme.copyWith(
-            labelStyle: _withColor(
-              inputTheme.labelStyle,
-              colorScheme.onSurface,
-            ),
-            hintStyle: _withColor(
-              inputTheme.hintStyle,
-              colorScheme.onSurfaceVariant,
-            ),
-            floatingLabelStyle: _withColor(
-              inputTheme.floatingLabelStyle,
-              colorScheme.primary,
-            ),
-          ),
-          textTheme: textTheme.copyWith(
-            bodyLarge: _withColor(textTheme.bodyLarge, colorScheme.onSurface),
-            bodyMedium: _withColor(textTheme.bodyMedium, colorScheme.onSurface),
-          ),
-        ),
-        child: child!,
-      );
-    },
-  );
-}
-
-/// [base] recoloured to [color], keeping every other property it carries.
-///
-/// The bare fallback applies only where the theme configured nothing at all —
-/// the one case in which there is no configuration left to preserve.
-TextStyle _withColor(TextStyle? base, Color color) =>
-    base?.copyWith(color: color) ?? TextStyle(color: color);
+// `showThemedDatePicker` used to live here and no longer does. The picker the
+// user opens is the Material skin's (`material_controls.dart`, reached from
+// this field's own `controls.dateField`), and this file kept a second,
+// unreachable copy so that `base_date_field_picker_theme_test.dart` had
+// something on the application's side to measure. That is exactly the failure
+// mode the #400 test exists to prevent, one level up: the guard would have
+// stayed green while the function the application actually runs drifted. The
+// test now opens this field and inspects the picker it really gets, so the copy
+// had nothing left to justify it.

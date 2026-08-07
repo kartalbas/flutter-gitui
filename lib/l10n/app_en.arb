@@ -2973,6 +2973,29 @@
   "clearFiltersAction": "Clear filters",
   "noBranchAvailable": "No branch",
   "hintTextCommandPalette": "What do you want to do?",
+  "commandPaletteResultsCount": "{count, plural, =1{{count} result} other{{count} results}}",
+  "@commandPaletteResultsCount": {
+    "description": "Count of commands matching the palette search",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "commandPaletteNoCommandsFound": "No commands found",
+  "commandPaletteTryDifferentSearchTerm": "Try a different search term",
+  "commandPaletteHintNavigate": "Navigate",
+  "commandPaletteHintExecute": "Execute",
+  "commandPaletteHintClose": "Close",
+  "commandPaletteCommandsAvailable": "{count, plural, =1{{count} command available} other{{count} commands available}}",
+  "@commandPaletteCommandsAvailable": {
+    "description": "Total number of commands the palette offers",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "hintTextSearchFiles": "Search files...",
   "hintTextCommitMessage": "Enter commit message...",
   "hintTextSearchCommits": "Search commits (try: author:john, hash:abc123, date:today)",

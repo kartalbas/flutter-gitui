@@ -139,6 +139,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.3,
@@ -174,9 +175,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                   child: BaseTextField(
                     controller: _controller,
                     focusNode: _focusNode,
-                    hintText: AppLocalizations.of(
-                      context,
-                    )!.hintTextCommandPalette,
+                    hintText: l10n.hintTextCommandPalette,
                     prefixIcon: PhosphorIconsRegular.magnifyingGlass,
                     variant: TextFieldVariant.filled,
                     onSubmitted: (_) {
@@ -196,7 +195,9 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: BodySmallLabel(
-                        '${_filteredCommands.length} results',
+                        l10n.commandPaletteResultsCount(
+                          _filteredCommands.length,
+                        ),
                       ),
                     ),
                   ),
@@ -218,9 +219,13 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                                 ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(height: AppTheme.paddingM),
-                              TitleMediumLabel('No commands found'),
+                              TitleMediumLabel(
+                                l10n.commandPaletteNoCommandsFound,
+                              ),
                               const SizedBox(height: AppTheme.paddingS),
-                              BodySmallLabel('Try a different search term'),
+                              BodySmallLabel(
+                                l10n.commandPaletteTryDifferentSearchTerm,
+                              ),
                             ],
                           ),
                         )
@@ -267,14 +272,28 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                   ),
                   child: Row(
                     children: [
-                      _buildKeyHint(context, '↑↓', 'Navigate'),
+                      _buildKeyHint(
+                        context,
+                        '↑↓',
+                        l10n.commandPaletteHintNavigate,
+                      ),
                       const SizedBox(width: AppTheme.paddingM),
-                      _buildKeyHint(context, '↵', 'Execute'),
+                      _buildKeyHint(
+                        context,
+                        '↵',
+                        l10n.commandPaletteHintExecute,
+                      ),
                       const SizedBox(width: AppTheme.paddingM),
-                      _buildKeyHint(context, 'Esc', 'Close'),
+                      _buildKeyHint(
+                        context,
+                        'Esc',
+                        l10n.commandPaletteHintClose,
+                      ),
                       const Spacer(),
                       BodySmallLabel(
-                        '${GitCommands.all.length} commands available',
+                        l10n.commandPaletteCommandsAvailable(
+                          GitCommands.all.length,
+                        ),
                       ),
                     ],
                   ),

@@ -5,6 +5,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/services/managed_install.dart';
 import '../../core/services/update_service.dart';
 import '../../core/services/update_providers.dart';
 import '../../core/services/logger_service.dart';
@@ -36,12 +37,13 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final staged = ref.watch(readyUpdateProvider);
     final hasStagedDownload =
         staged != null && staged.info.version == widget.updateInfo.version;
 
     return BaseDialog(
-      title: 'Update Available',
+      title: l10n.updateAvailableTitle,
       icon: PhosphorIconsRegular.downloadSimple,
       variant: DialogVariant.normal,
       maxWidth: 600,
@@ -70,12 +72,15 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       TitleSmallLabel(
-                        'Version ${widget.updateInfo.version}',
+                        l10n.updateVersionHeading(widget.updateInfo.version),
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                       const SizedBox(height: AppTheme.paddingXS),
                       BodySmallLabel(
-                        'Released ${_formatDate(widget.updateInfo.releaseDate)} • ${widget.updateInfo.fileSizeFormatted}',
+                        l10n.updateReleasedOn(
+                          _formatDate(context, widget.updateInfo.releaseDate),
+                          widget.updateInfo.fileSizeFormatted,
+                        ),
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ],
@@ -89,7 +94,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
 
           // Changelog
           if (widget.updateInfo.changelog.isNotEmpty) ...[
-            TitleSmallLabel('What\'s New'),
+            TitleSmallLabel(l10n.updateWhatsNew),
             const SizedBox(height: AppTheme.paddingS),
             Container(
               constraints: const BoxConstraints(maxHeight: 300),
@@ -109,7 +114,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           // Download progress
           if (_isDownloading) ...[
             LabelMediumLabel(
-              'Downloading update...',
+              l10n.updateDownloadingProgress,
               color: theme.colorScheme.primary,
             ),
             const SizedBox(height: AppTheme.paddingS),
@@ -176,7 +181,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
                       });
                     },
                     child: BodySmallLabel(
-                      "Don't show this update again",
+                      l10n.updateDontShowAgain,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
@@ -189,26 +194,26 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       actions: [
         if (!_isDownloading) ...[
           BaseButton(
-            label: 'Skip',
+            label: l10n.skip,
             variant: ButtonVariant.tertiary,
             onPressed: _handleSkipUpdate,
           ),
           BaseButton(
-            label: 'Download Only',
+            label: l10n.updateDownloadOnly,
             variant: ButtonVariant.secondary,
             leadingIcon: PhosphorIconsRegular.arrowSquareOut,
             onPressed: _openDownloadInBrowser,
           ),
           BaseButton(
             label: hasStagedDownload
-                ? AppLocalizations.of(context)!.restartAndInstall
-                : 'Download & Install',
+                ? l10n.restartAndInstall
+                : l10n.updateDownloadAndInstall,
             variant: ButtonVariant.primary,
             onPressed: _downloadAndInstall,
           ),
         ] else ...[
           BaseButton(
-            label: 'Downloading...',
+            label: l10n.updateDownloadingButton,
             variant: ButtonVariant.primary,
             onPressed: null,
           ),
@@ -229,6 +234,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
   }
 
   Future<void> _openDownloadInBrowser() async {
+    // Read before the first await: the messages are needed in branches that
+    // run after it, where reaching for the context again is the unsafe form.
+    final l10n = AppLocalizations.of(context)!;
     final url = Uri.parse(widget.updateInfo.downloadUrl);
     try {
       final launched = await launchUrl(
@@ -239,8 +247,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         Logger.error('Could not launch URL: $url');
         if (mounted) {
           setState(() {
-            _errorMessage =
-                'Could not open browser. Please download manually from:\n${widget.updateInfo.downloadUrl}';
+            _errorMessage = l10n.updateBrowserOpenFailed(
+              widget.updateInfo.downloadUrl,
+            );
           });
         }
       } else {
@@ -253,19 +262,27 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       Logger.error('Error launching URL', e);
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error opening browser: ${e.toString()}';
+          _errorMessage = l10n.updateBrowserOpenError(e.toString());
         });
       }
     }
   }
 
-  String _formatDate(DateTime date) {
+  /// When the release appeared, in the language the application is running in.
+  ///
+  /// timeago defaults to English whatever the locale, which put "2 days ago"
+  /// into an otherwise translated dialog; main.dart registers the messages for
+  /// all six locales, so the current one only has to be named here.
+  String _formatDate(BuildContext context, DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
 
     // Use timeago for recent dates (within a week)
     if (difference.inDays < 7) {
-      return timeago.format(date);
+      return timeago.format(
+        date,
+        locale: Localizations.localeOf(context).languageCode,
+      );
     } else {
       // Use ISO date format for older dates
       return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -330,6 +347,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
   }
 
   Future<void> _downloadAndInstall() async {
+    // Every failure below is reported after an await, so the translations are
+    // taken once here while the context is still known to be current.
+    final l10n = AppLocalizations.of(context)!;
     setState(() {
       _isDownloading = true;
       _errorMessage = null;
@@ -345,7 +365,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       final managed = ref.read(managedInstallProvider);
       if (managed != null) {
         setState(() {
-          _errorMessage = managed.explanation;
+          _errorMessage = managed.explanation(l10n);
           _isDownloading = false;
         });
         return;
@@ -377,8 +397,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       if (filePath.isEmpty) {
         if (mounted) {
           setState(() {
-            _errorMessage =
-                'Failed to download update. Please try again later.';
+            _errorMessage = l10n.updateDownloadFailed;
             _isDownloading = false;
           });
         }
@@ -425,8 +444,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           Logger.error('Update installation returned false', null, null, true);
           if (mounted) {
             setState(() {
-              _errorMessage =
-                  'Failed to install update. Check logs for details.';
+              _errorMessage = l10n.updateInstallFailed;
               _isDownloading = false;
             });
           }
@@ -436,7 +454,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       Logger.error('Error downloading/installing update', e, stackTrace, true);
       if (mounted) {
         setState(() {
-          _errorMessage = 'An error occurred: ${e.toString()}';
+          _errorMessage = l10n.updateUnexpectedError(e.toString());
           _isDownloading = false;
         });
       }

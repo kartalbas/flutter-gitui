@@ -3806,5 +3806,106 @@
   "updateOperationRunningBody": "A git operation is still running. Installing the update now would close the application in the middle of it. Wait for the operation to finish, then try again.",
   "updateUnsavedInputTitle": "Unsaved Input",
   "updateUnsavedInputBody": "A commit message is being written. Installing the update restarts the application, and that input will be lost.",
-  "installAnyway": "Install Anyway"
+  "installAnyway": "Install Anyway",
+  "loading": "Loading...",
+  "updatesManagedBy": "Updates are managed by {manager}",
+  "@updatesManagedBy": {
+    "description": "Settings line naming the package manager that delivers new versions. The manager is a proper noun and must not be translated.",
+    "placeholders": {
+      "manager": {
+        "type": "String",
+        "example": "Snap"
+      }
+    }
+  },
+  "updatesManagedByUnknownInstaller": "Updates are managed by whoever installed this copy",
+  "managedInstallSnap": "This copy was installed as a snap and runs from a read-only image, so it cannot replace its own files. snapd installs new versions in the background, or immediately with \"snap refresh flutter-gitui\".",
+  "@managedInstallSnap": {
+    "description": "Why the application does not update itself when it runs from a snap. Leave the command in quotes untranslated."
+  },
+  "managedInstallFlatpak": "This copy was installed with Flatpak and runs from a read-only deployment, so it cannot replace its own files. New versions arrive with \"flatpak update\".",
+  "@managedInstallFlatpak": {
+    "description": "Why the application does not update itself when it runs from a Flatpak. Leave the command in quotes untranslated."
+  },
+  "managedInstallAppImage": "This copy runs from a read-only AppImage, so it cannot replace its own files. Download a newer AppImage to update it.",
+  "@managedInstallAppImage": {
+    "description": "Why the application does not update itself when it runs from an AppImage."
+  },
+  "managedInstallWinget": "This copy was installed with winget, which records the installed version itself. Updating from inside the application would replace those files behind winget's back and be overwritten again by the next \"winget upgrade\", so new versions are taken from winget.",
+  "@managedInstallWinget": {
+    "description": "Why the application does not update itself when winget installed it. Leave \"winget\" and the command in quotes untranslated."
+  },
+  "managedInstallMicrosoftStore": "This copy was installed from the Microsoft Store, which deploys it into a read-only, signed package directory. New versions arrive through the Store.",
+  "@managedInstallMicrosoftStore": {
+    "description": "Why the application does not update itself when the Microsoft Store installed it."
+  },
+  "managedInstallHomebrewCask": "This copy was installed as a Homebrew cask, which records the installed version itself. New versions arrive with \"brew upgrade --cask flutter-gitui\".",
+  "@managedInstallHomebrewCask": {
+    "description": "Why the application does not update itself when a Homebrew cask installed it. Leave the command in quotes untranslated."
+  },
+  "managedInstallUndetermined": "Where this copy is installed could not be established, so it is treated as belonging to whoever installed it. Updating it from inside the application could overwrite files a package manager owns.",
+  "@managedInstallUndetermined": {
+    "description": "Why the application does not update itself when the installation could not be identified at all."
+  },
+  "updateAvailableTitle": "Update Available",
+  "updateVersionHeading": "Version {version}",
+  "@updateVersionHeading": {
+    "description": "Heading of the update dialog naming the offered release",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.5.14-alpha"
+      }
+    }
+  },
+  "updateReleasedOn": "Released {date} • {size}",
+  "@updateReleasedOn": {
+    "description": "When the offered release was published and how large its download is",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "2 days ago"
+      },
+      "size": {
+        "type": "String",
+        "example": "42.3 MB"
+      }
+    }
+  },
+  "updateWhatsNew": "What's New",
+  "updateDownloadingProgress": "Downloading update...",
+  "updateDontShowAgain": "Don't show this update again",
+  "updateDownloadOnly": "Download Only",
+  "updateDownloadAndInstall": "Download & Install",
+  "updateDownloadingButton": "Downloading...",
+  "updateBrowserOpenFailed": "The browser could not be opened. Download the update manually from:\n{url}",
+  "@updateBrowserOpenFailed": {
+    "description": "Shown when the download link could not be handed to a browser",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateBrowserOpenError": "The browser could not be opened: {error}",
+  "@updateBrowserOpenError": {
+    "description": "Shown when opening the download link raised an error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "updateDownloadFailed": "The update could not be downloaded. Please try again later.",
+  "updateInstallFailed": "The update could not be installed. See the application log for details.",
+  "updateUnexpectedError": "An error occurred: {error}",
+  "@updateUnexpectedError": {
+    "description": "Shown when downloading or installing the update failed unexpectedly",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

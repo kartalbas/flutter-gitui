@@ -1,9 +1,11 @@
 // Whether the running application owns its own installation, and therefore
 // whether it may update itself at all (#364).
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/core/services/managed_install.dart';
+import 'package:flutter_gitui/generated/app_localizations.dart';
 
 /// A plain Linux desktop environment, so a test that stages a package manager
 /// differs from a downloaded build in exactly the one variable it sets.
@@ -189,17 +191,77 @@ void main() {
   });
 
   group('ManagedInstall', () {
-    test('names a manager and a reason for every managed installation', () {
-      // Settings shows both verbatim, so a value added later without its copy
-      // would ship an empty explanation instead of failing here.
+    test('names a manager for every installation it can identify', () {
+      // The name is a proper noun the enum spells once and no locale touches,
+      // so it has to be there -- and only the value that identified nothing at
+      // all may be without one.
       for (final install in ManagedInstall.values) {
-        expect(install.manager.trim(), isNotEmpty, reason: install.name);
-        expect(install.explanation.trim(), isNotEmpty, reason: install.name);
-        expect(
-          install.explanation.trim(),
-          endsWith('.'),
-          reason: '${install.name} is shown as a sentence',
-        );
+        if (install == ManagedInstall.undetermined) {
+          expect(install.manager, isNull, reason: install.name);
+          continue;
+        }
+        expect(install.manager?.trim(), isNotEmpty, reason: install.name);
+      }
+    });
+  });
+
+  group('ManagedInstall messages', () {
+    /// Every locale the application ships, so a value added without its
+    /// translations fails here rather than showing an English sentence -- or
+    /// nothing -- in the five other languages (#389).
+    late Map<Locale, AppLocalizations> translations;
+
+    setUpAll(() async {
+      translations = {
+        for (final locale in AppLocalizations.supportedLocales)
+          locale: await AppLocalizations.delegate.load(locale),
+      };
+    });
+
+    test('explains every managed installation in every locale', () {
+      // Settings and the update dialog show this verbatim, so a value added
+      // later without its copy would ship an empty explanation.
+      for (final entry in translations.entries) {
+        for (final install in ManagedInstall.values) {
+          final where = '${install.name} in ${entry.key.languageCode}';
+          final explanation = install.explanation(entry.value).trim();
+          expect(explanation, isNotEmpty, reason: where);
+          expect(
+            explanation,
+            endsWith('.'),
+            reason: '$where is shown as a sentence',
+          );
+        }
+      }
+    });
+
+    test('keeps the manager name untranslated in every locale', () {
+      // The design decision this pins: the sentence around the name is prose
+      // and belongs to the translations, the name itself is a proper noun and
+      // has to come through every locale spelled exactly as the enum has it.
+      for (final entry in translations.entries) {
+        for (final install in ManagedInstall.values) {
+          final where = '${install.name} in ${entry.key.languageCode}';
+          final line = install.managedByLine(entry.value);
+          expect(line.trim(), isNotEmpty, reason: where);
+
+          final manager = install.manager;
+          if (manager == null) {
+            // Nothing was identified, so the line names no product at all.
+            continue;
+          }
+          expect(line, contains(manager), reason: where);
+        }
+      }
+    });
+
+    test('names no manager it could not identify', () {
+      // "Updates are managed by null" is the failure this forbids: the
+      // undetermined case gets a sentence of its own rather than a hole where
+      // a proper noun would be.
+      for (final entry in translations.entries) {
+        final line = ManagedInstall.undetermined.managedByLine(entry.value);
+        expect(line, isNot(contains('null')), reason: entry.key.languageCode);
       }
     });
   });

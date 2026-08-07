@@ -144,7 +144,7 @@ class UpdateService {
     final managed = ManagedInstallDetector.detectCurrentProcess();
     if (managed != null) {
       Logger.info(
-        'Update check suppressed: ${managed.manager} manages this installation',
+        'Update check suppressed: ${managed.name} manages this installation',
       );
       return Success(UpdateCheckSuppressed(managed));
     }

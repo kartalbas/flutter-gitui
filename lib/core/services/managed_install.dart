@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import '../../generated/app_localizations.dart';
+
 /// Who owns an installation of this application, when that is not the
 /// application itself.
 ///
@@ -11,64 +13,35 @@ import 'dart:io';
 /// contrast, is user-writable, so the in-app install succeeds and quietly
 /// replaces files winget still records as the old version, until the next
 /// `winget upgrade` overwrites them again (#364).
+///
+/// A value carries nothing but the manager's own name, and that name is a
+/// proper noun -- "Snap", "winget", "Microsoft Store" -- which no locale
+/// translates. The sentence explaining why self-update is off is prose, so it
+/// lives in the translations instead and is reached through
+/// [ManagedInstallMessages]. Keeping the sentence here would mean every new
+/// locale edits this enum, which is exactly backwards (#389).
 enum ManagedInstall {
   /// snapd mounts the snap read-only at `$SNAP` and refreshes it on its own.
-  snap(
-    manager: 'Snap',
-    explanation:
-        'This copy was installed as a snap and runs from a read-only image, '
-        'so it cannot replace its own files. snapd installs new versions in '
-        'the background, or immediately with "snap refresh flutter-gitui".',
-  ),
+  snap(manager: 'Snap'),
 
   /// A Flatpak runs from a read-only deployment that flatpak itself replaces.
-  flatpak(
-    manager: 'Flatpak',
-    explanation:
-        'This copy was installed with Flatpak and runs from a read-only '
-        'deployment, so it cannot replace its own files. New versions arrive '
-        'with "flatpak update".',
-  ),
+  flatpak(manager: 'Flatpak'),
 
   /// An AppImage is a read-only image mounted only for the length of the run,
   /// so the files the updater would overwrite disappear again at exit.
-  appImage(
-    manager: 'AppImage',
-    explanation:
-        'This copy runs from a read-only AppImage, so it cannot replace its '
-        'own files. Download a newer AppImage to update it.',
-  ),
+  appImage(manager: 'AppImage'),
 
   /// winget keeps its own record of the installed version, and that record is
   /// what the next upgrade acts on -- not what is actually on disk.
-  winget(
-    manager: 'winget',
-    explanation:
-        'This copy was installed with winget, which records the installed '
-        'version itself. Updating from inside the application would replace '
-        'those files behind winget\'s back and be overwritten again by the '
-        'next "winget upgrade", so new versions are taken from winget.',
-  ),
+  winget(manager: 'winget'),
 
   /// A packaged application is deployed read-only and signed under
   /// `Program Files\WindowsApps`, where nothing but the Store may write.
-  microsoftStore(
-    manager: 'the Microsoft Store',
-    explanation:
-        'This copy was installed from the Microsoft Store, which deploys it '
-        'into a read-only, signed package directory. New versions arrive '
-        'through the Store.',
-  ),
+  microsoftStore(manager: 'Microsoft Store'),
 
   /// Homebrew stages a cask in its own Caskroom, links the bundle from there
   /// and keeps the version record next to it.
-  homebrewCask(
-    manager: 'Homebrew',
-    explanation:
-        'This copy was installed as a Homebrew cask, which records the '
-        'installed version itself. New versions arrive with '
-        '"brew upgrade --cask flutter-gitui".',
-  ),
+  homebrewCask(manager: 'Homebrew'),
 
   /// Where this application runs from could not be established at all.
   ///
@@ -76,22 +49,46 @@ enum ManagedInstall {
   /// that was wrongly detected still delivers its update, so a false
   /// suppression costs the user a delay; a false "this installation is ours"
   /// corrupts a managed installation and keeps corrupting it.
-  undetermined(
-    manager: 'the installer this copy came from',
-    explanation:
-        'Where this copy is installed could not be established, so it is '
-        'treated as belonging to whoever installed it. Updating it from '
-        'inside the application could overwrite files a package manager owns.',
-  );
+  ///
+  /// The one value with no [manager]: nothing was identified, so there is no
+  /// name to print and the surface says so in words instead.
+  undetermined();
 
-  const ManagedInstall({required this.manager, required this.explanation});
+  const ManagedInstall({this.manager});
 
-  /// Who delivers new versions, phrased to follow "managed by".
-  final String manager;
+  /// The package manager's own name, spelled the way it brands itself.
+  ///
+  /// Never translated, and null only for [undetermined], where no manager
+  /// could be named at all.
+  final String? manager;
+}
+
+/// What the update surfaces say about a managed installation.
+///
+/// Both sentences are translations rather than enum fields, so adding a locale
+/// is an `.arb` entry and nothing else. The manager's name is substituted into
+/// the translated sentence untouched, because a proper noun survives
+/// translation unchanged (#389).
+extension ManagedInstallMessages on ManagedInstall {
+  /// One line naming who delivers new versions for this installation.
+  String managedByLine(AppLocalizations l10n) {
+    final name = manager;
+    return name == null
+        ? l10n.updatesManagedByUnknownInstaller
+        : l10n.updatesManagedBy(name);
+  }
 
   /// Why this application does not update itself here, in a sentence a
-  /// settings screen can show as-is.
-  final String explanation;
+  /// settings screen or an error banner can show as-is.
+  String explanation(AppLocalizations l10n) => switch (this) {
+    ManagedInstall.snap => l10n.managedInstallSnap,
+    ManagedInstall.flatpak => l10n.managedInstallFlatpak,
+    ManagedInstall.appImage => l10n.managedInstallAppImage,
+    ManagedInstall.winget => l10n.managedInstallWinget,
+    ManagedInstall.microsoftStore => l10n.managedInstallMicrosoftStore,
+    ManagedInstall.homebrewCask => l10n.managedInstallHomebrewCask,
+    ManagedInstall.undetermined => l10n.managedInstallUndetermined,
+  };
 }
 
 /// Whether the running process belongs to an installation a package manager

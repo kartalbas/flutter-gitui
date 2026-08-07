@@ -11,6 +11,7 @@ import '../../../shared/components/base_list_item.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/services/managed_install.dart';
 import '../../../core/services/update_check_policy.dart';
 import '../../../core/services/update_providers.dart';
 import '../../../shared/dialogs/update_available_dialog.dart';
@@ -30,7 +31,9 @@ class UpdatesSection extends ConsumerStatefulWidget {
 }
 
 class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
-  String _currentVersion = 'Loading...';
+  /// Null until package_info_plus has answered; the placeholder shown until
+  /// then is a translation, so it is resolved at build time rather than here.
+  String? _currentVersion;
 
   @override
   void initState() {
@@ -115,7 +118,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     // be a claim no check was ever made to support (#364).
     final suppressedBy = report.suppressedBy;
     if (suppressedBy != null) {
-      Logger.info('Manual update check suppressed: ${suppressedBy.manager}');
+      Logger.info('Manual update check suppressed: ${suppressedBy.name}');
       return;
     }
 
@@ -147,11 +150,13 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       );
     } else {
       Logger.info('No updates found');
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.upToDateMessage(_currentVersion),
-          ),
+          // The version is read in initState and this runs on a button the
+          // user has to reach first, so the placeholder is a formality; an
+          // empty version still reads better here than the word "Loading".
+          content: Text(l10n.upToDateMessage(_currentVersion ?? '')),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
@@ -189,7 +194,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const Spacer(),
-              LabelLargeLabel(_currentVersion),
+              LabelLargeLabel(_currentVersion ?? l10n.loading),
             ],
           ),
         ),
@@ -205,10 +210,8 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BodyMediumLabel(
-                  'Updates are managed by ${managedInstall.manager}',
-                ),
-                BodySmallLabel(managedInstall.explanation),
+                BodyMediumLabel(managedInstall.managedByLine(l10n)),
+                BodySmallLabel(managedInstall.explanation(l10n)),
               ],
             ),
           )

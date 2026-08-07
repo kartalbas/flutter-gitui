@@ -115,7 +115,7 @@ Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
     // will be. Nothing is recorded either: the last-check line in Settings
     // describes checks, and there was no check to describe (#364).
     if (checkResult case UpdateCheckSuppressed(:final install)) {
-      Logger.info('Update check suppressed: managed by ${install.manager}');
+      Logger.info('Update check suppressed: managed by ${install.name}');
       ref.read(updateAvailableProvider.notifier).state = null;
       return UpdateCheckReport(suppressedBy: install);
     }

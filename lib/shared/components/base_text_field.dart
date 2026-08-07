@@ -211,8 +211,13 @@ class _BaseTextFieldState extends State<BaseTextField> {
   void didUpdateWidget(BaseTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
+      // What the field currently shows, captured before the old controller is
+      // released. It survives only into an internally created replacement: a
+      // caller who hands us a controller is handing us its text too, and
+      // overwriting that would be the field second-guessing its owner.
+      final carriedText = _controller.text;
       _releaseController();
-      _adoptController();
+      _adoptController(carriedText: carriedText);
     }
     if (widget.obscureText != oldWidget.obscureText) {
       _obscureText = widget.obscureText;
@@ -225,12 +230,21 @@ class _BaseTextFieldState extends State<BaseTextField> {
     super.dispose();
   }
 
-  /// Takes the caller's controller, or creates one seeded with
-  /// [BaseTextField.initialValue] and remembers that this state owns it.
-  void _adoptController() {
+  /// Takes the caller's controller, or creates one and remembers that this
+  /// state owns it.
+  ///
+  /// [carriedText] is what the field was showing a moment ago, passed only
+  /// when replacing one controller with another. An internally created
+  /// replacement continues from it rather than from
+  /// [BaseTextField.initialValue]: a caller who stops supplying a controller
+  /// is changing who owns the text, not asking for the user's typing to be
+  /// thrown away. On the first build there is nothing to carry, so the seed
+  /// is [BaseTextField.initialValue].
+  void _adoptController({String? carriedText}) {
     _ownsController = widget.controller == null;
     _controller =
-        widget.controller ?? TextEditingController(text: widget.initialValue);
+        widget.controller ??
+        TextEditingController(text: carriedText ?? widget.initialValue);
     _hasText = _controller.text.isNotEmpty;
     _controller.addListener(_onTextChanged);
   }

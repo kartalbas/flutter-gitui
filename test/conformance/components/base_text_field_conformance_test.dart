@@ -561,6 +561,40 @@ void main() {
       expect(find.text('edited'), findsOneWidget);
     });
 
+    testWidgets('the text survives losing a caller-owned controller', (
+      WidgetTester tester,
+    ) async {
+      // The other direction of the swap, and the one that loses user input.
+      // A caller that stops supplying a controller is changing who owns the
+      // text, not asking for what the user typed to be discarded -- but the
+      // replacement used to be seeded from initialValue, so the typing went
+      // away and the field silently reverted to the value it opened with.
+      final TextEditingController owned = TextEditingController(text: 'mine');
+      addTearDown(owned.dispose);
+
+      await pumpConformance(
+        tester,
+        SizedBox(
+          width: _probeWidth,
+          child: BaseTextField(label: 'Label', controller: owned),
+        ),
+      );
+      await tester.enterText(find.byType(EditableText), 'typed by the user');
+      await pumpConformance(
+        tester,
+        const SizedBox(
+          width: _probeWidth,
+          child: BaseTextField(label: 'Label', initialValue: 'seeded'),
+        ),
+      );
+
+      expect(
+        tester.widget<EditableText>(find.byType(EditableText)).controller.text,
+        'typed by the user',
+      );
+      expect(find.text('seeded'), findsNothing);
+    });
+
     testWidgets('a controller and an initialValue together are rejected', (
       WidgetTester tester,
     ) async {

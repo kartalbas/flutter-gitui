@@ -273,3 +273,134 @@ deviations:
       visible step above the stock 40 dp container and exactly the
       minimum tap target, carrying the conforming 24 dp M3 glyph.
     registered: 2026-08-06
+
+  # BaseCard (lib/shared/components/base_card.dart). The component is the
+  # app's Material 3 outlined card, so the spec values below are the
+  # generated `_OutlinedCardDefaultsM3` defaults, measured by pumping
+  # `Card.outlined` through the same conformance harness and reading it with
+  # the same probes.
+
+  - id: CARD-001
+    component: BaseCard
+    property: containerColor
+    spec_value: surface
+    app_value: surfaceContainerHigh
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/card.dart:383 (_OutlinedCardDefaultsM3.color, colorScheme.surface)"
+    rationale: >
+      An outlined card at `surface` is only distinguishable from what it sits
+      on when that background is lower on the tonal ladder. In this app a card
+      is routinely nested inside a BasePanel, whose own container is
+      `surfaceContainerLow` — a `surface` card would then be *lighter* than
+      the panel holding it and read as being behind it. Sitting one step up at
+      `surfaceContainerHigh` keeps the nesting order legible on every surface
+      the app places a card on: scaffold, panel and dialog.
+    registered: 2026-08-07
+
+  - id: CARD-002
+    component: BaseCard
+    property: margin
+    spec_value: 4.0
+    app_value: 0.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/card.dart:376 (_OutlinedCardDefaultsM3 margin, EdgeInsets.all(4.0))"
+    rationale: >
+      The gap between cards belongs to the collection that lays them out — a
+      grid's spacing, a list's separator — and every such collection in this
+      app spends the shared 8/16/24 spacing scale. A 4 dp margin baked into
+      the card would compound with that spacing and, worse, would offset a
+      card from the panels and toolbars it has to align with, since those
+      carry no margin of their own.
+    registered: 2026-08-07
+
+  - id: CARD-003
+    component: BaseCard
+    property: overlay.focused
+    spec_value: "#1F000000"
+    app_value: none
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/ink_well.dart:1039 (InkWell focus highlight, ThemeData.focusColor)"
+    rationale: >
+      A card collection is a composite widget: the grid is a single Tab stop
+      and the highlight roves inside it with the arrow keys
+      (lib/shared/widgets/keyboard_navigable_view.dart:520-524). Letting each
+      card request focus would put one Tab stop per card in the traversal
+      order and make Tab, not the arrow keys, the way through a grid. The
+      focus indication is therefore carried by the card's emphasized border,
+      driven by `containerHasFocus`, instead of by a per-card focus layer.
+    registered: 2026-08-07
+
+  # BaseListItem (lib/shared/components/base_list_item.dart). The spec values
+  # below are the generated `_LisTileDefaultsM3` defaults, measured by pumping
+  # a real `ListTile` through the same conformance harness and reading it with
+  # the same probes.
+
+  - id: LIST-001
+    component: BaseListItem
+    property: contentPadding.vertical
+    spec_value: 8.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/list_tile.dart:1831 (_LisTileDefaultsM3 minVerticalPadding, 8)"
+    rationale: >
+      Material 3 does not derive a row's height from padding at all: ListTile
+      picks 56, 72 or 88 dp from the number of text lines it was given and
+      uses `minVerticalPadding` only as the floor for content that outgrows
+      that ladder. BaseListItem cannot do the same, because its content slot
+      is an opaque widget whose line count it never learns. 16 dp reproduces
+      the ladder from a single constant instead: one line lands on the 56 dp
+      minimum, and two lines — the app's commit, file and repository rows —
+      land within a pixel of the M3 two-line height of 72 dp. Halving it to 8
+      would collapse every two-line row to 56 and lose the M3 distinction
+      between a one-line and a two-line item.
+    registered: 2026-08-07
+
+  - id: LIST-002
+    component: BaseListItem
+    property: overlay.focused
+    spec_value: "#1F000000"
+    app_value: none
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/ink_well.dart:1039 (InkWell focus highlight, ThemeData.focusColor)"
+    rationale: >
+      A list is a composite widget: the collection is a single Tab stop and
+      the highlight roves inside it with the arrow keys
+      (lib/shared/widgets/keyboard_navigable_view.dart:520-524). Letting each
+      row request focus would put one Tab stop per row in the traversal order,
+      so tabbing out of a thousand-commit history would take a thousand
+      presses. The focus indication is therefore carried by the row's ring,
+      driven by `containerHasFocus`, instead of by a per-row focus layer. Same
+      argument as CARD-003.
+    registered: 2026-08-07
+
+  # BasePanel (lib/shared/components/base_panel.dart). A panel is two M3
+  # components stacked, so it is measured against two oracles: the elevated
+  # `Card` for the container and the `ExpansionTile` header — itself a
+  # `ListTile` — for the title row. Both are pumped through the same
+  # conformance harness and read with the same probes.
+
+  - id: PANEL-001
+    component: BasePanel.header
+    property: contentPadding.start
+    spec_value: 16.0
+    app_value: 24.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/list_tile.dart:1829 (_LisTileDefaultsM3.contentPadding, EdgeInsetsDirectional.only(start: 16.0, end: 24.0))"
+    rationale: >
+      A panel header is not a free-standing list row: it sits directly above
+      the panel's own content, separated only by a divider, and the eye reads
+      the two as one column. The header therefore has to start on the same
+      optical left edge as that content, which is the panel's content padding
+      (AppTheme.paddingL, 24). The M3 list-item inset of 16 would offset every
+      panel title from everything underneath it by 8 px. The trailing inset,
+      where no such alignment exists, keeps the M3 24 dp.
+    registered: 2026-08-07
+
+  - id: PANEL-002
+    component: BasePanel
+    property: margin
+    spec_value: 4.0
+    app_value: 0.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/card.dart:306 (_CardDefaultsM3 margin, EdgeInsets.all(4.0))"
+    rationale: >
+      A panel is a layout region, not a floating card: it is placed by split
+      views and screen scaffolds that own the gap between regions and spend
+      the shared 8/16/24 spacing scale on it. A 4 dp margin baked into the
+      panel would compound with that gap and would misalign a panel against
+      the toolbars and rails it has to line up with. Same argument as
+      CARD-002.
+    registered: 2026-08-07

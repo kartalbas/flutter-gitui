@@ -7,11 +7,18 @@ import 'base_animated_widgets.dart';
 
 /// Base component for all list item patterns in the app.
 ///
-/// Provides unified selection behavior:
-/// - Normal state
-/// - Hover state (lighter background)
-/// - Selected state (primary border + tinted background)
-/// - Multi-selected state (secondary border + tinted background)
+/// The row reproduces Material 3 list-item geometry as the SDK's own
+/// `ListTile` renders it (flutter/lib/src/material/list_tile.dart:1818-1860):
+/// a 56 dp minimum tile height, a 16 dp leading edge, a 24 dp trailing edge,
+/// a 16 dp gap after the leading slot, a `bodyLarge` title, an
+/// `onSurfaceVariant` icon theme, and hover/press painted as Material state
+/// layers by an [InkWell] over an [Ink] tile rather than as container-color
+/// swaps.
+///
+/// Selection is the app's own layer on top of that geometry:
+/// - Normal state (transparent tile)
+/// - Selected state (secondaryContainer + onSecondaryContainer ring)
+/// - Multi-selected state (tertiaryContainer + onTertiaryContainer ring)
 ///
 /// Example usage:
 /// ```dart
@@ -66,11 +73,19 @@ class BaseListItem extends StatefulWidget {
     this.onTap,
     this.onDoubleTap,
     this.onSecondaryTap,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: AppTheme.paddingL,
-      vertical: AppTheme.paddingM,
+    this.padding = const EdgeInsetsDirectional.only(
+      start: AppTheme.paddingM,
+      end: AppTheme.paddingL,
+      top: AppTheme.paddingM,
+      bottom: AppTheme.paddingM,
     ),
   });
+
+  /// Smallest height a row may occupy, the Material 3 one-line list-item
+  /// height (`_defaultTileHeight`,
+  /// flutter/lib/src/material/list_tile.dart:1509). Taller content grows the
+  /// row, exactly as it does in `ListTile`.
+  static const double minTileHeight = 56.0;
 
   /// Main content area (required)
   final Widget content;
@@ -118,15 +133,13 @@ class BaseListItem extends StatefulWidget {
   final Function(Offset)? onSecondaryTap;
 
   /// Internal padding
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   State<BaseListItem> createState() => _BaseListItemState();
 }
 
 class _BaseListItemState extends State<BaseListItem> {
-  bool _isHovered = false;
-
   // Rows must react on the press, so the double click is recognised from the
   // interval between taps rather than through the detector's onDoubleTap,
   // which would hold every single tap for 300 ms. Each row has its own state
@@ -175,7 +188,10 @@ class _BaseListItemState extends State<BaseListItem> {
       }
     }
 
-    // Determine background color using Material Design 3 surface tones
+    // Determine background color using Material Design 3 surface tones. Hover
+    // is deliberately absent here: it is a state layer the InkWell paints on
+    // top of the Ink tile, so it stays visible on a selected row instead of
+    // being hidden under an opaque selection color.
     Color? backgroundColor;
     if (widget.isSelected) {
       // Selected state: use secondaryContainer for emphasis
@@ -183,9 +199,6 @@ class _BaseListItemState extends State<BaseListItem> {
     } else if (widget.isMultiSelected) {
       // Multi-selected state: use tertiaryContainer
       backgroundColor = colorScheme.tertiaryContainer;
-    } else if (_isHovered && widget.isSelectable) {
-      // Hover state: use surfaceContainerHighest
-      backgroundColor = colorScheme.surfaceContainerHighest;
     }
 
     // Determine border using Material Design 3 outline colors. The border is
@@ -211,83 +224,98 @@ class _BaseListItemState extends State<BaseListItem> {
       );
     }
 
-    return MouseRegion(
-      onEnter: widget.isSelectable
-          ? (_) => setState(() => _isHovered = true)
-          : null,
-      onExit: widget.isSelectable
-          ? (_) => setState(() => _isHovered = false)
-          : null,
-      cursor: widget.isSelectable && widget.onTap != null
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
-      child: GestureDetector(
-        // Deliberately no onDoubleTap: registering one makes Flutter withhold
-        // every single tap until the 300 ms double-tap window closes.
-        onTap:
-            widget.isSelectable &&
-                (widget.onTap != null || widget.onDoubleTap != null)
-            ? _handleTap
-            : null,
-        onSecondaryTapDown: widget.onSecondaryTap != null
-            ? (details) => widget.onSecondaryTap!(details.globalPosition)
-            : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                border: border,
-                borderRadius: BorderRadius.circular(AppTheme.radiusS),
-              ),
-              padding: widget.padding,
-              child: Row(
-                children: [
-                  // Leading widget
-                  if (widget.leading != null) ...[
-                    widget.leading!,
-                    const SizedBox(width: AppTheme.paddingM),
-                  ],
+    final isInteractive =
+        widget.isSelectable &&
+        (widget.onTap != null || widget.onDoubleTap != null);
 
-                  // Content area (expands to fill available space)
-                  Expanded(
-                    child: DefaultTextStyle(
-                      style: theme.textTheme.bodyMedium!.copyWith(
-                        color: colorScheme.onSurface,
+    return GestureDetector(
+      // The secondary (right) button has no InkWell equivalent, so the
+      // context-menu gesture keeps its own detector around the row.
+      onSecondaryTapDown: widget.onSecondaryTap != null
+          ? (details) => widget.onSecondaryTap!(details.globalPosition)
+          : null,
+      child: Stack(
+        children: [
+          InkWell(
+            // Deliberately no onDoubleTap: registering one makes Flutter
+            // withhold every single tap until the 300 ms double-tap window
+            // closes.
+            onTap: isInteractive ? _handleTap : null,
+            // A list is a single Tab stop with a roving highlight
+            // (lib/shared/widgets/keyboard_navigable_view.dart:520-524), so an
+            // individual row must never become a Tab stop of its own; the
+            // focus indication is the ring driven by [containerHasFocus].
+            // Registered as LIST-002.
+            canRequestFocus: false,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: BaseListItem.minTileHeight,
+              ),
+              // Ink, not Container: the tile color has to be painted INTO the
+              // ancestor Material's ink layer so the hover and press state
+              // layers land on top of it. A Container would paint over them
+              // and a selected row would lose its hover feedback. This is how
+              // ListTile paints its own tileColor (list_tile.dart:999-1003).
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  border: border,
+                ),
+                padding: widget.padding,
+                child: IconTheme.merge(
+                  data: IconThemeData(color: colorScheme.onSurfaceVariant),
+                  child: Row(
+                    children: [
+                      // Leading widget
+                      if (widget.leading != null) ...[
+                        widget.leading!,
+                        const SizedBox(width: AppTheme.paddingM),
+                      ],
+
+                      // Content area (expands to fill available space)
+                      Expanded(
+                        child: DefaultTextStyle(
+                          style: theme.textTheme.bodyLarge!.copyWith(
+                            color: colorScheme.onSurface,
+                          ),
+                          child: widget.content,
+                        ),
                       ),
-                      child: widget.content,
-                    ),
+
+                      // Badge
+                      if (widget.badge != null) ...[
+                        const SizedBox(width: AppTheme.paddingS),
+                        widget.badge!,
+                      ],
+
+                      // Trailing widget (or auto-generated three-dot menu)
+                      if (effectiveTrailing != null) ...[
+                        const SizedBox(width: AppTheme.paddingM),
+                        effectiveTrailing,
+                      ],
+                    ],
                   ),
-
-                  // Badge
-                  if (widget.badge != null) ...[
-                    const SizedBox(width: AppTheme.paddingS),
-                    widget.badge!,
-                  ],
-
-                  // Trailing widget (or auto-generated three-dot menu)
-                  if (effectiveTrailing != null) ...[
-                    const SizedBox(width: AppTheme.paddingM),
-                    effectiveTrailing,
-                  ],
-                ],
+                ),
               ),
             ),
-            // Subtle divider for visual separation
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppTheme.paddingL,
-                top: AppTheme.paddingS,
-              ),
-              child: Divider(
-                height: 1,
-                thickness: 1,
-                color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-              ),
+          ),
+          // Subtle divider for visual separation, inset to the row's leading
+          // edge. It is drawn INSIDE the tile's own height rather than
+          // stacked below it, so a row's pitch equals its tile height: lists
+          // that allocate a fixed extent per row (KeyboardNavigableListView's
+          // itemExtent, which the roving highlight needs to scroll a row into
+          // view) would otherwise be one pixel short of every row.
+          PositionedDirectional(
+            start: AppTheme.paddingM,
+            end: 0,
+            bottom: 0,
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

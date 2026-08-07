@@ -74,4 +74,51 @@ const Set<String> conformanceTokenManifest = <String>{
   'BaseIconButton.overlay.pressed', // M3: onSurfaceVariant @ 10% — conforms
   'BaseIconButton.overlay.hovered', // M3: onSurfaceVariant @ 8% — conforms
   'BaseIconButton.overlay.focused', // M3: onSurfaceVariant @ 10% — conforms
+  // BaseCard vs the Material 3 outlined-card oracle (`Card.outlined`,
+  // Flutter 3.44.4 card.dart:371-396). Both sides are pumped in the same
+  // harness and read with the same probes, so fonts, density and pixel ratio
+  // cancel out; state layers are diffed out of the ink paint stream.
+  'BaseCard.shape', // M3: 12.0 — conforms
+  'BaseCard.elevation', // M3: 0.0 — conforms
+  'BaseCard.containerColor', // M3: surface — registered CARD-001
+  'BaseCard.borderColor', // M3: outlineVariant — conforms
+  'BaseCard.borderWidth', // M3: 1.0 — conforms
+  'BaseCard.margin', // M3: 4.0 — registered CARD-002
+  'BaseCard.contentTextStyle', // M3: bodyMedium — conforms
+  'BaseCard.overlay.hovered', // M3: hoverColor ink — conforms
+  'BaseCard.overlay.pressed', // M3: splash + highlight ink — conforms
+  'BaseCard.overlay.focused', // M3: focusColor ink — registered CARD-003
+  // BaseListItem vs the Material 3 list-item oracle (`ListTile`,
+  // Flutter 3.44.4 list_tile.dart:1818-1860).
+  'BaseListItem.minTileHeight', // M3: 56.0 — conforms
+  'BaseListItem.contentPadding.start', // M3: 16.0 — conforms
+  'BaseListItem.contentPadding.end', // M3: 24.0 — conforms
+  'BaseListItem.contentPadding.vertical', // M3: 8.0 — registered LIST-001
+  'BaseListItem.leadingGap', // M3: 16.0 — conforms
+  'BaseListItem.shape', // M3: 0.0 — conforms
+  'BaseListItem.tileColor', // M3: transparent — conforms
+  'BaseListItem.titleTextStyle', // M3: bodyLarge — conforms
+  'BaseListItem.iconColor', // M3: onSurfaceVariant — conforms
+  'BaseListItem.overlay.hovered', // M3: hoverColor ink — conforms
+  'BaseListItem.overlay.pressed', // M3: splash + highlight ink — conforms
+  'BaseListItem.overlay.focused', // M3: focusColor ink — registered LIST-002
+  // BasePanel vs two Material 3 oracles: the elevated card for the container
+  // (`Card`, card.dart:301-323) and the expansion-tile header for the header
+  // row (`ExpansionTile`, expansion_tile.dart:907-925, whose header is a
+  // ListTile).
+  'BasePanel.elevation', // M3: 1.0 — conforms
+  'BasePanel.shape', // M3: 12.0 — conforms
+  'BasePanel.containerColor', // M3: surfaceContainerLow — conforms
+  'BasePanel.borderColor', // M3: outlineVariant — conforms
+  'BasePanel.margin', // M3: 4.0 — registered PANEL-002
+  'BasePanel.contentTextStyle', // M3: bodyMedium — conforms
+  'BasePanel.header.minTileHeight', // M3: 56.0 — conforms
+  'BasePanel.header.contentPadding.start', // M3: 16.0 — registered PANEL-001
+  'BasePanel.header.contentPadding.end', // M3: 24.0 — conforms
+  'BasePanel.header.titleTextStyle', // M3: bodyLarge — conforms
+  'BasePanel.collapsedIconColor', // M3: onSurfaceVariant — conforms
+  'BasePanel.expandedIconColor', // M3: primary — conforms
+  'BasePanel.header.overlay.hovered', // M3: hoverColor ink — conforms
+  'BasePanel.header.overlay.pressed', // M3: splash + highlight — conforms
+  'BasePanel.header.overlay.focused', // M3: focusColor ink — conforms
 };

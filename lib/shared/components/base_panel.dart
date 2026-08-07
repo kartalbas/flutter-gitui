@@ -7,6 +7,15 @@ import '../../shared/theme/app_theme.dart';
 /// A panel is a card with a header section containing a title and
 /// optional action buttons, plus a content area and optional footer.
 ///
+/// The container is the Material 3 **elevated card** (`Card`,
+/// flutter/lib/src/material/card.dart:301-323): level-1 elevation on
+/// `surfaceContainerLow` behind a 12 dp corner. The header is the Material 3
+/// **expansion-tile header** (`ExpansionTile`,
+/// flutter/lib/src/material/expansion_tile.dart:907-925): a 56 dp minimum
+/// height, an `onSurfaceVariant` caret while collapsed and a `primary` one
+/// while expanded, and hover/focus/press state layers painted by its
+/// [InkWell]. See test/conformance/components/base_panel_conformance_test.dart.
+///
 /// Example usage:
 /// ```dart
 /// BasePanel(
@@ -69,6 +78,12 @@ class BasePanel extends StatefulWidget {
   /// Content padding
   final EdgeInsets padding;
 
+  /// Smallest height the header may occupy, the Material 3 one-line
+  /// list-item height an `ExpansionTile` header is built from
+  /// (`_defaultTileHeight`, flutter/lib/src/material/list_tile.dart:1509).
+  /// A taller title or an action button grows the header, as it does there.
+  static const double headerMinHeight = 56.0;
+
   @override
   State<BasePanel> createState() => _BasePanelState();
 }
@@ -107,17 +122,17 @@ class _BasePanelState extends State<BasePanel> {
 
     return Material(
       elevation: widget.elevation,
-      borderRadius: BorderRadius.circular(AppTheme.radiusM),
-      color: colorScheme.surface,
+      borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      color: colorScheme.surfaceContainerLow,
       child: Container(
         decoration: BoxDecoration(
           border: widget.hasBorder
-              ? Border.all(color: colorScheme.outline, width: 1)
+              ? Border.all(color: colorScheme.outlineVariant, width: 1)
               : null,
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
           child: DefaultTextStyle(
             style: theme.textTheme.bodyMedium!.copyWith(
               color: colorScheme.onSurface,
@@ -129,37 +144,69 @@ class _BasePanelState extends State<BasePanel> {
                 // Header section
                 InkWell(
                   onTap: widget.isCollapsible ? _toggleExpanded : null,
-                  child: Padding(
-                    padding: EdgeInsets.all(AppTheme.paddingL),
-                    child: Row(
-                      children: [
-                        // Title
-                        Expanded(child: widget.title),
-
-                        // Action buttons
-                        if (widget.actions != null &&
-                            widget.actions!.isNotEmpty) ...{
-                          SizedBox(width: AppTheme.paddingM),
-                          ...widget.actions!.map(
-                            (action) => Padding(
-                              padding: EdgeInsets.only(left: AppTheme.paddingS),
-                              child: action,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: BasePanel.headerMinHeight,
+                    ),
+                    child: Padding(
+                      // Horizontal 24 keeps the title on the same optical
+                      // left edge as the panel content below the divider
+                      // (registered as PANEL-001); vertical 8 is the M3
+                      // minVerticalPadding, with the height carried by the
+                      // 56 dp minimum above.
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: AppTheme.paddingL,
+                        vertical: AppTheme.paddingS,
+                      ),
+                      child: Row(
+                        children: [
+                          // Title. The header's own text role is bodyLarge on
+                          // onSurface, the style an ExpansionTile header
+                          // inherits from ListTile (list_tile.dart:1844,
+                          // expansion_tile.dart:915); a call site that passes
+                          // a styled label overrides it.
+                          Expanded(
+                            child: DefaultTextStyle(
+                              style: theme.textTheme.bodyLarge!.copyWith(
+                                color: colorScheme.onSurface,
+                              ),
+                              child: widget.title,
                             ),
                           ),
-                        },
 
-                        // Collapse/expand icon
-                        if (widget.isCollapsible) ...{
-                          SizedBox(width: AppTheme.paddingM),
-                          Icon(
-                            _isExpanded
-                                ? PhosphorIconsRegular.caretUp
-                                : PhosphorIconsRegular.caretDown,
-                            size: AppTheme.iconM,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        },
-                      ],
+                          // Action buttons
+                          if (widget.actions != null &&
+                              widget.actions!.isNotEmpty) ...{
+                            const SizedBox(width: AppTheme.paddingM),
+                            ...widget.actions!.map(
+                              (action) => Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  start: AppTheme.paddingS,
+                                ),
+                                child: action,
+                              ),
+                            ),
+                          },
+
+                          // Collapse/expand icon. M3 tints the caret with
+                          // `primary` while the tile is expanded and leaves it
+                          // `onSurfaceVariant` while collapsed, so the caret
+                          // carries the state on its own
+                          // (expansion_tile.dart:918 and :924).
+                          if (widget.isCollapsible) ...{
+                            const SizedBox(width: AppTheme.paddingM),
+                            Icon(
+                              _isExpanded
+                                  ? PhosphorIconsRegular.caretUp
+                                  : PhosphorIconsRegular.caretDown,
+                              size: AppTheme.iconM,
+                              color: _isExpanded
+                                  ? colorScheme.primary
+                                  : colorScheme.onSurfaceVariant,
+                            ),
+                          },
+                        ],
+                      ),
                     ),
                   ),
                 ),

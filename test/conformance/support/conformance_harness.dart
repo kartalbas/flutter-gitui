@@ -22,6 +22,7 @@ library;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,6 +49,13 @@ Future<void> pumpConformance(
   await tester.pumpWidget(
     MaterialApp(
       debugShowCheckedModeBanner: false,
+      // Container components read localized strings for their built-in
+      // affordances (BaseListItem's overflow menu tooltip, for example), so
+      // the harness always supplies the app's delegates; a suite that forgets
+      // them would fail on a null AppLocalizations rather than on a
+      // conformance mismatch.
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: brightness == Brightness.light
           ? AppTheme.lightTheme()
           : AppTheme.darkTheme(),
@@ -232,6 +240,119 @@ RenderObject inkFeatures(WidgetTester tester) {
     (RenderObject renderObject) =>
         renderObject.runtimeType.toString() == '_RenderInkFeatures',
   );
+}
+
+/// Every fill color the ink layer paints right now, in paint order.
+///
+/// State layers are painted ink rather than widget properties, so the only
+/// way to *measure* one (as opposed to asserting it with the `paints`
+/// matcher) is to replay the ink render object onto a recording canvas and
+/// read the colors back out. The recording covers the whole subtree below
+/// the ink layer, which is exactly what [inkColorsAddedBy] needs to diff.
+List<Color> paintedInkColors(WidgetTester tester) {
+  final TestRecordingCanvas canvas = TestRecordingCanvas();
+  final TestRecordingPaintingContext context = TestRecordingPaintingContext(
+    canvas,
+  );
+  inkFeatures(tester).paint(context, Offset.zero);
+  const Set<Symbol> fillCalls = <Symbol>{
+    #drawRect,
+    #drawRRect,
+    #drawDRRect,
+    #drawPath,
+    #drawCircle,
+    #drawOval,
+  };
+  final List<Color> colors = <Color>[];
+  for (final RecordedInvocation recorded in canvas.invocations) {
+    final Invocation invocation = recorded.invocation;
+    if (!invocation.isMethod || !fillCalls.contains(invocation.memberName)) {
+      continue;
+    }
+    for (final Object? argument in invocation.positionalArguments) {
+      if (argument is Paint) {
+        colors.add(argument.color);
+      }
+    }
+  }
+  return colors;
+}
+
+/// The colors that appear in the ink layer only after [drive] has run —
+/// i.e. the state layer that driving the state added.
+///
+/// Diffing against the resting frame is what makes the probe symmetric: it
+/// works the same on a Base component and on the SDK widget it is measured
+/// against, and it reports a hand-painted container swap (a *new container
+/// color*) just as faithfully as a real state layer, which is precisely the
+/// distinction this suite has to detect.
+Future<List<Color>> inkColorsAddedBy(
+  WidgetTester tester,
+  Future<void> Function() drive,
+) async {
+  final List<Color> before = paintedInkColors(tester);
+  await drive();
+  final List<Color> after = paintedInkColors(tester);
+  final List<Color> added = <Color>[];
+  final List<Color> remaining = List<Color>.of(before);
+  for (final Color color in after) {
+    if (!remaining.remove(color)) {
+      added.add(color);
+    }
+  }
+  return added;
+}
+
+/// The ink the layer gains while [finder] is hovered, with the pointer
+/// removed again so a later pump in the same test starts clean.
+Future<List<Color>> hoverStateLayer(WidgetTester tester, Finder finder) async {
+  final TestGesture gesture = await tester.createGesture(
+    kind: PointerDeviceKind.mouse,
+  );
+  await gesture.addPointer(location: Offset.zero);
+  await tester.pump();
+  final List<Color> added = await inkColorsAddedBy(tester, () async {
+    await gesture.moveTo(tester.getCenter(finder));
+    await tester.pumpAndSettle();
+  });
+  await gesture.removePointer();
+  await tester.pumpAndSettle();
+  return added;
+}
+
+/// The ink the layer gains while [finder] is held pressed, with the gesture
+/// released again.
+Future<List<Color>> pressStateLayer(WidgetTester tester, Finder finder) async {
+  late TestGesture gesture;
+  final List<Color> added = await inkColorsAddedBy(tester, () async {
+    gesture = await pressAndHold(tester, finder);
+    // pressAndHold's pump only starts the highlight's fade-in ticker (its
+    // first tick is at elapsed zero); one more pump completes the fade.
+    await tester.pump(const Duration(milliseconds: 200));
+  });
+  await gesture.up();
+  await tester.pumpAndSettle();
+  return added;
+}
+
+/// The ink the layer gains once Tab has moved keyboard focus. A component
+/// that deliberately refuses focus (because its collection owns the Tab stop)
+/// adds nothing, which is exactly the measurement a deviation documents.
+Future<List<Color>> focusStateLayer(WidgetTester tester) async {
+  return inkColorsAddedBy(tester, () => focusFirstWithTab(tester));
+}
+
+/// Renders a measured state layer as a stable descriptor: role names where a
+/// color is a scheme role, `#AARRGGBB` otherwise, and `none` for a component
+/// that paints no layer at all.
+String describeStateLayer(WidgetTester tester, List<Color> colors) {
+  if (colors.isEmpty) {
+    return 'none';
+  }
+  final ColorScheme scheme = Theme.of(
+    tester.element(find.byType(Scaffold)),
+  ).colorScheme;
+  return colors.map((Color color) => colorRoleName(scheme, color)).join(' + ');
 }
 
 /// All fifteen Material 3 text roles of [textTheme], keyed by role name, in

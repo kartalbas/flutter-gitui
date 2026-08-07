@@ -42,6 +42,16 @@ BoxDecoration _decorationOf(WidgetTester tester, Finder scope) {
   return container.decoration! as BoxDecoration;
 }
 
+/// BaseListItem paints its tile with [Ink] rather than a [Container], so the
+/// hover and press state layers land on top of the selection color instead of
+/// under it (lib/shared/components/base_list_item.dart).
+BoxDecoration _inkDecorationOf(WidgetTester tester, Finder scope) {
+  final ink = tester.widget<Ink>(
+    find.descendant(of: scope, matching: find.byType(Ink)).first,
+  );
+  return ink.decoration! as BoxDecoration;
+}
+
 void main() {
   testWidgets(
     'BaseListItem: ring border while focused, background-only while not',
@@ -65,7 +75,7 @@ void main() {
         tester.element(find.byType(BaseListItem).first),
       ).colorScheme;
 
-      final focused = _decorationOf(
+      final focused = _inkDecorationOf(
         tester,
         find.widgetWithText(BaseListItem, 'focused'),
       );
@@ -75,7 +85,7 @@ void main() {
         scheme.onSecondaryContainer,
       );
 
-      final unfocused = _decorationOf(
+      final unfocused = _inkDecorationOf(
         tester,
         find.widgetWithText(BaseListItem, 'unfocused'),
       );

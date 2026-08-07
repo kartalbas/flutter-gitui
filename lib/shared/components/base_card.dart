@@ -3,12 +3,18 @@ import '../../shared/theme/app_theme.dart';
 
 /// Base component for all card patterns in the app.
 ///
-/// Renders flat (no shadow elevation) and communicates state through
-/// Material 3 tonal surfaces and outline borders:
+/// This is the app's Material 3 **outlined card**: it renders flat (no shadow
+/// elevation) behind a 1 px `outlineVariant` border, exactly like
+/// `Card.outlined` (flutter/lib/src/material/card.dart:371-396), and reserves
+/// the tonal containers for selection rather than for elevation:
 /// - Normal state (surfaceContainerHigh, 1px outlineVariant border)
-/// - Hover state (surfaceContainerHighest, 1px outlineVariant border)
 /// - Multi-selected state (tertiaryContainer, 2px onTertiaryContainer border)
 /// - Selected state (secondaryContainer, 2px onSecondaryContainer border)
+///
+/// Hover and press are **not** container-color swaps but Material state
+/// layers painted by the card's own [InkWell], so they read the same on a
+/// resting card and on a selected one. See
+/// test/conformance/components/base_card_conformance_test.dart.
 ///
 /// Example usage:
 /// ```dart
@@ -37,7 +43,7 @@ import '../../shared/theme/app_theme.dart';
 ///   onTap: () => print('Card tapped'),
 /// )
 /// ```
-class BaseCard extends StatefulWidget {
+class BaseCard extends StatelessWidget {
   const BaseCard({
     super.key,
     required this.content,
@@ -95,30 +101,21 @@ class BaseCard extends StatefulWidget {
   final EdgeInsets padding;
 
   @override
-  State<BaseCard> createState() => _BaseCardState();
-}
-
-class _BaseCardState extends State<BaseCard> {
-  bool _isHovered = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Determine background color using Material Design 3 surface tones
+    // Determine background color using Material Design 3 surface tones. Hover
+    // is deliberately absent here: it is a state layer the InkWell below
+    // paints on top of whichever container color the card is resting on, so
+    // hovering a selected card is as visible as hovering a resting one.
     Color? backgroundColor;
-    if (widget.isSelected) {
+    if (isSelected) {
       // Selected state: use secondaryContainer for emphasis
-      backgroundColor =
-          widget.customBackgroundColor ?? colorScheme.secondaryContainer;
-    } else if (widget.isMultiSelected) {
+      backgroundColor = customBackgroundColor ?? colorScheme.secondaryContainer;
+    } else if (isMultiSelected) {
       // Multi-selected state: use tertiaryContainer
-      backgroundColor =
-          widget.customBackgroundColor ?? colorScheme.tertiaryContainer;
-    } else if (_isHovered && widget.isSelectable) {
-      // Hover state: use surfaceContainerHighest
-      backgroundColor = colorScheme.surfaceContainerHighest;
+      backgroundColor = customBackgroundColor ?? colorScheme.tertiaryContainer;
     } else {
       // Normal state: use surfaceContainerHigh
       backgroundColor = colorScheme.surfaceContainerHigh;
@@ -131,18 +128,18 @@ class _BaseCardState extends State<BaseCard> {
     // (at the same width, so the content does not shift when focus moves) —
     // still clearly the selection, no longer claiming the keyboard.
     BoxBorder? border;
-    if (widget.isSelected) {
+    if (isSelected) {
       // Selected: use onSecondaryContainer for border
       border = Border.all(
-        color: widget.containerHasFocus
-            ? (widget.customBorderColor ?? colorScheme.onSecondaryContainer)
+        color: containerHasFocus
+            ? (customBorderColor ?? colorScheme.onSecondaryContainer)
             : colorScheme.outlineVariant,
         width: 2,
       );
-    } else if (widget.isMultiSelected) {
+    } else if (isMultiSelected) {
       // Multi-selected: use onTertiaryContainer for border
       border = Border.all(
-        color: widget.containerHasFocus
+        color: containerHasFocus
             ? colorScheme.onTertiaryContainer
             : colorScheme.outlineVariant,
         width: 2,
@@ -152,70 +149,62 @@ class _BaseCardState extends State<BaseCard> {
       border = Border.all(color: colorScheme.outlineVariant, width: 1);
     }
 
-    return MouseRegion(
-      onEnter: widget.isSelectable
-          ? (_) => setState(() => _isHovered = true)
-          : null,
-      onExit: widget.isSelectable
-          ? (_) => setState(() => _isHovered = false)
-          : null,
-      cursor: widget.isSelectable && widget.onTap != null
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
-      child: GestureDetector(
-        onTap: widget.isSelectable ? widget.onTap : null,
-        child: Container(
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            border: border,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            // Ink children (list tiles, ink wells) paint their hover, focus
-            // and pressed state layers on the nearest Material. Without one
-            // inside the decorated box those layers land on a Material behind
-            // the card's background and stay invisible — which keyboard
-            // traversal exposes the moment a tile in a card receives focus.
-            child: Material(
-              type: MaterialType.transparency,
-              child: DefaultTextStyle(
-                style: theme.textTheme.bodyMedium!.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Header section
-                    if (widget.header != null) ...[
-                      widget.header!,
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: colorScheme.outlineVariant,
-                      ),
-                    ],
-
-                    // Content section (main area)
-                    Flexible(
-                      child: Padding(
-                        padding: widget.padding,
-                        child: widget.content,
-                      ),
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: border,
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+        // Ink children (list tiles, ink wells) paint their hover, focus
+        // and pressed state layers on the nearest Material. Without one
+        // inside the decorated box those layers land on a Material behind
+        // the card's background and stay invisible — which keyboard
+        // traversal exposes the moment a tile in a card receives focus.
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: isSelectable ? onTap : null,
+            // A card collection is a single Tab stop with a roving highlight
+            // (lib/shared/widgets/keyboard_navigable_view.dart:520-524), so
+            // an individual card must never become a Tab stop of its own;
+            // the focus indication is the emphasized border driven by
+            // [containerHasFocus]. Registered as CARD-004.
+            canRequestFocus: false,
+            child: DefaultTextStyle(
+              style: theme.textTheme.bodyMedium!.copyWith(
+                color: colorScheme.onSurface,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header section
+                  if (header != null) ...[
+                    header!,
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: colorScheme.outlineVariant,
                     ),
-
-                    // Footer section
-                    if (widget.footer != null) ...[
-                      Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: colorScheme.outlineVariant,
-                      ),
-                      widget.footer!,
-                    ],
                   ],
-                ),
+
+                  // Content section (main area)
+                  Flexible(
+                    child: Padding(padding: padding, child: content),
+                  ),
+
+                  // Footer section
+                  if (footer != null) ...[
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: colorScheme.outlineVariant,
+                    ),
+                    footer!,
+                  ],
+                ],
               ),
             ),
           ),

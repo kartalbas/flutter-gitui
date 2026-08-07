@@ -47,12 +47,18 @@ jobs:
         run: flutter pub get
 
       # `--update-goldens` writes every baseline the selected tests capture,
-      # creating test/conformance/goldens/images/ on the first run. The `golden`
-      # tag selects exactly the pixel-comparison tests (declared in
-      # dart_test.yaml); the scene smoke suite is untagged and stays out of it,
-      # because it compares nothing and would only slow this job down.
+      # creating test/conformance/goldens/images/ inside the Material skin
+      # package on the first run. The `golden` tag selects exactly the
+      # pixel-comparison tests (declared in that package's dart_test.yaml); the
+      # scene smoke suite is untagged and stays out of it, because it compares
+      # nothing and would only slow this job down.
+      #
+      # Run from the skin package's own directory: the suite lives in the skin
+      # it measures (packages/gitui_skin_material, #249 P0) and resolves its
+      # deviation register relative to the package root it is started in.
       - name: Regenerate baselines
         shell: bash
+        working-directory: packages/gitui_skin_material
         run: |
           set -euo pipefail
           if [ -n "${{ inputs.name_filter }}" ]; then
@@ -70,7 +76,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          count=$(find test/conformance/goldens/images -name '*.png' 2>/dev/null | wc -l)
+          count=$(find packages/gitui_skin_material/test/conformance/goldens/images -name '*.png' 2>/dev/null | wc -l)
           echo "baselines on disk: $count"
           if [ "$count" -eq 0 ]; then
             echo "::error::The run produced no PNG baselines. Check the name filter and the test output above."
@@ -87,8 +93,8 @@ jobs:
           {
             echo "## Golden baselines"
             echo
-            added=$(git ls-files --others --exclude-standard -- test/conformance/goldens/images | sort)
-            changed=$(git diff --name-only -- test/conformance/goldens/images | sort)
+            added=$(git ls-files --others --exclude-standard -- packages/gitui_skin_material/test/conformance/goldens/images | sort)
+            changed=$(git diff --name-only -- packages/gitui_skin_material/test/conformance/goldens/images | sort)
             if [ -n "$added" ]; then
               echo "### New ($(echo "$added" | wc -l))"
               echo
@@ -119,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: golden-baselines
-          path: test/conformance/goldens/images/
+          path: packages/gitui_skin_material/test/conformance/goldens/images/
           if-no-files-found: error
           retention-days: 14
 
@@ -133,7 +139,7 @@ jobs:
             echo "### To adopt these baselines"
             echo
             echo '1. Download the `golden-baselines` artifact from this run.'
-            echo '2. Unzip it over `test/conformance/goldens/images/`.'
+            echo '2. Unzip it over `packages/gitui_skin_material/test/conformance/goldens/images/`.'
             echo '3. Look at every image listed as new or changed above.'
             echo '4. Commit them only if the rendering is what you intended.'
           } >> "$GITHUB_STEP_SUMMARY"

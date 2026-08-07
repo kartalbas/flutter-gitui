@@ -334,7 +334,7 @@ docs(contributing): Add error handling standards
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run the application test suite
 flutter test
 
 # Run specific test file
@@ -342,6 +342,12 @@ flutter test test/core/git/git_service_test.dart
 
 # Run with coverage
 flutter test --coverage
+
+# Run the Material 3 conformance suite. It lives in the skin package it
+# measures, which is a separate workspace member, so none of the commands
+# above reach it. Start it from that package's directory: the suite resolves
+# its deviation register relative to the package root it is started in.
+cd packages/gitui_skin_material && flutter test
 ```
 
 ### Test Structure
@@ -382,7 +388,7 @@ void main() {
 - **Public APIs**: Doc comments in code
 - **Error Handling**: `docs/ERROR-HANDLING-PATTERNS.md` and `docs/ERROR-HANDLING-MIGRATION.md`
 - **UI patterns and design system**: `docs/UI-CONCEPT.md`
-- **Material 3 conformance (normative, executable)**: `docs/deviation_register.yaml`, asserted by `test/conformance/`
+- **Material 3 conformance (normative, executable)**: `packages/gitui_skin_material/docs/deviation_register.yaml`, asserted by `packages/gitui_skin_material/test/conformance/`
 - **Accessibility**: `docs/ACCESSIBILITY.md`
 - **Contributing**: This file
 - **User-Facing**: `README.md`
@@ -408,6 +414,9 @@ one, and it has never existed in this repository.
    flutter test
    flutter analyze
    dart format .
+   # The Material 3 conformance suite is not reached by `flutter test` above;
+   # it lives in the skin package it measures. Run it last, from there.
+   cd packages/gitui_skin_material && flutter test
    ```
 
 2. **Update Documentation**
@@ -490,7 +499,7 @@ Describe how you tested the changes
 - **Error Handling**: See `docs/ERROR-HANDLING-MIGRATION.md` and
   `docs/ERROR-HANDLING-PATTERNS.md`
 - **UI Patterns**: See `docs/UI-CONCEPT.md` (usage) and
-  `docs/deviation_register.yaml` (conformance — it outranks the prose)
+  `packages/gitui_skin_material/docs/deviation_register.yaml` (conformance — it outranks the prose)
 - **Accessibility**: See `docs/ACCESSIBILITY.md`
 - **Questions**: Open an issue or ask in #engineering
 

@@ -372,7 +372,8 @@ class BaseDialog extends StatelessWidget {
           // ignore: avoid_dialog
           return Dialog(
             // 12 dp, not Material 3's 28 (DLG-001 in
-            // docs/deviation_register.yaml). This is a Windows/Linux desktop
+            // packages/gitui_skin_material/docs/deviation_register.yaml). This
+            // is a Windows/Linux desktop
             // app, and 28 dp is a phone-scale corner: it is the one radius in
             // the whole app that would read as a mobile sheet. 12 dp is the
             // surface corner this app already uses for the cards and panels

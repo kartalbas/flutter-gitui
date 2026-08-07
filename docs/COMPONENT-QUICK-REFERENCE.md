@@ -65,7 +65,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 ### Button Sizes
 
 Measured, not estimated: these are the values
-`test/conformance/components/base_button_conformance_test.dart` asserts. The
+`packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart` asserts. The
 earlier "14 / 16 / 18px" icon column here was wrong in two of three rows.
 
 | Size | Container height | Label role | Icon size | M3 | Use Case |
@@ -77,7 +77,7 @@ earlier "14 / 16 / 18px" icon column here was wrong in two of three rows.
 M3 reference values: `_FilledButtonDefaultsM3` — `minimumSize` `Size(64, 40)`
 (Flutter 3.44.4 `filled_button.dart:611`), `textStyle` `labelLarge` (`:544`),
 `iconSize` `18.0` (`:617`). The `BTN-*` ids are the registered deviations in
-`docs/deviation_register.yaml`.
+`packages/gitui_skin_material/docs/deviation_register.yaml`.
 
 `BaseIconButton` sizes differ — container 32 / 40 / 48 and glyph **16 / 20 /
 24** (`ICO-002`..`ICO-005`; M3 is a 40 dp container with a 24 dp glyph,
@@ -285,8 +285,8 @@ BaseListItem(
 Sizes are at `AppFontSize.medium` and are what the theme really renders — the
 column this table used to carry was the *Material 3* scale, which differs on
 nine of fifteen roles. Both columns are asserted role by role by
-`test/conformance/theme/text_theme_conformance_test.dart`; the `TYPE-*` ids
-are the entries in `docs/deviation_register.yaml`.
+`packages/gitui_skin_material/test/conformance/theme/text_theme_conformance_test.dart`; the `TYPE-*` ids
+are the entries in `packages/gitui_skin_material/docs/deviation_register.yaml`.
 
 | Component | Size | M3 | Weight | Use Case |
 |-----------|------|----|--------|----------|
@@ -806,9 +806,10 @@ BaseCard(
 ## 📚 See Also
 
 - **UI-CONCEPT.md** - Complete design system documentation (usage)
-- **deviation_register.yaml** - Registered departures from Material 3.
+- **packages/gitui_skin_material/docs/deviation_register.yaml** - Registered
+  departures from Material 3.
   Normative and executable; where it and any prose document disagree, the
-  register wins. Asserted by `test/conformance/`.
+  register wins. Asserted by `packages/gitui_skin_material/test/conformance/`.
 - **ACCESSIBILITY.md** - Accessibility standards, marked Asserted vs Aspirational
 - **NAVIGATION-PATTERNS.md** - Screen structure and navigation
 - **ERROR-HANDLING-PATTERNS.md** - Error state patterns

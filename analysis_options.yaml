@@ -43,7 +43,7 @@ analyzer:
     # (a future skin package, the lint plugin, any dev dependency) fails the
     # blocking analysis step, so "the app cannot reach a skin package" is a
     # hard invariant before the first skin package ever joins the workspace.
-    # test/conformance/dependency_isolation_gate_test.dart pins this entry.
+    # test/dependency_isolation_gate_test.dart pins this entry.
     depend_on_referenced_packages: error
 
 linter:

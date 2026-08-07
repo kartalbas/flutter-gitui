@@ -27,7 +27,7 @@ import 'base_menu_item.dart';
 /// badge and trailing for text, and the row's [IconTheme] for glyphs, which
 /// are held to the 3 : 1 non-text threshold rather than 4.5 : 1. The pairs are
 /// asserted per slot, per state and per brightness by
-/// test/conformance/a11y/component_colors_contrast_test.dart.
+/// packages/gitui_skin_material/test/conformance/a11y/component_colors_contrast_test.dart.
 ///
 /// Example usage:
 /// ```dart

@@ -6,9 +6,12 @@
 #   flutter test --tags a11y-extended      # extended accessibility sweeps
 #
 # golden:
-#   Pixel-comparison tests under test/conformance/goldens/. Each golden test
-#   is ALSO guarded with `skip: !Platform.isLinux` in code, because baselines
-#   are rasterised on the Linux CI runner and other OSes shape text
+#   Pixel-comparison tests. They live in the skin package whose pixels they
+#   render - packages/gitui_skin_material/test/conformance/goldens/ (#249 P0) -
+#   and that package declares the same tags; the declaration is kept here so
+#   `--exclude-tags golden` stays a known tag in this package too. Each golden
+#   test is ALSO guarded with `skip: !Platform.isLinux` in code, because
+#   baselines are rasterised on the Linux CI runner and other OSes shape text
 #   differently. The tag exists so CI and developers can select or exclude
 #   them explicitly regardless of platform.
 #

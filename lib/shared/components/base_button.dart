@@ -51,8 +51,9 @@ enum ButtonSize {
 /// and [TextButton] — so every button is keyboard-operable out of the box:
 /// Tab reaches it, a focus state layer marks it, and Enter and Space activate
 /// it. Divergences from the M3 defaults are registered in
-/// docs/deviation_register.yaml (BTN-001..BTN-006) and asserted by
-/// test/conformance/components/base_button_conformance_test.dart.
+/// packages/gitui_skin_material/docs/deviation_register.yaml
+/// (BTN-001..BTN-006) and asserted by
+/// packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart.
 ///
 /// ## Size Standards
 /// Sizes describe the visual container; every size sits inside a >= 48 dp
@@ -397,9 +398,10 @@ _MaterialBase _baseOf(ButtonVariant variant) {
 /// [IconButton.filled] and [IconButton.outlined] — so every icon action is
 /// keyboard-operable out of the box: Tab reaches it, a focus state layer
 /// marks it, and Enter and Space activate it. Divergences from the M3
-/// defaults are registered in docs/deviation_register.yaml
+/// defaults are registered in
+/// packages/gitui_skin_material/docs/deviation_register.yaml
 /// (ICO-001..ICO-005) and asserted by
-/// test/conformance/components/base_icon_button_conformance_test.dart.
+/// packages/gitui_skin_material/test/conformance/components/base_icon_button_conformance_test.dart.
 ///
 /// ## Size Standards
 /// Sizes describe the visual container; every size sits inside a >= 48 dp

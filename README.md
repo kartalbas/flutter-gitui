@@ -248,10 +248,15 @@ Notable conventions:
 Every push must pass the same checks CI runs, or the build fails:
 
 ```bash
-dart format lib test          # formatting
-flutter analyze lib test      # static analysis
-flutter test                  # unit/widget tests
+dart format .                 # formatting (the whole repository, as CI does)
+flutter analyze               # static analysis (the whole pub workspace)
 dart run custom_lint          # the project's own lint rules
+flutter test                  # the application's unit/widget tests
+
+# The Material 3 conformance suite lives in the skin package it measures,
+# which is a separate workspace member: the `flutter test` above does not
+# reach it, and CI runs it as its own step.
+cd packages/gitui_skin_material && flutter test
 ```
 
 ### Releases

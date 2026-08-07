@@ -210,7 +210,7 @@ Material Design's 4dp grid ensures touch targets meet minimum size requirements:
   Flutter 3.44.4 `packages/flutter/lib/src/material/constants.dart:27`.
   Asserted for `BaseButton` and `BaseIconButton` at every size by
   `meetsGuideline(androidTapTargetGuideline)` in
-  `test/conformance/components/base_button_conformance_test.dart` and
+  `packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart` and
   `..._icon_button_conformance_test.dart`.
 - Icon buttons, **painted container**: 32 / 40 / 48 dp for small / medium /
   large. The M3 container is a single 40 dp
@@ -432,7 +432,7 @@ What is actually the case:
   carries the same exemption for inactive components. The 38 % is Material 3's
   disabled treatment (`filled_button.dart:559`), and this app conforms to it —
   that conformance is asserted by
-  `test/conformance/components/base_button_conformance_test.dart`
+  `packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart`
   (`BaseButton.disabled.foregroundColor`). It is a *conformance* result, not a
   contrast result.
 - **Hint text at 60 % is not exempt** — placeholder text is live text and must
@@ -481,7 +481,7 @@ it delegates to `FilledButton`/`OutlinedButton`/`TextButton`, so the M3
 disabled treatment applies unchanged — container `onSurface` at **12 %**
 (`filled_button.dart:550`), content `onSurface` at **38 %**
 (`filled_button.dart:559`). Both are asserted as conforming by
-`test/conformance/components/base_button_conformance_test.dart` (tokens
+`packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart` (tokens
 `BaseButton.disabled.containerColor` and `BaseButton.disabled.foregroundColor`).
 
 The snippet that used to stand here showed a `surfaceContainerHighest`
@@ -622,7 +622,7 @@ shade is tuned to be vivid, not to be readable as text on a near-white
 surface; the two goals conflict.
 
 What is true today, and is **asserted** by
-`test/conformance/a11y/git_colors_contrast_test.dart` across every selectable
+`packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart` across every selectable
 scheme and both brightnesses:
 
 - every text role holds **≥ 4.5:1** on all six painted surfaces, on its own
@@ -688,7 +688,7 @@ type scale, with enhanced rendering.
 **The block that used to stand here listed the M3 sizes and presented them as
 the app's sizes. They are not the same numbers.** Nine of the fifteen roles
 render smaller than M3 specifies. Both columns below are asserted, role by
-role, by `test/conformance/theme/text_theme_conformance_test.dart`, which
+role, by `packages/gitui_skin_material/test/conformance/theme/text_theme_conformance_test.dart`, which
 measures `AppTheme.lightTheme().textTheme` against
 `Typography.englishLike2021` (Flutter 3.44.4
 `packages/flutter/lib/src/material/typography.dart:2096-2112`).
@@ -712,7 +712,7 @@ measures `AppTheme.lightTheme().textTheme` against
 | `labelSmall` | 11 | 11 | conforms |
 
 App values are `lib/shared/theme/app_theme.dart:286-377`; the reasons for each
-reduction are in `docs/deviation_register.yaml` under the `TYPE-*` ids. Every
+reduction are in `packages/gitui_skin_material/docs/deviation_register.yaml` under the `TYPE-*` ids. Every
 role keeps the M3 `letterSpacing` and line `height` unchanged — only the size
 moves.
 

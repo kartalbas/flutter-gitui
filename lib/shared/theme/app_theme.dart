@@ -510,8 +510,9 @@ class AppTheme {
   /// `size` is the font size at [AppFontSize.medium] in logical pixels.
   /// Display, headline, title and body sizes are deliberately tuned below
   /// the phone-first Material 3 defaults for this dense desktop app; every
-  /// deviation is recorded in docs/deviation_register.yaml with the M3 value
-  /// noted inline below. The other settings derive from medium via
+  /// deviation is recorded in
+  /// packages/gitui_skin_material/docs/deviation_register.yaml with the M3
+  /// value noted inline below. The other settings derive from medium via
   /// [_fontSizeFactor].
   ///
   /// `tracking` (letter spacing in logical pixels) and `height` (line height

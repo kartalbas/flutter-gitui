@@ -1184,8 +1184,10 @@ const Map<String, DialogExclusion> dialogSourceExclusions = {
 };
 
 /// The package root, found by walking up to the nearest pubspec.yaml - the
-/// same resolution test/conformance/support/deviation_register.dart uses, so
-/// the census works no matter which directory the runner was started from.
+/// same resolution
+/// packages/gitui_skin_material/test/conformance/support/deviation_register.dart
+/// uses, so the census works no matter which directory the runner was
+/// started from.
 Directory packageRoot() {
   Directory directory = Directory.current;
   for (int i = 0; i < 10; i++) {

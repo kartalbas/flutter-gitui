@@ -9,9 +9,9 @@
 /// answer here is the same one: derive the foreground from the background it
 /// is actually painted on, and assert the pair.
 ///
-/// `test/conformance/a11y/component_colors_contrast_test.dart` measures every
-/// pair the Base components resolve, in both brightnesses, against these
-/// thresholds.
+/// `packages/gitui_skin_material/test/conformance/a11y/component_colors_contrast_test.dart`
+/// measures every pair the Base components resolve, in both brightnesses,
+/// against these thresholds.
 library;
 
 import 'package:flutter/material.dart';

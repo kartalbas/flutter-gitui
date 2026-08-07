@@ -38,10 +38,10 @@ Widget _chipLabel(String text) => Text(text);
 ///
 /// Geometry, typography, state layers and the selection treatment are asserted
 /// against the SDK's own `FilterChip` by
-/// test/conformance/components/base_filter_chip_conformance_test.dart;
+/// packages/gitui_skin_material/test/conformance/components/base_filter_chip_conformance_test.dart;
 /// the two deliberate divergences — a selected outline that turns `secondary`
 /// instead of transparent, and no checkmark — are registered as CHIP-001 and
-/// CHIP-002 in docs/deviation_register.yaml.
+/// CHIP-002 in packages/gitui_skin_material/docs/deviation_register.yaml.
 ///
 /// Example usage:
 /// ```dart

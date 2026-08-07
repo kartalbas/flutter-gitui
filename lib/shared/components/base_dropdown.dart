@@ -10,9 +10,9 @@ import 'base_text_field.dart';
 ///
 /// Geometry, outline colors per state and typography are asserted against a
 /// real SDK `DropdownButtonFormField` by
-/// test/conformance/components/base_dropdown_conformance_test.dart; the single
-/// deliberate divergence is registered as DROP-001 in
-/// docs/deviation_register.yaml.
+/// packages/gitui_skin_material/test/conformance/components/base_dropdown_conformance_test.dart;
+/// the single deliberate divergence is registered as DROP-001 in
+/// packages/gitui_skin_material/docs/deviation_register.yaml.
 class BaseDropdown<T> extends StatelessWidget {
   final T? initialValue;
   final String? labelText;

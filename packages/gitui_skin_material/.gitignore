@@ -1,0 +1,5 @@
+# The repository root ignores `/build/` anchored at the root only, so this
+# workspace member needs its own entry or `flutter test` artifacts (fonts,
+# shaders, dill caches) would be committed with the skin.
+build/
+.dart_tool/

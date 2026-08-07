@@ -41,9 +41,9 @@ enum TextFieldVariant {
 ///
 /// Geometry, outline colors per state, typography and the disabled and error
 /// treatments are asserted against a real SDK `TextField` by
-/// test/conformance/components/base_text_field_conformance_test.dart; the three
-/// deliberate divergences are registered as FIELD-001..FIELD-003 in
-/// docs/deviation_register.yaml.
+/// packages/gitui_skin_material/test/conformance/components/base_text_field_conformance_test.dart;
+/// the three deliberate divergences are registered as FIELD-001..FIELD-003 in
+/// packages/gitui_skin_material/docs/deviation_register.yaml.
 ///
 /// Example usage:
 /// ```dart

@@ -38,13 +38,13 @@ current evidence for each.
 
 | Criterion | Requirement | Status | Evidence |
 |---|---|---|---|
-| **1.4.3 Contrast (Minimum)** | Text ≥ 4.5:1 | **Asserted for the git semantic palette only** | `test/conformance/a11y/git_colors_contrast_test.dart` |
+| **1.4.3 Contrast (Minimum)** | Text ≥ 4.5:1 | **Asserted for the git semantic palette only** | `packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart` |
 | **1.4.11 Non-text Contrast** | UI components ≥ 3:1 | **Asserted for the commit-graph lanes only** | same test |
-| **2.1.1 Keyboard** | All functionality operable by keyboard | **Asserted for `BaseButton` and `BaseIconButton`** (Tab reaches them, Enter and Space both activate); **Aspirational app-wide** | `test/conformance/components/base_button_conformance_test.dart`, `..._icon_button_...` — group `keyboard operation` |
+| **2.1.1 Keyboard** | All functionality operable by keyboard | **Asserted for `BaseButton` and `BaseIconButton`** (Tab reaches them, Enter and Space both activate); **Aspirational app-wide** | `packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart`, `..._icon_button_...` — group `keyboard operation` |
 | **2.1.2 No Keyboard Trap** | Focus can always leave | **Aspirational** — nothing asserts it | — |
-| **2.4.7 Focus Visible** | Focus is always visible | **Asserted for `BaseButton`/`BaseIconButton`** (the M3 focus state layer is measured in the ink paint stream); **deliberately absent on `BaseCard`/`BaseListItem`**, whose collection owns the Tab stop — registered as `CARD-003` and `LIST-002`; **Aspirational elsewhere** | same suites, group `keyboard operation`; `docs/deviation_register.yaml` |
+| **2.4.7 Focus Visible** | Focus is always visible | **Asserted for `BaseButton`/`BaseIconButton`** (the M3 focus state layer is measured in the ink paint stream); **deliberately absent on `BaseCard`/`BaseListItem`**, whose collection owns the Tab stop — registered as `CARD-003` and `LIST-002`; **Aspirational elsewhere** | same suites, group `keyboard operation`; `packages/gitui_skin_material/docs/deviation_register.yaml` |
 | **3.2.4 Consistent Identification** | Components identified consistently | **Aspirational** — enforced socially by the `Base*` layer, not by a test | — |
-| **4.1.2 Name, Role, Value** | Name/role/state exposed to AT | **Asserted for `BaseIconButton` with a tooltip** (`labeledTapTargetGuideline`); **Aspirational elsewhere** | `test/conformance/components/base_icon_button_conformance_test.dart` — `the tooltip labels the tap target` |
+| **4.1.2 Name, Role, Value** | Name/role/state exposed to AT | **Asserted for `BaseIconButton` with a tooltip** (`labeledTapTargetGuideline`); **Aspirational elsewhere** | `packages/gitui_skin_material/test/conformance/components/base_icon_button_conformance_test.dart` — `the tooltip labels the tap target` |
 
 There is no app-level accessibility audit, no golden-based check, and no use of
 Flutter's `textContrastGuideline` anywhere in the suite — the contrast that
@@ -119,7 +119,7 @@ the theme's brightness. The values are derived from the previous palette's
 hues by HCT tone mapping.
 
 **What is asserted, and by which test.**
-`test/conformance/a11y/git_colors_contrast_test.dart` — a single test that
+`packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart` — a single test that
 iterates **every** `AppColorScheme` value × **both** brightnesses and checks:
 
 1. every text role holds **≥ 4.5:1** against each of six painted surfaces —
@@ -177,7 +177,7 @@ All functionality must be accessible via keyboard without requiring a mouse.
 
 > **Asserted:** Tab moves focus onto a `BaseButton`/`BaseIconButton`, the M3
 > focus state layer paints, and **Enter and Space each fire `onPressed`**
-> (`test/conformance/components/base_button_conformance_test.dart` and
+> (`packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart` and
 > `..._icon_button_...`, group `keyboard operation`).
 >
 > **Aspirational — everything else in this section.** No test asserts that
@@ -186,7 +186,7 @@ All functionality must be accessible via keyboard without requiring a mouse.
 > arrow keys navigate a list or tree. The table and examples below describe
 > the intended contract, not a verified one. `BaseCard` and `BaseListItem`
 > deliberately do **not** take a Tab stop (`CARD-003`, `LIST-002` in
-> `docs/deviation_register.yaml`) — the surrounding collection is the single
+> `packages/gitui_skin_material/docs/deviation_register.yaml`) — the surrounding collection is the single
 > Tab stop and the arrow keys move the highlight within it, so an unfocusable
 > row is by design, not a defect.
 
@@ -279,7 +279,7 @@ All interactive elements must be properly labeled for screen readers.
 
 > **Asserted:** exactly one thing — a `BaseIconButton` carrying a `tooltip`
 > satisfies `labeledTapTargetGuideline`
-> (`test/conformance/components/base_icon_button_conformance_test.dart`).
+> (`packages/gitui_skin_material/test/conformance/components/base_icon_button_conformance_test.dart`).
 >
 > **Aspirational:** everything else in this section. No test walks the
 > semantics tree of a screen, and no screen reader has been run against a
@@ -416,12 +416,12 @@ pass review while failing the test.
 at **every** `ButtonSize`, and the `small` size is additionally checked to keep
 its compact painted container *inside* a ≥ 48 dp hit area:
 
-- `test/conformance/components/base_button_conformance_test.dart` — group `tap targets`
-- `test/conformance/components/base_icon_button_conformance_test.dart` — group `tap targets`
+- `packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart` — group `tap targets`
+- `packages/gitui_skin_material/test/conformance/components/base_icon_button_conformance_test.dart` — group `tap targets`
 
 This is the distinction that matters: the *painted container* is 32 / 40 / 48
 dp (registered as `BTN-002`, `BTN-005`, `ICO-002`, `ICO-005` in
-`docs/deviation_register.yaml`), while the *layout box* is inflated to ≥ 48 dp
+`packages/gitui_skin_material/docs/deviation_register.yaml`), while the *layout box* is inflated to ≥ 48 dp
 by Material's padded tap-target mechanism. A component that hard-codes a
 `Container(width:, height:)` instead of delegating to `ButtonStyleButton`
 discards that mechanism and ships a sub-48 dp target — which is exactly how
@@ -461,7 +461,7 @@ Icon buttons without text labels require extra care:
 
 **Asserted:** `BaseIconButton` with a `tooltip` passes
 `meetsGuideline(labeledTapTargetGuideline)`
-(`test/conformance/components/base_icon_button_conformance_test.dart` — `the
+(`packages/gitui_skin_material/test/conformance/components/base_icon_button_conformance_test.dart` — `the
 tooltip labels the tap target`). A `BaseIconButton` **without** a tooltip has
 no asserted label; the tooltip is what supplies it.
 
@@ -712,8 +712,8 @@ multiplier** applied to every role's `medium` size and rounded to whole
 logical pixels — not a fixed pixel offset, and the `medium` column is **not**
 the Material 3 default (`app_theme.dart:231-236` and `:264-378`; the
 departures from M3 are registered as `TYPE-001`..`TYPE-009` in
-`docs/deviation_register.yaml` and asserted by
-`test/conformance/theme/text_theme_conformance_test.dart`).
+`packages/gitui_skin_material/docs/deviation_register.yaml` and asserted by
+`packages/gitui_skin_material/test/conformance/theme/text_theme_conformance_test.dart`).
 
 ```dart
 enum AppFontSize {
@@ -743,7 +743,7 @@ Git semantic colors are *intended* to work for most types of colorblindness.
 ### Why Git Colors Work
 
 **This has never been measured.** No test simulates a colour-vision
-deficiency, and `test/conformance/a11y/git_colors_contrast_test.dart` checks
+deficiency, and `packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart` checks
 luminance contrast against surfaces only — it says nothing about whether two
 git roles are distinguishable *from each other* under any deficiency. The
 three lines below are design intent, not a result:
@@ -861,8 +861,8 @@ Before submitting a PR with UI changes, verify:
 - [ ] **Base* components**: Using wrapper components (no raw Material widgets)
 - [ ] **Theme colors**: Using `ColorScheme` (no hardcoded colors)
 - [ ] **If a `Base*` component or the theme changed**:
-      `flutter test test/conformance/` is green — that is the only part of
-      this checklist a machine verifies
+      `cd packages/gitui_skin_material && flutter test` is green — that is
+      the only part of this checklist a machine verifies
 
 ### Recommended
 
@@ -912,7 +912,7 @@ For accessibility questions or to report accessibility issues, please:
 1. Check this guide first — and note whether the relevant claim is marked
    **Asserted** or **Aspirational**
 2. Review `docs/UI-CONCEPT.md` §5.2 for component patterns and the conformance
-   suite, and `docs/deviation_register.yaml` for approved departures
+   suite, and `packages/gitui_skin_material/docs/deviation_register.yaml` for approved departures
 3. Open a GitHub issue with label `accessibility`
 4. Include details about the assistive technology used (screen reader, keyboard, etc.)
 

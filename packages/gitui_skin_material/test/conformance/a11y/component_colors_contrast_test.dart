@@ -701,7 +701,7 @@ const Set<String> kMeasuredComponentSources = <String>{
 /// oversight, and moving the boundary means enrolling that layer in the whole
 /// matrix rather than in this one file.
 List<String> _selectionContainerComponents() {
-  final Directory root = _packageRoot();
+  final Directory root = _applicationRoot();
   final Directory components = Directory('${root.path}/lib/shared/components');
   final RegExp pattern = RegExp(r'\b(secondaryContainer|tertiaryContainer)\b');
   final List<String> files = <String>[];
@@ -720,8 +720,21 @@ List<String> _selectionContainerComponents() {
   return files;
 }
 
+/// The application package root: this package's own root (`packages/
+/// gitui_skin_material/`) less the two directories that nest it, which is the
+/// same `path: ../..` edge this package's pubspec declares its `flutter_gitui`
+/// dependency with.
+///
+/// The census below scans the *application's* component sources. Since this
+/// suite moved into the Material skin package (#408, #249 §5.1) the nearest
+/// pubspec.yaml above it is this package's, so the plain package-root walk
+/// would look for `lib/shared/components` inside a package that has no `lib/`.
+Directory _applicationRoot() => _packageRoot().parent.parent;
+
 /// The package root, found by walking up to the directory holding pubspec.yaml
-/// — the same walk test/conformance/support/deviation_register.dart makes.
+/// — the same walk
+/// packages/gitui_skin_material/test/conformance/support/deviation_register.dart
+/// makes.
 Directory _packageRoot() {
   Directory dir = Directory.current;
   for (int i = 0; i < 10; i++) {

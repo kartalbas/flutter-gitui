@@ -13,8 +13,8 @@ import '../../generated/app_localizations.dart';
 ///
 /// It is measured against the same oracle as [BaseTextField] — a real SDK
 /// `TextField` with an `OutlineInputBorder` — by
-/// test/conformance/components/base_date_field_conformance_test.dart, because
-/// it is the same M3 component: an `InputDecorator` around a value.
+/// packages/gitui_skin_material/test/conformance/components/base_date_field_conformance_test.dart,
+/// because it is the same M3 component: an `InputDecorator` around a value.
 ///
 /// It therefore speaks the text field's state language rather than a button's:
 /// hover darkens the outline to `onSurface` and focus draws it in `primary` at

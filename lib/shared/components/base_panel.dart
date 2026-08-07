@@ -14,7 +14,8 @@ import '../../shared/theme/app_theme.dart';
 /// flutter/lib/src/material/expansion_tile.dart:907-925): a 56 dp minimum
 /// height, an `onSurfaceVariant` caret while collapsed and a `primary` one
 /// while expanded, and hover/focus/press state layers painted by its
-/// [InkWell]. See test/conformance/components/base_panel_conformance_test.dart.
+/// [InkWell]. See
+/// packages/gitui_skin_material/test/conformance/components/base_panel_conformance_test.dart.
 ///
 /// Example usage:
 /// ```dart

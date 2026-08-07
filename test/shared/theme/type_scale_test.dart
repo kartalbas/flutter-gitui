@@ -9,7 +9,8 @@ import 'package:google_fonts/google_fonts.dart';
 /// paired with the size this app renders at `AppFontSize.medium`.
 ///
 /// Where the two differ the app value is a registered desktop-density
-/// deviation; see docs/deviation_register.yaml, entries TYPE-001..TYPE-009.
+/// deviation; see packages/gitui_skin_material/docs/deviation_register.yaml,
+/// entries TYPE-001..TYPE-009.
 const _mediumScale =
     <String, ({double app, double m3, double tracking, double height})>{
       'displayLarge': (app: 45, m3: 57, tracking: -0.25, height: 1.12),
@@ -71,7 +72,8 @@ void main() {
           reason:
               '${entry.key} font size drifted. Material 3 specifies '
               '${entry.value.m3}; this app renders ${entry.value.app} as a '
-              'registered desktop deviation (docs/deviation_register.yaml).',
+              'registered desktop deviation '
+              '(packages/gitui_skin_material/docs/deviation_register.yaml).',
         );
       }
     });

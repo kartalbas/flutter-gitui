@@ -14,13 +14,13 @@ import '../../shared/theme/app_theme.dart';
 /// Hover and press are **not** container-color swaps but Material state
 /// layers painted by the card's own [InkWell], so they read the same on a
 /// resting card and on a selected one. See
-/// test/conformance/components/base_card_conformance_test.dart.
+/// packages/gitui_skin_material/test/conformance/components/base_card_conformance_test.dart.
 ///
 /// The content's text color follows whichever of those containers is painted,
 /// through [readableForeground], so a selection never leaves the label on a
 /// role that was chosen against the unselected background. The pairs are
 /// asserted per state and per brightness by
-/// test/conformance/a11y/component_colors_contrast_test.dart.
+/// packages/gitui_skin_material/test/conformance/a11y/component_colors_contrast_test.dart.
 ///
 /// Example usage:
 /// ```dart

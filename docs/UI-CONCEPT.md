@@ -16,12 +16,12 @@ is not executed.
 
 **Precedence, highest first:**
 
-1. **`docs/deviation_register.yaml` — the normative machine-readable appendix
+1. **`packages/gitui_skin_material/docs/deviation_register.yaml` — the normative machine-readable appendix
    to this document.** Where this document and the register disagree, **the
    register wins**, without exception and without discussion. The register is
-   executed by `test/conformance/`: an unregistered mismatch fails a test, and
+   executed by `packages/gitui_skin_material/test/conformance/`: an unregistered mismatch fails a test, and
    a registered entry that has come back into line fails as stale
-   (`test/conformance/support/expect_conformant.dart`). This document is
+   (`packages/gitui_skin_material/test/conformance/support/expect_conformant.dart`). This document is
    executed by nobody. A number here can rot silently; a number there cannot.
 2. **The Flutter SDK sources** for every Material 3 spec value. The ruler is
    `packages/flutter/lib/src/material/`, specifically the
@@ -34,7 +34,7 @@ this file" rule was never true and is withdrawn:
 
 | Document | Scope |
 |---|---|
-| `docs/deviation_register.yaml` | Registered departures from M3 (normative, executable) |
+| `packages/gitui_skin_material/docs/deviation_register.yaml` | Registered departures from M3 (normative, executable) |
 | `docs/ACCESSIBILITY.md` | Accessibility standards, and what is actually asserted |
 | `docs/COMPONENT-QUICK-REFERENCE.md` | Per-component API lookup |
 | `docs/DESIGN-RATIONALE.md` | Why the system is shaped the way it is |
@@ -56,8 +56,8 @@ Material 3 *conformance* result, and the two must not be conflated.**
 
 What the migration established is that the codebase routes through the Base\*
 layer instead of raw Material widgets. Whether that layer matches Material 3
-is a separate question, answered by `test/conformance/` and recorded in
-`docs/deviation_register.yaml` — not by this list.
+is a separate question, answered by `packages/gitui_skin_material/test/conformance/` and recorded in
+`packages/gitui_skin_material/docs/deviation_register.yaml` — not by this list.
 
 **Current state (usage):**
 - ✅ All dialogs use BaseDialog (0 violations)
@@ -69,13 +69,13 @@ is a separate question, answered by `test/conformance/` and recorded in
 - ✅ 64 files migrated across 15 commits
 
 **Current state (conformance):** every `Base*` component is now measured
-against its Material 3 oracle by a suite under `test/conformance/components/`
+against its Material 3 oracle by a suite under `packages/gitui_skin_material/test/conformance/components/`
 — the buttons, the container components (`BaseCard`, `BaseListItem`,
 `BasePanel`), the input components (`BaseTextField`, `BaseDropdown`,
 `BaseDateField`), the chips, the two dialogs, the menu family and the badge
 family — and the app's `TextTheme` by
-`test/conformance/theme/text_theme_conformance_test.dart`. Every deliberate
-departure those suites find is registered in `docs/deviation_register.yaml`,
+`packages/gitui_skin_material/test/conformance/theme/text_theme_conformance_test.dart`. Every deliberate
+departure those suites find is registered in `packages/gitui_skin_material/docs/deviation_register.yaml`,
 and the register is executable in both directions: an unregistered mismatch
 fails, and a registered entry that has come back into line fails as stale.
 
@@ -130,7 +130,7 @@ Flutter GitUI has 7 comprehensive base components:
 "Complete" above means *implemented and used everywhere* — see the note on
 usage versus conformance at the top of this document. Each of these components
 additionally has a Material 3 conformance suite under
-`test/conformance/components/`, which is a separate claim: that the component
+`packages/gitui_skin_material/test/conformance/components/`, which is a separate claim: that the component
 matches the specification, not merely that call sites use it.
 
 ---
@@ -149,13 +149,13 @@ matches the specification, not merely that call sites use it.
 - Helper functions for common dialogs
 
 > **Conformance: measured.**
-> `test/conformance/components/base_dialog_conformance_test.dart` asserts
+> `packages/gitui_skin_material/test/conformance/components/base_dialog_conformance_test.dart` asserts
 > nineteen tokens against a real `AlertDialog` pushed through the same harness
 > and read with the same probes. Padding, action spacing, action alignment,
 > elevation, surface role, surface tint, barrier colour, title role, content
 > role and icon size all measure the Material 3 value — the padding used to be
 > a uniform 32px and now spends M3's asymmetric 24/16/24. Four departures are
-> approved and recorded in `docs/deviation_register.yaml`: the 12px corner
+> approved and recorded in `packages/gitui_skin_material/docs/deviation_register.yaml`: the 12px corner
 > against M3's 28 (DLG-001, Flutter 3.44.4
 > `packages/flutter/lib/src/material/dialog.dart:1967`), the `primary` variant
 > icon against `secondary` (DLG-002), and the fixed 650px column against M3's
@@ -213,11 +213,11 @@ await showDialog(
 > **Conformance: measured.** `BaseButton` maps its variants onto
 > `FilledButton` / `OutlinedButton` / `TextButton` and is measured against
 > those classes' `defaultStyleOf` by
-> `test/conformance/components/base_button_conformance_test.dart`. The M3
+> `packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart`. The M3
 > corner is a `StadiumBorder` — 20.0 dp at the 40 dp container
 > (`_FilledButtonDefaultsM3.shape`, Flutter 3.44.4 `filled_button.dart:645`) —
 > so the 8 dp corner is a **registered** deviation, `BTN-001` in
-> `docs/deviation_register.yaml`. Icon sizes are **16 / 18 / 18** dp for
+> `packages/gitui_skin_material/docs/deviation_register.yaml`. Icon sizes are **16 / 18 / 18** dp for
 > small / medium / large (M3 is 18 for all three,
 > `_FilledButtonDefaultsM3.iconSize`, `filled_button.dart:617`; the small step
 > is registered as `BTN-004`). Container heights are **32 / 40 / 48**
@@ -281,7 +281,7 @@ BaseIconButton(
 - Material Design 3 surface tones
 
 > **Conformance: measured** against `ListTile` by
-> `test/conformance/components/base_list_item_conformance_test.dart`. Start
+> `packages/gitui_skin_material/test/conformance/components/base_list_item_conformance_test.dart`. Start
 > inset (16), end inset (24), shape (0), leading gap (16), min tile height
 > (56) and the `bodyLarge` title role all conform
 > (`_LisTileDefaultsM3`, Flutter 3.44.4 `list_tile.dart:1818-1860`). Two
@@ -331,7 +331,7 @@ BaseListItem(
 - Selection support
 
 > **Conformance: measured** against `Card.outlined` by
-> `test/conformance/components/base_card_conformance_test.dart`. The 12 dp
+> `packages/gitui_skin_material/test/conformance/components/base_card_conformance_test.dart`. The 12 dp
 > corner, the 0 elevation, the `outlineVariant` 1 dp border and the
 > `bodyMedium` content role all conform to `_OutlinedCardDefaultsM3`
 > (Flutter 3.44.4 `card.dart:363-399`). Three departures are registered:
@@ -375,13 +375,13 @@ BaseCard(
 - Border radius: `AppTheme.radiusS` (4px, `base_text_field.dart:336`)
 
 > **Conformance: measured.**
-> `test/conformance/components/base_text_field_conformance_test.dart` asserts
+> `packages/gitui_skin_material/test/conformance/components/base_text_field_conformance_test.dart` asserts
 > nineteen tokens against a real `TextField` pumped through the same harness,
 > reading the container, its outline and its corners out of the paint stream
 > because `InputDecorator` resolves them privately. The 4 dp corner is
 > Flutter's `OutlineInputBorder` default and is now asserted as one; three
 > departures are registered as FIELD-001 to FIELD-003 in
-> `docs/deviation_register.yaml`.
+> `packages/gitui_skin_material/docs/deviation_register.yaml`.
 
 **Example:**
 ```dart
@@ -461,7 +461,7 @@ Icon(PhosphorIconsRegular.plus, color: context.gitColors.added)
 | `branchStash` | `#8C10A1` | `#ED76FD` |
 
 Values are `git_semantic_colors.dart:65-110`. The contrast these hold is
-asserted by `test/conformance/a11y/git_colors_contrast_test.dart`; see
+asserted by `packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart`; see
 `docs/ACCESSIBILITY.md` for exactly what that test checks.
 
 ---
@@ -473,7 +473,7 @@ asserted by `test/conformance/a11y/git_colors_contrast_test.dart`; see
 When implementing any UI component:
 - ✅ Follow the patterns in this section for which component and which
   constant to reach for
-- ✅ Check `docs/deviation_register.yaml` before changing any value a `Base*`
+- ✅ Check `packages/gitui_skin_material/docs/deviation_register.yaml` before changing any value a `Base*`
   component renders — the register outranks this section
 - ❌ Do not treat a number in this section as a Material 3 spec value unless
   it carries an SDK `file:line`
@@ -1022,24 +1022,24 @@ measuring the rendered widget against the SDK's own generated defaults.
 **How to answer the conformance question:**
 
 ```bash
-flutter test test/conformance/
+cd packages/gitui_skin_material && flutter test
 ```
 
 **What that runs, and what each part proves:**
 
 | Path | What it measures | Oracle |
 |---|---|---|
-| `test/conformance/theme/text_theme_conformance_test.dart` | all 15 M3 text roles of the app's `TextTheme` | `Typography.englishLike2021`, `typography.dart:2096-2112` |
-| `test/conformance/components/base_button_conformance_test.dart` | geometry, label role, icon size, colour roles, state layers, focus, Enter/Space, tap target | `FilledButton`/`OutlinedButton`/`TextButton` `defaultStyleOf` |
-| `test/conformance/components/base_icon_button_conformance_test.dart` | same, plus the tooltip-labelled tap target | `_IconButtonDefaultsM3`, pinned with citations |
-| `test/conformance/components/base_card_conformance_test.dart` | shape, elevation, container/border colour, margin, state layers | `Card.outlined` |
-| `test/conformance/components/base_list_item_conformance_test.dart` | insets, min height, shape, title role, state layers | `ListTile` |
-| `test/conformance/components/base_panel_conformance_test.dart` | container and header, measured against two oracles | `Card` + `ExpansionTile` header |
-| `test/conformance/a11y/git_colors_contrast_test.dart` | WCAG contrast of the git palette on every scheme, surface and brightness | WCAG 2.1 SC 1.4.3 / 1.4.11 |
-| `test/conformance/deviation_register_test.dart` | that every register entry is well-formed and reachable | — |
+| `packages/gitui_skin_material/test/conformance/theme/text_theme_conformance_test.dart` | all 15 M3 text roles of the app's `TextTheme` | `Typography.englishLike2021`, `typography.dart:2096-2112` |
+| `packages/gitui_skin_material/test/conformance/components/base_button_conformance_test.dart` | geometry, label role, icon size, colour roles, state layers, focus, Enter/Space, tap target | `FilledButton`/`OutlinedButton`/`TextButton` `defaultStyleOf` |
+| `packages/gitui_skin_material/test/conformance/components/base_icon_button_conformance_test.dart` | same, plus the tooltip-labelled tap target | `_IconButtonDefaultsM3`, pinned with citations |
+| `packages/gitui_skin_material/test/conformance/components/base_card_conformance_test.dart` | shape, elevation, container/border colour, margin, state layers | `Card.outlined` |
+| `packages/gitui_skin_material/test/conformance/components/base_list_item_conformance_test.dart` | insets, min height, shape, title role, state layers | `ListTile` |
+| `packages/gitui_skin_material/test/conformance/components/base_panel_conformance_test.dart` | container and header, measured against two oracles | `Card` + `ExpansionTile` header |
+| `packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart` | WCAG contrast of the git palette on every scheme, surface and brightness | WCAG 2.1 SC 1.4.3 / 1.4.11 |
+| `packages/gitui_skin_material/test/conformance/deviation_register_test.dart` | that every register entry is well-formed and reachable | — |
 
 **How a mismatch is resolved.** `expectConformant`
-(`test/conformance/support/expect_conformant.dart`) fails in *both*
+(`packages/gitui_skin_material/test/conformance/support/expect_conformant.dart`) fails in *both*
 directions:
 
 - a mismatch with **no** register entry fails as `M3 CONFORMANCE FAILURE`;
@@ -1052,18 +1052,18 @@ directions:
 
 So there are exactly two acceptable outcomes for a difference from Material 3:
 **make the component conform**, or **register the deviation** in
-`docs/deviation_register.yaml` with `id`, `component`, `property`,
+`packages/gitui_skin_material/docs/deviation_register.yaml` with `id`, `component`, `property`,
 `spec_value`, `app_value`, `spec_source` (an SDK `file:line`), `rationale` and
 `registered` date. An unregistered difference is a defect, not a decision.
 
 **Adding a measurement** additionally requires listing the token in
-`test/conformance/support/token_manifest.dart`; `expectConformant` refuses to
+`packages/gitui_skin_material/test/conformance/support/token_manifest.dart`; `expectConformant` refuses to
 assert on a token that is not in the manifest, so the set of things being
 measured stays reviewable in a diff.
 
 **Do not read silence as conformance.** Every `Base*` component now has a
 conformance suite, but a suite only measures the tokens listed in
-`test/conformance/support/token_manifest.dart`. Where this document gives a
+`packages/gitui_skin_material/test/conformance/support/token_manifest.dart`. Where this document gives a
 number that no token covers, it is a description of the current code, not a
 conformance claim.
 
@@ -1075,12 +1075,12 @@ conformance claim.
 
 During code reviews:
 - ✅ Cite this document for **usage** questions (which component, which constant)
-- ✅ Cite `docs/deviation_register.yaml` for **conformance** questions — and if
+- ✅ Cite `packages/gitui_skin_material/docs/deviation_register.yaml` for **conformance** questions — and if
   it disagrees with this document, the register is right
 - ✅ Cite an SDK `file:line` under
   `packages/flutter/lib/src/material/` for any Material 3 spec value
 - ❌ Never settle a conformance argument by quoting prose, this document
-  included; run `flutter test test/conformance/` instead
+  included; run `cd packages/gitui_skin_material && flutter test` instead
 
 ---
 
@@ -1109,9 +1109,10 @@ During code reviews:
    - ❌ Reject: Raw Text with manual styling
 
 6. **Conformance (only if the PR touches a `Base*` component or the theme)**
-   - ✅ Approve: `flutter test test/conformance/` is green, and any new
-     difference from Material 3 carries a `docs/deviation_register.yaml`
-     entry with an SDK `spec_source` and a reason
+   - ✅ Approve: `cd packages/gitui_skin_material && flutter test` is green,
+     and any new difference from Material 3 carries a
+     `packages/gitui_skin_material/docs/deviation_register.yaml` entry with
+     an SDK `spec_source` and a reason
    - ❌ Reject: a `Base*` geometry, typography role, state layer or tap target
      changed with no conformance run and no register entry
 
@@ -1267,9 +1268,9 @@ The rule is replaced by a precedence order.
 
 **ALWAYS:**
 - ✅ Use this document for UI **usage** decisions
-- ✅ Defer to `docs/deviation_register.yaml` on any **conformance** question —
+- ✅ Defer to `packages/gitui_skin_material/docs/deviation_register.yaml` on any **conformance** question —
   it is this document's normative machine-readable appendix, it is executed by
-  `test/conformance/`, and where the two disagree, **the register wins**
+  `packages/gitui_skin_material/test/conformance/`, and where the two disagree, **the register wins**
 - ✅ Take Material 3 spec values from the Flutter SDK
   (`packages/flutter/lib/src/material/`, the
   `// BEGIN GENERATED TOKEN PROPERTIES` blocks), citing `file:line`
@@ -1285,8 +1286,8 @@ The rule is replaced by a precedence order.
 
 **When asked to work on UI:**
 1. Read this document for the pattern
-2. Read `docs/deviation_register.yaml` before changing any `Base*` value
-3. Read the relevant `test/conformance/` suite to see what is already asserted
+2. Read `packages/gitui_skin_material/docs/deviation_register.yaml` before changing any `Base*` value
+3. Read the relevant `packages/gitui_skin_material/test/conformance/` suite to see what is already asserted
 4. Consult `docs/ACCESSIBILITY.md` for accessibility requirements
 5. If a number here is not backed by an SDK citation or a test, treat it as
    unverified and go measure it
@@ -1304,8 +1305,9 @@ The rule is replaced by a precedence order.
 **Prose does not prove conformance.**
 
 - Usage question → this document
-- Conformance question → `flutter test test/conformance/`, and
-  `docs/deviation_register.yaml` for anything deliberately different
+- Conformance question → `cd packages/gitui_skin_material && flutter test`,
+  and `packages/gitui_skin_material/docs/deviation_register.yaml` for anything
+  deliberately different
 - Material 3 spec value → the Flutter SDK, with a `file:line`
 
 ---

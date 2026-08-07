@@ -1,0 +1,54 @@
+name: gitui_skin_material
+description: >-
+  The Material 3 skin for Flutter GitUI (#249). Today it holds only the
+  Material conformance suite and this skin's deviation register; the skin
+  implementation itself arrives with P2. Nothing depends on it yet.
+publish_to: 'none'
+version: 0.0.0
+
+environment:
+  sdk: ^3.9.2
+
+# Member of the app's pub workspace so this package resolves against the same
+# Flutter/Dart SDK and the same shared transitive versions the app uses. The
+# workspace-isolation gate (analysis_options.yaml, depend_on_referenced_packages
+# at error severity, #383) keeps lib/ unable to import this package without a
+# declared dependency edge - and today there is none, in either direction, for
+# lib/: the register and the goldens are measurements of the app, not inputs to
+# it.
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The application under measurement. The conformance suite renders the real
+  # `Base*` components under the real `AppTheme`, so the dependency edge is
+  # genuine and `depend_on_referenced_packages` (error severity) is satisfied.
+  flutter_gitui:
+    path: ../..
+
+  # Direct imports of the conformance suite, declared here rather than relied
+  # on transitively for the same reason.
+  flex_color_scheme: ^8.4.0              # Theme factory the theme suite reads
+  google_fonts: ^8.2.0                   # Bundled fonts the harness pins
+  yaml: ^3.1.3                           # Parses this package's register
+
+  # The design-system lint gate. The conformance suite instantiates the raw
+  # Material oracles it measures against (`Card.outlined`, `ListTile`,
+  # `AlertDialog`, ...) and silences the matching rule per line with an
+  # `// ignore:` comment; those ignores are only meaningful while the rules
+  # actually run here, so the plugin travels with the suite.
+  custom_lint: ^0.8.1
+  flutter_gitui_lint:
+    path: ../../lint_rules/flutter_gitui_lint
+
+flutter:
+  # The app declares `uses-material-design: true` and this package depends on
+  # it, so the primary pubspec of a `flutter test` run started here must agree
+  # or every run prints a mismatch warning.
+  uses-material-design: true

@@ -453,6 +453,10 @@ flutter analyze
 # Run tests
 flutter test
 
+# Run the Material 3 conformance suite. It lives in the skin package it
+# measures, a separate workspace member, so `flutter test` above misses it.
+cd packages/gitui_skin_material && flutter test
+
 # Test in both themes
 # Settings → Appearance → Theme → Light/Dark
 ```

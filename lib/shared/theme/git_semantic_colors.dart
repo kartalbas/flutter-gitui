@@ -9,7 +9,8 @@ import 'package:flutter/material.dart';
 /// contrast over every surface the app paints them on (all ten selectable
 /// schemes; scaffold through surfaceContainerHighest; the 12 % diff-row tint;
 /// the 15 % badge tint) is at least 4.5:1 for text roles and 3:1 for the
-/// commit-graph lanes. `test/conformance/a11y/git_colors_contrast_test.dart`
+/// commit-graph lanes.
+/// `packages/gitui_skin_material/test/conformance/a11y/git_colors_contrast_test.dart`
 /// asserts exactly that and must be kept passing when any value changes.
 @immutable
 class GitSemanticColors extends ThemeExtension<GitSemanticColors> {

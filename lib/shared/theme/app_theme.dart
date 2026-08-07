@@ -66,20 +66,8 @@ class AppTheme {
       ],
       textTheme: _brightnessCorrectedTextTheme(theme),
       chipTheme: _stateAwareChipTheme(theme),
-      popupMenuTheme: PopupMenuThemeData(
-        textStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        titleTextStyle: theme.textTheme.titleLarge?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-        contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-        iconColor: theme.colorScheme.primary,
-      ),
+      popupMenuTheme: layeredPopupMenuTheme(theme),
+      dialogTheme: layeredDialogTheme(theme),
       textButtonTheme: TextButtonThemeData(
         style: _layerOn(
           TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
@@ -130,11 +118,7 @@ class AppTheme {
           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: theme.colorScheme.primary,
-        selectionColor: theme.colorScheme.primary.withValues(alpha: 0.3),
-        selectionHandleColor: theme.colorScheme.primary,
-      ),
+      textSelectionTheme: layeredTextSelectionTheme(theme),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.android: _getPageTransition(animationSpeed),
@@ -189,20 +173,8 @@ class AppTheme {
       ],
       textTheme: _brightnessCorrectedTextTheme(theme),
       chipTheme: _stateAwareChipTheme(theme),
-      popupMenuTheme: PopupMenuThemeData(
-        textStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        titleTextStyle: theme.textTheme.titleLarge?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-        contentTextStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface,
-        ),
-        iconColor: theme.colorScheme.primary,
-      ),
+      popupMenuTheme: layeredPopupMenuTheme(theme),
+      dialogTheme: layeredDialogTheme(theme),
       textButtonTheme: TextButtonThemeData(
         style: _layerOn(
           TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
@@ -253,11 +225,7 @@ class AppTheme {
           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
         ),
       ),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: theme.colorScheme.primary,
-        selectionColor: theme.colorScheme.primary.withValues(alpha: 0.3),
-        selectionHandleColor: theme.colorScheme.primary,
-      ),
+      textSelectionTheme: layeredTextSelectionTheme(theme),
       pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.android: _getPageTransition(animationSpeed),
@@ -363,8 +331,124 @@ class AppTheme {
   ///
   /// [base] is nullable because a `…ButtonThemeData` may legitimately carry
   /// no style at all; there is then nothing to merge into.
+  ///
+  /// ## The rule this helper states
+  ///
+  /// **Nothing handed to `copyWith` above may be a freshly constructed
+  /// sub-theme.** Every sub-theme applied to the built theme has to be layered
+  /// onto the one [FlexThemeData] produced, and there are exactly two ways to
+  /// do that:
+  ///
+  ///   * a `ButtonStyle` layers with `merge`, which is this helper, because the
+  ///     app builds a whole style with `…Button.styleFrom` and needs it in
+  ///     front of the configured one; and
+  ///   * a `…ThemeData` layers with **its own** `copyWith` on the built
+  ///     instance — `theme.dialogTheme.copyWith(…)` rather than
+  ///     `DialogThemeData(…)` — which composes the same way round: the named
+  ///     arguments are the app's explicit choice and every field they omit is
+  ///     the configured value, kept.
+  ///
+  /// The distinction is only in the spelling; the rule is one rule. It was
+  /// broken twice, for four sub-themes in #399 and for three more in #416, in
+  /// both cases by writing the constructor form, and both times the loss was
+  /// silent because a discarded token has no symptom until someone measures
+  /// it.
+  ///
+  /// ## How the rule is enforced rather than merely stated
+  ///
+  /// Reading a value back off the built `ThemeData` is *not* enough on its own:
+  /// a substituted sub-theme that happens to hard-code the same numbers reads
+  /// back identically. So the three `…ThemeData` layers are written as the
+  /// named methods below — [layeredPopupMenuTheme], [layeredDialogTheme] and
+  /// [layeredTextSelectionTheme] — and `theme_token_reach_test.dart` drives
+  /// those methods with a *probe* [FlexSubThemesData] whose elevations and
+  /// corners are values no literal in this file could coincide with. A layered
+  /// method carries the probe values out; a substituting one carries this
+  /// file's own constants out and fails there by name.
   static ButtonStyle _layerOn(ButtonStyle addition, ButtonStyle? base) {
     return base == null ? addition : addition.merge(base);
+  }
+
+  /// The menu sub-theme, layered onto the one [FlexColorScheme] built for
+  /// [configured] rather than substituted for it (see [_layerOn] for the rule).
+  ///
+  /// What the substitution used to discard is the configured menu elevation
+  /// ([elevationLevel2]), which is also Material 3's own popup elevation
+  /// (Flutter 3.44.4 packages/flutter/lib/src/material/popup_menu.dart:1839,
+  /// `_PopupMenuDefaultsM3`), so the menu was already painting that number as
+  /// an SDK fallback and letting it through moves nothing on screen.
+  @visibleForTesting
+  static PopupMenuThemeData layeredPopupMenuTheme(ThemeData configured) {
+    return configured.popupMenuTheme.copyWith(
+      textStyle: configured.textTheme.bodyMedium?.copyWith(
+        color: configured.colorScheme.onSurface,
+      ),
+    );
+  }
+
+  /// The dialog sub-theme, layered onto the one [FlexColorScheme] built for
+  /// [configured] rather than substituted for it.
+  ///
+  /// This is the sub-theme with the most to lose: the wholesale replacement
+  /// discarded the configured dialog background (`surfaceContainerHigh`),
+  /// elevation ([elevationLevel3]), corner ([radiusL]) and action-row padding
+  /// all at once. None of the four changes a pixel. The background, the
+  /// elevation and the padding are the values Material 3 resolves anyway when
+  /// the theme says nothing (Flutter 3.44.4
+  /// packages/flutter/lib/src/material/dialog.dart:1962-1998,
+  /// `_DialogDefaultsM3`), and the corner is the one `BaseDialog` and
+  /// `BaseViewerDialog` already pin on the widget, where a widget value beats a
+  /// theme value (registered DLG-001). What changes is only that the dialog
+  /// surface is now *described* by this theme instead of falling back to the
+  /// SDK.
+  ///
+  /// That has one consequence outside this file, and it is the reason this
+  /// method is worth naming. `Dialog` and `AlertDialog` read `dialogTheme`
+  /// **before** `_DialogDefaultsM3` (dialog.dart:290-297 and :886), so every
+  /// field returned here is a field a stock `AlertDialog` pumped under this
+  /// theme reports as if it were the specification. The two dialog conformance
+  /// suites therefore pin exactly these seven tokens from `_DialogDefaultsM3`
+  /// instead of pumping an oracle for them, and
+  /// `base_dialog_conformance_test.dart` carries a guard that fails if this
+  /// method ever starts returning an eighth.
+  @visibleForTesting
+  static DialogThemeData layeredDialogTheme(ThemeData configured) {
+    return configured.dialogTheme.copyWith(
+      titleTextStyle: configured.textTheme.titleLarge?.copyWith(
+        color: configured.colorScheme.onSurface,
+      ),
+      contentTextStyle: configured.textTheme.bodyMedium?.copyWith(
+        color: configured.colorScheme.onSurface,
+      ),
+      iconColor: configured.colorScheme.primary,
+    );
+  }
+
+  /// The text-selection sub-theme, layered onto the one [FlexColorScheme] built
+  /// for [configured] rather than substituted for it.
+  ///
+  /// `TextSelectionThemeData` holds exactly three fields and all three are
+  /// named here, so this particular layering is **provably inert today**: the
+  /// constructor form would produce a byte-identical result, and no test can
+  /// tell the two apart. It is written this way anyway so the rule has no
+  /// exception to argue from — the day the SDK adds a fourth field, or
+  /// [FlexSubThemesData] starts configuring one, it arrives instead of
+  /// vanishing. `theme_token_reach_test.dart` asserts the exhaustiveness rather
+  /// than the layering, and fails the moment that premise stops holding.
+  ///
+  /// The one thing the layering direction *does* decide here is which side wins
+  /// where both speak: [FlexSubThemesData] tints the dark theme's selection at
+  /// 50 %, and the app's 30 % stays in front of it.
+  @visibleForTesting
+  static TextSelectionThemeData layeredTextSelectionTheme(
+    ThemeData configured,
+  ) {
+    final Color primary = configured.colorScheme.primary;
+    return configured.textSelectionTheme.copyWith(
+      cursorColor: primary,
+      selectionColor: primary.withValues(alpha: 0.3),
+      selectionHandleColor: primary,
+    );
   }
 
   /// Map AppColorScheme to FlexScheme

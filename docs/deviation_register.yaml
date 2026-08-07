@@ -573,9 +573,10 @@ deviations:
   # BaseDialog (lib/shared/components/base_dialog.dart), measured against a
   # real `AlertDialog` pushed with `showDialog` through the same conformance
   # harness. The spec values are the generated `_DialogDefaultsM3` and
-  # `AlertDialog`'s own layout defaults. Two tokens have to be pinned from
+  # `AlertDialog`'s own layout defaults. Seven tokens have to be pinned from
   # those sources rather than read off the pumped oracle, because this app's
-  # `dialogTheme` overrides them (see the suite's library comment); the
+  # `dialogTheme` carries a value for each of them and Dialog/AlertDialog read
+  # the theme before the defaults (see the suite's library comment); the
   # entries affected say so.
   #
   # BaseDialog's padding, action spacing, action alignment, elevation, surface
@@ -603,6 +604,45 @@ deviations:
       as a distinct floating layer - is answered here by the properties that do
       conform: the dialog sits at elevation 6 on surfaceContainerHigh behind a
       54% black barrier, and none of those three was ever the corner's job.
+
+      Since #416 the 12 dp exists in two places rather than one, and this
+      paragraph records which of them renders. When this entry was written,
+      app_theme.dart replaced the configured dialogTheme with a freshly built
+      one, so the built theme carried no dialog shape at all and the corner
+      reached the surface only from the component, which pins
+      AppTheme.radiusL on its Dialog. That sub-theme is now layered onto the
+      configured one instead of replacing it, so the theme carries the same
+      12 dp - from FlexSubThemesData.defaultRadius, which is the same rung of
+      the corner scale. Nothing on screen moved: a widget-level shape beats a
+      theme-level one (Flutter 3.44.4
+      packages/flutter/lib/src/material/dialog.dart:295, "shape ??
+      dialogTheme.shape ?? defaults.shape"), so BaseDialog's pin is still what
+      paints, and the
+      elevation and surface colour this rationale leans on above are now
+      stated by the theme rather than resolved as SDK fallbacks - the same
+      numbers either way. What did change is that the specification value can
+      no longer be measured by pumping an AlertDialog under this app's theme,
+      because that oracle would now report the app's own 12 dp back;
+      base_dialog_conformance_test.dart pins M3's 28 dp from _DialogDefaultsM3
+      with the citation above, exactly as it already pins the three text and
+      icon tokens, and asserts that the corner the theme carries and the corner
+      the component renders are the same number, so the two sources cannot
+      drift into two different dialogs.
+
+      That last consequence is not the corner's alone, and stating it here only
+      for the corner would be the more dangerous half of the truth. Dialog and
+      AlertDialog prefer the theme over _DialogDefaultsM3 for every field the
+      theme carries, so the elevation, the surface colour and the action-row
+      inset the paragraph above leans on stopped being independently measurable
+      at the same moment - and those three are the more treacherous case,
+      because their configured values coincide with the M3 default, which is
+      exactly the state in which a self-referential oracle looks green. Both
+      dialog suites therefore pin all seven fields the app's dialogTheme
+      carries (shape, elevation, backgroundColor, actionsPadding,
+      titleTextStyle, contentTextStyle, iconColor) and pump an oracle only for
+      what it does not, and base_dialog_conformance_test.dart carries a guard
+      asserting the app configures nothing beyond those seven, so an eighth
+      field cannot quietly turn one of the remaining oracles into a mirror.
     registered: 2026-08-07
 
   - id: DLG-002
@@ -684,6 +724,14 @@ deviations:
       over the first. The two dialog components must also agree - they open
       from the same screens, sometimes one from the other, and two different
       corner radii would read as two different kinds of surface.
+
+      The viewer pins AppTheme.radiusL on its own Dialog exactly as BaseDialog
+      does, so the mechanism paragraph of DLG-001 applies here unchanged: since
+      #416 the app theme carries the same 12 dp as well, the widget pin is
+      still what paints, and this suite pins M3's 28 dp rather than pumping an
+      oracle that would now report the app's value back. The same goes for the
+      other six fields the app's dialogTheme carries, which is why VIEW-005 and
+      VIEW-006 measure against a pinned 24 dp rather than against a pumped one.
     registered: 2026-08-07
 
   - id: VIEW-002

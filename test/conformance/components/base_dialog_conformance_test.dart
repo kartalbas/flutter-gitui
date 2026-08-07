@@ -14,19 +14,39 @@
 /// `ButtonStyleButton`), so the generated `_DialogDefaultsM3`
 /// (flutter/lib/src/material/dialog.dart:1954-1998) is reached by pumping the
 /// SDK widget. That works for every token the app leaves alone — and stops
-/// working for the three this app's own `dialogTheme` overrides. `AppTheme`
-/// configures `titleTextStyle`, `contentTextStyle` and `iconColor`
-/// (lib/shared/theme/app_theme.dart:70-78 in the light theme, :184-192 in the
-/// dark one), and `Dialog`/`AlertDialog` read the theme **before** the
-/// defaults, so a pumped `AlertDialog` reports the app's override rather than
-/// the M3 value and would measure this app against itself.
+/// working for every field this app's own `dialogTheme` carries, because
+/// `Dialog` and `AlertDialog` read the theme **before** the defaults
+/// (dialog.dart:290-297 for the surface, :818-886 for the content), so for
+/// those a pumped `AlertDialog` reports the app's own value as if it were the
+/// specification and the suite would be measuring this app against itself.
 ///
-/// Those three tokens are therefore pinned from `_DialogDefaultsM3` with source
-/// citations, exactly as the BaseIconButton suite pins `_IconButtonDefaultsM3`.
-/// They are pinned as *roles* (`textTheme.headlineSmall`, `colorScheme
-/// .secondary`) evaluated against the same theme, so the app's registered
-/// type-scale deviations cancel out of the comparison and only the role is
-/// measured.
+/// The rule this suite follows is therefore mechanical: **pin exactly the
+/// fields `AppTheme.layeredDialogTheme` returns non-null, pump everything
+/// else.** Since #416 that is seven fields, and the count is not a matter of
+/// judgement — `AppTheme` configures `titleTextStyle`, `contentTextStyle` and
+/// `iconColor` outright, and layering its choices onto the sub-theme
+/// `FlexSubThemesData` built (rather than replacing it, which is what #416
+/// fixed) lets the configured `shape`, `elevation`, `backgroundColor` and
+/// `actionsPadding` through as well. Five of those seven happen to coincide
+/// with the M3 default today, which is precisely why the contamination is
+/// invisible unless the oracle is pinned: an oracle that agrees with the
+/// specification by accident stops agreeing the moment somebody edits
+/// `FlexSubThemesData`, and nothing would fail.
+///
+/// The pinned values come from `_DialogDefaultsM3` with source citations,
+/// exactly as the BaseIconButton suite pins `_IconButtonDefaultsM3`. Colours
+/// and text are pinned as *roles* (`textTheme.headlineSmall`,
+/// `colorScheme.secondary`, `colorScheme.surfaceContainerHigh`) evaluated
+/// against the same theme, so the app's registered type-scale deviations cancel
+/// out of the comparison and only the role is measured; the corner, the
+/// elevation and the action insets are pinned as literals, because a number has
+/// no role to evaluate.
+///
+/// What keeps that list honest is the group 'the app theme cannot contaminate
+/// the oracle' below: it asserts that every `dialogTheme` field the suite still
+/// reads off a pumped oracle is null in the app's theme. Configure an eighth
+/// field in `app_theme.dart` and that guard fails by name, instead of an oracle
+/// quietly turning into a mirror.
 ///
 /// Worth recording while reading this: BaseDialog renders its title with
 /// `HeadlineSmallLabel`, which *conforms* to M3 — and therefore silently
@@ -50,6 +70,21 @@ const String _title = 'Dialog title';
 const String _content = 'Dialog content';
 const String _first = 'Cancel';
 const String _second = 'Confirm';
+
+/// Material 3's own dialog numbers, pinned from the generated
+/// `_DialogDefaultsM3` (Flutter 3.44.4
+/// packages/flutter/lib/src/material/dialog.dart:1962-1998) rather than read
+/// off a pumped `AlertDialog`, because this app's `dialogTheme` carries a value
+/// for each of them and `Dialog`/`AlertDialog` read the theme before the
+/// defaults. See the library comment for the rule and
+/// `the app theme cannot contaminate the oracle` below for its guard.
+///
+/// The colour and text roles this app also overrides are pinned at their point
+/// of use instead, because a role has to be evaluated against the theme under
+/// test rather than written down as a number.
+const double _m3Corner = 28.0; // dialog.dart:1967
+const double _m3Elevation = 6.0; // dialog.dart:1966
+const double _m3ActionsInset = 24.0; // dialog.dart:1994, left/right/bottom
 
 /// The Material 3 oracle: a stock `AlertDialog`.
 ///
@@ -172,57 +207,75 @@ Color _iconColor(WidgetTester tester, Finder finder) {
 void main() {
   group('the dialog surface', () {
     testWidgets('corner radius (DLG-001)', (WidgetTester tester) async {
-      await pumpConformanceDialog(tester, _oracleDialog());
-      final double expected = _cornerRadius(_surfaceMaterial(tester).shape);
-      expect(
-        expected,
-        28.0,
-        reason:
-            'the M3 dialog corner is 28 dp '
-            '(dialog.dart:1961, _DialogDefaultsM3.shape); if the SDK moved, '
-            'DLG-001 has to be re-argued rather than silently re-measured',
-      );
-
+      // Pinned rather than pumped, and since #416 it has to be: app_theme.dart
+      // now layers the configured `dialogTheme` onto the built theme instead of
+      // replacing it, so the theme carries the app's own 12 dp corner, and
+      // `Dialog` reads the theme before the M3 defaults
+      // (dialog.dart:295, `shape ?? dialogTheme.shape ?? defaults.shape`).
+      // A pumped AlertDialog would therefore report 12 and measure this app
+      // against itself. If the SDK moves this number, DLG-001 has to be
+      // re-argued rather than silently re-measured.
       await pumpConformanceDialog(tester, _baseDialog());
+      final double rendered = _cornerRadius(_surfaceMaterial(tester).shape);
 
       expectConformant(
         token: 'BaseDialog.shape',
         component: 'BaseDialog',
-        measured: _cornerRadius(_surfaceMaterial(tester).shape),
-        expected: expected,
+        measured: rendered,
+        expected: _m3Corner,
+      );
+
+      // The anti-drift half of DLG-001, and the reason the register's rationale
+      // now names two sources. Since #416 the 12 dp exists twice: BaseDialog
+      // pins it on the `Dialog` widget, where a widget value beats a theme
+      // value, and the merged `dialogTheme` carries the same rung of the corner
+      // scale. The component's pin is what renders; this holds the theme to the
+      // same number so the two cannot drift into two different corners.
+      expect(
+        _cornerRadius(_theme(tester).dialogTheme.shape),
+        rendered,
+        reason:
+            'The dialog corner the app theme carries and the corner BaseDialog '
+            'pins (base_dialog.dart) must be the same number. Both read '
+            'AppTheme.radiusL — the component directly, the theme through '
+            "FlexSubThemesData.defaultRadius — so a mismatch means one of the "
+            'two was edited alone and an SDK-owned dialog would now round '
+            'differently from the app\'s own.',
       );
     });
 
     testWidgets('elevation', (WidgetTester tester) async {
-      await pumpConformanceDialog(tester, _oracleDialog());
-      final double expected = _surfaceMaterial(tester).elevation;
-
+      // Pinned, for the reason the library comment gives: the app's layered
+      // `dialogTheme` states an elevation, `Dialog` reads
+      // `elevation ?? dialogTheme.elevation ?? defaults.elevation`
+      // (dialog.dart:291), and an oracle pumped under this theme would report
+      // whatever app_theme.dart configured. That the two numbers coincide today
+      // is what makes pinning necessary rather than optional — a coincidence
+      // cannot be asserted on.
       await pumpConformanceDialog(tester, _baseDialog());
 
       expectConformant(
         token: 'BaseDialog.elevation',
         component: 'BaseDialog',
         measured: _surfaceMaterial(tester).elevation,
-        expected: expected,
+        expected: _m3Elevation,
       );
     });
 
     testWidgets('container colour', (WidgetTester tester) async {
-      await pumpConformanceDialog(tester, _oracleDialog());
-      ColorScheme scheme = _theme(tester).colorScheme;
-      final String expected = colorRoleName(
-        scheme,
-        _surfaceMaterial(tester).color!,
-      );
-
+      // Pinned as a role for the same reason as the elevation:
+      // `_DialogDefaultsM3.backgroundColor` is `colorScheme.surfaceContainerHigh`
+      // (dialog.dart:1979) and `Dialog` reads the theme first (dialog.dart:290),
+      // so the app's configured dialog background — the same role, computed by
+      // FlexColorScheme — would come back as the specification.
       await pumpConformanceDialog(tester, _baseDialog());
-      scheme = _theme(tester).colorScheme;
+      final ColorScheme scheme = _theme(tester).colorScheme;
 
       expectConformant(
         token: 'BaseDialog.containerColor',
         component: 'BaseDialog',
         measured: colorRoleName(scheme, _surfaceMaterial(tester).color!),
-        expected: expected,
+        expected: colorRoleName(scheme, scheme.surfaceContainerHigh),
         unit: '',
       );
     });
@@ -385,26 +438,24 @@ void main() {
       );
     });
 
+    // The two action insets are the last pair of pinned tokens, and the only
+    // *padding* the app's dialogTheme reaches: AlertDialog resolves
+    // `actionsPadding ?? dialogTheme.actionsPadding ?? defaults.actionsPadding`
+    // (dialog.dart:884-890), while the title and content insets above are
+    // AlertDialog's own arguments and never consult the theme — which is why
+    // those four keep their pumped oracle and these two do not.
     testWidgets('actions trailing inset', (WidgetTester tester) async {
-      await pumpConformanceDialog(tester, _oracleDialog());
-      final double expected =
-          _surface(tester).right - tester.getRect(_oracleActions()).right;
-
       await pumpConformanceDialog(tester, _baseDialog());
 
       expectConformant(
         token: 'BaseDialog.actionsPadding.end',
         component: 'BaseDialog',
         measured: _surface(tester).right - tester.getRect(_baseActions()).right,
-        expected: expected,
+        expected: _m3ActionsInset,
       );
     });
 
     testWidgets('actions bottom inset', (WidgetTester tester) async {
-      await pumpConformanceDialog(tester, _oracleDialog());
-      final double expected =
-          _surface(tester).bottom - tester.getRect(_oracleActions()).bottom;
-
       await pumpConformanceDialog(tester, _baseDialog());
 
       expectConformant(
@@ -412,7 +463,7 @@ void main() {
         component: 'BaseDialog',
         measured:
             _surface(tester).bottom - tester.getRect(_baseActions()).bottom,
-        expected: expected,
+        expected: _m3ActionsInset,
       );
     });
   });
@@ -617,6 +668,56 @@ void main() {
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
+  });
+
+  group('the app theme cannot contaminate the oracle', () {
+    // The guard behind the pinned/pumped split, and the reason that split is a
+    // rule rather than a judgement call. Every field the app's `dialogTheme`
+    // carries is a field `Dialog`/`AlertDialog` prefers over `_DialogDefaultsM3`
+    // (dialog.dart:266-297 and :769-890), so a pumped `AlertDialog` under this
+    // app's theme reports it as the specification. The seven the app does carry
+    // are pinned above. This asserts that it carries *nothing else* — because
+    // the day it does, an oracle in this file silently turns into a mirror and
+    // the corresponding token starts certifying itself as conformant.
+    //
+    // Written as an equality rather than seven null checks so it is exhaustive:
+    // a field added to `DialogThemeData` by a future SDK, or newly configured
+    // by `FlexSubThemesData`, fails here too rather than slipping past a
+    // hand-written list.
+    for (final MapEntry<String, ThemeData Function()> brightness
+        in <String, ThemeData Function()>{
+          'light': AppTheme.lightTheme,
+          'dark': AppTheme.darkTheme,
+        }.entries) {
+      test('the app configures exactly the pinned seven (${brightness.key})', () {
+        final DialogThemeData configured = brightness.value().dialogTheme;
+        expect(
+          configured,
+          DialogThemeData(
+            backgroundColor: configured.backgroundColor,
+            elevation: configured.elevation,
+            shape: configured.shape,
+            actionsPadding: configured.actionsPadding,
+            iconColor: configured.iconColor,
+            titleTextStyle: configured.titleTextStyle,
+            contentTextStyle: configured.contentTextStyle,
+          ),
+          reason:
+              "The app's dialogTheme must carry no field beyond the seven this "
+              'suite pins its oracle for. A failure names the extra field, and '
+              'the fix is not to widen this expectation: pin that token from '
+              '_DialogDefaultsM3 in this suite and in '
+              'base_viewer_dialog_conformance_test.dart first, because until '
+              'then the measurement it feeds is comparing the app against '
+              'itself. The fields this protects and what each one feeds: '
+              'surfaceTintColor -> the surface tint test, barrierColor -> the '
+              'barrier colour test, insetPadding and constraints -> the '
+              'min/max width tests (DLG-003/DLG-004), shadowColor, alignment '
+              'and clipBehavior -> nothing measured here yet. Configured was '
+              '$configured.',
+        );
+      });
+    }
   });
 
   group('the app corner token really drives the shape', () {

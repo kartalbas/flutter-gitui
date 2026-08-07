@@ -195,13 +195,19 @@ const Set<String> conformanceTokenManifest = <String>{
   'BaseActionChip.labelColor', // M3: onSurface — conforms
   // BaseDialog vs a real `AlertDialog`, both pushed with `showDialog` through
   // the same harness, because a dialog's surface, width and barrier only exist
-  // inside a route. Three tokens are pinned from the generated
+  // inside a route. Seven tokens are pinned from the generated
   // `_DialogDefaultsM3` instead of read off the oracle, because this app's own
-  // `dialogTheme` overrides them and a pumped AlertDialog would report the
-  // override — see the suite's library comment.
-  'BaseDialog.shape', // M3: 28.0 — registered DLG-001
-  'BaseDialog.elevation', // M3: 6.0 — conforms
-  'BaseDialog.containerColor', // M3: surfaceContainerHigh — conforms
+  // `dialogTheme` carries a value for each and `Dialog`/`AlertDialog` read the
+  // theme before the defaults, so a pumped AlertDialog would report the app's
+  // value as the specification — see the suite's library comment.
+  // `shape`, `elevation`, `containerColor` and the two action insets joined the
+  // pinned set in #416, when the app stopped replacing the configured dialog
+  // sub-theme and the theme started carrying those four fields. Five of the
+  // seven coincide with the M3 default today; they are pinned because a
+  // coincidence is not a specification.
+  'BaseDialog.shape', // M3: 28.0 (pinned) — registered DLG-001
+  'BaseDialog.elevation', // M3: 6.0 (pinned) — conforms
+  'BaseDialog.containerColor', // M3: surfaceContainerHigh (pinned) — conforms
   'BaseDialog.surfaceTintColor', // M3: transparent — conforms
   'BaseDialog.barrierColor', // M3: black at 54% — conforms
   'BaseDialog.titleTextStyle', // M3: headlineSmall (pinned) — conforms
@@ -210,8 +216,8 @@ const Set<String> conformanceTokenManifest = <String>{
   'BaseDialog.contentPadding.start', // M3: 24.0 — conforms
   'BaseDialog.titleToContentGap', // M3: 16.0 — conforms
   'BaseDialog.contentToActionsGap', // M3: 24.0 — conforms
-  'BaseDialog.actionsPadding.end', // M3: 24.0 — conforms
-  'BaseDialog.actionsPadding.bottom', // M3: 24.0 — conforms
+  'BaseDialog.actionsPadding.end', // M3: 24.0 (pinned) — conforms
+  'BaseDialog.actionsPadding.bottom', // M3: 24.0 (pinned) — conforms
   'BaseDialog.actionsSpacing', // M3: 8.0 — conforms
   'BaseDialog.actionsAlignment', // M3: end — conforms
   'BaseDialog.icon.size', // M3: 24.0 — conforms
@@ -221,17 +227,17 @@ const Set<String> conformanceTokenManifest = <String>{
   // BaseViewerDialog vs the same `AlertDialog` oracle: the viewer is a
   // `Dialog` too, and measuring both dialog components against one ruler is
   // what shows which differences they share and which are the viewer's own.
-  'BaseViewerDialog.shape', // M3: 28.0 — registered VIEW-001
-  'BaseViewerDialog.elevation', // M3: 6.0 — conforms
-  'BaseViewerDialog.containerColor', // M3: surfaceContainerHigh — conforms
+  'BaseViewerDialog.shape', // M3: 28.0 (pinned) — registered VIEW-001
+  'BaseViewerDialog.elevation', // M3: 6.0 (pinned) — conforms
+  'BaseViewerDialog.containerColor', // M3: surfaceContainerHigh (pinned)
   'BaseViewerDialog.surfaceTintColor', // M3: transparent — conforms
   'BaseViewerDialog.barrierColor', // M3: black at 54% — conforms
-  'BaseViewerDialog.titleTextStyle', // M3: headlineSmall — VIEW-002
+  'BaseViewerDialog.titleTextStyle', // M3: headlineSmall (pinned) — VIEW-002
   'BaseViewerDialog.contentTextStyle', // M3: bodyMedium (pinned) — conforms
   'BaseViewerDialog.headerPadding.start', // M3: 24.0 — registered VIEW-003
   'BaseViewerDialog.contentPadding.start', // M3: 24.0 — registered VIEW-004
-  'BaseViewerDialog.actionsPadding.end', // M3: 24.0 — registered VIEW-005
-  'BaseViewerDialog.actionsPadding.bottom', // M3: 24.0 — VIEW-006
+  'BaseViewerDialog.actionsPadding.end', // M3: 24.0 (pinned) — VIEW-005
+  'BaseViewerDialog.actionsPadding.bottom', // M3: 24.0 (pinned) — VIEW-006
   'BaseViewerDialog.actionsSpacing', // M3: 8.0 — conforms
   'BaseViewerDialog.actionsAlignment', // M3: end — conforms
   'BaseViewerDialog.minWidth', // M3: 280.0 — registered VIEW-007

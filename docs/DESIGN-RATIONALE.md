@@ -206,9 +206,25 @@ This creates noticeable but not jarring differences.
 **4. Accessibility**
 
 Material Design's 4dp grid ensures touch targets meet minimum size requirements:
-- Minimum touch target: 48x48dp (12 units)
-- Icon buttons: 40x40dp (10 units) with a 24px icon - `AppTheme.iconL`
-- Small buttons: 32x32dp (8 units) - `ButtonSize.small`
+- Minimum **hit area**: 48x48dp (12 units) — `kMinInteractiveDimension = 48.0`,
+  Flutter 3.44.4 `packages/flutter/lib/src/material/constants.dart:27`.
+  Asserted for `BaseButton` and `BaseIconButton` at every size by
+  `meetsGuideline(androidTapTargetGuideline)` in
+  `test/conformance/components/base_button_conformance_test.dart` and
+  `..._icon_button_conformance_test.dart`.
+- Icon buttons, **painted container**: 32 / 40 / 48 dp for small / medium /
+  large. The M3 container is a single 40 dp
+  (`_IconButtonDefaultsM3.minimumSize`, `icon_button.dart:1128`), so the 32
+  and the 48 are registered deviations `ICO-002` and `ICO-005`. The container
+  is smaller than the hit area on purpose — Material's padded tap target
+  inflates the layout box while the paint stays compact.
+- Icon buttons, **glyph**: **16 / 20 / 24** px for small / medium / large, not
+  a flat 24. M3 specifies 24 for all sizes
+  (`_IconButtonDefaultsM3.iconSize`, `icon_button.dart:1138`); the 16 and the
+  20 are registered as `ICO-003` and `ICO-004`. Only `ButtonSize.large`
+  carries the conforming 24 (`AppTheme.iconL`). The earlier line here —
+  "Icon buttons: 40x40dp with a 24px icon" — described neither the default
+  size nor the default glyph correctly.
 
 ### Usage Guidelines
 
@@ -362,40 +378,72 @@ await BaseDialog.show(
 Flutter GitUI uses **Material Design 3 opacity standards** for interaction states:
 
 ```dart
-// Hover states
-backgroundColor: colorScheme.surfaceContainerHighest  // ~12% opacity
+// Hover on a container (a tonal step, NOT an opacity — see below)
+backgroundColor: colorScheme.surfaceContainerHighest
 
-// Disabled states
-foregroundColor: colorScheme.onSurface.withValues(alpha: 0.38)  // 38% opacity
+// Disabled content (M3: onSurface at 38%, filled_button.dart:559)
+foregroundColor: colorScheme.onSurface.withValues(alpha: 0.38)
 
-// Selection states
-backgroundColor: colorScheme.primary.withValues(alpha: 0.12)    // 12% opacity
+// Selection: change the colour role, do not tint
+backgroundColor: colorScheme.secondaryContainer
 
-// Subtle hints
-hintColor: colorScheme.onSurface.withValues(alpha: 0.6)        // 60% opacity
+// Subtle hints (this app's convention, not an M3 token)
+hintColor: colorScheme.onSurface.withValues(alpha: 0.6)
 ```
 
 ### Why These Specific Values?
 
 **1. Material Design 3 Specification**
 
-These values come directly from Material Design 3's interaction state layer specification:
+**The table that stood here was wrong**, and it was wrong in the two rows a
+reviewer is most likely to check: it gave focus as 16 % and pressed/selection
+as 12 %. Material 3 uses neither. These are the values as generated into the
+Flutter SDK the app builds against (3.44.4,
+`packages/flutter/lib/src/material/`):
 
-| State | Opacity | Use Case |
-|-------|---------|----------|
-| 8% | 0.08 | Hover (very subtle) |
-| 12% | 0.12 | Hover (containers), Selection |
-| 16% | 0.16 | Focus |
-| 38% | 0.38 | Disabled |
-| 60% | 0.60 | Hint text |
-| 70% | 0.70 | Helper text |
+| State | Opacity | SDK source |
+|-------|---------|---|
+| Hover | **0.08** | `filled_button.dart:571`, `icon_button.dart:1103` |
+| Focus | **0.10** | `filled_button.dart:574`, `icon_button.dart:1106` |
+| Pressed | **0.10** | `filled_button.dart:568`, `icon_button.dart:1100` |
+| Disabled container | **0.12** on `onSurface` | `filled_button.dart:550` |
+| Disabled content | **0.38** on `onSurface` | `filled_button.dart:559` |
+| Selected | *no opacity at all* | selection changes the **colour role** — `secondaryContainer` for a navigation indicator (`navigation_bar.dart:1463`), `primary` for a selected `IconButton` foreground (`icon_button.dart:1080`) |
+
+`0.16` is not a Material 3 value. It survives in the framework only in
+Material-2 code paths that M3 does not use (`button_theme.dart:583`,
+`toggle_buttons.dart:961,971`).
+
+The 60 % and 70 % rows were never state-layer values either; they are this
+app's own hint- and helper-text conventions, not M3 tokens, and nothing
+measures them.
 
 **2. Accessibility**
 
-The opacity values ensure **WCAG AA contrast ratios** are maintained:
-- 38% disabled = 4.5:1 contrast (meets AA for large text)
-- 60% hints = 4.5:1+ contrast (meets AA for body text)
-- 12% selection = subtle but visible
+The two WCAG claims that stood here — "38% disabled = 4.5:1" and "60% hints =
+4.5:1+" — were **asserted without ever being measured, and are not true as
+stated**. Nothing in `test/` measures either one.
+
+What is actually the case:
+
+- **Disabled content at 38 % does not reach 4.5:1** against a light surface,
+  and is not required to. WCAG 2.1 SC 1.4.3 exempts "text or images of text
+  that are part of an **inactive** user interface component", and SC 1.4.11
+  carries the same exemption for inactive components. The 38 % is Material 3's
+  disabled treatment (`filled_button.dart:559`), and this app conforms to it —
+  that conformance is asserted by
+  `test/conformance/components/base_button_conformance_test.dart`
+  (`BaseButton.disabled.foregroundColor`). It is a *conformance* result, not a
+  contrast result.
+- **Hint text at 60 % is not exempt** — placeholder text is live text and must
+  clear 4.5:1. **This is unverified**: no test measures it, and it is close
+  enough to the threshold that it must be measured rather than assumed.
+- **Selection contrast is unverified.** Selection is a container-role change,
+  so the relevant check is the `on*` pairing of that container, which nothing
+  in `test/` measures.
+
+The only contrast this repository actually asserts is the git semantic
+palette; see `docs/ACCESSIBILITY.md`.
 
 **3. Visual Feedback**
 
@@ -423,17 +471,29 @@ if (widget.isSelected) {
   // Multi-selected: use tertiaryContainer (different color)
   backgroundColor = colorScheme.tertiaryContainer;
 } else if (_isHovered && widget.isSelectable) {
-  // Hover: use surfaceContainerHighest (~12% opacity)
+  // Hover: one step up the tonal ladder, not an alpha tint
   backgroundColor = colorScheme.surfaceContainerHighest;
 }
 ```
 
-**BaseButton** - Disabled state:
+**BaseButton** - Disabled state. The component no longer paints this itself;
+it delegates to `FilledButton`/`OutlinedButton`/`TextButton`, so the M3
+disabled treatment applies unchanged — container `onSurface` at **12 %**
+(`filled_button.dart:550`), content `onSurface` at **38 %**
+(`filled_button.dart:559`). Both are asserted as conforming by
+`test/conformance/components/base_button_conformance_test.dart` (tokens
+`BaseButton.disabled.containerColor` and `BaseButton.disabled.foregroundColor`).
+
+The snippet that used to stand here showed a `surfaceContainerHighest`
+disabled container, which was the pre-rework hand-painted behaviour and is
+**not** the M3 treatment:
+
 ```dart
-if (isEffectivelyDisabled) {
-  backgroundColor = colorScheme.surfaceContainerHighest;
-  foregroundColor = colorScheme.onSurface.withValues(alpha: 0.38); // 38% disabled
-}
+// ❌ Historical, no longer the implementation
+backgroundColor = colorScheme.surfaceContainerHighest;
+// ✅ What M3 specifies, and what the component now renders
+backgroundColor = colorScheme.onSurface.withValues(alpha: 0.12);
+foregroundColor = colorScheme.onSurface.withValues(alpha: 0.38);
 ```
 
 **Input Fields** - Hint text:
@@ -462,12 +522,20 @@ inputDecorationTheme: InputDecorationTheme(
 
 **Better approach:**
 ```dart
-// ✅ Use MD3 surface containers instead
-backgroundColor: colorScheme.surfaceContainerLow      // 5% blend
-backgroundColor: colorScheme.surfaceContainer         // 8% blend
-backgroundColor: colorScheme.surfaceContainerHigh     // 11% blend
-backgroundColor: colorScheme.surfaceContainerHighest  // 12% blend
+// ✅ Use MD3 surface containers instead of an alpha blend
+backgroundColor: colorScheme.surfaceContainerLow
+backgroundColor: colorScheme.surfaceContainer
+backgroundColor: colorScheme.surfaceContainerHigh
+backgroundColor: colorScheme.surfaceContainerHighest
 ```
+
+The "5% / 8% / 11% / 12% blend" annotations that used to sit beside these
+roles were invented. Surface containers are not alpha blends at all — they are
+**tones of the neutral palette**, at tone 96 / 94 / 92 / 90 in light and
+10 / 12 / 17 / 22 in dark (`material_color_utilities` 0.13.0,
+`lib/dynamiccolor/material_dynamic_colors.dart:117-159`). That is why the
+ladder still separates correctly in dark mode, where an alpha blend of the
+same percentages would not.
 
 ---
 
@@ -475,8 +543,16 @@ backgroundColor: colorScheme.surfaceContainerHighest  // 12% blend
 
 Flutter GitUI uses **color psychology** for git status indicators:
 
+The **hue** choices below are still the rationale. The **values** are not:
+the `AppTheme.gitAdded`/`branchLocal`/… constants listed here no longer exist,
+and the single-hex-per-role design they embodied was abandoned because it
+could not hold WCAG AA in both brightnesses. The current palette is
+`GitSemanticColors` in `lib/shared/theme/git_semantic_colors.dart`, a
+brightness-aware `ThemeExtension` with a light and a dark value per role
+(`:65-110`), reached through `context.gitColors`.
+
 ```dart
-// Git status colors
+// ❌ Historical — these constants were removed
 static const Color gitAdded     = Color(0xFF4CAF50); // Green
 static const Color gitModified  = Color(0xFFFF9800); // Orange
 static const Color gitDeleted   = Color(0xFFF44336); // Red
@@ -484,11 +560,13 @@ static const Color gitRenamed   = Color(0xFF2196F3); // Blue
 static const Color gitUntracked = Color(0xFF9E9E9E); // Grey
 static const Color gitConflict  = Color(0xFFE91E63); // Pink/Magenta
 
-// Branch colors
-static const Color branchLocal  = Color(0xFF4CAF50); // Green
-static const Color branchRemote = Color(0xFF2196F3); // Blue
-static const Color branchTag    = Color(0xFFFF9800); // Orange
-static const Color branchStash  = Color(0xFF9C27B0); // Purple
+// ✅ Current — one value per role per brightness
+context.gitColors.added      // #006318 light / #59BC5B dark
+context.gitColors.modified   // #7D4800 light / #FF9800 dark
+context.gitColors.deleted    // #A70007 light / #FF8272 dark
+context.gitColors.renamed    // #005794 light / #58ACFF dark
+context.gitColors.untracked  // #555656 light / #A8A8A8 dark
+context.gitColors.conflict   // #A40040 light / #FF7E98 dark
 ```
 
 ### Color Psychology
@@ -525,28 +603,44 @@ static const Color branchStash  = Color(0xFF9C27B0); // Purple
 
 ### Why These Exact Shades?
 
-**Material Design Palette:**
+**Material Design Palette (historical):**
 
-All colors come from Material Design color palette (500 shade):
-- Green 500: `#4CAF50` - Vibrant but not neon
-- Orange 500: `#FF9800` - Warm, visible against dark
-- Red 500: `#F44336` - Strong without being harsh
-- Blue 500: `#2196F3` - True blue, not purple-ish
-- Grey 500: `#9E9E9E` - Neutral middle grey
-- Pink 500: `#E91E63` - Distinct from red
+The removed constants were the Material 500 shades — Green 500 `#4CAF50`,
+Orange 500 `#FF9800`, Red 500 `#F44336`, Blue 500 `#2196F3`, Grey 500
+`#9E9E9E`, Pink 500 `#E91E63`. The current values keep those **hues** but move
+their **tone** per brightness, via HCT tone mapping, so that the contrast
+requirement can actually be met.
 
 **Accessibility:**
 
-All colors meet WCAG AA contrast ratios:
-- Against white background: 3:1+ (AA for large text)
-- Against dark background: 7:1+ (AAA for body text)
+The claim that used to stand here — "All colors meet WCAG AA contrast ratios:
+against white 3:1+, against dark 7:1+" — was **false, and had never been
+measured**. When measured, all six status roles failed 4.5:1 as text on the
+light surface, `gitConflict` failed in both brightnesses, three also missed
+the looser 3:1 non-text threshold, and the worst case was **1.41:1**. A 500
+shade is tuned to be vivid, not to be readable as text on a near-white
+surface; the two goals conflict.
 
-**Colorblind-Friendly:**
+What is true today, and is **asserted** by
+`test/conformance/a11y/git_colors_contrast_test.dart` across every selectable
+scheme and both brightnesses:
 
-The palette works for most common colorblindness types:
-- Deuteranopia (red-green): Orange vs. Blue differentiation
-- Protanopia (red-green): Grey vs. all other colors
-- Tritanopia (blue-yellow): Red vs. Green differentiation
+- every text role holds **≥ 4.5:1** on all six painted surfaces, on its own
+  12 % diff-row tint and on its own 15 % badge tint;
+- the black-or-white foreground chosen for a filled badge or button holds
+  **≥ 4.5:1** on the solid role colour;
+- the eight commit-graph lane colours hold **≥ 3:1** (SC 1.4.11 — a 2 px line
+  is a graphic, not text).
+
+See `docs/ACCESSIBILITY.md` for the full breakdown.
+
+**Colorblind-Friendly — unverified:**
+
+The palette is *intended* to work for the common deficiencies (deuteranopia,
+protanopia, tritanopia), but **nothing measures this**: no test simulates a
+colour-vision deficiency, and the contrast test compares each role against
+*surfaces*, never against another role. Treat the "Color + Icon" rule in
+`docs/ACCESSIBILITY.md` as the actual safeguard.
 
 ### Usage Examples
 
@@ -588,50 +682,64 @@ Icon(
 
 ## Why Typography Hierarchy
 
-Flutter GitUI uses **Material Design 3 typography scale** with enhanced rendering:
+Flutter GitUI uses a **desktop-tuned derivative** of the Material Design 3
+type scale, with enhanced rendering.
 
-```dart
-// Material Design 3 Typography Scale
-displayLarge   = 57px  // Hero text, splash screens
-displayMedium  = 45px  // Large headers
-displaySmall   = 36px  // Section headers
-headlineLarge  = 32px  // Page titles
-headlineMedium = 28px  // Section titles
-headlineSmall  = 24px  // Subsection titles
-titleLarge     = 22px  // Card/panel titles
-titleMedium    = 16px  // List item titles
-titleSmall     = 14px  // Compact titles
-bodyLarge      = 16px  // Emphasized body
-bodyMedium     = 14px  // Standard body (default)
-bodySmall      = 12px  // Captions, hints
-labelLarge     = 14px  // Button labels
-labelMedium    = 12px  // Chip labels
-labelSmall     = 11px  // Tiny labels, badges
-```
+**The block that used to stand here listed the M3 sizes and presented them as
+the app's sizes. They are not the same numbers.** Nine of the fifteen roles
+render smaller than M3 specifies. Both columns below are asserted, role by
+role, by `test/conformance/theme/text_theme_conformance_test.dart`, which
+measures `AppTheme.lightTheme().textTheme` against
+`Typography.englishLike2021` (Flutter 3.44.4
+`packages/flutter/lib/src/material/typography.dart:2096-2112`).
 
-### Why Material Design 3 Scale?
+| Role | **This app** (`AppFontSize.medium`) | Material 3 | Register |
+|---|---|---|---|
+| `displayLarge` | **45** | 57 | `TYPE-001` |
+| `displayMedium` | **36** | 45 | `TYPE-002` |
+| `displaySmall` | **32** | 36 | `TYPE-003` |
+| `headlineLarge` | **28** | 32 | `TYPE-004` |
+| `headlineMedium` | **24** | 28 | `TYPE-005` |
+| `headlineSmall` | **22** | 24 | `TYPE-006` |
+| `titleLarge` | **20** | 22 | `TYPE-007` |
+| `titleMedium` | 16 | 16 | conforms |
+| `titleSmall` | 14 | 14 | conforms |
+| `bodyLarge` | **15** | 16 | `TYPE-008` |
+| `bodyMedium` | **13** | 14 | `TYPE-009` |
+| `bodySmall` | 12 | 12 | conforms |
+| `labelLarge` | 14 | 14 | conforms |
+| `labelMedium` | 12 | 12 | conforms |
+| `labelSmall` | 11 | 11 | conforms |
 
-**1. Tested Hierarchy**
+App values are `lib/shared/theme/app_theme.dart:286-377`; the reasons for each
+reduction are in `docs/deviation_register.yaml` under the `TYPE-*` ids. Every
+role keeps the M3 `letterSpacing` and line `height` unchanged — only the size
+moves.
 
-The MD3 scale has been tested across millions of apps:
-- Clear visual distinction between levels
-- Comfortable reading at all sizes
-- Works on small and large screens
+### Why a derivative rather than the M3 scale verbatim?
 
-**2. Mathematical Progression**
+**1. Tested hierarchy, phone-first proportions**
 
-The scale uses a **major third (1.25x) ratio** with adjustments:
-- 11 → 12 → 14 → 16 → 22 → 24 → 28 → 32 → 36 → 45 → 57
-- Each step is visually distinct but not jarring
+The M3 scale is well tested, but it is tuned for phone hero surfaces at
+phone viewing distance. On a dense desktop Git client a 57 px display line
+dwarfs the rows around it. The reductions preserve the *ramp* — each role
+stays strictly larger than the one below it — while compressing the top of it.
 
-**3. Optical Sizing**
+**2. Mathematical progression**
 
-Fonts are designed for specific size ranges:
+The app's ramp, medium setting:
+- 11 → 12 → 13 → 14 → 15 → 16 → 20 → 22 → 24 → 28 → 32 → 36 → 45
+
+(The M3 ramp, for comparison, is 11 → 12 → 14 → 16 → 22 → 24 → 28 → 32 → 36 →
+45 → 57.)
+
+**3. Optical sizing**
+
 - **Tiny (11px)**: Dense information (badges, timestamps)
 - **Small (12-14px)**: Body text, captions
-- **Medium (16-22px)**: Titles, emphasized text
+- **Medium (15-22px)**: Titles, emphasized text
 - **Large (24-36px)**: Headers, section dividers
-- **Display (45-57px)**: Hero content, branding
+- **Display (36-45px)**: Hero content, branding
 
 ### Enhanced Rendering
 
@@ -684,18 +792,26 @@ Text('Caption', style: Theme.of(context).textTheme.bodySmall)  // Verbose
 
 Users can adjust font size while maintaining hierarchy:
 
+The setting is a **single multiplier** applied to every role's medium size and
+rounded to whole logical pixels (`app_theme.dart:231-236`, `:279`) — not a
+fixed pixel offset, and `medium` is this app's baseline, not the M3 baseline:
+
 ```dart
 enum AppFontSize {
-  tiny,    // -3px from standard (for power users)
-  small,   // -2px from standard
-  medium,  // Standard MD3 sizes
-  large,   // +2px from standard (accessibility)
+  tiny,    // x0.85
+  small,   // x0.92
+  medium,  // x1.00 - this app's baseline (see the table above)
+  large,   // x1.10 - accessibility
 }
 
-// Hierarchy is maintained at all sizes
-// Medium: 14px body → 22px title → 32px headline
-// Large:  16px body → 24px title → 36px headline
+// Hierarchy is maintained at all sizes, e.g. bodyMedium / titleLarge /
+// headlineLarge:
+// Medium: 13px body -> 20px title -> 28px headline
+// Large:  14px body -> 22px title -> 31px headline
 ```
+
+The factors are chosen so that after rounding no two settings collapse to the
+same pixel size for any role.
 
 ---
 

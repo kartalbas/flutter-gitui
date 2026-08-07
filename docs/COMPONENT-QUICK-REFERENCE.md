@@ -64,11 +64,28 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 ### Button Sizes
 
-| Size | Icon Size | Use Case |
-|------|-----------|----------|
-| **small** | 14px | Tight spaces, inline actions |
-| **medium** | 16px | Standard (default) |
-| **large** | 18px | Primary prominent actions |
+Measured, not estimated: these are the values
+`test/conformance/components/base_button_conformance_test.dart` asserts. The
+earlier "14 / 16 / 18px" icon column here was wrong in two of three rows.
+
+| Size | Container height | Label role | Icon size | M3 | Use Case |
+|------|---|---|---|---|----------|
+| **small** | 32px (`BTN-002`) | `labelMedium` (`BTN-003`) | **16px** (`BTN-004`) | 40 / `labelLarge` / 18 | Tight spaces, inline actions |
+| **medium** | 40px (conforms) | `labelLarge` (conforms) | **18px** (conforms) | 40 / `labelLarge` / 18 | Standard (default) |
+| **large** | 48px (`BTN-005`) | `labelLarge` (conforms) | **18px** (conforms) | 40 / `labelLarge` / 18 | Primary prominent actions |
+
+M3 reference values: `_FilledButtonDefaultsM3` — `minimumSize` `Size(64, 40)`
+(Flutter 3.44.4 `filled_button.dart:611`), `textStyle` `labelLarge` (`:544`),
+`iconSize` `18.0` (`:617`). The `BTN-*` ids are the registered deviations in
+`docs/deviation_register.yaml`.
+
+`BaseIconButton` sizes differ — container 32 / 40 / 48 and glyph **16 / 20 /
+24** (`ICO-002`..`ICO-005`; M3 is a 40 dp container with a 24 dp glyph,
+`icon_button.dart:1128` and `:1138`).
+
+At every size, the *hit area* of both components is ≥ 48×48 even where the
+painted container is smaller — asserted with
+`meetsGuideline(androidTapTargetGuideline)`.
 
 ### Examples
 
@@ -112,11 +129,12 @@ BaseButton(
   onPressed: () => close(),
 )
 
-// Full-width button
+// Full-width button (the parameter is `fullWidth`, base_button.dart:128 —
+// `isFullWidth` does not exist)
 BaseButton(
   label: 'Continue',
   variant: ButtonVariant.primary,
-  isFullWidth: true,
+  fullWidth: true,
   onPressed: () => proceed(),
 )
 ```
@@ -264,23 +282,32 @@ BaseListItem(
 
 ## 📰 BaseLabel - Typography
 
-| Component | Size | Weight | Use Case |
-|-----------|------|--------|----------|
-| **DisplayLargeLabel** | 57px | Regular | Splash screens (rarely used) |
-| **DisplayMediumLabel** | 45px | Regular | Hero sections (rarely used) |
-| **DisplaySmallLabel** | 36px | Regular | Large headings (rarely used) |
-| **HeadlineLargeLabel** | 32px | Regular | Major sections |
-| **HeadlineMediumLabel** | 28px | Regular | Section dividers |
-| **HeadlineSmallLabel** | 24px | Regular | Sub-sections |
-| **TitleLargeLabel** | 22px | Medium | Dialog titles, main headings |
-| **TitleMediumLabel** | 16px | Medium | Card headers, section titles |
-| **TitleSmallLabel** | 14px | Medium | Panel headers |
-| **BodyLargeLabel** | 16px | Regular | Prominent body text |
-| **BodyMediumLabel** | 14px | Regular | List titles, body text (MOST COMMON) |
-| **BodySmallLabel** | 12px | Regular | Subtitles, descriptions |
-| **LabelLargeLabel** | 14px | Medium | Large labels |
-| **LabelMediumLabel** | 12px | Medium | Standard labels |
-| **LabelSmallLabel** | 11px | Medium | Captions, timestamps |
+Sizes are at `AppFontSize.medium` and are what the theme really renders — the
+column this table used to carry was the *Material 3* scale, which differs on
+nine of fifteen roles. Both columns are asserted role by role by
+`test/conformance/theme/text_theme_conformance_test.dart`; the `TYPE-*` ids
+are the entries in `docs/deviation_register.yaml`.
+
+| Component | Size | M3 | Weight | Use Case |
+|-----------|------|----|--------|----------|
+| **DisplayLargeLabel** | **45px** (`TYPE-001`) | 57 | Regular | Splash screens (rarely used) |
+| **DisplayMediumLabel** | **36px** (`TYPE-002`) | 45 | Regular | Hero sections (rarely used) |
+| **DisplaySmallLabel** | **32px** (`TYPE-003`) | 36 | Regular | Large headings (rarely used) |
+| **HeadlineLargeLabel** | **28px** (`TYPE-004`) | 32 | Regular | Major sections |
+| **HeadlineMediumLabel** | **24px** (`TYPE-005`) | 28 | Regular | Section dividers |
+| **HeadlineSmallLabel** | **22px** (`TYPE-006`) | 24 | Regular | Sub-sections |
+| **TitleLargeLabel** | **20px** (`TYPE-007`) | 22 | Medium | Dialog titles, main headings |
+| **TitleMediumLabel** | 16px | 16 | Medium | Card headers, section titles |
+| **TitleSmallLabel** | 14px | 14 | Medium | Panel headers |
+| **BodyLargeLabel** | **15px** (`TYPE-008`) | 16 | Regular | Prominent body text |
+| **BodyMediumLabel** | **13px** (`TYPE-009`) | 14 | Regular | List titles, body text (MOST COMMON) |
+| **BodySmallLabel** | 12px | 12 | Regular | Subtitles, descriptions |
+| **LabelLargeLabel** | 14px | 14 | Medium | Large labels (M3 button-label role) |
+| **LabelMediumLabel** | 12px | 12 | Medium | Standard labels |
+| **LabelSmallLabel** | 11px | 11 | Medium | Captions, timestamps |
+
+The `tiny` / `small` / `large` user settings derive from this column by a
+single multiplier (×0.85 / ×0.92 / ×1.10, rounded), `app_theme.dart:231-236`.
 
 ### Special Typography Components
 
@@ -501,10 +528,17 @@ Wrap(
 
 | Constant | Value | Use Case |
 |----------|-------|----------|
-| `radiusS` | 4px | Buttons, text fields, list items, chips |
-| `radiusM` | 8px | Cards, containers |
-| `radiusL` | 12px | Dialogs, modals |
+| `radiusS` | 4px | Text fields, chips |
+| `radiusM` | 8px | **Buttons and icon buttons** (`BTN-001`, `ICO-001`) |
+| `radiusL` | 12px | **Cards** (`base_card.dart:156`), panels, dialogs, modals |
 | `radiusXL` | 16px | Large panels, screens |
+
+Corrected: buttons use `radiusM` (8), not `radiusS`; cards use `radiusL` (12),
+not `radiusM`; and `BaseListItem` carries **no** radius at all — it paints
+square, matching M3's `ListTile`. The M3 button and icon-button shape is a
+`StadiumBorder` (20 dp at the 40 dp container, `filled_button.dart:645` and
+`icon_button.dart:1146`), so the 8 dp corner is a registered deviation, not a
+conformance.
 
 ### Icon Sizes
 
@@ -512,9 +546,13 @@ Wrap(
 |----------|-------|----------|
 | `iconXS` | 12px | Inline indicators, tiny icons |
 | `iconS` | 16px | Small buttons, tab icons |
-| `iconM` | 20px | Standard icons in lists |
-| `iconL` | 24px | Default button icons (DON'T specify, use default) |
+| `iconM` | 20px | Standard icons in lists; the default `BaseIconButton` glyph (`ICO-004`) |
+| `iconL` | 24px | Bare `Icon` default; the `BaseIconButton.large` glyph (M3-conforming) |
 | `iconXL` | 32px | Headers, emphasis |
+
+Do **not** pass a size to a `BaseButton`/`BaseIconButton` icon — the component
+sets it from its `ButtonStyle` (18 dp inside `BaseButton`, 16/20/24 dp inside
+`BaseIconButton`). These constants are for icons you place yourself.
 
 Sizes above 32px are expressed as multiples of the scale, e.g.
 `AppTheme.iconXL * 2` (64px) for empty-state artwork and drag overlays.
@@ -553,7 +591,7 @@ decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppTheme.radiusM))
 
 // Icons
 Icon(PhosphorIconsRegular.folder, size: AppTheme.iconM)
-Icon(PhosphorIconsRegular.gitBranch)  // Don't specify size, use default 24px
+Icon(PhosphorIconsRegular.gitBranch)  // No size: falls back to IconTheme (24px)
 
 // Colors
 color: context.gitColors.modified
@@ -603,13 +641,13 @@ Destructive action? (Delete, Remove)
 
 ```
 Dialog title or main heading?
-  → TitleLargeLabel (22px)
+  → TitleLargeLabel (20px)
 
 Section header?
   → TitleMediumLabel (16px)
 
 List item title or body text?
-  → BodyMediumLabel (14px)
+  → BodyMediumLabel (13px)
 
 List item subtitle?
   → BodySmallLabel (12px)
@@ -767,7 +805,11 @@ BaseCard(
 
 ## 📚 See Also
 
-- **UI-CONCEPT.md** - Complete design system documentation
+- **UI-CONCEPT.md** - Complete design system documentation (usage)
+- **deviation_register.yaml** - Registered departures from Material 3.
+  Normative and executable; where it and any prose document disagree, the
+  register wins. Asserted by `test/conformance/`.
+- **ACCESSIBILITY.md** - Accessibility standards, marked Asserted vs Aspirational
 - **NAVIGATION-PATTERNS.md** - Screen structure and navigation
 - **ERROR-HANDLING-PATTERNS.md** - Error state patterns
 - **DESIGN-RATIONALE.md** - Why these decisions were made

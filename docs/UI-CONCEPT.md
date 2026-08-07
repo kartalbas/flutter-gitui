@@ -7,35 +7,59 @@
 
 ---
 
-## ⚠️ CRITICAL: SINGLE SOURCE OF TRUTH
+## ⚠️ CRITICAL: WHICH DOCUMENT DECIDES WHAT
 
-**THIS IS THE ONLY UI DOCUMENTATION YOU SHOULD USE!**
+This document is the **prose** standard for UI *usage*: which component to
+reach for, which constant to spend, which pattern to follow. It is not, and
+cannot be, the authority on whether those components match Material 3 — prose
+is not executed.
 
-- ❌ **DO NOT** read STATUS.md during UI work
-- ❌ **DO NOT** read ARCHITECTURE.md during UI work
-- ❌ **DO NOT** read REQUIREMENTS.md during UI work
-- ❌ **DO NOT** read DIALOG-PATTERNS.md during UI work
-- ❌ **DO NOT** read any other documentation files during UI development
-- ✅ **USE ONLY** this UI-CONCEPT.md document
+**Precedence, highest first:**
 
-**Why?** Reading multiple documents creates confusion, conflicts, and inconsistencies. This document contains EVERYTHING you need for UI consistency work.
+1. **`docs/deviation_register.yaml` — the normative machine-readable appendix
+   to this document.** Where this document and the register disagree, **the
+   register wins**, without exception and without discussion. The register is
+   executed by `test/conformance/`: an unregistered mismatch fails a test, and
+   a registered entry that has come back into line fails as stale
+   (`test/conformance/support/expect_conformant.dart`). This document is
+   executed by nobody. A number here can rot silently; a number there cannot.
+2. **The Flutter SDK sources** for every Material 3 spec value. The ruler is
+   `packages/flutter/lib/src/material/`, specifically the
+   `// BEGIN GENERATED TOKEN PROPERTIES` blocks, which are generated from the
+   Material token database. Never this document, and never memory.
+3. **This document** for everything the two above do not cover.
 
-**When working on UI:**
-1. Open ONLY this document
-2. Reference ONLY this document
-3. Close all other documentation tabs
-4. If in doubt, search THIS document only
+**Sibling documents that are also current** — the earlier "read nothing but
+this file" rule was never true and is withdrawn:
+
+| Document | Scope |
+|---|---|
+| `docs/deviation_register.yaml` | Registered departures from M3 (normative, executable) |
+| `docs/ACCESSIBILITY.md` | Accessibility standards, and what is actually asserted |
+| `docs/COMPONENT-QUICK-REFERENCE.md` | Per-component API lookup |
+| `docs/DESIGN-RATIONALE.md` | Why the system is shaped the way it is |
+| `docs/ANIMATION-GUIDELINES.md` | Motion, durations, reduced motion |
+| `docs/NAVIGATION-PATTERNS.md` | Screen and panel navigation |
+
+The previous version of this section also told readers never to open
+`STATUS.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md` and `DIALOG-PATTERNS.md`.
+**None of those four files exists**, and `git log` shows none of them ever did.
+They have been removed from the list rather than left as a rule that cannot be
+followed.
 
 ---
 
-## ✅ MIGRATION COMPLETE (November 16, 2025)
+## ✅ COMPONENT MIGRATION COMPLETE (November 16, 2025) — USAGE ONLY
 
-**The UI migration to Material Design 3 standards is 100% complete!**
+**Every call site uses the Base\* components. That is a *usage* result, not a
+Material 3 *conformance* result, and the two must not be conflated.**
 
-This document now serves as the single source of truth for all UI standards and best practices. The Base* component system is fully implemented and consistently used throughout the codebase.
+What the migration established is that the codebase routes through the Base\*
+layer instead of raw Material widgets. Whether that layer matches Material 3
+is a separate question, answered by `test/conformance/` and recorded in
+`docs/deviation_register.yaml` — not by this list.
 
-**Current State:**
-- ✅ 100% of actionable violations fixed
+**Current state (usage):**
 - ✅ All dialogs use BaseDialog (0 violations)
 - ✅ All buttons use BaseButton (17/17 migrated)
 - ✅ All list items use BaseListItem (17/17 migrated)
@@ -43,6 +67,14 @@ This document now serves as the single source of truth for all UI standards and 
 - ✅ All spacing uses AppTheme constants (36 files, ~200+ values migrated)
 - ✅ All semantic colors use theme ColorScheme (8 replacements)
 - ✅ 64 files migrated across 15 commits
+
+**Current state (conformance):** `BaseButton`, `BaseIconButton`, `BaseCard`,
+`BaseListItem` and `BasePanel` are measured against their Material 3 oracles
+by `test/conformance/components/`, and the app's `TextTheme` by
+`test/conformance/theme/text_theme_conformance_test.dart`. Every deliberate
+departure those suites find is registered in `docs/deviation_register.yaml`.
+**`BaseDialog`, `BaseTextField` and `BaseBadge` have no conformance suite yet
+— their Material 3 conformance is unverified**, not established.
 
 ---
 
@@ -52,7 +84,7 @@ This document now serves as the single source of truth for all UI standards and 
 2. [Base Component System](#2-base-component-system)
 3. [Unified UI Standards](#3-unified-ui-standards)
 4. [Component Decision Trees](#4-component-decision-trees)
-5. [Material Design 3 Compliance Checklist](#5-material-design-3-compliance-checklist)
+5. [Design-System Usage Checklist (§5.1) and Material 3 Conformance (§5.2)](#5-design-system-usage-checklist-51-and-material-3-conformance-52)
 6. [Code Review Guidelines](#6-code-review-guidelines)
 7. [Appendix: Quick Reference](#appendix-quick-reference)
 
@@ -90,6 +122,13 @@ Flutter GitUI has 7 comprehensive base components:
 | **BaseTextField** | `lib/shared/components/base_text_field.dart` | Text inputs | ✅ Complete |
 | **BaseBadge** | `lib/shared/components/base_badge.dart` | Badges/chips | ✅ Complete |
 | **BaseLabel** | `lib/shared/components/base_label.dart` | Typography | ✅ Complete |
+| **BasePanel** | `lib/shared/components/base_panel.dart` | Layout regions | ✅ Complete |
+
+"Complete" above means *implemented and used everywhere* — see the note on
+usage versus conformance at the top of this document. `BaseButton`,
+`BaseIconButton`, `BaseCard`, `BaseListItem` and `BasePanel` additionally have
+a Material 3 conformance suite; `BaseDialog`, `BaseTextField` and `BaseBadge`
+do not.
 
 ---
 
@@ -99,10 +138,19 @@ Flutter GitUI has 7 comprehensive base components:
 
 **Features:**
 - 3 semantic variants (normal, confirmation, destructive)
-- Consistent padding: `AppTheme.paddingXL` (32px)
-- Border radius: `AppTheme.radiusL` (12px)
+- Consistent padding: `AppTheme.paddingXL` (32px) — `base_dialog.dart:235`
+- Border radius: `AppTheme.radiusL` (12px) — `base_dialog.dart:224`
 - Keyboard support (ESC to close)
 - Helper functions for common dialogs
+
+> **Conformance: unverified.** There is no `BaseDialog` suite under
+> `test/conformance/`, so neither number above is asserted against Material 3.
+> For reference, the M3 dialog corner is **28.0** and its content padding
+> **24.0** (`_DialogDefaultsM3`, Flutter 3.44.4
+> `packages/flutter/lib/src/material/dialog.dart:1967` for the shape,
+> `:1994` for `actionsPadding`). The 12px/32px values are therefore an
+> *unregistered* departure — not an approved one — until a suite measures them
+> and `docs/deviation_register.yaml` records the decision.
 
 **Variants:**
 ```dart
@@ -149,8 +197,23 @@ await showDialog(
 - 3 size options (small, medium, large)
 - Loading states
 - Leading/trailing icons
-- Full-width option
-- Border radius: `AppTheme.radiusS` (4px)
+- Full-width option (the parameter is `fullWidth`, `base_button.dart:128`)
+- Border radius: `AppTheme.radiusM` (**8px**, `base_button.dart:323`) — the
+  earlier "`AppTheme.radiusS` (4px)" in this section was wrong
+
+> **Conformance: measured.** `BaseButton` maps its variants onto
+> `FilledButton` / `OutlinedButton` / `TextButton` and is measured against
+> those classes' `defaultStyleOf` by
+> `test/conformance/components/base_button_conformance_test.dart`. The M3
+> corner is a `StadiumBorder` — 20.0 dp at the 40 dp container
+> (`_FilledButtonDefaultsM3.shape`, Flutter 3.44.4 `filled_button.dart:645`) —
+> so the 8 dp corner is a **registered** deviation, `BTN-001` in
+> `docs/deviation_register.yaml`. Icon sizes are **16 / 18 / 18** dp for
+> small / medium / large (M3 is 18 for all three,
+> `_FilledButtonDefaultsM3.iconSize`, `filled_button.dart:617`; the small step
+> is registered as `BTN-004`). Container heights are **32 / 40 / 48**
+> (`BTN-002`, conforming, `BTN-005`), and the small label drops to
+> `labelMedium` (`BTN-003`); medium and large carry the M3 `labelLarge`.
 
 **Variants:**
 ```dart
@@ -198,10 +261,25 @@ BaseIconButton(
 
 **Features:**
 - 4 selection states (normal, hover, selected, multi-selected)
-- Consistent padding: `EdgeInsets.symmetric(horizontal: AppTheme.paddingL, vertical: AppTheme.paddingM)`
-- Border radius: `AppTheme.radiusS` (4px)
+- Consistent padding: `EdgeInsetsDirectional.only(start: AppTheme.paddingM,
+  end: AppTheme.paddingL, top: AppTheme.paddingM, bottom: AppTheme.paddingM)`
+  — start 16 / end 24 / vertical 16, `base_list_item.dart:76-81`. The earlier
+  `symmetric(horizontal: paddingL)` in this section was wrong: the row is
+  **not** symmetric, and its 16 dp start inset is exactly the M3 value.
+- **No border radius** — the row paints square, like M3's `ListTile`. The
+  earlier "`AppTheme.radiusS` (4px)" was wrong.
 - Context menu support
 - Material Design 3 surface tones
+
+> **Conformance: measured** against `ListTile` by
+> `test/conformance/components/base_list_item_conformance_test.dart`. Start
+> inset (16), end inset (24), shape (0), leading gap (16), min tile height
+> (56) and the `bodyLarge` title role all conform
+> (`_LisTileDefaultsM3`, Flutter 3.44.4 `list_tile.dart:1818-1860`). Two
+> departures are registered: the 16 dp vertical padding (`LIST-001`, against
+> M3's 8 dp `minVerticalPadding`, `list_tile.dart:1831`) and the absent
+> per-row focus layer (`LIST-002`), because the collection owns the Tab stop
+> and the arrow keys move the highlight inside it.
 
 **Example:**
 ```dart
@@ -239,8 +317,19 @@ BaseListItem(
 **Features:**
 - Header/content/footer sections
 - Elevation-based states
-- Border radius: `AppTheme.radiusM` (8px)
+- Border radius: `AppTheme.radiusL` (**12px**, `base_card.dart:156`) — the
+  earlier "`AppTheme.radiusM` (8px)" in this section was wrong
 - Selection support
+
+> **Conformance: measured** against `Card.outlined` by
+> `test/conformance/components/base_card_conformance_test.dart`. The 12 dp
+> corner, the 0 elevation, the `outlineVariant` 1 dp border and the
+> `bodyMedium` content role all conform to `_OutlinedCardDefaultsM3`
+> (Flutter 3.44.4 `card.dart:363-399`). Three departures are registered:
+> container colour `surfaceContainerHigh` instead of `surface` (`CARD-001`),
+> zero margin instead of M3's 4 dp (`CARD-002`, `card.dart:376`), and no
+> per-card focus layer (`CARD-003`), for the same collection-owns-the-Tab-stop
+> reason as `LIST-002`.
 
 **Example:**
 ```dart
@@ -274,7 +363,12 @@ BaseCard(
 - Clear button
 - Password toggle
 - Validation support
-- Border radius: `AppTheme.radiusS` (4px)
+- Border radius: `AppTheme.radiusS` (4px, `base_text_field.dart:336`)
+
+> **Conformance: unverified.** There is no `BaseTextField` suite under
+> `test/conformance/`. The 4 dp corner does match Flutter's
+> `OutlineInputBorder` default (`input_border.dart:333`), but nothing asserts
+> that, and no other text-field token has been measured at all.
 
 **Example:**
 ```dart
@@ -327,26 +421,49 @@ static const double iconXL = 32.0;
 ```
 
 **Git-Specific Colors:**
+
+The `AppTheme.gitAdded`/`gitModified`/… constants this section used to list
+**no longer exist** — `grep -r gitAdded lib/` returns nothing. One fixed hex
+per role cannot hold 4.5:1 on both a near-white and a near-black surface, so
+the palette became a brightness-aware `ThemeExtension`:
+
+**File:** `lib/shared/theme/git_semantic_colors.dart`
+
 ```dart
-static const Color gitAdded = Color(0xFF4CAF50);      // Green
-static const Color gitModified = Color(0xFFFF9800);   // Orange
-static const Color gitDeleted = Color(0xFFF44336);    // Red
-static const Color gitRenamed = Color(0xFF2196F3);    // Blue
-static const Color gitUntracked = Color(0xFF9E9E9E);  // Grey
-static const Color gitConflict = Color(0xFFE91E63);   // Pink
+// Read it from the BuildContext extension; never hardcode a git colour.
+Icon(PhosphorIconsRegular.plus, color: context.gitColors.added)
 ```
+
+| Role | Light | Dark |
+|---|---|---|
+| `added` | `#006318` | `#59BC5B` |
+| `modified` | `#7D4800` | `#FF9800` |
+| `deleted` | `#A70007` | `#FF8272` |
+| `renamed` | `#005794` | `#58ACFF` |
+| `untracked` | `#555656` | `#A8A8A8` |
+| `conflict` | `#A40040` | `#FF7E98` |
+| `branchLocal` | `#006318` | `#59BC5B` |
+| `branchRemote` | `#005794` | `#58ACFF` |
+| `branchTag` | `#7D4800` | `#FF9800` |
+| `branchStash` | `#8C10A1` | `#ED76FD` |
+
+Values are `git_semantic_colors.dart:65-110`. The contrast these hold is
+asserted by `test/conformance/a11y/git_colors_contrast_test.dart`; see
+`docs/ACCESSIBILITY.md` for exactly what that test checks.
 
 ---
 
 ## 3. Unified UI Standards
 
-### ⚠️ REMINDER: USE ONLY THIS DOCUMENT
+### ⚠️ REMINDER: THIS SECTION IS THE *USAGE* STANDARD
 
 When implementing any UI component:
-- ✅ Reference standards in THIS document only
-- ❌ DO NOT check other docs for "how we used to do it"
-- ❌ DO NOT mix patterns from other documentation
-- This section contains the ONLY correct patterns
+- ✅ Follow the patterns in this section for which component and which
+  constant to reach for
+- ✅ Check `docs/deviation_register.yaml` before changing any value a `Base*`
+  component renders — the register outranks this section
+- ❌ Do not treat a number in this section as a Material 3 spec value unless
+  it carries an SDK `file:line`
 
 ---
 
@@ -556,12 +673,52 @@ color: Theme.of(context).colorScheme.onError,
 color: context.gitColors.added,     // Green - for added files
 color: context.gitColors.modified,  // Orange - for modified files
 color: context.gitColors.deleted,   // Red - for deleted files
+```
 
-// Opacity for states (MD3 standard)
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),  // Hover
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),  // Pressed
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),  // Selected
-color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.38),  // Disabled
+#### Material 3 state-layer opacities
+
+The table this section used to carry — hover `0.08`, pressed `0.12`, selected
+`0.16`, disabled `0.38` — was **wrong on two of its four rows**, and the
+wrong rows are the ones a reviewer would actually check. The real values,
+read out of the generated token blocks in the Flutter SDK the app builds
+against (3.44.4, `packages/flutter/lib/src/material/`):
+
+| State | Alpha | SDK source (Flutter 3.44.4) |
+|---|---|---|
+| Hover | **0.08** | `filled_button.dart:571` (`onPrimary.withOpacity(0.08)`); `icon_button.dart:1103`; `FilledButton.styleFrom` at `filled_button.dart:280` |
+| Focus | **0.10** — *not 0.16* | `filled_button.dart:574`; `icon_button.dart:1106`; `filled_button.dart:281` |
+| Pressed | **0.10** — *not 0.12* | `filled_button.dart:568`; `icon_button.dart:1100`; `filled_button.dart:279` |
+| Disabled container | **0.12** on `onSurface` | `filled_button.dart:550` |
+| Disabled content | **0.38** on `onSurface` | `filled_button.dart:559` |
+
+Two further corrections that matter more than the digits:
+
+- **There is no "selected" state-layer opacity in Material 3, and `0.16` is
+  not an M3 value at all.** Selection is expressed by *changing a colour
+  role*, not by laying a tint over the old one: the navigation components
+  switch their indicator to `secondaryContainer`
+  (`navigation_bar.dart:1463`, `navigation_rail.dart:1272`,
+  `navigation_drawer.dart:749`), and a selected `IconButton` switches its
+  foreground to `primary` (`icon_button.dart:1080`). Where a *selected*
+  control does paint a state layer, it uses the same 8/10/10 opacities on the
+  selected foreground role (`icon_button.dart:1088-1098`). The only `0.16`
+  values left in the framework are in Material-2 code paths that M3 does not
+  use — `button_theme.dart:583` and `toggle_buttons.dart:961,971`.
+- **A bare `InkWell` does not get these numbers.** With no `ButtonStyle`
+  supplying an `overlayColor`, `InkWell` falls back to `ThemeData` —
+  `focusColor` = 12% black/white, `hoverColor` = 4% black/white
+  (`theme_data.dart:467-468`), and `highlightColor`/`splashColor` = opaque-ish
+  greys (`0x66BCBCBC`/`0x66C8C8C8` in light, `0x40CCCCCC` in dark,
+  `theme_data.dart:501-502`). Those are **not** M3 state layers.
+  Hand-painting a component out of `Material` + `InkWell` therefore opts it
+  out of the M3 state-layer system silently. This is why the Base\*
+  components delegate to the `ButtonStyleButton` family rather than
+  reimplementing it.
+
+```dart
+// State layers are supplied by the component's ButtonStyle, not written
+// by hand at the call site. If you are typing an alpha for a hover,
+// focus or pressed tint, you are almost certainly in the wrong layer.
 ```
 
 ---
@@ -576,18 +733,24 @@ color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.38),  // Disabl
 
 **Pattern:**
 ```dart
-// Small radius (buttons, text fields, list items)
+// Small radius (text fields, chips)
 borderRadius: BorderRadius.circular(AppTheme.radiusS),  // 4px
 
-// Medium radius (cards, containers)
+// Medium radius (buttons and icon buttons)
 borderRadius: BorderRadius.circular(AppTheme.radiusM),  // 8px
 
-// Large radius (dialogs, modals)
+// Large radius (cards, panels, dialogs, modals)
 borderRadius: BorderRadius.circular(AppTheme.radiusL),  // 12px
 
 // Extra large radius (large panels, bottom sheets)
 borderRadius: BorderRadius.circular(AppTheme.radiusXL), // 16px
 ```
+
+The earlier version of this list put buttons and list items on `radiusS` and
+cards on `radiusM`. Neither matched the code: `BaseButton` uses `radiusM`
+(`base_button.dart:323`), `BaseCard` uses `radiusL` (`base_card.dart:156`),
+and `BaseListItem` has no radius at all — it paints square, as M3's `ListTile`
+does.
 
 ---
 
@@ -707,14 +870,16 @@ What is the relationship between elements?
 
 ```
 What type of component?
-├─ Small interactive elements (buttons, text fields, chips, list items)
+├─ Text fields, chips
 │  └─ AppTheme.radiusS (4px)
-├─ Medium containers (cards, panels)
-│  └─ AppTheme.radiusM (8px)
-├─ Large containers (dialogs, modals, popovers)
+├─ Buttons, icon buttons
+│  └─ AppTheme.radiusM (8px)   [registered deviation BTN-001 / ICO-001]
+├─ Cards, panels, dialogs, modals, popovers
 │  └─ AppTheme.radiusL (12px)
-└─ Extra large containers (bottom sheets, side panels)
-   └─ AppTheme.radiusXL (16px)
+├─ Extra large containers (bottom sheets, side panels)
+│  └─ AppTheme.radiusXL (16px)
+└─ List rows
+   └─ no radius — square, as M3's ListTile
 ```
 
 ---
@@ -748,77 +913,160 @@ What element needs color?
 
 ---
 
-## 5. Material Design 3 Compliance Checklist
+## 5. Design-System Usage Checklist (§5.1) and Material 3 Conformance (§5.2)
 
-Use this checklist for code reviews and new feature development:
+**Two different questions are being asked here, and this section used to ask
+only one of them under the other's name.**
 
-### 5.1 Dialogs
+- **"Did the call site use the design system?"** — a *usage* question. It is
+  answered by reading the diff: `BaseButton` instead of `FilledButton`,
+  `AppTheme.paddingM` instead of `16`. That is §5.1 below, and it is the only
+  thing the old "Material Design 3 Compliance Checklist" ever checked.
+- **"Does the design system match Material 3?"** — a *conformance* question.
+  A reviewer cannot answer it by reading a diff, because the number to compare
+  against lives in the Flutter SDK's generated token tables, not in the diff
+  and not in this document. Checking that `BaseButton` was used tells you
+  nothing about whether `BaseButton`'s corner, label role, icon size or state
+  layers match `FilledButton`'s. **This is exactly the gap that let the app
+  ship a 4 dp corner, an 11 px button label and six failing colour contrasts
+  while every checklist item above was ticked.** That is §5.2, and it is not
+  a checklist — it is a test run.
+
+### 5.1 Usage checklist (read the diff)
+
+Use this for code reviews and new feature development:
+
+#### 5.1.1 Dialogs
 - [ ] Uses `BaseDialog` (not SimpleDialog, AlertDialog)
 - [ ] Uses appropriate `DialogVariant` (normal, confirmation, destructive)
 - [ ] Actions use `BaseButton` with correct variants
 - [ ] Content uses `BaseLabel` components for text
 - [ ] No hardcoded padding or spacing
 
-### 5.2 Buttons
+#### 5.1.2 Buttons
 - [ ] Uses `BaseButton` or `BaseIconButton` (not FilledButton, ElevatedButton, TextButton, IconButton)
 - [ ] Uses appropriate `ButtonVariant`
 - [ ] Uses appropriate `ButtonSize` if not default
 - [ ] No manual style definition
 - [ ] Tooltip provided for icon buttons
 
-### 5.3 List Items
+#### 5.1.3 List Items
 - [ ] Uses `BaseListItem` (not ListTile)
 - [ ] Selection states properly handled (isSelected, isMultiSelected)
 - [ ] Leading/trailing icons use `AppTheme.icon*` sizes
 - [ ] No hardcoded padding
 
-### 5.4 Colors
+#### 5.1.4 Colors
 - [ ] Uses `Theme.of(context).colorScheme.*` for all colors
 - [ ] No `Colors.white`, `Colors.blue`, or other `Colors.*`
-- [ ] Git-specific colors (context.gitColors.*) only for semantic use
-- [ ] Opacity values follow MD3: 0.08, 0.12, 0.16, 0.38
+- [ ] Git-specific colors (`context.gitColors.*`) only for semantic use
+- [ ] **No hand-written state-layer alpha at the call site at all.** Hover,
+      focus and pressed tints come from the component's `ButtonStyle`. If a
+      literal alpha is unavoidable, it must be one of the M3 values in §3.5
+      (hover 0.08, focus 0.10, pressed 0.10, disabled container 0.12,
+      disabled content 0.38) — and note that the old "0.08 / 0.12 / 0.16 /
+      0.38" line that stood here named two values M3 does not use.
 
-### 5.5 Spacing
+#### 5.1.5 Spacing
 - [ ] Uses `AppTheme.padding*` for all spacing
 - [ ] No hardcoded numbers in SizedBox
 - [ ] No hardcoded numbers in EdgeInsets
 - [ ] No non-standard values (2, 3, 6, 10, 12, 14, 20)
 
-### 5.6 Border Radius
+#### 5.1.6 Border Radius
 - [ ] Uses `AppTheme.radius*` for all border radius
 - [ ] No hardcoded `BorderRadius.circular(X)`
 - [ ] No non-standard values (6, 10)
 
-### 5.7 Typography
+#### 5.1.7 Typography
 - [ ] Uses `BaseLabel` components (not raw Text)
 - [ ] No manual `TextStyle` definition
 - [ ] Appropriate label type for context (BodyMedium, TitleLarge, etc.)
 
-### 5.8 Icons
+#### 5.1.8 Icons
 - [ ] Icon sizes use `AppTheme.icon*` constants
 - [ ] No hardcoded icon sizes
 - [ ] Phosphor icons used consistently
 
-### 5.9 Text Fields
+#### 5.1.9 Text Fields
 - [ ] Uses `BaseTextField` (not TextField)
 - [ ] Appropriate variant selected
 - [ ] Validation handled via validator parameter
 
-### 5.10 Cards
+#### 5.1.10 Cards
 - [ ] Uses `BaseCard` (not Container with manual decoration)
 - [ ] No hardcoded padding or border radius inside card
 
 ---
 
+### 5.2 Material 3 conformance (run the suite)
+
+Conformance is not reviewed, it is **executed**. Nothing in §5.1 can detect a
+`Base*` component whose geometry, typography role, state-layer opacity, focus
+indication or minimum tap target differs from Material 3 — that requires
+measuring the rendered widget against the SDK's own generated defaults.
+
+**How to answer the conformance question:**
+
+```bash
+flutter test test/conformance/
+```
+
+**What that runs, and what each part proves:**
+
+| Path | What it measures | Oracle |
+|---|---|---|
+| `test/conformance/theme/text_theme_conformance_test.dart` | all 15 M3 text roles of the app's `TextTheme` | `Typography.englishLike2021`, `typography.dart:2096-2112` |
+| `test/conformance/components/base_button_conformance_test.dart` | geometry, label role, icon size, colour roles, state layers, focus, Enter/Space, tap target | `FilledButton`/`OutlinedButton`/`TextButton` `defaultStyleOf` |
+| `test/conformance/components/base_icon_button_conformance_test.dart` | same, plus the tooltip-labelled tap target | `_IconButtonDefaultsM3`, pinned with citations |
+| `test/conformance/components/base_card_conformance_test.dart` | shape, elevation, container/border colour, margin, state layers | `Card.outlined` |
+| `test/conformance/components/base_list_item_conformance_test.dart` | insets, min height, shape, title role, state layers | `ListTile` |
+| `test/conformance/components/base_panel_conformance_test.dart` | container and header, measured against two oracles | `Card` + `ExpansionTile` header |
+| `test/conformance/a11y/git_colors_contrast_test.dart` | WCAG contrast of the git palette on every scheme, surface and brightness | WCAG 2.1 SC 1.4.3 / 1.4.11 |
+| `test/conformance/deviation_register_test.dart` | that every register entry is well-formed and reachable | — |
+
+**How a mismatch is resolved.** `expectConformant`
+(`test/conformance/support/expect_conformant.dart`) fails in *both*
+directions:
+
+- a mismatch with **no** register entry fails as `M3 CONFORMANCE FAILURE`;
+- a register entry whose value has come back into line fails as
+  `STALE DEVIATION`;
+- a register entry whose documented `spec_value` no longer matches the SDK
+  fails as `REGISTER SPEC MISMATCH` (the SDK default moved);
+- a register entry whose measured value drifted to a third value fails as
+  `DEVIATION DRIFT`.
+
+So there are exactly two acceptable outcomes for a difference from Material 3:
+**make the component conform**, or **register the deviation** in
+`docs/deviation_register.yaml` with `id`, `component`, `property`,
+`spec_value`, `app_value`, `spec_source` (an SDK `file:line`), `rationale` and
+`registered` date. An unregistered difference is a defect, not a decision.
+
+**Adding a measurement** additionally requires listing the token in
+`test/conformance/support/token_manifest.dart`; `expectConformant` refuses to
+assert on a token that is not in the manifest, so the set of things being
+measured stays reviewable in a diff.
+
+**Known unmeasured surface — do not read silence as conformance.**
+`BaseDialog`, `BaseTextField` and `BaseBadge` have no conformance suite, and
+there are no goldens. For those components this document's numbers are
+descriptions of the current code, not conformance claims.
+
+---
+
 ## 6. Code Review Guidelines
 
-### ⚠️ REMINDER: USE ONLY THIS DOCUMENT
+### ⚠️ REMINDER: WHAT A REVIEW CAN AND CANNOT SETTLE
 
 During code reviews:
-- ✅ Reference ONLY UI-CONCEPT.md for UI standards
-- ❌ DO NOT cite other documentation for UI decisions
-- ❌ DO NOT cross-reference multiple documents
-- This document is the single source of truth for UI
+- ✅ Cite this document for **usage** questions (which component, which constant)
+- ✅ Cite `docs/deviation_register.yaml` for **conformance** questions — and if
+  it disagrees with this document, the register is right
+- ✅ Cite an SDK `file:line` under
+  `packages/flutter/lib/src/material/` for any Material 3 spec value
+- ❌ Never settle a conformance argument by quoting prose, this document
+  included; run `flutter test test/conformance/` instead
 
 ---
 
@@ -845,6 +1093,13 @@ During code reviews:
 5. **Typography**
    - ✅ Approve: Uses BaseLabel components
    - ❌ Reject: Raw Text with manual styling
+
+6. **Conformance (only if the PR touches a `Base*` component or the theme)**
+   - ✅ Approve: `flutter test test/conformance/` is green, and any new
+     difference from Material 3 carries a `docs/deviation_register.yaml`
+     entry with an SDK `spec_source` and a reason
+   - ❌ Reject: a `Base*` geometry, typography role, state layer or tap target
+     changed with no conformance run and no register entry
 
 ---
 
@@ -932,10 +1187,11 @@ Please use theme colors instead of hardcoded values:
 
 | Size | Constant | Value | Use Case |
 |------|----------|-------|----------|
-| S | `AppTheme.radiusS` | 4px | Buttons, fields, chips |
-| M | `AppTheme.radiusM` | 8px | Cards, containers |
-| L | `AppTheme.radiusL` | 12px | Dialogs, modals |
-| XL | `AppTheme.radiusXL` | 16px | Panels, sheets |
+| S | `AppTheme.radiusS` | 4px | Text fields, chips |
+| M | `AppTheme.radiusM` | 8px | Buttons, icon buttons (`BTN-001`/`ICO-001`) |
+| L | `AppTheme.radiusL` | 12px | Cards, panels, dialogs, modals |
+| XL | `AppTheme.radiusXL` | 16px | Large panels, sheets |
+| — | *(none)* | 0 | List rows — square, as M3's `ListTile` |
 
 ---
 
@@ -953,14 +1209,19 @@ Please use theme colors instead of hardcoded values:
 
 ---
 
-### A.5 Material Design 3 Opacity Standards
+### A.5 Material Design 3 State-Layer Opacities
 
-| State | Alpha Value | Use Case |
-|-------|-------------|----------|
-| Hover | 0.08 | Hover state on surfaces |
-| Focus/Pressed | 0.12 | Pressed/focused state |
-| Selected | 0.16 | Selected items |
-| Disabled | 0.38 | Disabled elements |
+Corrected against the Flutter 3.44.4 generated token blocks; see §3.5 for the
+full explanation and for why "Selected 0.16" is not a Material 3 concept.
+
+| State | Alpha | SDK source (`packages/flutter/lib/src/material/`) |
+|-------|-------|---|
+| Hover | 0.08 | `filled_button.dart:571`, `icon_button.dart:1103` |
+| Focus | 0.10 | `filled_button.dart:574`, `icon_button.dart:1106` |
+| Pressed | 0.10 | `filled_button.dart:568`, `icon_button.dart:1100` |
+| Disabled container | 0.12 on `onSurface` | `filled_button.dart:550` |
+| Disabled content | 0.38 on `onSurface` | `filled_button.dart:559` |
+| Selected | *(no opacity — change the colour role)* | `navigation_bar.dart:1463` (`secondaryContainer`), `icon_button.dart:1080` (`primary`) |
 
 ---
 
@@ -978,61 +1239,60 @@ Please use theme colors instead of hardcoded values:
 
 ## Document Usage Rules
 
-### ⚠️ CRITICAL: Single Source of Truth Enforcement
+### ⚠️ CRITICAL: Precedence, not exclusivity
+
+This section used to say "use ONLY UI-CONCEPT.md" and to forbid opening
+`STATUS.md`, `ARCHITECTURE.md`, `REQUIREMENTS.md` and `DIALOG-PATTERNS.md` —
+**four files that do not exist and never have**. Worse, the rule guaranteed
+the failure it was meant to prevent: a document that forbids consulting the
+executable ruler is a document that can be wrong for months without anybody
+noticing, which is precisely what happened to §3.5's opacity table and to
+`docs/ACCESSIBILITY.md`'s contrast claim.
+
+The rule is replaced by a precedence order.
 
 **ALWAYS:**
-- ✅ Use ONLY UI-CONCEPT.md for all UI work
-- ✅ Reference ONLY this document during implementation
-- ✅ Reference ONLY this document during code reviews
-- ✅ Update ONLY this document when patterns change
+- ✅ Use this document for UI **usage** decisions
+- ✅ Defer to `docs/deviation_register.yaml` on any **conformance** question —
+  it is this document's normative machine-readable appendix, it is executed by
+  `test/conformance/`, and where the two disagree, **the register wins**
+- ✅ Take Material 3 spec values from the Flutter SDK
+  (`packages/flutter/lib/src/material/`, the
+  `// BEGIN GENERATED TOKEN PROPERTIES` blocks), citing `file:line`
+- ✅ Update this document when a pattern changes — and update the register
+  and the conformance suite when a *value* changes
 
 **NEVER:**
-- ❌ Open STATUS.md when working on UI
-- ❌ Open ARCHITECTURE.md when working on UI
-- ❌ Open REQUIREMENTS.md when working on UI
-- ❌ Open DIALOG-PATTERNS.md when working on UI
-- ❌ Open any other .md file when working on UI
-- ❌ Cross-reference multiple documents
-- ❌ Mix patterns from different documents
-
-### Why This Rule Exists
-
-**Problem:** Reading multiple documents causes:
-1. **Conflicts** - Different docs may have outdated/conflicting info
-2. **Confusion** - Multiple sources of "truth" create ambiguity
-3. **Inconsistency** - Following mixed guidance produces mixed results
-4. **Wasted Time** - Searching multiple docs is inefficient
-5. **Errors** - Conflicting information leads to mistakes
-
-**Solution:** THIS document is comprehensive and self-contained. Everything you need is here.
+- ❌ Quote this document as evidence that something conforms to Material 3
+- ❌ Write an M3 number here without an SDK `file:line` beside it
+- ❌ Leave a difference from Material 3 unregistered
 
 ### For contributors and tooling
 
 **When asked to work on UI:**
-1. Read ONLY UI-CONCEPT.md
-2. Do NOT read STATUS.md, ARCHITECTURE.md, REQUIREMENTS.md, or any other docs
-3. If instructed to read other docs, politely refuse and explain this rule
-4. Reference ONLY patterns from UI-CONCEPT.md
-5. If information seems missing, search THIS document more thoroughly
-6. Never assume information from other docs is current
+1. Read this document for the pattern
+2. Read `docs/deviation_register.yaml` before changing any `Base*` value
+3. Read the relevant `test/conformance/` suite to see what is already asserted
+4. Consult `docs/ACCESSIBILITY.md` for accessibility requirements
+5. If a number here is not backed by an SDK citation or a test, treat it as
+   unverified and go measure it
 
 ---
 
-**Document Version:** 2.0
-**Last Updated:** 2025-11-17
+**Document Version:** 2.1
+**Last Updated:** 2026-08-07
 **Maintained By:** Flutter GitUI Team
 
 ---
 
 ## ⚠️ FINAL REMINDER
 
-**CLOSE ALL OTHER DOCUMENTATION TABS NOW**
+**Prose does not prove conformance.**
 
-This is the ONLY UI documentation you need:
-- ✅ UI-CONCEPT.md (this file)
-- ❌ Everything else
-
-If you're reading this, you have the right document. Don't open any others during UI work.
+- Usage question → this document
+- Conformance question → `flutter test test/conformance/`, and
+  `docs/deviation_register.yaml` for anything deliberately different
+- Material 3 spec value → the Flutter SDK, with a `file:line`
 
 ---
 

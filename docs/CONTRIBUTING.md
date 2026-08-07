@@ -380,10 +380,15 @@ void main() {
 ### Where to Document
 
 - **Public APIs**: Doc comments in code
-- **Architecture**: `docs/ARCHITECTURE.md`
 - **Error Handling**: `docs/ERROR-HANDLING-PATTERNS.md` and `docs/ERROR-HANDLING-MIGRATION.md`
+- **UI patterns and design system**: `docs/UI-CONCEPT.md`
+- **Material 3 conformance (normative, executable)**: `docs/deviation_register.yaml`, asserted by `test/conformance/`
+- **Accessibility**: `docs/ACCESSIBILITY.md`
 - **Contributing**: This file
 - **User-Facing**: `README.md`
+
+There is no `docs/ARCHITECTURE.md`; earlier versions of this list pointed at
+one, and it has never existed in this repository.
 
 ### Documentation Standards
 
@@ -482,9 +487,11 @@ Describe how you tested the changes
 
 ## Need Help?
 
-- **Error Handling**: See `docs/ERROR-HANDLING-MIGRATION.md`
-- **Architecture**: See `docs/ARCHITECTURE.md`
-- **UI Patterns**: See `docs/ERROR-HANDLING-PATTERNS.md`
+- **Error Handling**: See `docs/ERROR-HANDLING-MIGRATION.md` and
+  `docs/ERROR-HANDLING-PATTERNS.md`
+- **UI Patterns**: See `docs/UI-CONCEPT.md` (usage) and
+  `docs/deviation_register.yaml` (conformance — it outranks the prose)
+- **Accessibility**: See `docs/ACCESSIBILITY.md`
 - **Questions**: Open an issue or ask in #engineering
 
 ---

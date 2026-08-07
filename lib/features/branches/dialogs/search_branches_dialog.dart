@@ -47,10 +47,26 @@ class _SearchBranchesDialogState extends State<SearchBranchesDialog> {
         prefixIcon: PhosphorIconsRegular.magnifyingGlass,
         onSubmitted: (_) => _apply(),
       ),
-      // The affirmative action of this dialog - applying the typed filter -
-      // has no button at all: it is reachable only through Enter (onSubmit
-      // above) or the field's own submit. What is here is the alternative
-      // "drop the filter entirely" and the way out.
+      // Clear, Cancel, Search: the order advanced_search_dialog.dart already
+      // uses, with the affirmative action last as M3 arranges it.
+      //
+      // Applying the filter used to have no button at all: it existed only as
+      // onSubmit above, so the row showed no way to complete the dialog and
+      // Enter was a shortcut standing in for the action itself. It is now the
+      // dialog's one affirmative action, and Enter still fires the same
+      // callback.
+      //
+      // Clear stays neutral, not dismissive, because it leaves the dialog
+      // *with a result*: it pops '', the caller drops its filter, and the
+      // branch list changes. Escape and Cancel pop null and the caller keeps
+      // whatever filter it had. Those are two materially different outcomes,
+      // and dismissive is defined as the one Escape is the keyboard
+      // equivalent of - so only one of them can hold it, or a skin
+      // implementing that rule has two candidates to bind Escape to and may
+      // pick the one that wipes the user's filter. Neutral's first clause,
+      // "a second way forward that is not *the* way forward", is what Clear
+      // is; AdvancedFiltersDialog's Reset all is the same shape and already
+      // carries the same role.
       actions: [
         DialogAction(
           label: l10n.clear,
@@ -61,6 +77,11 @@ class _SearchBranchesDialogState extends State<SearchBranchesDialog> {
           label: l10n.cancel,
           role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
+        ),
+        DialogAction(
+          label: l10n.search,
+          role: DialogActionRole.affirmative,
+          onPressed: _apply,
         ),
       ],
     );

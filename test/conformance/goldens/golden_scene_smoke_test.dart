@@ -24,6 +24,9 @@
 ///   * **The scene painted something.** A scene whose builder silently
 ///     produced an empty box would generate a blank baseline that then
 ///     "passes" forever, so a zero-area capture is a failure.
+///   * **Nothing the scene paints escapes the capture.** Ink is not painted
+///     where its widget sits, so a scene can paint correctly and still be
+///     missing from its own baseline; see `_expectInkIsCaptured`.
 library;
 
 import 'package:flutter/material.dart';
@@ -90,8 +93,71 @@ void main() {
                 'Scene "${scene.name}" laid out to $size. A zero-area scene '
                 'would produce a blank baseline that passes forever.',
           );
+
+          _expectInkIsCaptured(tester, scene, captured);
         },
       );
     }
+  }
+}
+
+/// Asserts that every ink-painting widget in [scene] paints into an ink layer
+/// that lies *inside* the captured boundary.
+///
+/// An `Ink` decoration and an `InkWell`'s hover, focus and press layers are
+/// not painted at the widget's own position in the paint order. They are
+/// registered on the nearest ancestor `Material`, whose render object paints
+/// every registered feature before it paints its own child subtree. So the ink
+/// lands wherever that `Material` is — and if the nearest one is *above* the
+/// `RepaintBoundary` the golden is captured from, the ink is not in the image
+/// at all, and whatever the subtree paints in between covers it as well.
+///
+/// That is not hypothetical. `BaseListItem` paints its selection tile through
+/// `Ink` (base_list_item.dart:311) because a `Container` would paint over the
+/// hover and press layers. With no `Material` inside the boundary, the nearest
+/// one was the harness `Scaffold`'s, and `base_list_item_states_dark.png`
+/// contained zero pixels of `secondaryContainer` while its captions announced
+/// a selected and a multi-selected row. The baseline was reviewed, committed
+/// and compared by CI for as long as it existed, and it proved nothing about
+/// the state it was named after.
+///
+/// The check walks up from each ink painter and requires a `Material` to be
+/// met before the boundary is. It is deliberately expressed from the widget's
+/// point of view rather than as "the harness has a Material", so it keeps
+/// testing the property that matters if the harness is ever restructured.
+void _expectInkIsCaptured(
+  WidgetTester tester,
+  GoldenScene scene,
+  Finder captured,
+) {
+  final Element boundary = tester.element(captured);
+  for (final Element element in collectAllElementsFrom(
+    boundary,
+    skipOffstage: false,
+  )) {
+    final Widget widget = element.widget;
+    if (widget is! Ink && widget is! InkResponse) continue;
+
+    bool reachedMaterialFirst = false;
+    element.visitAncestorElements((Element ancestor) {
+      if (ancestor.widget is Material) {
+        reachedMaterialFirst = true;
+        return false;
+      }
+      // The boundary itself, reached before any Material: the ink of this
+      // widget is painted outside the image the golden is made of.
+      return !identical(ancestor, boundary);
+    });
+
+    expect(
+      reachedMaterialFirst,
+      isTrue,
+      reason:
+          'Scene "${scene.name}" contains a ${widget.runtimeType} whose '
+          'nearest ancestor Material lies outside the captured boundary, so '
+          'its tile and its hover, focus and press layers paint into an ink '
+          'layer the golden never sees. Give the boundary a Material of its '
+          'own (see pumpGoldenScene) rather than moving the widget.',
+    );
   }
 }

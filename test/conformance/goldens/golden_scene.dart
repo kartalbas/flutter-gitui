@@ -111,6 +111,38 @@ const double kGoldenScenePadding = 24.0;
 /// transparent pixels wherever the scene does not paint, and a light and a
 /// dark baseline would then be indistinguishable in the parts that matter
 /// least and impossible to review in the parts that matter most.
+///
+/// ## Why the backdrop is followed by a `Material`
+///
+/// An `Ink` decoration and an `InkWell`'s hover, focus and press layers are
+/// not painted where the widget sits. They are registered on the nearest
+/// ancestor `Material`, whose `_RenderInkFeatures` paints every registered
+/// feature first and its own child subtree afterwards. So an ink feature
+/// always lands *below* everything drawn between that `Material` and the
+/// widget that produced it.
+///
+/// Without the `Material` below, the nearest ancestor was the `Scaffold`'s,
+/// which sits *above* this `RepaintBoundary`. That had two consequences and
+/// each on its own is fatal to a baseline: the ink painted outside the
+/// boundary the golden is captured from, so it was never in the image at all,
+/// and the opaque backdrop below — painted by this subtree, therefore later —
+/// covered it. `BaseListItem` paints its selection tile through `Ink`
+/// (base_list_item.dart:311), so `base_list_item_states_dark.png` contained
+/// zero pixels of `secondaryContainer` while its captions promised a selected
+/// and a multi-selected row; measured on the committed baseline, 92,084
+/// samples of `surface` and none of the selection colour.
+///
+/// Placing a `Material` here fixes both at once: the ink layer is now inside
+/// the captured boundary, and it paints after the backdrop and before the
+/// content. It is `MaterialType.transparency` so it contributes no background
+/// of its own — the backdrop stays the single `ColoredBox` it always was, and
+/// the only thing this adds to a baseline is ink that was previously lost.
+/// The relative order of the tile and the state layers is untouched, because
+/// both still register on one and the same ink layer in the same order: the
+/// `Ink` decoration at mount, a hover or press layer when it happens, which is
+/// later and therefore on top. That ordering is what
+/// `base_list_item_conformance_test.dart` asserts, and it is the reason the
+/// component may not go back to a `Container`.
 Future<Finder> pumpGoldenScene(
   WidgetTester tester,
   GoldenScene scene, {
@@ -146,18 +178,36 @@ Future<Finder> pumpGoldenScene(
             child: Builder(
               builder: (BuildContext context) {
                 final ColorScheme colors = Theme.of(context).colorScheme;
-                Widget content = Padding(
-                  padding: const EdgeInsets.all(kGoldenScenePadding),
-                  child: scene.build(context),
+                return ColoredBox(
+                  color: colors.surface,
+                  child: Material(
+                    // Transparency, so this Material is only an ink layer and
+                    // never a second backdrop; see the doc comment above.
+                    // `golden_scene_smoke_test` asserts every scene's ink
+                    // reaches an ink layer inside the boundary, so removing
+                    // this fails there rather than silently emptying an image.
+                    type: MaterialType.transparency,
+                    child: Builder(
+                      // A context below the Material, so a scene that reads
+                      // `Material.of` resolves to the layer its ink is
+                      // actually captured in.
+                      builder: (BuildContext context) {
+                        Widget content = Padding(
+                          padding: const EdgeInsets.all(kGoldenScenePadding),
+                          child: scene.build(context),
+                        );
+                        if (scene.width != null || scene.height != null) {
+                          content = SizedBox(
+                            width: scene.width,
+                            height: scene.height,
+                            child: content,
+                          );
+                        }
+                        return content;
+                      },
+                    ),
+                  ),
                 );
-                if (scene.width != null || scene.height != null) {
-                  content = SizedBox(
-                    width: scene.width,
-                    height: scene.height,
-                    child: content,
-                  );
-                }
-                return ColoredBox(color: colors.surface, child: content);
               },
             ),
           ),

@@ -64,6 +64,7 @@ enum DestructiveAction {
   amend(DangerTier.reflogRecoverable),
   squash(DangerTier.reflogRecoverable),
   rebase(DangerTier.reflogRecoverable),
+  forceRenameBranch(DangerTier.reflogRecoverable),
   deleteLocalBranch(DangerTier.reflogRecoverable),
   deleteLocalTag(DangerTier.reflogRecoverable),
 

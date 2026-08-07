@@ -87,7 +87,7 @@ class RequireConfirmDestructive extends DartLintRule {
     'revert', 'cherryPick',
     // reflogRecoverable tier
     'resetSoft', 'resetMixed', 'amend', 'squash', 'rebase',
-    'deleteLocalBranch', 'deleteLocalTag',
+    'forceRenameBranch', 'deleteLocalBranch', 'deleteLocalTag',
     // permanent tier
     'resetHard', 'cleanWorkingDirectory', 'discardFile', 'discardAll',
     'deleteUntrackedFile', 'dropStash', 'clearStashes',
@@ -143,13 +143,16 @@ class RequireConfirmDestructive extends DartLintRule {
     });
   }
 
-  /// Whether this invocation performs a destructive action. Three methods are
+  /// Whether this invocation performs a destructive action. Four methods are
   /// only destructive for certain arguments and are checked structurally:
   /// - `cleanWorkingDirectory(dryRun: true)` only lists what would be removed;
   /// - `push`/`pushRemote` are only destructive when a `force:` argument is
   ///   present that is not the literal `false`;
   /// - `commit` is only destructive (amend) when an `amend:` argument is
-  ///   present that is not the literal `false`.
+  ///   present that is not the literal `false`;
+  /// - `renameBranch` is only destructive when a `force:` argument is present
+  ///   that is not the literal `false` (`git branch -M` overwrites an
+  ///   existing branch of the target name).
   /// A non-literal `force:`/`amend:` value counts as destructive, because the
   /// call CAN take the destructive path at runtime.
   bool _isDestructiveCall(MethodInvocation node) {
@@ -159,7 +162,7 @@ class RequireConfirmDestructive extends DartLintRule {
       final dryRun = _namedArgument(node, 'dryRun');
       return !(dryRun is BooleanLiteral && dryRun.value);
     }
-    if (name == 'push' || name == 'pushRemote') {
+    if (name == 'push' || name == 'pushRemote' || name == 'renameBranch') {
       final force = _namedArgument(node, 'force');
       if (force == null) return false;
       return !(force is BooleanLiteral && !force.value);

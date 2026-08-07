@@ -36,6 +36,7 @@ void main() {
         DestructiveAction.amend,
         DestructiveAction.squash,
         DestructiveAction.rebase,
+        DestructiveAction.forceRenameBranch,
         DestructiveAction.deleteLocalBranch,
         DestructiveAction.deleteLocalTag,
       ]) {

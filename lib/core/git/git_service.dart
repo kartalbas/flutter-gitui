@@ -1386,7 +1386,12 @@ class GitService {
   /// Rename a branch
   /// [oldName] - Current branch name (null for current branch)
   /// [newName] - New branch name
-  /// [force] - Force rename even if new name already exists
+  /// [force] - Force rename even if new name already exists. This maps to
+  /// `git branch -M`, which OVERWRITES an existing branch of the target name;
+  /// the overwritten tip stays reachable only through the reflog, so a caller
+  /// passing `force: true` must route through `confirmDestructive` as
+  /// `DestructiveAction.forceRenameBranch` (the `require_confirm_destructive`
+  /// lint enforces this).
   ///
   /// Returns [Result.Success] on successful rename.
   /// Returns [Result.Failure] if git command fails.

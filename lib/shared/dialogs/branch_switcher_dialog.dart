@@ -13,8 +13,18 @@ import '../../core/git/models/branch.dart';
 import '../../core/services/notification_service.dart';
 import '../components/base_dialog.dart';
 import '../components/base_list_item.dart';
+import '../controllers/item_navigation_controller.dart';
+import '../widgets/keyboard_navigable_view.dart';
+import '../widgets/search_field_handoff.dart';
 
-/// Dialog for switching between git branches
+/// Dialog for switching between git branches (Ctrl+B).
+///
+/// Fully keyboard operable, the same way the hosted-repository picker is: the
+/// search field takes focus on open, the arrow keys move the highlight through
+/// the results without leaving the field, and Enter checks the highlighted
+/// branch out. It used to offer no keyboard path at all past the filter - the
+/// rows were tappable and nothing else - so filtering with the keyboard ended
+/// in a reach for the mouse.
 class BranchSwitcherDialog extends ConsumerStatefulWidget {
   const BranchSwitcherDialog({super.key});
 
@@ -28,10 +38,55 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
   String _searchQuery = '';
   bool _showRemoteBranches = false;
 
+  /// The result list on the shared navigation semantics: arrows rove its
+  /// highlight (from the field via the handoff, or from the list as its own
+  /// Tab stop) and activation checks the highlighted branch out.
+  late final ItemNavigationController _listController;
+
+  /// The branches currently on screen, refreshed every build, so activation
+  /// resolves an index against exactly what the user sees.
+  List<GitBranch> _matches = const [];
+
+  /// Height of one result row, for keeping the highlight scrolled into view.
+  /// A fixed extent is what lets the list scroll the highlight into view at
+  /// all, so it is sized for the tallest row: the branch name plus its last
+  /// commit message, plus the list item's own padding.
+  static const double _rowExtent = 80;
+
+  @override
+  void initState() {
+    super.initState();
+    _listController = ItemNavigationController(onActivate: _activateIndex);
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
+    _listController.dispose();
     super.dispose();
+  }
+
+  void _activateIndex(int index) {
+    if (index < 0 || index >= _matches.length) return;
+    _switchBranch(_matches[index]);
+  }
+
+  /// Enter from anywhere in the dialog takes the highlighted branch, falling
+  /// back to the first one while nothing is highlighted yet.
+  void _confirm() {
+    if (_matches.isEmpty) return;
+    final index = _listController.selectedIndex;
+    _switchBranch(
+      _matches[index < 0 ? 0 : index.clamp(0, _matches.length - 1)],
+    );
+  }
+
+  /// Restarts the highlight at the first row of a fresh result set - a new
+  /// query or the other tab, where the old position would point at an
+  /// unrelated branch.
+  void _resetHighlight() {
+    _listController.select(-1);
+    _listController.scheduleInitialHighlight();
   }
 
   @override
@@ -39,20 +94,37 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
     final localBranchesAsync = ref.watch(localBranchesProvider);
     final remoteBranchesAsync = ref.watch(remoteBranchesProvider);
 
+    _matches = _filtered(
+      localBranchesAsync.value ?? const [],
+      remoteBranchesAsync.value ?? const [],
+    );
+    if (_matches.isNotEmpty) {
+      // The first match is highlighted from the start, so Enter without any
+      // arrow key takes it.
+      _listController.scheduleInitialHighlight();
+    }
+
     return BaseDialog(
       icon: PhosphorIconsBold.gitBranch,
       title: AppLocalizations.of(context)!.switchBranch,
+      // Enter checks out the highlighted branch from anywhere in the dialog.
+      onSubmit: _matches.isEmpty ? null : _confirm,
       content: Column(
         children: [
-          // Search field
-          BaseTextField(
-            controller: _searchController,
-            autofocus: true,
-            hintText: AppLocalizations.of(context)!.searchBranches,
-            prefixIcon: PhosphorIconsRegular.magnifyingGlass,
-            onChanged: (value) {
-              setState(() => _searchQuery = value);
-            },
+          // Arrows typed in the field move the list's highlight and Enter
+          // takes the highlighted branch while the caret stays in the field.
+          SearchFieldHandoff(
+            controller: _listController,
+            child: BaseTextField(
+              controller: _searchController,
+              autofocus: true,
+              hintText: AppLocalizations.of(context)!.searchBranches,
+              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+              onChanged: (value) {
+                setState(() => _searchQuery = value);
+                _resetHighlight();
+              },
+            ),
           ),
           const SizedBox(height: AppTheme.paddingM),
 
@@ -69,13 +141,19 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
                   context,
                   label: AppLocalizations.of(context)!.localTab,
                   isSelected: !_showRemoteBranches,
-                  onTap: () => setState(() => _showRemoteBranches = false),
+                  onTap: () {
+                    setState(() => _showRemoteBranches = false);
+                    _resetHighlight();
+                  },
                 ),
                 _buildToggleButton(
                   context,
                   label: AppLocalizations.of(context)!.remoteTab,
                   isSelected: _showRemoteBranches,
-                  onTap: () => setState(() => _showRemoteBranches = true),
+                  onTap: () {
+                    setState(() => _showRemoteBranches = true);
+                    _resetHighlight();
+                  },
                 ),
               ],
             ),
@@ -87,29 +165,8 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           SizedBox(
             height: 400,
             child: localBranchesAsync.when(
-              data: (localBranches) {
-                final remoteBranches = _showRemoteBranches
-                    ? (remoteBranchesAsync.value ?? [])
-                    : <GitBranch>[];
-
-                final allBranches = [...localBranches, ...remoteBranches];
-
-                // Filter branches by search query
-                final filteredBranches = allBranches.where((branch) {
-                  if (_searchQuery.isEmpty) return true;
-                  return branch.name.toLowerCase().contains(
-                    _searchQuery.toLowerCase(),
-                  );
-                }).toList();
-
-                // Sort: current first, then by name
-                filteredBranches.sort((a, b) {
-                  if (a.isCurrent && !b.isCurrent) return -1;
-                  if (!a.isCurrent && b.isCurrent) return 1;
-                  return a.name.compareTo(b.name);
-                });
-
-                if (filteredBranches.isEmpty) {
+              data: (_) {
+                if (_matches.isEmpty) {
                   return Center(
                     child: BodyLargeLabel(
                       AppLocalizations.of(context)!.noBranchesFound,
@@ -118,62 +175,16 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
                   );
                 }
 
-                return ListView.builder(
-                  itemCount: filteredBranches.length,
-                  itemBuilder: (context, index) {
-                    final branch = filteredBranches[index];
-                    final isCurrent = branch.isCurrent;
-                    final isRemote = branch.isRemote;
-
-                    return BaseListItem(
-                      isSelected: isCurrent,
-                      leading: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Active indicator
-                          SizedBox(
-                            width: AppTheme.paddingL,
-                            child: isCurrent
-                                ? Icon(
-                                    PhosphorIconsBold.check,
-                                    size: AppTheme.iconS,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                  )
-                                : null,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          // Remote indicator
-                          if (isRemote)
-                            Icon(
-                              PhosphorIconsRegular.cloud,
-                              size: AppTheme.paddingM,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                        ],
-                      ),
-                      content: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BodyMediumLabel(branch.name),
-                          if (branch.lastCommitMessage != null)
-                            LabelMediumLabel(
-                              branch.lastCommitMessage!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                        ],
-                      ),
-                      trailing: Icon(
-                        PhosphorIconsBold.gitBranch,
-                        color: isCurrent
-                            ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      onTap: () => _switchBranch(branch),
-                    );
-                  },
+                // A navigable collection: one Tab stop with the roving
+                // highlight the field's handoff drives, kept scrolled into
+                // view by the fixed row extent.
+                return KeyboardNavigableListView(
+                  controller: _listController,
+                  itemCount: _matches.length,
+                  itemExtent: _rowExtent,
+                  itemBuilder:
+                      (context, index, isSelected, containerHasFocus) =>
+                          _buildRow(_matches[index], isHighlighted: isSelected),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -196,6 +207,82 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],
+    );
+  }
+
+  /// The branches the dialog shows, in the order it shows them: the search
+  /// filter applied to the visible tab, current branch first.
+  List<GitBranch> _filtered(
+    List<GitBranch> localBranches,
+    List<GitBranch> remoteBranches,
+  ) {
+    final all = [...localBranches, if (_showRemoteBranches) ...remoteBranches];
+    final matches = all.where((branch) {
+      if (_searchQuery.isEmpty) return true;
+      return branch.name.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+    matches.sort((a, b) {
+      if (a.isCurrent && !b.isCurrent) return -1;
+      if (!a.isCurrent && b.isCurrent) return 1;
+      return a.name.compareTo(b.name);
+    });
+    return matches;
+  }
+
+  Widget _buildRow(GitBranch branch, {required bool isHighlighted}) {
+    final isCurrent = branch.isCurrent;
+    return BaseListItem(
+      // The row the keyboard is on carries the selection styling; the branch
+      // that happens to be checked out is marked by its check icon instead,
+      // so the two never compete for the same visual.
+      isSelected: isHighlighted,
+      // The highlight follows the caret in the search field, so it keeps its
+      // full strength while the field drives it.
+      containerHasFocus: true,
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Active indicator
+          SizedBox(
+            width: AppTheme.paddingL,
+            child: isCurrent
+                ? Icon(
+                    PhosphorIconsBold.check,
+                    size: AppTheme.iconS,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : null,
+          ),
+          const SizedBox(width: AppTheme.paddingS),
+          // Remote indicator
+          if (branch.isRemote)
+            Icon(
+              PhosphorIconsRegular.cloud,
+              size: AppTheme.paddingM,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+        ],
+      ),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BodyMediumLabel(branch.name),
+          if (branch.lastCommitMessage != null)
+            LabelMediumLabel(
+              branch.lastCommitMessage!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+        ],
+      ),
+      trailing: Icon(
+        PhosphorIconsBold.gitBranch,
+        color: isCurrent
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      onTap: () => _switchBranch(branch),
     );
   }
 

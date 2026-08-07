@@ -158,8 +158,14 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 const SizedBox(height: AppTheme.paddingM),
               ],
 
-              // Tag name
+              // Tag name. Keyed because the template selector above it and
+              // the commit dropdown below it both appear only once their
+              // providers resolve, a frame or two after the dialog opened.
+              // Without a key the reshuffle replaces this field's element,
+              // which throws away the focus its `autofocus` had just won, and
+              // the dialog ends up with nothing focused to type into.
               BaseTextField(
+                key: const ValueKey('createTag.tagName'),
                 controller: _tagNameController,
                 label: l10n.tagName,
                 hintText: l10n.tagNameHint,

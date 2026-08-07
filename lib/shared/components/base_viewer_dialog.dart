@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
-import 'base_dialog.dart' show focusedEditableKeepsEnter;
+import 'base_dialog.dart' show DialogKeyboardHost;
 import '../../shared/theme/app_theme.dart';
 import 'base_button.dart';
 import 'base_label.dart';
@@ -110,30 +109,16 @@ class BaseViewerDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    return Focus(
-      autofocus: true,
-      onKeyEvent: (node, event) {
-        if (event is! KeyDownEvent) return KeyEventResult.ignored;
-
-        if (event.logicalKey == LogicalKeyboardKey.escape) {
-          if (barrierDismissible) {
-            Navigator.of(context).pop();
-            return KeyEventResult.handled;
-          }
-        }
-
-        // Same contract as BaseDialog: Enter fires the primary action from
-        // anywhere, except inside a multiline editable.
-        if (onSubmit != null &&
-            !focusedEditableKeepsEnter() &&
-            (event.logicalKey == LogicalKeyboardKey.enter ||
-                event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
-          onSubmit!();
-          return KeyEventResult.handled;
-        }
-
-        return KeyEventResult.ignored;
-      },
+    // The same keyboard host BaseDialog uses, rather than a second copy of
+    // the Esc/Enter handler: this component used to wrap itself in an eager
+    // `Focus(autofocus: true)`, which registers before any descendant and
+    // therefore won the autofocus race against a field inside the viewer, so
+    // such a viewer opened with focus on the dialog frame and nothing to type
+    // into. The shared host defers its claim until the autofocus pipeline has
+    // settled, and stays out of the Tab ring.
+    return DialogKeyboardHost(
+      barrierDismissible: barrierDismissible,
+      onSubmit: onSubmit,
       child: Dialog(
         backgroundColor: backgroundColor,
         shape: RoundedRectangleBorder(

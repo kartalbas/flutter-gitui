@@ -203,31 +203,9 @@ class BaseDialog extends StatelessWidget {
       }
     }
 
-    return _DialogFocus(
-      onKeyEvent: (node, event) {
-        if (event is! KeyDownEvent) return KeyEventResult.ignored;
-
-        if (event.logicalKey == LogicalKeyboardKey.escape) {
-          if (barrierDismissible) {
-            Navigator.of(context).pop();
-            return KeyEventResult.handled;
-          }
-        }
-
-        // Enter confirms from anywhere in the dialog, not only while a single
-        // text field happens to hold focus. The exception is a multiline
-        // editable: Enter inserts a newline there, and hijacking it would
-        // make the field impossible to fill.
-        if (onSubmit != null &&
-            !focusedEditableKeepsEnter() &&
-            (event.logicalKey == LogicalKeyboardKey.enter ||
-                event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
-          onSubmit!();
-          return KeyEventResult.handled;
-        }
-
-        return KeyEventResult.ignored;
-      },
+    return DialogKeyboardHost(
+      barrierDismissible: barrierDismissible,
+      onSubmit: onSubmit,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final availableWidth = MediaQuery.of(context).size.width;
@@ -322,27 +300,59 @@ class BaseDialog extends StatelessWidget {
   }
 }
 
-/// The dialog's keyboard host.
+/// The keyboard host every dialog is wrapped in, so the dialog keyboard
+/// contract is inherited from one place instead of being re-typed per dialog
+/// component. [BaseDialog] and `BaseViewerDialog` both build on it.
 ///
-/// It must hold focus for Esc/Enter to arrive, but it must not steal it: an
-/// eager `Focus(autofocus: true)` wrapper registers before any descendant and
-/// wins the autofocus race, which silently defeated `autofocus: true` on the
-/// first field of every dialog (the focus manager discards later autofocus
-/// requests once the scope has a focused child). So the wrapper claims focus
-/// only after the autofocus pipeline settled and nothing inside the dialog
-/// took it; key events from a focused field still bubble up to this node.
-class _DialogFocus extends StatefulWidget {
-  const _DialogFocus({required this.onKeyEvent, required this.child});
+/// It carries two responsibilities that are each easy to get wrong on their
+/// own:
+///
+/// **The keys.** Escape closes a dismissible dialog and Enter fires
+/// [onSubmit], both from anywhere inside it — a dialog that can only be
+/// completed with the mouse is unfinished. The single exception is a focused
+/// multiline editable, which keeps its Enter because Enter inserts a newline
+/// there (see [focusedEditableKeepsEnter]); hijacking it would make the field
+/// impossible to fill.
+///
+/// **The focus.** The host must hold focus for those keys to arrive, but it
+/// must not steal it: an eager `Focus(autofocus: true)` wrapper registers
+/// before any descendant and wins the autofocus race, which silently defeated
+/// `autofocus: true` on the first field of every dialog (the focus manager
+/// discards later autofocus requests once the scope has a focused child). So
+/// the host claims focus only after the autofocus pipeline settled and nothing
+/// inside the dialog took it; key events from a focused field still bubble up
+/// to this node either way.
+///
+/// It is deliberately not a Tab stop ([FocusNode.skipTraversal]). The node
+/// covers the whole dialog and draws nothing, so leaving it in the traversal
+/// ring gave every dialog one stop where the user sees no focus ring and has
+/// nothing to operate — Tab is supposed to walk the dialog's *controls*.
+/// Skipping traversal keeps it focusable for the fallback above and for the
+/// keys, and Tab from it still moves on to the first real control.
+class DialogKeyboardHost extends StatefulWidget {
+  const DialogKeyboardHost({
+    super.key,
+    required this.barrierDismissible,
+    required this.onSubmit,
+    required this.child,
+  });
 
-  final KeyEventResult Function(FocusNode, KeyEvent) onKeyEvent;
+  /// Whether Escape may close the dialog, mirroring the host route's own
+  /// barrier behaviour so both dismissal paths agree.
+  final bool barrierDismissible;
+
+  /// The dialog's primary action, fired by Enter. Null leaves Enter inert,
+  /// which is what a destructive prompt wants.
+  final VoidCallback? onSubmit;
+
   final Widget child;
 
   @override
-  State<_DialogFocus> createState() => _DialogFocusState();
+  State<DialogKeyboardHost> createState() => _DialogKeyboardHostState();
 }
 
-class _DialogFocusState extends State<_DialogFocus> {
-  final FocusNode _node = FocusNode(debugLabel: 'BaseDialog');
+class _DialogKeyboardHostState extends State<DialogKeyboardHost> {
+  final FocusNode _node = FocusNode(debugLabel: 'DialogKeyboardHost');
 
   @override
   void initState() {
@@ -368,11 +378,38 @@ class _DialogFocusState extends State<_DialogFocus> {
     super.dispose();
   }
 
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      if (widget.barrierDismissible) {
+        Navigator.of(context).pop();
+        return KeyEventResult.handled;
+      }
+    }
+
+    // Enter confirms from anywhere in the dialog, not only while a single
+    // text field happens to hold focus. The exception is a multiline
+    // editable: Enter inserts a newline there, and hijacking it would make
+    // the field impossible to fill.
+    final onSubmit = widget.onSubmit;
+    if (onSubmit != null &&
+        !focusedEditableKeepsEnter() &&
+        (event.logicalKey == LogicalKeyboardKey.enter ||
+            event.logicalKey == LogicalKeyboardKey.numpadEnter)) {
+      onSubmit();
+      return KeyEventResult.handled;
+    }
+
+    return KeyEventResult.ignored;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
       focusNode: _node,
-      onKeyEvent: widget.onKeyEvent,
+      skipTraversal: true,
+      onKeyEvent: _onKeyEvent,
       child: widget.child,
     );
   }

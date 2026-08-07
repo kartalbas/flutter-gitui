@@ -66,7 +66,11 @@ enum ButtonSize {
 ///   hero and empty-state actions
 ///
 /// All sizes share the 8 dp control corner (BTN-001) instead of the M3
-/// stadium shape.
+/// stadium shape. That corner is not written here: it comes from the
+/// `filledButtonRadius` / `outlinedButtonRadius` / `textButtonRadius` tokens
+/// the app theme configures (lib/shared/theme/app_theme.dart), which are in
+/// turn one rung of the `AppTheme.radius*` corner scale. Editing that scale
+/// therefore changes what this component renders.
 ///
 /// ## Variant Standards
 /// - **Primary**: filled, primary/onPrimary - for primary actions
@@ -305,11 +309,27 @@ class BaseButton extends StatelessWidget {
       ),
     };
 
-    // Every measured property is pinned at the widget so conformance stays
-    // deterministic: the app theme overrides the button sub-themes (bodyLarge
-    // text style, FlexColorScheme radii and comfortable density), and none of
-    // that may leak into the component. The padded tap target plus standard
-    // density guarantee the >= 48 dp hit area around every container size.
+    // Every property this component *owns* is pinned at the widget so
+    // conformance stays deterministic: the app theme's bodyLarge button text
+    // style and its comfortable visual density are size decisions this
+    // component makes per size, and neither may leak in. The padded tap
+    // target plus standard density guarantee the >= 48 dp hit area around
+    // every container size.
+    //
+    // `shape` is deliberately NOT among them. It is the one measured property
+    // the theme owns: `ButtonStyleButton` resolves widget style before
+    // `themeStyleOf`, so any widget-level shape makes the corner unreachable
+    // from the theme forever — which is exactly how the configured
+    // `filledButtonRadius` / `outlinedButtonRadius` / `textButtonRadius`
+    // tokens (app_theme.dart) came to govern nothing. Leaving the slot empty
+    // hands the control corner to those tokens.
+    //
+    // BTN-001 does not weaken by moving: the conformance suite measures the
+    // corner this component actually RENDERS under the real app theme and
+    // compares it against the M3 stadium oracle, so the 8 dp stays a
+    // registered, asserted deviation. Should the token ever stop arriving,
+    // the button would fall back to the stadium, and `expectConformant`
+    // would fail the entry as a stale deviation rather than pass quietly.
     final ButtonStyle style = ButtonStyle(
       textStyle: WidgetStatePropertyAll<TextStyle?>(labelStyle),
       iconSize: WidgetStatePropertyAll<double>(iconSize),
@@ -317,12 +337,6 @@ class BaseButton extends StatelessWidget {
       padding: padding == null
           ? null
           : WidgetStatePropertyAll<EdgeInsetsGeometry>(padding),
-      // BTN-001: the shared 8 dp control corner instead of the M3 stadium.
-      shape: WidgetStatePropertyAll<OutlinedBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        ),
-      ),
       visualDensity: VisualDensity.standard,
       tapTargetSize: MaterialTapTargetSize.padded,
     ).merge(_variantStyle(context));
@@ -397,7 +411,9 @@ _MaterialBase _baseOf(ButtonVariant variant) {
 /// - **Large**: 48 dp container (ICO-005), 24 dp icon
 ///
 /// All sizes share the 8 dp control corner (ICO-001) instead of the M3
-/// stadium shape.
+/// stadium shape — the same corner [BaseButton] takes from the theme, but
+/// named here as a constant because no icon-button radius token exists to
+/// carry it (see the `shape` comment in `build`).
 ///
 /// ## Variant Standards
 /// - **Primary**: filled, primary/onPrimary - for affirmative icon actions
@@ -577,7 +593,16 @@ class BaseIconButton extends StatelessWidget {
       padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
         EdgeInsets.all(AppTheme.paddingS),
       ),
-      // ICO-001: the shared 8 dp control corner instead of the M3 stadium.
+      // ICO-001: the shared control corner instead of the M3 stadium.
+      //
+      // Unlike [BaseButton], which lets the theme own its corner, this one
+      // has to name the constant: `FlexSubThemesData` exposes a radius token
+      // for every button family EXCEPT the icon button (there is no
+      // `iconButtonRadius`), so no configured token can reach an
+      // `IconButton`. Reading the same rung of the corner scale the theme's
+      // button radii are configured from is what keeps the two components on
+      // one corner; `theme_token_reach_test.dart` asserts they still agree,
+      // so this constant cannot drift away from the tokens unnoticed.
       shape: WidgetStatePropertyAll<OutlinedBorder>(
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusM),

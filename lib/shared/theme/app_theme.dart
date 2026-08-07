@@ -30,15 +30,25 @@ class AppTheme {
         useM2StyleDividerInM3: true,
         alignedDropdown: true,
         useInputDecoratorThemeInDialogs: true,
-        defaultRadius: 12.0,
-        elevatedButtonRadius: 8.0,
-        filledButtonRadius: 8.0,
-        outlinedButtonRadius: 8.0,
-        textButtonRadius: 8.0,
-        inputDecoratorRadius: 8.0,
+        // Every radius below names a rung of the app's corner scale
+        // ([radiusXS] .. [radiusXL] further down this class) rather than a
+        // bare literal, so the scale stays the one place a corner is chosen.
+        // These tokens are live: `BaseButton` takes its corner from
+        // `filledButtonRadius` / `outlinedButtonRadius` / `textButtonRadius`
+        // and nothing else, so editing [radiusM] moves the buttons on screen.
+        // `inputDecoratorRadius` is the exception — the input components
+        // deliberately render [radiusS] instead (registered as the FIELD
+        // deviations), and this value only reaches SDK-owned fields such as
+        // the date picker's.
+        defaultRadius: radiusL,
+        elevatedButtonRadius: radiusM,
+        filledButtonRadius: radiusM,
+        outlinedButtonRadius: radiusM,
+        textButtonRadius: radiusM,
+        inputDecoratorRadius: radiusM,
         fabUseShape: true,
-        fabRadius: 16.0,
-        chipRadius: 8.0,
+        fabRadius: radiusXL,
+        chipRadius: radiusM,
       ),
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3: true,
@@ -67,16 +77,39 @@ class AppTheme {
         iconColor: theme.colorScheme.primary,
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+        style: _layerOn(
+          TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+          theme.textButtonTheme.style,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+        style: _layerOn(
+          ElevatedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+          theme.elevatedButtonTheme.style,
+        ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+        style: _layerOn(
+          OutlinedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+          theme.outlinedButtonTheme.style,
+        ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
+      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
         labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
+        // A field's label keeps one style whether it rests inside the field
+        // or floats above it, so this repeats `labelStyle` deliberately
+        // rather than leaving the slot empty. It has to be spelled out:
+        // `FlexSubThemesData` supplies a state-resolving `floatingLabelStyle`
+        // of its own, and while the sub-theme was being replaced wholesale
+        // that never arrived, so the floating label silently fell back to
+        // `labelStyle`. Merging the sub-theme (see [_layerOn]) lets it
+        // through, and it would grow the floating label from bodyMedium to
+        // bodyLarge and recolour it — a restyling this app never chose.
+        // Whether the label should instead follow Material 3's bodySmall
+        // floating role is a separate decision for the FIELD family.
+        floatingLabelStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -120,15 +153,16 @@ class AppTheme {
         useM2StyleDividerInM3: true,
         alignedDropdown: true,
         useInputDecoratorThemeInDialogs: true,
-        defaultRadius: 12.0,
-        elevatedButtonRadius: 8.0,
-        filledButtonRadius: 8.0,
-        outlinedButtonRadius: 8.0,
-        textButtonRadius: 8.0,
-        inputDecoratorRadius: 8.0,
+        // The same corner scale as the light theme; see the comment there.
+        defaultRadius: radiusL,
+        elevatedButtonRadius: radiusM,
+        filledButtonRadius: radiusM,
+        outlinedButtonRadius: radiusM,
+        textButtonRadius: radiusM,
+        inputDecoratorRadius: radiusM,
         fabUseShape: true,
-        fabRadius: 16.0,
-        chipRadius: 8.0,
+        fabRadius: radiusXL,
+        chipRadius: radiusM,
       ),
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3: true,
@@ -157,16 +191,39 @@ class AppTheme {
         iconColor: theme.colorScheme.primary,
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+        style: _layerOn(
+          TextButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+          theme.textButtonTheme.style,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+        style: _layerOn(
+          ElevatedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+          theme.elevatedButtonTheme.style,
+        ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+        style: _layerOn(
+          OutlinedButton.styleFrom(textStyle: theme.textTheme.bodyLarge),
+          theme.outlinedButtonTheme.style,
+        ),
       ),
-      inputDecorationTheme: InputDecorationTheme(
+      inputDecorationTheme: theme.inputDecorationTheme.copyWith(
         labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface,
+        ),
+        // A field's label keeps one style whether it rests inside the field
+        // or floats above it, so this repeats `labelStyle` deliberately
+        // rather than leaving the slot empty. It has to be spelled out:
+        // `FlexSubThemesData` supplies a state-resolving `floatingLabelStyle`
+        // of its own, and while the sub-theme was being replaced wholesale
+        // that never arrived, so the floating label silently fell back to
+        // `labelStyle`. Merging the sub-theme (see [_layerOn]) lets it
+        // through, and it would grow the floating label from bodyMedium to
+        // bodyLarge and recolour it — a restyling this app never chose.
+        // Whether the label should instead follow Material 3's bodySmall
+        // floating role is a separate decision for the FIELD family.
+        floatingLabelStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
@@ -191,6 +248,24 @@ class AppTheme {
         },
       ),
     );
+  }
+
+  /// Layers the app's own [addition] on top of the sub-theme
+  /// [FlexColorScheme] already built, instead of replacing it.
+  ///
+  /// This exists because `ThemeData.copyWith` *substitutes* a sub-theme: a
+  /// bare `copyWith(textButtonTheme: TextButtonThemeData(style: …))` throws
+  /// away everything [FlexSubThemesData] configured for text buttons —
+  /// including the corner radius — and the tokens above would silently reach
+  /// no widget at all. `ButtonStyle.merge` is the composing operation: the
+  /// receiver's non-null fields win and the argument only fills the gaps, so
+  /// passing [addition] as the receiver keeps the app's explicit choice in
+  /// front while every token it says nothing about survives.
+  ///
+  /// [base] is nullable because a `…ButtonThemeData` may legitimately carry
+  /// no style at all; there is then nothing to merge into.
+  static ButtonStyle _layerOn(ButtonStyle addition, ButtonStyle? base) {
+    return base == null ? addition : addition.merge(base);
   }
 
   /// Map AppColorScheme to FlexScheme

@@ -468,20 +468,17 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
     setState(() => _isRebasing = true);
 
     try {
-      final gitService = ref.read(gitServiceProvider);
-      if (gitService == null) return;
-
-      // Throw on failure so the conflict handling in catch actually runs
+      // The GitActions wrapper owns the refresh contract for the history
+      // rewrite and throws on failure so the conflict handling in catch
+      // actually runs.
       // confirmed-by: this dialog itself; choosing the branch and pressing
       // Start Rebase is the confirmation.
-      (await gitService.rebaseBranch(
-        ontoBranch: _selectedBranch!,
-        interactive: _interactive,
-      )).unwrap();
-
-      // Refresh rebase state
-      ref.invalidate(rebaseStateProvider);
-      ref.invalidate(repositoryStatusProvider);
+      await ref
+          .read(gitActionsProvider)
+          .rebaseBranch(
+            ontoBranch: _selectedBranch!,
+            interactive: _interactive,
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -495,10 +492,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       }
     } catch (e) {
       if (mounted) {
-        // Check if it's a conflict error
+        // Check if it's a conflict error; the wrapper already refreshed the
+        // rebase state before rethrowing, so no invalidation is needed here.
         final errorMsg = e.toString().toLowerCase();
         if (errorMsg.contains('conflict') || errorMsg.contains('merge')) {
-          ref.invalidate(rebaseStateProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -529,14 +526,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
   Future<void> _continueRebase() async {
     try {
-      final gitService = ref.read(gitServiceProvider);
-      if (gitService == null) return;
-
-      (await gitService.continueRebase()).unwrap();
-
-      // Refresh state
-      ref.invalidate(rebaseStateProvider);
-      ref.invalidate(repositoryStatusProvider);
+      // The GitActions wrapper refreshes rebase state, status, branches and
+      // history: continuing can complete the rewrite.
+      await ref.read(gitActionsProvider).continueRebase();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -564,14 +556,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
   Future<void> _skipRebase() async {
     try {
-      final gitService = ref.read(gitServiceProvider);
-      if (gitService == null) return;
-
-      (await gitService.skipRebase()).unwrap();
-
-      // Refresh state
-      ref.invalidate(rebaseStateProvider);
-      ref.invalidate(repositoryStatusProvider);
+      // The GitActions wrapper refreshes rebase state, status, branches and
+      // history: skipping advances (and can complete) the rewrite.
+      await ref.read(gitActionsProvider).skipRebase();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -597,14 +584,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
   Future<void> _abortRebase() async {
     try {
-      final gitService = ref.read(gitServiceProvider);
-      if (gitService == null) return;
-
-      (await gitService.abortRebase()).unwrap();
-
-      // Refresh state
-      ref.invalidate(rebaseStateProvider);
-      ref.invalidate(repositoryStatusProvider);
+      // The GitActions wrapper refreshes rebase state, status, branches and
+      // history: aborting moves the branch tip back to where it was.
+      await ref.read(gitActionsProvider).abortRebase();
 
       if (mounted) {
         Navigator.of(context).pop();

@@ -1353,6 +1353,93 @@ class GitActions {
   }
 
   // ============================================
+  // Rebase Operations
+  // ============================================
+
+  /// The refresh contract for a history rewrite.
+  ///
+  /// Every rebase step (start, continue, skip, abort) moves the branch tip
+  /// and replaces commits, so everything derived from them must reload: the
+  /// rebase state, the working-tree status (conflicts appear and disappear),
+  /// the branch list (tips and ahead/behind markers moved) and the commit
+  /// log. Invalidating [commitHistoryProvider] is the app-wide history
+  /// refresh signal: the paged commit window (commitWindowProvider in
+  /// lib/features/history) watches it and reloads itself back to its paged
+  /// depth, so the history view shows the rewritten commits without a manual
+  /// refresh.
+  Future<void> _refreshAfterHistoryRewrite() async {
+    ref.invalidate(rebaseStateProvider);
+    await _refreshOrQueue(RefreshType.branches, refreshBranches);
+    await _refreshOrQueue(RefreshType.status, refreshStatus);
+    if (_batchContext != null && _batchContext!.isActive) {
+      _batchContext!.markForRefresh(RefreshType.history);
+    } else {
+      ref.invalidate(commitHistoryProvider);
+    }
+  }
+
+  /// Rebase the current branch onto [ontoBranch].
+  ///
+  /// The refresh runs before the error propagates: a rebase that stops on a
+  /// conflict has already replayed part of history, moved HEAD and dirtied
+  /// the working tree, so the UI must reload even when the operation reports
+  /// failure.
+  Future<void> rebaseBranch({
+    required String ontoBranch,
+    bool interactive = false,
+    bool preserveMerges = false,
+  }) async {
+    final gitService = ref.read(gitServiceProvider);
+    if (gitService == null) return;
+
+    final result = await gitService.rebaseBranch(
+      ontoBranch: ontoBranch,
+      interactive: interactive,
+      preserveMerges: preserveMerges,
+    );
+
+    await _refreshAfterHistoryRewrite();
+
+    result.unwrap(); // Throw on error to propagate to caller
+  }
+
+  /// Continue an interrupted rebase after its conflicts were resolved.
+  Future<void> continueRebase() async {
+    final gitService = ref.read(gitServiceProvider);
+    if (gitService == null) return;
+
+    final result = await gitService.continueRebase();
+
+    await _refreshAfterHistoryRewrite();
+
+    result.unwrap(); // Throw on error to propagate to caller
+  }
+
+  /// Skip the current commit during a rebase.
+  Future<void> skipRebase() async {
+    final gitService = ref.read(gitServiceProvider);
+    if (gitService == null) return;
+
+    final result = await gitService.skipRebase();
+
+    await _refreshAfterHistoryRewrite();
+
+    result.unwrap(); // Throw on error to propagate to caller
+  }
+
+  /// Abort a rebase and return to the pre-rebase state.
+  Future<void> abortRebase() async {
+    final gitService = ref.read(gitServiceProvider);
+    if (gitService == null) return;
+
+    final result = await gitService.abortRebase();
+
+    await _refreshAfterHistoryRewrite();
+
+    result.unwrap(); // Throw on error to propagate to caller
+  }
+
+  // ============================================
   // Advanced Commit Operations
   // ============================================
 

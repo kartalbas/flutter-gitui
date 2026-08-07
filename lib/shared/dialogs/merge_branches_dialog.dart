@@ -815,9 +815,12 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 : null,
           );
         } else {
+          // The GitActions wrapper owns the refresh contract for the history
+          // rewrite and throws on failure, so a failed rebase can no longer
+          // fall through to the push below.
           // confirmed-by: this dialog itself; choosing the rebase strategy
           // and pressing the primary action is the confirmation.
-          await gitService.rebaseBranch(
+          await gitActions.rebaseBranch(
             ontoBranch: _sourceBranch!.name,
             interactive: _interactive,
             preserveMerges: _preserveMerges,
@@ -851,10 +854,11 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 : null,
           );
         } else {
-          // Rebase target onto source
+          // Rebase target onto source. The GitActions wrapper owns the
+          // refresh contract for the history rewrite and throws on failure.
           // confirmed-by: this dialog itself; choosing the rebase strategy
           // and pressing the primary action is the confirmation.
-          await gitService!.rebaseBranch(
+          await gitActions.rebaseBranch(
             ontoBranch: _sourceBranch!.name,
             interactive: _interactive,
             preserveMerges: _preserveMerges,

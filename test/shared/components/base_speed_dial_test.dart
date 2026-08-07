@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_speed_dial.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 
@@ -18,6 +19,11 @@ Future<void> _pumpDial(
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      // The dial's own button names the next press ("Expand"/"Collapse") in
+      // the user's language, so it reads AppLocalizations and needs the app's
+      // delegates here just as every screen supplies them.
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Stack(
           children: [
@@ -199,6 +205,8 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Stack(
             children: [

@@ -1033,3 +1033,130 @@ deviations:
       parameter, so a caller placing a dot inside a dense row can still ask for
       the M3 6.
     registered: 2026-08-07
+
+  # BaseSwitch (lib/shared/components/base_animated_widgets.dart) against the
+  # generated `_SwitchDefaultsM3` / `_SwitchConfigM3`. The component is a
+  # pass-through to Material's own `Switch`, so everything it renders comes
+  # from the app's theme: track and thumb geometry, the thumb growing on press,
+  # every colour role in every state and the whole disabled treatment all
+  # measure the M3 value and are therefore not registered. Three entries
+  # remain, and they are one decision.
+
+  - id: SWITCH-001
+    component: BaseSwitch
+    property: overlay.focused
+    spec_value: onSurface @ 10%
+    app_value: onSurface @ 12%
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/switch.dart:2285 (_SwitchDefaultsM3.overlayColor, focused and unselected)"
+    rationale: >
+      The state-layer opacity is not written in the component: BaseSwitch
+      passes no `overlayColor` at all, so the value comes from the app's
+      `switchTheme`, which FlexColorScheme derives at 12% for focus and press
+      while matching Material 3 exactly on hover (8%), on every thumb, track
+      and outline role in every state, and on the whole disabled treatment -
+      the suite measures all of those next to this one and they conform.
+
+      It is registered rather than overridden in the component because
+      overriding it would be the defect issue #341 was opened about, in
+      reverse: a Base component pinning a value its theme is supposed to own is
+      exactly what stops a configured token from reaching the widget, and the
+      pluggable-skin work of #249 depends on the component staying a
+      pass-through. Two percentage points of alpha on a translucent circle is
+      the smallest difference in this register, and paying for it with a switch
+      that no longer follows its theme would be a bad trade. If the theme is
+      ever brought onto the M3 value, this entry fails as stale and goes away.
+    registered: 2026-08-07
+
+  - id: SWITCH-002
+    component: BaseSwitch
+    property: overlay.pressed
+    spec_value: onSurface @ 10%
+    app_value: onSurface @ 12%
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/switch.dart:2279 (_SwitchDefaultsM3.overlayColor, pressed and unselected)"
+    rationale: >
+      The pressed half of SWITCH-001, and the same single value. Material 3
+      gives focus and press the same opacity and so does this theme, so the
+      switch keeps the M3 structure of its state layers and differs only in the
+      level.
+    registered: 2026-08-07
+
+  - id: SWITCH-003
+    component: BaseSwitch
+    property: selected.overlay.focused
+    spec_value: primary @ 10%
+    app_value: primary @ 12%
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/switch.dart:2274 (_SwitchDefaultsM3.overlayColor, focused and selected)"
+    rationale: >
+      The selected half of SWITCH-001. Material 3 switches the state layer's
+      role from `onSurface` to `primary` once the switch is on, and this theme
+      switches it too - only the opacity is the 12% of SWITCH-001. The entry
+      exists separately so that a theme which fixed the unselected value and
+      forgot the selected one would still be caught.
+    registered: 2026-08-07
+
+  # BaseSpeedDial (lib/shared/components/base_speed_dial.dart). Material 3 has
+  # no speed dial; it has the two floating action buttons the dial is built
+  # from, and those are what the suite measures against `_FABDefaultsM3`. The
+  # dial's own button conforms on size, corner, elevation (resting and
+  # hovered), container and foreground role, glyph size and state layer, and
+  # both button sizes conform on tap target and on the 16 dp edge margin, so
+  # only the entry below is registered.
+
+  - id: FAB-001
+    component: BaseSpeedDial.miniFab
+    property: shape
+    spec_value: 12.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/floating_action_button.dart:818 (_FABDefaultsM3.shape, _FloatingActionButtonType.small)"
+    rationale: >
+      Material 3 gives the 56 dp button a 16 dp corner and the 40 dp one a 12,
+      because it sizes each corner to the button it belongs to and expects a
+      floating button to appear on its own. In a speed dial they do not appear
+      on their own: the action buttons stand in a single column directly above
+      the dial's own button, aligned on the same right edge, so their corners
+      are read against each other rather than against the screen. One corner
+      keeps the column reading as one control instead of as a stack of
+      differently rounded ones.
+
+      The value is not invented for this component. It is the app's
+      `fabRadius` token (AppTheme.radiusXL, configured in app_theme.dart), and
+      it is Material 3's own regular-FAB corner, which the dial's main button
+      measures and conforms to - so this entry says only that the smaller
+      button adopts the larger one's corner, not that the app chose a corner of
+      its own.
+    registered: 2026-08-07
+
+  # Accessibility minimums measured across the component matrix
+  # (test/conformance/a11y/component_matrix_a11y_test.dart). These are not
+  # Material 3 component tokens but platform and WCAG minimums; they are
+  # carried here so they get the same executable both-directions treatment as
+  # everything above - an unregistered miss fails, and a miss that has been
+  # fixed fails as stale.
+
+  - id: A11Y-001
+    component: BaseSwitcher
+    property: tapTargetHeight
+    spec_value: 48.0
+    app_value: 37.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/constants.dart:27 (kMinInteractiveDimension), asserted by flutter_test's androidTapTargetGuideline (packages/flutter_test/lib/src/accessibility.dart:777-780)"
+    rationale: >
+      The switcher is the repository, workspace and branch control in the app's
+      top bar, and its height is that bar's height: 8 dp of padding above and
+      below a 16 dp glyph and a 13 px label, inside a 1 dp outline. Growing it
+      to 48 would grow the top bar on every screen by 11 dp of chrome that
+      shows nothing, on a window where vertical space is spent on the commit
+      list.
+
+      The 48 dp figure is Android's touch-target guideline for a fingertip, not
+      a WCAG AA requirement: WCAG 2.2's target-size criterion at AA (2.5.8) is
+      24 by 24, which a 37 dp control clears with room to spare, and this app
+      ships to Windows and Linux where the target is acquired with a mouse
+      pointer. The horizontal dimension is not the issue either - a switcher is
+      125 to 130 dp wide, so the target is large in the axis the pointer
+      travels along.
+
+      This is deliberately narrower than the argument the buttons make:
+      BTN-002 and ICO-002 shrink only the *painted* container and keep a full
+      48 dp hit area through the padded tap target. The switcher has no such
+      padding, and this entry says so rather than implying it does.
+    registered: 2026-08-07

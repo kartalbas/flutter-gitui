@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../theme/app_theme.dart';
@@ -66,6 +67,7 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Positioned(
       right: _position.dx,
       bottom: _position.dy,
@@ -82,6 +84,16 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
           return KeyEventResult.ignored;
         },
         child: GestureDetector(
+          // The pan and the focus-grabbing tap are pointer conveniences, not
+          // controls: dragging repositions the dial and the tap only moves
+          // keyboard focus onto it so Escape collapses it. Annotating them
+          // would put an unlabeled 56 dp node carrying a tap and four scroll
+          // actions into the semantics tree in front of the buttons that do
+          // the work, which is exactly what `labeledTapTargetGuideline` and
+          // `androidTapTargetGuideline` flag. The dial stays fully operable
+          // without them - every action is a labelled button below, and the
+          // dial is reachable and dismissible from the keyboard.
+          excludeFromSemantics: true,
           onPanUpdate: (details) {
             // Clamp so the whole dial, measured at its real rendered size,
             // keeps the standard edge margin on every side of the viewport.
@@ -148,6 +160,11 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
                         ),
                         // Action button
                         FloatingActionButton.small(
+                          // The action's name, on the button itself. The chip
+                          // to its left shows the same words, but that chip is
+                          // a sibling node: without this the mini FAB reaches
+                          // assistive technology as an unlabeled tap target.
+                          tooltip: action.label,
                           // No hero: these buttons never survive a route
                           // change, so the animation is meaningless, and a tag
                           // is a liability. Flutter throws when two heroes in
@@ -169,6 +186,10 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
                 ),
               // Main FAB
               FloatingActionButton(
+                // The dial's own button is icon-only and its glyph changes
+                // with the state, so the tooltip names what the next press
+                // will do rather than what is on screen.
+                tooltip: widget.isExpanded ? l10n.collapse : l10n.expand,
                 // Same reasoning, and here the tag was a shared string
                 // literal: two dials on one route -- a screen's own and the
                 // one inside an open diff viewer -- would have collided.

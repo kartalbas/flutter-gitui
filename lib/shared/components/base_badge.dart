@@ -171,12 +171,22 @@ class BaseBadge extends StatelessWidget {
           ),
           if (onDeleted != null) ...[
             SizedBox(width: AppTheme.paddingS / 2),
-            GestureDetector(
-              onTap: onDeleted,
-              child: Icon(
-                Icons.close,
-                size: iconSize + 2,
-                color: foregroundColor,
+            // The glyph is the whole control, so without a tooltip it reaches
+            // assistive technology as a tappable node with no name at all -
+            // which is what the a11y matrix sweep measures. The message is
+            // Material's own, the one `Chip` gives its delete affordance
+            // (Flutter 3.44.4 packages/flutter/lib/src/material/chip.dart:1307-1308),
+            // so it is already translated into every locale the app ships and
+            // reads the same here as it does on a chip.
+            Tooltip(
+              message: MaterialLocalizations.of(context).deleteButtonTooltip,
+              child: GestureDetector(
+                onTap: onDeleted,
+                child: Icon(
+                  Icons.close,
+                  size: iconSize + 2,
+                  color: foregroundColor,
+                ),
               ),
             ),
           ],

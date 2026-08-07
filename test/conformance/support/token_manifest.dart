@@ -281,4 +281,56 @@ const Set<String> conformanceTokenManifest = <String>{
   'BaseIconBadge.labelTextStyle', // M3: labelSmall — registered BADGE-008
   'BaseDotBadge.size', // M3: 6.0 (smallSize) — registered BADGE-009
   'BaseDotBadge.shape', // M3: circle — conforms
+  // BaseSwitch vs the generated `_SwitchDefaultsM3` / `_SwitchConfigM3`
+  // (Flutter 3.44.4 switch.dart:2168 onwards). The oracle is pinned rather
+  // than pumped because the app installs a `switchTheme`, so a stock `Switch`
+  // under this theme would report the app's own values as the specification —
+  // see the suite's library comment. Geometry and colour are read out of the
+  // paint stream, because a switch is one CustomPaint rather than a tree of
+  // styled boxes.
+  'BaseSwitch.trackWidth', // M3: 52.0 — conforms
+  'BaseSwitch.trackHeight', // M3: 32.0 — conforms
+  'BaseSwitch.trackShape', // M3: stadium, 16.0 at the 32 dp track — conforms
+  'BaseSwitch.tapTargetSize', // M3: 48.0 — conforms
+  'BaseSwitch.unselected.thumbDiameter', // M3: 16.0 — conforms
+  'BaseSwitch.selected.thumbDiameter', // M3: 24.0 — conforms
+  'BaseSwitch.pressed.thumbDiameter', // M3: 28.0 — conforms
+  'BaseSwitch.unselected.trackColor', // M3: surfaceContainerHighest — conforms
+  'BaseSwitch.unselected.thumbColor', // M3: outline — conforms
+  'BaseSwitch.unselected.trackOutline', // M3: outline 2 dp — conforms
+  'BaseSwitch.selected.trackColor', // M3: primary — conforms
+  'BaseSwitch.selected.thumbColor', // M3: onPrimary — conforms
+  'BaseSwitch.selected.trackOutline', // M3: transparent — conforms
+  'BaseSwitch.disabled.unselected.trackColor', // M3: the role @ 12% — conforms
+  'BaseSwitch.disabled.unselected.thumbColor', // M3: onSurface @ 38% — conforms
+  'BaseSwitch.disabled.selected.trackColor', // M3: onSurface @ 12% — conforms
+  'BaseSwitch.disabled.selected.thumbColor', // M3: surface — conforms
+  'BaseSwitch.overlay.hovered', // M3: onSurface @ 8% — conforms
+  'BaseSwitch.overlay.focused', // M3: onSurface @ 10% — registered SWITCH-001
+  'BaseSwitch.overlay.pressed', // M3: onSurface @ 10% — registered SWITCH-002
+  'BaseSwitch.selected.overlay.focused', // M3: primary @ 10% — SWITCH-003
+  // BaseSpeedDial (lib/shared/components/base_speed_dial.dart) vs the
+  // generated `_FABDefaultsM3` (Flutter 3.44.4 floating_action_button.dart:775
+  // onwards), pinned for the same reason as the switch: the app configures
+  // `fabUseShape` and `fabRadius`, so a stock FAB under this theme would
+  // report the app's corner back as the specification.
+  'BaseSpeedDial.fab.containerSize', // M3: 56.0 — conforms
+  'BaseSpeedDial.fab.shape', // M3: 16.0 — conforms
+  'BaseSpeedDial.fab.elevation', // M3: 6.0 — conforms
+  'BaseSpeedDial.fab.hoveredElevation', // M3: 8.0 — conforms
+  'BaseSpeedDial.fab.containerColor', // M3: primaryContainer — conforms
+  'BaseSpeedDial.fab.foregroundColor', // M3: onPrimaryContainer — conforms
+  'BaseSpeedDial.fab.iconSize', // M3: 24.0 — conforms
+  'BaseSpeedDial.fab.overlay.hovered', // M3: onPrimaryContainer @ 8% — conforms
+  'BaseSpeedDial.miniFab.containerSize', // M3: 40.0 — conforms
+  'BaseSpeedDial.miniFab.shape', // M3: 12.0 — registered FAB-001
+  'BaseSpeedDial.miniFab.iconSize', // M3: 24.0 — conforms
+  'BaseSpeedDial.miniFab.containerColor', // M3: primaryContainer — conforms
+  'BaseSpeedDial.miniFab.tapTargetSize', // M3: 48.0 — conforms
+  'BaseSpeedDial.edgeMargin', // M3: 16.0 — conforms
+  // The accessibility matrix sweep (test/conformance/a11y). These are not
+  // Material 3 component tokens but WCAG/platform minimums measured on the
+  // same component matrix the goldens render, so the register can hold them
+  // in the same executable both-directions form as everything above.
+  'BaseSwitcher.tapTargetHeight', // 48.0 minimum — registered A11Y-001
 };

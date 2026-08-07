@@ -37,11 +37,13 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
-      # Same scope as the analysis below, so the gate matches what the repository
-      # was formatted with. Keeping it enforced stops future diffs from mixing
-      # real changes with reformatting noise.
+      # The whole repository, so the gate matches the command a developer
+      # actually runs. A narrower scope let release/ and tools/ drift, and
+      # anyone running `dart format .` then produced an unrelated diff on top
+      # of their own change. Generated output is untracked and needs no
+      # exclusion.
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed lib test lint_rules
+        run: dart format --output=none --set-exit-if-changed .
 
       # lint_rules/ resolves as a member of the root pub workspace, sharing one
       # analyzer with the app, so the plugin package is analyzed here together

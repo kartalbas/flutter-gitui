@@ -33,14 +33,21 @@ void main() async {
   // Check each language file
   final languageFiles = await l10nDir
       .list()
-      .where((entity) => entity is File && entity.path.endsWith('.arb') && !entity.path.endsWith('app_en.arb'))
+      .where(
+        (entity) =>
+            entity is File &&
+            entity.path.endsWith('.arb') &&
+            !entity.path.endsWith('app_en.arb'),
+      )
       .cast<File>()
       .toList();
 
   final Map<String, MissingKeysInfo> results = {};
 
   for (final langFile in languageFiles) {
-    final langName = langFile.path.split(Platform.pathSeparator).last
+    final langName = langFile.path
+        .split(Platform.pathSeparator)
+        .last
         .replaceAll('app_', '')
         .replaceAll('.arb', '');
 
@@ -48,14 +55,13 @@ void main() async {
     final langJson = jsonDecode(langContent) as Map<String, dynamic>;
 
     // Get all keys from this language (excluding metadata keys)
-    final langKeys = langJson.keys
-        .where((key) => !key.startsWith('@'))
-        .toSet();
+    final langKeys = langJson.keys.where((key) => !key.startsWith('@')).toSet();
 
     // Find missing keys
     final missingKeys = englishKeys.difference(langKeys);
     final extraKeys = langKeys.difference(englishKeys);
-    final coverage = ((langKeys.length / englishKeys.length) * 100).toStringAsFixed(1);
+    final coverage = ((langKeys.length / englishKeys.length) * 100)
+        .toStringAsFixed(1);
 
     results[langName] = MissingKeysInfo(
       languageCode: langName,
@@ -76,10 +82,12 @@ void main() async {
   for (final entry in sortedResults) {
     final info = entry.value;
     final emoji = info.missingKeys.isEmpty ? '✅' : '⚠️';
-    print('$emoji ${info.languageCode.toUpperCase().padRight(4)} | '
-        'Coverage: ${info.coverage.padLeft(5)}% | '
-        'Keys: ${info.totalKeys.toString().padLeft(4)}/${englishKeys.length} | '
-        'Missing: ${info.missingKeys.length}');
+    print(
+      '$emoji ${info.languageCode.toUpperCase().padRight(4)} | '
+      'Coverage: ${info.coverage.padLeft(5)}% | '
+      'Keys: ${info.totalKeys.toString().padLeft(4)}/${englishKeys.length} | '
+      'Missing: ${info.missingKeys.length}',
+    );
   }
 
   print('');
@@ -141,10 +149,14 @@ void main() async {
     final info = entry.value;
     if (info.missingKeys.isEmpty) continue;
 
-    final outputFile = File('${outputDir.path}/missing_keys_${info.languageCode}.txt');
+    final outputFile = File(
+      '${outputDir.path}/missing_keys_${info.languageCode}.txt',
+    );
     final buffer = StringBuffer();
 
-    buffer.writeln('Missing translations for ${info.languageCode.toUpperCase()}');
+    buffer.writeln(
+      'Missing translations for ${info.languageCode.toUpperCase()}',
+    );
     buffer.writeln('Coverage: ${info.coverage}%');
     buffer.writeln('Missing: ${info.missingKeys.length} keys');
     buffer.writeln('=' * 80);
@@ -154,7 +166,9 @@ void main() async {
       final englishValue = englishJson[key];
       buffer.writeln('Key: $key');
       buffer.writeln('EN:  $englishValue');
-      buffer.writeln('${info.languageCode.toUpperCase()}:  [MISSING - NEEDS TRANSLATION]');
+      buffer.writeln(
+        '${info.languageCode.toUpperCase()}:  [MISSING - NEEDS TRANSLATION]',
+      );
       buffer.writeln('');
     }
 

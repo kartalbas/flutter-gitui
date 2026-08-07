@@ -23,6 +23,10 @@ dependencies:
   # The Fluent 2 / WinUI widget library the Fluent skin delegates to. Pinned so
   # the resolution answer recorded in FINDINGS.md stays reproducible.
   fluent_ui: ^4.16.1
+  # The AppKit widget library the macOS skin delegates to. Added for the §5.0
+  # gate: the question is not only whether `pub get` succeeds but whether a
+  # shared workspace solve moves any EXISTING application dependency.
+  macos_ui: ^2.2.2
 
 dev_dependencies:
   flutter_test:

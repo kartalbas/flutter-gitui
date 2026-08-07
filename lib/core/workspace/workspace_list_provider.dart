@@ -67,18 +67,10 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     Logger.debug('ProjectNotifier state now has ${state.length} workspaces');
 
     // Ensure default workspace exists (but don't save during initialization)
-    final hasDefaultWorkspace = state.any((p) => p.id == 'default');
+    final hasDefaultWorkspace = state.any((p) => p.id == Workspace.defaultId);
     if (!hasDefaultWorkspace) {
       Logger.info('No default workspace found, creating one');
-      final defaultWorkspace = Workspace(
-        id: 'default',
-        name: 'Default',
-        description: 'Default workspace for all repositories',
-        color: WorkspaceColors.defaults[0],
-        repositoryPaths: [],
-        createdAt: DateTime.now(),
-      );
-      state = [defaultWorkspace, ...state];
+      state = [Workspace.createDefault(), ...state];
 
       // Don't save during initialization - only save when user makes explicit changes
       // The default workspace will be saved when the user first modifies workspaces
@@ -255,7 +247,7 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
   /// Delete a project
   /// Note: The default project cannot be deleted
   Future<void> deleteWorkspace(String projectId) async {
-    if (projectId == 'default') {
+    if (projectId == Workspace.defaultId) {
       throw Exception('The default project cannot be deleted');
     }
 
@@ -268,7 +260,7 @@ class ProjectNotifier extends StateNotifier<List<Workspace>> {
     if (selectedWorkspace?.id == projectId) {
       await ref
           .read(selectedProjectProvider.notifier)
-          .selectProjectById('default');
+          .selectProjectById(Workspace.defaultId);
     }
   }
 

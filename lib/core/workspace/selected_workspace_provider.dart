@@ -59,7 +59,7 @@ class SelectedProjectNotifier extends StateNotifier<Workspace?> {
 
     // Otherwise select default project or first project
     final defaultWorkspace = projects
-        .where((p) => p.id == 'default')
+        .where((p) => p.id == Workspace.defaultId)
         .firstOrNull;
     state = defaultWorkspace ?? projects.first;
 

@@ -2145,6 +2145,7 @@
   "changesCommittedSuccessfully": "Änderungen erfolgreich committet",
   "commitFailed": "Commit fehlgeschlagen: {error}",
   "defaultLabel": "Standard",
+  "defaultWorkspaceDescription": "Standard-Arbeitsbereich für alle Repositories",
   "emptyStateNoHistory": "Kein Verlauf",
   "emptyStateNoHistoryMessage": "Diese Datei hat keinen Commit-Verlauf",
   "emptyStateNoCommits": "Keine Commits",

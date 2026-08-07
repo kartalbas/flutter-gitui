@@ -2145,6 +2145,7 @@
   "changesCommittedSuccessfully": "Cambios confirmados exitosamente",
   "commitFailed": "Commit falló: {error}",
   "defaultLabel": "Predeterminado",
+  "defaultWorkspaceDescription": "Espacio de trabajo predeterminado para todos los repositorios",
   "emptyStateNoHistory": "Sin historial",
   "emptyStateNoHistoryMessage": "Este archivo no tiene historial de commits",
   "emptyStateNoCommits": "Sin commits",

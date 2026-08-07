@@ -20,6 +20,7 @@ import '../../core/config/app_config.dart';
 import '../../core/workspace/workspace_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
 import '../../core/workspace/workspace_list_provider.dart';
+import '../../core/workspace/models/workspace.dart';
 import '../../core/workspace/models/workspace_repository.dart';
 import '../../core/workspace/models/repository_status.dart';
 import '../../core/workspace/repository_status_provider.dart';
@@ -127,11 +128,11 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final repositories = selectedProject != null
         ? allRepositories.where((repo) {
             // Special handling for default project: show all unassigned repos
-            if (selectedProject.id == 'default') {
+            if (selectedProject.id == Workspace.defaultId) {
               // Check if this repo is assigned to any other project
               final projects = ref.read(projectProvider);
               final isAssignedToOther = projects
-                  .where((p) => p.id != 'default')
+                  .where((p) => p.id != Workspace.defaultId)
                   .any((p) => p.containsRepository(repo.path));
 
               // Show if not assigned to other projects OR explicitly assigned to default

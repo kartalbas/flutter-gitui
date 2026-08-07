@@ -1060,6 +1060,7 @@
   "changesCommittedSuccessfully": "Değişiklikler başarıyla commit edildi",
   "commitFailed": "Commit başarısız: {error}",
   "defaultLabel": "Varsayılan",
+  "defaultWorkspaceDescription": "Tüm depolar için varsayılan çalışma alanı",
   "emptyStateNoHistory": "Geçmiş Yok",
   "emptyStateNoHistoryMessage": "Bu dosyanın commit geçmişi yok",
   "emptyStateNoCommits": "Commit Yok",

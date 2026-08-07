@@ -8,6 +8,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
+import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
 
 /// Provider for tracking expanded state of projects
@@ -37,6 +38,8 @@ class ProjectSection extends ConsumerWidget {
     final isUnassigned = project == null;
     final projectId = project?.id ?? 'unassigned';
     final isExpanded = ref.watch(projectExpandedProvider(projectId));
+    final l10n = AppLocalizations.of(context)!;
+    final description = project?.displayDescription(l10n);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,18 +117,16 @@ class ProjectSection extends ConsumerWidget {
                     children: [
                       TitleMediumLabel(
                         isUnassigned
-                            ? AppLocalizations.of(
-                                context,
-                              )!.unassignedRepositories
-                            : project!.name,
+                            ? l10n.unassignedRepositories
+                            : project!.displayName(l10n),
                         color: isUnassigned
                             ? Theme.of(context).colorScheme.onSurface
                             : project!.color,
                       ),
-                      if (!isUnassigned && project!.description != null) ...{
+                      if (!isUnassigned && description != null) ...{
                         const SizedBox(height: 2),
                         BodySmallLabel(
-                          project!.description!,
+                          description,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

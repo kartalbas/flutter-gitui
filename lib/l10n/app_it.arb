@@ -954,6 +954,7 @@
   "changesCommittedSuccessfully": "Modifiche committate con successo",
   "commitFailed": "Commit fallito: {error}",
   "defaultLabel": "Predefinito",
+  "defaultWorkspaceDescription": "Area di lavoro predefinita per tutti i repository",
   "emptyStateNoHistory": "Nessuna cronologia",
   "emptyStateNoHistoryMessage": "Questo file non ha cronologia di commit",
   "emptyStateNoCommits": "Nessun commit",

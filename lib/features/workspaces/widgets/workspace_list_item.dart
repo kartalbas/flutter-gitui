@@ -6,6 +6,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
 
 /// List item widget displaying a workspace in a compact row format
@@ -38,6 +39,9 @@ class WorkspaceListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final description = project.displayDescription(l10n);
+
     return BaseListItem(
       isSelected: isSelected || isHighlighted,
       // The focus ring belongs to the roving highlight alone; the selected
@@ -51,7 +55,7 @@ class WorkspaceListItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
         child: Icon(
-          project.id == 'default'
+          project.isDefaultWorkspace
               ? PhosphorIconsBold.house
               : PhosphorIconsBold.folder,
           color: project.color,
@@ -63,16 +67,16 @@ class WorkspaceListItem extends StatelessWidget {
         children: [
           // Workspace name
           TitleMediumLabel(
-            project.name,
+            project.displayName(l10n),
             color: project.color,
             overflow: TextOverflow.ellipsis,
           ),
 
           // Description
-          if (project.description != null) ...[
+          if (description != null) ...[
             const SizedBox(height: AppTheme.paddingXS),
             BodySmallLabel(
-              project.description!,
+              description,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

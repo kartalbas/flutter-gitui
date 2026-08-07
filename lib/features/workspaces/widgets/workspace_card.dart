@@ -7,6 +7,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
+import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
 
 /// Workspace card widget for grid view
@@ -39,6 +40,9 @@ class WorkspaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final description = project.displayDescription(l10n);
+
     return BaseCard(
       isSelected: isSelected || isHighlighted,
       // The focus ring belongs to the roving highlight alone; the selected
@@ -64,7 +68,7 @@ class WorkspaceCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
                 child: Icon(
-                  project.id == 'default'
+                  project.isDefaultWorkspace
                       ? PhosphorIconsBold.house
                       : PhosphorIconsBold.folder,
                   color: project.color,
@@ -114,7 +118,7 @@ class WorkspaceCard extends StatelessWidget {
 
           // Project name
           TitleLargeLabel(
-            project.name,
+            project.displayName(l10n),
             color: isSelected
                 ? Theme.of(context).colorScheme.onSecondaryContainer
                 : Theme.of(context).colorScheme.onSurface,
@@ -122,10 +126,10 @@ class WorkspaceCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
 
-          if (project.description != null) ...[
+          if (description != null) ...[
             const SizedBox(height: AppTheme.paddingS),
             BodyMediumLabel(
-              project.description!,
+              description,
               color: isSelected
                   ? Theme.of(context).colorScheme.onSecondaryContainer
                   : Theme.of(context).colorScheme.onSurfaceVariant,

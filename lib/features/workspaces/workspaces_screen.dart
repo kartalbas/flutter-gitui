@@ -11,6 +11,7 @@ import '../../shared/components/base_menu_item.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/workspace/workspace_list_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
+import '../../core/workspace/default_workspace_text.dart';
 import '../../core/workspace/models/workspace.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../../core/config/app_config.dart';
@@ -189,7 +190,7 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
                 _activateProjectAt(index);
               },
               onEdit: () => _editProject(context, ref, project),
-              onDelete: project.id != 'default'
+              onDelete: !project.isDefaultWorkspace
                   ? () => _deleteProject(context, ref, project)
                   : null,
             );
@@ -293,27 +294,28 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
   ) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => BaseDialog(
-        title: AppLocalizations.of(context)!.deleteWorkspace,
-        content: Text(
-          AppLocalizations.of(
-            context,
-          )!.dialogContentDeleteWorkspace(project.name),
-        ),
-        variant: DialogVariant.destructive,
-        actions: [
-          DialogAction(
-            label: AppLocalizations.of(context)!.cancel,
-            role: DialogActionRole.dismissive,
-            onPressed: () => Navigator.of(context).pop(false),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return BaseDialog(
+          title: l10n.deleteWorkspace,
+          content: Text(
+            l10n.dialogContentDeleteWorkspace(project.displayName(l10n)),
           ),
-          DialogAction(
-            label: AppLocalizations.of(context)!.delete,
-            role: DialogActionRole.destructive,
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
+          variant: DialogVariant.destructive,
+          actions: [
+            DialogAction(
+              label: l10n.cancel,
+              role: DialogActionRole.dismissive,
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            DialogAction(
+              label: l10n.delete,
+              role: DialogActionRole.destructive,
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && context.mounted) {

@@ -2365,6 +2365,10 @@
     }
   },
   "defaultLabel": "Default",
+  "defaultWorkspaceDescription": "Default workspace for all repositories",
+  "@defaultWorkspaceDescription": {
+    "description": "Description of the workspace the application creates by itself. It is not stored in the user's config file, so it follows the UI language; the name of that workspace is defaultLabel."
+  },
   "emptyStateNoHistory": "No History",
   "emptyStateNoHistoryMessage": "This file has no commit history",
   "emptyStateNoCommits": "No Commits",

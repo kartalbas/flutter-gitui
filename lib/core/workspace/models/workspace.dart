@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 
 /// A workspace that groups multiple repositories
 class Workspace {
+  /// Identifier of the one workspace the application creates by itself.
+  ///
+  /// It exists on every installation, cannot be deleted, and is the fallback
+  /// selection, so several call sites have to recognise it. Its name and
+  /// description are supplied by the application rather than the user; see
+  /// `default_workspace_text.dart` for how they reach the screen.
+  static const String defaultId = 'default';
+
   final String id;
   final String name;
   final String? description;
@@ -24,6 +32,21 @@ class Workspace {
     required this.createdAt,
     this.updatedAt,
   });
+
+  /// The workspace the application creates on an installation that has none.
+  ///
+  /// It deliberately carries no name and no description. Those two words are
+  /// written by the application rather than by the user, so storing them would
+  /// freeze one language into the user's config file and render it there in
+  /// every locale from then on; instead they are resolved from the active
+  /// locale at display time (`default_workspace_text.dart`).
+  factory Workspace.createDefault() => Workspace(
+    id: defaultId,
+    name: '',
+    color: WorkspaceColors.defaults[0],
+    repositoryPaths: const [],
+    createdAt: DateTime.now(),
+  );
 
   /// Create a copy with updated fields
   Workspace copyWith({

@@ -4,6 +4,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../generated/app_localizations.dart';
@@ -39,16 +40,37 @@ class _ProjectDialogState extends State<ProjectDialog> {
   late final TextEditingController _descriptionController;
   late Color _selectedColor;
 
+  /// Whether the edited workspace's text has been put into the fields already.
+  bool _fieldsPrefilled = false;
+
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.project?.name);
-    _descriptionController = TextEditingController(
-      text: widget.project?.description,
-    );
+    _nameController = TextEditingController();
+    _descriptionController = TextEditingController();
     _selectedColor = widget.project?.color ?? WorkspaceColors.random();
+  }
 
-    // The preview row renders the current name, so typing must rebuild the dialog
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_fieldsPrefilled) return;
+    _fieldsPrefilled = true;
+
+    final project = widget.project;
+    if (project != null) {
+      // The words shown on screen, not the words in the file: the default
+      // workspace stores neither its name nor its description, so editing it
+      // has to start from what the user is actually looking at. _handleSave
+      // maps an untouched submission back to "absent".
+      final l10n = AppLocalizations.of(context)!;
+      _nameController.text = project.displayName(l10n);
+      _descriptionController.text = project.displayDescription(l10n) ?? '';
+    }
+
+    // The preview row renders the current name, so typing must rebuild the
+    // dialog. Attached after the prefill, so filling the fields does not ask
+    // for a rebuild while dependencies are still being resolved.
     _nameController.addListener(_onNameChanged);
   }
 
@@ -255,16 +277,25 @@ class _ProjectDialogState extends State<ProjectDialog> {
   }
 
   void _handleSave() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final result = ProjectDialogResult(
-        name: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-        color: _selectedColor,
-      );
-      Navigator.of(context).pop(result);
-    }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final name = _nameController.text.trim();
+    final description = _descriptionController.text.trim();
+    // Text the user left exactly as the dialog presented it is still the
+    // application's own wording for the default workspace, so it goes back to
+    // the file as absent and keeps following the UI language. Everything else
+    // is the user's own text and is stored as typed.
+    final isDefault = widget.project?.isDefaultWorkspace ?? false;
+
+    final result = ProjectDialogResult(
+      name: isDefault ? storedDefaultWorkspaceName(name, l10n) : name,
+      description: isDefault
+          ? storedDefaultWorkspaceDescription(description, l10n)
+          : (description.isEmpty ? null : description),
+      color: _selectedColor,
+    );
+    Navigator.of(context).pop(result);
   }
 }
 

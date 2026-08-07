@@ -8,6 +8,7 @@ import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
 import '../../core/workspace/workspace_list_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
+import '../../core/workspace/default_workspace_text.dart';
 import '../../core/workspace/models/workspace.dart';
 
 /// Button widget for quickly switching between workspaces
@@ -26,10 +27,11 @@ class WorkspaceSwitcher extends ConsumerWidget {
     }
 
     // Get display name
-    final displayName = selectedProject?.name ?? l10n.allWorkspaces;
+    final displayName =
+        selectedProject?.displayName(l10n) ?? l10n.allWorkspaces;
 
     return BaseSwitcher(
-      icon: selectedProject?.id == 'default'
+      icon: selectedProject?.isDefaultWorkspace ?? false
           ? PhosphorIconsBold.house
           : PhosphorIconsBold.folder,
       label: displayName,
@@ -59,10 +61,10 @@ class WorkspaceSwitcher extends ConsumerWidget {
         return PopupMenuItem<Workspace>(
           value: project,
           child: MenuItemContentTwoLine(
-            icon: project.id == 'default'
+            icon: project.isDefaultWorkspace
                 ? PhosphorIconsBold.house
                 : PhosphorIconsBold.folder,
-            primaryLabel: project.name,
+            primaryLabel: project.displayName(l10n),
             secondaryLabel: l10n.repositoryCount(
               project.repositoryPaths.length,
             ),

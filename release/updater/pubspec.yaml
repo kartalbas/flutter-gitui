@@ -4,7 +4,13 @@ version: 1.0.0
 publish_to: none
 
 environment:
-  sdk: ^3.5.0
+  # Matches the application's constraint on purpose. A lower floor bought
+  # nothing -- the same toolchain compiles this updater -- and it silently
+  # changed how `dart format` treats this file: a language version below 3.7
+  # selects the old short style, so the repository-wide format gate produced
+  # a different verdict depending on whether this nested package happened to
+  # be resolved on the machine running it.
+  sdk: ^3.9.2
 
 dependencies:
   archive: ^3.6.1

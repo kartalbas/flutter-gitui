@@ -152,7 +152,8 @@ void main(List<String> args) async {
     _log('      ✓ Update extracted to: $extractDir');
     if (skippedUpdater) {
       _log(
-          '      ℹ Note: Updater itself was skipped (will be updated on next cycle)');
+        '      ℹ Note: Updater itself was skipped (will be updated on next cycle)',
+      );
     }
     _log('');
 
@@ -204,16 +205,21 @@ void main(List<String> args) async {
 }
 
 /// Wait for a process to exit by checking if it's still running
-Future<void> _waitForProcessToExit(int pid,
-    {Duration timeout = const Duration(seconds: 30)}) async {
+Future<void> _waitForProcessToExit(
+  int pid, {
+  Duration timeout = const Duration(seconds: 30),
+}) async {
   final startTime = DateTime.now();
 
   while (DateTime.now().difference(startTime) < timeout) {
     try {
       if (Platform.isWindows) {
         // Check if process is still running
-        final result =
-            await Process.run('tasklist', ['/FI', 'PID eq $pid', '/NH']);
+        final result = await Process.run('tasklist', [
+          '/FI',
+          'PID eq $pid',
+          '/NH',
+        ]);
         if (!result.stdout.toString().contains('$pid')) {
           // Process has exited
           return;
@@ -246,8 +252,10 @@ Future<bool> _extractArchive(String archivePath, String destinationDir) async {
 
   // Get current updater executable path to skip it during extraction
   final currentExePath = Platform.resolvedExecutable;
-  final currentExeRelativePath =
-      path.relative(currentExePath, from: destinationDir);
+  final currentExeRelativePath = path.relative(
+    currentExePath,
+    from: destinationDir,
+  );
 
   _log('Current updater path: $currentExePath');
   _log('Relative path: $currentExeRelativePath');

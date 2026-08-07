@@ -67,7 +67,7 @@ final shouldRetry = await BaseDialog.show<bool>(
           ),
           child: SelectableText(
             errorMessage,
-            style: AppTheme.monoTextTheme().bodySmall,
+            style: context.code,
           ),
         ),
       ],
@@ -567,7 +567,7 @@ Future<bool> _showGitErrorDialog({
               child: SingleChildScrollView(
                 child: SelectableText(
                   error.stderr!,
-                  style: AppTheme.monoTextTheme().bodySmall?.copyWith(
+                  style: context.code.copyWith(
                     color: Theme.of(context).colorScheme.onErrorContainer,
                   ),
                 ),

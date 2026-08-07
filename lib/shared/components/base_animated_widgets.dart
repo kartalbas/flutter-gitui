@@ -33,7 +33,7 @@ class BaseDropdownButton<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     // Note: DropdownButton doesn't support custom animation duration in current Flutter version
     // Animation is controlled through MaterialApp theme settings
-    return DropdownButton<T>(
+    final dropdown = DropdownButton<T>(
       value: value,
       items: items,
       onChanged: onChanged,
@@ -48,6 +48,11 @@ class BaseDropdownButton<T> extends StatelessWidget {
       style: null, // Use theme default
       borderRadius: BorderRadius.circular(AppTheme.radiusM),
     );
+
+    // DropdownButton has no tooltip slot of its own, so honor the parameter
+    // by wrapping the control, matching BasePopupMenuButton's contract.
+    if (tooltip == null) return dropdown;
+    return Tooltip(message: tooltip!, child: dropdown);
   }
 }
 
@@ -126,13 +131,24 @@ class BaseSwitch extends StatelessWidget {
     return Switch(
       value: value,
       onChanged: onChanged,
-      thumbColor: activeThumbColor != null
-          ? WidgetStateProperty.all(activeThumbColor)
-          : null,
-      trackColor: activeTrackColor != null
-          ? WidgetStateProperty.all(activeTrackColor)
-          : null,
+      thumbColor: _resolvePerState(activeThumbColor, inactiveThumbColor),
+      trackColor: _resolvePerState(activeTrackColor, inactiveTrackColor),
     );
+  }
+
+  /// Resolves the caller's colors per state: the active color only while
+  /// selected, the inactive color otherwise. Disabled states resolve to null
+  /// so the theme's disabled treatment stays intact, and when neither color
+  /// is given the property itself is null, leaving the theme in full control.
+  static WidgetStateProperty<Color?>? _resolvePerState(
+    Color? active,
+    Color? inactive,
+  ) {
+    if (active == null && inactive == null) return null;
+    return WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.disabled)) return null;
+      return states.contains(WidgetState.selected) ? active : inactive;
+    });
   }
 }
 

@@ -28,7 +28,6 @@ class BaseSelectAllButton extends StatelessWidget {
     super.key,
     required this.isAllSelected,
     required this.onPressed,
-    this.showLabel = true,
   });
 
   /// Whether all items are currently selected
@@ -36,9 +35,6 @@ class BaseSelectAllButton extends StatelessWidget {
 
   /// Callback when button is pressed (should toggle selection state)
   final VoidCallback onPressed;
-
-  /// Whether to show the label text (defaults to true)
-  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +45,7 @@ class BaseSelectAllButton extends StatelessWidget {
       leadingIcon: isAllSelected
           ? PhosphorIconsRegular.checkSquare
           : PhosphorIconsRegular.square,
-      label: showLabel
-          ? (isAllSelected ? l10n.deselectAll : l10n.selectAll)
-          : '',
+      label: isAllSelected ? l10n.deselectAll : l10n.selectAll,
       variant: ButtonVariant.tertiary,
       size: ButtonSize.small,
     );

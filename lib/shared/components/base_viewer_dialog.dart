@@ -202,14 +202,7 @@ class BaseViewerDialog extends StatelessWidget {
               ),
 
               // Content (expanded)
-              Expanded(
-                child: Padding(
-                  padding: headerBackgroundColor == null
-                      ? EdgeInsets.zero
-                      : const EdgeInsets.all(0),
-                  child: content,
-                ),
-              ),
+              Expanded(child: content),
 
               // Footer (custom widget like PDF navigation)
               if (footer != null)

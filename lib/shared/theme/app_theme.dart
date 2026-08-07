@@ -242,14 +242,6 @@ class AppTheme {
     FontFeature.enable('clig'), // Contextual ligatures
   ];
 
-  /// Font features for monospace (code) text styles.
-  static const List<FontFeature> _monoFontFeatures = [
-    FontFeature.enable('kern'), // Kerning
-    FontFeature.enable('liga'), // Ligatures for coding fonts
-    FontFeature.enable('clig'), // Contextual ligatures
-    FontFeature.enable('zero'), // Slashed zero for better distinction
-  ];
-
   /// Build the app's [TextTheme] from a Google Fonts base theme.
   ///
   /// This is the single place that defines the app's type scale: all 15
@@ -396,15 +388,6 @@ class AppTheme {
       baseTheme = GoogleFonts.interTextTheme();
     }
     return _buildTextTheme(baseTheme, fontSize, _textFontFeatures);
-  }
-
-  /// Monospace text theme for code (JetBrains Mono)
-  static TextTheme monoTextTheme({AppFontSize fontSize = AppFontSize.medium}) {
-    return _buildTextTheme(
-      GoogleFonts.jetBrainsMonoTextTheme(),
-      fontSize,
-      _monoFontFeatures,
-    );
   }
 
   /// List of available fonts for the app

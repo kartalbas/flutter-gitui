@@ -1136,6 +1136,36 @@
   },
   "protectedBranchesNotDeleted": "Protected branches and the current branch will not be deleted.",
   "deleteAll": "Delete All",
+  "branchesSelectedForDeletion": "{count, plural, =0{Select the branches to delete} =1{1 branch selected for deletion} other{{count} branches selected for deletion}}",
+  "@branchesSelectedForDeletion": {
+    "description": "Header above the branch list of the bulk delete dialog. With nothing ticked it asks for a selection, otherwise it states how many branches are about to be deleted.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "branchStatusMerged": "merged",
+  "@branchStatusMerged": {
+    "description": "Pill beside a branch name in the bulk delete dialog saying the branch's commits already exist somewhere else - merged into the current branch, or pushed to the upstream it tracks - so `git branch -d` deletes it and nothing is lost. Lowercase: it is a status badge, not a sentence."
+  },
+  "branchStatusUnmerged": "unmerged",
+  "@branchStatusUnmerged": {
+    "description": "Pill beside a branch name in the bulk delete dialog saying the branch carries commits that exist nowhere else, so `git branch -d` refuses it and only a forced deletion removes it - after which its commits survive only in the reflog. Lowercase: it is a status badge, not a sentence."
+  },
+  "unmergedBranchesWillBeSkipped": "{count, plural, =1{1 selected branch is not fully merged. An ordinary deletion keeps it, so no commits are lost.} other{{count} selected branches are not fully merged. An ordinary deletion keeps them, so no commits are lost.}}",
+  "@unmergedBranchesWillBeSkipped": {
+    "description": "Shown in the bulk delete dialog while some selected branch carries commits that exist nowhere else. Deliberately phrased as what the deletion protects rather than as an obstacle with a remedy: the force opt-in sits right below it and states its own cost.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "forceDeleteBranchesWarning": "Force delete also removes the unmerged branches. Their commits then survive only in the reflog.",
+  "@forceDeleteBranchesWarning": {
+    "description": "The standing subtitle of the force opt-in in the bulk delete dialog - shown whether or not the box is ticked, so the cost is read before the choice - and the extra paragraph of the confirmation that follows a forced bulk delete. Self-contained on purpose, since it has to read alone in the second of those. The plural counterpart of forceDeleteWarning, which talks about a single branch."
+  },
   "searchRemotesDialog": "Search Remotes",
   "searchQuery": "Search query",
   "remoteNameOrUrl": "Remote name or URL",

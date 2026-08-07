@@ -4,6 +4,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
+import '../components/base_badge.dart';
 import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
 import '../components/base_dialog.dart';
@@ -269,13 +270,15 @@ class BranchSwitcher extends ConsumerWidget {
     final gitService = ref.read(gitServiceProvider);
     if (gitService == null) return;
 
-    // The badge sits next to the force-delete button, so it has to come from
-    // git's own merge check against HEAD. Ahead/behind counters only describe
-    // the branch's own upstream and say nothing about whether it was merged
-    // here, which made pushed-but-unmerged branches look safe to destroy.
-    final Set<String> mergedBranches;
+    // The dialog states which branches it will keep before the user presses
+    // anything, so this has to be git's own answer to "would `git branch -d`
+    // take this one" - see getBranchesDeletableWithoutForce, which reproduces
+    // git's rule (upstream when the branch tracks one, HEAD otherwise) rather
+    // than approximating it with `git branch --merged`.
+    final Set<String> deletableWithoutForce;
     try {
-      mergedBranches = (await gitService.getMergedBranches()).unwrap().toSet();
+      deletableWithoutForce =
+          (await gitService.getBranchesDeletableWithoutForce()).unwrap();
     } catch (e) {
       if (!context.mounted) return;
       NotificationService.showError(
@@ -287,11 +290,11 @@ class BranchSwitcher extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    final result = await showDialog<_BulkDeleteResult>(
+    final result = await showDialog<BulkDeleteResult>(
       context: context,
-      builder: (context) => _BulkDeleteBranchesDialog(
+      builder: (context) => BulkDeleteBranchesDialog(
         branches: deletableBranches,
-        mergedBranches: mergedBranches,
+        deletableWithoutForce: deletableWithoutForce,
       ),
     );
 
@@ -311,8 +314,11 @@ class BranchSwitcher extends ConsumerWidget {
         action: DestructiveAction.deleteLocalBranch,
         icon: PhosphorIconsRegular.trash,
         title: l10n.deleteAllUnprotectedBranches,
+        // The bulk phrasing, not `forceDeleteWarning`: that one says "This
+        // branch is not fully merged", which is the wrong sentence in front
+        // of a list of them.
         message: result.force
-            ? '$message\n\n${l10n.forceDeleteWarning}'
+            ? '$message\n\n${l10n.forceDeleteBranchesWarning}'
             : message,
         confirmLabel: l10n.deleteAll,
       );
@@ -393,31 +399,93 @@ class BranchSwitcher extends ConsumerWidget {
   }
 }
 
-/// Result from bulk delete dialog
-class _BulkDeleteResult {
-  final List<GitBranch> selectedBranches;
-  final bool force;
+/// What [BulkDeleteBranchesDialog] reported when it closed: the branches the
+/// user ticked, and whether they asked for the unmerged ones to go with them.
+///
+/// A dismissal reports nothing at all (`null`), so a caller can never mistake
+/// "the user said no" for "the user selected nothing".
+class BulkDeleteResult {
+  const BulkDeleteResult({required this.selectedBranches, required this.force});
 
-  _BulkDeleteResult({required this.selectedBranches, required this.force});
+  final List<GitBranch> selectedBranches;
+
+  /// Whether the deletion runs as `git branch -D` instead of `git branch -d`,
+  /// i.e. whether unmerged branches are destroyed rather than skipped.
+  final bool force;
 }
 
-/// Dialog for bulk deleting branches with checkboxes
-class _BulkDeleteBranchesDialog extends StatefulWidget {
-  final List<GitBranch> branches;
-  final Set<String> mergedBranches;
-
-  const _BulkDeleteBranchesDialog({
+/// The confirmation for deleting every unprotected branch at once - the most
+/// destructive prompt in the application.
+class BulkDeleteBranchesDialog extends StatefulWidget {
+  const BulkDeleteBranchesDialog({
+    super.key,
     required this.branches,
-    required this.mergedBranches,
+    required this.deletableWithoutForce,
   });
 
+  /// The deletable branches, in the order they are listed.
+  final List<GitBranch> branches;
+
+  /// The branches `git branch -d` accepts, from
+  /// [GitService.getBranchesDeletableWithoutForce] - i.e. those whose commits
+  /// are already somewhere else, either merged into HEAD or pushed to the
+  /// upstream the branch tracks. They wear the `merged` pill.
+  ///
+  /// Every other branch wears `unmerged`: `git branch -d` refuses it, so an
+  /// unforced deletion keeps it, and only a forced deletion removes it - at
+  /// the price of leaving the reflog as the sole way back.
+  ///
+  /// This is git's own rule rather than `git branch --merged`, which is what
+  /// the dialog used to be handed and which disagrees with `-d` in both
+  /// directions; the dialog promises the user which branches it will keep, so
+  /// the promise has to be the one git honours.
+  final Set<String> deletableWithoutForce;
+
+  /// The checkbox of one branch row, so a caller (and a test) can address a
+  /// named branch rather than the n-th checkbox on screen.
+  static Key checkboxKeyFor(String branchName) =>
+      Key('bulk-delete-branch-$branchName');
+
+  /// The explicit force opt-in.
+  static const Key forceCheckboxKey = Key('bulk-delete-force');
+
   @override
-  State<_BulkDeleteBranchesDialog> createState() =>
+  State<BulkDeleteBranchesDialog> createState() =>
       _BulkDeleteBranchesDialogState();
 }
 
-class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
+class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
   late Map<String, bool> _selectedBranches;
+
+  // One delete action with force as an explicit opt-in, rather than the
+  // "Delete Selected" and "Force Delete Selected" buttons that used to sit
+  // next to each other.
+  //
+  // The two buttons differed by one word and by nothing else - same row, same
+  // danger colour, same single click - which put `git branch -D`, which
+  // discards commits and leaves the reflog as the only way back, exactly one
+  // button-width away from `git branch -d`, which refuses to lose anything. A
+  // slip between two adjacent buttons is not a decision, and this is the
+  // dialog where a slip costs the most.
+  //
+  // The pair also hid the thing the user most needs to know. Under `-d` every
+  // unmerged branch in the selection simply fails, and neither button said
+  // so: the user pressed "Delete Selected" with eight branches ticked and
+  // learned only from the summary notification afterwards that three of them
+  // were still there. With one action the dialog can state that up front -
+  // how many ticked branches are unmerged and will be kept - and this
+  // checkbox is the answer to exactly that sentence, sitting beside it in the
+  // content instead of in the action row. It is therefore shown only while
+  // that sentence is on screen (see the content below): with nothing unmerged
+  // in the selection, `-D` and `-d` do the same thing and the only effect a
+  // force checkbox could have is on a later selection.
+  //
+  // It is also what the single-branch delete already does
+  // (lib/features/branches/dialogs/delete_branch_dialog.dart, where force is a
+  // checkbox and the confirm button relabels itself). The bulk delete is
+  // strictly the more dangerous of the two, so it cannot be the one that is
+  // less deliberate.
+  bool _force = false;
 
   @override
   void initState() {
@@ -429,10 +497,21 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
   int get _selectedCount =>
       _selectedBranches.values.where((selected) => selected).length;
 
+  /// How many ticked branches `git branch -d` would refuse - the branches an
+  /// unforced deletion keeps, and the only branches force changes anything
+  /// for.
+  int get _unmergedSelectedCount => widget.branches
+      .where(
+        (branch) =>
+            _selectedBranches[branch.name] == true &&
+            !_isDeletableWithoutForce(branch),
+      )
+      .length;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final unmergedSelected = _unmergedSelectedCount;
 
     return BaseDialog(
       title: l10n.deleteAllUnprotectedBranches,
@@ -442,62 +521,49 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(
-            'Select branches to delete ($_selectedCount selected)',
-          ),
+          BodyMediumLabel(l10n.branchesSelectedForDeletion(_selectedCount)),
           const SizedBox(height: AppTheme.paddingS),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 300),
             child: SingleChildScrollView(
               child: Column(
                 children: widget.branches.map((branch) {
-                  final isMerged = _isBranchMerged(branch);
+                  final losesNothing = _isDeletableWithoutForce(branch);
+                  // A raw CheckboxListTile, as in the single-branch delete
+                  // and the tag delete. The Base* layer has no checkbox row
+                  // to reuse yet, and `avoid_list_tile` does not catch this
+                  // one because it matches the name ListTile exactly - so
+                  // CheckboxListTile, SwitchListTile and ExpansionTile all
+                  // pass it. Both halves of that belong in the component
+                  // layer, not in this dialog.
                   return CheckboxListTile(
+                    key: BulkDeleteBranchesDialog.checkboxKeyFor(branch.name),
                     value: _selectedBranches[branch.name] ?? false,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedBranches[branch.name] = value ?? false;
-                      });
-                    },
+                    onChanged: (value) => _toggleBranch(branch, value ?? false),
                     title: Row(
                       children: [
                         Expanded(child: BodyMediumLabel(branch.name)),
-                        if (isMerged)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingXS,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: context.gitColors.added.withValues(
-                                alpha: 0.2,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusS,
-                              ),
-                            ),
-                            child: BodySmallLabel(
-                              'merged',
-                              color: context.gitColors.added,
-                            ),
-                          )
-                        else
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingXS,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.error.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusS,
-                              ),
-                            ),
-                            child: BodySmallLabel(
-                              'unmerged',
-                              color: colorScheme.error,
-                            ),
-                          ),
+                        // The component layer's badge, not a hand-rolled
+                        // pill: `BadgeVariant.success` and
+                        // `BadgeVariant.danger` are already the green-on-tint
+                        // and red-on-tint this needs, and the branches panel
+                        // draws its own row badges with the same component
+                        // (features/branches/widgets/branch_list_tile.dart).
+                        // A copy here would render the same status a little
+                        // differently on the same kind of row, and would not
+                        // follow the badge when the component changes - which
+                        // the golden baselines pin and this dialog does not
+                        // appear in.
+                        BaseBadge(
+                          label: losesNothing
+                              ? l10n.branchStatusMerged
+                              : l10n.branchStatusUnmerged,
+                          variant: losesNothing
+                              ? BadgeVariant.success
+                              : BadgeVariant.danger,
+                          size: BadgeSize.small,
+                          isPill: false,
+                        ),
                       ],
                     ),
                     dense: true,
@@ -507,41 +573,141 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
               ),
             ),
           ),
+          // The force opt-in is offered only while it would change something,
+          // and then only underneath the sentence that explains it.
+          //
+          // With every ticked branch already deletable, `-D` and `-d` do
+          // exactly the same thing, so a force checkbox there is a control
+          // whose only possible effect is on the *next* selection - it arms a
+          // mode out of sight. Hiding it also removes the failure this dialog
+          // is most exposed to: a row of identical dense checkboxes where the
+          // last one, at the same rhythm and one gap below the branches, is
+          // the one that arms `git branch -D` over the whole selection.
+          if (unmergedSelected > 0) ...[
+            const SizedBox(height: AppTheme.paddingM),
+            BodyMediumLabel(
+              l10n.unmergedBranchesWillBeSkipped(unmergedSelected),
+            ),
+            const SizedBox(height: AppTheme.paddingS),
+            _forceOptIn(context, l10n),
+          ],
         ],
       ),
-      // Two destructive actions and no dismissal of their own: this dialog
-      // relies entirely on Escape and the title bar's close button to get
-      // out, which is why neither of these may be the affirmative one - a
-      // language that marks the affirmative action as its default would be
-      // making a bulk branch deletion the default.
+      // The dialog now has a way to say no, and still no affirmative action.
+      //
+      // Escape and the title bar's close button used to be the only exits,
+      // which reads as though the deletion had already been decided and the
+      // user were only picking a variant of it. Neither delete may become the
+      // affirmative action instead: the affirmative one is the action a design
+      // language may single out as the dialog's default (Cupertino draws it as
+      // the default action, Fluent moves it to the head of the row), and that
+      // would make a bulk branch deletion the default. So the dismissive
+      // action is the only one with no danger attached, and it is what the eye
+      // lands on.
       actions: [
         DialogAction(
-          label: 'Delete Selected',
-          role: DialogActionRole.destructive,
-          enabled: _selectedCount > 0,
-          onPressed: () => _deleteSelected(force: false),
+          label: l10n.cancel,
+          role: DialogActionRole.dismissive,
+          onPressed: () => Navigator.of(context).pop(),
         ),
         DialogAction(
-          label: 'Force Delete Selected',
+          // The label states which of the two git commands is about to run,
+          // so the force checkbox is never a hidden mode.
+          label: _force ? l10n.forceDelete : l10n.delete,
           role: DialogActionRole.destructive,
           enabled: _selectedCount > 0,
-          onPressed: () => _deleteSelected(force: true),
+          onPressed: _deleteSelected,
         ),
       ],
     );
   }
 
-  bool _isBranchMerged(GitBranch branch) {
-    return widget.mergedBranches.contains(branch.name);
+  /// The explicit opt-in to `git branch -D`, deliberately built to be nothing
+  /// like the branch rows above it.
+  ///
+  /// It used to be the same dense [CheckboxListTile] as a branch row, in the
+  /// default text colour, 8 dp below a list the user was already clicking
+  /// through - so the next checkbox under the cursor, at the same rhythm,
+  /// was the one that arms a `-D` over the whole selection. And the only
+  /// statement of what force costs appeared *after* it was ticked, i.e. after
+  /// the decision.
+  ///
+  /// So: its own error-tinted, bordered block, a warning glyph, an
+  /// error-coloured label, and the consequence spelled out underneath whether
+  /// the box is ticked or not. That last part is the important one - the user
+  /// reads what force does before choosing it, not as a confirmation of a
+  /// choice already made.
+  Widget _forceOptIn(BuildContext context, AppLocalizations l10n) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.paddingS),
+      decoration: BoxDecoration(
+        color: colorScheme.error.withValues(alpha: 0.08),
+        border: Border.all(color: colorScheme.error.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+      ),
+      // The tile paints its hover, focus and pressed state layers on the
+      // nearest Material, so inside a decorated box it needs one of its own or
+      // those layers land behind the tint and stay invisible - the same reason
+      // BaseCard carries one (shared/components/base_card.dart).
+      child: Material(
+        type: MaterialType.transparency,
+        child: CheckboxListTile(
+          key: BulkDeleteBranchesDialog.forceCheckboxKey,
+          value: _force,
+          onChanged: (value) => setState(() => _force = value ?? false),
+          activeColor: colorScheme.error,
+          title: Row(
+            children: [
+              Icon(
+                PhosphorIconsBold.warning,
+                size: AppTheme.iconS,
+                color: colorScheme.error,
+              ),
+              const SizedBox(width: AppTheme.paddingS),
+              Expanded(
+                child: LabelLargeLabel(
+                  l10n.forceDelete,
+                  color: colorScheme.error,
+                ),
+              ),
+            ],
+          ),
+          subtitle: BodySmallLabel(
+            l10n.forceDeleteBranchesWarning,
+            color: colorScheme.error,
+          ),
+          dense: true,
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+      ),
+    );
   }
 
-  void _deleteSelected({required bool force}) {
+  /// Whether `git branch -d` takes this branch as it stands, which is what the
+  /// `merged` pill means. See [BulkDeleteBranchesDialog.deletableWithoutForce].
+  bool _isDeletableWithoutForce(GitBranch branch) =>
+      widget.deletableWithoutForce.contains(branch.name);
+
+  void _toggleBranch(GitBranch branch, bool selected) {
+    setState(() {
+      _selectedBranches[branch.name] = selected;
+      // Unticking the last unmerged branch takes the force opt-in off screen,
+      // so it must not stay armed behind it: a ticked-then-hidden checkbox
+      // would re-arm `-D` the moment another unmerged branch is ticked again,
+      // with nothing on screen saying so.
+      if (_unmergedSelectedCount == 0) _force = false;
+    });
+  }
+
+  void _deleteSelected() {
     final selectedBranches = widget.branches
         .where((branch) => _selectedBranches[branch.name] == true)
         .toList();
 
     Navigator.of(
       context,
-    ).pop(_BulkDeleteResult(selectedBranches: selectedBranches, force: force));
+    ).pop(BulkDeleteResult(selectedBranches: selectedBranches, force: _force));
   }
 }

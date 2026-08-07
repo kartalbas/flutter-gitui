@@ -105,9 +105,7 @@ class RepositoryCard extends ConsumerWidget {
                 icon: repository.isFavorite
                     ? PhosphorIconsFill.star
                     : PhosphorIconsRegular.star,
-                iconColor: repository.isFavorite
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+                isSelected: repository.isFavorite,
                 onPressed: onToggleFavorite,
                 tooltip: repository.isFavorite
                     ? AppLocalizations.of(context)!.tooltipRemoveFromFavorites

@@ -327,9 +327,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     icon: _hasActiveFilters()
                         ? PhosphorIconsFill.funnel
                         : PhosphorIconsRegular.funnel,
-                    iconColor: _hasActiveFilters()
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
+                    isSelected: _hasActiveFilters(),
                     tooltip: AppLocalizations.of(context)!.advancedFilters,
                     onPressed: () => _showAdvancedFiltersDialog(context, tags),
                     variant: ButtonVariant.secondary,

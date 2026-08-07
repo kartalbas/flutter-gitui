@@ -352,20 +352,20 @@ void main() {
     });
   });
 
-  group('iconColor override', () {
-    testWidgets('iconColor overrides the enabled glyph only, not the state '
-        'layers', (WidgetTester tester) async {
-      const Color override = Color(0xFFFFC107);
+  group('selected state', () {
+    testWidgets('a selected toggle tints the enabled glyph with primary '
+        'only, not the state layers', (WidgetTester tester) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.star, iconColor: override, onPressed: () {}),
+        BaseIconButton(icon: Icons.star, isSelected: true, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
-      expect(_renderedIconColor(tester, Icons.star), override);
+      expect(_renderedIconColor(tester, Icons.star), scheme.primary);
       // The overlay keeps deriving from the variant foreground with the M3
-      // opacities, so the override never changes the button chrome. Both
-      // sides go through colorRoleName because styleFrom quantises the
-      // overlay alpha to 8 bit while the oracle carries the exact fraction.
+      // opacities, so the selected treatment never changes the button
+      // chrome. Both sides go through colorRoleName because styleFrom
+      // quantises the overlay alpha to 8 bit while the oracle carries the
+      // exact fraction.
       expect(
         colorRoleName(
           scheme,
@@ -377,24 +377,44 @@ void main() {
       );
     });
 
-    testWidgets('iconColor is ignored while disabled', (
+    testWidgets('an unselected toggle keeps the standard foreground', (
       WidgetTester tester,
     ) async {
-      const Color override = Color(0xFFFFC107);
       await pumpConformance(
         tester,
-        const BaseIconButton(
-          icon: Icons.star,
-          iconColor: override,
-          onPressed: null,
-        ),
+        BaseIconButton(icon: Icons.star, isSelected: false, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
-      expect(
-        _renderedIconColor(tester, Icons.star),
-        _m3DisabledForeground(scheme),
-        reason: 'the override tint must never survive into disabled',
-      );
+      expect(_renderedIconColor(tester, Icons.star), _m3Foreground(scheme));
+    });
+
+    testWidgets('the selected tint never survives into disabled', (
+      WidgetTester tester,
+    ) async {
+      // Both disabling paths — a null onPressed and the explicit isDisabled
+      // flag — must show the M3 disabled foreground, whatever the flag says.
+      final List<BaseIconButton> disabledSelected = <BaseIconButton>[
+        const BaseIconButton(
+          icon: Icons.star,
+          isSelected: true,
+          onPressed: null,
+        ),
+        BaseIconButton(
+          icon: Icons.star,
+          isSelected: true,
+          isDisabled: true,
+          onPressed: () {},
+        ),
+      ];
+      for (final BaseIconButton button in disabledSelected) {
+        await pumpConformance(tester, button);
+        final ColorScheme scheme = _theme(tester).colorScheme;
+        expect(
+          _renderedIconColor(tester, Icons.star),
+          _m3DisabledForeground(scheme),
+          reason: 'the selected tint must never survive into disabled',
+        );
+      }
     });
   });
 

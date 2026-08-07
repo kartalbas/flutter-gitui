@@ -446,7 +446,7 @@ class BaseIconButton extends StatelessWidget {
     this.variant = ButtonVariant.ghost,
     this.size = ButtonSize.medium,
     this.isDisabled = false,
-    this.iconColor,
+    this.isSelected,
   });
 
   /// Callback when button is pressed (null if disabled)
@@ -467,11 +467,14 @@ class BaseIconButton extends StatelessWidget {
   /// Whether button is disabled
   final bool isDisabled;
 
-  /// Overrides the variant's icon color, so toggle-style buttons can make
-  /// their active state (e.g. a favorited star) read unmistakably without
-  /// changing the button chrome. Ignored while disabled, because the "on"
-  /// tint must never survive into the disabled treatment.
-  final Color? iconColor;
+  /// Marks a toggle-style button's state, mirroring [IconButton.isSelected]:
+  /// null (the default) is a plain action button with no selected state,
+  /// false a toggle that is currently off, and true a toggle that is on
+  /// (e.g. a favorited star). While selected the glyph adopts the primary
+  /// role — the Base layer's selected treatment — without changing the
+  /// button chrome. Ignored while disabled, because the selected tint must
+  /// never survive into the disabled treatment.
+  final bool? isSelected;
 
   /// The variant's colors, expressed through [IconButton.styleFrom] so the
   /// state layers derive from the right foreground with the M3 opacities
@@ -584,41 +587,48 @@ class BaseIconButton extends StatelessWidget {
       tapTargetSize: MaterialTapTargetSize.padded,
     ).merge(_variantStyle(context));
 
-    if (iconColor != null) {
-      // The override recolors the glyph only: the state layers keep
-      // deriving from the variant foreground, and the disabled treatment
-      // always wins over the override.
-      final Color disabledForeground = Theme.of(
-        context,
-      ).colorScheme.onSurface.withValues(alpha: 0.38);
+    if (isSelected ?? false) {
+      // The selected treatment recolors the glyph only: the state layers
+      // keep deriving from the variant foreground, and the disabled
+      // treatment always wins, so the selected tint never survives into
+      // disabled.
+      final ColorScheme colorScheme = Theme.of(context).colorScheme;
+      final Color disabledForeground = colorScheme.onSurface.withValues(
+        alpha: 0.38,
+      );
       style = style.copyWith(
         iconColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.disabled)) {
             return disabledForeground;
           }
-          return iconColor;
+          return colorScheme.primary;
         }),
       );
     }
 
     // The icon carries no size or color: the style's IconTheme applies both.
+    // isSelected passes through so the framework's native toggle support
+    // maintains WidgetState.selected and the selected semantics.
     return switch (_baseOf(variant)) {
       _MaterialBase.filled => IconButton.filled(
         onPressed: effectiveOnPressed,
         icon: Icon(icon),
         tooltip: tooltip,
+        isSelected: isSelected,
         style: style,
       ),
       _MaterialBase.outlined => IconButton.outlined(
         onPressed: effectiveOnPressed,
         icon: Icon(icon),
         tooltip: tooltip,
+        isSelected: isSelected,
         style: style,
       ),
       _MaterialBase.text => IconButton(
         onPressed: effectiveOnPressed,
         icon: Icon(icon),
         tooltip: tooltip,
+        isSelected: isSelected,
         style: style,
       ),
     };

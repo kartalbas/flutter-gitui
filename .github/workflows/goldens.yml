@@ -1,0 +1,139 @@
+name: Goldens
+
+# Manual only, and deliberately so.
+#
+# This workflow regenerates the design-system golden baselines and uploads them
+# as an artifact for a human to inspect and commit. It never writes to the
+# repository. A job that regenerated goldens automatically whenever they failed
+# would convert every visual regression into a silent commit: the suite would
+# stay green forever while the UI drifted, which is precisely the failure the
+# baselines exist to prevent. The whole value of a golden is that a person
+# looks at the new picture and says "yes, I meant that".
+#
+# Baselines are produced here rather than on a developer machine because glyph
+# rasterisation, subpixel positioning and corner anti-aliasing differ per
+# platform. A PNG generated on Windows or macOS can never match one generated
+# on the Ubuntu runner CI compares on, so there is exactly one machine allowed
+# to produce them, and it is this one.
+on:
+  workflow_dispatch:
+    inputs:
+      name_filter:
+        description: >-
+          Optional substring of a test name, to regenerate a subset (e.g.
+          "base_button" or "screen_"). Leave empty to regenerate everything.
+        required: false
+        default: ""
+
+env:
+  FLUTTER_VERSION: "3.44.4"
+
+jobs:
+  generate:
+    name: Generate golden baselines
+    # Must match the runner the blocking golden step in ci.yml uses, or the
+    # baselines this job produces would fail the comparison they exist for.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      # `--update-goldens` writes every baseline the selected tests capture,
+      # creating test/conformance/goldens/images/ on the first run. The `golden`
+      # tag selects exactly the pixel-comparison tests (declared in
+      # dart_test.yaml); the scene smoke suite is untagged and stays out of it,
+      # because it compares nothing and would only slow this job down.
+      - name: Regenerate baselines
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${{ inputs.name_filter }}" ]; then
+            flutter test --update-goldens --tags golden \
+              --plain-name "${{ inputs.name_filter }}" \
+              --reporter expanded test/conformance/goldens
+          else
+            flutter test --update-goldens --tags golden \
+              --reporter expanded test/conformance/goldens
+          fi
+
+      # A run that selected nothing is a mistake, not a success: a typo in the
+      # filter would otherwise upload an empty artifact and look like it worked.
+      - name: Verify the run produced baselines
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=$(find test/conformance/goldens/images -name '*.png' 2>/dev/null | wc -l)
+          echo "baselines on disk: $count"
+          if [ "$count" -eq 0 ]; then
+            echo "::error::The run produced no PNG baselines. Check the name filter and the test output above."
+            exit 1
+          fi
+
+      # The review aid: which baselines are new, which changed, and which were
+      # left alone. Without it a reviewer facing seventy PNGs has no way to know
+      # where to look, and "review the goldens" degrades into "click merge".
+      - name: Summarise what changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Golden baselines"
+            echo
+            added=$(git ls-files --others --exclude-standard -- test/conformance/goldens/images | sort)
+            changed=$(git diff --name-only -- test/conformance/goldens/images | sort)
+            if [ -n "$added" ]; then
+              echo "### New ($(echo "$added" | wc -l))"
+              echo
+              echo '```'
+              echo "$added"
+              echo '```'
+              echo
+            fi
+            if [ -n "$changed" ]; then
+              echo "### Changed ($(echo "$changed" | wc -l))"
+              echo
+              echo "Each of these is a visual difference against what is committed."
+              echo "Open the downloaded artifact next to the committed PNG and confirm"
+              echo "the change is one you intended before committing it."
+              echo
+              echo '```'
+              echo "$changed"
+              echo '```'
+              echo
+            fi
+            if [ -z "$added" ] && [ -z "$changed" ]; then
+              echo "No baseline changed. The committed images already match what"
+              echo "the current code renders, so there is nothing to commit."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload baselines for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-baselines
+          path: test/conformance/goldens/images/
+          if-no-files-found: error
+          retention-days: 14
+
+      # Downloading and committing is a human step on purpose; spelling it out
+      # here keeps the procedure with the job that produces the input for it.
+      - name: Explain the next step
+        shell: bash
+        run: |
+          {
+            echo
+            echo "### To adopt these baselines"
+            echo
+            echo '1. Download the `golden-baselines` artifact from this run.'
+            echo '2. Unzip it over `test/conformance/goldens/images/`.'
+            echo '3. Look at every image listed as new or changed above.'
+            echo '4. Commit them only if the rendering is what you intended.'
+          } >> "$GITHUB_STEP_SUMMARY"

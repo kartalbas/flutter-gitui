@@ -10,6 +10,30 @@ import 'config_migration.dart';
 import '../services/logger_service.dart';
 import '../utils/result.dart';
 
+/// Raised when the settings could not be written to disk.
+///
+/// The underlying failure is a platform exception whose text names an errno
+/// and a temporary file the user never asked about. This carries a sentence
+/// instead, because a failed save is reported to the user and the platform's
+/// own words explain nothing to them.
+class ConfigWriteException implements Exception {
+  const ConfigWriteException(this.configPath, this.cause);
+
+  /// The file the settings belong in.
+  final String configPath;
+
+  /// What the platform actually refused, kept for the log.
+  final Object cause;
+
+  @override
+  String toString() =>
+      'Your settings could not be saved to $configPath. Another program is '
+      'holding that file open - an antivirus scanner, a backup agent or a '
+      'second copy of this application are the usual causes. The change is '
+      'still applied in this session and will be written on the next attempt. '
+      '(Underlying error: $cause)';
+}
+
 /// Configuration service for loading and saving YAML config
 class ConfigService {
   static const String _configFileName = 'config.yaml';
@@ -17,6 +41,28 @@ class ConfigService {
 
   /// Lock to prevent concurrent YAML writes
   static final _saveLock = _AsyncLock();
+
+  /// How long to keep retrying a rename a transient lock refused.
+  ///
+  /// On Windows a file that has just been written is opened for scanning by
+  /// Defender, the search indexer or a backup agent, and those handles are
+  /// usually opened without FILE_SHARE_DELETE - so a rename during the scan
+  /// fails with "access is denied". The window is milliseconds wide, and this
+  /// code renames immediately after writing, which is the narrowest possible
+  /// race with it: the first attempt is the one most likely to lose.
+  static const List<Duration> _renameRetryDelays = <Duration>[
+    Duration(milliseconds: 20),
+    Duration(milliseconds: 40),
+    Duration(milliseconds: 80),
+    Duration(milliseconds: 160),
+    Duration(milliseconds: 320),
+  ];
+
+  /// Replaces the rename, so a test can refuse it the way a scanner does
+  /// without needing a scanner. Null in production.
+  @visibleForTesting
+  static Future<void> Function(File temp, String targetPath)?
+  debugRenameOverride;
 
   /// Get the user's home directory with proper fallback
   static Future<String> _getHomeDirectory() async {
@@ -73,6 +119,9 @@ class ConfigService {
   static Future<Result<AppConfig>> load() async {
     return runCatchingAsync(() async {
       final configPath = await getConfigFilePath();
+      // Before reading, adopt any save that wrote its file but could not move
+      // it into place. Skipping this reads settings the user already replaced.
+      await _recoverStrandedSave(configPath);
       final file = File(configPath);
 
       if (!await file.exists()) {
@@ -131,22 +180,152 @@ class ConfigService {
         final yamlMap = config.toYaml();
         final yamlString = _toYamlString(yamlMap);
 
-        // Write to temporary file first (atomic write pattern)
-        await tempFile.writeAsString(yamlString);
+        try {
+          // Write to temporary file first (atomic write pattern)
+          await tempFile.writeAsString(yamlString);
 
-        // Atomically replace the original file by renaming
-        // This prevents corruption if the app crashes during write
-        await tempFile.rename(configPath);
+          // Atomically replace the original file by renaming
+          // This prevents corruption if the app crashes during write
+          await _replaceAtomically(tempFile, configPath);
+        } on FileSystemException catch (error) {
+          // A failed save is reported to the user, and the platform's own
+          // wording names an errno and a temporary file they never asked
+          // about. Say what happened instead.
+          throw ConfigWriteException(configPath, error);
+        }
 
         Logger.config('Saved config to: $configPath');
       });
     });
   }
 
+  /// Moves [temp] over [targetPath], retrying a rename a transient lock
+  /// refused, and writing the file directly when every attempt fails.
+  ///
+  /// The retries handle the scanner race described at [_renameRetryDelays].
+  /// The fallback handles the case where the lock outlives them: it gives up
+  /// atomicity for this one write rather than giving up the user's change,
+  /// which is the worse of the two outcomes. The atomic path exists to survive
+  /// a crash halfway through a write, and a crash is far rarer than a scanner.
+  ///
+  /// The temporary file is removed only after the target has been written, so
+  /// a failure at the last step leaves the newer settings on disk for
+  /// [_recoverStrandedSave] to adopt on the next launch.
+  static Future<void> _replaceAtomically(File temp, String targetPath) async {
+    Object? lastError;
+
+    for (var attempt = 0; attempt <= _renameRetryDelays.length; attempt++) {
+      try {
+        final rename = debugRenameOverride;
+        if (rename != null) {
+          await rename(temp, targetPath);
+        } else {
+          await temp.rename(targetPath);
+        }
+        return;
+      } on FileSystemException catch (error) {
+        lastError = error;
+        if (attempt < _renameRetryDelays.length) {
+          await Future<void>.delayed(_renameRetryDelays[attempt]);
+        }
+      }
+    }
+
+    Logger.warning(
+      'Could not move the config into place after '
+      '${_renameRetryDelays.length + 1} attempts, writing it directly: '
+      '$lastError',
+    );
+
+    try {
+      await File(targetPath).writeAsString(await temp.readAsString());
+    } on FileSystemException catch (error) {
+      // The target itself is held, not just the temporary file. The settings
+      // stay in the temporary file and the next launch adopts them.
+      throw ConfigWriteException(targetPath, error);
+    }
+
+    await _deleteQuietly(temp);
+  }
+
+  /// Adopts a save that completed everywhere except its last step.
+  ///
+  /// A temporary file that still exists is a write that succeeded and a rename
+  /// that did not, so the user's newest settings are sitting beside the ones
+  /// the application is about to read. Left alone they are silently lost and
+  /// every later launch reads the older file, which is exactly what was
+  /// observed in the field.
+  ///
+  /// **Existence alone decides it, not a timestamp.** A save that lands
+  /// consumes its temporary file - the rename moves it, and the fallback
+  /// deletes it after writing the target - and a later save rewrites that same
+  /// path before renaming. So a surviving temporary file cannot belong to a
+  /// save that succeeded, whatever the clock says. Comparing timestamps would
+  /// also be unsound here: measured on Windows, [File.lastModified] resolves to
+  /// whole seconds, so two writes 60 ms apart carry an identical stamp and any
+  /// ordering read from them is a guess.
+  ///
+  /// It is adopted only when it parses. One that does not parse is the debris
+  /// of a write interrupted partway through and is removed, because keeping it
+  /// would make every later launch try to adopt it again.
+  ///
+  /// This never throws: a config that cannot be repaired must not stop the
+  /// application from starting.
+  static Future<void> _recoverStrandedSave(String configPath) async {
+    try {
+      final temp = File('$configPath.tmp');
+      if (!await temp.exists()) return;
+
+      final config = File(configPath);
+      final text = await temp.readAsString();
+      try {
+        loadYaml(text) as Map;
+      } catch (_) {
+        Logger.warning(
+          'Discarding an unreadable $configPath.tmp: it is the debris of an '
+          'interrupted write, not a save that lost its last step.',
+        );
+        await _deleteQuietly(temp);
+        return;
+      }
+
+      await config.writeAsString(text);
+      await _deleteQuietly(temp);
+      Logger.config(
+        'Recovered settings from $configPath.tmp: an earlier save wrote them '
+        'but could not move them into place.',
+      );
+    } catch (error) {
+      Logger.warning('Could not recover a stranded config save: $error');
+    }
+  }
+
+  /// Deletes [file], ignoring a failure. Used where the file is already
+  /// redundant, so failing to remove it costs nothing.
+  static Future<void> _deleteQuietly(File file) async {
+    try {
+      await file.delete();
+    } on FileSystemException catch (error) {
+      Logger.warning('Could not remove ${file.path}: $error');
+    }
+  }
+
   /// The exact YAML text [save] writes, so the serialisation can be
   /// round-tripped in a test without touching the user's home directory.
   @visibleForTesting
   static String toYamlString(Map<String, dynamic> map) => _toYamlString(map);
+
+  /// [_replaceAtomically] against an explicit path, so a test can drive the
+  /// retry and the fallback in a temporary directory rather than in the
+  /// user's home.
+  @visibleForTesting
+  static Future<void> replaceAtomically(File temp, String targetPath) =>
+      _replaceAtomically(temp, targetPath);
+
+  /// [_recoverStrandedSave] against an explicit path, for the same reason.
+  @visibleForTesting
+  static Future<void> recoverStrandedSave(String configPath) =>
+      _recoverStrandedSave(configPath);
 
   /// Convert map to YAML string with proper formatting and comments
   static String _toYamlString(Map<String, dynamic> map, [int indent = 0]) {

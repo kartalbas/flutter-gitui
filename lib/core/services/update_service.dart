@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:path/path.dart' as path;
 import 'logger_service.dart';
+import 'macos_update.dart';
 import 'managed_install.dart';
+import 'update_reasons.dart';
 import '../utils/result.dart';
 
 /// Update information model
@@ -88,18 +91,33 @@ final class UpdateCheckSuppressed extends UpdateCheckResult {
   const UpdateCheckSuppressed(this.install);
 }
 
-/// A failed update check, already phrased for the person who started it.
+/// A newer release exists, but this installation has to install it by hand.
 ///
-/// The transport error behind it belongs in the log: a SocketException naming
-/// an internal host and an errno, or a rate-limit JSON body, tells the user
-/// nothing they can act on.
+/// Not a failure -- the check ran and found the release -- and not an update
+/// this application may apply, so it is neither of the two states above. The
+/// version is named, and [reason] says why the in-app install is declined
+/// (#387).
+final class ManualUpdateAvailable extends UpdateCheckResult {
+  final UpdateInfo info;
+  final ManualInstallReason reason;
+
+  const ManualUpdateAvailable(this.info, this.reason);
+}
+
+/// A failed update check, reduced to the reason behind it.
+///
+/// The reason is data, not a sentence: it is persisted and rendered in the
+/// locale that is active when it is shown (#393). The transport error behind
+/// it belongs in the log, where a SocketException naming an internal host and
+/// an errno, or a rate-limit JSON body, is worth something.
 class UpdateCheckException implements Exception {
-  final String message;
+  final UpdateFailureReason reason;
 
-  const UpdateCheckException(this.message);
+  const UpdateCheckException(this.reason);
 
+  /// Read by logs and by [Result.unwrap], never by a user-facing surface.
   @override
-  String toString() => message;
+  String toString() => 'Update check failed: $reason';
 }
 
 /// Service for checking and downloading app updates
@@ -108,19 +126,29 @@ class UpdateService {
   static const String _releasesUrl =
       'https://api.github.com/repos/kartalbas/flutter-gitui/releases';
 
-  /// Where a release can always be fetched by hand when the check fails.
-  static const String _releasesPageUrl =
-      'https://github.com/kartalbas/flutter-gitui/releases';
+  /// How long a single GitHub request may take before the check gives up.
+  static const Duration _requestTimeout = Duration(seconds: 10);
 
-  /// Get platform-specific manifest file name
-  static String get _manifestFileName {
-    if (Platform.isWindows) {
-      return 'latest-windows.json';
-    } else if (Platform.isLinux) {
-      return 'latest-linux.json';
-    }
-    return 'latest.json'; // fallback
-  }
+  /// The manifest asset a build running on [operatingSystem] must read, or
+  /// null when no release job publishes one for it.
+  ///
+  /// Every name here is written by the release workflow's manifest step
+  /// (`.github/workflows/release.yml`). It used to fall back to `latest.json`
+  /// for anything else, which is an asset no job has ever produced: on macOS
+  /// that turned "this platform is not covered" into "the release is missing
+  /// its manifest", a different and misleading complaint. Returning null says
+  /// the true thing, and says it before a single request goes out (#387).
+  ///
+  /// Takes the operating system as a string rather than reading [Platform] so
+  /// that all three answers are provable from one test run on one machine.
+  @visibleForTesting
+  static String? manifestFileNameFor(String operatingSystem) =>
+      switch (operatingSystem) {
+        'windows' => 'latest-windows.json',
+        'linux' => 'latest-linux.json',
+        'macos' => 'latest-macos.json',
+        _ => null,
+      };
 
   /// Download URL of the release asset called [name], null when absent.
   static String? _assetUrl(List<dynamic> assets, String name) {
@@ -134,8 +162,11 @@ class UpdateService {
 
   /// Check for updates
   /// Returns Result\<UpdateCheckResult\> - UpdateAvailable when a newer release
-  /// can be installed, UpToDate when none is, UpdateCheckSuppressed when a
-  /// package manager owns this installation, Failure on error
+  /// can be installed, ManualUpdateAvailable when one exists that this
+  /// installation may not apply itself, UpToDate when none is,
+  /// UpdateCheckSuppressed when a package manager owns this installation,
+  /// Failure on error. A Failure carries its [UpdateFailureReason] as the
+  /// [Failure.error], where [failureReason] can recover it.
   static Future<Result<UpdateCheckResult>> checkForUpdates() async {
     // A package manager that owns this installation also owns the update path,
     // and the answer never changes while the process runs. Deciding it here,
@@ -151,6 +182,18 @@ class UpdateService {
 
     final result = await runCatchingAsync<UpdateCheckResult>(() async {
       Logger.info('Checking for updates...');
+
+      // Asked before anything leaves the machine: a platform no release job
+      // publishes a manifest for cannot be answered by any amount of network
+      // traffic, and saying so here keeps that case from being reported as a
+      // release with a missing asset (#387).
+      final manifestFileName = manifestFileNameFor(Platform.operatingSystem);
+      if (manifestFileName == null) {
+        Logger.warning(
+          'No update manifest is published for ${Platform.operatingSystem}',
+        );
+        throw const UpdateCheckException(UpdatePlatformUnsupported());
+      }
 
       // Get current version
       final packageInfo = await PackageInfo.fromPlatform();
@@ -172,7 +215,7 @@ class UpdateService {
             Uri.parse(_releasesUrl),
             headers: const {'Accept': 'application/vnd.github+json'},
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(_requestTimeout);
 
       if (releasesResponse.statusCode != 200) {
         Logger.warning(
@@ -207,10 +250,7 @@ class UpdateService {
         );
         if (!anyPublished) {
           Logger.warning('No published release exists yet');
-          throw UpdateCheckException(
-            'No release has been published yet, so there is nothing to update '
-            'to. Releases appear at $_releasesPageUrl.',
-          );
+          throw const UpdateCheckException(UpdateNoReleasePublished());
         }
         Logger.info('✓ No published release for this channel');
         return const UpToDate();
@@ -219,20 +259,17 @@ class UpdateService {
       // Manifest and archive are both read from this one release, so the
       // digest can never end up describing bytes from a different build.
       final assets = release['assets'] as List<dynamic>? ?? const <dynamic>[];
-      final manifestUrl = _assetUrl(assets, _manifestFileName);
+      final tag = release['tag_name'] as String? ?? '';
+      final manifestUrl = _assetUrl(assets, manifestFileName);
       if (manifestUrl == null) {
-        Logger.warning('Release ${release['tag_name']} has no manifest asset');
-        throw UpdateCheckException(
-          'Release ${release['tag_name']} publishes no update information for '
-          'this platform, so it cannot be installed automatically. Download it '
-          'from $_releasesPageUrl.',
-        );
+        Logger.warning('Release $tag has no $manifestFileName asset');
+        throw UpdateCheckException(UpdateReleaseNotInstallable(tag));
       }
 
       Logger.info('Manifest URL: $manifestUrl');
       final response = await http
           .get(Uri.parse(manifestUrl))
-          .timeout(const Duration(seconds: 10));
+          .timeout(_requestTimeout);
 
       Logger.info('Manifest response status: ${response.statusCode}');
 
@@ -242,9 +279,7 @@ class UpdateService {
         );
         Logger.warning('Response body: ${response.body}');
         throw UpdateCheckException(
-          'The update information of release ${release['tag_name']} could not '
-          'be downloaded (HTTP ${response.statusCode}). Try again later, or '
-          'download the release from $_releasesPageUrl.',
+          UpdateManifestUnavailable(tag: tag, statusCode: response.statusCode),
         );
       }
 
@@ -279,35 +314,36 @@ class UpdateService {
           downloadFileName =
               platformData?['fileName'] as String? ??
               'flutter-gitui-v$latestVersion-linux.zip';
+        } else if (Platform.isMacOS) {
+          // The archive is named for how it was built: the signed and notarised
+          // one is '-macos.zip', the ad-hoc-signed fallback '-macos-unsigned',
+          // so the manifest's own fileName is the only reliable source. The
+          // default below is the signed name, which is what a manifest missing
+          // the field would have to mean.
+          platform = 'macos';
+          platformData = manifestData['macos'] as Map<String, dynamic>?;
+          downloadFileName =
+              platformData?['fileName'] as String? ??
+              'flutter-gitui-v$latestVersion-macos.zip';
         } else {
-          // Only Windows and Linux publish release archives and can install
-          // them; offering an update anywhere else would end in a multi-MB
-          // download that can never be applied.
+          // Every platform that publishes a manifest is handled above, and
+          // manifestFileNameFor already refused the rest before any request
+          // went out; this is the belt to that braces.
           Logger.warning('Unsupported platform for updates');
-          throw UpdateCheckException(
-            'Automatic updates are published for Windows and Linux only. '
-            'Download a release from $_releasesPageUrl.',
-          );
+          throw const UpdateCheckException(UpdatePlatformUnsupported());
         }
 
         // The manifest is remote input; anything but a plain basename could
         // escape the temp directory or the generated update script.
         if (!RegExp(r'^[A-Za-z0-9._-]+$').hasMatch(downloadFileName)) {
           Logger.warning('Rejected manifest fileName: $downloadFileName');
-          throw UpdateCheckException(
-            'Release ${release['tag_name']} names an archive that is not a '
-            'valid file name, so the update was refused. Download the release '
-            'from $_releasesPageUrl.',
-          );
+          throw UpdateCheckException(UpdateReleaseNotInstallable(tag));
         }
 
         final downloadUrl = _assetUrl(assets, downloadFileName);
         if (downloadUrl == null) {
           Logger.warning('Release asset not found: $downloadFileName');
-          throw UpdateCheckException(
-            'Release ${release['tag_name']} publishes no $downloadFileName, so '
-            'the update cannot be downloaded. Get it from $_releasesPageUrl.',
-          );
+          throw UpdateCheckException(UpdateReleaseNotInstallable(tag));
         }
         final fileSize = platformData?['fileSize'] as int? ?? 0;
         final sha256Digest = platformData?['sha256'] as String?;
@@ -323,17 +359,36 @@ class UpdateService {
         Logger.info('Download URL: $downloadUrl');
         Logger.info('File size: $fileSize bytes');
 
-        return UpdateAvailable(
-          UpdateInfo(
-            version: latestVersion,
-            downloadUrl: downloadUrl,
-            changelog: changelog,
-            releaseDate: DateTime.parse(manifestData['releaseDate'] as String),
-            fileSize: fileSize,
-            platform: platform,
-            sha256: sha256Digest,
-          ),
+        final info = UpdateInfo(
+          version: latestVersion,
+          downloadUrl: downloadUrl,
+          changelog: changelog,
+          releaseDate: DateTime.parse(manifestData['releaseDate'] as String),
+          fileSize: fileSize,
+          platform: platform,
+          sha256: sha256Digest,
         );
+
+        // A macOS release that was not signed and notarised is found, named
+        // and then handed back for a manual install rather than applied here.
+        // Replacing a bundle the user once allowed past Gatekeeper by hand
+        // with one macOS cannot verify risks leaving them with an application
+        // that no longer opens at all, and this project has no Mac on which
+        // that could be tried before it reaches a user. The version is still
+        // reported, because "there is a new version, fetch it yourself" is
+        // strictly more than macOS users have today (#387).
+        if (Platform.isMacOS && !macosArchiveIsSelfInstallable(platformData)) {
+          Logger.info(
+            'Release $tag publishes an unsigned macOS archive; offering it as '
+            'a manual download instead of installing it',
+          );
+          return ManualUpdateAvailable(
+            info,
+            ManualInstallReason.unsignedMacosRelease,
+          );
+        }
+
+        return UpdateAvailable(info);
       } else {
         Logger.info('✓ App is up to date ($fullVersion >= $latestVersion)');
         return const UpToDate();
@@ -341,43 +396,34 @@ class UpdateService {
     });
 
     // runCatchingAsync keeps only e.toString() as the failure message, which
-    // for a transport error is a line naming a host and an OS errno. Replace
-    // it with the sentence for this failure mode, and log the original here so
-    // the diagnosis the message points at is actually in the log.
+    // for a transport error is a line naming a host and an OS errno. That line
+    // is exactly what the log wants and exactly what the user must never see,
+    // so it stays the Failure's message and the reason travels as the error:
+    // the message is for the log, the reason is what a surface renders (#393).
     if (result case Failure<UpdateCheckResult>(
+      :final message,
       :final error,
       :final stackTrace,
     )) {
       Logger.error('Update check failed', error, stackTrace);
       return Failure(
-        _checkFailureMessage(error),
-        error: error,
+        message,
+        error: UpdateCheckException(failureReason(error)),
         stackTrace: stackTrace,
       );
     }
     return result;
   }
 
-  /// The user-facing sentence behind a failed update check.
+  /// Why a check failed, as data a surface can render in the active locale.
   ///
-  /// unwrap() rethrows a Failure as Exception(message), so what reaches a
-  /// caller's catch is the phrased message behind Dart's 'Exception: ' prefix.
-  /// Stripping it here keeps exception syntax out of the UI.
-  static String describeCheckFailure(Object error) {
-    const prefix = 'Exception: ';
-    final text = error.toString();
-    if (text.startsWith(prefix) && text.length > prefix.length) {
-      return text.substring(prefix.length);
-    }
-    return _checkFailureMessage(error);
-  }
-
-  /// What to tell the user about [error], and what they can do about it.
-  static String _checkFailureMessage(Object? error) {
-    if (error is UpdateCheckException) return error.message;
+  /// Accepts whatever a `catch` produced -- the [UpdateCheckException] this
+  /// service raises, a transport error, or something entirely unclassified --
+  /// so a caller never has to know which of those it is holding.
+  static UpdateFailureReason failureReason(Object? error) {
+    if (error is UpdateCheckException) return error.reason;
     if (error is TimeoutException) {
-      return 'GitHub did not answer within 10 seconds. Check your connection '
-          'and try again, or download from $_releasesPageUrl.';
+      return UpdateCheckTimedOut(_requestTimeout.inSeconds);
     }
     // Offline, blocked by a proxy, or unable to resolve the host: all of these
     // arrive as a socket, TLS or client failure and all mean the same thing to
@@ -385,51 +431,40 @@ class UpdateService {
     if (error is SocketException ||
         error is HandshakeException ||
         error is http.ClientException) {
-      return 'GitHub could not be reached. Check your internet connection or '
-          'proxy settings and try again, or download from $_releasesPageUrl.';
+      return const UpdateNetworkUnreachable();
     }
-    if (error is FormatException) {
-      return 'GitHub returned an update response this version cannot read. '
-          'Try again later, or download from $_releasesPageUrl.';
-    }
-    return 'The update check failed. See the application log for details, or '
-        'download from $_releasesPageUrl.';
+    if (error is FormatException) return const UpdateResponseUnreadable();
+    return const UpdateCheckFailedUnexpectedly();
   }
 
-  /// Why a release listing did not return 200, phrased for the user.
+  /// Why a release listing did not return 200.
   static UpdateCheckException _releaseListFailure(http.Response response) {
     final status = response.statusCode;
     // An exhausted quota answers 403 -- or 429 for a secondary limit -- with
     // x-ratelimit-remaining 0 and a JSON body that means nothing to the user,
-    // while the reset header says exactly how long the wait is.
+    // while the reset header says exactly when the wait is over.
     if ((status == 403 || status == 429) &&
         response.headers['x-ratelimit-remaining'] == '0') {
-      final wait = _rateLimitWait(response.headers['x-ratelimit-reset']);
       return UpdateCheckException(
-        'GitHub is rate-limiting update checks from this network. $wait, or '
-        'download the update from $_releasesPageUrl.',
+        UpdateRateLimited(
+          rateLimitReset(response.headers['x-ratelimit-reset']),
+        ),
       );
     }
-    return UpdateCheckException(
-      'GitHub could not be asked for releases (HTTP $status). Try again later, '
-      'or download the update from $_releasesPageUrl.',
-    );
+    return UpdateCheckException(UpdateReleaseListUnavailable(status));
   }
 
-  /// How long until a rate limit resets, from x-ratelimit-reset epoch seconds.
-  static String _rateLimitWait(String? resetHeader) {
+  /// When a rate limit resets, from the x-ratelimit-reset epoch seconds, or
+  /// null when the header was absent or unreadable.
+  ///
+  /// The instant is what gets persisted, not a phrase derived from it: a
+  /// "try again in about 40 minutes" written into the configuration is a lie
+  /// the moment it is read back on the next launch (#393).
+  @visibleForTesting
+  static DateTime? rateLimitReset(String? resetHeader) {
     final reset = int.tryParse(resetHeader ?? '');
-    if (reset == null) return 'Try again later';
-    final minutes = DateTime.fromMillisecondsSinceEpoch(
-      reset * 1000,
-      isUtc: true,
-    ).difference(DateTime.now().toUtc()).inMinutes;
-    if (minutes <= 1) return 'Try again in about a minute';
-    if (minutes < 60) return 'Try again in about $minutes minutes';
-    final hours = (minutes / 60).round();
-    return hours == 1
-        ? 'Try again in about an hour'
-        : 'Try again in about $hours hours';
+    if (reset == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(reset * 1000, isUtc: true);
   }
 
   /// Whether [newVersion] takes precedence over [currentVersion].
@@ -660,6 +695,8 @@ class UpdateService {
         return await _installWindowsUpdate(updateFilePath);
       } else if (Platform.isLinux) {
         return await _installLinuxUpdate(updateFilePath);
+      } else if (Platform.isMacOS) {
+        return await _installMacosUpdate(updateFilePath);
       } else {
         Logger.warning('Update installation not supported on this platform');
         throw Exception('Update installation not supported on this platform');
@@ -979,6 +1016,90 @@ rm "\$0"
       }
     } catch (e, stackTrace) {
       Logger.error('Error installing Linux update', e, stackTrace);
+      return false;
+    }
+  }
+
+  /// Install a macOS update (.zip containing the `.app` bundle)
+  ///
+  /// A bundle cannot replace itself while it is running, so the swap is handed
+  /// to a detached `/bin/sh` script that waits for this process to exit,
+  /// unpacks beside the installed bundle, moves the new one into its place and
+  /// relaunches it -- the same sequence `updater.exe` performs on Windows. Why
+  /// a script rather than that compiled helper is argued in
+  /// `lib/core/services/macos_update.dart`; the short version is that a loose
+  /// executable in the release zip is not covered by the `.app`'s
+  /// notarisation, and an installation already on disk has no helper anyway.
+  ///
+  /// Only ever reached for an archive the release job signed and notarised:
+  /// [checkForUpdates] hands an unsigned macOS release back as a
+  /// [ManualUpdateAvailable] instead, so it never reaches a download, let
+  /// alone this method (#387).
+  static Future<bool> _installMacosUpdate(String archivePath) async {
+    try {
+      final executablePath = Platform.resolvedExecutable;
+      final bundlePath = macosBundlePath(executablePath);
+
+      Logger.info('=== macOS Update Installation ===');
+      Logger.info('Executable path: $executablePath');
+      Logger.info('Bundle path: $bundlePath');
+      Logger.info('Archive path: $archivePath');
+
+      if (bundlePath == null) {
+        // A build started straight out of build/macos/ rather than from an
+        // installed bundle. Swapping "the directory two levels up" there would
+        // move something nobody asked to be moved.
+        Logger.error(
+          'Refusing to update: $executablePath does not run from an .app '
+          'bundle, so there is no bundle to replace',
+        );
+        return false;
+      }
+
+      // Beside the bundle, so the move that puts the new version in place is a
+      // rename within one directory rather than a copy across volumes: the
+      // window in which neither version is in place is as short as the file
+      // system can make it.
+      final bundleParent = path.dirname(bundlePath);
+      final stagePath = path.join(bundleParent, '.flutter-gitui-update-$pid');
+      final backupPath = '$bundlePath.previous-$pid';
+
+      // The helper has no terminal, so the only place a failure can be read
+      // afterwards is the log the application itself writes.
+      final logPath =
+          Logger.logFilePath ?? path.join(bundleParent, '_update_error.log');
+
+      final scriptPath = path.join(
+        path.dirname(archivePath),
+        '_update-$pid.sh',
+      );
+      await File(scriptPath).writeAsString(
+        macosUpdateScript(
+          bundlePath: bundlePath,
+          archivePath: archivePath,
+          stagePath: stagePath,
+          backupPath: backupPath,
+          logPath: logPath,
+          appPid: pid,
+        ),
+      );
+
+      // /bin/sh runs the script whether or not the exec bit survived; the mode
+      // is set anyway so the file behaves like a script when read by a human.
+      await Process.run('chmod', ['+x', scriptPath]);
+
+      final started = await _launchDetached('/bin/sh', [
+        scriptPath,
+      ], bundleParent);
+      if (!started) {
+        Logger.error('Failed to launch the macOS update helper');
+        return false;
+      }
+
+      Logger.info('Main app will now exit to allow update');
+      return true;
+    } catch (e, stackTrace) {
+      Logger.error('Error installing macOS update', e, stackTrace);
       return false;
     }
   }

@@ -3,8 +3,10 @@ import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 import '../config/config_providers.dart';
+import '../utils/result.dart';
 import 'managed_install.dart';
 import 'update_check_policy.dart';
+import 'update_reasons.dart';
 import 'update_service.dart';
 import 'logger_service.dart';
 
@@ -40,6 +42,17 @@ class ReadyUpdate {
 /// The staged download, if the auto-download setting produced one.
 final readyUpdateProvider = StateProvider<ReadyUpdate?>((ref) => null);
 
+/// A release that was found but has to be installed by hand, for the surfaces
+/// that have to explain that rather than offer a restart (#387).
+///
+/// Session state rather than configuration: it describes the release the last
+/// check found, and the next check re-establishes it in the second it takes.
+/// Settings reads it so the explanation is there on every launch, not only in
+/// the message that follows a button press.
+final manualUpdateProvider = StateProvider<ManualUpdateAvailable?>(
+  (ref) => null,
+);
+
 /// The version a background download is currently transferring.
 ///
 /// Startup and a manual check can overlap; without this latch both would
@@ -48,12 +61,20 @@ final _downloadingVersionProvider = StateProvider<String?>((ref) => null);
 
 /// Outcome of one update check, for callers that surface it themselves.
 ///
-/// The background path ignores it; Settings uses it to open the update
-/// dialog, show an up-to-date notice or show the failure message without
-/// issuing a second request.
+/// The background path ignores it; Settings uses it to open the update dialog,
+/// show an up-to-date notice, or render the failure reason -- without issuing
+/// a second request. Exactly one of the four fields is ever set.
 class UpdateCheckReport {
   final UpdateInfo? update;
-  final String? failureMessage;
+
+  /// Why the check failed, as data. The sentence is rendered from it in the
+  /// locale that is active when it is shown, never carried as prose (#393).
+  final UpdateFailureReason? failureReason;
+
+  /// Set when a newer release was found that this installation may not install
+  /// itself, so the caller names the version and points at the download
+  /// instead of offering a restart (#387).
+  final ManualUpdateAvailable? manualUpdate;
 
   /// Set when no check was made because this package manager owns the
   /// installation. Kept apart from "nothing to offer" so a caller can explain
@@ -62,7 +83,8 @@ class UpdateCheckReport {
 
   const UpdateCheckReport({
     this.update,
-    this.failureMessage,
+    this.failureReason,
+    this.manualUpdate,
     this.suppressedBy,
   });
 }
@@ -105,11 +127,21 @@ Future<void> dismissUpdateVersion(dynamic ref, String version) async {
 Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
   try {
     ref.read(checkingForUpdatesProvider.notifier).state = true;
+    // Whatever the last check concluded, this one supersedes it. Clearing here
+    // means a manual-install notice never outlives the release that caused it.
+    ref.read(manualUpdateProvider.notifier).state = null;
 
     // unwrapOr(null) collapsed "the check failed" into "no update available":
-    // an offline or server error was logged as being up to date. Throwing
-    // instead lets the catch record the real error.
-    final checkResult = (await UpdateService.checkForUpdates()).unwrap();
+    // an offline or server error was logged as being up to date. Rethrowing
+    // the service's own exception keeps the failure -- and with it the reason
+    // the catch below has to record -- intact; unwrap() would flatten it into
+    // an Exception carrying nothing but a log line (#393).
+    final result = await UpdateService.checkForUpdates();
+    if (result case Failure<UpdateCheckResult>(:final error)) {
+      throw error ??
+          const UpdateCheckException(UpdateCheckFailedUnexpectedly());
+    }
+    final checkResult = (result as Success<UpdateCheckResult>).value;
 
     // A package manager owns this installation, so no check was made and none
     // will be. Nothing is recorded either: the last-check line in Settings
@@ -120,13 +152,31 @@ Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
       return UpdateCheckReport(suppressedBy: install);
     }
 
+    // A release exists that this installation may not install itself. It is
+    // recorded exactly like any other found update -- there is one, and its
+    // version is what the last-check line names -- but nothing is staged and
+    // the quiet toolbar indicator stays dark, because that indicator's whole
+    // offer is "restart and install", which is the one thing not on the table
+    // here (#387).
+    if (checkResult case ManualUpdateAvailable(:final info)) {
+      Logger.info('Update ${info.version} must be installed manually');
+      ref.read(updateAvailableProvider.notifier).state = null;
+      ref.read(manualUpdateProvider.notifier).state = checkResult;
+      await _recordCheck(
+        ref,
+        UpdateCheckOutcome.updateAvailable,
+        version: info.version,
+      );
+      return UpdateCheckReport(manualUpdate: checkResult);
+    }
+
     // Check if this version was dismissed
     final dismissedVersion = ref.read(dismissedUpdateVersionProvider);
 
     if (checkResult is! UpdateAvailable) {
       Logger.info('No updates available');
       ref.read(updateAvailableProvider.notifier).state = null;
-      await _recordCheck(ref, UpdateCheckOutcome.upToDate, null);
+      await _recordCheck(ref, UpdateCheckOutcome.upToDate);
       return const UpdateCheckReport();
     }
     final updateInfo = checkResult.info;
@@ -151,7 +201,7 @@ Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
     await _recordCheck(
       ref,
       UpdateCheckOutcome.updateAvailable,
-      updateInfo.version,
+      version: updateInfo.version,
     );
     // A dismissed version is not staged either: downloading what the user
     // declined would spend their bandwidth on it anyway.
@@ -161,9 +211,9 @@ Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
     return UpdateCheckReport(update: updateInfo);
   } catch (e) {
     Logger.error('Error checking for updates', e);
-    final message = UpdateService.describeCheckFailure(e);
-    await _recordCheck(ref, UpdateCheckOutcome.failed, message);
-    return UpdateCheckReport(failureMessage: message);
+    final reason = UpdateService.failureReason(e);
+    await _recordCheck(ref, UpdateCheckOutcome.failed, failure: reason);
+    return UpdateCheckReport(failureReason: reason);
   } finally {
     ref.read(checkingForUpdatesProvider.notifier).state = false;
   }
@@ -173,16 +223,18 @@ Future<UpdateCheckReport> checkForUpdates(dynamic ref) async {
 /// background check into an error surface.
 Future<void> _recordCheck(
   dynamic ref,
-  UpdateCheckOutcome outcome,
-  String? detail,
-) async {
+  UpdateCheckOutcome outcome, {
+  String? version,
+  UpdateFailureReason? failure,
+}) async {
   try {
     await ref
         .read(configProvider.notifier)
         .recordUpdateCheck(
           time: DateTime.now(),
           outcome: outcome,
-          detail: detail,
+          version: version,
+          failure: failure,
         );
   } catch (e) {
     Logger.error('Could not persist update check result', e);

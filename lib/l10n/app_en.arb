@@ -3881,6 +3881,154 @@
   "@managedInstallUndetermined": {
     "description": "Why the application does not update itself when the installation could not be identified at all."
   },
+  "updateFailureNoRelease": "No release has been published yet, so there is nothing to update to. Releases appear at {url}.",
+  "@updateFailureNoRelease": {
+    "description": "The update channel has no published release at all.",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureReleaseList": "GitHub could not be asked for releases (HTTP {status}). Try again later, or download the update from {url}.",
+  "@updateFailureReleaseList": {
+    "description": "GitHub refused to list the releases with an HTTP status that is not a rate limit.",
+    "placeholders": {
+      "status": {
+        "type": "int",
+        "example": "503"
+      },
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureRateLimited": "GitHub is rate-limiting update checks from this network. Try again later, or download the update from {url}.",
+  "@updateFailureRateLimited": {
+    "description": "GitHub is rate-limiting update checks from this network and the moment the limit lifts is unknown.",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureRateLimitedUntil": "GitHub is rate-limiting update checks from this network. Try again after {time}, or download the update from {url}.",
+  "@updateFailureRateLimitedUntil": {
+    "description": "GitHub is rate-limiting update checks from this network until a known local time, on a 24-hour clock.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "14:35"
+      },
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureManifestUnavailable": "The update information of release {tag} could not be downloaded (HTTP {status}). Try again later, or download the release from {url}.",
+  "@updateFailureManifestUnavailable": {
+    "description": "The release's own update manifest could not be downloaded.",
+    "placeholders": {
+      "tag": {
+        "type": "String",
+        "example": "v0.5.15-alpha"
+      },
+      "status": {
+        "type": "int",
+        "example": "503"
+      },
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureReleaseNotInstallable": "Release {tag} publishes nothing this application can install on this platform. Download it from {url}.",
+  "@updateFailureReleaseNotInstallable": {
+    "description": "The release exists but publishes no archive this platform can install.",
+    "placeholders": {
+      "tag": {
+        "type": "String",
+        "example": "v0.5.15-alpha"
+      },
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureNetworkUnreachable": "GitHub could not be reached. Check your internet connection or proxy settings and try again, or download from {url}.",
+  "@updateFailureNetworkUnreachable": {
+    "description": "Offline, blocked by a proxy, or the host could not be resolved.",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureTimedOut": "GitHub did not answer within {seconds} seconds. Check your connection and try again, or download from {url}.",
+  "@updateFailureTimedOut": {
+    "description": "GitHub did not answer within the request timeout.",
+    "placeholders": {
+      "seconds": {
+        "type": "int",
+        "example": "10"
+      },
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureResponseUnreadable": "GitHub returned an update response this version cannot read. Try again later, or download from {url}.",
+  "@updateFailureResponseUnreadable": {
+    "description": "GitHub answered with something this version cannot parse.",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailurePlatformUnsupported": "Automatic updates are published for Windows, Linux and macOS only. Download a release from {url}.",
+  "@updateFailurePlatformUnsupported": {
+    "description": "No release archive is published for the platform this build runs on.",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateFailureUnknown": "The update check failed. See the application log for details, or download from {url}.",
+  "@updateFailureUnknown": {
+    "description": "An update check failure that could not be classified at all.",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
+  "updateManualInstallUnsigned": "Version {version} is available, but the published macOS build is neither signed nor notarised, so this application will not replace itself with it. Download it from {url} and replace the application yourself.",
+  "@updateManualInstallUnsigned": {
+    "description": "A macOS release was found that is neither signed nor notarised, so the application declines to replace itself with it. The user is told the version and where to get it.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.5.15-alpha"
+      },
+      "url": {
+        "type": "String",
+        "example": "https://github.com/kartalbas/flutter-gitui/releases"
+      }
+    }
+  },
   "updateAvailableTitle": "Update Available",
   "updateVersionHeading": "Version {version}",
   "@updateVersionHeading": {

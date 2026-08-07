@@ -6,6 +6,7 @@ import 'app_config.dart';
 import 'config_service.dart';
 import '../diff/models/diff_tool.dart';
 import '../services/update_check_policy.dart';
+import '../services/update_reasons.dart';
 import '../tools/version_detector.dart';
 import '../workspace/models/workspace_repository.dart';
 import '../services/logger_service.dart';
@@ -773,16 +774,22 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
 
   /// Persists when the last update check ran and what it concluded, so the
   /// daily/weekly schedule survives restarts and Settings can show the result.
+  ///
+  /// [version] and [failure] belong to different outcomes and both are written
+  /// on every call, so the record always describes one check and never keeps a
+  /// leftover from the one before it.
   Future<void> recordUpdateCheck({
     required DateTime time,
     required UpdateCheckOutcome outcome,
-    String? detail,
+    String? version,
+    UpdateFailureReason? failure,
   }) async {
     state = state.copyWith(
       updates: state.updates.copyWith(
         lastCheckTime: time,
         lastCheckOutcome: outcome,
-        lastCheckDetail: detail,
+        lastCheckVersion: version,
+        lastCheckFailure: failure,
       ),
     );
     await _saveConfig();

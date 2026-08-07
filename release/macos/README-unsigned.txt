@@ -39,6 +39,20 @@ and launch it again.
 If the app still refuses to start after being allowed, please report it:
 https://github.com/kartalbas/flutter-gitui/issues
 
+Updating this build
+-------------------
+
+This build does not update itself. It still checks for new versions and
+tells you when one exists, but it will not replace its own bundle,
+because the replacement would be unsigned as well: macOS remembers the
+permission you gave in step 3 for this exact copy of the app, and a copy
+it has never seen has to be allowed all over again. An update that ends
+in "is damaged and can't be opened" is worse than no update at all, so
+the app names the new version and leaves the swap to you: download it
+from the releases page and repeat the steps above.
+
+    https://github.com/kartalbas/flutter-gitui/releases
+
 Signed and notarised builds will replace this arrangement once the
 project holds an Apple Developer Program membership; those will launch
-without any of the steps above.
+without any of the steps above, and they do update themselves.

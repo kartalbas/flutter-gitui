@@ -14,6 +14,7 @@ import '../../../core/services/logger_service.dart';
 import '../../../core/services/managed_install.dart';
 import '../../../core/services/update_check_policy.dart';
 import '../../../core/services/update_providers.dart';
+import '../../../core/services/update_reasons.dart';
 import '../../../shared/dialogs/update_available_dialog.dart';
 import '../../../features/changelog/changelog_dialog.dart';
 import 'settings_section.dart';
@@ -78,7 +79,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
         return l10n.updateCheckResultUpToDate;
       case UpdateCheckOutcome.updateAvailable:
         return l10n.updateCheckResultUpdateAvailable(
-          updates.lastCheckDetail ?? '?',
+          updates.lastCheckVersion ?? '?',
         );
       case UpdateCheckOutcome.failed:
         return l10n.updateCheckResultFailed;
@@ -122,17 +123,38 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       return;
     }
 
-    final failureMessage = report.failureMessage;
-    if (failureMessage != null) {
+    final l10n = AppLocalizations.of(context)!;
+
+    final failureReason = report.failureReason;
+    if (failureReason != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          // The check phrases each failure mode as something the user can act
-          // on; the raw exception named an internal host and an OS errno.
-          content: Text(failureMessage),
+          // The check classifies each failure mode as something the user can
+          // act on; the raw exception named an internal host and an OS errno.
+          // The sentence is produced here, in the active locale, from the
+          // reason the check returned (#393).
+          content: Text(failureReason.message(l10n)),
           backgroundColor: Theme.of(context).colorScheme.error,
           // The message says what to do next and carries a URL, which four
           // seconds is not enough to read.
           duration: const Duration(seconds: 8),
+        ),
+      );
+      return;
+    }
+
+    // A release exists that this build may not install itself -- an unsigned
+    // macOS archive today. Naming the version and where to get it is the whole
+    // answer, so it is a message rather than the install dialog (#387).
+    final manualUpdate = report.manualUpdate;
+    if (manualUpdate != null) {
+      Logger.info('Manual update available: ${manualUpdate.info.version}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            manualUpdate.reason.message(l10n, manualUpdate.info.version),
+          ),
+          duration: const Duration(seconds: 12),
         ),
       );
       return;
@@ -150,7 +172,6 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       );
     } else {
       Logger.info('No updates found');
-      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           // The version is read in initState and this runs on a button the
@@ -173,6 +194,9 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     // the background and no result to report, so those controls give way to the
     // one thing that is true here -- who does deliver new versions (#364).
     final managedInstall = ref.watch(managedInstallProvider);
+    // Null unless the last check found a release this build may not install
+    // itself -- an unsigned macOS archive today (#387).
+    final manualUpdate = ref.watch(manualUpdateProvider);
 
     return SettingsSection(
       title: l10n.updates,
@@ -267,11 +291,26 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
               children: [
                 BodyMediumLabel(l10n.lastUpdateCheck),
                 BodySmallLabel(_lastCheckSummary(l10n, updates)),
+                // Rendered here rather than stored: the reason was persisted as
+                // a code, so this line follows whatever language is in force
+                // now, not the one that happened to be active when the check
+                // failed (#393).
                 if (updates.lastCheckOutcome == UpdateCheckOutcome.failed &&
-                    updates.lastCheckDetail != null)
+                    updates.lastCheckFailure != null)
                   BodySmallLabel(
-                    updates.lastCheckDetail!,
+                    updates.lastCheckFailure!.message(l10n),
                     color: Theme.of(context).colorScheme.error,
+                  ),
+                // A release this build may not install itself is explained
+                // here rather than only in the message that follows the
+                // button, so a user who never presses it still finds out why
+                // no restart is being offered (#387).
+                if (manualUpdate != null)
+                  BodySmallLabel(
+                    manualUpdate.reason.message(
+                      l10n,
+                      manualUpdate.info.version,
+                    ),
                   ),
               ],
             ),

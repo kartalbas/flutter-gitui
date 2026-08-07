@@ -138,21 +138,21 @@ class ConfigService {
       final storedVersion = yamlMap['config_version'] as int?;
       if (storedVersion == null ||
           storedVersion < AppConfig.currentConfigVersion) {
-        return _migrate(config);
+        return _migrate(config, storedVersion);
       }
       return config;
     });
   }
 
   /// Repairs data written by an older build and stamps the current schema
-  /// version, so the repair judges stored values exactly once.
-  ///
-  /// Everything the user enters afterwards is written by the current
-  /// serialiser, which emits a bare `null` for an absent value and a quoted
-  /// `"null"` for that text, so the ambiguity the repair resolves cannot recur
-  /// and a deliberate value is never second-guessed.
-  static Future<AppConfig> _migrate(AppConfig config) async {
-    final migrated = repairStringifiedNulls(config);
+  /// version, so each repair judges stored values exactly once. Which repairs
+  /// a given file needs is [migrateConfig]'s decision, taken from the version
+  /// the file carried.
+  static Future<AppConfig> _migrate(
+    AppConfig config,
+    int? storedVersion,
+  ) async {
+    final migrated = migrateConfig(config, storedVersion);
     final saveResult = await save(migrated);
     if (saveResult.isFailure) {
       // A config directory that cannot be written must not stop the app from

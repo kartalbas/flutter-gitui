@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../diff/models/diff_tool.dart';
 import '../services/update_check_policy.dart';
+import '../services/update_reasons.dart';
 import '../utils/executable_path.dart';
 import '../workspace/models/workspace_repository.dart';
 
@@ -44,7 +45,16 @@ class AppConfig {
   /// Version 1 is the first that serialises an absent optional value as a real
   /// YAML null; a file without the stamp was written by a build that stored the
   /// text "null" instead, and is repaired once on load.
-  static const int currentConfigVersion = 1;
+  ///
+  /// Version 2 is the first that stores the default workspace's name and
+  /// description as absent instead of writing the application's own English
+  /// sentences into the file; a file below it is swept once on load so those
+  /// sentences stop overriding the UI language.
+  ///
+  /// Each step is gated on the version that introduced it, never on "below the
+  /// current one", so raising this constant does not re-run an earlier repair
+  /// over values the user has entered since.
+  static const int currentConfigVersion = 2;
 
   const AppConfig({
     required this.git,
@@ -730,17 +740,31 @@ class UpdatesConfig {
   final DateTime? lastCheckTime;
   final UpdateCheckOutcome? lastCheckOutcome;
 
-  /// What the outcome refers to: the version found for
-  /// [UpdateCheckOutcome.updateAvailable], the user-facing failure message
-  /// for [UpdateCheckOutcome.failed], null for an up-to-date result.
-  final String? lastCheckDetail;
+  /// The version found by the last check, set only alongside
+  /// [UpdateCheckOutcome.updateAvailable].
+  ///
+  /// A version is machine data -- the same six characters in every language --
+  /// so it is stored as it is found.
+  final String? lastCheckVersion;
+
+  /// Why the last check failed, set only alongside
+  /// [UpdateCheckOutcome.failed].
+  ///
+  /// A reason, never a sentence. What used to live here was the finished
+  /// English message, which froze one language into the configuration file:
+  /// the settings screen re-renders this on a later launch, so a user who
+  /// switched locale in between kept reading the old language until the next
+  /// check happened to overwrite it. The code plus its data is stored and the
+  /// sentence is produced at display time instead (#393).
+  final UpdateFailureReason? lastCheckFailure;
 
   const UpdatesConfig({
     this.checkFrequency = UpdateCheckFrequency.onStart,
     this.autoDownload = false,
     this.lastCheckTime,
     this.lastCheckOutcome,
-    this.lastCheckDetail,
+    this.lastCheckVersion,
+    this.lastCheckFailure,
   });
 
   static const UpdatesConfig defaults = UpdatesConfig();
@@ -750,7 +774,8 @@ class UpdatesConfig {
     bool? autoDownload,
     Object? lastCheckTime = _unset,
     Object? lastCheckOutcome = _unset,
-    Object? lastCheckDetail = _unset,
+    Object? lastCheckVersion = _unset,
+    Object? lastCheckFailure = _unset,
   }) {
     return UpdatesConfig(
       checkFrequency: checkFrequency ?? this.checkFrequency,
@@ -761,9 +786,12 @@ class UpdatesConfig {
       lastCheckOutcome: identical(lastCheckOutcome, _unset)
           ? this.lastCheckOutcome
           : lastCheckOutcome as UpdateCheckOutcome?,
-      lastCheckDetail: identical(lastCheckDetail, _unset)
-          ? this.lastCheckDetail
-          : lastCheckDetail as String?,
+      lastCheckVersion: identical(lastCheckVersion, _unset)
+          ? this.lastCheckVersion
+          : lastCheckVersion as String?,
+      lastCheckFailure: identical(lastCheckFailure, _unset)
+          ? this.lastCheckFailure
+          : lastCheckFailure as UpdateFailureReason?,
     );
   }
 
@@ -773,12 +801,14 @@ class UpdatesConfig {
       'auto_download': autoDownload,
       'last_check_time': lastCheckTime?.toIso8601String(),
       'last_check_outcome': lastCheckOutcome?.name,
-      'last_check_detail': lastCheckDetail,
+      'last_check_version': lastCheckVersion,
+      'last_check_failure': lastCheckFailure?.toStored(),
     };
   }
 
   factory UpdatesConfig.fromYaml(Map<dynamic, dynamic> yaml) {
     final storedTime = yaml['last_check_time'] as String?;
+    final outcome = _outcomeFromName(yaml['last_check_outcome'] as String?);
     return UpdatesConfig(
       checkFrequency: yaml['check_frequency'] != null
           ? UpdateCheckFrequency.values.firstWhere(
@@ -790,9 +820,39 @@ class UpdatesConfig {
       // tryParse: a hand-edited timestamp must degrade to "never checked"
       // instead of taking the whole configuration down.
       lastCheckTime: storedTime != null ? DateTime.tryParse(storedTime) : null,
-      lastCheckOutcome: _outcomeFromName(yaml['last_check_outcome'] as String?),
-      lastCheckDetail: yaml['last_check_detail'] as String?,
+      lastCheckOutcome: outcome,
+      lastCheckVersion: _versionFromYaml(yaml, outcome),
+      lastCheckFailure: UpdateFailureReason.fromStored(
+        yaml['last_check_failure'] as Map<dynamic, dynamic>?,
+      ),
     );
+  }
+
+  /// The found version, reading the pre-#393 `last_check_detail` when this
+  /// configuration still carries one.
+  ///
+  /// That single field used to hold two different things depending on the
+  /// outcome, and the migration treats them differently because they are
+  /// different:
+  ///
+  ///  * after `updateAvailable` it held a version string -- data, not prose,
+  ///    identical in every locale -- so it is carried over unchanged;
+  ///  * after `failed` it held a rendered English sentence, and that is
+  ///    dropped on read rather than shown one last time. Displaying it would
+  ///    mean deliberately printing a frozen-language sentence on the very
+  ///    screen this change exists to fix, and it would force a "legacy prose"
+  ///    field to be carried in the model forever to hold it. Nothing is lost
+  ///    that the user needs: the outcome itself still says the check failed,
+  ///    and a check re-runs on the next start under the default schedule and
+  ///    replaces the whole record anyway.
+  static String? _versionFromYaml(
+    Map<dynamic, dynamic> yaml,
+    UpdateCheckOutcome? outcome,
+  ) {
+    final current = yaml['last_check_version'] as String?;
+    if (current != null) return current;
+    if (outcome != UpdateCheckOutcome.updateAvailable) return null;
+    return yaml['last_check_detail'] as String?;
   }
 
   static UpdateCheckOutcome? _outcomeFromName(String? name) {

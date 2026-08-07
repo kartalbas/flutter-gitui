@@ -256,11 +256,15 @@ jobs:
             --asset-out assets/changelog.json \
             --notes-out dist/release-notes.md
 
-      # No updater build: the macOS archive ships the bare .app because the
-      # in-app update flow stops short of macOS by construction, not by
-      # oversight — UpdateService.installUpdate branches on Windows and Linux
-      # and throws on anything else (lib/core/services/update_service.dart).
-      # Bundling the helper would only pretend otherwise.
+      # No updater build, even though macOS can now update itself (#387): its
+      # helper is a short shell script the application writes at install time
+      # and hands to /bin/sh, not a compiled binary shipped in the archive.
+      # Two reasons, both decisive. A loose executable next to the .app is not
+      # covered by the notarisation of the .app, so Gatekeeper would block the
+      # very helper meant to carry the update through; and an installation
+      # already on a user's disk carries no helper at all, so the first macOS
+      # update can never depend on one being present. See the reasoning in
+      # lib/core/services/macos_update.dart.
       - name: Build macos
         shell: bash
         run: |
@@ -618,22 +622,42 @@ jobs:
           VERSION="${TAG#v}"
           RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           CHANGELOG=$(retry gh release view "$TAG" --json body --jq .body)
-          # No latest-macos.json even when a macOS archive — signed or
-          # unsigned — is attached, and that is settled rather than pending
-          # (issue #155). Nothing would read it: UpdateService._manifestFileName
-          # resolves a name only for Windows and Linux, and its macOS fallback
-          # is 'latest.json', an asset no release carries. Nothing could act on
-          # it either — checkForUpdates rejects any other platform outright, and
-          # installUpdate throws there, so the macOS archive deliberately ships
-          # no updater helper. Publishing the manifest anyway would add a file
-          # no code path fetches whose only effect is to arm a half-built update
-          # flow the day somebody changes that fallback. macOS users update by
-          # downloading the next release; the client tells them so instead of
-          # failing silently.
-          for PLATFORM in windows linux; do
+          # macOS gets a manifest of its own since #387, in the same shape as
+          # the other two plus one field they do not carry: `signed`. It says
+          # whether this archive is the Developer ID-signed and notarised one
+          # or the ad-hoc-signed fallback published when no signing secrets are
+          # configured, and the client installs a macOS update only when it is
+          # true (UpdateService.checkForUpdates, macosArchiveIsSelfInstallable).
+          # The flag belongs in the manifest rather than in the client build
+          # because it describes the bytes about to be installed, and because a
+          # client already on a user's disk cannot be changed: the day signing
+          # is configured, self-update switches itself on with no client
+          # release needed. Windows and Linux carry no such flag — their
+          # installers were never gated on a signature, and adding a field
+          # nothing reads would invite the question of why.
+          MANIFESTS=()
+          for PLATFORM in windows linux macos; do
+            SIGNED=true
             case "$PLATFORM" in
               windows) FILE="flutter-gitui-v${VERSION}-windows.zip" ;;
               linux) FILE="flutter-gitui-v${VERSION}-linux.tar.gz" ;;
+              macos)
+                # build-macos is allowed to fail without blocking the release,
+                # so a missing macOS archive is a skipped manifest rather than
+                # a failed publish. That it is missing is caught by "Verify the
+                # macOS archive arrived" above, which is the step that knows
+                # whether the job claimed success.
+                if [ -f "dist/flutter-gitui-v${VERSION}-macos.zip" ]; then
+                  FILE="flutter-gitui-v${VERSION}-macos.zip"
+                  SIGNED=true
+                elif [ -f "dist/flutter-gitui-v${VERSION}-macos-unsigned.zip" ]; then
+                  FILE="flutter-gitui-v${VERSION}-macos-unsigned.zip"
+                  SIGNED=false
+                else
+                  echo "no macOS archive in dist/, skipping latest-macos.json"
+                  continue
+                fi
+                ;;
             esac
             if [ ! -f "dist/$FILE" ]; then
               echo "::error::missing dist/$FILE"
@@ -647,8 +671,11 @@ jobs:
               --arg fileName "$FILE" \
               --argjson fileSize "$(stat -c %s "dist/$FILE")" \
               --arg sha256 "$(sha256sum "dist/$FILE" | cut -d ' ' -f 1)" \
+              --argjson signed "$SIGNED" \
               '{version: $version, releaseDate: $releaseDate, changelog: $changelog, platform: $platform}
-               + {($platform): {fileName: $fileName, fileSize: $fileSize, sha256: $sha256, platform: $platform}}' \
+               + {($platform): ({fileName: $fileName, fileSize: $fileSize, sha256: $sha256, platform: $platform}
+                                + (if $platform == "macos" then {signed: $signed} else {} end))}' \
               > "dist/latest-${PLATFORM}.json"
+            MANIFESTS+=("dist/latest-${PLATFORM}.json")
           done
-          retry gh release upload "$TAG" dist/latest-windows.json dist/latest-linux.json --clobber
+          retry gh release upload "$TAG" "${MANIFESTS[@]}" --clobber

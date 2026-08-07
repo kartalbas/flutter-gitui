@@ -33,16 +33,27 @@ All five repository secrets (Settings → Secrets and variables → Actions) mus
 | `MACOS_NOTARY_KEY_ID` | The key's ID | Shown next to the key on the same page (also in the file name, `AuthKey_<KEYID>.p8`). |
 | `MACOS_NOTARY_ISSUER_ID` | The team's issuer ID (a UUID) | Shown at the top of the same Integrations page. |
 
-### Why macOS gets no update manifest
+### The macOS update manifest, and why it carries a `signed` flag
 
-Even when a macOS archive is published, no `latest-macos.json` is attached. This is a settled decision (issue #155), not an outstanding gap, and it follows from what the client actually does — `lib/core/services/update_service.dart`:
+Every release that ships a macOS archive now attaches a `latest-macos.json` beside the Windows and Linux ones (issue #387; this reverses the earlier decision recorded under #155, which rested on a client that could neither read such a manifest nor act on one). It has the same shape as the other two, plus one field they do not carry:
 
-- `_manifestFileName` resolves a manifest name for Windows and Linux only; its fallback on every other platform is `latest.json`, which no release carries. A published `latest-macos.json` would therefore be fetched by nothing.
-- `checkForUpdates` rejects any platform other than Windows and Linux outright, and `installUpdate` throws there as well. Even a correctly shaped manifest could not lead to an installed update, which is also why the macOS archive ships no `updater` helper.
+```json
+"macos": { "fileName": "…", "fileSize": 0, "sha256": "…", "platform": "macos", "signed": false }
+```
 
-So the manifest would be a file no code path reads, whose only lasting effect is to arm a half-built update flow the day somebody changes that fallback. The important part is that its absence is **not** silent: a macOS client asking for `latest.json` finds no such asset and gets a phrased error naming the releases page ("publishes no update information for this platform"), rather than the "you are up to date" that the original defect produced. macOS users update by downloading the next release.
+`signed` is `true` only for the archive this workflow signed with the Developer ID certificate, notarised and stapled; the ad-hoc-signed fallback published when no `MACOS_*` secret is configured is `false`. The client installs a macOS update **only** when it is `true` (`macosArchiveIsSelfInstallable`, `lib/core/services/macos_update.dart`); otherwise it names the version it found and points at the releases page.
 
-The release workflow verifies that a `build-macos` job which reported success really did deliver exactly one archive. macOS is the only platform with no manifest to be caught by — the manifest step hard-fails on a missing Windows or Linux archive — so without that check it would be the one platform able to disappear from a green release unnoticed.
+Three reasons for gating there rather than shipping self-update unconditionally:
+
+- Replacing a bundle the user once allowed past Gatekeeper by hand with one macOS cannot verify risks leaving them with an application that no longer opens — and the failure lands on a working installation, which is worse than the manual download it replaces.
+- This project has no Mac. A self-update path for the unsigned artifact would go out untested, and the one thing an untested bundle swap must not do is destroy the installation it was meant to improve.
+- With a Developer ID signature and a stapled ticket, correctness stops depending on our reasoning: macOS verifies the replacement itself.
+
+The flag lives in the manifest rather than in the client build because it describes the bytes about to be installed, not the ones already running, and because a client already on a user's disk cannot be changed. The day the five secrets are configured, every installed macOS client starts updating itself with no client-side release needed.
+
+Windows and Linux carry no such flag. Their installers were never gated on a signature, and adding a field nothing reads would only invite the question of why it is ignored.
+
+A missing macOS archive skips `latest-macos.json` rather than failing the publish, because `build-macos` is allowed to fail without blocking Windows and Linux. That is exactly why the separate "Verify the macOS archive arrived" step exists: it catches a `build-macos` that reported success and still delivered nothing, which the manifest step — hard-failing only on a missing Windows or Linux archive — would let through as a green release without macOS.
 
 ## Package stores: winget and Snap
 

@@ -995,6 +995,50 @@ its answer.**
 45 members across 7 facets, plus 28 spec classes and 9 vocabularies. The
 blueprint implementation is approximately 700 lines.
 
+### 2.13 Completeness — the contract is derived from three sources, not one
+
+Those 45 members were derived from **what this application renders today**. That
+is one of the three sources it needs, and on its own it produces a contract that
+is complete for Material and quietly short for the other two.
+
+The failure it causes is late and expensive. Nothing reveals a missing member
+until someone writes the Fluent skin in P7 and finds there is no member through
+which a `CommandBar` or an `InfoBar` can be reached, or writes the macOS skin in
+P8 and finds nowhere to express a sheet as distinct from a dialog. At that point
+there are two ways out and both are bad: hand-paint the widget, which is the one
+thing this design forbids, or reopen the contract twenty weeks in, after 4,400
+call sites have been migrated onto it.
+
+So the member list is settled against **three** sources before P1 builds it:
+
+1. **What the application renders today.** The source of the current 45, and the
+   floor: anything the app draws must be reachable, or a screen keeps drawing it
+   itself and the blueprint catches it as a leak.
+2. **What each language's canon offers.** Material 3, Fluent 2 and macOS each
+   have widgets and patterns with no counterpart in the other two, and a skin
+   that cannot reach its own canon will imitate it instead. Every canonical
+   widget of each language is either mapped to a member, mapped to a *pattern*
+   member covering several, or written down as deliberately out of scope with a
+   reason.
+3. **What the application will need but cannot yet express.** Where a language
+   offers something the application has no way to ask for — a persistent,
+   actionable notification surface is the standing example (#418) — the member
+   is designed now rather than bolted on later. A contract extended after the
+   ban in P6 is a contract extended against the lint that exists to stop it.
+
+**Where a member is missing, it is developed, not deferred.** The output of the
+census is a member list, and a gap in it is work in P1, not a finding for P7.
+
+The blueprint's obligation follows from this and is stronger than "renders
+nothing": it implements **every** member and accepts **every** parameter. A
+blueprint that silently ignores a parameter teaches the next skin author to
+ignore it too, because the blueprint is the template they copy. Where a
+parameter can be rendered distinguishably without becoming design — a wider
+square for a larger scale, an outline for a different emphasis — the blueprint
+does so, because then a parameter the application never varies shows up as a
+constant, and a parameter a skin drops shows up as a difference from the
+blueprint.
+
 ---
 
 ## 3. The blueprint skin, and the five checks

@@ -3,7 +3,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_text_field.dart';
 
 /// Dialog for searching branches by name.
@@ -48,15 +47,19 @@ class _SearchBranchesDialogState extends State<SearchBranchesDialog> {
         prefixIcon: PhosphorIconsRegular.magnifyingGlass,
         onSubmitted: (_) => _apply(),
       ),
+      // The affirmative action of this dialog - applying the typed filter -
+      // has no button at all: it is reachable only through Enter (onSubmit
+      // above) or the field's own submit. What is here is the alternative
+      // "drop the filter entirely" and the way out.
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.clear,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.neutral,
           onPressed: () => Navigator.of(context).pop(''),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.secondary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

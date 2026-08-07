@@ -5,7 +5,6 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/git/models/stash.dart';
 
@@ -61,14 +60,14 @@ class _CreateBranchFromStashDialogState
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.create,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () =>
               Navigator.of(context).pop(_branchNameController.text),
         ),

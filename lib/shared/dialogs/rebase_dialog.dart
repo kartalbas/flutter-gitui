@@ -61,73 +61,64 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       ),
       actions: rebaseStateAsync.when(
         data: (state) => _buildActions(context, state),
-        loading: () => [
-          BaseButton(
-            label: AppLocalizations.of(context)!.close,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-        error: (_, _) => [
-          BaseButton(
-            label: AppLocalizations.of(context)!.close,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
+        loading: () => [_closeAction(context)],
+        error: (_, _) => [_closeAction(context)],
       ),
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, RebaseState state) {
+  /// Leaving the dialog while the rebase itself stays where it is. Dismissive
+  /// rather than affirmative: it neither continues nor abandons the rebase,
+  /// it just stops looking at it.
+  DialogAction _closeAction(BuildContext context) => DialogAction(
+    label: AppLocalizations.of(context)!.close,
+    role: DialogActionRole.dismissive,
+    onPressed: () => Navigator.of(context).pop(),
+  );
+
+  List<DialogAction> _buildActions(BuildContext context, RebaseState state) {
     if (state.isActive) {
       return [
-        if (!state.hasConflicts) ...[
-          BaseButton(
-            label: AppLocalizations.of(context)!.abort,
-            variant: ButtonVariant.tertiary,
-            onPressed: _abortRebase,
-          ),
-        ],
+        // `git rebase --abort` ends the rebase by returning the branch to
+        // where it started. Deliberately a peer and not destructive: the
+        // repository's own catalogue of destructive git actions
+        // (lib/core/git/destructive_action.dart) does not list an abort, and
+        // a dialog must not claim a danger the catalogue denies.
+        DialogAction(
+          label: AppLocalizations.of(context)!.abort,
+          role: DialogActionRole.neutral,
+          onPressed: _abortRebase,
+        ),
         if (state.hasConflicts) ...[
-          BaseButton(
-            label: AppLocalizations.of(context)!.abort,
-            variant: ButtonVariant.tertiary,
-            onPressed: _abortRebase,
-          ),
-          BaseButton(
+          // Skipping drops the conflicting commit; continuing is the way
+          // forward the dialog is asking about, and the one Enter fires.
+          DialogAction(
             label: AppLocalizations.of(context)!.skip,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.neutral,
             onPressed: _skipRebase,
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.continueOperation,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
             onPressed: _continueRebase,
           ),
         ],
-        BaseButton(
-          label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.tertiary,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ];
-    } else {
-      return [
-        BaseButton(
-          label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.startRebase,
-          variant: ButtonVariant.primary,
-          onPressed: (_selectedBranch != null && !_isRebasing)
-              ? _startRebase
-              : null,
-        ),
+        _closeAction(context),
       ];
     }
+    return [
+      DialogAction(
+        label: AppLocalizations.of(context)!.cancel,
+        role: DialogActionRole.dismissive,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      DialogAction(
+        label: AppLocalizations.of(context)!.startRebase,
+        role: DialogActionRole.affirmative,
+        enabled: _selectedBranch != null && !_isRebasing,
+        onPressed: _startRebase,
+      ),
+    ];
   }
 
   Widget _buildStart(BuildContext context, String? currentBranch) {

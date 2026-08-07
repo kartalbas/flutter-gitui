@@ -6,7 +6,6 @@ import '../../core/workspace/models/repository_status.dart';
 import '../../core/workspace/repository_status_provider.dart';
 import '../../core/workspace/workspace_provider.dart';
 import '../../generated/app_localizations.dart';
-import '../components/base_button.dart';
 import '../components/base_dialog.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
@@ -82,9 +81,11 @@ class BackgroundActivityDialog extends ConsumerWidget {
         ),
       ),
       actions: [
-        BaseButton(
+        // A monitor with nothing to confirm: closing it IS completing it,
+        // which is why Enter fires this action above.
+        DialogAction(
           label: l10n.close,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

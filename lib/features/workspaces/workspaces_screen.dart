@@ -8,7 +8,6 @@ import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_menu_item.dart';
-import '../../shared/components/base_button.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/workspace/workspace_list_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
@@ -303,14 +302,14 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
         ),
         variant: DialogVariant.destructive,
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.delete,
-            variant: ButtonVariant.danger,
+            role: DialogActionRole.destructive,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

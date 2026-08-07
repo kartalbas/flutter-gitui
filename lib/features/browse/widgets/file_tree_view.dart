@@ -10,7 +10,6 @@ import 'package:path/path.dart' as p;
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_speed_dial.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/controllers/tree_view_controller.dart';
@@ -939,14 +938,14 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
               label: AppLocalizations.of(context)!.dialogLabelNewName,
             ),
             actions: [
-              BaseButton(
+              DialogAction(
                 label: AppLocalizations.of(context)!.cancel,
-                variant: ButtonVariant.tertiary,
+                role: DialogActionRole.dismissive,
                 onPressed: () => Navigator.pop(context),
               ),
-              BaseButton(
+              DialogAction(
                 label: AppLocalizations.of(context)!.dialogActionRename,
-                variant: ButtonVariant.primary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.pop(context, controller.text),
               ),
             ],
@@ -1055,19 +1054,22 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
                       )!.dialogContentFileExistsDestination(fileName),
               ),
               actions: [
-                BaseButton(
+                DialogAction(
                   label: AppLocalizations.of(context)!.cancel,
-                  variant: ButtonVariant.tertiary,
+                  role: DialogActionRole.dismissive,
                   onPressed: () => Navigator.pop(context, 'cancel'),
                 ),
-                BaseButton(
+                // Keeping both is a second way forward - it copies without
+                // losing anything - so it is a peer of replacing rather than
+                // the answer the dialog is asking for.
+                DialogAction(
                   label: AppLocalizations.of(context)!.dialogActionKeepBoth,
-                  variant: ButtonVariant.tertiary,
+                  role: DialogActionRole.neutral,
                   onPressed: () => Navigator.pop(context, 'keep_both'),
                 ),
-                BaseButton(
+                DialogAction(
                   label: AppLocalizations.of(context)!.replace,
-                  variant: ButtonVariant.primary,
+                  role: DialogActionRole.affirmative,
                   onPressed: () => Navigator.pop(context, 'replace'),
                 ),
               ],
@@ -1174,14 +1176,14 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
               AppLocalizations.of(context)!.dialogContentDeleteFile(fileName),
             ),
             actions: [
-              BaseButton(
+              DialogAction(
                 label: AppLocalizations.of(context)!.cancel,
-                variant: ButtonVariant.tertiary,
+                role: DialogActionRole.dismissive,
                 onPressed: () => Navigator.pop(context, false),
               ),
-              BaseButton(
+              DialogAction(
                 label: AppLocalizations.of(context)!.delete,
-                variant: ButtonVariant.danger,
+                role: DialogActionRole.destructive,
                 onPressed: () => Navigator.pop(context, true),
               ),
             ],

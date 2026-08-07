@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/destructive_action.dart';
 import '../../generated/app_localizations.dart';
-import '../components/base_button.dart';
 import '../components/base_dialog.dart';
 import '../components/base_label.dart';
 import '../components/base_text_field.dart';
@@ -97,14 +96,23 @@ Future<bool> confirmDestructive({
       onSubmit: destructive ? null : () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(message),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        // The tier decides the role, exactly as it decides the styling and
+        // whether Enter is armed above: the two recoverable tiers are asking
+        // the user to go ahead, the permanent ones are asking them to accept
+        // a loss. The role is what carries that to a design language which
+        // expresses destruction on the action rather than on the dialog
+        // (Cupertino's isDestructiveAction), where our red fill has no
+        // counterpart at all.
+        DialogAction(
           label: confirmLabel ?? l10n.confirm,
-          variant: destructive ? ButtonVariant.danger : ButtonVariant.primary,
+          role: destructive
+              ? DialogActionRole.destructive
+              : DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
@@ -229,17 +237,20 @@ class _TypeToConfirmDialogState extends State<_TypeToConfirmDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: widget.confirmLabel,
-          variant: ButtonVariant.danger,
+          role: DialogActionRole.destructive,
           // Disabled until the token matches: a stray click on the red
           // button cannot confirm what the keyboard has not yet proven.
-          onPressed: _matches ? _submit : null,
+          // Enter is gated by the same predicate inside _submit, so the two
+          // paths cannot disagree.
+          enabled: _matches,
+          onPressed: _submit,
         ),
       ],
     );

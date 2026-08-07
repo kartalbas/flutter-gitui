@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/workspace/workspace_provider.dart';
@@ -261,15 +260,20 @@ class _RepositorySwitcherDialogState
         ],
       ),
       actions: [
+        // Closing the *repository* is an action on the workspace that only
+        // exists while one is open, not a way out of this dialog - hence a
+        // peer, and hence still conditional now that the element is data.
         if (currentRepo != null)
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.closeRepository,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.neutral,
             onPressed: _closeRepository,
           ),
-        BaseButton(
+        // Picking a repository from the list is the affirmative action (Enter
+        // on the highlighted row, see onSubmit above); this leaves without it.
+        DialogAction(
           label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

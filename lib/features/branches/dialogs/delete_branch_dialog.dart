@@ -3,7 +3,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/models/branch.dart';
@@ -76,14 +75,14 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(DeleteBranchResult.cancel),
         ),
-        BaseButton(
+        DialogAction(
           label: _force ? l10n.forceDelete : l10n.delete,
-          variant: ButtonVariant.danger,
+          role: DialogActionRole.destructive,
           onPressed: () => Navigator.of(context).pop(
             _force ? DeleteBranchResult.forceDelete : DeleteBranchResult.delete,
           ),

@@ -303,22 +303,20 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
         ),
       ),
       actions: [
-        // Cancel button
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: _isCommitting ? null : () => Navigator.of(context).pop(),
+          role: DialogActionRole.dismissive,
+          enabled: !_isCommitting,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-
-        // Commit button
-        BaseButton(
+        DialogAction(
           label: _isAmend
               ? AppLocalizations.of(context)!.labelAmendCommit
               : AppLocalizations.of(context)!.commit,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.check,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.check,
           isLoading: _isCommitting,
-          onPressed: _isCommitting ? null : _commit,
+          onPressed: _commit,
         ),
       ],
     );

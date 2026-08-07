@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
 import '../../core/git/models/remote.dart';
 import '../components/base_dialog.dart';
-import '../components/base_button.dart';
 import '../components/base_label.dart';
 
 /// Dialog to confirm pruning a remote
@@ -23,14 +22,14 @@ class PruneRemoteDialog extends StatelessWidget {
       onSubmit: () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(l10n.pruneRemoteConfirm(remote.name)),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.prune,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],

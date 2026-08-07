@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../generated/app_localizations.dart';
 
@@ -31,9 +30,9 @@ class BranchSwitchErrorDialog extends StatelessWidget {
       onSubmit: () => Navigator.pop(context),
       content: BodyMediumLabel(l10n.failedToSwitchToBranch(branchName, error)),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.ok,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.pop(context),
         ),
       ],

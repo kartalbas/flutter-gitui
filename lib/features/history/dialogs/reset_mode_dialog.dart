@@ -3,7 +3,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/git/models/commit.dart';
 import '../../../core/git/git_service.dart';
@@ -66,25 +65,31 @@ class ResetModeDialog extends StatelessWidget {
           BodySmallLabel(l10n.branchPointerWillMove),
         ],
       ),
+      // Soft, mixed and hard are three different resets, not one action with
+      // two alternatives, so none of them is the affirmative one and Enter
+      // must not pick for the user (see the null onSubmit above). The two
+      // recoverable modes are peers; only the hard reset destroys work, and
+      // saying so on the action is what lets a language that has no red fill
+      // still mark it (Cupertino's isDestructiveAction).
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: '${l10n.soft}\n(${l10n.keepChangesStagedSoft})',
-          variant: ButtonVariant.secondary,
+          role: DialogActionRole.neutral,
           onPressed: () => Navigator.of(context).pop(ResetMode.soft),
         ),
-        BaseButton(
+        DialogAction(
           label: '${l10n.mixed}\n(${l10n.keepChangesUnstagedMixed})',
-          variant: ButtonVariant.secondary,
+          role: DialogActionRole.neutral,
           onPressed: () => Navigator.of(context).pop(ResetMode.mixed),
         ),
-        BaseButton(
+        DialogAction(
           label: '${l10n.hard}\n(${l10n.discardAllChangesHard})',
-          variant: ButtonVariant.danger,
+          role: DialogActionRole.destructive,
           onPressed: () => Navigator.of(context).pop(ResetMode.hard),
         ),
       ],

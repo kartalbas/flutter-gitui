@@ -8,7 +8,6 @@ import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../generated/app_localizations.dart';
 import '../services/batch_operations_service.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 
 /// Progress state for a single repository operation
 class RepositoryProgress {
@@ -350,15 +349,18 @@ class _BatchOperationProgressDialogState
           ),
         ],
       ),
-      actions: !_isRunning
-          ? [
-              BaseButton(
+      // While the batch runs the dialog offers no action at all - not even a
+      // disabled one - because there is nothing the user may do until it
+      // finishes; afterwards, taking the results away is what completes it.
+      actions: _isRunning
+          ? null
+          : [
+              DialogAction(
                 label: l10n.close,
-                variant: ButtonVariant.primary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.of(context).pop(_results),
               ),
-            ]
-          : null,
+            ],
     );
   }
 

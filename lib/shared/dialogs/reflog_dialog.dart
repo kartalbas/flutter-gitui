@@ -5,7 +5,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
-import '../components/base_button.dart';
 import '../components/copyable_text.dart';
 import '../../core/git/git_providers.dart';
 import '../components/base_dialog.dart';
@@ -35,16 +34,20 @@ class ReflogDialog extends ConsumerWidget {
         error: (error, _) => _buildError(context, error),
       ),
       actions: [
-        BaseButton(
+        // Refresh re-reads the reflog and leaves the dialog open, so it is a
+        // peer of the close action rather than a second way to finish.
+        DialogAction(
           label: AppLocalizations.of(context)!.refresh,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.neutral,
           onPressed: () {
             ref.invalidate(reflogProvider);
           },
         ),
-        BaseButton(
+        // A viewer with nothing to confirm: closing it is completing it, and
+        // Enter fires exactly this action.
+        DialogAction(
           label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

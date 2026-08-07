@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../generated/app_localizations.dart';
 
@@ -27,14 +26,14 @@ class UncommittedChangesDialog extends StatelessWidget {
         l10n.youHaveUncommittedChanges(changeCount, pluralForm),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.pop(context, false),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.switchAnyway,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.pop(context, true),
         ),
       ],

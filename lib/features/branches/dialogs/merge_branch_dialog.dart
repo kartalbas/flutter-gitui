@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/git/models/branch.dart';
 import '../../../core/git/git_providers.dart';
@@ -31,14 +30,14 @@ class MergeBranchDialog extends ConsumerWidget {
         l10n.mergeBranchConfirm(branch.shortName, targetBranch),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.merge,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],

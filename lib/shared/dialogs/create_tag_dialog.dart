@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
@@ -225,16 +224,17 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: _isCreating ? null : () => Navigator.of(context).pop(),
+          role: DialogActionRole.dismissive,
+          enabled: !_isCreating,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.createTag,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           isLoading: _isCreating,
-          onPressed: _isCreating ? null : _createTag,
+          onPressed: _createTag,
         ),
       ],
     );

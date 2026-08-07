@@ -509,20 +509,23 @@ class _BulkDeleteBranchesDialogState extends State<_BulkDeleteBranchesDialog> {
           ),
         ],
       ),
+      // Two destructive actions and no dismissal of their own: this dialog
+      // relies entirely on Escape and the title bar's close button to get
+      // out, which is why neither of these may be the affirmative one - a
+      // language that marks the affirmative action as its default would be
+      // making a bulk branch deletion the default.
       actions: [
-        BaseButton(
+        DialogAction(
           label: 'Delete Selected',
-          variant: ButtonVariant.danger,
-          onPressed: _selectedCount > 0
-              ? () => _deleteSelected(force: false)
-              : null,
+          role: DialogActionRole.destructive,
+          enabled: _selectedCount > 0,
+          onPressed: () => _deleteSelected(force: false),
         ),
-        BaseButton(
+        DialogAction(
           label: 'Force Delete Selected',
-          variant: ButtonVariant.danger,
-          onPressed: _selectedCount > 0
-              ? () => _deleteSelected(force: true)
-              : null,
+          role: DialogActionRole.destructive,
+          enabled: _selectedCount > 0,
+          onPressed: () => _deleteSelected(force: true),
         ),
       ],
     );

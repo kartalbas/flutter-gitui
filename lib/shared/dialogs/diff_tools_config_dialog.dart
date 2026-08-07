@@ -5,7 +5,6 @@ import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../components/base_card.dart';
 import '../theme/app_theme.dart';
 import '../../core/diff/diff_providers.dart';
@@ -59,15 +58,16 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
         error: (error, _) => _buildError(context, error),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.save,
-          variant: ButtonVariant.primary,
-          onPressed: _hasChanges ? _saveSettings : null,
+          role: DialogActionRole.affirmative,
+          enabled: _hasChanges,
+          onPressed: _saveSettings,
         ),
       ],
     );

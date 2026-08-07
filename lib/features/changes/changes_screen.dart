@@ -281,9 +281,11 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
               )!.dialogContentWebBrowserLimitationChanges,
             ),
             actions: [
-              BaseButton(
+              // A report with nothing to answer: acknowledging it completes
+              // it, which is what onSubmit fires too.
+              DialogAction(
                 label: AppLocalizations.of(context)!.ok,
-                variant: ButtonVariant.tertiary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -329,14 +331,14 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
             ),
           ),
           actions: [
-            BaseButton(
+            DialogAction(
               label: AppLocalizations.of(context)!.cancel,
-              variant: ButtonVariant.tertiary,
+              role: DialogActionRole.dismissive,
               onPressed: () => Navigator.of(context).pop(false),
             ),
-            BaseButton(
+            DialogAction(
               label: AppLocalizations.of(context)!.stageAllAndCommit,
-              variant: ButtonVariant.primary,
+              role: DialogActionRole.affirmative,
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
@@ -443,9 +445,10 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           ),
           variant: DialogVariant.destructive,
           actions: [
-            BaseButton(
+            // Likewise a report: acknowledging it is the whole interaction.
+            DialogAction(
               label: AppLocalizations.of(context)!.ok,
-              variant: ButtonVariant.tertiary,
+              role: DialogActionRole.affirmative,
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
           ],
@@ -477,14 +480,14 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           ),
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.stageAll,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
@@ -515,14 +518,14 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           'Unstage all ${stagedFiles.length} staged file${stagedFiles.length == 1 ? '' : 's'}?',
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.unstageAll,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

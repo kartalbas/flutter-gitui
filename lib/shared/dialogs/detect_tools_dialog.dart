@@ -10,7 +10,6 @@ import '../../core/services/logger_service.dart';
 import '../../core/utils/executable_path.dart';
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../components/base_dialog.dart';
 
 /// Dialog to detect and select available tools on Linux
@@ -197,26 +196,25 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
             )
           : _buildContent(context, l10n),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.applySelected,
-          variant: ButtonVariant.primary,
-          onPressed:
-              (_selectedGit != null ||
-                  _selectedDiffTool != null ||
-                  _selectedTextEditor != null)
-              ? () {
-                  Navigator.of(context).pop({
-                    'git': _selectedGit,
-                    'diffTool': _selectedDiffTool,
-                    'textEditor': _selectedTextEditor,
-                  });
-                }
-              : null,
+          role: DialogActionRole.affirmative,
+          enabled:
+              _selectedGit != null ||
+              _selectedDiffTool != null ||
+              _selectedTextEditor != null,
+          onPressed: () {
+            Navigator.of(context).pop({
+              'git': _selectedGit,
+              'diffTool': _selectedDiffTool,
+              'textEditor': _selectedTextEditor,
+            });
+          },
         ),
       ],
     );

@@ -17,7 +17,6 @@ import '../../shared/dialogs/reflog_dialog.dart';
 import '../git/git_providers.dart';
 import '../git/destructive_action.dart';
 import '../../shared/components/base_dialog.dart';
-import '../../shared/components/base_button.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/dialogs/confirm_destructive.dart';
 import '../services/notification_service.dart';
@@ -751,9 +750,11 @@ class GitCommands {
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.cherryPickCommitInstructions),
             actions: [
-              BaseButton(
+              // An instruction sheet with nothing to answer: acknowledging it
+              // is what completes it, which is what onSubmit fires too.
+              DialogAction(
                 label: l10n.ok,
-                variant: ButtonVariant.tertiary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -778,9 +779,11 @@ class GitCommands {
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.revertCommitInstructions),
             actions: [
-              BaseButton(
+              // An instruction sheet with nothing to answer: acknowledging it
+              // is what completes it, which is what onSubmit fires too.
+              DialogAction(
                 label: l10n.ok,
-                variant: ButtonVariant.tertiary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -805,9 +808,11 @@ class GitCommands {
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.resetToCommitInstructions),
             actions: [
-              BaseButton(
+              // An instruction sheet with nothing to answer: acknowledging it
+              // is what completes it, which is what onSubmit fires too.
+              DialogAction(
                 label: l10n.ok,
-                variant: ButtonVariant.tertiary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],

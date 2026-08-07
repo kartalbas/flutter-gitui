@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
@@ -740,23 +739,23 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: _isMerging ? null : () => Navigator.of(context).pop(),
+          role: DialogActionRole.dismissive,
+          enabled: !_isMerging,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: _strategy == MergeStrategy.merge
               ? AppLocalizations.of(context)!.merge
               : AppLocalizations.of(context)!.rebase,
-          variant: ButtonVariant.primary,
-          leadingIcon: _strategy == MergeStrategy.merge
+          role: DialogActionRole.affirmative,
+          icon: _strategy == MergeStrategy.merge
               ? PhosphorIconsRegular.gitMerge
               : PhosphorIconsRegular.gitBranch,
-          onPressed:
-              _isMerging || _sourceBranch == null || _targetBranch == null
-              ? null
-              : _mergeBranches,
+          enabled:
+              !_isMerging && _sourceBranch != null && _targetBranch != null,
+          onPressed: _mergeBranches,
         ),
       ],
     );

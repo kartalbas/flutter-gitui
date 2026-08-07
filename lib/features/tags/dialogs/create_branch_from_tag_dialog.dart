@@ -5,7 +5,6 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 
 /// Dialog for creating a branch from a tag
@@ -115,15 +114,15 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.createBranch,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.gitBranch,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.gitBranch,
           onPressed: _createBranch,
         ),
       ],

@@ -3,7 +3,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 
 /// Dialog for confirming tag checkout
@@ -24,14 +23,14 @@ class CheckoutTagDialog extends StatelessWidget {
       onSubmit: () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(confirmMessage),
       actions: [
-        BaseButton(
+        DialogAction(
           label: loc.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: loc.checkout,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],

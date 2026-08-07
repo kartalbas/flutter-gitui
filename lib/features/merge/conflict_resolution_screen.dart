@@ -700,14 +700,14 @@ class _ConflictResolutionScreenState
           AppLocalizations.of(context)!.dialogContentContinueMerge,
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.dialogActionContinue,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
@@ -743,14 +743,15 @@ class _ConflictResolutionScreenState
           AppLocalizations.of(context)!.dialogContentAbortMerge,
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          // Aborting the merge throws away every conflict already resolved.
+          DialogAction(
             label: AppLocalizations.of(context)!.dialogTitleAbortMerge,
-            variant: ButtonVariant.danger,
+            role: DialogActionRole.destructive,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

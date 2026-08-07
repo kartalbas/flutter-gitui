@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 
 /// Dialog for confirming deletion of multiple tags
@@ -66,14 +65,14 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: loc.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(null),
         ),
-        BaseButton(
+        DialogAction(
           label: loc.delete,
-          variant: ButtonVariant.danger,
+          role: DialogActionRole.destructive,
           onPressed: () => Navigator.of(
             context,
           ).pop({'confirmed': true, 'deleteFromRemote': _deleteFromRemote}),

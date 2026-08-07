@@ -3,7 +3,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../core/git/models/branch.dart';
 
@@ -75,14 +74,14 @@ class _RenameBranchDialogState extends State<RenameBranchDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.rename,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               Navigator.of(context).pop(_controller.text.trim());

@@ -5,7 +5,6 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_dropdown.dart';
 import '../../../shared/components/base_menu_item.dart';
@@ -416,15 +415,15 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.createPRButton,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsBold.gitPullRequest,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsBold.gitPullRequest,
           onPressed: _handleCreate,
         ),
       ],

@@ -5,7 +5,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../core/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -268,15 +267,16 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.squashCommits,
-          variant: ButtonVariant.primary,
-          onPressed: _areConsecutive ? _squash : null,
+          role: DialogActionRole.affirmative,
+          enabled: _areConsecutive,
+          onPressed: _squash,
         ),
       ],
     );

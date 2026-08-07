@@ -6,7 +6,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/theme/app_theme.dart';
 
@@ -216,19 +215,21 @@ ${widget.result.fullOutput}
         ],
       ),
       actions: [
-        // Copy button
-        BaseButton(
+        // Copying the git output leaves the dialog open, so it is a peer of
+        // closing rather than a second way to finish.
+        DialogAction(
           label: AppLocalizations.of(context)!.copyOutput,
-          variant: ButtonVariant.tertiary,
-          leadingIcon: PhosphorIconsRegular.copy,
+          role: DialogActionRole.neutral,
+          icon: PhosphorIconsRegular.copy,
           onPressed: _copyToClipboard,
         ),
 
-        // Close button
-        BaseButton(
+        // The dialog reports what git said and asks for nothing else, so
+        // acknowledging it is what completes it.
+        DialogAction(
           label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.x,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.x,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

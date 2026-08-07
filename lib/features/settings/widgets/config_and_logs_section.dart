@@ -248,14 +248,14 @@ class ConfigAndLogsSection extends ConsumerWidget {
             'Are you sure you want to delete app.log? This action cannot be undone.',
           ),
           actions: [
-            BaseButton(
+            DialogAction(
               label: l10n.cancel,
-              variant: ButtonVariant.tertiary,
+              role: DialogActionRole.dismissive,
               onPressed: () => Navigator.of(context).pop(false),
             ),
-            BaseButton(
+            DialogAction(
               label: l10n.delete,
-              variant: ButtonVariant.danger,
+              role: DialogActionRole.destructive,
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
@@ -309,14 +309,14 @@ class ConfigAndLogsSection extends ConsumerWidget {
             'Are you sure you want to delete git.log? This action cannot be undone.',
           ),
           actions: [
-            BaseButton(
+            DialogAction(
               label: l10n.cancel,
-              variant: ButtonVariant.tertiary,
+              role: DialogActionRole.dismissive,
               onPressed: () => Navigator.of(context).pop(false),
             ),
-            BaseButton(
+            DialogAction(
               label: l10n.delete,
-              variant: ButtonVariant.danger,
+              role: DialogActionRole.destructive,
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

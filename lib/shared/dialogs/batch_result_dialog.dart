@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_dialog.dart';
-import '../components/base_button.dart';
 import '../../features/repositories/repository_batch_error_provider.dart';
 import '../../core/services/notification_service.dart';
 
@@ -86,11 +85,12 @@ class BatchResultDialog extends StatelessWidget {
         ],
       ),
       actions: [
-        // Copy button
-        BaseButton(
+        // Copying the message leaves the dialog open, so it is a peer of the
+        // dismissal rather than a second way to finish.
+        DialogAction(
           label: 'Copy',
-          variant: ButtonVariant.tertiary,
-          leadingIcon: PhosphorIconsRegular.copy,
+          role: DialogActionRole.neutral,
+          icon: PhosphorIconsRegular.copy,
           onPressed: () {
             Clipboard.setData(ClipboardData(text: result.message));
             NotificationService.showSuccess(
@@ -99,11 +99,17 @@ class BatchResultDialog extends StatelessWidget {
             );
           },
         ),
-        // Dismiss button
-        BaseButton(
+        // Acknowledging the result is all this dialog asks for, so Dismiss is
+        // its affirmative action - in both outcomes. It used to switch to the
+        // danger variant when the batch had failed, which said "this button
+        // destroys something" to express "the operation failed": the failure
+        // is a property of the dialog, already carried by the destructive
+        // DialogVariant and the warning icon above, not of the button that
+        // closes it.
+        DialogAction(
           label: 'Dismiss',
-          variant: isSuccess ? ButtonVariant.primary : ButtonVariant.danger,
-          leadingIcon: PhosphorIconsRegular.x,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.x,
           onPressed: () {
             onDismiss();
             Navigator.of(context).pop();

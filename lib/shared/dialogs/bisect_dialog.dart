@@ -62,70 +62,64 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       ),
       actions: bisectStateAsync.when(
         data: (state) => _buildActions(context, state),
-        loading: () => [
-          BaseButton(
-            label: AppLocalizations.of(context)!.close,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-        error: (_, _) => [
-          BaseButton(
-            label: AppLocalizations.of(context)!.close,
-            variant: ButtonVariant.tertiary,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
+        // Nothing is known about the bisect yet, so leaving is all this
+        // dialog can offer and it is therefore what Enter would finish on.
+        loading: () => [_closeAction(context, DialogActionRole.affirmative)],
+        error: (_, _) => [_closeAction(context, DialogActionRole.affirmative)],
       ),
     );
   }
 
-  List<Widget> _buildActions(BuildContext context, BisectState state) {
+  DialogAction _closeAction(BuildContext context, DialogActionRole role) =>
+      DialogAction(
+        label: AppLocalizations.of(context)!.close,
+        role: role,
+        onPressed: () => Navigator.of(context).pop(),
+      );
+
+  /// `git bisect reset` returns the working tree to where the bisect started
+  /// and leaves the dialog open, so it is a peer of closing rather than a
+  /// second way to finish.
+  DialogAction _resetAction(BuildContext context) => DialogAction(
+    label: AppLocalizations.of(context)!.reset,
+    role: DialogActionRole.neutral,
+    onPressed: _resetBisect,
+  );
+
+  List<DialogAction> _buildActions(BuildContext context, BisectState state) {
+    // Completed: the bisect has named the offending commit and there is
+    // nothing left to answer, so acknowledging the result finishes the dialog
+    // - which is also what onSubmit fires Enter into above.
     if (state.isCompleted) {
       return [
-        BaseButton(
-          label: AppLocalizations.of(context)!.reset,
-          variant: ButtonVariant.tertiary,
-          onPressed: _resetBisect,
-        ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.tertiary,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ];
-    } else if (state.isActive) {
-      return [
-        BaseButton(
-          label: AppLocalizations.of(context)!.reset,
-          variant: ButtonVariant.tertiary,
-          onPressed: _resetBisect,
-        ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.tertiary,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ];
-    } else {
-      return [
-        BaseButton(
-          label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.startBisect,
-          variant: ButtonVariant.primary,
-          onPressed:
-              (_selectedGoodCommit != null &&
-                  _selectedBadCommit != null &&
-                  !_isStarting)
-              ? _startBisect
-              : null,
-        ),
+        _resetAction(context),
+        _closeAction(context, DialogActionRole.affirmative),
       ];
     }
+    // Running: Good, Bad and Skip live in the content area and are the real
+    // answers; closing abandons the question rather than answering it.
+    if (state.isActive) {
+      return [
+        _resetAction(context),
+        _closeAction(context, DialogActionRole.dismissive),
+      ];
+    }
+    return [
+      DialogAction(
+        label: AppLocalizations.of(context)!.cancel,
+        role: DialogActionRole.dismissive,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      DialogAction(
+        label: AppLocalizations.of(context)!.startBisect,
+        role: DialogActionRole.affirmative,
+        enabled:
+            _selectedGoodCommit != null &&
+            _selectedBadCommit != null &&
+            !_isStarting,
+        onPressed: _startBisect,
+      ),
+    ];
   }
 
   Widget _buildStart(BuildContext context) {

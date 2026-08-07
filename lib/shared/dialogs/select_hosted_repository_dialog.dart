@@ -211,15 +211,17 @@ class _SelectHostedRepositoryDialogState
               ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.ok,
-          leadingIcon: PhosphorIconsRegular.check,
-          onPressed: matches.isEmpty ? null : () => _confirm(matches),
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.check,
+          enabled: matches.isNotEmpty,
+          onPressed: () => _confirm(matches),
         ),
       ],
     );

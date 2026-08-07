@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../core/workspace/models/workspace.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../generated/app_localizations.dart';
@@ -228,15 +227,15 @@ class _ProjectDialogState extends State<ProjectDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: isEditing ? l10n.saveProjectButton : l10n.createProjectButton,
-          variant: ButtonVariant.primary,
-          leadingIcon: isEditing
+          role: DialogActionRole.affirmative,
+          icon: isEditing
               ? PhosphorIconsBold.floppyDisk
               : PhosphorIconsBold.plus,
           onPressed: _handleSave,

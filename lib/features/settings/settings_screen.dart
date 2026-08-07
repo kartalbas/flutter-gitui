@@ -11,7 +11,6 @@ import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_menu_item.dart';
-import '../../shared/components/base_button.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/diff/models/diff_tool.dart';
@@ -165,10 +164,12 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
                 actions: [
-                  BaseButton(
+                  // A result sheet with nothing to answer: acknowledging it
+                  // completes it, which is what onSubmit fires too.
+                  DialogAction(
                     onPressed: () => Navigator.of(dialogContext).pop(),
                     label: l10n.ok,
-                    variant: ButtonVariant.tertiary,
+                    role: DialogActionRole.affirmative,
                   ),
                 ],
               ),
@@ -189,10 +190,11 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
               actions: [
-                BaseButton(
+                // Likewise a result sheet: acknowledging it is all there is.
+                DialogAction(
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   label: l10n.ok,
-                  variant: ButtonVariant.tertiary,
+                  role: DialogActionRole.affirmative,
                 ),
               ],
             ),
@@ -210,10 +212,11 @@ class SettingsScreen extends ConsumerWidget {
                 l10n.validationErrorMessage(selectedPath, e.toString()),
               ),
               actions: [
-                BaseButton(
+                // Likewise a result sheet: acknowledging it is all there is.
+                DialogAction(
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   label: l10n.ok,
-                  variant: ButtonVariant.tertiary,
+                  role: DialogActionRole.affirmative,
                 ),
               ],
             ),
@@ -292,12 +295,12 @@ class SettingsScreen extends ConsumerWidget {
               },
               content: BodyMediumLabel(l10n.unknownTextEditorMessage(fileName)),
               actions: [
-                BaseButton(
+                DialogAction(
                   onPressed: () => Navigator.of(dialogContext).pop(),
                   label: l10n.cancel,
-                  variant: ButtonVariant.tertiary,
+                  role: DialogActionRole.dismissive,
                 ),
-                BaseButton(
+                DialogAction(
                   onPressed: () async {
                     Navigator.of(dialogContext).pop();
                     await ref
@@ -305,7 +308,7 @@ class SettingsScreen extends ConsumerWidget {
                         .setTextEditor(selectedPath, version: version);
                   },
                   label: l10n.useAnyway,
-                  variant: ButtonVariant.primary,
+                  role: DialogActionRole.affirmative,
                 ),
               ],
             ),
@@ -581,23 +584,26 @@ class SettingsScreen extends ConsumerWidget {
           prefixIcon: PhosphorIconsRegular.user,
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(),
             label: l10n.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
           ),
-          BaseButton(
+          // Clearing the stored default is a second way to leave with a
+          // result - the opposite one - not the way this dialog is asking
+          // about, so it is a peer of saving rather than a second primary.
+          DialogAction(
             onPressed: () {
               ref.read(configProvider.notifier).setDefaultUserName(null);
               Navigator.of(dialogContext).pop();
             },
             label: l10n.clear,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.neutral,
           ),
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(name.trim()),
             label: l10n.save,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
           ),
         ],
       ),
@@ -629,23 +635,25 @@ class SettingsScreen extends ConsumerWidget {
           prefixIcon: PhosphorIconsRegular.at,
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(),
             label: l10n.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
           ),
-          BaseButton(
+          // As above: clearing the stored default is the opposite outcome to
+          // saving one, and a peer of it.
+          DialogAction(
             onPressed: () {
               ref.read(configProvider.notifier).setDefaultUserEmail(null);
               Navigator.of(dialogContext).pop();
             },
             label: l10n.clear,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.neutral,
           ),
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(email.trim()),
             label: l10n.save,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
           ),
         ],
       ),
@@ -685,12 +693,12 @@ class SettingsScreen extends ConsumerWidget {
           prefixIcon: PhosphorIconsRegular.listNumbers,
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(),
             label: l10n.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
           ),
-          BaseButton(
+          DialogAction(
             onPressed: () {
               final value = int.tryParse(limit);
               if (value != null && value > 0) {
@@ -698,7 +706,7 @@ class SettingsScreen extends ConsumerWidget {
               }
             },
             label: l10n.save,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
           ),
         ],
       ),
@@ -720,15 +728,15 @@ class SettingsScreen extends ConsumerWidget {
         variant: DialogVariant.destructive,
         content: BodyMediumLabel(l10n.resetSettingsMessage),
         actions: [
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(false),
             label: l10n.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
           ),
-          BaseButton(
+          DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             label: l10n.reset,
-            variant: ButtonVariant.danger,
+            role: DialogActionRole.destructive,
           ),
         ],
       ),

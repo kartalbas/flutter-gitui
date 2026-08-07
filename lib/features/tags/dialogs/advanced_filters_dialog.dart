@@ -5,7 +5,6 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/models/tag.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_date_field.dart';
 import '../../../shared/components/base_dropdown.dart';
@@ -179,16 +178,18 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        // Resetting every filter is a second, opposite way to leave with a
+        // result, not the one the dialog is asking about.
+        DialogAction(
           label: loc.resetAll,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.neutral,
           onPressed: () {
             Navigator.of(context).pop({'reset': true});
           },
         ),
-        BaseButton(
+        DialogAction(
           label: loc.done,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop({
             'dateFilter': _dateFilter,
             'customDateStart': _customDateStart,

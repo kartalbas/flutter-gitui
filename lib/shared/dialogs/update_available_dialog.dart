@@ -13,7 +13,6 @@ import '../../core/services/exit_guard.dart';
 import '../../core/services/progress_service.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
-import '../components/base_button.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 
@@ -193,28 +192,34 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       ),
       actions: [
         if (!_isDownloading) ...[
-          BaseButton(
+          // Skipping this version records the choice and closes: it is how
+          // the user declines the update, so it is the dismissal.
+          DialogAction(
             label: l10n.skip,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: _handleSkipUpdate,
           ),
-          BaseButton(
+          // Downloading in the browser is a second, manual way forward - a
+          // peer of installing, not the way the dialog is asking about.
+          DialogAction(
             label: l10n.updateDownloadOnly,
-            variant: ButtonVariant.secondary,
-            leadingIcon: PhosphorIconsRegular.arrowSquareOut,
+            role: DialogActionRole.neutral,
+            icon: PhosphorIconsRegular.arrowSquareOut,
             onPressed: _openDownloadInBrowser,
           ),
-          BaseButton(
+          DialogAction(
             label: hasStagedDownload
                 ? l10n.restartAndInstall
                 : l10n.updateDownloadAndInstall,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
             onPressed: _downloadAndInstall,
           ),
         ] else ...[
-          BaseButton(
+          // Mid-download the affirmative action is still the affirmative one,
+          // just not invokable, so the dialog keeps exactly one.
+          DialogAction(
             label: l10n.updateDownloadingButton,
-            variant: ButtonVariant.primary,
+            role: DialogActionRole.affirmative,
             onPressed: null,
           ),
         ],
@@ -307,9 +312,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           onSubmit: () => Navigator.of(context).pop(),
           content: BodyMediumLabel(l10n.updateOperationRunningBody),
           actions: [
-            BaseButton(
+            DialogAction(
               label: l10n.ok,
-              variant: ButtonVariant.primary,
+              role: DialogActionRole.affirmative,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -327,14 +332,16 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           variant: DialogVariant.destructive,
           content: BodyMediumLabel(l10n.updateUnsavedInputBody),
           actions: [
-            BaseButton(
+            DialogAction(
               label: l10n.cancel,
-              variant: ButtonVariant.tertiary,
+              role: DialogActionRole.dismissive,
               onPressed: () => Navigator.of(context).pop(false),
             ),
-            BaseButton(
+            // Installing anyway exits the app over unsaved input, which is
+            // what makes it destructive rather than merely affirmative.
+            DialogAction(
               label: l10n.installAnyway,
-              variant: ButtonVariant.danger,
+              role: DialogActionRole.destructive,
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

@@ -206,20 +206,22 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        // Clearing the filters resets the form and leaves the dialog open, so
+        // it is a peer of searching rather than a way to finish.
+        DialogAction(
           label: AppLocalizations.of(context)!.clearFiltersButton,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.neutral,
           onPressed: _clearFilters,
         ),
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.advancedSearchButton,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.magnifyingGlass,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.magnifyingGlass,
           onPressed: _applySearch,
         ),
       ],

@@ -8,7 +8,6 @@ import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
@@ -200,16 +199,18 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: _isCloning ? null : () => Navigator.of(context).pop(),
+          role: DialogActionRole.dismissive,
+          enabled: !_isCloning,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.clone,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.downloadSimple,
-          onPressed: _isCloning ? null : _cloneRepository,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.downloadSimple,
+          enabled: !_isCloning,
+          onPressed: _cloneRepository,
         ),
       ],
     );

@@ -177,16 +177,18 @@ class _InitializeRepositoryDialogState
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.cancel,
-          variant: ButtonVariant.tertiary,
-          onPressed: _isInitializing ? null : () => Navigator.of(context).pop(),
+          role: DialogActionRole.dismissive,
+          enabled: !_isInitializing,
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: AppLocalizations.of(context)!.initialize,
-          variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.plus,
-          onPressed: _isInitializing ? null : _initializeRepository,
+          role: DialogActionRole.affirmative,
+          icon: PhosphorIconsRegular.plus,
+          enabled: !_isInitializing,
+          onPressed: _initializeRepository,
         ),
       ],
     );

@@ -525,9 +525,11 @@ ${line.summary}
           ),
         ),
         actions: [
-          BaseButton(
+          // A statistics sheet with nothing to answer: acknowledging it is
+          // what completes it, which is what onSubmit fires too.
+          DialogAction(
             label: AppLocalizations.of(context)!.close,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.affirmative,
             onPressed: () => Navigator.pop(context),
           ),
         ],

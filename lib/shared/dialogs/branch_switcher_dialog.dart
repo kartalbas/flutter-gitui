@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
 import '../components/base_menu_item.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
@@ -201,9 +200,12 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        // The affirmative action of this dialog is picking a branch from the
+        // list (Enter on the highlighted row, see onSubmit above); leaving
+        // without picking one is what this button does.
+        DialogAction(
           label: AppLocalizations.of(context)!.close,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

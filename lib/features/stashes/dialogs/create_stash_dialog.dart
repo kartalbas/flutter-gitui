@@ -202,23 +202,22 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.create,
-          variant: ButtonVariant.primary,
-          onPressed: _selectedFiles.isEmpty && !_stashAllFiles
-              ? null
-              : () => Navigator.of(context).pop({
-                  'message': _messageController.text.trim(),
-                  'includeUntracked': _includeUntracked,
-                  'keepIndex': _keepIndex,
-                  'stashAllFiles': _stashAllFiles,
-                  'selectedFiles': _selectedFiles.toList(),
-                }),
+          role: DialogActionRole.affirmative,
+          enabled: _selectedFiles.isNotEmpty || _stashAllFiles,
+          onPressed: () => Navigator.of(context).pop({
+            'message': _messageController.text.trim(),
+            'includeUntracked': _includeUntracked,
+            'keepIndex': _keepIndex,
+            'stashAllFiles': _stashAllFiles,
+            'selectedFiles': _selectedFiles.toList(),
+          }),
         ),
       ],
     );

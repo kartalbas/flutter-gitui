@@ -12,7 +12,6 @@ import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_menu_item.dart';
-import '../../shared/components/base_button.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/git_service.dart';
@@ -615,9 +614,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
               )!.dialogContentWebBrowserLimitationRepositories,
             ),
             actions: [
-              BaseButton(
+              DialogAction(
                 label: AppLocalizations.of(context)!.ok,
-                variant: ButtonVariant.primary,
+                role: DialogActionRole.affirmative,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
@@ -696,14 +695,14 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           'This will not delete any files.',
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.remove,
-            variant: ButtonVariant.danger,
+            role: DialogActionRole.destructive,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
@@ -797,14 +796,14 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           'This will not delete any files.',
         ),
         actions: [
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.cancel,
-            variant: ButtonVariant.tertiary,
+            role: DialogActionRole.dismissive,
             onPressed: () => Navigator.of(context).pop(false),
           ),
-          BaseButton(
+          DialogAction(
             label: AppLocalizations.of(context)!.clearAll,
-            variant: ButtonVariant.danger,
+            role: DialogActionRole.destructive,
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],

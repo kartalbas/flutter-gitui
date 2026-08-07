@@ -4,7 +4,6 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_text_field.dart';
 import '../components/base_dialog.dart';
-import '../components/base_button.dart';
 import '../../core/git/models/remote.dart';
 
 /// Dialog for editing a remote's URL
@@ -61,14 +60,14 @@ class _EditRemoteUrlDialogState extends State<EditRemoteUrlDialog> {
         ),
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.save,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               Navigator.of(context).pop(_controller.text);

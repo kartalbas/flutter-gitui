@@ -20,6 +20,124 @@ enum DialogVariant {
   destructive,
 }
 
+/// What an action at the bottom of a dialog *means*, independent of how any
+/// one design language chooses to draw it.
+///
+/// The role, not a button variant, is what a dialog declares, because the
+/// three design languages disagree about how emphasis is expressed and even
+/// about where the actions go: Material 3 and Apple's HIG put the affirmative
+/// action last (on the right), Fluent 2 puts it **first** (on the left) and
+/// stretches every action to equal width, and Cupertino expresses "this one is
+/// destructive" and "this one is the default" on the action itself
+/// (`CupertinoDialogAction.isDestructiveAction` / `isDefaultAction`) rather
+/// than on the dialog. A caller that hands over a ready-made button has
+/// already made all three of those decisions for every language at once, and
+/// none of them can be undone by the code that renders the dialog — which is
+/// why [BaseDialog.actions] carries data with a role instead of widgets.
+enum DialogActionRole {
+  /// Completes the dialog by doing the thing it asked about: Save, Create,
+  /// Merge, Continue, and the OK of a dialog whose only job is to be
+  /// acknowledged.
+  ///
+  /// A dialog has **at most one** affirmative action — it is the one a
+  /// language may single out as its default, and "the default" is not a set.
+  /// A dialog offering several equally weighted ways forward gives them all
+  /// [neutral] instead ([BaseDialog] asserts this).
+  affirmative,
+
+  /// Completes the dialog by destroying something: Delete, Discard, Force
+  /// delete, Reset --hard, Abort.
+  ///
+  /// Separate from [affirmative] rather than a flag on it, because a dialog
+  /// may legitimately offer two of them (delete and force-delete) while it may
+  /// only ever have one default, and because two languages draw a destructive
+  /// action with their own treatment rather than with a red tint we choose.
+  destructive,
+
+  /// Leaves the dialog without doing what it asked: Cancel, Close, Not now.
+  /// The lowest-emphasis action, and the one Escape is the keyboard
+  /// equivalent of.
+  dismissive,
+
+  /// Any other action the dialog offers, weighted between [dismissive] and
+  /// [affirmative]: a second way forward that is not *the* way forward (Keep
+  /// both, Download only, a soft reset next to a hard one), or an auxiliary
+  /// action that does not close the dialog at all (Copy, Refresh, Clear
+  /// filters).
+  neutral,
+}
+
+/// One action at the bottom of a [BaseDialog], as data rather than as a
+/// widget.
+///
+/// Everything here is language-neutral: a string, a callback, a role, two
+/// flags and an [IconData] (which Flutter's Material, Cupertino and Fluent
+/// libraries all accept). Nothing in it names a Material class, a colour or a
+/// size, so each design language can render the same action its own way — put
+/// it on the other side of the row, stretch it to equal width, or turn it into
+/// a `CupertinoDialogAction` with the alert's dividers.
+class DialogAction {
+  const DialogAction({
+    required this.label,
+    required this.onPressed,
+    required this.role,
+    this.icon,
+    this.enabled = true,
+    this.isLoading = false,
+  });
+
+  /// The action's text. Also its accessible name, and in the languages that
+  /// stack their actions full-width the only thing distinguishing them.
+  final String label;
+
+  /// What the action does. Null disables it, exactly as on a button, so a
+  /// call site that already computes `condition ? callback : null` needs no
+  /// rewriting; [enabled] is the readable alternative for the cases that do
+  /// have a callback and simply may not run it yet.
+  final VoidCallback? onPressed;
+
+  /// What the action means. See [DialogActionRole]: this is the single piece
+  /// of information the widget form threw away, and the reason this type
+  /// exists.
+  final DialogActionRole role;
+
+  /// An optional leading glyph. [IconData] is the one visual value that
+  /// survives the language change unharmed — all three libraries take it —
+  /// though which *glyph* is right per language remains a skin's decision.
+  final IconData? icon;
+
+  /// Whether the action may run right now. Distinct from a null [onPressed]
+  /// only in how it reads at the call site: a dialog whose confirm button
+  /// waits for a typed token or a validated form says
+  /// `enabled: _tokenMatches` and keeps its callback visible, instead of
+  /// hiding it inside a ternary.
+  final bool enabled;
+
+  /// Whether the action is currently running, so the dialog can show progress
+  /// in its place. A loading action is never invokable.
+  final bool isLoading;
+
+  /// The resolved answer to "can the user invoke this now", folding together
+  /// the three ways an action can be unavailable.
+  bool get isEnabled => enabled && !isLoading && onPressed != null;
+}
+
+/// How Material 3 — this app's current and default design language — expresses
+/// each [DialogActionRole].
+///
+/// This mapping is deliberately the *only* place a role becomes a button
+/// variant. Another language expresses the same four roles differently (Fluent
+/// gives the affirmative its accent fill and leaves the rest as standard
+/// buttons; Cupertino has no fills at all and marks the default action with
+/// weight), so a call site that picked a variant itself would have been
+/// picking Material's answer for every language.
+ButtonVariant _variantForRole(DialogActionRole role) => switch (role) {
+  DialogActionRole.affirmative => ButtonVariant.primary,
+  DialogActionRole.destructive => ButtonVariant.danger,
+  DialogActionRole.dismissive => ButtonVariant.tertiary,
+  DialogActionRole.neutral => ButtonVariant.secondary,
+};
+
 /// Whether the widget holding primary focus is a multiline editable text.
 ///
 /// Enter inside such a field inserts a newline; a dialog-level Enter-to-submit
@@ -53,14 +171,14 @@ bool focusedEditableKeepsEnter() => focusedEditableOwnsKey(
 ///     variant: DialogVariant.destructive,
 ///     icon: PhosphorIconsRegular.warning,
 ///     actions: [
-///       BaseButton(
+///       DialogAction(
 ///         label: 'Cancel',
-///         variant: ButtonVariant.tertiary,
+///         role: DialogActionRole.dismissive,
 ///         onPressed: () => Navigator.pop(context, false),
 ///       ),
-///       BaseButton(
+///       DialogAction(
 ///         label: 'Delete',
-///         variant: ButtonVariant.danger,
+///         role: DialogActionRole.destructive,
 ///         onPressed: () {
 ///           deleteBranch();
 ///           Navigator.pop(context, true);
@@ -98,8 +216,16 @@ class BaseDialog extends StatelessWidget {
   /// [build] asserts the direct-child case in debug builds.
   final Widget content;
 
-  /// Action buttons (bottom) - typically Cancel and Confirm buttons
-  final List<Widget>? actions;
+  /// The actions along the bottom of the dialog, in reading order — typically
+  /// a dismissive Cancel followed by the affirmative confirm.
+  ///
+  /// Data, not widgets, so that the code rendering the dialog can still tell
+  /// which action is which: see [DialogActionRole] for why that matters and
+  /// what a widget list made impossible. The order given here is the order
+  /// Material renders and the order Tab walks; a design language that arranges
+  /// them differently derives its own order from the roles rather than from
+  /// the position in this list.
+  final List<DialogAction>? actions;
 
   /// Dialog variant (visual style)
   final DialogVariant variant;
@@ -155,6 +281,31 @@ class BaseDialog extends StatelessWidget {
             );
           }
         }
+      }
+      return true;
+    }());
+
+    // At most one action may be the affirmative one. Several languages single
+    // the affirmative action out - Cupertino makes it the default action,
+    // Fluent moves it to the head of the row - and none of them can do that
+    // with a set of two, so a second affirmative would silently make the
+    // dialog unrenderable in a language other than this one. Peers that are
+    // all equally a way forward take DialogActionRole.neutral instead.
+    assert(() {
+      final affirmative =
+          actions
+              ?.where((a) => a.role == DialogActionRole.affirmative)
+              .length ??
+          0;
+      if (affirmative > 1) {
+        throw FlutterError(
+          'BaseDialog "$title" declares $affirmative affirmative actions.\n'
+          'A dialog has at most one: the affirmative action is the one a '
+          'design language may single out as its default, and a default is '
+          'not a set. Give the equally weighted alternatives '
+          'DialogActionRole.neutral, and keep DialogActionRole.affirmative '
+          'for the single action that completes the dialog.',
+        );
       }
       return true;
     }());
@@ -274,7 +425,18 @@ class BaseDialog extends StatelessWidget {
                         alignment: WrapAlignment.end,
                         spacing: AppTheme.paddingM,
                         runSpacing: AppTheme.paddingS,
-                        children: actions!,
+                        children: [
+                          for (final action in actions!)
+                            BaseButton(
+                              label: action.label,
+                              variant: _variantForRole(action.role),
+                              leadingIcon: action.icon,
+                              isLoading: action.isLoading,
+                              onPressed: action.isEnabled
+                                  ? action.onPressed
+                                  : null,
+                            ),
+                        ],
                       ),
                     },
                   ],
@@ -449,14 +611,14 @@ Future<bool> showConfirmationDialog({
       // Enter confirms: a confirmation prompt's whole job is a quick yes.
       onSubmit: () => Navigator.of(context).pop(true),
       actions: [
-        BaseButton(
+        DialogAction(
           label: cancelText ?? l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: confirmText ?? l10n.confirm,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],
@@ -503,14 +665,14 @@ Future<bool> showDestructiveDialog({
       // destroys data. Esc cancels from anywhere; the red button stays
       // reachable with Tab + Enter/Space, which is the deliberate two-step.
       actions: [
-        BaseButton(
+        DialogAction(
           label: cancelText ?? l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(false),
         ),
-        BaseButton(
+        DialogAction(
           label: confirmText ?? l10n.delete,
-          variant: ButtonVariant.danger,
+          role: DialogActionRole.destructive,
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],

@@ -6,7 +6,6 @@ import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../generated/app_localizations.dart';
@@ -352,14 +351,14 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
         ],
       ),
       actions: [
-        BaseButton(
+        DialogAction(
           label: l10n.cancel,
-          variant: ButtonVariant.tertiary,
+          role: DialogActionRole.dismissive,
           onPressed: () => Navigator.of(context).pop(),
         ),
-        BaseButton(
+        DialogAction(
           label: l10n.createBranchButton,
-          variant: ButtonVariant.primary,
+          role: DialogActionRole.affirmative,
           onPressed: _createBranch,
         ),
       ],

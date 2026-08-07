@@ -1475,6 +1475,65 @@ unmeasured and each could change a contract member:
 If (1) fails, `chrome.shell` and `chrome.wrapRoot` are where the change lands
 and the cost of the programme grows. That is why this runs first.
 
+#### The gate has run. Two answers passed, one did not.
+
+Measured in `spike/skin_lab/test/macos_gate_test.dart` (19 tests) against
+`macos_ui 2.2.2`. Every claim below is executed, not read.
+
+**(3) Co-resolution — passed, purely additively.** Four new transitive packages
+and **no removed lines at all** in `pubspec.lock`; no existing application
+dependency moved version. A pub workspace shares one version solve, so a
+constraint fight would have moved the app's own pins silently. `macos_ui` is as
+well-behaved here as `fluent_ui` was.
+
+**(1) The shell under a foreign root — passed.** `MacosWindow` + `Sidebar` +
+`MacosScaffold` + `ToolBar` mount and paint under a plain `MaterialApp`, with a
+recorder installed on all four macOS-only channels asserting it stays empty.
+`showMacosAlertDialog` and `showMacosSheet` push onto a Material `Navigator`.
+`MacosTheme` is *mandatory* rather than optional — `MacosWindow` without one
+throws at `window.dart:181` — so `chrome.wrapRoot` must install it.
+
+§2.8's account of the failure mode is **wrong in the direction that makes its
+own remedy more necessary**. A `MacosTheme` genuinely does not survive into a
+route (`_InheritedMacosTheme extends InheritedWidget`, `macos_theme.dart:121`,
+not `InheritedTheme`). But `debugCheckHasMacosTheme` asserts on
+`MacosTheme.maybeOf(context) == null` (`utils.dart:21-37`), so in the
+architecture §2.7 specifies — the theme installed by `wrapRoot`, below the
+navigator — a skin that forgets `SkinContentHost` gets a **hard debug throw**
+before anything renders, not the silently light dialog the prose describes. The
+silent case appears only when a *different* `MacosTheme` sits above the
+navigator, which satisfies the assert with the wrong theme. Both arrangements
+are pinned as tests. §2.9 Exception 1 is also confirmed load-bearing: both macOS
+overlay helpers read `MaterialLocalizations` unguarded
+(`macos_alert_dialog.dart:248`, `macos_sheet.dart:133`).
+
+**(2) Form registration — failed, and the contract changes.** `MacosTextField`
+does not register with a `Form`: `grep -rn 'FormField' macos_ui/lib` returns
+zero hits, and a measured `validate()` over an empty required field returns
+**`true`**. That is precisely the defect this repository already shipped once —
+`base_text_field.dart` carries the comment describing how a `TextField` never
+runs a validator, so `formKey.currentState!.validate()` found no fields and
+waved invalid input through. The fix there was `TextFormField`, a Material
+widget the macOS skin cannot use.
+
+So `SkinControls.textField` (§2.4) **must not leave form registration to the
+skin**. `FieldSpec` carries the validator, and the API package wraps every
+skin's returned field in a single `FormField<String>` host that feeds
+`field.didChange` from `onChanged` — the same "impossible to forget" shape as
+`SkinContentHost`. `FormField` is exported from `package:flutter/widgets.dart`
+(`widgets.dart:63`), not from material, so the blueprint keeps compiling and the
+compile-time proof survives. Without this, the 46 `BaseTextField(` sites and 12
+`currentState!.validate()` sites stop guarding the moment a non-Material skin is
+selected — silently, which is the failure mode this whole design exists to
+prevent.
+
+**Also settled, ahead of P8.** `MacosSegmentedControl` requires both a
+`List<MacosTab>` and a `MacosTabController` and carries no value type
+(`segmented_control.dart:22-33`): it is a tab bar. `choiceGroup<T>` adapts onto
+it for single-select with string labels; `filterToggle` — multi-select — has no
+macOS counterpart at all, and that belongs in the register before the skin is
+written rather than during it.
+
 ### 5.1 P0 — move the ruler, change nothing (1 week)
 
 Relocate `test/conformance/` (15 component suites, the a11y matrix, the theme

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/config/app_config.dart';
+import 'contrast.dart';
 import 'git_semantic_colors.dart';
 
+export 'contrast.dart';
 export 'git_semantic_colors.dart';
 
 /// Application theme configuration
@@ -62,6 +64,8 @@ class AppTheme {
         AnimationSpeedExtension(speed: animationSpeed),
         GitSemanticColors.light,
       ],
+      textTheme: _brightnessCorrectedTextTheme(theme),
+      chipTheme: _stateAwareChipTheme(theme),
       popupMenuTheme: PopupMenuThemeData(
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
@@ -112,8 +116,15 @@ class AppTheme {
         floatingLabelStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
+        // Material 3's hint role is `onSurfaceVariant` (Flutter 3.44.4
+        // packages/flutter/lib/src/material/input_decorator.dart:5956,
+        // `_InputDecoratorDefaultsM3.hintStyle`). The 60 % `onSurface` this
+        // used to be is a dimmed colour rather than a role, and it measures
+        // 4.14 : 1 against the filled field's own container in the worst of
+        // the ten selectable schemes - under the 4.5 : 1 SC 1.4.3 asks of
+        // placeholder text, which is text like any other.
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          color: theme.colorScheme.onSurfaceVariant,
         ),
         helperStyle: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -176,6 +187,8 @@ class AppTheme {
         AnimationSpeedExtension(speed: animationSpeed),
         GitSemanticColors.dark,
       ],
+      textTheme: _brightnessCorrectedTextTheme(theme),
+      chipTheme: _stateAwareChipTheme(theme),
       popupMenuTheme: PopupMenuThemeData(
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
@@ -226,8 +239,15 @@ class AppTheme {
         floatingLabelStyle: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.onSurface,
         ),
+        // Material 3's hint role is `onSurfaceVariant` (Flutter 3.44.4
+        // packages/flutter/lib/src/material/input_decorator.dart:5956,
+        // `_InputDecoratorDefaultsM3.hintStyle`). The 60 % `onSurface` this
+        // used to be is a dimmed colour rather than a role, and it measures
+        // 4.14 : 1 against the filled field's own container in the worst of
+        // the ten selectable schemes - under the 4.5 : 1 SC 1.4.3 asks of
+        // placeholder text, which is text like any other.
         hintStyle: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          color: theme.colorScheme.onSurfaceVariant,
         ),
         helperStyle: theme.textTheme.bodySmall?.copyWith(
           color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
@@ -247,6 +267,85 @@ class AppTheme {
           TargetPlatform.windows: _getPageTransition(animationSpeed),
         },
       ),
+    );
+  }
+
+  /// The type scale, recoloured for the brightness the theme is built for.
+  ///
+  /// The scale is built from a Google Fonts base theme, and that base theme
+  /// carries a colour of its own: `#1D1B20`, which is Material 3's *light*
+  /// `onSurface`. `ThemeData` merges a supplied `TextTheme` over
+  /// `Typography.white` in a dark theme, so a non-null colour wins, and the
+  /// dark type scale came out near-black.
+  ///
+  /// Almost nothing showed it, because almost everything that paints text here
+  /// names its own colour — `BaseLabel` first among them. The exception is the
+  /// one role the SDK reads straight off the scale: a `TextField` takes the
+  /// colour of the text the user types from `textTheme.bodyLarge.color`
+  /// (Flutter 3.44.4 packages/flutter/lib/src/material/text_field.dart,
+  /// `_m3StateInputStyle`), so a dark-mode field painted #1D1B20 on its
+  /// #2A2A2B fill: 1.17 : 1, an invisible value.
+  ///
+  /// Applying the scheme's `onSurface` here is what makes the scale
+  /// brightness-aware — the same correction the git palette got when it became
+  /// a per-brightness extension — and it keeps the SDK's disabled derivation
+  /// intact, because that derivation is this colour at 38 %.
+  static TextTheme _brightnessCorrectedTextTheme(ThemeData theme) {
+    return theme.textTheme.apply(
+      bodyColor: theme.colorScheme.onSurface,
+      displayColor: theme.colorScheme.onSurface,
+    );
+  }
+
+  /// The chip theme with a label colour that follows the chip's own state.
+  ///
+  /// `RawChip` *replaces* the Material 3 default label style with the theme's
+  /// whenever the theme carries one (Flutter 3.44.4
+  /// packages/flutter/lib/src/material/chip.dart:1367, `chipTheme.labelStyle
+  /// ?? chipDefaults.labelStyle!`), and `FlexSubThemesData` always carries
+  /// one, with a single flat colour. That silently dropped the per-state role
+  /// `_FilterChipDefaultsM3.labelStyle` resolves (filter_chip.dart:332-337):
+  /// a selected chip kept the unselected `onSurfaceVariant` label while its
+  /// container had already turned `secondaryContainer`, which measures
+  /// 2.86 : 1 in the dark theme.
+  ///
+  /// The colour is resolved per state instead, which `RawChip` supports
+  /// (chip.dart:1376 resolves `labelStyle.color` against the chip's states).
+  /// The resting colour is left exactly as the sub-theme had it, and so is the
+  /// disabled one: whether a disabled chip should follow M3's `onSurface` at
+  /// 38 % is a separate decision from this one, and making it here would
+  /// change a state that is not at fault.
+  ///
+  /// `secondaryLabelStyle` carries the same selected colour, because a
+  /// *single-choice* chip never reaches the resolver above: `ChoiceChip` hands
+  /// `RawChip` the theme's `secondaryLabelStyle` outright while selected
+  /// (choice_chip.dart:230), so leaving it alone would have fixed the filter
+  /// chips and left the choice chips at 4.45 : 1 — the two sit side by side in
+  /// the same dialogs.
+  static ChipThemeData _stateAwareChipTheme(ThemeData theme) {
+    final ColorScheme colors = theme.colorScheme;
+    final TextStyle? configured = theme.chipTheme.labelStyle;
+    final Color resting = configured?.color ?? colors.onSurfaceVariant;
+    final Color selected = readableForeground(
+      preferred: colors.onSecondaryContainer,
+      background: colors.secondaryContainer,
+      // `secondaryContainer` is an opaque scheme role, so it composites to
+      // itself and the base only has to be named, not chosen.
+      backgroundBase: colors.surface,
+    );
+    final TextStyle base =
+        configured ?? theme.textTheme.labelLarge ?? const TextStyle();
+    return theme.chipTheme.copyWith(
+      labelStyle: base.copyWith(
+        color: WidgetStateColor.resolveWith((Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
+            return resting;
+          }
+          return states.contains(WidgetState.selected) ? selected : resting;
+        }),
+      ),
+      secondaryLabelStyle: (theme.chipTheme.secondaryLabelStyle ?? base)
+          .copyWith(color: selected),
     );
   }
 

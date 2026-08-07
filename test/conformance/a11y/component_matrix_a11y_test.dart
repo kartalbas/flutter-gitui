@@ -28,10 +28,20 @@
 ///
 /// Two of the three guidelines pass outright. The third,
 /// `textContrastGuideline`, needs two named exemptions, and the tap-target
-/// guideline needs two named skips. Each is an enum value with its reason on
+/// guideline needs one named skip. Each is an enum value with its reason on
 /// it, in the shape the dialog keyboard sweep uses for its Enter exceptions,
 /// and each is held honest by a test at the bottom of this file: an exemption
 /// that stopped being needed fails, so it cannot rot in place.
+///
+/// ## What this sweep cannot see
+///
+/// `textContrastGuideline` judges a screenshot histogram, not the colours a
+/// component resolves, and the enum below records the measurements proving it
+/// returns three different answers for one colour pair. The complementary
+/// check - the foreground and background a component actually resolves per
+/// state, compared directly - lives in component_colors_contrast_test.dart in
+/// this directory, and it is what caught the selection-state failures this
+/// sweep reported as passing.
 library;
 
 import 'dart:ui' as ui show Tristate;
@@ -44,6 +54,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../goldens/component_scenes.dart';
 import '../goldens/golden_scene.dart';
+import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
 
 // ---------------------------------------------------------------------------
@@ -157,36 +168,26 @@ enum TapTargetExemption {
   /// asserts the measured value against it below, so the decision cannot drift
   /// and cannot quietly come back into line without the register noticing.
   registeredInTheDeviationRegister,
-
-  /// An open defect, named rather than approved. It is not fixed here because
-  /// every available fix changes the component's layout, and the layout of this
-  /// component is frozen in two committed Linux golden baselines that cannot be
-  /// regenerated from a Windows checkout; shipping the fix without the
-  /// baselines would turn the blocking golden step red for everyone. The
-  /// staleness test below fails the moment the target grows, so the entry
-  /// cannot outlive the defect.
-  openDefectThatCannotBeFixedWithoutMovingAGolden,
 }
 
 /// The components whose tappable nodes are exempt from the 48 dp minimum, and
-/// which of the two reasons each one carries.
+/// which reason each one carries.
 ///
 /// Keyed by the widget that *owns* the node rather than by the node itself: a
 /// node has no identity across runs, but the component it belongs to does, and
 /// naming the component is what makes an exemption reviewable.
-const Map<Type, TapTargetExemption>
-kTapTargetExemptions = <Type, TapTargetExemption>{
-  // 37 dp tall: the top bar's repository/branch control, A11Y-001.
-  BaseSwitcher: TapTargetExemption.registeredInTheDeviationRegister,
-  // A deletable BaseBadge's close glyph is a bare 14 dp `GestureDetector`
-  // (base_badge.dart). Material's own `Chip` gives its delete affordance a
-  // full 48 dp target and passes this guideline, so there is no argument
-  // from the specification for 14 — this is a defect, and it is recorded as
-  // one. Fixing it means giving the glyph a real button container, which
-  // changes the badge's width and therefore base_badges_light.png and
-  // base_badges_dark.png.
-  BaseBadge: TapTargetExemption.openDefectThatCannotBeFixedWithoutMovingAGolden,
-};
+///
+/// `BaseBadge` used to be here: its delete glyph was a bare 14 dp
+/// `GestureDetector`, named as an open defect rather than approved, because
+/// Material's own `Chip` gives its delete affordance a full 48 dp target and
+/// passes this guideline. It now does the same — the glyph is a real button
+/// with the 48 dp interactive minimum around it, asserted at the bottom of
+/// this file — so the entry is gone rather than reworded.
+const Map<Type, TapTargetExemption> kTapTargetExemptions =
+    <Type, TapTargetExemption>{
+      // 37 dp tall: the top bar's repository/branch control, A11Y-001.
+      BaseSwitcher: TapTargetExemption.registeredInTheDeviationRegister,
+    };
 
 /// One entry of [kTapTargetExemptions], rendered for a failure message.
 String _describeEntry(MapEntry<Type, TapTargetExemption> entry) =>
@@ -197,8 +198,6 @@ String describeExemption(TapTargetExemption exemption) {
   return switch (exemption) {
     TapTargetExemption.registeredInTheDeviationRegister =>
       'a decision argued in docs/deviation_register.yaml',
-    TapTargetExemption.openDefectThatCannotBeFixedWithoutMovingAGolden =>
-      'an open defect whose fix would move a committed golden baseline',
   };
 }
 
@@ -443,36 +442,134 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets(
-      "BaseBadge's delete affordance is still the defect the exemption names",
-      (WidgetTester tester) async {
-        await pumpGoldenScene(
+    testWidgets("BaseBadge's delete affordance carries the 48 dp minimum", (
+      WidgetTester tester,
+    ) async {
+      // The sweep above would pass a matrix that stopped rendering a deletable
+      // badge at all, so the target is measured by name here: the scene must
+      // still contain one, and the box around its glyph must still be the
+      // interactive minimum rather than the 14 dp glyph it used to be.
+      await pumpGoldenScene(
+        tester,
+        _sceneNamed('base_badges'),
+        brightness: Brightness.light,
+      );
+      final Finder deleteGlyph = find.descendant(
+        of: find.byType(BaseBadge),
+        matching: find.byIcon(Icons.close),
+      );
+      expect(
+        deleteGlyph,
+        findsOneWidget,
+        reason:
+            'the matrix must keep rendering a deletable badge, or nothing '
+            'here measures the delete affordance at all',
+      );
+      final Finder target = find.ancestor(
+        of: deleteGlyph,
+        matching: find.byType(InkResponse),
+      );
+      expect(
+        tester.getSize(target).shortestSide,
+        greaterThanOrEqualTo(kMinInteractiveDimension),
+        reason:
+            "BaseBadge's delete affordance is back under the interactive "
+            'minimum the androidTapTargetGuideline requires. It is a button '
+            'with a 48 dp box around a smaller glyph (base_badge.dart, '
+            '_BadgeDeleteButton); do not shrink the box to the glyph.',
+      );
+    });
+
+    testWidgets("BaseBadge's 48 dp box never covers the badge's own label", (
+      WidgetTester tester,
+    ) async {
+      // The other half of the same requirement, and the one that makes the
+      // enlargement honest rather than merely large: a target that reaches
+      // the minimum by growing over the label turns a click on the badge's
+      // text into a destructive action. It measured 13 dp of overlap at the
+      // default size — a tap 20 dp from the glyph, visually on the last
+      // characters of "Date: Last 7 days" in the tags filter bar
+      // (lib/features/tags/widgets/tags_active_filters.dart:44-49), cleared
+      // the filter. The badge sets the glyph off from the label by exactly
+      // what the 48 dp box needs instead, which is the line Material draws
+      // for its own chip: the delete affordance may claim the gap and the
+      // trailing padding, never the label (chip.dart:2425-2431).
+      //
+      // Every size, because the arithmetic differs per size and the small pill
+      // has the least room to give.
+      for (final BadgeSize size in BadgeSize.values) {
+        int deleted = 0;
+        await tester.pumpWidget(const SizedBox.shrink());
+        await pumpConformance(
           tester,
-          _sceneNamed('base_badges'),
-          brightness: Brightness.light,
+          BaseBadge(
+            label: 'Date: Last 7 days',
+            size: size,
+            onDeleted: () => deleted++,
+          ),
         );
-        final Finder deleteGlyph = find.descendant(
-          of: find.byType(BaseBadge),
-          matching: find.byIcon(Icons.close),
+        final Rect target = tester.getRect(
+          find.ancestor(
+            of: find.byIcon(Icons.close),
+            matching: find.byType(InkResponse),
+          ),
         );
+        final Rect label = tester.getRect(find.text('Date: Last 7 days'));
+
         expect(
-          deleteGlyph,
-          findsOneWidget,
+          target.overlaps(label),
+          isFalse,
           reason:
-              'the matrix must keep rendering a deletable badge, or the '
-              'exemption is about something nobody sees',
+              'the ${size.name} badge\'s delete target $target reaches into '
+              'its label $label, so a click on the badge\'s own text deletes '
+              'the badge',
         );
+
+        // The rectangles are one thing and the hit test is another, so the
+        // last pixel of the label is actually clicked.
+        await tester.tapAt(Offset(label.right - 1, label.center.dy));
+        await tester.pump();
         expect(
-          tester.getSize(deleteGlyph).shortestSide,
-          lessThan(48.0),
+          deleted,
+          0,
           reason:
-              'The delete affordance now meets the minimum, so '
-              'TapTargetExemption.'
-              'openDefectThatCannotBeFixedWithoutMovingAGolden no longer '
-              'applies to BaseBadge. Remove it from kTapTargetExemptions.',
+              'a tap on the last pixel of the ${size.name} badge\'s label '
+              'deleted the badge',
         );
-      },
-    );
+      }
+    });
+
+    testWidgets("BaseBadge's 48 dp box is a hit area, not just a rectangle", (
+      WidgetTester tester,
+    ) async {
+      // The guideline reads a semantics rectangle, and Material's own chip
+      // satisfies it by *declaring* one (chip.dart, _RenderEnsureMinSemanticsSize
+      // overrides semanticBounds while the InkWell stays glyph-sized). A
+      // declared rectangle nobody can tap is not a fix, so the corner of the
+      // box is tapped here: it is 17 dp above the pill's own top edge at the
+      // default badge size, so nothing but the enlarged target can receive it.
+      int deleted = 0;
+      await pumpConformance(
+        tester,
+        BaseBadge(label: 'deletable', onDeleted: () => deleted++),
+      );
+      final Finder target = find.ancestor(
+        of: find.byIcon(Icons.close),
+        matching: find.byType(InkResponse),
+      );
+      final Rect box = tester.getRect(target);
+      await tester.tapAt(Offset(box.center.dx, box.top + 2));
+      await tester.pump();
+
+      expect(
+        deleted,
+        1,
+        reason:
+            'a tap inside the delete button\'s 48 dp box but outside the '
+            'painted pill did not reach it, so the target only measures 48 dp '
+            'and is not one',
+      );
+    });
   });
 }
 

@@ -324,7 +324,13 @@ class _ConflictResolutionScreenState
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    // BaseLabel rather than a styled Text: the row publishes
+                    // the foreground its selected tile needs, and a `Text`
+                    // whose style names `onSurface` puts the unselected role
+                    // straight back on it - 4.13 : 1 in the dark theme. The
+                    // label keeps the weight and the strike-through and takes
+                    // the colour from the row.
+                    BaseLabel(
                       conflict.fileName,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         fontWeight: isSelected
@@ -333,7 +339,6 @@ class _ConflictResolutionScreenState
                         decoration: conflict.isResolved
                             ? TextDecoration.lineThrough
                             : null,
-                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     BodySmallLabel(conflict.typeDisplay),

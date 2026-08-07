@@ -21,6 +21,14 @@ import 'base_menu_item.dart';
 /// - Selected state (secondaryContainer + onSecondaryContainer ring)
 /// - Multi-selected state (tertiaryContainer + onTertiaryContainer ring)
 ///
+/// The row's text and icon colors follow whichever tile is painted, through
+/// [readableForeground], so a selected row never leaves its title on a role
+/// chosen against the unselected tile. That covers every slot — content,
+/// badge and trailing for text, and the row's [IconTheme] for glyphs, which
+/// are held to the 3 : 1 non-text threshold rather than 4.5 : 1. The pairs are
+/// asserted per slot, per state and per brightness by
+/// test/conformance/a11y/component_colors_contrast_test.dart.
+///
 /// Example usage:
 /// ```dart
 /// BaseListItem(
@@ -207,6 +215,44 @@ class _BaseListItemState extends State<BaseListItem> {
       backgroundColor = colorScheme.tertiaryContainer;
     }
 
+    // The row's foreground follows the tile the row actually paints. This is
+    // the same defect BaseCard carried: selection swaps the tile for a tonal
+    // container while the title stays on `onSurface`, which is the role
+    // chosen against the *unselected* tile — 4.13 : 1 on `secondaryContainer`
+    // in the dark theme, under the 4.5 : 1 SC 1.4.3 asks of body text.
+    // `readableForeground` takes the M3 pairing for the state and departs from
+    // it only where the scheme's own on-role misses the threshold.
+    //
+    // A row that paints no tile publishes nothing of its own and inherits
+    // instead, because "transparent" means the text sits on whatever is
+    // behind the row — which is `onSurface` on a plain surface, and the
+    // enclosing container's own foreground inside a selected BaseCard.
+    final Color foregroundColor = backgroundColor == null
+        ? DefaultTextStyle.of(context).style.color ?? colorScheme.onSurface
+        : readableForeground(
+            preferred: widget.isSelected
+                ? colorScheme.onSecondaryContainer
+                : colorScheme.onTertiaryContainer,
+            background: backgroundColor,
+            backgroundBase: colorScheme.surface,
+          );
+
+    // Icons are held to SC 1.4.11's 3 : 1 rather than to 4.5 : 1: a row's
+    // glyphs are non-text UI. M3's list-item icon role is `onSurfaceVariant`
+    // (list_tile.dart:1818-1860) and it stays exactly that wherever it clears
+    // the threshold; on the dark theme's selected tile it measures 2.86 : 1,
+    // so there the same fallback the label uses takes over. Without this the
+    // leading glyph of a selected row was the one part of it still coloured
+    // for the unselected tile.
+    final Color iconColor = backgroundColor == null
+        ? colorScheme.onSurfaceVariant
+        : readableForeground(
+            preferred: colorScheme.onSurfaceVariant,
+            background: backgroundColor,
+            backgroundBase: colorScheme.surface,
+            minRatio: kWcagNonTextContrast,
+          );
+
     // Determine border using Material Design 3 outline colors. The border is
     // the focus ring: it shows its on-container color only while the item's
     // collection holds keyboard focus. An unfocused selection paints the same
@@ -268,38 +314,50 @@ class _BaseListItemState extends State<BaseListItem> {
                   border: border,
                 ),
                 padding: widget.padding,
-                child: IconTheme.merge(
-                  data: IconThemeData(color: colorScheme.onSurfaceVariant),
-                  child: Row(
-                    children: [
-                      // Leading widget
-                      if (widget.leading != null) ...[
-                        widget.leading!,
-                        const SizedBox(width: AppTheme.paddingM),
-                      ],
+                // The tile's foreground is published to the whole row, not
+                // just to the content slot. A badge or a trailing label sits
+                // on the same tile as the title, and wrapping only `content`
+                // left them on the ambient `onSurface`: a label in the
+                // trailing slot of a selected row measured 4.13 : 1 in the
+                // dark theme, the exact failure this component's content slot
+                // had. Only the colour is merged here so each slot keeps its
+                // own type role — the content's `bodyLarge`, a badge's
+                // `labelSmall` — and only the colour moves with the tile.
+                child: DefaultTextStyle.merge(
+                  style: TextStyle(color: foregroundColor),
+                  child: IconTheme.merge(
+                    data: IconThemeData(color: iconColor),
+                    child: Row(
+                      children: [
+                        // Leading widget
+                        if (widget.leading != null) ...[
+                          widget.leading!,
+                          const SizedBox(width: AppTheme.paddingM),
+                        ],
 
-                      // Content area (expands to fill available space)
-                      Expanded(
-                        child: DefaultTextStyle(
-                          style: theme.textTheme.bodyLarge!.copyWith(
-                            color: colorScheme.onSurface,
+                        // Content area (expands to fill available space)
+                        Expanded(
+                          child: DefaultTextStyle(
+                            style: theme.textTheme.bodyLarge!.copyWith(
+                              color: foregroundColor,
+                            ),
+                            child: widget.content,
                           ),
-                          child: widget.content,
                         ),
-                      ),
 
-                      // Badge
-                      if (widget.badge != null) ...[
-                        const SizedBox(width: AppTheme.paddingS),
-                        widget.badge!,
-                      ],
+                        // Badge
+                        if (widget.badge != null) ...[
+                          const SizedBox(width: AppTheme.paddingS),
+                          widget.badge!,
+                        ],
 
-                      // Trailing widget (or auto-generated three-dot menu)
-                      if (effectiveTrailing != null) ...[
-                        const SizedBox(width: AppTheme.paddingM),
-                        effectiveTrailing,
+                        // Trailing widget (or auto-generated three-dot menu)
+                        if (effectiveTrailing != null) ...[
+                          const SizedBox(width: AppTheme.paddingM),
+                          effectiveTrailing,
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),

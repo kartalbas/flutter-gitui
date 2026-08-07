@@ -26,7 +26,9 @@ class BaseLabel extends StatelessWidget {
   /// Text style (will have color overridden unless customColor is provided)
   final TextStyle? style;
 
-  /// Custom color (if null, uses theme's onSurface color)
+  /// Custom color. When null the label takes the color the surface it sits on
+  /// has already published through its [DefaultTextStyle], and only falls back
+  /// to `onSurface` where nothing has.
   final Color? color;
 
   /// Text alignment
@@ -46,8 +48,21 @@ class BaseLabel extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Use custom color if provided, otherwise use onSurface
-    final effectiveColor = color ?? colorScheme.onSurface;
+    // The caller's colour first, then whatever the enclosing surface has
+    // already published for its content, and `onSurface` only where nothing
+    // has. Spelling `onSurface` out unconditionally is what made this label
+    // paint straight over the surface it sits on: a selected BaseCard or
+    // BaseListItem swaps its container for a tonal colour and publishes the
+    // matching foreground through a DefaultTextStyle, and a label that ignores
+    // it puts the unselected role back on the selected container - 4.13 : 1 in
+    // the dark theme. Reading the inherited colour is the same correction
+    // base_menu_item.dart already makes for the same reason
+    // (_inheritedLabelColor there), and it changes nothing on a plain surface,
+    // where the inherited colour is `onSurface` anyway.
+    final effectiveColor =
+        color ??
+        DefaultTextStyle.of(context).style.color ??
+        colorScheme.onSurface;
 
     // ignore: avoid_text_with_style
     return Text(

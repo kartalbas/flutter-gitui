@@ -16,6 +16,12 @@ import '../../shared/theme/app_theme.dart';
 /// resting card and on a selected one. See
 /// test/conformance/components/base_card_conformance_test.dart.
 ///
+/// The content's text color follows whichever of those containers is painted,
+/// through [readableForeground], so a selection never leaves the label on a
+/// role that was chosen against the unselected background. The pairs are
+/// asserted per state and per brightness by
+/// test/conformance/a11y/component_colors_contrast_test.dart.
+///
 /// Example usage:
 /// ```dart
 /// BaseCard(
@@ -121,6 +127,41 @@ class BaseCard extends StatelessWidget {
       backgroundColor = colorScheme.surfaceContainerHigh;
     }
 
+    // The content's foreground follows the container the card actually
+    // paints. Selection swaps that container for a tonal one, and a label left
+    // on `onSurface` would keep the role chosen against the *unselected*
+    // background: 4.13 : 1 on `secondaryContainer` in the dark theme, under
+    // the 4.5 : 1 SC 1.4.3 asks of body text. `readableForeground` takes the
+    // M3 pairing for the state and only departs from it where the scheme's own
+    // on-role misses the threshold — which it does here, at 4.45 : 1.
+    //
+    // A [customBackgroundColor] is *not* one of those pairings, so it keeps
+    // `onSurface` as the role to try: the colour comes from outside the
+    // scheme — repository_card.dart passes `primary` at 10 %, workspace_card
+    // .dart the workspace colour at 10 % — and `onSecondaryContainer` is the
+    // on-role of a container this card is then not painting. Trying
+    // `onSurface` and falling back only when it fails is what keeps a tinted
+    // card reading like the surface it is a tint of.
+    //
+    // Both go through the rule against the colour the card *composites* to,
+    // not against the colour it was handed: a 10 % tint is transparent, and
+    // judging it by its own channels reads a pale lilac `primary` as a light
+    // container in the dark theme and answers black. What a card is composited
+    // over is `surface` — M3's role for what the application paints behind
+    // everything, and the darkest of the surface tones the card can land on,
+    // so the flattened colour is never assumed lighter than it really is.
+    final Color foregroundColor = readableForeground(
+      preferred: customBackgroundColor != null
+          ? colorScheme.onSurface
+          : isSelected
+          ? colorScheme.onSecondaryContainer
+          : isMultiSelected
+          ? colorScheme.onTertiaryContainer
+          : colorScheme.onSurface,
+      background: backgroundColor,
+      backgroundBase: colorScheme.surface,
+    );
+
     // Determine border using Material Design 3 outline colors. The
     // emphasized border is the focus ring: it shows its on-container color
     // only while the card's collection holds keyboard focus. An unfocused
@@ -174,7 +215,7 @@ class BaseCard extends StatelessWidget {
             canRequestFocus: false,
             child: DefaultTextStyle(
               style: theme.textTheme.bodyMedium!.copyWith(
-                color: colorScheme.onSurface,
+                color: foregroundColor,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

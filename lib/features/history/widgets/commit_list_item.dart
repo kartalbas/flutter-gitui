@@ -87,12 +87,13 @@ class CommitListItem extends ConsumerWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Subject line
+          // Subject line. No colour: BaseListItem publishes the foreground its
+          // tile needs, which is `onSurface` on an unselected row and the role
+          // that clears 4.5 : 1 on the selected tile. Naming
+          // `onSecondaryContainer` here reinstated the M3 pairing that misses
+          // it at 4.45 : 1 in the dark theme.
           BodyMediumLabel(
             commit.shortSubject,
-            color: isSelected
-                ? Theme.of(context).colorScheme.onSecondaryContainer
-                : Theme.of(context).colorScheme.onSurface,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -191,31 +192,24 @@ class CommitListItem extends ConsumerWidget {
 
           const SizedBox(height: 2),
 
-          // Short hash and current branch
+          // Short hash and current branch. The metadata line is deliberately
+          // one step quieter than the subject, so an unselected row keeps
+          // `onSurfaceVariant`; a selected row hands that decision back to
+          // BaseListItem, which resolves both the text and the glyph against
+          // the tile it paints.
           Row(
             children: [
               LabelMediumLabel(
                 commit.shortHash,
                 color: isSelected
-                    ? Theme.of(context).colorScheme.onSecondaryContainer
+                    ? null
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               if (currentBranch != null) ...[
                 const SizedBox(width: AppTheme.paddingS),
-                Icon(
-                  PhosphorIconsRegular.gitBranch,
-                  size: 11,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSecondaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                Icon(PhosphorIconsRegular.gitBranch, size: 11),
                 const SizedBox(width: AppTheme.paddingXS),
-                LabelMediumLabel(
-                  currentBranch!,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSecondaryContainer
-                      : Theme.of(context).colorScheme.onSurface,
-                ),
+                LabelMediumLabel(currentBranch!),
               ],
             ],
           ),

@@ -454,6 +454,15 @@ class _BaseTextFieldState extends State<BaseTextField> {
           // (text_field.dart:1886-1890). Overriding the style with bodyMedium
           // shrank the text a user types to the size of supporting text and
           // replaced that disabled treatment with a flat color.
+          //
+          // That role carries its *colour* too: the SDK reads
+          // `textTheme.bodyLarge.color` and nothing else. It used to be the
+          // light `onSurface` baked into the Google Fonts base theme, so a
+          // dark-mode field painted the value at 1.17 : 1 — the third finding
+          // of #402. The fix is in the type scale rather than here
+          // (AppTheme._brightnessCorrectedTextTheme), precisely so this field
+          // keeps deriving both the colour and the disabled treatment from one
+          // role instead of pinning either.
         ),
       ),
     );

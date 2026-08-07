@@ -1,0 +1,30 @@
+name: gitui_skin_api
+description: >-
+  The skin contract for Flutter GitUI (#249): the closed vocabularies, the
+  spec classes and the 55 members every skin implements and the application
+  calls. It imports package:flutter/widgets.dart and nothing else from
+  Flutter - that single fact is the compile-time proof that no member of this
+  contract carries a Material assumption, and it is the property the blueprint
+  skin exists to keep honest.
+publish_to: 'none'
+version: 0.0.0
+
+environment:
+  sdk: ^3.9.2
+
+# Member of the app's pub workspace so this package resolves against the same
+# Flutter/Dart SDK and the same shared transitive versions every other member
+# uses. It is deliberately NOT in the app's `dependencies:` yet: nothing in
+# lib/ calls the contract before P2, and the workspace-isolation gate
+# (analysis_options.yaml, depend_on_referenced_packages at error severity,
+# #383) is what makes that absence enforced rather than merely true today.
+resolution: workspace
+
+dependencies:
+  # The only dependency, and the whole point. `package:flutter/material.dart`
+  # is reachable from this package the moment `flutter` is a dependency, so
+  # the ban is not expressed here - it is expressed by every library in lib/
+  # importing `package:flutter/widgets.dart` and nothing else, and by the
+  # blueprint skin failing to compile if that ever stops being true.
+  flutter:
+    sdk: flutter

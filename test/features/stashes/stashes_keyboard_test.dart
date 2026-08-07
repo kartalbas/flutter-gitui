@@ -2,16 +2,15 @@
 // stop whose highlight starts on the first stash, and Enter opens and closes
 // the highlighted stash's details.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/stash.dart';
 import 'package:flutter_gitui/features/stashes/stashes_screen.dart';
-import 'package:flutter_gitui/generated/app_localizations.dart';
+
+import '../../skin/pump_under_skin.dart';
 
 GitStash _stash(int index, String message) => GitStash(
   ref: 'stash@{$index}',
@@ -23,23 +22,18 @@ GitStash _stash(int index, String message) => GitStash(
 
 void main() {
   Future<void> pumpScreen(WidgetTester tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          currentRepositoryPathProvider.overrideWith((ref) => '/repo'),
-          stashesProvider.overrideWith(
-            (ref) async => [
-              _stash(0, 'first stash'),
-              _stash(1, 'second stash'),
-            ],
-          ),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const StashesScreen(),
+    await pumpUnderSkin(
+      tester,
+      home: const StashesScreen(),
+      // The window this test was written against; the funnel's desktop
+      // default would be a second change in the same edit.
+      surface: null,
+      overrides: [
+        currentRepositoryPathProvider.overrideWith((ref) => '/repo'),
+        stashesProvider.overrideWith(
+          (ref) async => [_stash(0, 'first stash'), _stash(1, 'second stash')],
         ),
-      ),
+      ],
     );
     await tester.pumpAndSettle();
   }

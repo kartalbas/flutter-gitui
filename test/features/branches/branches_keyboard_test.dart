@@ -5,14 +5,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/branch.dart';
 import 'package:flutter_gitui/features/branches/branches_screen.dart';
-import 'package:flutter_gitui/generated/app_localizations.dart';
+
+import '../../skin/pump_under_skin.dart';
 
 /// Records checkouts instead of running git, so an assertion reads exactly
 /// which branch the keyboard activated — and that typing activated none.
@@ -42,31 +42,27 @@ GitBranch _branch(String name, {bool isCurrent = false}) => GitBranch(
 void main() {
   Future<List<String>> pumpScreen(WidgetTester tester) async {
     final switchedTo = <String>[];
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          currentRepositoryPathProvider.overrideWith((ref) => '/repo'),
-          localBranchesProvider.overrideWith(
-            (ref) async => [
-              _branch('main', isCurrent: true),
-              _branch('alpha'),
-              _branch('beta'),
-              _branch('gamma'),
-            ],
-          ),
-          remoteBranchesProvider.overrideWith(
-            (ref) async => const <GitBranch>[],
-          ),
-          gitActionsProvider.overrideWith(
-            (ref) => _RecordingGitActions(ref, switchedTo),
-          ),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const BranchesScreen(),
+    await pumpUnderSkin(
+      tester,
+      home: const BranchesScreen(),
+      // The window this test was written against; the funnel's desktop
+      // default would be a second change in the same edit.
+      surface: null,
+      overrides: [
+        currentRepositoryPathProvider.overrideWith((ref) => '/repo'),
+        localBranchesProvider.overrideWith(
+          (ref) async => [
+            _branch('main', isCurrent: true),
+            _branch('alpha'),
+            _branch('beta'),
+            _branch('gamma'),
+          ],
         ),
-      ),
+        remoteBranchesProvider.overrideWith((ref) async => const <GitBranch>[]),
+        gitActionsProvider.overrideWith(
+          (ref) => _RecordingGitActions(ref, switchedTo),
+        ),
+      ],
     );
     await tester.pumpAndSettle();
     return switchedTo;

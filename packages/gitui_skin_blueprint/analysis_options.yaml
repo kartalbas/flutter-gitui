@@ -1,0 +1,78 @@
+# Analysis options for the blueprint skin package.
+#
+# It restates the application's settings rather than including
+# `../../analysis_options.yaml`, and that is a workaround for a measured defect
+# rather than a preference: `custom_lint` 0.8.1 silently DISCARDS a package's
+# whole `custom_lint:` section when the same file carries a RELATIVE
+# `include:`, so the rule below stayed on and the gate stayed red no matter
+# what this file said. A `package:` include is resolved and works. The cost is
+# that the settings the root file carries are repeated here and both copies
+# have to be kept in step, which is why each one says what it is for.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # The workspace-isolation gate (#383), restated. Pub workspace resolution
+    # makes every member importable from every other one even without a
+    # dependency edge, and the analyser's only objection is this lint at its
+    # default info severity, which `flutter analyze` does not fail on. At error
+    # severity, an import here of anything absent from this package's
+    # `dependencies` - the application, the lint plugin, another skin - is a
+    # hard stop in the blocking analysis step. It matters more in a skin
+    # package than anywhere else: a skin reaching back into `lib/` would invert
+    # the one dependency edge the whole contract is built on.
+    depend_on_referenced_packages: error
+
+linter:
+  rules:
+    # Restated from the application's options, and they earn their place here
+    # too: a skin holds focus nodes, controllers and listeners whose lifetime
+    # is a widget's, and a desktop session that switches repository for hours
+    # is exactly where one that outlives its widget shows up.
+    - cancel_subscriptions
+    - close_sinks
+
+# Two design-system rules are switched off, and each has its own reason.
+#
+# `avoid_text_with_style` tells the code it finds to use a `BaseLabel`
+# subclass, which binds a Material 3 text-theme role. That is right about
+# `lib/`, which is why it stays on everywhere else - but it cannot be obeyed
+# here in either the letter or the spirit:
+#
+#   * the letter: `BaseLabel` lives in the application package, and the
+#     isolation gate above makes a skin package importing it a hard error.
+#     There is nothing to switch to.
+#   * the spirit: the rule exists to stop application code from deciding what
+#     text looks like. A SKIN is the layer that decides what text looks like.
+#     Silencing an inapplicable rule once, with a reason, is honest; silencing
+#     it with an `// ignore:` comment at every site would suggest each site had
+#     something to answer for.
+#
+# The discipline the rule was standing in for is kept by the package itself
+# rather than by the analyser: `BlueprintText` in `lib/src/blueprint_ink.dart`
+# is the one place a `Text` is given a style, and every mark and every piece of
+# application content is meant to go through it. That is a stronger guarantee
+# than the rule was making, because it is one line of code rather than a habit
+# every call site has to keep.
+#
+# `avoid_hardcoded_spacing` is off for the same shape of reason, one step
+# further along. It tells the code it finds to use `AppTheme.paddingXS/S/M/L/XL`
+# - constants that live in the application and that the isolation gate makes
+# unreachable from here - and its spirit is that application code must not
+# decide a length. A SKIN is the layer that decides lengths: that is the whole
+# of the line this programme draws, and `docs/SKIN-CONTRACT.md` §3.6 scopes
+# every rule of that family to `lib/**` for exactly this reason. What keeps the
+# discipline here is not the analyser but the vocabulary: every length the
+# facets resolve comes from `BlueprintDistance`, `BlueprintGeometry` or
+# `BlueprintVocabulary`, so a number written anywhere else is visible in review
+# as a number that belongs to none of them.
+#
+# Any further rule switched off here needs its own entry and its own reason.
+# The Material skin package will need several at P2 - `avoid_card`,
+# `avoid_list_tile`, `avoid_text_field` and the rest of that family all point
+# at components a skin is precisely the right place to build - and the same
+# rule applies there: one line, one reason, never a blanket.
+custom_lint:
+  rules:
+    - avoid_text_with_style: false
+    - avoid_hardcoded_spacing: false

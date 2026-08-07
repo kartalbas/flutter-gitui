@@ -9,14 +9,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/tag.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
-import 'package:flutter_gitui/generated/app_localizations.dart';
+
+import '../../skin/pump_under_skin.dart';
 
 GitTag _tag(String name, String hash, DateTime date) => GitTag(
   name: name,
@@ -91,25 +91,17 @@ void main() {
     // A desktop-sized window, so three tag cards and the details of the one
     // that is open all fit: a row scrolled out of the build window would fail
     // an assertion about text that the user can in fact see.
-    tester.view.physicalSize = const Size(1600, 1200);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          currentRepositoryPathProvider.overrideWith((ref) => '/repo'),
-          tagsProvider.overrideWith((ref) async => _tags),
-          localOnlyTagsProvider.overrideWith((ref) async => <String>{}),
-          remoteOnlyTagsProvider.overrideWith((ref) async => <String>{}),
-          remoteNamesProvider.overrideWith((ref) async => const <String>[]),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const TagsScreen(),
-        ),
-      ),
+    await pumpUnderSkin(
+      tester,
+      home: const TagsScreen(),
+      surface: const Size(1600, 1200),
+      overrides: [
+        currentRepositoryPathProvider.overrideWith((ref) => '/repo'),
+        tagsProvider.overrideWith((ref) async => _tags),
+        localOnlyTagsProvider.overrideWith((ref) async => <String>{}),
+        remoteOnlyTagsProvider.overrideWith((ref) async => <String>{}),
+        remoteNamesProvider.overrideWith((ref) async => const <String>[]),
+      ],
     );
     await tester.pumpAndSettle();
   }

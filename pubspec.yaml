@@ -17,6 +17,21 @@ workspace:
   # `dependencies`. The workspace-isolation gate below
   # (depend_on_referenced_packages: error) keeps lib/ unable to import it.
   - spike/skin_lab
+  # The skin contract (#249, P1): the vocabularies, the specs and the 55
+  # members every skin implements. A workspace member so it resolves against
+  # this Flutter/Dart SDK and these shared transitive versions, and
+  # deliberately NOT in this package's `dependencies` yet - nothing in lib/
+  # calls the contract before P2, and the workspace-isolation gate below
+  # (depend_on_referenced_packages: error) is what makes that absence
+  # enforced rather than merely true today.
+  - packages/gitui_skin_api
+  # The blueprint skin (#249, P1): the development-only instrument that renders
+  # every contract member naked, so that anything still looking styled is
+  # design that leaked into application code. A workspace member for the same
+  # reason as the contract it implements, and equally absent from this
+  # package's `dependencies` - it is registered by `lib/main.dart` from P2
+  # onwards and reachable from nowhere else.
+  - packages/gitui_skin_blueprint
   # The Material 3 skin (#249, P0). It holds this design language's
   # conformance suite and its own deviation register - the measurements that
   # were filed under this package's `test/` and `docs/` until the skins became
@@ -114,6 +129,19 @@ dev_dependencies:
   custom_lint: ^0.8.1
   flutter_gitui_lint:
     path: lint_rules/flutter_gitui_lint
+
+  # The skin contract and the instrument that falsifies it (#249, P1). They are
+  # DEV dependencies on purpose, and the distinction is the whole isolation
+  # gate: `test/skin/pump_under_skin.dart` has to construct a BlueprintSkin to
+  # run the zero-and-extremes sweep over the real screens, while `lib/` must
+  # still be unable to name either package before P2. `depend_on_referenced_
+  # packages` at error severity (analysis_options.yaml, #383) is what enforces
+  # that asymmetry; at P2 the two move into `dependencies:` in the same commit
+  # that gives main.dart its `SkinRegistry.register` line.
+  gitui_skin_api:
+    path: packages/gitui_skin_api
+  gitui_skin_blueprint:
+    path: packages/gitui_skin_blueprint
 
   # Code Generation
   build_runner: ^2.15.1

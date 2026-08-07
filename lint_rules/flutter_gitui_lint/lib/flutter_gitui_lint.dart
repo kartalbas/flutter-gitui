@@ -24,7 +24,10 @@ import 'src/lints/avoid_text_with_style.dart';
 import 'src/lints/avoid_null_color_in_copy_with.dart';
 import 'src/lints/avoid_print.dart';
 import 'src/lints/avoid_raw_shortcuts.dart';
+import 'src/lints/no_value_in_contract.dart';
+import 'src/lints/no_widget_in_contract.dart';
 import 'src/lints/require_confirm_destructive.dart';
+import 'src/lints/token_read_is_mechanical.dart';
 
 /// Flutter GitUI custom lint rules
 ///
@@ -80,5 +83,20 @@ class _FlutterGitUILint extends PluginBase {
 
     // Safety lints
     RequireConfirmDestructive(),
+
+    // Skin-contract lints (#249). They guard the two properties the whole
+    // design rests on and that nothing else can check: that no contract member
+    // names a design value, and that a Widget crosses into a skin only as a
+    // ContentPort. Both are scoped to packages/gitui_skin_api and both are
+    // permanent - unlike the migration classifiers below, they have no end
+    // date, because the contract they guard does not.
+    NoValueInContract(),
+    NoWidgetInContract(),
+
+    // Migration classifiers. These measure a migration in progress rather than
+    // guarding an invariant, so they are off by default (see the rule's
+    // `enabledByDefault`) and they are deleted when their migration lands.
+    // token_read_is_mechanical goes at P6 of #249.
+    TokenReadIsMechanical(),
   ];
 }

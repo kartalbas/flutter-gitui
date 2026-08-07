@@ -114,8 +114,45 @@ jobs:
       - name: Resolve dependencies
         run: flutter pub get
 
+      # Everything except the pixel comparisons. They are split off into their
+      # own step below so the two verdicts stay legible: "the behaviour broke"
+      # and "the rendering changed" are different findings and a reviewer
+      # should be able to tell which one a red build is reporting without
+      # reading the log.
+      #
+      # This still covers the golden *scenes*: golden_scene_smoke_test.dart is
+      # untagged and builds every scene in the matrix in both brightnesses,
+      # asserting it renders without an exception and without an overflow.
       - name: Run tests
-        run: flutter test --reporter expanded
+        run: flutter test --exclude-tags golden --reporter expanded
+
+      # A golden that has no baseline reports "golden file not found", which
+      # reads like a broken test rather than a missing input. Saying so once,
+      # up front, with the workflow that produces them, saves the next person
+      # the search.
+      - name: Verify golden baselines are committed
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=$(find test/conformance/goldens/images -name '*.png' 2>/dev/null | wc -l)
+          echo "committed golden baselines: $count"
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No golden baselines are committed under test/conformance/goldens/images. Run the 'Goldens' workflow (workflow_dispatch), download its golden-baselines artifact, review the images and commit them."
+            exit 1
+          fi
+
+      # Blocking, and on ubuntu because that is where the baselines were
+      # rasterised: text shaping and anti-aliasing differ per platform, so the
+      # comparison is only meaningful on the machine that produced them. Every
+      # golden test additionally carries `skip: !Platform.isLinux` in code, so
+      # this step is the only place they actually execute.
+      #
+      # A drift of up to 0.5% of pixels is tolerated by the comparator in
+      # test/conformance/goldens/flutter_test_config.dart, which absorbs the
+      # anti-aliasing differences a Skia point release brings without letting a
+      # real regression through.
+      - name: Run golden tests
+        run: flutter test --tags golden --reporter expanded test/conformance/goldens
 
   build:
     name: Build ${{ matrix.platform }}

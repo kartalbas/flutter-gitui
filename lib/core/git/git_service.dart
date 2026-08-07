@@ -1290,25 +1290,112 @@ class GitService {
     return output.split('\n').where((s) => s.isNotEmpty).toList();
   }
 
-  /// Get names of the local branches already merged into the current HEAD
+  /// Names of the local branches `git branch -d` deletes without `-D`, i.e.
+  /// the ones whose deletion loses no commits.
   ///
-  /// These are exactly the branches `git branch -d` accepts without -D.
+  /// This is deliberately **not** `git branch --merged`, which this used to
+  /// ask and which is wrong in both directions. Git's own rule
+  /// (`builtin/branch.c`, `branch_merged`) is: a branch whose configured
+  /// upstream still resolves is checked against *that upstream*, and only a
+  /// branch without one is checked against HEAD. Measured against git 2.54:
   ///
-  /// Returns [Result.Success] with the merged branch names on success.
-  /// Returns [Result.Failure] if git command fails.
-  Future<Result<List<String>>> getMergedBranches() async {
+  /// * a branch that was pushed but never merged into HEAD is deleted by `-d`
+  ///   ("warning: deleting branch 'x' that has been merged to
+  ///   'refs/remotes/origin/x', but not yet merged to HEAD"), while
+  ///   `--merged` never lists it - so the old answer called it unmerged and
+  ///   git deleted it anyway;
+  /// * a branch merged into HEAD but *ahead* of its upstream is refused by
+  ///   `-d`, while `--merged` does list it - so the old answer called it
+  ///   merged and git refused it.
+  ///
+  /// The bulk delete states, before the user presses anything, which of the
+  /// selected branches it will skip, so this has to be git's answer rather
+  /// than an approximation of it.
+  ///
+  /// Two commands, because neither answers the question alone: `--merged`
+  /// gives the HEAD side, and `for-each-ref` gives each branch's upstream plus
+  /// its divergence from it, where "not ahead of the upstream" is exactly
+  /// "merged into the upstream".
+  ///
+  /// Returns [Result.Success] with the deletable branch names on success.
+  /// Returns [Result.Failure] if a git command fails.
+  Future<Result<Set<String>>> getBranchesDeletableWithoutForce() async {
     return runCatchingAsync(() async {
-      final result = await _execute(
-        'branch --merged --format="%(refname:short)"',
+      // `--format` must precede `--merged`: `--merged` takes an optional
+      // commit-ish (PARSE_OPT_LASTARG_DEFAULT), so with the flags the other
+      // way round git swallows `--format=%(refname:short)` as the commit to
+      // compare against and dies with "malformed object name". That is what
+      // this command did, which made the whole bulk-delete dialog fail to
+      // open in any real repository.
+      final mergedResult = await _execute(
+        'branch --format="%(refname:short)" --merged',
       );
-      final output = result.stdout.toString();
-      return output
-          .split('\n')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
+      final mergedIntoHead = _nonEmptyLines(
+        mergedResult.stdout.toString(),
+      ).toSet();
+
+      // `~` as the separator: git forbids it anywhere in a ref name
+      // (git-check-ref-format), so neither the branch name nor the upstream
+      // ref can contain one and the split is unambiguous.
+      //
+      // `trackshort` rather than `track`, because it is a sigil
+      // (`=` `<` `>` `<>`) instead of a sentence: git translates the words
+      // "ahead" and "behind" but not those, so the parse cannot depend on the
+      // locale git happens to run under. It is empty both when no upstream is
+      // configured and when the configured one no longer resolves ("gone") -
+      // and in the latter case git falls back to HEAD as well, which is why
+      // both fall into the same branch below.
+      final refsResult = await _execute(
+        'for-each-ref refs/heads '
+        '--format="%(refname:short)~%(upstream)~%(upstream:trackshort)"',
+      );
+
+      final deletable = <String>{};
+      for (final line in _nonEmptyLines(refsResult.stdout.toString())) {
+        final fields = line.split('~');
+        if (fields.length < 3) continue;
+        final name = fields[0];
+        if (branchDeletableWithoutForce(
+          upstream: fields[1],
+          divergence: fields[2],
+          mergedIntoHead: mergedIntoHead.contains(name),
+        )) {
+          deletable.add(name);
+        }
+      }
+      return deletable;
     });
   }
+
+  /// Git's `-d` rule for a single branch, from that branch's `for-each-ref`
+  /// row: [upstream] is `%(upstream)` (empty when none is configured),
+  /// [divergence] is `%(upstream:trackshort)` and [mergedIntoHead] says
+  /// whether `git branch --merged` listed the branch.
+  ///
+  /// Split out of [getBranchesDeletableWithoutForce] so the rule itself is
+  /// testable without a repository - the query around it can only be checked
+  /// against real git, but this is where getting it wrong costs a branch.
+  static bool branchDeletableWithoutForce({
+    required String upstream,
+    required String divergence,
+    required bool mergedIntoHead,
+  }) {
+    // No usable upstream - none configured, or one that no longer resolves,
+    // which trackshort reports as empty and git treats the same way: the
+    // comparison falls back to HEAD.
+    if (upstream.isEmpty || divergence.isEmpty) return mergedIntoHead;
+    // In sync with the upstream (`=`) or behind it (`<`): every commit on this
+    // branch is already on the upstream, so deleting it loses nothing. Ahead
+    // (`>`) or diverged (`<>`) means it carries commits the upstream has not,
+    // and git refuses it - whether or not HEAD happens to contain them.
+    return divergence == '=' || divergence == '<';
+  }
+
+  /// The non-empty, trimmed lines of a git command's stdout.
+  Iterable<String> _nonEmptyLines(String output) => output
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty);
 
   /// Create a new branch
   /// [branchName] - Name of the new branch

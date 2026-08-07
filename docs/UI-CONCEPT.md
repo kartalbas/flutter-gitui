@@ -68,13 +68,16 @@ is a separate question, answered by `test/conformance/` and recorded in
 - ✅ All semantic colors use theme ColorScheme (8 replacements)
 - ✅ 64 files migrated across 15 commits
 
-**Current state (conformance):** `BaseButton`, `BaseIconButton`, `BaseCard`,
-`BaseListItem` and `BasePanel` are measured against their Material 3 oracles
-by `test/conformance/components/`, and the app's `TextTheme` by
+**Current state (conformance):** every `Base*` component is now measured
+against its Material 3 oracle by a suite under `test/conformance/components/`
+— the buttons, the container components (`BaseCard`, `BaseListItem`,
+`BasePanel`), the input components (`BaseTextField`, `BaseDropdown`,
+`BaseDateField`), the chips, the two dialogs, the menu family and the badge
+family — and the app's `TextTheme` by
 `test/conformance/theme/text_theme_conformance_test.dart`. Every deliberate
-departure those suites find is registered in `docs/deviation_register.yaml`.
-**`BaseDialog`, `BaseTextField` and `BaseBadge` have no conformance suite yet
-— their Material 3 conformance is unverified**, not established.
+departure those suites find is registered in `docs/deviation_register.yaml`,
+and the register is executable in both directions: an unregistered mismatch
+fails, and a registered entry that has come back into line fails as stale.
 
 ---
 
@@ -125,10 +128,10 @@ Flutter GitUI has 7 comprehensive base components:
 | **BasePanel** | `lib/shared/components/base_panel.dart` | Layout regions | ✅ Complete |
 
 "Complete" above means *implemented and used everywhere* — see the note on
-usage versus conformance at the top of this document. `BaseButton`,
-`BaseIconButton`, `BaseCard`, `BaseListItem` and `BasePanel` additionally have
-a Material 3 conformance suite; `BaseDialog`, `BaseTextField` and `BaseBadge`
-do not.
+usage versus conformance at the top of this document. Each of these components
+additionally has a Material 3 conformance suite under
+`test/conformance/components/`, which is a separate claim: that the component
+matches the specification, not merely that call sites use it.
 
 ---
 
@@ -138,19 +141,25 @@ do not.
 
 **Features:**
 - 3 semantic variants (normal, confirmation, destructive)
-- Consistent padding: `AppTheme.paddingXL` (32px) — `base_dialog.dart:235`
-- Border radius: `AppTheme.radiusL` (12px) — `base_dialog.dart:224`
-- Keyboard support (ESC to close)
+- Material 3's own dialog insets: `AppTheme.paddingL` (24px) around the
+  dialog, 16px between title and content, 24px between content and the action
+  row, and 8px between the actions — `base_dialog.dart:399`
+- Border radius: `AppTheme.radiusL` (12px) — `base_dialog.dart:382`
+- Keyboard support (ESC to close, Enter to submit)
 - Helper functions for common dialogs
 
-> **Conformance: unverified.** There is no `BaseDialog` suite under
-> `test/conformance/`, so neither number above is asserted against Material 3.
-> For reference, the M3 dialog corner is **28.0** and its content padding
-> **24.0** (`_DialogDefaultsM3`, Flutter 3.44.4
-> `packages/flutter/lib/src/material/dialog.dart:1967` for the shape,
-> `:1994` for `actionsPadding`). The 12px/32px values are therefore an
-> *unregistered* departure — not an approved one — until a suite measures them
-> and `docs/deviation_register.yaml` records the decision.
+> **Conformance: measured.**
+> `test/conformance/components/base_dialog_conformance_test.dart` asserts
+> nineteen tokens against a real `AlertDialog` pushed through the same harness
+> and read with the same probes. Padding, action spacing, action alignment,
+> elevation, surface role, surface tint, barrier colour, title role, content
+> role and icon size all measure the Material 3 value — the padding used to be
+> a uniform 32px and now spends M3's asymmetric 24/16/24. Four departures are
+> approved and recorded in `docs/deviation_register.yaml`: the 12px corner
+> against M3's 28 (DLG-001, Flutter 3.44.4
+> `packages/flutter/lib/src/material/dialog.dart:1967`), the `primary` variant
+> icon against `secondary` (DLG-002), and the fixed 650px column against M3's
+> shrink-to-content between 280px and the viewport (DLG-003, DLG-004).
 
 **Variants:**
 ```dart
@@ -365,10 +374,14 @@ BaseCard(
 - Validation support
 - Border radius: `AppTheme.radiusS` (4px, `base_text_field.dart:336`)
 
-> **Conformance: unverified.** There is no `BaseTextField` suite under
-> `test/conformance/`. The 4 dp corner does match Flutter's
-> `OutlineInputBorder` default (`input_border.dart:333`), but nothing asserts
-> that, and no other text-field token has been measured at all.
+> **Conformance: measured.**
+> `test/conformance/components/base_text_field_conformance_test.dart` asserts
+> nineteen tokens against a real `TextField` pumped through the same harness,
+> reading the container, its outline and its corners out of the paint stream
+> because `InputDecorator` resolves them privately. The 4 dp corner is
+> Flutter's `OutlineInputBorder` default and is now asserted as one; three
+> departures are registered as FIELD-001 to FIELD-003 in
+> `docs/deviation_register.yaml`.
 
 **Example:**
 ```dart
@@ -1048,10 +1061,11 @@ So there are exactly two acceptable outcomes for a difference from Material 3:
 assert on a token that is not in the manifest, so the set of things being
 measured stays reviewable in a diff.
 
-**Known unmeasured surface — do not read silence as conformance.**
-`BaseDialog`, `BaseTextField` and `BaseBadge` have no conformance suite, and
-there are no goldens. For those components this document's numbers are
-descriptions of the current code, not conformance claims.
+**Do not read silence as conformance.** Every `Base*` component now has a
+conformance suite, but a suite only measures the tokens listed in
+`test/conformance/support/token_manifest.dart`. Where this document gives a
+number that no token covers, it is a description of the current code, not a
+conformance claim.
 
 ---
 

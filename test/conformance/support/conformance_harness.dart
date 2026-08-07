@@ -65,6 +65,126 @@ Future<void> pumpConformance(
   await tester.pump();
 }
 
+/// Pumps [dialog] the way the app really shows one: pushed onto a route by
+/// `showDialog` over a Scaffold, under the app's real theme.
+///
+/// A dialog is not a widget in a box. Its surface colour, elevation, corner,
+/// inset padding, minimum and maximum width and barrier all come from the
+/// route and from `Dialog`'s own defaults resolution, and none of them exist
+/// for a `BaseDialog` pumped as a bare child. Measuring it as a route is
+/// therefore not a convenience — it is the only way the measured value is the
+/// value the user sees.
+///
+/// The returned future completes when the route has finished animating in, so
+/// every measurement is taken on a settled frame.
+Future<void> pumpConformanceDialog(
+  WidgetTester tester,
+  Widget dialog, {
+  Brightness brightness = Brightness.light,
+  bool barrierDismissible = true,
+}) async {
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  tester.view.physicalSize = kConformanceSurface;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  // Tear the previous tree down first. A conformance test pumps twice — the
+  // oracle, then the component — and pumping a second MaterialApp of the same
+  // shape only *updates* the first one, so its Navigator keeps the route stack
+  // and the dialog opened for the oracle stays on screen, behind its own
+  // barrier. The second measurement would then silently be taken on the first
+  // dialog. Unmounting the app disposes the Navigator with it.
+  await tester.pumpWidget(const SizedBox.shrink());
+
+  await tester.pumpWidget(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      theme: brightness == Brightness.light
+          ? AppTheme.lightTheme()
+          : AppTheme.darkTheme(),
+      home: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) => Center(
+            // A stock button, not a BaseButton: this is test scaffolding that
+            // must not drag a component under measurement into the tree.
+            // ignore: avoid_text_button
+            child: TextButton(
+              onPressed: () => showDialog<void>(
+                context: context,
+                barrierDismissible: barrierDismissible,
+                builder: (BuildContext _) => dialog,
+              ),
+              // The opener is not part of any measurement; it exists only so
+              // the dialog is reached through the same `showDialog` call the
+              // app uses instead of by pushing a route by hand.
+              child: const Text(_openDialogLabel),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text(_openDialogLabel));
+  await tester.pumpAndSettle();
+}
+
+const String _openDialogLabel = 'open the dialog under measurement';
+
+/// The `Material` that paints a dialog's visual container — the surface whose
+/// colour, elevation, surface tint and corner Material 3 specifies.
+///
+/// Both sides of a dialog comparison expose it identically, because both build
+/// a `Dialog`: `AlertDialog` returns one, and so does `BaseDialog`. The first
+/// `Material` below it is the surface; the ones further down belong to the
+/// controls the dialog contains.
+Finder dialogSurface() => find
+    .descendant(of: find.byType(Dialog), matching: find.byType(Material))
+    .first;
+
+/// The colour of the modal barrier behind the currently open dialog route.
+///
+/// A route paints its barrier through an `AnimatedModalBarrier`, which builds
+/// a `ModalBarrier` per frame with the animated colour; the first barrier that
+/// carries a colour at all is the dialog's (a route also installs a colourless
+/// one that only absorbs pointers).
+Color barrierColor(WidgetTester tester) {
+  return tester
+      .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+      .firstWhere(
+        (ModalBarrier barrier) => barrier.color != null,
+        orElse: () => fail('The open route paints no coloured modal barrier.'),
+      )
+      .color!;
+}
+
+/// Where a row of actions sits inside [box]: `end`, `start`, `center` or
+/// `stretch`.
+///
+/// Alignment has to be *measured* rather than read off a property, because the
+/// two sides of a dialog comparison express it with different widgets — M3
+/// with an `OverflowBar`'s `MainAxisAlignment`, the app with a `Wrap`'s
+/// `WrapAlignment` or a `Row`'s. Comparing the gap left of the first action
+/// against the gap right of the last one describes both in the same words. The
+/// 1 dp slack absorbs sub-pixel layout, nothing more.
+String describeRowAlignment(Rect box, Rect first, Rect last) {
+  final double lead = first.left - box.left;
+  final double trail = box.right - last.right;
+  if (lead <= 1 && trail <= 1) {
+    return 'stretch';
+  }
+  if (trail < lead - 1) {
+    return 'end';
+  }
+  if (lead < trail - 1) {
+    return 'start';
+  }
+  return 'center';
+}
+
 /// Material 3 defaults for a filled button, straight from the framework.
 ///
 /// `defaultStyleOf` is public API on ButtonStyleButton and returns the
@@ -300,11 +420,38 @@ Future<void> focusFirstWithTab(WidgetTester tester) async {
 /// with the `paints` matcher, e.g.
 /// `expect(inkFeatures(tester), paints..rect(color: overlay))`.
 /// Same idiom as flutter/test/material/ink_well_test.dart.
-RenderObject inkFeatures(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere(
+///
+/// [within] restricts the search to one subtree, which a component living in a
+/// route needs: an app has one ink layer per `Material`, the walk starts at the
+/// root, and the Scaffold's layer therefore always comes first. A menu or a
+/// dialog paints into the layer of *its own* surface, so measuring its state
+/// layers without saying where to look reads an ink layer that nothing is
+/// happening in and reports "no state layer at all".
+RenderObject inkFeatures(WidgetTester tester, {Finder? within}) {
+  final Iterable<RenderObject> candidates = within == null
+      ? tester.allRenderObjects
+      : _renderObjectsUnder(within);
+  return candidates.firstWhere(
     (RenderObject renderObject) =>
         renderObject.runtimeType.toString() == '_RenderInkFeatures',
   );
+}
+
+/// Every render object in the subtree rooted at [finder], in paint order.
+Iterable<RenderObject> _renderObjectsUnder(Finder finder) {
+  final List<RenderObject> found = <RenderObject>[];
+  void visit(Element element) {
+    final RenderObject? renderObject = element.renderObject;
+    if (renderObject != null) {
+      found.add(renderObject);
+    }
+    element.visitChildren(visit);
+  }
+
+  for (final Element element in finder.evaluate()) {
+    visit(element);
+  }
+  return found;
 }
 
 /// Every fill color the ink layer paints right now, in paint order.
@@ -314,12 +461,12 @@ RenderObject inkFeatures(WidgetTester tester) {
 /// matcher) is to replay the ink render object onto a recording canvas and
 /// read the colors back out. The recording covers the whole subtree below
 /// the ink layer, which is exactly what [inkColorsAddedBy] needs to diff.
-List<Color> paintedInkColors(WidgetTester tester) {
+List<Color> paintedInkColors(WidgetTester tester, {Finder? within}) {
   final TestRecordingCanvas canvas = TestRecordingCanvas();
   final TestRecordingPaintingContext context = TestRecordingPaintingContext(
     canvas,
   );
-  inkFeatures(tester).paint(context, Offset.zero);
+  inkFeatures(tester, within: within).paint(context, Offset.zero);
   const Set<Symbol> fillCalls = <Symbol>{
     #drawRect,
     #drawRRect,
@@ -353,11 +500,12 @@ List<Color> paintedInkColors(WidgetTester tester) {
 /// distinction this suite has to detect.
 Future<List<Color>> inkColorsAddedBy(
   WidgetTester tester,
-  Future<void> Function() drive,
-) async {
-  final List<Color> before = paintedInkColors(tester);
+  Future<void> Function() drive, {
+  Finder? within,
+}) async {
+  final List<Color> before = paintedInkColors(tester, within: within);
   await drive();
-  final List<Color> after = paintedInkColors(tester);
+  final List<Color> after = paintedInkColors(tester, within: within);
   final List<Color> added = <Color>[];
   final List<Color> remaining = List<Color>.of(before);
   for (final Color color in after) {
@@ -370,7 +518,11 @@ Future<List<Color>> inkColorsAddedBy(
 
 /// The ink the layer gains while [finder] is hovered, with the pointer
 /// removed again so a later pump in the same test starts clean.
-Future<List<Color>> hoverStateLayer(WidgetTester tester, Finder finder) async {
+Future<List<Color>> hoverStateLayer(
+  WidgetTester tester,
+  Finder finder, {
+  Finder? within,
+}) async {
   final TestGesture gesture = await tester.createGesture(
     kind: PointerDeviceKind.mouse,
   );
@@ -379,7 +531,7 @@ Future<List<Color>> hoverStateLayer(WidgetTester tester, Finder finder) async {
   final List<Color> added = await inkColorsAddedBy(tester, () async {
     await gesture.moveTo(tester.getCenter(finder));
     await tester.pumpAndSettle();
-  });
+  }, within: within);
   await gesture.removePointer();
   await tester.pumpAndSettle();
   return added;
@@ -387,14 +539,18 @@ Future<List<Color>> hoverStateLayer(WidgetTester tester, Finder finder) async {
 
 /// The ink the layer gains while [finder] is held pressed, with the gesture
 /// released again.
-Future<List<Color>> pressStateLayer(WidgetTester tester, Finder finder) async {
+Future<List<Color>> pressStateLayer(
+  WidgetTester tester,
+  Finder finder, {
+  Finder? within,
+}) async {
   late TestGesture gesture;
   final List<Color> added = await inkColorsAddedBy(tester, () async {
     gesture = await pressAndHold(tester, finder);
     // pressAndHold's pump only starts the highlight's fade-in ticker (its
     // first tick is at elapsed zero); one more pump completes the fade.
     await tester.pump(const Duration(milliseconds: 200));
-  });
+  }, within: within);
   await gesture.up();
   await tester.pumpAndSettle();
   return added;
@@ -403,8 +559,12 @@ Future<List<Color>> pressStateLayer(WidgetTester tester, Finder finder) async {
 /// The ink the layer gains once Tab has moved keyboard focus. A component
 /// that deliberately refuses focus (because its collection owns the Tab stop)
 /// adds nothing, which is exactly the measurement a deviation documents.
-Future<List<Color>> focusStateLayer(WidgetTester tester) async {
-  return inkColorsAddedBy(tester, () => focusFirstWithTab(tester));
+Future<List<Color>> focusStateLayer(WidgetTester tester, {Finder? within}) {
+  return inkColorsAddedBy(
+    tester,
+    () => focusFirstWithTab(tester),
+    within: within,
+  );
 }
 
 /// Renders a measured state layer as a stable descriptor: role names where a

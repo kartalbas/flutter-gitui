@@ -193,4 +193,92 @@ const Set<String> conformanceTokenManifest = <String>{
   'BaseActionChip.containerHeight', // M3: 48.0 — conforms
   'BaseActionChip.labelTextStyle', // M3: labelLarge — conforms
   'BaseActionChip.labelColor', // M3: onSurface — conforms
+  // BaseDialog vs a real `AlertDialog`, both pushed with `showDialog` through
+  // the same harness, because a dialog's surface, width and barrier only exist
+  // inside a route. Three tokens are pinned from the generated
+  // `_DialogDefaultsM3` instead of read off the oracle, because this app's own
+  // `dialogTheme` overrides them and a pumped AlertDialog would report the
+  // override — see the suite's library comment.
+  'BaseDialog.shape', // M3: 28.0 — registered DLG-001
+  'BaseDialog.elevation', // M3: 6.0 — conforms
+  'BaseDialog.containerColor', // M3: surfaceContainerHigh — conforms
+  'BaseDialog.surfaceTintColor', // M3: transparent — conforms
+  'BaseDialog.barrierColor', // M3: black at 54% — conforms
+  'BaseDialog.titleTextStyle', // M3: headlineSmall (pinned) — conforms
+  'BaseDialog.contentTextStyle', // M3: bodyMedium (pinned) — conforms
+  'BaseDialog.titlePadding.top', // M3: 24.0 — conforms
+  'BaseDialog.contentPadding.start', // M3: 24.0 — conforms
+  'BaseDialog.titleToContentGap', // M3: 16.0 — conforms
+  'BaseDialog.contentToActionsGap', // M3: 24.0 — conforms
+  'BaseDialog.actionsPadding.end', // M3: 24.0 — conforms
+  'BaseDialog.actionsPadding.bottom', // M3: 24.0 — conforms
+  'BaseDialog.actionsSpacing', // M3: 8.0 — conforms
+  'BaseDialog.actionsAlignment', // M3: end — conforms
+  'BaseDialog.icon.size', // M3: 24.0 — conforms
+  'BaseDialog.icon.color', // M3: secondary (pinned) — registered DLG-002
+  'BaseDialog.minWidth', // M3: 280.0 — registered DLG-003
+  'BaseDialog.maxWidth', // M3: 1200.0 at the harness surface — DLG-004
+  // BaseViewerDialog vs the same `AlertDialog` oracle: the viewer is a
+  // `Dialog` too, and measuring both dialog components against one ruler is
+  // what shows which differences they share and which are the viewer's own.
+  'BaseViewerDialog.shape', // M3: 28.0 — registered VIEW-001
+  'BaseViewerDialog.elevation', // M3: 6.0 — conforms
+  'BaseViewerDialog.containerColor', // M3: surfaceContainerHigh — conforms
+  'BaseViewerDialog.surfaceTintColor', // M3: transparent — conforms
+  'BaseViewerDialog.barrierColor', // M3: black at 54% — conforms
+  'BaseViewerDialog.titleTextStyle', // M3: headlineSmall — VIEW-002
+  'BaseViewerDialog.contentTextStyle', // M3: bodyMedium (pinned) — conforms
+  'BaseViewerDialog.headerPadding.start', // M3: 24.0 — registered VIEW-003
+  'BaseViewerDialog.contentPadding.start', // M3: 24.0 — registered VIEW-004
+  'BaseViewerDialog.actionsPadding.end', // M3: 24.0 — registered VIEW-005
+  'BaseViewerDialog.actionsPadding.bottom', // M3: 24.0 — VIEW-006
+  'BaseViewerDialog.actionsSpacing', // M3: 8.0 — conforms
+  'BaseViewerDialog.actionsAlignment', // M3: end — conforms
+  'BaseViewerDialog.minWidth', // M3: 280.0 — registered VIEW-007
+  'BaseViewerDialog.maxWidth', // M3: 1200.0 — registered VIEW-008
+  // The menu family, against two oracles: a real `PopupMenuButton` holding
+  // `PopupMenuItem`s for the surface and the item (BaseMenuItem is a
+  // PopupMenuItem subclass), and `MenuItemButton` — M3's own menu item, the
+  // only one with a leading-icon slot — for the glyph and the gap after it.
+  // Note that `titleSmall` and `labelLarge` share a metric triple in the M3
+  // type scale, so `describeTextRole` names the SDK's labelLarge `titleSmall`;
+  // both sides go through the same descriptor.
+  'BasePopupMenuButton.menu.shape', // M3: 4.0 — conforms
+  'BasePopupMenuButton.menu.containerColor', // M3: surfaceContainer — conforms
+  'BasePopupMenuButton.menu.elevation', // M3: 3.0 — conforms
+  'BasePopupMenuButton.menu.padding.vertical', // M3: 8.0 — conforms
+  'BasePopupMenuButton.iconSize', // M3: 24.0 — registered MENU-004
+  'BaseMenuItem.minHeight', // M3: 48.0 — conforms
+  'BaseMenuItem.contentPadding.start', // M3: 12.0 — conforms
+  'BaseMenuItem.labelTextStyle', // M3: labelLarge — conforms
+  'BaseMenuItem.labelColor', // M3: onSurface — conforms
+  'BaseMenuItem.disabled.labelColor', // M3: onSurface @ 38% — conforms
+  'BaseMenuItem.overlay.hovered', // M3: hoverColor ink — conforms
+  'BaseMenuItem.overlay.pressed', // M3: splash + highlight ink — conforms
+  'BaseMenuItem.overlay.focused', // M3: focusColor ink — conforms
+  'MenuItemContent.labelTextStyle', // M3: labelLarge — registered MENU-001
+  'MenuItemContent.disabled.labelColor', // M3: onSurface @ 38% — conforms
+  'MenuItemContent.iconSize', // M3: 24.0 — registered MENU-002
+  'MenuItemContent.leadingGap', // M3: 12.0 — registered MENU-003
+  // The badge family vs a real `Badge`, pumped through the same harness.
+  // Material 3 has one badge and this app has four, which is what the register
+  // entries below describe. `colorRoleName` reports M3's `onError` as
+  // `onPrimary` here, because the two roles are the same white in this app's
+  // scheme; both sides go through the same descriptor.
+  'BaseBadge.containerHeight', // M3: 16.0 (largeSize) — BADGE-001
+  'BaseBadge.shape', // M3: stadium — conforms
+  'BaseBadge.padding.horizontal', // M3: 4.0 — registered BADGE-002
+  'BaseBadge.labelFontSize', // M3: 11.0 (labelSmall) — BADGE-003
+  'BaseBadge.danger.containerColor', // M3: error — registered BADGE-004
+  'BaseBadge.danger.labelColor', // M3: onError — registered BADGE-005
+  'BaseNumericBadge.containerHeight', // M3: 16.0 — registered BADGE-006
+  'BaseNumericBadge.shape', // M3: stadium — conforms
+  'BaseNumericBadge.danger.containerColor', // M3: error — conforms
+  'BaseNumericBadge.danger.labelColor', // M3: onError — conforms
+  'BaseNumericBadge.labelTextStyle', // M3: labelSmall — BADGE-007
+  'BaseIconBadge.alignment', // M3: topEnd — conforms
+  'BaseIconBadge.offset', // M3: Offset(4, 4) from the child — conforms
+  'BaseIconBadge.labelTextStyle', // M3: labelSmall — registered BADGE-008
+  'BaseDotBadge.size', // M3: 6.0 (smallSize) — registered BADGE-009
+  'BaseDotBadge.shape', // M3: circle — conforms
 };

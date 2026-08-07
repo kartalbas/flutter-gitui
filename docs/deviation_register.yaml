@@ -145,6 +145,15 @@ deviations:
       action next to a dense toolbar. The earlier wording here claimed the
       8 dp corner was shared with text fields; it is not, and their 4 dp is
       the SDK default they provably match (FIELD family).
+
+      Since #399 the 8 dp is no longer written in the component. BaseButton
+      leaves shape unset so ButtonStyleButton resolves it from the theme, and
+      app_theme.dart configures filledButtonRadius, outlinedButtonRadius and
+      textButtonRadius from AppTheme.radiusM. Only the source moved, from a
+      widget constant to a theme token; the suite still measures what the
+      component renders, so this entry stays asserted - and if the token ever
+      stops arriving, the button falls back to the M3 stadium and this entry
+      fails as stale rather than passing quietly.
     registered: 2026-08-06
 
   - id: BTN-002
@@ -223,9 +232,23 @@ deviations:
     app_value: 8.0
     spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/icon_button.dart:1146 (_IconButtonDefaultsM3.shape, StadiumBorder = 20.0 dp at the 40 dp container)"
     rationale: >
-      The 8 dp control corner is shared with buttons (BTN-001), text
-      fields, cards and menus across this desktop app; a stadium pill
-      would break the shared corner language.
+      The 8 dp control corner is the one this app gives its small pressable
+      controls, and an icon button is the closest neighbour of the labelled
+      button that already carries it (BTN-001): the two stand side by side in
+      every toolbar, so a stadium pill next to an 8 dp button would read as a
+      different kind of control rather than as the same one without a label.
+      The wider surfaces keep their own corners and are not part of this
+      argument - cards and panels sit at 12 (both the M3 default they provably
+      match), text fields at the 4 dp M3 gives OutlineInputBorder, and a menu
+      surface at the 4 dp of the M3 popup menu.
+
+      Unlike BaseButton, which takes that corner from the theme since #399,
+      BaseIconButton names AppTheme.radiusM directly: FlexSubThemesData has a
+      radius token for every button family except the icon button, so no
+      configured token can reach an IconButton. app_theme.dart configures the
+      button radii from that same constant, and theme_token_reach_test.dart
+      asserts the two components still render the same corner, so the two
+      cannot drift apart.
     registered: 2026-08-06
 
   - id: ICO-002
@@ -545,4 +568,468 @@ deviations:
       multi-select one — see CHIP-001 — because the two appear side by side in
       the same dialogs and a user must not have to learn two ways of reading
       "this one is on".
+    registered: 2026-08-07
+
+  # BaseDialog (lib/shared/components/base_dialog.dart), measured against a
+  # real `AlertDialog` pushed with `showDialog` through the same conformance
+  # harness. The spec values are the generated `_DialogDefaultsM3` and
+  # `AlertDialog`'s own layout defaults. Two tokens have to be pinned from
+  # those sources rather than read off the pumped oracle, because this app's
+  # `dialogTheme` overrides them (see the suite's library comment); the
+  # entries affected say so.
+  #
+  # BaseDialog's padding, action spacing, action alignment, elevation, surface
+  # role, surface tint, barrier, title role, content role and icon size all
+  # measure the M3 value, so nothing about them is registered here.
+
+  - id: DLG-001
+    component: BaseDialog
+    property: shape
+    spec_value: 28.0
+    app_value: 12.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1967 (_DialogDefaultsM3.shape, RoundedRectangleBorder with a 28.0 radius)"
+    rationale: >
+      Decided rather than inherited, and decided against the spec value. 28 dp
+      is Material 3's extra-large corner, sized for a phone dialog that fills
+      most of a small screen. This app ships to Windows and Linux, where the
+      host dialogs are much squarer - Windows 11's own ContentDialog rounds at
+      8 dp and libadwaita's dialogs at 12 - and a 28 dp arc on a 650 dp wide
+      window reads as a mobile sheet rather than as a desktop dialog. 12 dp is
+      also the corner this app's surfaces already carry: BaseCard and BasePanel
+      both measure 12, and both reach it as the Material 3 default for a card,
+      so a dialog at 12 stays in the same corner language as the panels and
+      cards it hosts instead of introducing a radius more than twice theirs.
+      The argument for 28 - that M3 separates the two shapes so a dialog reads
+      as a distinct floating layer - is answered here by the properties that do
+      conform: the dialog sits at elevation 6 on surfaceContainerHigh behind a
+      54% black barrier, and none of those three was ever the corner's job.
+    registered: 2026-08-07
+
+  - id: DLG-002
+    component: BaseDialog
+    property: icon.color
+    spec_value: secondary
+    app_value: primary
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1976 (_DialogDefaultsM3.iconColor, colorScheme.secondary)"
+    rationale: >
+      Material 3 tints the dialog's hero icon `secondary` precisely so that it
+      does not compete with the action row. This app gives the icon a different
+      job: it says which of the three dialog variants is on screen. A
+      destructive prompt draws it in `error`, the same role as its confirm
+      button and its title, so the warning is readable before the text is; the
+      confirmation and normal variants draw it in `primary`, the role their own
+      affirmative action carries. A neutral third accent would leave the
+      destructive variant's icon looking like every other dialog's, which is
+      the one case where the glyph has to carry meaning on its own. The value
+      registered here is the confirmation variant's, and the suite asserts the
+      destructive variant's `error` next to it so this rationale cannot quietly
+      stop being true. The M3 value is pinned rather than measured, because the
+      app's own `dialogTheme.iconColor` overrides it and a pumped AlertDialog
+      would report the app's `primary` back as if it were the specification.
+    registered: 2026-08-07
+
+  - id: DLG-003
+    component: BaseDialog
+    property: minWidth
+    spec_value: 280.0
+    app_value: 650.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:275 (Dialog's default BoxConstraints(minWidth: 280.0), the width a dialog shrinks to around minimal content)"
+    rationale: >
+      A desktop dialog is a small window, and this app opens dialogs over dense
+      screens in quick succession - create branch, commit, edit remote, select
+      repository. Material 3 shrink-wraps each one to its content between
+      280 dp and the viewport, so every dialog is a different width and its
+      buttons, fields and labels land somewhere new each time one opens. A
+      single declared column width holds them in one place. It is the caller's
+      `maxWidth` parameter rather than a constant, so a dialog that genuinely
+      needs more room asks for it, and the default
+      (AppConstants.defaultDialogWidth, 650) is well above the M3 floor rather
+      than below it, so no dialog is ever narrower than the specification
+      allows.
+    registered: 2026-08-07
+
+  - id: DLG-004
+    component: BaseDialog
+    property: maxWidth
+    spec_value: 1200.0
+    app_value: 650.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:32 (_defaultInsetPadding, 40 dp each side; 1200 is the 1280 dp conformance surface less those two insets)"
+    rationale: >
+      The upper end of the single decision DLG-003 describes: because the width
+      is declared rather than derived, a dialog does not grow with its content
+      either. A form that would otherwise stretch to 1200 dp on a wide monitor
+      keeps its 650 dp column, which is also the readable measure for the
+      labelled fields these dialogs hold - a 1200 dp text field under a 15 px
+      label is a line nobody can scan. The declared width is still capped at
+      90% of the window, so a dialog can never outgrow a small screen.
+    registered: 2026-08-07
+
+  # BaseViewerDialog (lib/shared/components/base_viewer_dialog.dart), the app's
+  # second dialog shape: a fixed fraction of the window holding a diff, a table
+  # or a PDF, with a header bar in place of a title block and an edge-to-edge
+  # content area. It is measured against the same `AlertDialog` oracle as
+  # BaseDialog, which is what makes the shared decisions below distinguishable
+  # from the viewer's own.
+
+  - id: VIEW-001
+    component: BaseViewerDialog
+    property: shape
+    spec_value: 28.0
+    app_value: 12.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1967 (_DialogDefaultsM3.shape, RoundedRectangleBorder with a 28.0 radius)"
+    rationale: >
+      The same decision as DLG-001, and the viewer is the case that makes it
+      clearest: it fills 90% of the window, so Material 3's 28 dp would cut a
+      visible arc out of each corner of what the user reads as a second window
+      over the first. The two dialog components must also agree - they open
+      from the same screens, sometimes one from the other, and two different
+      corner radii would read as two different kinds of surface.
+    registered: 2026-08-07
+
+  - id: VIEW-002
+    component: BaseViewerDialog
+    property: titleTextStyle
+    spec_value: "headlineSmall (fontSize 22.0, weight FontWeight.w400)"
+    app_value: "titleLarge (fontSize 20.0, weight FontWeight.w400)"
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1988 (_DialogDefaultsM3.titleTextStyle, textTheme.headlineSmall)"
+    rationale: >
+      A viewer's title is not a dialog title block. It sits in a header bar
+      alongside a subtitle, a metadata readout, the viewer's own actions and a
+      close button, and Material 3's role for exactly that arrangement is
+      `titleLarge` - the role its own app bar uses (app_bar.dart:2563). At
+      `headlineSmall` the title would out-weigh the row it shares and push the
+      subtitle under it out of the header's height. The sizes inside the two
+      values are this app's registered type scale (TYPE-006 and TYPE-007), not
+      M3's 24 and 22; the roles are what this entry is about. The spec value is
+      pinned from `_DialogDefaultsM3` rather than measured, because the app's
+      `dialogTheme.titleTextStyle` overrides it - see DLG-002.
+    registered: 2026-08-07
+
+  - id: VIEW-003
+    component: BaseViewerDialog
+    property: headerPadding.start
+    spec_value: 24.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:825-830 (AlertDialog's default title padding, 24 dp on each side)"
+    rationale: >
+      The viewer's chrome is deliberately thinner than a dialog's, because
+      every dp it spends is taken from the diff, table or document it exists to
+      show - and unlike a form, that content is the reason the window is open
+      at all. 16 dp is the app's toolbar step and the same inset the viewer's
+      own header actions and close button stand on, so the header reads as a
+      toolbar rather than as an indented title block. VIEW-005 and VIEW-006 are
+      the same 16 dp at the other end of the viewer.
+    registered: 2026-08-07
+
+  - id: VIEW-004
+    component: BaseViewerDialog
+    property: contentPadding.start
+    spec_value: 24.0
+    app_value: 0.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:857-862 (AlertDialog's default content padding, 24 dp on each side)"
+    rationale: >
+      The viewer's content area is edge to edge on purpose. What it holds owns
+      its own horizontal structure - a diff's gutter and line numbers, a
+      table's column headers, a PDF page's own margins - and each of those is a
+      scrollable region whose scrollbar has to sit on the window edge where the
+      pointer looks for it, not 24 dp inside it. A dialog's content padding
+      exists to set prose and form fields off from the surface, and there is
+      neither here. Content that does need an inset brings its own, which is
+      why this is 0 rather than a smaller number.
+    registered: 2026-08-07
+
+  - id: VIEW-005
+    component: BaseViewerDialog
+    property: actionsPadding.end
+    spec_value: 24.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1994 (_DialogDefaultsM3.actionsPadding, 24 dp left, right and bottom)"
+    rationale: >
+      The same 16 dp chrome step as VIEW-003, applied to the footer so the
+      action row lines up with the header actions directly above it on the same
+      edge. A 24 dp footer under a 16 dp header would leave the two rows of
+      controls that frame the content visibly out of line.
+    registered: 2026-08-07
+
+  - id: VIEW-006
+    component: BaseViewerDialog
+    property: actionsPadding.bottom
+    spec_value: 24.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1994 (_DialogDefaultsM3.actionsPadding, 24 dp left, right and bottom)"
+    rationale: >
+      The vertical half of VIEW-005: the footer's inset is uniform, so the
+      action row sits the same 16 dp from the bottom edge as from the trailing
+      one. The spacing between the actions themselves is Material 3's 8 dp and
+      is therefore not registered.
+    registered: 2026-08-07
+
+  - id: VIEW-007
+    component: BaseViewerDialog
+    property: minWidth
+    spec_value: 280.0
+    app_value: 1152.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:275 (Dialog's default BoxConstraints(minWidth: 280.0), the width a dialog shrinks to around minimal content)"
+    rationale: >
+      A viewer is sized by the window, not by its content: it opens at 90% of
+      the viewport in both axes, which is 1152 dp of the 1280 dp conformance
+      surface. Shrink-wrapping would be actively wrong here, because the
+      content is a diff or a document whose useful width is however much the
+      screen can give it, and because a viewer that resized itself as the user
+      paged through a document would move its own controls out from under the
+      pointer.
+    registered: 2026-08-07
+
+  - id: VIEW-008
+    component: BaseViewerDialog
+    property: maxWidth
+    spec_value: 1200.0
+    app_value: 1152.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:32 (_defaultInsetPadding, 40 dp each side; 1200 is the 1280 dp conformance surface less those two insets)"
+    rationale: >
+      The upper end of VIEW-007's single fixed fraction, and the near miss that
+      shows the fraction is a decision rather than a coincidence: 90% of the
+      viewport leaves 64 dp of barrier on each side where Material 3's inset
+      padding leaves 40. The wider margin is what keeps a full-window viewer
+      legible as a layer above the app rather than as a new screen, and it is
+      the same factor `widthFactor` exposes to a caller that wants a narrower
+      viewer.
+    registered: 2026-08-07
+
+  # The menu family: `BaseMenuItem` and `MenuItemContent`
+  # (lib/shared/components/base_menu_item.dart) and `BasePopupMenuButton`
+  # (lib/shared/components/base_animated_widgets.dart). Two oracles, because
+  # `PopupMenuItem` has no leading-icon slot at all: a real `PopupMenuButton`
+  # holding `PopupMenuItem`s for the surface and the item, and Material 3's own
+  # `MenuItemButton` for the glyph and the gap that follows it.
+  #
+  # `BaseMenuItem` itself is registered nowhere: it is a `PopupMenuItem`
+  # subclass that overrides nothing, and its height, inset, label role, label
+  # colour, disabled colour and three state layers all measure the M3 value.
+  # Everything below is either the app's content row inside the item or the
+  # button that opens the menu.
+
+  - id: MENU-001
+    component: MenuItemContent
+    property: labelTextStyle
+    spec_value: "titleSmall (fontSize 14.0, weight FontWeight.w500)"
+    app_value: "bodyLarge (fontSize 15.0, weight FontWeight.w400)"
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/popup_menu.dart:1849 (_PopupMenuDefaultsM3.labelTextStyle, textTheme.labelLarge)"
+    rationale: >
+      Menus in this app are not lists of verbs; their entries name the same
+      things the rows behind them do - branch names, file paths, remotes,
+      commit subjects - and the user reads a menu entry and the row it acts on
+      in one glance. Setting the entry at the app's body size keeps those two
+      readings at the same size instead of shrinking a name by a step the
+      moment it moves into a menu. The size also has to hold across the whole
+      family: `MenuItemLabel` builds menu entries too, and additionally serves
+      segmented buttons and dropdown values outside any menu where it is held
+      to a different measured token (BaseDropdown.valueTextStyle), so a menu
+      that mixed the two builders would otherwise mix two label sizes. Note
+      that the spec value reads `titleSmall`: that role and `labelLarge` are
+      the same metric triple in the M3 type scale, so the suite's descriptor
+      cannot tell them apart and names the first it reaches - the SDK asks for
+      `labelLarge`.
+    registered: 2026-08-07
+
+  - id: MENU-002
+    component: MenuItemContent
+    property: iconSize
+    spec_value: 24.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/menu_anchor.dart:4130 (_MenuButtonDefaultsM3.iconSize, 24.0)"
+    rationale: >
+      A menu entry's leading glyph identifies the action; it is not a control
+      of its own, and at 24 dp it is taller than the 15 px label beside it and
+      becomes the first thing the eye lands on in a list of ten entries. 16 dp
+      is the app's dense icon step (AppTheme.iconS), already registered for the
+      compact icon button in ICO-003, and it is the size the same glyphs carry
+      in the tree and list rows these menus act on - so an entry's icon matches
+      the icon of the row it refers to.
+    registered: 2026-08-07
+
+  - id: MENU-003
+    component: MenuItemContent
+    property: leadingGap
+    spec_value: 12.0
+    app_value: 8.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/menu_anchor.dart:63 (_kLabelItemDefaultSpacing, the spacing _MenuItemLabel puts after a leading icon at standard visual density)"
+    rationale: >
+      The gap belongs with the glyph it follows: MENU-002 reduces that glyph
+      from 24 dp to 16, and keeping M3's 12 dp gap would leave the smaller icon
+      floating further from its label than the larger one does, which reads as
+      an indent rather than as an icon-and-label pair. 8 dp is the app's
+      spacing step below the 12 the SDK spends, and it preserves the
+      glyph-to-label proportion of the stock arrangement.
+    registered: 2026-08-07
+
+  - id: MENU-004
+    component: BasePopupMenuButton
+    property: iconSize
+    spec_value: 24.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/popup_menu.dart:1782 (PopupMenuButton takes its glyph size from the ambient IconTheme, which is 24 dp under Material 3)"
+    rationale: >
+      The overflow button is an icon button standing in a toolbar next to other
+      icon buttons, and it has to be the size they are or the row of controls
+      looks unaligned. 20 dp is the size already registered for the default
+      BaseIconButton glyph in ICO-004 (AppTheme.iconM), so this entry is that
+      one decision reaching the one icon button in the app that is not built
+      through BaseIconButton.
+    registered: 2026-08-07
+
+  # The badge family (lib/shared/components/base_badge.dart), measured against
+  # a real `Badge`. Material 3 has exactly one badge - a 16 dp notification
+  # marker in `error`, or a 6 dp dot - and this app has four components with
+  # three sizes and six variants between them, which is the decision every
+  # entry below follows from.
+  #
+  # `colorRoleName` names a colour after the first scheme role carrying that
+  # exact value, and `onError` and `onPrimary` are the same white in this app's
+  # scheme, so a spec value of `onPrimary` below means Material 3's `onError`.
+
+  - id: BADGE-001
+    component: BaseBadge
+    property: containerHeight
+    spec_value: 16.0
+    app_value: 25.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:495 (_BadgeDefaultsM3.largeSize, the fixed 16.0 height of a labelled badge)"
+    rationale: >
+      M3's badge is a marker that hangs off the corner of something else and
+      carries a count, so a fixed 16 dp height is all it needs. BaseBadge is a
+      status pill that stands in the layout on its own - "ahead 3", "conflict",
+      "detached HEAD" - beside text, buttons and chips, and a 16 dp capsule next
+      to a 32 dp button reads as a stray fragment. Its height is not a constant
+      either: it is the label plus 4 dp above and below, so the pill grows with
+      the three badge sizes and with the user's font-size setting instead of
+      clipping its label at a fixed 16. 25 dp is that sum at the default
+      (medium) size.
+    registered: 2026-08-07
+
+  - id: BADGE-002
+    component: BaseBadge
+    property: padding.horizontal
+    spec_value: 4.0
+    app_value: 16.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:496 (_BadgeDefaultsM3.padding, EdgeInsets.symmetric(horizontal: 4))"
+    rationale: >
+      4 dp is enough for the one or two digits M3's badge holds. BaseBadge
+      holds words, and a word inside a fully rounded pill needs the inset to
+      clear the curve - at 4 dp the first and last glyph sit inside the arc of
+      the end cap. 16 dp is the app's standard horizontal padding step and
+      matches what the chips this pill stands beside spend, so a filter chip
+      and a status pill in the same row have the same optical weight.
+    registered: 2026-08-07
+
+  - id: BADGE-003
+    component: BaseBadge
+    property: labelFontSize
+    spec_value: 11.0
+    app_value: 12.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:511 (_BadgeDefaultsM3.textStyle, textTheme.labelSmall, which is 11.0 at this app's scale)"
+    rationale: >
+      The badge label is the `labelSmall` role at a size stepped per badge
+      size; the suite asserts that its letter spacing and line-height ratio are
+      still labelSmall's, so this is a step within the role rather than an
+      invented style - the same mechanism the app's font-size setting applies
+      to every role. The step exists because BaseBadge has three sizes where M3
+      has one: 10 px for the dense small pill used inside list rows, 12 for the
+      default, 14 for the prominent one. 12 is the value registered here
+      because it is what the default renders.
+    registered: 2026-08-07
+
+  - id: BADGE-004
+    component: BaseBadge
+    property: danger.containerColor
+    spec_value: error
+    app_value: error @ 15%
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:505 (_BadgeDefaultsM3.backgroundColor, colorScheme.error)"
+    rationale: >
+      M3's badge is always a solid `error` fill, because it has exactly one
+      meaning: something needs attention. BaseBadge has six variants that have
+      to stay legible side by side - a file row can show a success pill, a
+      warning pill and a danger pill at once - and six solid fills in six
+      accent colours turn that row into a colour chart. A 15% tint of the
+      variant's own role keeps each pill's meaning while leaving the row's
+      dominant colour to the content behind it, and it is what lets the label
+      itself carry the accent (BADGE-005). The solid treatment is not lost:
+      BaseNumericBadge, the component that means what M3's badge means, uses
+      the solid `error` fill and conforms.
+    registered: 2026-08-07
+
+  - id: BADGE-005
+    component: BaseBadge
+    property: danger.labelColor
+    spec_value: onPrimary
+    app_value: error
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:508 (_BadgeDefaultsM3.textColor, colorScheme.onError - reported as onPrimary because the two roles are the same white in this scheme)"
+    rationale: >
+      The direct consequence of BADGE-004: an `onError` label is white, and
+      white on a 15% error tint is unreadable. The accent moves to the label,
+      where it does the work the solid fill used to do, and the pair stays a
+      contrast pair rather than becoming a colour-only signal - the label is
+      the darkest thing in the pill in both brightnesses.
+    registered: 2026-08-07
+
+  - id: BADGE-006
+    component: BaseNumericBadge
+    property: containerHeight
+    spec_value: 16.0
+    app_value: 20.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:495 (_BadgeDefaultsM3.largeSize, the fixed 16.0 height of a labelled badge)"
+    rationale: >
+      The count badge is the one component here that means what M3's badge
+      means, and it conforms on colour, on shape and on placement. Its height
+      does not, because it is used standing in a row rather than hanging off an
+      icon: a count next to a branch name or a panel title is read as part of
+      that line, and a 16 dp capsule beside a 15 px label sits visibly below
+      the line's cap height. 20 dp also carries a two-digit count with the 6 dp
+      side padding that keeps "99+" clear of the end cap.
+    registered: 2026-08-07
+
+  - id: BADGE-007
+    component: BaseNumericBadge
+    property: labelTextStyle
+    spec_value: "labelSmall (fontSize 11.0, weight FontWeight.w500)"
+    app_value: "labelMedium (fontSize 12.0, weight FontWeight.w700)"
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:511 (_BadgeDefaultsM3.textStyle, textTheme.labelSmall)"
+    rationale: >
+      One step up the label scale and one weight up, for the same reason: the
+      count is the entire content of the badge, it is set on a solid accent
+      fill, and it is read at desktop viewing distance rather than on a phone
+      held at arm's length. `labelMedium` is a real role of the type scale
+      rather than a size of its own, and the bold weight is what keeps two
+      digits legible against `primary` or `error` once the fill is solid.
+    registered: 2026-08-07
+
+  - id: BADGE-008
+    component: BaseIconBadge
+    property: labelTextStyle
+    spec_value: "labelSmall (fontSize 11.0, weight FontWeight.w500)"
+    app_value: "labelSmall (fontSize 11.0, weight FontWeight.w700)"
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:511 (_BadgeDefaultsM3.textStyle, textTheme.labelSmall)"
+    rationale: >
+      The role and the size conform; only the weight does not. This is the
+      badge that overlays an icon, so its label is set at 11 px on a fill only
+      16 dp across, sitting over whatever the icon beneath it happens to be -
+      the smallest and busiest place any text in this app appears. The bold
+      weight is the same one BADGE-007 gives the standalone count, so a count
+      reads the same whether it stands in a row or hangs off an icon.
+    registered: 2026-08-07
+
+  - id: BADGE-009
+    component: BaseDotBadge
+    property: size
+    spec_value: 6.0
+    app_value: 8.0
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/badge.dart:494 (_BadgeDefaultsM3.smallSize, the 6.0 diameter of an unlabelled badge)"
+    rationale: >
+      The dot marks state on a desktop screen viewed at arm's length rather
+      than on a phone held close, and it is frequently the only indication that
+      a branch has unpushed work or a file has been modified. At 6 dp it is
+      barely wider than the caret beside it on a standard-density monitor and
+      is genuinely easy to miss; 8 dp is the app's smallest spacing step and
+      keeps the marker visible without turning it into a bullet. The size is a
+      parameter, so a caller placing a dot inside a dense row can still ask for
+      the M3 6.
     registered: 2026-08-07

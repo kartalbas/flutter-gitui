@@ -269,7 +269,17 @@ class BaseNumericBadge extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(_minSize / 2),
       ),
+      // A shrink-wrapping centre, not a plain one. `Center` with no factors
+      // expands to whatever maximum it is offered, so the badge filled its
+      // parent whenever that parent handed down a bounded width - inside a
+      // Row or a Wrap the main axis is unbounded and it happened to hug its
+      // label, but in any bounded box (a SizedBox, a Center, a table cell) a
+      // 20 dp count badge became as large as the box. The factors make the
+      // centre size to the label, and the container's min constraints still
+      // hold it at 20 dp.
       child: Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
         // ignore: avoid_text_with_style
         child: Text(
           displayText,

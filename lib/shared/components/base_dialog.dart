@@ -371,6 +371,13 @@ class BaseDialog extends StatelessWidget {
 
           // ignore: avoid_dialog
           return Dialog(
+            // 12 dp, not Material 3's 28 (DLG-001 in
+            // docs/deviation_register.yaml). This is a Windows/Linux desktop
+            // app, and 28 dp is a phone-scale corner: it is the one radius in
+            // the whole app that would read as a mobile sheet. 12 dp is the
+            // surface corner this app already uses for the cards and panels
+            // the dialog hosts, and it sits between the 8 dp of Windows 11's
+            // own ContentDialog and the 12 dp of libadwaita's.
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppTheme.radiusL),
             ),
@@ -383,7 +390,15 @@ class BaseDialog extends StatelessWidget {
                 maxHeight: dialogHeight,
               ),
               child: Padding(
-                padding: EdgeInsets.all(AppTheme.paddingXL),
+                // Material 3's dialog insets, which happen to be exactly this
+                // app's own spacing steps: 24 dp around the whole dialog, 16
+                // between the title and the content, 24 between the content
+                // and the action row. These are AlertDialog's defaults
+                // (flutter/lib/src/material/dialog.dart:825 for the title
+                // padding, :857 for the content padding, :1994 for the
+                // actions padding). The uniform 32 dp this used to spend was
+                // never measured against them.
+                padding: EdgeInsets.all(AppTheme.paddingL),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -392,7 +407,17 @@ class BaseDialog extends StatelessWidget {
                     Row(
                       children: [
                         if (variantIcon != null) ...{
-                          Icon(variantIcon, size: 28, color: iconColor),
+                          // The M3 dialog icon is the ambient 24 dp glyph:
+                          // AlertDialog wraps it in an IconTheme that sets a
+                          // colour and nothing else
+                          // (flutter/lib/src/material/dialog.dart:818), so the
+                          // size comes from the theme. The 28 that stood here
+                          // was on no icon scale at all.
+                          Icon(
+                            variantIcon,
+                            size: AppTheme.iconL,
+                            color: iconColor,
+                          ),
                           SizedBox(width: AppTheme.paddingM),
                         },
                         Expanded(
@@ -409,7 +434,7 @@ class BaseDialog extends StatelessWidget {
                       ],
                     ),
 
-                    SizedBox(height: AppTheme.paddingL),
+                    SizedBox(height: AppTheme.paddingM),
 
                     // Content section (scrollable if long)
                     Flexible(child: SingleChildScrollView(child: content)),
@@ -420,10 +445,15 @@ class BaseDialog extends StatelessWidget {
                     // end-aligned run is the M3 fallback for that case and
                     // renders identically while one line fits.
                     if (actions != null && actions!.isNotEmpty) ...{
-                      SizedBox(height: AppTheme.paddingXL),
+                      SizedBox(height: AppTheme.paddingL),
                       Wrap(
                         alignment: WrapAlignment.end,
-                        spacing: AppTheme.paddingM,
+                        // 8 dp between actions, the spacing M3's OverflowBar
+                        // gets from AlertDialog's default buttonPadding
+                        // (dialog.dart:882). The run spacing is ours: an
+                        // OverflowBar stacks its overflow with no gap at all,
+                        // which would leave two wrapped buttons touching.
+                        spacing: AppTheme.paddingS,
                         runSpacing: AppTheme.paddingS,
                         children: [
                           for (final action in actions!)

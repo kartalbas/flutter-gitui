@@ -1,5 +1,19 @@
 import 'package:flutter/material.dart';
 
+/// The colour a menu item's own label should use when the caller names none.
+///
+/// It is the colour the enclosing menu item already published through its
+/// [DefaultTextStyle], not `colorScheme.onSurface`. That distinction is the
+/// whole point: `PopupMenuItem` resolves its label colour per widget state and
+/// hands a **disabled** item `onSurface` at 38%
+/// (flutter/lib/src/material/popup_menu.dart:1847-1852), and a content widget
+/// that spells `onSurface` out again paints straight over it — which is why a
+/// disabled entry in an overflow menu used to look exactly like an enabled one.
+/// Reading the inherited colour keeps every state the item resolves, and still
+/// lets a caller override it explicitly.
+Color? _inheritedLabelColor(BuildContext context) =>
+    DefaultTextStyle.of(context).style.color;
+
 /// Base component for all clickable menu items in the application.
 ///
 /// This ensures consistent font sizing across all menus (popup menus, dropdowns, etc.)
@@ -45,7 +59,7 @@ class MenuItemContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveLabelColor = labelColor ?? theme.colorScheme.onSurface;
+    final effectiveLabelColor = labelColor ?? _inheritedLabelColor(context);
 
     return Row(
       children: [
@@ -94,7 +108,9 @@ class MenuItemContentWithCheck extends StatelessWidget {
     final theme = Theme.of(context);
     final effectiveLabelColor =
         labelColor ??
-        (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
+        (isSelected
+            ? theme.colorScheme.primary
+            : _inheritedLabelColor(context));
     final effectiveIconColor =
         iconColor ??
         (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
@@ -157,7 +173,9 @@ class MenuItemContentTwoLine extends StatelessWidget {
     final theme = Theme.of(context);
     final effectivePrimaryColor =
         primaryLabelColor ??
-        (isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface);
+        (isSelected
+            ? theme.colorScheme.primary
+            : _inheritedLabelColor(context));
     final effectiveIconColor = iconColor;
     final effectiveSecondaryColor =
         secondaryLabelColor ?? theme.colorScheme.onSurfaceVariant;

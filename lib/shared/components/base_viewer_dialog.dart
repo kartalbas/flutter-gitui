@@ -121,6 +121,10 @@ class BaseViewerDialog extends StatelessWidget {
       onSubmit: onSubmit,
       child: Dialog(
         backgroundColor: backgroundColor,
+        // The same 12 dp corner BaseDialog carries, and for the same reason:
+        // see DLG-001/VIEW-001 in docs/deviation_register.yaml. A viewer fills
+        // 90% of the window, where Material 3's 28 dp would cut a visible arc
+        // out of every corner of what is effectively a second window.
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusL),
         ),

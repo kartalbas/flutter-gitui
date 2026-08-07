@@ -13,6 +13,18 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   plugins:
     - custom_lint
+  errors:
+    # Workspace-isolation gate (#383, prerequisite for the #249 skin
+    # packages): pub workspace resolution makes every workspace member
+    # importable and compilable from this package even without a dependency
+    # edge, and the analyzer's only objection is this lint - at its default
+    # info severity, which `flutter analyze` does not fail on. At error
+    # severity an import in lib/ of any package absent from `dependencies`
+    # (a future skin package, the lint plugin, any dev dependency) fails the
+    # blocking analysis step, so "the app cannot reach a skin package" is a
+    # hard invariant before the first skin package ever joins the workspace.
+    # test/conformance/dependency_isolation_gate_test.dart pins this entry.
+    depend_on_referenced_packages: error
 
 linter:
   # The lint rules applied to this project can be customized in the

@@ -22,6 +22,8 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_dialog.dart';
+import '../../shared/components/base_shrinking_row.dart';
+import '../../shared/components/base_switcher.dart';
 import '../git/git_providers.dart';
 import '../config/config_providers.dart';
 import '../services/notification_service.dart';
@@ -279,6 +281,12 @@ class _AppShellState extends ConsumerState<AppShell> {
     // so a screen's own claim was silently discarded. The host claims focus
     // only after the autofocus pipeline settled with nothing focused, and its
     // node is skipTraversal, so it is never a Tab stop.
+    //
+    // sanctioned-shortcuts: the shell's global chord map is the app's one
+    // legitimate raw shortcut surface (#382). Every binding _buildShortcuts
+    // returns is a Ctrl/Meta chord, which no editable and no navigable
+    // collection interprets, so it can never shadow text input or the shared
+    // navigation semantics.
     return CallbackShortcuts(
       bindings: _buildShortcuts(),
       child: BaseFocusRegionHost(
@@ -431,73 +439,91 @@ class _AppShellState extends ConsumerState<AppShell> {
                             child: LayoutBuilder(
                               builder: (context, constraints) => Row(
                                 children: [
-                                  // Only the switchers scroll. The git actions used
-                                  // to scroll with them, which at a narrow width
-                                  // simply carried them out of sight - nothing
-                                  // indicated more existed. They now sit outside
-                                  // the scroll area and collapse into an overflow
-                                  // menu instead.
-                                  // The switchers get the width they need before
-                                  // anything else claims it. They name the
-                                  // workspace, repository and branch every other
-                                  // control acts on, and a clipped name says
-                                  // nothing, whereas an action that no longer
-                                  // fits is still reachable in its overflow
-                                  // menu. Half the bar is the ceiling; past that
-                                  // they scroll, so they can never squeeze the
-                                  // actions out entirely.
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: constraints.maxWidth / 2,
-                                    ),
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: [
-                                          // Workspace switcher
-                                          const WorkspaceSwitcher(),
-                                          const SizedBox(
-                                            width: AppTheme.paddingM,
-                                          ),
-                                          // Repository switcher
-                                          const RepositorySwitcher(),
-                                          const SizedBox(
-                                            width: AppTheme.paddingM,
-                                          ),
-                                          // Branch switcher
-                                          const BranchSwitcher(),
-                                          const SizedBox(
-                                            width: AppTheme.paddingM,
-                                          ),
-                                          // Global branch switcher
-                                          const GlobalBranchSwitcher(),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppTheme.paddingM),
-                                  // The git actions stay rendered without a target
-                                  // and grey out with a reason, so the toolbar
-                                  // never shows an unexplained gap (#303).
-                                  //
-                                  // Expanded, so they take exactly what is left
-                                  // after the switchers and the controls on the
-                                  // right, and hand whatever no longer fits to
-                                  // their own overflow menu. A fixed share of the
-                                  // bar was the bug: it claimed its width whether
-                                  // or not the switchers needed it, so the names
-                                  // were clipped while every icon still showed.
-                                  // Aligned left so the group stays attached to
-                                  // the switchers it operates on.
+                                  // The switchers and the git actions share
+                                  // what the right-hand cluster leaves over.
+                                  // Their split is measured rather than
+                                  // flexed: an equal flex split hands each
+                                  // side a quota regardless of need, which
+                                  // squeezed every switcher into a bordered
+                                  // sliver while the git icons kept room they
+                                  // could have yielded to their overflow menu.
                                   Expanded(
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: OverflowActionBar(
-                                        actions: _buildGitActions(
-                                          context,
-                                          ref,
-                                          gitActionTargets,
-                                        ),
+                                    child: LayoutBuilder(
+                                      builder: (context, inner) => Row(
+                                        children: [
+                                          // The switchers get the width they
+                                          // need before the git actions claim
+                                          // any: they name the workspace,
+                                          // repository and branch every other
+                                          // control acts on, and a clipped
+                                          // name says nothing, whereas an
+                                          // action that no longer fits stays
+                                          // reachable in its overflow menu.
+                                          // Their ceiling reserves that menu's
+                                          // button, so the actions can never
+                                          // be squeezed out entirely. Within
+                                          // the ceiling each switcher shrinks
+                                          // to an ellipsized label - never
+                                          // below the width its fixed chrome
+                                          // needs - instead of the group
+                                          // scrolling, which used to cut the
+                                          // last switcher mid-widget into a
+                                          // seemingly empty sliver whose
+                                          // render box reached under the git
+                                          // actions.
+                                          ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth:
+                                                  (inner.maxWidth -
+                                                          AppTheme.paddingM -
+                                                          OverflowActionBar
+                                                              .menuExtent)
+                                                      .clamp(
+                                                        0.0,
+                                                        inner.maxWidth,
+                                                      ),
+                                            ),
+                                            child: const BaseShrinkingRow(
+                                              spacing: AppTheme.paddingM,
+                                              minChildWidth:
+                                                  BaseSwitcher.minShrunkWidth,
+                                              children: [
+                                                WorkspaceSwitcher(),
+                                                RepositorySwitcher(),
+                                                BranchSwitcher(),
+                                                GlobalBranchSwitcher(),
+                                              ],
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: AppTheme.paddingM,
+                                          ),
+                                          // The git actions stay rendered
+                                          // without a target and grey out with
+                                          // a reason, so the toolbar never
+                                          // shows an unexplained gap (#303).
+                                          //
+                                          // Expanded, so they take exactly
+                                          // what the switchers leave - at
+                                          // least their overflow menu button,
+                                          // by the ceiling above - and hand
+                                          // whatever no longer fits to that
+                                          // menu. Aligned left so the group
+                                          // stays attached to the switchers
+                                          // it operates on.
+                                          Expanded(
+                                            child: Align(
+                                              alignment: Alignment.centerLeft,
+                                              child: OverflowActionBar(
+                                                actions: _buildGitActions(
+                                                  context,
+                                                  ref,
+                                                  gitActionTargets,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),

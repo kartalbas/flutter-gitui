@@ -1,0 +1,18 @@
+# This package is analyzed on its own, resolved by its own `dart pub get`.
+#
+# It needs its own configuration rather than inheriting the repository's,
+# because the analyzer searches upward for the nearest analysis_options.yaml
+# and would otherwise find the root one -- which excludes this directory, so
+# analysing the package here would have reported "No issues found!" no matter
+# what the code said. The root excludes it because the root has no resolution
+# for `archive` and `path`; that exclusion must not follow the package into
+# its own analysis.
+#
+# Deliberately no `include:`: this package depends only on `archive` and
+# `path`, so a lint bundle would have to become a dependency of the updater
+# to configure the updater. Errors -- undefined symbols, type errors, dead
+# code paths -- are reported without one, and those are what this gate is for.
+analyzer:
+  language:
+    strict-casts: true
+    strict-raw-types: true

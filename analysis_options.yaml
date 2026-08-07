@@ -13,6 +13,15 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   plugins:
     - custom_lint
+  exclude:
+    # A separate package with its own pubspec and its own dependencies. The
+    # root analyzer pulls its sources in but has no resolution for `archive`
+    # or `path`, so every symbol from them reads as undefined -- unless the
+    # developer happens to have run `dart pub get` inside that directory once,
+    # which is why a fresh checkout reported five errors in code that is fine.
+    # It is analyzed on its own terms by the CI step that resolves it first,
+    # so excluding it here hides nothing.
+    - release/updater/**
   errors:
     # Workspace-isolation gate (#383, prerequisite for the #249 skin
     # packages): pub workspace resolution makes every workspace member

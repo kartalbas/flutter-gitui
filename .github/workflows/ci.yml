@@ -45,11 +45,23 @@ jobs:
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .
 
-      # lint_rules/ resolves as a member of the root pub workspace, sharing one
-      # analyzer with the app, so the plugin package is analyzed here together
-      # with the application sources.
+      # The whole repository, for the same reason the format step covers it:
+      # a narrower scope left tools/ unanalyzed and made the gate disagree
+      # with the plain command a developer runs. lint_rules/ resolves as a
+      # member of the root pub workspace and shares this analyzer, so the
+      # plugin package is covered here together with the application sources.
       - name: Analyze application code
-        run: flutter analyze lib test lint_rules
+        run: flutter analyze
+
+      # release/updater is a separate package, excluded from the root analysis
+      # because the root has no resolution for its dependencies. It is the code
+      # that downloads and unpacks an update, so it gets its own gate rather
+      # than none: resolve it, then analyze it on its own terms.
+      - name: Analyze the updater package
+        working-directory: release/updater
+        run: |
+          dart pub get
+          dart analyze
 
       # Blocking design-system gate: executes the avoid_* rules from
       # lint_rules/flutter_gitui_lint. `flutter analyze` never runs custom_lint

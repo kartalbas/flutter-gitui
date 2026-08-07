@@ -155,7 +155,7 @@ class _BasePanelState extends State<BasePanel> {
                             _isExpanded
                                 ? PhosphorIconsRegular.caretUp
                                 : PhosphorIconsRegular.caretDown,
-                            size: 20,
+                            size: AppTheme.iconM,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         },

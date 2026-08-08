@@ -28,6 +28,12 @@ import 'package:gitui_skin_api/gitui_skin_api.dart';
 /// or a `BorderRadius` is still a defect here, it is just that the constant it
 /// must come from now lives in the skin instead of the application.
 abstract final class MaterialMetrics {
+  /// The densest inset that still reads: a code line, a table row. Material
+  /// has no token for this because its own dense tables set the row height
+  /// rather than the row's padding, so the value is measured from what this
+  /// application's blame and diff views already used.
+  static const double spaceHairline = 2;
+
   /// Touching. Two halves of one thing.
   static const double spaceXS = 4;
 
@@ -112,6 +118,7 @@ abstract final class MaterialSpacing {
   /// How far a container's content sits from its own edge.
   static double inset(Inset inset) => switch (inset) {
     Inset.none => 0,
+    Inset.hairline => MaterialMetrics.spaceHairline,
     Inset.tight => MaterialMetrics.spaceS,
     Inset.normal => MaterialMetrics.spaceM,
     Inset.roomy => MaterialMetrics.spaceL,

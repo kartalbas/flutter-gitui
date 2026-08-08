@@ -799,7 +799,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         Expanded(
                           child: CommitDetailsPanel(commit: selection.primary!),
                         ),
-                        // Two panes of one region: `related`, Material's 8.
+                        // Two panes of one region: `related`.
                         const BaseGap(Proximity.related),
                         Expanded(
                           child: FileTreePanel(

@@ -99,7 +99,7 @@ class CommitListItem extends ConsumerWidget {
           BaseLabel(commit.shortSubject, role: TextRole.body, maxLines: 2),
 
           // A subject and the lines qualifying it are two halves of one
-          // thing: `hairline`, Material's 4.
+          // thing: `hairline`.
           const BaseGap(Proximity.hairline),
 
           // Refs (branches, tags)

@@ -170,7 +170,7 @@ class _CenteredNote extends StatelessWidget {
         children: [
           mark,
           // The mark and the sentence under it are members of one statement:
-          // `grouped`, Material's 16.
+          // `grouped`.
           const BaseGap(Proximity.grouped),
           BaseLabel(message, role: TextRole.body, tone: tone),
         ],

@@ -99,7 +99,7 @@ class BranchListTile extends ConsumerWidget {
           // Subtitle with commit message and tracking
           if (branch.lastCommitMessage != null) ...[
             // A title and the line that qualifies it are two halves of one
-            // thing: `hairline`, Material's 4.
+            // thing: `hairline`.
             const BaseGap(Proximity.hairline),
             BaseLabel(
               branch.lastCommitMessage!,

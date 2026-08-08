@@ -106,7 +106,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               autofocus: true,
             ),
             // A field and the options qualifying it are members of one
-            // group: `grouped`, Material's 16.
+            // group: `grouped`.
             const BaseGap(Proximity.grouped),
 
             // Search options
@@ -139,7 +139,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                 ),
               ],
             ),
-            // Two groups inside one form: `separate`, Material's 24.
+            // Two groups inside one form: `separate`.
             const BaseGap(Proximity.separate),
 
             // Specific filters

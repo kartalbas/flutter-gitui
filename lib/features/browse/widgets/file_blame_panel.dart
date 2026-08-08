@@ -281,12 +281,9 @@ class FileBlamePanel extends ConsumerWidget {
     return BaseInset(
       // A code line is as dense vertically as a row can be and reads at the
       // ordinary distance from the gutter: the two axes genuinely answer
-      // differently, which is why `inset` takes them separately. The literal
-      // 2 becomes `tight` - Material's 8 - and the line grows by 6 pixels of
-      // height; the alternative was to keep a number no ladder in the
-      // application contains.
+      // differently, which is why `inset` takes them separately.
       x: Inset.normal,
-      y: Inset.tight,
+      y: Inset.hairline,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

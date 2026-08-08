@@ -22,14 +22,14 @@ class BrowseNoFileSelectedState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           // The hero glyph and the headline are two groups inside one region:
-          // `separate`, Material's 24.
+          // `separate`.
           const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.noFileSelected,
             role: TextRole.pageTitle,
           ),
           // The headline and the sentence explaining it are two parts of one
-          // statement: `related`, Material's 8.
+          // statement: `related`.
           const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.selectFileToViewHistoryOrPreview,

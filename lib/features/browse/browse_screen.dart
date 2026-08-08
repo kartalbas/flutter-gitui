@@ -161,7 +161,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     child: _buildToolbar(context),
                   ),
                   // The toolbar and the panes under it are members of one
-                  // group: `grouped`, Material's 16.
+                  // group: `grouped`.
                   const BaseGap(Proximity.grouped),
                   // Main content
                   Expanded(

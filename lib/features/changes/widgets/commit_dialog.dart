@@ -199,7 +199,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             // button out of the dialog.
             if (_showStagedFiles && stagedFiles.isNotEmpty) ...[
               // The summary and the list it expands into are two parts of one
-              // statement: `related`, Material's 8.
+              // statement: `related`.
               const BaseGap(Proximity.related),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 160),
@@ -210,11 +210,11 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                     final file = stagedFiles[index];
                     return BaseInset(
                       // The rows of a dense file list are barely set off from
-                      // one another: `tight` vertically, nothing horizontally,
-                      // because the list already sits inside the dialog's own
-                      // inset.
+                      // one another: `hairline` vertically, nothing
+                      // horizontally, because the list already sits inside the
+                      // dialog's own inset.
                       x: Inset.none,
-                      y: Inset.tight,
+                      y: Inset.hairline,
                       child: Row(
                         children: [
                           FileStatusBadge(
@@ -238,7 +238,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             ],
 
             // The summary above and the field below belong to two different
-            // groups inside one form: `separate`, Material's 24.
+            // groups inside one form: `separate`.
             const BaseGap(Proximity.separate),
 
             // Commit message field

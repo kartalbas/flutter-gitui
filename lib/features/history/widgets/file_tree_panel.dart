@@ -109,7 +109,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   // The mark and the sentence under it are members of one
-                  // statement: `grouped`, Material's 16.
+                  // statement: `grouped`.
                   const BaseGap(Proximity.grouped),
                   BaseLabel(
                     AppLocalizations.of(context)!.messageNoFilesChanged,

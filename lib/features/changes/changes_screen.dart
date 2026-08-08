@@ -119,7 +119,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                       // are the surface, and the surface leaves with its
                       // member. Only how far the bar holds its buttons off its
                       // own edge is the design language's question, and that is
-                      // `Inset.normal` - Material's 16.
+                      // `Inset.normal`.
                       child: BaseInset(
                         child: SafeArea(
                           child: unstagedFiles.isEmpty

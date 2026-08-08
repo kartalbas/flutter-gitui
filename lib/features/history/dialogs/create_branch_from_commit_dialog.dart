@@ -87,7 +87,7 @@ class _CreateBranchFromCommitDialogState
               ),
             ),
           ),
-          // Two groups inside one form: `separate`, Material's 24.
+          // Two groups inside one form: `separate`.
           const BaseGap(Proximity.separate),
 
           // Branch name input

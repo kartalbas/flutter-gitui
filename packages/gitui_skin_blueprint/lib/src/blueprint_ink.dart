@@ -539,6 +539,7 @@ final class BlueprintDistance {
   /// How far a container's content sits from its own edge.
   double inset(Inset inset) => switch (inset) {
     Inset.none => 0,
+    Inset.hairline => pixels / 6,
     Inset.tight => pixels / 3,
     Inset.normal => pixels * 2 / 3,
     Inset.roomy => pixels,

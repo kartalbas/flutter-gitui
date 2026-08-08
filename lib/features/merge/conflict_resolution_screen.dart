@@ -175,7 +175,7 @@ class _ConflictResolutionScreenState
                 color: context.gitColors.added,
               ),
               // A hero glyph and the headline under it are two groups inside
-              // one region: `separate`, Material's 24.
+              // one region: `separate`.
               const BaseGap(Proximity.separate),
               BaseLabel(
                 AppLocalizations.of(context)!.dialogTitleNoMergeInProgress,
@@ -292,7 +292,7 @@ class _ConflictResolutionScreenState
         Container(
           // The header's fill stays: it is the surface, and the surface leaves
           // with its member. How far it holds its content off its own edge is
-          // the language's question - `Inset.normal`, Material's 16.
+          // the language's question - `Inset.normal`.
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: BaseInset(
             child: Row(

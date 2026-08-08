@@ -368,7 +368,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     // A mark and the word beside it are two halves of one
-                    // thing: `hairline`, Material's 4.
+                    // thing: `hairline`.
                     const BaseGap(Proximity.hairline),
                     BaseLabel(
                       _selectedFile!.isPartiallyStaged

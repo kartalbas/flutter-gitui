@@ -210,7 +210,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
             role: TextRole.sectionTitle,
           ),
           // A section title and the list it names are two parts of one
-          // statement: `related`, Material's 8.
+          // statement: `related`.
           const BaseGap(Proximity.related),
 
           // List of commits being squashed
@@ -250,7 +250,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
             ),
           ),
 
-          // Two groups inside one form: `separate`, Material's 24.
+          // Two groups inside one form: `separate`.
           const BaseGap(Proximity.separate),
 
           BaseLabel(l10n.newCommitMessage, role: TextRole.sectionTitle),

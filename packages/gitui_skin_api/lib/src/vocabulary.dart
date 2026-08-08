@@ -62,6 +62,17 @@ enum Inset {
   /// an image that must bleed.
   none,
 
+  /// As close to the edge as the content stays legible: a line of code, a row
+  /// in a listing dense enough that its height is the point.
+  ///
+  /// Distinct from [tight] on purpose. Folding the two together is the obvious
+  /// economy and it is wrong: it made every line of the blame view and every
+  /// row of the commit dialog's file list twelve pixels taller, which is not a
+  /// tuning difference but a different answer to "how much code fits on the
+  /// screen". Every language has this rung - it is the inset of a table row,
+  /// not of a chip - so it is named rather than left to each skin to guess.
+  hairline,
+
   /// Barely set in. A dense row, a chip, a badge.
   tight,
 

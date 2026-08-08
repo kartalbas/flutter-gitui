@@ -64,7 +64,7 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
             role: TextRole.body,
           ),
           // The question and the option qualifying it are two parts of one
-          // statement: `related`, Material's 8.
+          // statement: `related`.
           const BaseGap(Proximity.related),
           CheckboxListTile(
             value: _force,

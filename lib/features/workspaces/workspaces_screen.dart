@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, Proximity;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -22,6 +23,7 @@ import '../../core/services/notification_service.dart';
 import 'widgets/workspace_list_item.dart';
 import 'widgets/workspaces_empty_state.dart';
 import 'widgets/workspace_card.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Workspaces screen - shows all workspaces and allows selection
 class WorkspacesScreen extends ConsumerStatefulWidget {
@@ -108,7 +110,7 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
                     );
                   },
                 ),
-                const SizedBox(width: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
               ]
             : null,
         moreMenuItems: [
@@ -122,8 +124,8 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
+      body: BaseInset(
+        all: Inset.roomy,
         child: hasProjects
             ? Consumer(
                 builder: (context, ref, child) {

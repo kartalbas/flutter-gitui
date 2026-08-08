@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// No repository state for stashes screen
 class StashesNoRepositoryState extends StatelessWidget {
@@ -21,12 +21,12 @@ class StashesNoRepositoryState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.noRepositoryOpen,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.openRepositoryToManageStashes,
             role: TextRole.body,

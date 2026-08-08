@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_viewer_dialog.dart';
 import '../../../core/git/git_providers.dart';
@@ -86,7 +88,9 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
                     size: AppTheme.iconXL,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  // The mark and the sentence under it are members of one
+                  // statement: `grouped`, Material's 16.
+                  const BaseGap(Proximity.grouped),
                   BaseLabel(
                     l10n.noCommitsInRange,
                     role: TextRole.body,
@@ -105,7 +109,7 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
                 role: TextRole.detail,
                 tone: Tone.muted,
               ),
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               Expanded(
                 child: ListView.builder(
                   itemCount: commits.length,
@@ -134,7 +138,9 @@ class _CompareCommitRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BaseLabel(commit.shortSubject, role: TextRole.body, maxLines: 2),
-          const SizedBox(height: AppTheme.paddingXS),
+          // A subject and the line qualifying it are two halves of one
+          // thing: `hairline`.
+          const BaseGap(Proximity.hairline),
           Row(
             children: [
               BaseLabel(
@@ -142,13 +148,15 @@ class _CompareCommitRow extends StatelessWidget {
                 role: TextRole.detail,
                 tone: Tone.muted,
               ),
-              const SizedBox(width: AppTheme.paddingS),
-              Icon(
-                PhosphorIconsRegular.user,
-                size: AppTheme.iconXS,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              const BaseGap(Proximity.related),
+              // The inline-metadata mark of a row, at the one scale that job
+              // takes everywhere: `compact`.
+              const BaseIcon(
+                IconRole.user,
+                scale: ControlScale.compact,
+                tone: Tone.muted,
               ),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               Flexible(
                 child: BaseLabel(
                   commit.author,
@@ -157,7 +165,7 @@ class _CompareCommitRow extends StatelessWidget {
                   maxLines: 1,
                 ),
               ),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               Flexible(
                 child: BaseLabel(
                   commit.authorDateDisplay(

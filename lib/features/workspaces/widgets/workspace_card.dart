@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -11,6 +11,7 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Workspace card widget for grid view
 class WorkspaceCard extends StatelessWidget {
@@ -55,7 +56,7 @@ class WorkspaceCard extends StatelessWidget {
       customBackgroundColor: isSelected
           ? project.color.withValues(alpha: 0.1)
           : null,
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+      inset: Inset.normal,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -64,17 +65,19 @@ class WorkspaceCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: project.color.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
-                child: Icon(
-                  project.isDefaultWorkspace
-                      ? PhosphorIconsBold.house
-                      : PhosphorIconsBold.folder,
-                  color: project.color,
-                  size: AppTheme.iconL,
+                child: BaseInset(
+                  all: Inset.normal,
+                  child: Icon(
+                    project.isDefaultWorkspace
+                        ? PhosphorIconsBold.house
+                        : PhosphorIconsBold.folder,
+                    color: project.color,
+                    size: AppTheme.iconL,
+                  ),
                 ),
               ),
               const Spacer(),
@@ -116,7 +119,7 @@ class WorkspaceCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Project name
           BaseLabel(
@@ -126,11 +129,11 @@ class WorkspaceCard extends StatelessWidget {
           ),
 
           if (description != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(description, role: TextRole.body, maxLines: 2),
           ],
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Repository count
           Row(
@@ -140,7 +143,7 @@ class WorkspaceCard extends StatelessWidget {
                 size: AppTheme.iconS,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               BaseLabel(
                 AppLocalizations.of(
                   context,

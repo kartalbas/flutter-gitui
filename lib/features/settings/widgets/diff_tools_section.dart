@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
 import '../../../core/diff/diff_providers.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
 import 'settings_section.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Diff and merge tools section for settings screen
 class DiffToolsSection extends ConsumerWidget {
@@ -57,7 +57,7 @@ class DiffToolsSection extends ConsumerWidget {
                             : Tone.neutral,
                       ),
                       if (tools.customDiffToolVersion != null) ...[
-                        const SizedBox(height: AppTheme.paddingXS),
+                        const BaseGap(Proximity.hairline),
                         BaseLabel(
                           l10n.version(tools.customDiffToolVersion!),
                           role: TextRole.detail,
@@ -103,7 +103,7 @@ class DiffToolsSection extends ConsumerWidget {
                             : Tone.neutral,
                       ),
                       if (tools.customMergeToolVersion != null) ...[
-                        const SizedBox(height: AppTheme.paddingXS),
+                        const BaseGap(Proximity.hairline),
                         BaseLabel(
                           l10n.version(tools.customMergeToolVersion!),
                           role: TextRole.detail,

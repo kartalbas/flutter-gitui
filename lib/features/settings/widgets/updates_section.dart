@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../generated/app_localizations.dart';
@@ -20,6 +20,7 @@ import '../../../core/services/update_reasons.dart';
 import '../../../shared/dialogs/update_available_dialog.dart';
 import '../../../features/changelog/changelog_dialog.dart';
 import 'settings_section.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Updates section for settings
 ///
@@ -205,8 +206,8 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       icon: IconRole.downloadSimple,
       children: [
         // Current version
-        Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+        BaseInset(
+          all: Inset.normal,
           child: Row(
             children: [
               Icon(
@@ -214,7 +215,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
                 size: AppTheme.iconS,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               BaseLabel(
                 l10n.currentVersion,
                 role: TextRole.body,
@@ -339,8 +340,8 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           const Divider(),
 
           // Check for Updates button
-          Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
+          BaseInset(
+            all: Inset.normal,
             child: BaseButton(
               label: isChecking
                   ? l10n.checkingForUpdates
@@ -354,13 +355,13 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           ),
         ],
 
-        // View Changelog button
-        Padding(
-          padding: const EdgeInsets.only(
-            left: AppTheme.paddingM,
-            right: AppTheme.paddingM,
-            bottom: AppTheme.paddingM,
-          ),
+        // View Changelog button. Its three-sided padding was an inset with
+        // one side missing, which is composition written as a number: the
+        // section above owns the space over the button, so the button takes
+        // an ordinary inset across and below and the run states the rest.
+        BaseInset(
+          x: Inset.normal,
+          y: Inset.none,
           child: BaseButton(
             label: l10n.viewReleaseHistory,
             variant: ButtonVariant.secondary,
@@ -371,6 +372,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             fullWidth: true,
           ),
         ),
+        const BaseGap(Proximity.grouped),
       ],
     );
   }

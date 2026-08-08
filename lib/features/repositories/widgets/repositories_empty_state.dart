@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Empty state for repositories screen
 class RepositoriesEmptyState extends StatelessWidget {
@@ -31,18 +33,23 @@ class RepositoriesEmptyState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.primary,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.noRepositoriesYet,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.addRepositoryToGetStarted,
             role: TextRole.body,
             tone: Tone.muted,
           ),
-          const SizedBox(height: AppTheme.paddingXL),
+          // The verbal statement and the actions offered under it are two
+          // groups inside the one empty-state region: `separate`, the word
+          // every other empty state uses at this boundary. It is not
+          // `sectioned` - a message and its own call to action are not two
+          // regions about different subjects.
+          const BaseGap(Proximity.separate),
           Wrap(
             spacing: AppTheme.paddingM,
             runSpacing: AppTheme.paddingM,
@@ -101,9 +108,9 @@ class _ActionCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             BaseLabel(title, role: TextRole.pageTitle, align: TextAlign.center),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               description,
               role: TextRole.detail,

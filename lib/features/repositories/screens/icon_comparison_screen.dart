@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show Inset, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Temporary screen to compare repository icon options
 class IconComparisonScreen extends StatelessWidget {
@@ -82,8 +84,8 @@ class IconComparisonScreen extends StatelessWidget {
           role: TextRole.pageTitle,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
+      body: BaseInset(
+        all: Inset.roomy,
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -130,7 +132,7 @@ class _IconCard extends StatelessWidget {
         children: [
           // Icon name
           BaseLabel(option.name, role: TextRole.itemTitle),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Icons (regular and bold variants)
           Row(
@@ -144,11 +146,11 @@ class _IconCard extends StatelessWidget {
                     size: AppTheme.iconXL * 2,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  const SizedBox(height: AppTheme.paddingXS),
+                  const BaseGap(Proximity.hairline),
                   BaseLabel('Regular', role: TextRole.micro, tone: Tone.muted),
                 ],
               ),
-              const SizedBox(width: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
               // Bold variant
               Column(
                 children: [
@@ -157,13 +159,13 @@ class _IconCard extends StatelessWidget {
                     size: AppTheme.iconXL * 2,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(height: AppTheme.paddingXS),
+                  const BaseGap(Proximity.hairline),
                   BaseLabel('Bold', role: TextRole.micro, tone: Tone.muted),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Description
           BaseLabel(

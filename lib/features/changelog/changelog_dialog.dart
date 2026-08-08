@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +15,7 @@ import '../../core/models/changelog_release.dart';
 import '../../core/services/changelog_service.dart';
 import '../../core/services/version_service.dart';
 import '../../core/services/logger_service.dart';
+import '../../shared/components/base_layout.dart';
 
 class ChangelogDialog extends HookConsumerWidget {
   final int initialIndex;
@@ -129,117 +130,129 @@ class ChangelogDialog extends HookConsumerWidget {
                 // Version header
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
                     ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.new_releases,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 20,
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          BaseLabel(
-                            'Version ${release.version}',
-                            role: TextRole.pageTitle,
-                          ),
-                          if (index == 0) ...[
-                            const SizedBox(width: AppTheme.paddingS),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppTheme.paddingS,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusL,
+                  child: BaseInset(
+                    all: Inset.normal,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.new_releases,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 20,
+                            ),
+                            const BaseGap(Proximity.related),
+                            BaseLabel(
+                              'Version ${release.version}',
+                              role: TextRole.pageTitle,
+                            ),
+                            if (index == 0) ...[
+                              const BaseGap(Proximity.related),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppTheme.paddingS,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusL,
+                                  ),
+                                ),
+                                // Tone.onAccent, not a dropped override: the
+                                // pill behind this text is painted with the
+                                // accent by the application itself, which is
+                                // the exact case the tone's doc names. It
+                                // leaves with the pill when the badge surface
+                                // migrates.
+                                child: BaseLabel(
+                                  'LATEST',
+                                  role: TextRole.micro,
+                                  tone: Tone.onAccent,
                                 ),
                               ),
-                              // Tone.onAccent, not a dropped override: the
-                              // pill behind this text is painted with the
-                              // accent by the application itself, which is
-                              // the exact case the tone's doc names. It
-                              // leaves with the pill when the badge surface
-                              // migrates.
-                              child: BaseLabel(
-                                'LATEST',
-                                role: TextRole.micro,
-                                tone: Tone.onAccent,
-                              ),
+                            ],
+                          ],
+                        ),
+                        const BaseGap(Proximity.related),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                            const BaseGap(Proximity.hairline),
+                            BaseLabel(
+                              _formatDate(release.date),
+                              role: TextRole.detail,
+                              tone: Tone.muted,
+                            ),
+                            const BaseGap(Proximity.grouped),
+                            Icon(
+                              Icons.commit,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                            const BaseGap(Proximity.hairline),
+                            BaseLabel(
+                              release.commit,
+                              role: TextRole.detail,
+                              tone: Tone.muted,
                             ),
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: AppTheme.paddingS),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.calendar_today,
-                            size: 14,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: AppTheme.paddingXS),
-                          BaseLabel(
-                            _formatDate(release.date),
-                            role: TextRole.detail,
-                            tone: Tone.muted,
-                          ),
-                          const SizedBox(width: AppTheme.paddingM),
-                          Icon(
-                            Icons.commit,
-                            size: 14,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: AppTheme.paddingXS),
-                          BaseLabel(
-                            release.commit,
-                            role: TextRole.detail,
-                            tone: Tone.muted,
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
                 // Changelog content
                 Expanded(
+                  // A scroll view's padding is the inset its content owes
+                  // the viewport's edge and scrolls with it, so it is stated
+                  // as an inset around the content.
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppTheme.paddingL),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: MarkdownBody(
-                        data: release.changelog,
-                        selectable: true,
-                        styleSheet: MarkdownStyleSheet(
-                          h3: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            height: 2,
-                            color: Theme.of(context).colorScheme.onSurface,
+                    child: BaseInset(
+                      all: Inset.roomy,
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: MarkdownBody(
+                          data: release.changelog,
+                          selectable: true,
+                          styleSheet: MarkdownStyleSheet(
+                            h3: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  height: 2,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                            p: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              height: 1.6,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            listBullet: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  height: 1.8,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
                           ),
-                          p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.6,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          listBullet: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                height: 1.8,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
                         ),
                       ),
                     ),
@@ -252,7 +265,6 @@ class ChangelogDialog extends HookConsumerWidget {
         footer: releases.isEmpty
             ? null
             : Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   border: Border(
@@ -262,105 +274,108 @@ class ChangelogDialog extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                child: Row(
-                  children: [
-                    // "Don't show again" checkbox (left side)
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: dontShowAgain.value,
-                            onChanged: (value) =>
-                                setDontShowAgain(value ?? false),
-                          ),
-                          const SizedBox(width: AppTheme.paddingS),
-                          Flexible(
-                            child: BaseLabel(
-                              "Don't show on startup",
-                              role: TextRole.detail,
-                              tone: Tone.muted,
+                child: BaseInset(
+                  all: Inset.normal,
+                  child: Row(
+                    children: [
+                      // "Don't show again" checkbox (left side)
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: dontShowAgain.value,
+                              onChanged: (value) =>
+                                  setDontShowAgain(value ?? false),
                             ),
+                            const BaseGap(Proximity.related),
+                            Flexible(
+                              child: BaseLabel(
+                                "Don't show on startup",
+                                role: TextRole.detail,
+                                tone: Tone.muted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Navigation controls (center)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          BaseIconButton(
+                            onPressed: hasOlder
+                                ? () => currentIndex.value = releases.length - 1
+                                : null,
+                            icon: IconRole.caretLineLeft,
+                            tooltip: 'Oldest version',
+                            variant: ButtonVariant.primary,
+                          ),
+                          const BaseGap(Proximity.related),
+                          BaseIconButton(
+                            onPressed: hasOlder
+                                ? () => currentIndex.value = index + 1
+                                : null,
+                            icon: IconRole.caretLeft,
+                            tooltip: 'Older version',
+                            variant: ButtonVariant.primary,
+                          ),
+                          const BaseGap(Proximity.grouped),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingM,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusXL,
+                              ),
+                            ),
+                            // The pill paints its own fill and states the
+                            // foreground that pairs with it.
+                            child: DefaultTextStyle.merge(
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                              ),
+                              child: BaseLabel(
+                                '${index + 1} of ${releases.length}',
+                                role: TextRole.body,
+                              ),
+                            ),
+                          ),
+                          const BaseGap(Proximity.grouped),
+                          BaseIconButton(
+                            onPressed: hasNewer
+                                ? () => currentIndex.value = index - 1
+                                : null,
+                            icon: IconRole.caretRight,
+                            tooltip: 'Newer version',
+                            variant: ButtonVariant.primary,
+                          ),
+                          const BaseGap(Proximity.related),
+                          BaseIconButton(
+                            onPressed: hasNewer
+                                ? () => currentIndex.value = 0
+                                : null,
+                            icon: IconRole.caretLineRight,
+                            tooltip: 'Latest version',
+                            variant: ButtonVariant.primary,
+                          ),
+                          const BaseGap(Proximity.separate),
+                          BaseButton(
+                            label: 'Close',
+                            variant: ButtonVariant.primary,
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
                       ),
-                    ),
-
-                    // Navigation controls (center)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        BaseIconButton(
-                          onPressed: hasOlder
-                              ? () => currentIndex.value = releases.length - 1
-                              : null,
-                          icon: IconRole.caretLineLeft,
-                          tooltip: 'Oldest version',
-                          variant: ButtonVariant.primary,
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                        BaseIconButton(
-                          onPressed: hasOlder
-                              ? () => currentIndex.value = index + 1
-                              : null,
-                          icon: IconRole.caretLeft,
-                          tooltip: 'Older version',
-                          variant: ButtonVariant.primary,
-                        ),
-                        const SizedBox(width: AppTheme.paddingM),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppTheme.paddingM,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusXL,
-                            ),
-                          ),
-                          // The pill paints its own fill and states the
-                          // foreground that pairs with it.
-                          child: DefaultTextStyle.merge(
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                            ),
-                            child: BaseLabel(
-                              '${index + 1} of ${releases.length}',
-                              role: TextRole.body,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppTheme.paddingM),
-                        BaseIconButton(
-                          onPressed: hasNewer
-                              ? () => currentIndex.value = index - 1
-                              : null,
-                          icon: IconRole.caretRight,
-                          tooltip: 'Newer version',
-                          variant: ButtonVariant.primary,
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                        BaseIconButton(
-                          onPressed: hasNewer
-                              ? () => currentIndex.value = 0
-                              : null,
-                          icon: IconRole.caretLineRight,
-                          tooltip: 'Latest version',
-                          variant: ButtonVariant.primary,
-                        ),
-                        const SizedBox(width: AppTheme.paddingL),
-                        BaseButton(
-                          label: 'Close',
-                          variant: ButtonVariant.primary,
-                          onPressed: () => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
       ),
@@ -484,16 +499,16 @@ class _StatusPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingL),
+    return BaseInset(
+      all: Inset.roomy,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, size: 64, color: iconColor),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(title, role: TextRole.pageTitle),
           if (detail != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(detail!, role: TextRole.body, align: TextAlign.center),
           ],
         ],

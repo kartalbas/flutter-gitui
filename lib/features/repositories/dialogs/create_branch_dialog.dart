@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -11,6 +11,7 @@ import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../generated/app_localizations.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Branch prefix options
 enum BranchPrefix {
@@ -189,38 +190,43 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
         children: [
           if (_errorMessage != null) ...[
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
               // The callout paints its own fill and states the paired
               // foreground once, here.
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onErrorContainer,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      color: Theme.of(context).colorScheme.error,
-                      size: 20,
-                    ),
-                    const SizedBox(width: AppTheme.paddingM),
-                    Expanded(
-                      child: BaseLabel(_errorMessage!, role: TextRole.control),
-                    ),
-                  ],
+              child: BaseInset(
+                all: Inset.normal,
+                child: DefaultTextStyle.merge(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.warningCircle,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 20,
+                      ),
+                      const BaseGap(Proximity.grouped),
+                      Expanded(
+                        child: BaseLabel(
+                          _errorMessage!,
+                          role: TextRole.control,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
           ],
 
           // Branch prefix selector
           BaseLabel(l10n.branchPrefixLabel, role: TextRole.sectionTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
 
           // One group, not a hand-assembled row of chips: picking a prefix is
           // a single-choice question, and the group is the unit every design
@@ -240,7 +246,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
             onSelected: (prefix) => setState(() => _selectedPrefix = prefix),
           ),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Custom prefix input (only shown when custom is selected)
           if (_selectedPrefix == BranchPrefix.custom) ...[
@@ -250,7 +256,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
               hintText: l10n.customPrefixHint,
               helperText: l10n.customPrefixHelper,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
           ],
 
           // Branch name input
@@ -261,47 +267,49 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
             autofocus: true,
           ),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Full branch name preview
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
               border: Border.all(color: Theme.of(context).colorScheme.outline),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BaseLabel(
-                  l10n.fullBranchNameLabel,
-                  role: TextRole.micro,
-                  tone: Tone.muted,
-                ),
-                const SizedBox(height: AppTheme.paddingXS),
-                // Muted while nothing has been typed - a placeholder, whose
-                // half-alpha was the same statement said twice - and the
-                // accent once the preview names the branch that will exist.
-                BaseLabel(
-                  fullBranchName.isEmpty
-                      ? l10n.enterBranchNameLabel
-                      : fullBranchName,
-                  role: TextRole.itemTitle,
-                  tone: fullBranchName.isEmpty ? Tone.muted : Tone.accent,
-                ),
-              ],
+            child: BaseInset(
+              all: Inset.normal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BaseLabel(
+                    l10n.fullBranchNameLabel,
+                    role: TextRole.micro,
+                    tone: Tone.muted,
+                  ),
+                  const BaseGap(Proximity.hairline),
+                  // Muted while nothing has been typed - a placeholder, whose
+                  // half-alpha was the same statement said twice - and the
+                  // accent once the preview names the branch that will exist.
+                  BaseLabel(
+                    fullBranchName.isEmpty
+                        ? l10n.enterBranchNameLabel
+                        : fullBranchName,
+                    role: TextRole.itemTitle,
+                    tone: fullBranchName.isEmpty ? Tone.muted : Tone.accent,
+                  ),
+                ],
+              ),
             ),
           ),
 
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
 
           // Repository list
           BaseLabel(
             l10n.willCreateInRepositories(widget.repositories.length),
             role: TextRole.sectionTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
 
           Container(
             constraints: const BoxConstraints(maxHeight: 150),
@@ -326,7 +334,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
             ),
           ),
 
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
 
           // Options
           CheckboxListTile(

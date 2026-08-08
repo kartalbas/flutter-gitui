@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
@@ -163,7 +163,7 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
     }
 
     return BaseCard(
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       content: ListView.builder(
         itemCount: displayLines.length,
         itemBuilder: (context, index) {
@@ -181,7 +181,7 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
     final lines = widget.fullFileContent!.split('\n');
 
     return BaseCard(
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       content: ListView.builder(
         itemCount: lines.length,
         itemBuilder: (context, index) {

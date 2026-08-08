@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -15,6 +16,7 @@ import '../../../core/config/config_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/editor_launcher_service.dart';
 import 'settings_section.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Config and Logs section - Open log files and config folder
 class ConfigAndLogsSection extends ConsumerWidget {
@@ -29,8 +31,8 @@ class ConfigAndLogsSection extends ConsumerWidget {
       title: l10n.configAndLogs,
       icon: IconRole.folder,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+        BaseInset(
+          all: Inset.normal,
           child: Wrap(
             spacing: AppTheme.paddingM,
             runSpacing: AppTheme.paddingM,

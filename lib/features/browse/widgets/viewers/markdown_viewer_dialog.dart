@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
 import 'package:path/path.dart' as path;
 
+import '../../../../shared/components/base_layout.dart';
 import '../../../../shared/components/base_viewer_dialog.dart';
 import '../../../../shared/theme/app_theme.dart';
 
@@ -81,7 +82,10 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
                     size: 48,
                     color: Theme.of(context).colorScheme.error,
                   ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  // The hero glyph and the message under it are two groups
+                  // inside the one error-state region: `separate`, the word
+                  // every other empty and error state uses at this boundary.
+                  const BaseGap(Proximity.separate),
                   Text(_error!),
                 ],
               ),

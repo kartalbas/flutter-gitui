@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -10,6 +10,7 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// List item widget displaying a workspace in a compact row format
 class WorkspaceListItem extends StatelessWidget {
@@ -51,17 +52,19 @@ class WorkspaceListItem extends StatelessWidget {
       containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
       leading: Container(
-        padding: const EdgeInsets.all(AppTheme.paddingS),
         decoration: BoxDecoration(
           color: project.color.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        child: Icon(
-          project.isDefaultWorkspace
-              ? PhosphorIconsBold.house
-              : PhosphorIconsBold.folder,
-          color: project.color,
-          size: AppTheme.iconL,
+        child: BaseInset(
+          all: Inset.tight,
+          child: Icon(
+            project.isDefaultWorkspace
+                ? PhosphorIconsBold.house
+                : PhosphorIconsBold.folder,
+            color: project.color,
+            size: AppTheme.iconL,
+          ),
         ),
       ),
       content: Column(
@@ -77,11 +80,11 @@ class WorkspaceListItem extends StatelessWidget {
 
           // Description
           if (description != null) ...[
-            const SizedBox(height: AppTheme.paddingXS),
+            const BaseGap(Proximity.hairline),
             BaseLabel(description, role: TextRole.detail, maxLines: 1),
           ],
 
-          const SizedBox(height: AppTheme.paddingXS),
+          const BaseGap(Proximity.hairline),
 
           // Repository count
           Row(
@@ -91,7 +94,7 @@ class WorkspaceListItem extends StatelessWidget {
                 size: AppTheme.iconXS,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               BaseLabel(
                 AppLocalizations.of(
                   context,

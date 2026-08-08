@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
@@ -63,6 +63,7 @@ import '../../shared/dialogs/update_available_dialog.dart';
 import '../services/update_providers.dart';
 import '../services/update_service.dart';
 import '../../features/about/about_dialog.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Provider to track if "What's New" dialog has been checked this session
 /// This persists across widget rebuilds to prevent showing dialog multiple times
@@ -314,7 +315,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                       },
                       leading: Column(
                         children: [
-                          const SizedBox(height: AppTheme.paddingM),
+                          const BaseGap(Proximity.grouped),
                           // App logo/title - double-tap to show About dialog
                           GestureDetector(
                             onDoubleTap: () {
@@ -331,7 +332,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
                                 if (isRailExtended) ...[
-                                  const SizedBox(height: AppTheme.paddingS),
+                                  const BaseGap(Proximity.related),
                                   BaseLabel(
                                     AppLocalizations.of(context)!.appTitle,
                                     role: TextRole.sectionTitle,
@@ -341,17 +342,20 @@ class _AppShellState extends ConsumerState<AppShell> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: AppTheme.paddingL),
+                          const BaseGap(Proximity.separate),
                         ],
                       ),
+                      // The collapse control sits at the foot of the rail.
+                      // Its bottom padding was a one-sided inset, which is a
+                      // gap wearing a padding idiom: the distance belongs
+                      // between the control and the rail's own edge, so the
+                      // column states it after the control rather than the
+                      // control carrying a side.
                       trailing: Expanded(
-                        child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: AppTheme.paddingM,
-                            ),
-                            child: BaseIconButton(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            BaseIconButton(
                               icon: isRailExtended
                                   ? IconRole.caretLeft
                                   : IconRole.caretRight,
@@ -364,7 +368,8 @@ class _AppShellState extends ConsumerState<AppShell> {
                                   ? AppLocalizations.of(context)!.collapse
                                   : AppLocalizations.of(context)!.expand,
                             ),
-                          ),
+                            const BaseGap(Proximity.grouped),
+                          ],
                         ),
                       ),
                       destinations: AppDestination.values.map((dest) {
@@ -439,10 +444,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                           order: 2,
                           debugLabel: 'AppShell.toolbarRegion',
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingM,
-                              vertical: AppTheme.paddingS,
-                            ),
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
@@ -458,133 +459,135 @@ class _AppShellState extends ConsumerState<AppShell> {
                             // Measured, because how much room the git actions may
                             // claim before collapsing into their overflow menu
                             // depends on the window width.
-                            child: LayoutBuilder(
-                              builder: (context, constraints) => Row(
-                                children: [
-                                  // The switchers and the git actions share
-                                  // what the right-hand cluster leaves over.
-                                  // Their split is measured rather than
-                                  // flexed: an equal flex split hands each
-                                  // side a quota regardless of need, which
-                                  // squeezed every switcher into a bordered
-                                  // sliver while the git icons kept room they
-                                  // could have yielded to their overflow menu.
-                                  Expanded(
-                                    child: LayoutBuilder(
-                                      builder: (context, inner) => Row(
-                                        children: [
-                                          // The switchers get the width they
-                                          // need before the git actions claim
-                                          // any: they name the workspace,
-                                          // repository and branch every other
-                                          // control acts on, and a clipped
-                                          // name says nothing, whereas an
-                                          // action that no longer fits stays
-                                          // reachable in its overflow menu.
-                                          // Their ceiling reserves that menu's
-                                          // button, so the actions can never
-                                          // be squeezed out entirely. Within
-                                          // the ceiling each switcher shrinks
-                                          // to an ellipsized label - never
-                                          // below the width its fixed chrome
-                                          // needs - instead of the group
-                                          // scrolling, which used to cut the
-                                          // last switcher mid-widget into a
-                                          // seemingly empty sliver whose
-                                          // render box reached under the git
-                                          // actions.
-                                          ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                              maxWidth:
-                                                  (inner.maxWidth -
-                                                          AppTheme.paddingM -
-                                                          OverflowActionBar
-                                                              .menuExtent)
-                                                      .clamp(
-                                                        0.0,
-                                                        inner.maxWidth,
-                                                      ),
+                            child: BaseInset(
+                              x: Inset.normal,
+                              y: Inset.tight,
+                              child: LayoutBuilder(
+                                builder: (context, constraints) => Row(
+                                  children: [
+                                    // The switchers and the git actions share
+                                    // what the right-hand cluster leaves over.
+                                    // Their split is measured rather than
+                                    // flexed: an equal flex split hands each
+                                    // side a quota regardless of need, which
+                                    // squeezed every switcher into a bordered
+                                    // sliver while the git icons kept room they
+                                    // could have yielded to their overflow menu.
+                                    Expanded(
+                                      child: LayoutBuilder(
+                                        builder: (context, inner) => Row(
+                                          children: [
+                                            // The switchers get the width they
+                                            // need before the git actions claim
+                                            // any: they name the workspace,
+                                            // repository and branch every other
+                                            // control acts on, and a clipped
+                                            // name says nothing, whereas an
+                                            // action that no longer fits stays
+                                            // reachable in its overflow menu.
+                                            // Their ceiling reserves that menu's
+                                            // button, so the actions can never
+                                            // be squeezed out entirely. Within
+                                            // the ceiling each switcher shrinks
+                                            // to an ellipsized label - never
+                                            // below the width its fixed chrome
+                                            // needs - instead of the group
+                                            // scrolling, which used to cut the
+                                            // last switcher mid-widget into a
+                                            // seemingly empty sliver whose
+                                            // render box reached under the git
+                                            // actions.
+                                            ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                maxWidth:
+                                                    (inner.maxWidth -
+                                                            AppTheme.paddingM -
+                                                            OverflowActionBar
+                                                                .menuExtent)
+                                                        .clamp(
+                                                          0.0,
+                                                          inner.maxWidth,
+                                                        ),
+                                              ),
+                                              child: const BaseShrinkingRow(
+                                                spacing: AppTheme.paddingM,
+                                                minChildWidth:
+                                                    BaseSwitcher.minShrunkWidth,
+                                                children: [
+                                                  WorkspaceSwitcher(),
+                                                  RepositorySwitcher(),
+                                                  BranchSwitcher(),
+                                                  GlobalBranchSwitcher(),
+                                                ],
+                                              ),
                                             ),
-                                            child: const BaseShrinkingRow(
-                                              spacing: AppTheme.paddingM,
-                                              minChildWidth:
-                                                  BaseSwitcher.minShrunkWidth,
-                                              children: [
-                                                WorkspaceSwitcher(),
-                                                RepositorySwitcher(),
-                                                BranchSwitcher(),
-                                                GlobalBranchSwitcher(),
-                                              ],
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: AppTheme.paddingM,
-                                          ),
-                                          // The git actions stay rendered
-                                          // without a target and grey out with
-                                          // a reason, so the toolbar never
-                                          // shows an unexplained gap (#303).
-                                          //
-                                          // Expanded, so they take exactly
-                                          // what the switchers leave - at
-                                          // least their overflow menu button,
-                                          // by the ceiling above - and hand
-                                          // whatever no longer fits to that
-                                          // menu. Aligned left so the group
-                                          // stays attached to the switchers
-                                          // it operates on.
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: OverflowActionBar(
-                                                actions: _buildGitActions(
-                                                  context,
-                                                  ref,
-                                                  gitActionTargets,
+                                            const BaseGap(Proximity.grouped),
+                                            // The git actions stay rendered
+                                            // without a target and grey out with
+                                            // a reason, so the toolbar never
+                                            // shows an unexplained gap (#303).
+                                            //
+                                            // Expanded, so they take exactly
+                                            // what the switchers leave - at
+                                            // least their overflow menu button,
+                                            // by the ceiling above - and hand
+                                            // whatever no longer fits to that
+                                            // menu. Aligned left so the group
+                                            // stays attached to the switchers
+                                            // it operates on.
+                                            Expanded(
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: OverflowActionBar(
+                                                  actions: _buildGitActions(
+                                                    context,
+                                                    ref,
+                                                    gitActionTargets,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: AppTheme.paddingS),
-                                  // Capped like the git actions, so the utility
-                                  // icons collapse into their own overflow menu
-                                  // instead of claiming full width and pushing
-                                  // the switchers off the bar (#359). Without a
-                                  // cap this group is the only one that never
-                                  // yields, and the row overflows.
-                                  ConstrainedBox(
-                                    constraints: BoxConstraints(
-                                      maxWidth: (constraints.maxWidth * 0.25)
-                                          .clamp(
-                                            // Never below the overflow button
-                                            // itself, or the bar cannot even
-                                            // draw the menu it collapsed into.
-                                            OverflowActionBar.menuExtent,
-                                            _utilityActionBarWidth,
-                                          ),
-                                    ),
-                                    child: OverflowActionBar(
-                                      actions: _buildUtilityActions(
-                                        context,
-                                        ref,
-                                        updateAvailable,
+                                    const BaseGap(Proximity.related),
+                                    // Capped like the git actions, so the utility
+                                    // icons collapse into their own overflow menu
+                                    // instead of claiming full width and pushing
+                                    // the switchers off the bar (#359). Without a
+                                    // cap this group is the only one that never
+                                    // yields, and the row overflows.
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: (constraints.maxWidth * 0.25)
+                                            .clamp(
+                                              // Never below the overflow button
+                                              // itself, or the bar cannot even
+                                              // draw the menu it collapsed into.
+                                              OverflowActionBar.menuExtent,
+                                              _utilityActionBarWidth,
+                                            ),
+                                      ),
+                                      child: OverflowActionBar(
+                                        actions: _buildUtilityActions(
+                                          context,
+                                          ref,
+                                          updateAvailable,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: AppTheme.paddingS),
-                                  // These two stay put: each is a popup menu of
-                                  // its own rather than an action with a single
-                                  // callback, so neither can be folded into the
-                                  // overflow menu above. They are also the
-                                  // narrowest controls in the bar.
-                                  const QuickSettingsMenu(),
-                                  const SizedBox(width: AppTheme.paddingS),
-                                  const LanguageSelector(),
-                                ],
+                                    const BaseGap(Proximity.related),
+                                    // These two stay put: each is a popup menu of
+                                    // its own rather than an action with a single
+                                    // callback, so neither can be folded into the
+                                    // overflow menu above. They are also the
+                                    // narrowest controls in the bar.
+                                    const QuickSettingsMenu(),
+                                    const BaseGap(Proximity.related),
+                                    const LanguageSelector(),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -602,9 +605,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                                 // Warning banner for missing settings
                                 if (!allSettingsConfigured)
                                   Container(
-                                    padding: const EdgeInsets.all(
-                                      AppTheme.paddingM,
-                                    ),
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.errorContainer,
@@ -615,77 +615,78 @@ class _AppShellState extends ConsumerState<AppShell> {
                                     // two labels would inherit the page's
                                     // `onSurface` and paint it over an error
                                     // container.
-                                    child: DefaultTextStyle.merge(
-                                      style: TextStyle(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onErrorContainer,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            PhosphorIconsBold.warning,
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.error,
-                                          ),
-                                          const SizedBox(
-                                            width: AppTheme.paddingM,
-                                          ),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                BaseLabel(
-                                                  AppLocalizations.of(
-                                                    context,
-                                                  )!.requiredSettingsMissing,
-                                                  role: TextRole.sectionTitle,
-                                                ),
-                                                const SizedBox(
-                                                  height: AppTheme.paddingXS,
-                                                ),
-                                                BaseLabel(
-                                                  AppLocalizations.of(
-                                                    context,
-                                                  )!.pleaseConfigureSettings(
-                                                    missingSettings
-                                                        .map(
-                                                          (
-                                                            s,
-                                                          ) => _requiredSettingLabel(
-                                                            AppLocalizations.of(
-                                                              context,
-                                                            )!,
-                                                            s,
-                                                          ),
-                                                        )
-                                                        .join(', '),
-                                                  ),
-                                                  role: TextRole.detail,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          if (destination !=
-                                              AppDestination.settings)
-                                            BaseButton(
-                                              label: AppLocalizations.of(
+                                    child: BaseInset(
+                                      all: Inset.normal,
+                                      child: DefaultTextStyle.merge(
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onErrorContainer,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              PhosphorIconsBold.warning,
+                                              color: Theme.of(
                                                 context,
-                                              )!.goToSettings,
-                                              variant: ButtonVariant.danger,
-                                              onPressed: () {
-                                                ref
-                                                    .read(
-                                                      navigationDestinationProvider
-                                                          .notifier,
-                                                    )
-                                                    .state = AppDestination
-                                                    .settings;
-                                              },
+                                              ).colorScheme.error,
                                             ),
-                                        ],
+                                            const BaseGap(Proximity.grouped),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  BaseLabel(
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.requiredSettingsMissing,
+                                                    role: TextRole.sectionTitle,
+                                                  ),
+                                                  const BaseGap(
+                                                    Proximity.hairline,
+                                                  ),
+                                                  BaseLabel(
+                                                    AppLocalizations.of(
+                                                      context,
+                                                    )!.pleaseConfigureSettings(
+                                                      missingSettings
+                                                          .map(
+                                                            (
+                                                              s,
+                                                            ) => _requiredSettingLabel(
+                                                              AppLocalizations.of(
+                                                                context,
+                                                              )!,
+                                                              s,
+                                                            ),
+                                                          )
+                                                          .join(', '),
+                                                    ),
+                                                    role: TextRole.detail,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            if (destination !=
+                                                AppDestination.settings)
+                                              BaseButton(
+                                                label: AppLocalizations.of(
+                                                  context,
+                                                )!.goToSettings,
+                                                variant: ButtonVariant.danger,
+                                                onPressed: () {
+                                                  ref
+                                                      .read(
+                                                        navigationDestinationProvider
+                                                            .notifier,
+                                                      )
+                                                      .state = AppDestination
+                                                      .settings;
+                                                },
+                                              ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

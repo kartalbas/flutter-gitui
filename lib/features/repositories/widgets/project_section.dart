@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -12,6 +12,7 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Provider for tracking expanded state of projects
 final projectExpandedProvider = StateProvider.family<bool, String>(
@@ -54,10 +55,6 @@ class ProjectSection extends ConsumerWidget {
           },
           borderRadius: BorderRadius.circular(AppTheme.radiusM),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.paddingL,
-              vertical: AppTheme.paddingM,
-            ),
             decoration: BoxDecoration(
               color: isUnassigned
                   ? Theme.of(
@@ -73,142 +70,148 @@ class ProjectSection extends ConsumerWidget {
                     : project!.color.withValues(alpha: 0.3),
               ),
             ),
-            child: Row(
-              children: [
-                // Color indicator
-                Container(
-                  width: 4,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: isUnassigned
-                        ? Theme.of(context).colorScheme.outline
-                        : project!.color,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusXS),
+            child: BaseInset(
+              x: Inset.roomy,
+              y: Inset.normal,
+              child: Row(
+                children: [
+                  // Color indicator
+                  Container(
+                    width: 4,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: isUnassigned
+                          ? Theme.of(context).colorScheme.outline
+                          : project!.color,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusXS),
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppTheme.paddingM),
+                  const BaseGap(Proximity.grouped),
 
-                // Expand/Collapse icon
-                Icon(
-                  isExpanded
-                      ? PhosphorIconsRegular.caretDown
-                      : PhosphorIconsRegular.caretRight,
-                  size: AppTheme.iconM,
-                  color: isUnassigned
-                      ? Theme.of(context).colorScheme.onSurface
-                      : project!.color,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
+                  // Expand/Collapse icon
+                  Icon(
+                    isExpanded
+                        ? PhosphorIconsRegular.caretDown
+                        : PhosphorIconsRegular.caretRight,
+                    size: AppTheme.iconM,
+                    color: isUnassigned
+                        ? Theme.of(context).colorScheme.onSurface
+                        : project!.color,
+                  ),
+                  const BaseGap(Proximity.related),
 
-                // Project icon
-                Icon(
-                  isUnassigned
-                      ? PhosphorIconsBold.package
-                      : PhosphorIconsBold.folder,
-                  size: AppTheme.iconM,
-                  color: isUnassigned
-                      ? Theme.of(context).colorScheme.onSurface
-                      : project!.color,
-                ),
-                const SizedBox(width: AppTheme.paddingM),
+                  // Project icon
+                  Icon(
+                    isUnassigned
+                        ? PhosphorIconsBold.package
+                        : PhosphorIconsBold.folder,
+                    size: AppTheme.iconM,
+                    color: isUnassigned
+                        ? Theme.of(context).colorScheme.onSurface
+                        : project!.color,
+                  ),
+                  const BaseGap(Proximity.grouped),
 
-                // Project name and description
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BaseLabel(
-                        isUnassigned
-                            ? l10n.unassignedRepositories
-                            : project!.displayName(l10n),
-                        role: TextRole.sectionTitle,
+                  // Project name and description
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(
+                          isUnassigned
+                              ? l10n.unassignedRepositories
+                              : project!.displayName(l10n),
+                          role: TextRole.sectionTitle,
+                          tone: isUnassigned
+                              ? Tone.neutral
+                              : Tone.series(project!.colorIndex),
+                        ),
+                        if (!isUnassigned && description != null) ...{
+                          const BaseGap(Proximity.hairline),
+                          BaseLabel(
+                            description,
+                            role: TextRole.detail,
+                            tone: Tone.muted,
+                            maxLines: 1,
+                          ),
+                        },
+                      ],
+                    ),
+                  ),
+
+                  // Repository count
+                  Container(
+                    decoration: BoxDecoration(
+                      color: isUnassigned
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest
+                          : project!.color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusL),
+                    ),
+                    child: BaseInset(
+                      x: Inset.normal,
+                      y: Inset.tight,
+                      child: BaseLabel(
+                        '$repositoryCount',
+                        role: TextRole.micro,
                         tone: isUnassigned
                             ? Tone.neutral
                             : Tone.series(project!.colorIndex),
                       ),
-                      if (!isUnassigned && description != null) ...{
-                        const SizedBox(height: 2),
-                        BaseLabel(
-                          description,
-                          role: TextRole.detail,
-                          tone: Tone.muted,
-                          maxLines: 1,
-                        ),
-                      },
-                    ],
-                  ),
-                ),
-
-                // Repository count
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.paddingM,
-                    vertical: AppTheme.paddingS,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isUnassigned
-                        ? Theme.of(context).colorScheme.surfaceContainerHighest
-                        : project!.color.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
-                  ),
-                  child: BaseLabel(
-                    '$repositoryCount',
-                    role: TextRole.micro,
-                    tone: isUnassigned
-                        ? Tone.neutral
-                        : Tone.series(project!.colorIndex),
-                  ),
-                ),
-
-                // Actions (only for projects, not unassigned)
-                if (!isUnassigned) ...[
-                  const SizedBox(width: AppTheme.paddingS),
-                  BasePopupMenuButton<String>(
-                    icon: Icon(
-                      PhosphorIconsRegular.dotsThreeVertical,
-                      size: AppTheme.iconM,
-                      color: project!.color,
                     ),
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: MenuItemContent(
-                          icon: IconRole.pencil,
-                          label: AppLocalizations.of(context)!.editProject,
-                          scale: ControlScale.compact,
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: MenuItemContent(
-                          icon: IconRole.trash,
-                          label: AppLocalizations.of(context)!.deleteProject,
-                          scale: ControlScale.compact,
-                          tone: Tone.danger,
-                          labelColor: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          onEdit?.call();
-                          break;
-                        case 'delete':
-                          onDelete?.call();
-                          break;
-                      }
-                    },
                   ),
+
+                  // Actions (only for projects, not unassigned)
+                  if (!isUnassigned) ...[
+                    const BaseGap(Proximity.related),
+                    BasePopupMenuButton<String>(
+                      icon: Icon(
+                        PhosphorIconsRegular.dotsThreeVertical,
+                        size: AppTheme.iconM,
+                        color: project!.color,
+                      ),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: MenuItemContent(
+                            icon: IconRole.pencil,
+                            label: AppLocalizations.of(context)!.editProject,
+                            scale: ControlScale.compact,
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: MenuItemContent(
+                            icon: IconRole.trash,
+                            label: AppLocalizations.of(context)!.deleteProject,
+                            scale: ControlScale.compact,
+                            tone: Tone.danger,
+                            labelColor: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        switch (value) {
+                          case 'edit':
+                            onEdit?.call();
+                            break;
+                          case 'delete':
+                            onDelete?.call();
+                            break;
+                        }
+                      },
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
 
         // Repositories (shown when expanded)
-        if (isExpanded) ...[const SizedBox(height: AppTheme.paddingS), child],
-        const SizedBox(height: AppTheme.paddingM),
+        if (isExpanded) ...[const BaseGap(Proximity.related), child],
+        const BaseGap(Proximity.grouped),
       ],
     );
   }

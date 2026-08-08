@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../core/git/models/commit.dart';
 import '../../../core/git/git_service.dart';
 import '../../../generated/app_localizations.dart';
@@ -29,43 +31,44 @@ class ResetModeDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BaseLabel(l10n.resetCurrentBranchTo, role: TextRole.body),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  PhosphorIconsRegular.gitCommit,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BaseLabel(
-                        commit.shortSubject,
-                        role: TextRole.body,
-                        maxLines: 1,
-                      ),
-                      BaseLabel(
-                        '${commit.shortHash} by ${commit.author}',
-                        role: TextRole.detail,
-                      ),
-                    ],
+            child: BaseInset(
+              child: Row(
+                children: [
+                  const BaseIcon(
+                    IconRole.gitCommit,
+                    scale: ControlScale.compact,
+                    tone: Tone.accent,
                   ),
-                ),
-              ],
+                  const BaseGap(Proximity.related),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(
+                          commit.shortSubject,
+                          role: TextRole.body,
+                          maxLines: 1,
+                        ),
+                        BaseLabel(
+                          '${commit.shortHash} by ${commit.author}',
+                          role: TextRole.detail,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.chooseResetMode, role: TextRole.sectionTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(l10n.branchPointerWillMove, role: TextRole.detail),
         ],
       ),

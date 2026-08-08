@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -13,6 +13,7 @@ import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../../core/git/models/bisect_state.dart';
 import '../../core/git/models/commit.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for Git bisect operations
 class BisectDialog extends ConsumerStatefulWidget {
@@ -143,34 +144,35 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           children: [
             // Info banner
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  const Icon(PhosphorIconsRegular.info, size: 20),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(
-                        context,
-                      )!.bisectHelpsFindCommitThatIntroducedBug,
-                      role: TextRole.detail,
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        AppLocalizations.of(
+                          context,
+                        )!.bisectHelpsFindCommitThatIntroducedBug,
+                        role: TextRole.detail,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Good commit selection
             BaseLabel(
               AppLocalizations.of(context)!.goodCommitWhereBugWasNotPresent,
               role: TextRole.sectionTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             _buildCommitDropdown(
               commits: commits,
               selectedCommit: _selectedGoodCommit,
@@ -179,14 +181,14 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 setState(() => _selectedGoodCommit = hash);
               },
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Bad commit selection
             BaseLabel(
               AppLocalizations.of(context)!.badCommitWhereBugIsPresent,
               role: TextRole.sectionTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             _buildCommitDropdown(
               commits: commits,
               selectedCommit: _selectedBadCommit,
@@ -213,68 +215,72 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       children: [
         // Status banner
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(PhosphorIconsRegular.gitBranch, size: 20),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.bisectInProgress,
-                      role: TextRole.sectionTitle,
+          child: BaseInset(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.gitBranch, size: 20),
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        AppLocalizations.of(context)!.bisectInProgress,
+                        role: TextRole.sectionTitle,
+                      ),
                     ),
+                  ],
+                ),
+                if (state.stepsRemaining != null) ...[
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(context)!.approximatelyStepsRemaining(
+                      state.stepsRemaining.toString(),
+                      state.stepsRemaining as Object,
+                    ),
+                    role: TextRole.body,
                   ),
                 ],
-              ),
-              if (state.stepsRemaining != null) ...[
-                const SizedBox(height: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(context)!.approximatelyStepsRemaining(
-                    state.stepsRemaining.toString(),
-                    state.stepsRemaining as Object,
-                  ),
-                  role: TextRole.body,
-                ),
               ],
-            ],
+            ),
           ),
         ),
-        const SizedBox(height: AppTheme.paddingL),
+        const BaseGap(Proximity.separate),
 
         // Current commit
         BaseLabel(
           AppLocalizations.of(context)!.currentCommit,
           role: TextRole.sectionTitle,
         ),
-        const SizedBox(height: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
-          child: BaseLabel(
-            state.currentCommit ?? 'Unknown',
-            role: TextRole.body,
+          child: BaseInset(
+            child: BaseLabel(
+              state.currentCommit ?? 'Unknown',
+              role: TextRole.body,
+            ),
           ),
         ),
-        const SizedBox(height: AppTheme.paddingL),
+        const BaseGap(Proximity.separate),
 
         // Instructions
         BaseLabel(
           AppLocalizations.of(context)!.testThisCommitAndMark,
           role: TextRole.sectionTitle,
         ),
-        const SizedBox(height: AppTheme.paddingM),
+        const BaseGap(Proximity.grouped),
 
-        // Action buttons
+        // Action buttons. The gaps inside the run say `grouped`: sibling
+        // actions are members of one group, the vocabulary's own exemplar
+        // for a run of actions.
         Row(
           children: [
             Expanded(
@@ -286,7 +292,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 fullWidth: true,
               ),
             ),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.grouped),
             Expanded(
               child: BaseButton(
                 label: AppLocalizations.of(context)!.bad,
@@ -296,7 +302,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 fullWidth: true,
               ),
             ),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.grouped),
             Expanded(
               child: BaseButton(
                 label: AppLocalizations.of(context)!.skip,
@@ -308,7 +314,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.paddingL),
+        const BaseGap(Proximity.separate),
 
         // History needs a bounded height: BaseDialog wraps the content in a
         // SingleChildScrollView, so a flex child would sit in an unbounded
@@ -318,45 +324,46 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           AppLocalizations.of(context)!.bisectHistory,
           role: TextRole.sectionTitle,
         ),
-        const SizedBox(height: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 200),
           child: Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (state.goodCommits.isNotEmpty) ...[
-                    BaseLabel(
-                      AppLocalizations.of(
-                        context,
-                      )!.goodCommits(state.goodCommits.length),
-                      role: TextRole.body,
-                      tone: Tone.gitAdded,
-                    ),
-                    ...state.goodCommits.map(
-                      (hash) => BaseLabel('  $hash', role: TextRole.detail),
-                    ),
-                    const SizedBox(height: AppTheme.paddingS),
+            child: BaseInset(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (state.goodCommits.isNotEmpty) ...[
+                      BaseLabel(
+                        AppLocalizations.of(
+                          context,
+                        )!.goodCommits(state.goodCommits.length),
+                        role: TextRole.body,
+                        tone: Tone.gitAdded,
+                      ),
+                      ...state.goodCommits.map(
+                        (hash) => BaseLabel('  $hash', role: TextRole.detail),
+                      ),
+                      const BaseGap(Proximity.related),
+                    ],
+                    if (state.badCommits.isNotEmpty) ...[
+                      BaseLabel(
+                        AppLocalizations.of(
+                          context,
+                        )!.badCommits(state.badCommits.length),
+                        role: TextRole.body,
+                        tone: Tone.gitDeleted,
+                      ),
+                      ...state.badCommits.map(
+                        (hash) => BaseLabel('  $hash', role: TextRole.detail),
+                      ),
+                    ],
                   ],
-                  if (state.badCommits.isNotEmpty) ...[
-                    BaseLabel(
-                      AppLocalizations.of(
-                        context,
-                      )!.badCommits(state.badCommits.length),
-                      role: TextRole.body,
-                      tone: Tone.gitDeleted,
-                    ),
-                    ...state.badCommits.map(
-                      (hash) => BaseLabel('  $hash', role: TextRole.detail),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ),
@@ -375,29 +382,30 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             size: 64,
             color: context.gitColors.added,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.bisectComplete,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(
             AppLocalizations.of(context)!.foundFirstBadCommit,
             role: TextRole.body,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: context.gitColors.deleted.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: SelectableText(
-              state.foundCommit ?? 'Unknown',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontFamily: 'monospace',
-                fontWeight: FontWeight.bold,
+            child: BaseInset(
+              child: SelectableText(
+                state.foundCommit ?? 'Unknown',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -416,12 +424,12 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.error(error.toString()),
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel('', role: TextRole.detail, align: TextAlign.center),
         ],
       ),

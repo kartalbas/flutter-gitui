@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset;
 import '../../shared/theme/app_theme.dart';
+import 'base_layout.dart';
 
 /// Base component for all card patterns in the app.
 ///
@@ -25,8 +27,7 @@ import '../../shared/theme/app_theme.dart';
 /// Example usage:
 /// ```dart
 /// BaseCard(
-///   header: Padding(
-///     padding: const EdgeInsets.all(AppTheme.paddingM),
+///   header: BaseInset(
 ///     child: BaseLabel('Card Header', role: TextRole.sectionTitle),
 ///   ),
 ///   content: ListView(
@@ -35,8 +36,7 @@ import '../../shared/theme/app_theme.dart';
 ///       ListTile(title: BaseLabel('Item 2', role: TextRole.body)),
 ///     ],
 ///   ),
-///   footer: Padding(
-///     padding: const EdgeInsets.all(AppTheme.paddingM),
+///   footer: BaseInset(
 ///     child: Row(
 ///       mainAxisAlignment: MainAxisAlignment.end,
 ///       children: [
@@ -62,7 +62,7 @@ class BaseCard extends StatelessWidget {
     this.customBorderColor,
     this.customBackgroundColor,
     this.onTap,
-    this.padding = const EdgeInsets.all(AppTheme.paddingL),
+    this.inset = Inset.roomy,
   });
 
   /// Main content area (required) - typically scrollable
@@ -103,8 +103,15 @@ class BaseCard extends StatelessWidget {
   /// Callback when card is tapped
   final VoidCallback? onTap;
 
-  /// Internal padding for the content
-  final EdgeInsets padding;
+  /// How far the content sits from the card's own edge.
+  ///
+  /// A rung rather than an `EdgeInsets`, because "a card is a deliberately
+  /// generous surface" is a question three design languages answer with three
+  /// distances and all three are right, whereas 24 is Material's answer chosen
+  /// once for every language. [Inset.none] is the answer a card gives when its
+  /// content draws its own edges — a list that must reach the card's border, a
+  /// preview that bleeds.
+  final Inset inset;
 
   @override
   Widget build(BuildContext context) {
@@ -233,7 +240,7 @@ class BaseCard extends StatelessWidget {
 
                   // Content section (main area)
                   Flexible(
-                    child: Padding(padding: padding, child: content),
+                    child: BaseInset(all: inset, child: content),
                   ),
 
                   // Footer section

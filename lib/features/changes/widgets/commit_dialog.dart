@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/services/exit_guard.dart';
@@ -114,7 +116,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   PhosphorIconsRegular.warningCircle,
                   color: Theme.of(context).colorScheme.onError,
                 ),
-                const SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 Expanded(
                   child: BaseLabel(
                     AppLocalizations.of(context)!.commitFailed(e.toString()),
@@ -149,42 +151,46 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
           children: [
             // Staged files summary
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
+              // The summary's fill and corner stay: they are the surface, and
+              // the surface leaves with `surfaces.card`. How far it holds its
+              // content off its own edge is the language's question.
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.checkSquare,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  BaseLabel(
-                    AppLocalizations.of(context)!.messageFilesStaged(
-                      stagedFiles.length,
-                      stagedFiles.length == 1 ? '' : 's',
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    const BaseIcon(
+                      IconRole.checkSquare,
+                      scale: ControlScale.compact,
+                      tone: Tone.accent,
                     ),
-                    role: TextRole.body,
-                  ),
-                  const Spacer(),
-                  BaseButton(
-                    label: AppLocalizations.of(context)!.viewFiles,
-                    variant: ButtonVariant.tertiary,
-                    leadingIcon: _showStagedFiles
-                        ? IconRole.caretUp
-                        : IconRole.caretDown,
-                    onPressed: stagedFiles.isEmpty
-                        ? null
-                        : () {
-                            setState(() {
-                              _showStagedFiles = !_showStagedFiles;
-                            });
-                          },
-                  ),
-                ],
+                    const BaseGap(Proximity.related),
+                    BaseLabel(
+                      AppLocalizations.of(context)!.messageFilesStaged(
+                        stagedFiles.length,
+                        stagedFiles.length == 1 ? '' : 's',
+                      ),
+                      role: TextRole.body,
+                    ),
+                    const Spacer(),
+                    BaseButton(
+                      label: AppLocalizations.of(context)!.viewFiles,
+                      variant: ButtonVariant.tertiary,
+                      leadingIcon: _showStagedFiles
+                          ? IconRole.caretUp
+                          : IconRole.caretDown,
+                      onPressed: stagedFiles.isEmpty
+                          ? null
+                          : () {
+                              setState(() {
+                                _showStagedFiles = !_showStagedFiles;
+                              });
+                            },
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -192,7 +198,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             // the height cap prevents a large stage from pushing the commit
             // button out of the dialog.
             if (_showStagedFiles && stagedFiles.isNotEmpty) ...[
-              const SizedBox(height: AppTheme.paddingS),
+              // The summary and the list it expands into are two parts of one
+              // statement: `related`, Material's 8.
+              const BaseGap(Proximity.related),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 160),
                 child: ListView.builder(
@@ -200,15 +208,20 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   itemCount: stagedFiles.length,
                   itemBuilder: (context, index) {
                     final file = stagedFiles[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
+                    return BaseInset(
+                      // The rows of a dense file list are barely set off from
+                      // one another: `tight` vertically, nothing horizontally,
+                      // because the list already sits inside the dialog's own
+                      // inset.
+                      x: Inset.none,
+                      y: Inset.tight,
                       child: Row(
                         children: [
                           FileStatusBadge(
                             code: file.indexStatus.code,
                             color: file.indexStatus.colorOf(context),
                           ),
-                          const SizedBox(width: AppTheme.paddingS),
+                          const BaseGap(Proximity.related),
                           Expanded(
                             child: BaseLabel(
                               file.path,
@@ -224,14 +237,17 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
               ),
             ],
 
-            const SizedBox(height: AppTheme.paddingL),
+            // The summary above and the field below belong to two different
+            // groups inside one form: `separate`, Material's 24.
+            const BaseGap(Proximity.separate),
 
             // Commit message field
             BaseLabel(
               AppLocalizations.of(context)!.labelCommitMessage,
               role: TextRole.sectionTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            // A field label and its field are two parts of one statement.
+            const BaseGap(Proximity.related),
             BaseTextField(
               controller: _messageController,
               hintText: AppLocalizations.of(context)!.hintTextCommitMessage,
@@ -247,7 +263,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
               },
             ),
 
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Amend checkbox
             CheckboxListTile(
@@ -274,9 +290,8 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             ),
 
             // Commit tips
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingS),
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
@@ -288,23 +303,28 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   ).colorScheme.primary.withValues(alpha: 0.3),
                 ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.lightbulb,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.tipCommitMessage,
-                      role: TextRole.detail,
-                      tone: Tone.muted,
+              // The tip is a dense note rather than a card: `tight`, which is
+              // the 8 pixels this container named.
+              child: BaseInset(
+                all: Inset.tight,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const BaseIcon(
+                      IconRole.lightbulb,
+                      scale: ControlScale.compact,
+                      tone: Tone.accent,
                     ),
-                  ),
-                ],
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        AppLocalizations.of(context)!.tipCommitMessage,
+                        role: TextRole.detail,
+                        tone: Tone.muted,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

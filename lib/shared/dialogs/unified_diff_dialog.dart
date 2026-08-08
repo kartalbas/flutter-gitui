@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
 
 import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_parser.dart';
@@ -14,7 +14,7 @@ import '../components/base_badge.dart';
 import '../components/base_diff_viewer.dart';
 import '../components/base_button.dart';
 import '../components/base_viewer_dialog.dart';
-import '../theme/app_theme.dart';
+import '../components/base_layout.dart';
 
 /// Unified diff dialog that handles all diff viewing use cases
 class UnifiedDiffDialog extends ConsumerStatefulWidget {
@@ -183,7 +183,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             size: 48,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           Text(l10n.messageErrorLoadingDiff(error.toString())),
         ],
       ),

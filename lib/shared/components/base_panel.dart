@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset;
 import '../../shared/theme/app_theme.dart';
+import 'base_layout.dart';
 
 /// Base component for all panel patterns in the app.
 ///
@@ -49,7 +51,7 @@ class BasePanel extends StatefulWidget {
     this.initiallyExpanded = true,
     this.elevation = AppTheme.elevationLevel1,
     this.hasBorder = false,
-    this.padding = const EdgeInsets.all(AppTheme.paddingL),
+    this.inset = Inset.roomy,
   });
 
   /// Panel title (header)
@@ -76,8 +78,13 @@ class BasePanel extends StatefulWidget {
   /// Show border around panel
   final bool hasBorder;
 
-  /// Content padding
-  final EdgeInsets padding;
+  /// How far the content sits from the panel's own edge.
+  ///
+  /// A rung rather than an `EdgeInsets`, for the same reason `BaseCard.inset`
+  /// is one. [Inset.none] is what a panel says when its content is a list or a
+  /// tree that owns its own row geometry: the rows reach the panel's edge and
+  /// each row insets itself.
+  final Inset inset;
 
   /// Smallest height the header may occupy, the Material 3 one-line
   /// list-item height an `ExpansionTile` header is built from
@@ -223,10 +230,7 @@ class _BasePanelState extends State<BasePanel> {
                 // Content section (collapsible)
                 if (_isExpanded)
                   Flexible(
-                    child: Padding(
-                      padding: widget.padding,
-                      child: widget.content,
-                    ),
+                    child: BaseInset(all: widget.inset, child: widget.content),
                   ),
 
                 // Footer section

@@ -17,6 +17,7 @@ import '../../../core/git/models/stash.dart';
 import '../../../shared/dialogs/confirm_destructive.dart';
 import '../dialogs/create_branch_from_stash_dialog.dart';
 import '../dialogs/stash_diff_dialog.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Individual stash list tile with expansion and action buttons
 class StashListTile extends ConsumerWidget {
@@ -48,13 +49,11 @@ class StashListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingM,
-        vertical: AppTheme.paddingS,
-      ),
+    return BaseInset(
+      x: Inset.normal,
+      y: Inset.tight,
       child: BaseCard(
-        padding: EdgeInsets.zero,
+        inset: Inset.none,
         isSelected: isHighlighted,
         containerHasFocus: containerHasFocus,
         content: ExpansionTile(
@@ -131,8 +130,8 @@ class StashListTile extends ConsumerWidget {
   }
 
   Widget _buildStashDetails(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+    return BaseInset(
+      all: Inset.normal,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -142,21 +141,21 @@ class StashListTile extends ConsumerWidget {
             stash.ref,
             IconRole.tag,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.createBranch,
             stash.branch,
             IconRole.gitBranch,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.commit,
             stash.shortHash,
             IconRole.gitCommit,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.created,
@@ -165,7 +164,7 @@ class StashListTile extends ConsumerWidget {
             ),
             IconRole.clock,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           _buildActionButtons(context, ref),
         ],
       ),
@@ -185,9 +184,9 @@ class StashListTile extends ConsumerWidget {
         // pixels in `onSurfaceVariant` - so the swap changes the vocabulary,
         // not a pixel.
         BaseIcon(icon, tone: Tone.muted, scale: ControlScale.compact),
-        const SizedBox(width: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         BaseLabel('$label:', role: TextRole.detail, tone: Tone.muted),
-        const SizedBox(width: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         Expanded(child: BaseLabel(value, role: TextRole.body)),
       ],
     );

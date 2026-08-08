@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
@@ -17,6 +18,7 @@ import '../components/base_list_item.dart';
 import '../controllers/item_navigation_controller.dart';
 import '../widgets/keyboard_navigable_view.dart';
 import '../widgets/search_field_handoff.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for switching between workspace repositories (Ctrl+R).
 ///
@@ -154,7 +156,7 @@ class _RepositorySwitcherDialogState
               },
             ),
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Repository list needs a bounded height: BaseDialog wraps the
           // content in a SingleChildScrollView, so a flex child would sit in
@@ -198,6 +200,13 @@ class _RepositorySwitcherDialogState
                             // Active indicator
                             SizedBox(
                               width: AppTheme.paddingL,
+                              // Both marks below are drawn at Phosphor BOLD and
+                              // stay raw for that reason: a role carries no
+                              // weight (#249 conflict C3), the star's solid
+                              // variant is one the census pins deliberately,
+                              // and giving a weight up is a P3a decision rather
+                              // than a side effect of converting a SIZE. Their
+                              // `AppTheme.icon*` reads survive this phase.
                               child: isActive
                                   ? Icon(
                                       PhosphorIconsBold.check,
@@ -208,7 +217,7 @@ class _RepositorySwitcherDialogState
                                     )
                                   : null,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             // Favorite star
                             if (repo.isFavorite)
                               Icon(
@@ -235,12 +244,17 @@ class _RepositorySwitcherDialogState
                             if (!repo.isValidGitRepo)
                               Row(
                                 children: [
-                                  Icon(
-                                    PhosphorIconsRegular.warningCircle,
-                                    size: AppTheme.iconXS,
-                                    color: Theme.of(context).colorScheme.error,
+                                  // 12 px before the conversion. The XS rung of
+                                  // the old icon scale is not a meaning
+                                  // ControlScale keeps: a mark beside a line of
+                                  // detail is a dense mark, which is what the
+                                  // 16 px inline marks elsewhere already say.
+                                  const BaseIcon(
+                                    IconRole.warningCircle,
+                                    scale: ControlScale.compact,
+                                    tone: Tone.danger,
                                   ),
-                                  const SizedBox(width: AppTheme.paddingXS),
+                                  const BaseGap(Proximity.hairline),
                                   BaseLabel(
                                     AppLocalizations.of(
                                       context,

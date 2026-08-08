@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_menu_item.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
@@ -24,6 +23,7 @@ import 'widgets/stashes_no_repository_state.dart';
 import 'widgets/stashes_error_state.dart';
 import 'widgets/stashes_empty_state.dart';
 import 'services/stashes_service.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Stashes screen - Stash management
 class StashesScreen extends ConsumerStatefulWidget {
@@ -119,8 +119,8 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
+      body: BaseInset(
+        all: Inset.roomy,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

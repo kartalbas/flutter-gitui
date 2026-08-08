@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_diff_viewer.dart';
 import '../../../shared/components/base_speed_dial.dart';
@@ -286,12 +289,16 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
             child: BasePanel(
               title: Row(
                 children: [
-                  Icon(
-                    PhosphorIconsRegular.tree,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.primary,
+                  // The panel header's mark: a dense header glyph carrying the
+                  // application's own colour, which is `compact` and
+                  // `Tone.accent` - the 16 pixels and the `primary` this site
+                  // used to spell out.
+                  const BaseIcon(
+                    IconRole.tree,
+                    scale: ControlScale.compact,
+                    tone: Tone.accent,
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   // Flexible, because a section title is a rung larger than
                   // the panel header used to be and this pane is one third of
                   // the window: at the 800 px minimum the application allows
@@ -307,7 +314,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                   ),
                 ],
               ),
-              padding: EdgeInsets.zero,
+              inset: Inset.none,
               content: KeyboardNavigableTreeView<GitStatusTreeNode>(
                 controller: _treeController,
                 autofocus: true,
@@ -334,12 +341,12 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
               child: BasePanel(
                 title: Row(
                   children: [
-                    Icon(
-                      PhosphorIconsRegular.gitDiff,
-                      size: AppTheme.iconS,
-                      color: Theme.of(context).colorScheme.primary,
+                    const BaseIcon(
+                      IconRole.gitDiff,
+                      scale: ControlScale.compact,
+                      tone: Tone.accent,
                     ),
-                    const SizedBox(width: AppTheme.paddingS),
+                    const BaseGap(Proximity.related),
                     Expanded(
                       // The name of one object - the file whose diff is
                       // on screen - rather than the name of the region.
@@ -360,7 +367,9 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(width: AppTheme.paddingXS),
+                    // A mark and the word beside it are two halves of one
+                    // thing: `hairline`, Material's 4.
+                    const BaseGap(Proximity.hairline),
                     BaseLabel(
                       _selectedFile!.isPartiallyStaged
                           ? 'Partially staged'
@@ -371,7 +380,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                     ),
                   ],
                 ),
-                padding: EdgeInsets.zero,
+                inset: Inset.none,
                 content: _DiffViewerPanel(
                   key: ValueKey(
                     '${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode',
@@ -525,7 +534,7 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
                   size: AppTheme.iconXL,
                   color: Theme.of(context).colorScheme.error,
                 ),
-                const SizedBox(height: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
                 BaseLabel(
                   'Error loading diff: ${snapshot.error}',
                   role: TextRole.body,

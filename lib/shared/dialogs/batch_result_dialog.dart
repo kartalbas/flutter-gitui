@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_dialog.dart';
 import '../../features/repositories/repository_batch_error_provider.dart';
 import '../../core/services/notification_service.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for displaying batch operation results with copy and dismiss actions
 class BatchResultDialog extends StatelessWidget {
@@ -52,15 +53,14 @@ class BatchResultDialog extends StatelessWidget {
         children: [
           // Repository name
           BaseLabel('Repository', role: TextRole.detail, tone: Tone.muted),
-          const SizedBox(height: AppTheme.paddingXS),
+          const BaseGap(Proximity.hairline),
           BaseLabel(repositoryName, role: TextRole.body, maxLines: 2),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Message
           BaseLabel('Message', role: TextRole.detail, tone: Tone.muted),
-          const SizedBox(height: AppTheme.paddingXS),
+          const BaseGap(Proximity.hairline),
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: isSuccess
                   ? color.withValues(alpha: 0.1)
@@ -70,12 +70,14 @@ class BatchResultDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppTheme.radiusS),
               border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
             ),
-            child: SelectableText(
-              result.message,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurface,
-                fontFamily: 'monospace',
+            child: BaseInset(
+              child: SelectableText(
+                result.message,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontFamily: 'monospace',
+                ),
               ),
             ),
           ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Dialog for confirming deletion of multiple tags
 class DeleteTagsDialog extends StatefulWidget {
@@ -46,9 +47,9 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
           children: [
             BaseLabel(confirmMessage, role: TextRole.body),
             if (widget.hasRemotes) ...[
-              const SizedBox(height: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
               const Divider(),
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               CheckboxListTile(
                 value: _deleteFromRemote,
                 onChanged: (value) {

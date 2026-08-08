@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show Proximity, IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../core/git/models/branch.dart';
 
 /// Result from delete branch dialog
@@ -63,7 +63,9 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
             l10n.deleteBranchConfirm(branch.shortName),
             role: TextRole.body,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          // The question and the option qualifying it are two parts of one
+          // statement: `related`, Material's 8.
+          const BaseGap(Proximity.related),
           CheckboxListTile(
             value: _force,
             onChanged: (value) => setState(() => _force = value ?? false),

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_panel.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_diff_viewer.dart';
 import '../../../core/diff/diff_parser.dart';
@@ -35,15 +37,17 @@ class CommitDiffPanel extends ConsumerWidget {
     return BasePanel(
       title: Row(
         children: [
-          Icon(
-            PhosphorIconsRegular.gitDiff,
-            size: AppTheme.iconS,
-            color: Theme.of(context).colorScheme.primary,
+          // A panel header's mark: dense, and carrying the application's own
+          // colour rather than Material's `primary` slot.
+          const BaseIcon(
+            IconRole.gitDiff,
+            scale: ControlScale.compact,
+            tone: Tone.accent,
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(l10n.commitDiff, role: TextRole.sectionTitle),
           if (filePath != null) ...[
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Expanded(
               child: BaseLabel(
                 filePath,
@@ -68,7 +72,7 @@ class CommitDiffPanel extends ConsumerWidget {
             ),
           ),
       ],
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       content: fileAsync.when(
         data: (path) => path == null
             ? _CenteredNote(
@@ -165,7 +169,9 @@ class _CenteredNote extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           mark,
-          const SizedBox(height: AppTheme.paddingM),
+          // The mark and the sentence under it are members of one statement:
+          // `grouped`, Material's 16.
+          const BaseGap(Proximity.grouped),
           BaseLabel(message, role: TextRole.body, tone: tone),
         ],
       ),

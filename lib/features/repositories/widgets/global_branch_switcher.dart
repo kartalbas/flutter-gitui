@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show Inset, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_switcher.dart';
@@ -16,6 +17,7 @@ import '../repository_multi_select_provider.dart';
 import '../services/batch_operations_service.dart';
 import '../dialogs/batch_operation_progress_dialog.dart';
 import '../repository_batch_error_provider.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Global branch switcher widget - displays most common branch and allows batch checkout
 class GlobalBranchSwitcher extends ConsumerWidget {
@@ -102,11 +104,9 @@ class GlobalBranchSwitcher extends ConsumerWidget {
     BuildContext context,
     GlobalBranchInfo branchInfo,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingM,
-        vertical: AppTheme.paddingS,
-      ),
+    return BaseInset(
+      x: Inset.normal,
+      y: Inset.tight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -115,29 +115,33 @@ class GlobalBranchSwitcher extends ConsumerWidget {
             size: AppTheme.iconS,
             color: Theme.of(context).colorScheme.primary,
           ),
-          const SizedBox(width: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 BaseLabel(branchInfo.branchName, role: TextRole.body),
-                const SizedBox(height: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   'Switch ${branchInfo.repositoryCount} of ${branchInfo.totalRepositories} repos:',
                   role: TextRole.detail,
                   tone: Tone.muted,
                 ),
-                const SizedBox(height: 2),
-                ...branchInfo.repositoryNames.map(
-                  (repoName) => Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: BaseLabel(
+                // The list of affected repositories used a literal two-pixel
+                // gap and a one-sided top padding per name - two spellings of
+                // one relationship, and both of them numbers. The names touch
+                // the line that introduces them and touch each other, which
+                // is what the hairline rung says.
+                ...branchInfo.repositoryNames.expand(
+                  (repoName) => <Widget>[
+                    const BaseGap(Proximity.hairline),
+                    BaseLabel(
                       '• $repoName',
                       role: TextRole.detail,
                       tone: Tone.muted,
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

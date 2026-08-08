@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_list_item.dart';
 import 'settings_section.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Git configuration section for settings screen
 class GitConfigSection extends ConsumerWidget {
@@ -45,8 +45,8 @@ class GitConfigSection extends ConsumerWidget {
       children: [
         // Tool auto-detection button (Windows and Linux)
         if (onDetectTools != null) ...[
-          Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
+          BaseInset(
+            all: Inset.normal,
             child: BaseButton(
               label: l10n.searchToolsAutoDetect,
               variant: ButtonVariant.primary,
@@ -72,7 +72,7 @@ class GitConfigSection extends ConsumerWidget {
                 tone: git.executablePath == null ? Tone.invalid : Tone.neutral,
               ),
               if (git.gitVersion != null) ...[
-                const SizedBox(height: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   l10n.gitVersion(git.gitVersion!),
                   role: TextRole.detail,
@@ -116,7 +116,7 @@ class GitConfigSection extends ConsumerWidget {
                 tone: tools.textEditor == null ? Tone.invalid : Tone.neutral,
               ),
               if (tools.textEditorVersion != null) ...[
-                const SizedBox(height: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   l10n.version(tools.textEditorVersion!),
                   role: TextRole.detail,
@@ -160,7 +160,7 @@ class GitConfigSection extends ConsumerWidget {
                 tone: tools.diffTool == null ? Tone.invalid : Tone.neutral,
               ),
               if (tools.diffToolVersion != null) ...[
-                const SizedBox(height: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   l10n.version(tools.diffToolVersion!),
                   role: TextRole.detail,
@@ -202,7 +202,7 @@ class GitConfigSection extends ConsumerWidget {
                 tone: tools.mergeTool == null ? Tone.invalid : Tone.neutral,
               ),
               if (tools.mergeToolVersion != null) ...[
-                const SizedBox(height: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   l10n.version(tools.mergeToolVersion!),
                   role: TextRole.detail,

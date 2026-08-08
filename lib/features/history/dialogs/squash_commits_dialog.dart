@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../core/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../core/git/models/commit.dart';
 import '../../../core/git/git_providers.dart';
@@ -171,7 +174,8 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
         children: [
           if (errorMessage != null)
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
+              // The callout's fill and corner stay: they are the surface, and
+              // the surface leaves with `surfaces.banner`.
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
@@ -183,27 +187,31 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onErrorContainer,
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: AppTheme.paddingM),
-                    Expanded(
-                      child: BaseLabel(errorMessage, role: TextRole.body),
-                    ),
-                  ],
+                child: BaseInset(
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.warningCircle,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const BaseGap(Proximity.grouped),
+                      Expanded(
+                        child: BaseLabel(errorMessage, role: TextRole.body),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           BaseLabel(
             l10n.squashingCommitsCount(_selectedCommits.length),
             role: TextRole.sectionTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          // A section title and the list it names are two parts of one
+          // statement: `related`, Material's 8.
+          const BaseGap(Proximity.related),
 
           // List of commits being squashed
           Container(
@@ -218,10 +226,10 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
               itemBuilder: (context, index) {
                 final commit = _selectedCommits[index];
                 return BaseListItem(
-                  leading: Icon(
-                    PhosphorIconsRegular.gitCommit,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.primary,
+                  leading: const BaseIcon(
+                    IconRole.gitCommit,
+                    scale: ControlScale.compact,
+                    tone: Tone.accent,
                   ),
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,10 +250,11 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
             ),
           ),
 
-          const SizedBox(height: AppTheme.paddingL),
+          // Two groups inside one form: `separate`, Material's 24.
+          const BaseGap(Proximity.separate),
 
           BaseLabel(l10n.newCommitMessage, role: TextRole.sectionTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
 
           BaseTextField(
             controller: _messageController,
@@ -254,29 +263,33 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
             autofocus: true,
           ),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  PhosphorIconsRegular.info,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                Expanded(
-                  child: BaseLabel(
-                    l10n.squashCommitsInfo,
-                    role: TextRole.detail,
+            child: BaseInset(
+              child: Row(
+                children: [
+                  // A note's own mark: dense, and carrying the application's
+                  // colour. It was drawn at 18 here - a number on no ladder in
+                  // the application - for want of a word for the job.
+                  const BaseIcon(
+                    IconRole.info,
+                    scale: ControlScale.compact,
+                    tone: Tone.accent,
                   ),
-                ),
-              ],
+                  const BaseGap(Proximity.related),
+                  Expanded(
+                    child: BaseLabel(
+                      l10n.squashCommitsInfo,
+                      role: TextRole.detail,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

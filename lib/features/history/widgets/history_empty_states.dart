@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 
 /// Empty state when repository has no commits
@@ -24,9 +24,12 @@ class NoCommitsState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          // A hero glyph and the headline under it are two groups inside one
+          // region; the headline and its explanation are two parts of one
+          // statement.
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.emptyStateNoCommits, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(l10n.emptyStateNoCommitsMessage, role: TextRole.body),
         ],
       ),
@@ -51,9 +54,9 @@ class HistoryErrorState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           const BaseLabel('Error Loading History', role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             error.toString(),
             role: TextRole.detail,
@@ -81,9 +84,9 @@ class NoCommitSelectedState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.emptyStateNoCommitSelected, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             l10n.emptyStateNoCommitSelectedMessage,
             role: TextRole.body,
@@ -121,23 +124,26 @@ class NoSearchResultsState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             l10n.emptyStateTryAdjustingSearchCriteria,
             role: TextRole.body,
             tone: Tone.muted,
           ),
           if (onSearchAllHistory != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               l10n.historySearchCoversLoadedOnly,
               role: TextRole.detail,
               tone: Tone.muted,
             ),
           ],
-          const SizedBox(height: AppTheme.paddingM),
+          // The verbal statement and the actions offered under it are two
+          // groups inside the one empty-state region: `separate`, the word
+          // every other empty state uses at this boundary.
+          const BaseGap(Proximity.separate),
           BaseButton(
             label: l10n.clearFiltersAction,
             variant: ButtonVariant.tertiary,
@@ -145,7 +151,9 @@ class NoSearchResultsState extends StatelessWidget {
             onPressed: onClearFilters,
           ),
           if (onSearchAllHistory != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            // Sibling actions in one run are members of one group:
+            // `grouped`, the vocabulary's own exemplar for a run of actions.
+            const BaseGap(Proximity.grouped),
             BaseButton(
               label: l10n.historySearchAllHistory,
               variant: ButtonVariant.secondary,

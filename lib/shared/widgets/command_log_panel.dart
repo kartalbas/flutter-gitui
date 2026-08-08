@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, TextRole, Tone;
 import 'package:google_fonts/google_fonts.dart';
 import '../../generated/app_localizations.dart';
 
@@ -254,7 +254,7 @@ class _LogEntryCardState extends State<_LogEntryCard> {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
       child: BaseCard(
-        padding: EdgeInsets.zero,
+        inset: Inset.none,
         content: InkWell(
           onTap: hasOutput
               ? () => setState(() => _isExpanded = !_isExpanded)

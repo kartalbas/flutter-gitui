@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:photo_view/photo_view.dart';
 
+import '../../../../shared/components/base_icon.dart';
 import '../../../../shared/components/base_label.dart';
+import '../../../../shared/components/base_layout.dart';
 import '../../../../shared/components/base_viewer_dialog.dart';
-import '../../../../shared/theme/app_theme.dart';
 
 /// Enhanced image viewer dialog with zoom and pan
 class ImageViewerDialog extends StatelessWidget {
@@ -43,17 +43,22 @@ class ImageViewerDialog extends StatelessWidget {
         initialScale: PhotoViewComputedScale.contained,
         heroAttributes: PhotoViewHeroAttributes(tag: filePath),
       ),
-      footer: Padding(
-        padding: const EdgeInsets.all(12),
+      // The caption strip under the image is set in from the dialog's edge at
+      // the ordinary reading distance. It used to say 12, which is no rung of
+      // any ladder in the application; `Inset.normal` is the meaning and
+      // Material answers it with 16.
+      footer: BaseInset(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              PhosphorIconsRegular.mouseSimple,
-              size: 16,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            // A mark inside a caption line: `compact`, the 16 pixels this site
+            // named, and muted because it is secondary to the image above.
+            const BaseIcon(
+              IconRole.mouseSimple,
+              scale: ControlScale.compact,
+              tone: Tone.muted,
             ),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             // The caption is secondary to the image above it. The 0.7 was
             // that statement said a second time, in a number.
             const BaseLabel(

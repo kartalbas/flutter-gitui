@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -10,6 +10,7 @@ import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/git/git_providers.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Dialog for creating a new stash
 class CreateStashDialog extends ConsumerStatefulWidget {
@@ -66,7 +67,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BaseLabel(l10n.saveChangesToStash, role: TextRole.body),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseTextField(
             controller: _messageController,
             label: l10n.messageOptional,
@@ -74,7 +75,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
             maxLines: 2,
             autofocus: true,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // File selection mode toggle
           SwitchListTile(
@@ -100,7 +101,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
 
           // File selection list (only show when not stashing all files)
           if (!_stashAllFiles && allStatuses.isNotEmpty) ...[
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             Row(
               children: [
                 BaseLabel(
@@ -132,7 +133,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Container(
               constraints: const BoxConstraints(maxHeight: 300),
               decoration: BoxDecoration(
@@ -174,7 +175,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
               ),
             ),
           ] else if (!_stashAllFiles && allStatuses.isEmpty) ...[
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             BaseLabel(
               l10n.noFilesToStash,
               role: TextRole.detail,
@@ -182,7 +183,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
             ),
           ],
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           CheckboxListTile(
             value: _includeUntracked,
             onChanged: (value) {

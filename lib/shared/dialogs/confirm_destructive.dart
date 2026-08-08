@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 
 import '../../core/config/config_providers.dart';
 import '../../core/git/destructive_action.dart';
@@ -8,7 +9,7 @@ import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
 import '../components/base_label.dart';
 import '../components/base_text_field.dart';
-import '../theme/app_theme.dart';
+import '../components/base_layout.dart';
 
 /// The single gate every destructive Git action passes through, so a
 /// destructive action can never reach git without a confirmation the user can
@@ -207,12 +208,12 @@ class _TypeToConfirmDialogState extends State<_TypeToConfirmDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           BaseLabel(widget.message, role: TextRole.body),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             l10n.typeToConfirmInstruction(widget.token),
             role: TextRole.body,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseTextField(
             controller: _controller,
             focusNode: _fieldFocus,

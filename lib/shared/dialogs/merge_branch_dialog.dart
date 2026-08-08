@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -12,6 +12,7 @@ import '../../core/git/git_providers.dart';
 import '../../core/git/models/branch.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for merging a branch
 class MergeBranchDialog extends ConsumerStatefulWidget {
@@ -60,7 +61,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
               ),
               role: TextRole.body,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Branch selection
             branchesAsync.when(
@@ -72,16 +73,17 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
 
                 if (availableBranches.isEmpty) {
                   return Container(
-                    padding: const EdgeInsets.all(AppTheme.paddingM),
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
                       ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.noOtherBranchesAvailable,
-                      role: TextRole.body,
+                    child: BaseInset(
+                      child: BaseLabel(
+                        AppLocalizations.of(context)!.noOtherBranchesAvailable,
+                        role: TextRole.body,
+                      ),
                     ),
                   );
                 }
@@ -103,10 +105,10 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                                 : PhosphorIconsRegular.gitBranch,
                             size: 16,
                           ),
-                          const SizedBox(width: AppTheme.paddingS),
+                          const BaseGap(Proximity.related),
                           Text(branch.name),
                           if (branch.isRemote) ...[
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             BaseLabel(
                               AppLocalizations.of(context)!.remote,
                               role: TextRole.detail,
@@ -134,14 +136,14 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                 tone: Tone.danger,
               ),
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Merge options
             BaseLabel(
               AppLocalizations.of(context)!.mergeOptions,
               role: TextRole.sectionTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
 
             // Fast-forward only
             CheckboxListTile(
@@ -200,7 +202,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
               contentPadding: EdgeInsets.zero,
             ),
 
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Custom message option
             CheckboxListTile(
@@ -217,7 +219,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
             ),
 
             if (_customMessage) ...[
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               BaseTextField(
                 controller: _messageController,
                 label: AppLocalizations.of(context)!.mergeMessage,
@@ -230,66 +232,68 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
             ],
 
             // Info card
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  const Icon(PhosphorIconsRegular.info, size: 20),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      _squash
-                          ? AppLocalizations.of(
-                              context,
-                            )!.squashMergeWillCombineAllCommits
-                          : AppLocalizations.of(
-                              context,
-                            )!.thisWillMergeSelectedBranch,
-                      role: TextRole.body,
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        _squash
+                            ? AppLocalizations.of(
+                                context,
+                              )!.squashMergeWillCombineAllCommits
+                            : AppLocalizations.of(
+                                context,
+                              )!.thisWillMergeSelectedBranch,
+                        role: TextRole.body,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
             // Error message
             if (_errorMessage != null) ...[
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    Expanded(
-                      child: BaseLabel(
-                        _errorMessage!,
-                        role: TextRole.body,
-                        tone: Tone.danger,
+                child: BaseInset(
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.warningCircle,
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                    ),
-                  ],
+                      const BaseGap(Proximity.related),
+                      Expanded(
+                        child: BaseLabel(
+                          _errorMessage!,
+                          role: TextRole.body,
+                          tone: Tone.danger,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
 
             // Progress indicator
             if (_isMerging) ...[
-              const SizedBox(height: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
               const LinearProgressIndicator(),
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               // The italic leaves with the `TextStyle`: slanting an aside is
               // Material's answer to "this is a remark about what is
               // happening", and `TextRole.detail` is the question.

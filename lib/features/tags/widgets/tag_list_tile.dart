@@ -23,6 +23,7 @@ import '../dialogs/create_branch_from_tag_dialog.dart';
 import '../../history/providers/history_search_provider.dart';
 import '../../history/models/history_search_filter.dart';
 import '../../../core/navigation/navigation_item.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Individual tag list tile widget
 class TagListTile extends ConsumerWidget {
@@ -64,13 +65,11 @@ class TagListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingM,
-        vertical: AppTheme.paddingS,
-      ),
+    return BaseInset(
+      x: Inset.normal,
+      y: Inset.tight,
       child: BaseCard(
-        padding: EdgeInsets.zero,
+        inset: Inset.none,
         // The roving highlight wears the primary selection treatment; a
         // checked tag in selection mode wears the multi-select tint, the
         // same split the repository cards use.
@@ -80,8 +79,8 @@ class TagListTile extends ConsumerWidget {
         content: selectionMode
             ? InkWell(
                 onTap: () => onSelectionChanged?.call(!isSelected),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                child: BaseInset(
+                  all: Inset.normal,
                   child: Row(
                     children: [
                       Icon(
@@ -90,7 +89,7 @@ class TagListTile extends ConsumerWidget {
                             : PhosphorIconsRegular.tag,
                         color: tag.isAnnotated ? context.gitColors.added : null,
                       ),
-                      const SizedBox(width: AppTheme.paddingM),
+                      const BaseGap(Proximity.grouped),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +103,7 @@ class TagListTile extends ConsumerWidget {
                                   ),
                                 ),
                                 if (isLocalOnly) ...[
-                                  const SizedBox(width: AppTheme.paddingS),
+                                  const BaseGap(Proximity.related),
                                   _buildLocalBadge(context),
                                 ],
                               ],
@@ -145,7 +144,7 @@ class TagListTile extends ConsumerWidget {
                       child: BaseLabel(tag.name, role: TextRole.itemTitle),
                     ),
                     if (isLocalOnly) ...[
-                      const SizedBox(width: AppTheme.paddingS),
+                      const BaseGap(Proximity.related),
                       _buildLocalBadge(context),
                     ],
                   ],
@@ -241,7 +240,7 @@ class TagListTile extends ConsumerWidget {
             size: 12,
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
-          const SizedBox(width: 2),
+          const BaseGap(Proximity.hairline),
           Text(
             AppLocalizations.of(context)!.local,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -255,8 +254,8 @@ class TagListTile extends ConsumerWidget {
   }
 
   Widget _buildTagDetails(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+    return BaseInset(
+      all: Inset.normal,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -268,7 +267,7 @@ class TagListTile extends ConsumerWidget {
                 : AppLocalizations.of(context)!.tagTypeLightweight,
             IconRole.tag,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.tagDetailsCommit,
@@ -276,7 +275,7 @@ class TagListTile extends ConsumerWidget {
             IconRole.gitCommit,
           ),
           if (tag.displayTagger != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             _buildDetailRow(
               context,
               AppLocalizations.of(context)!.tagDetailsTagger,
@@ -285,7 +284,7 @@ class TagListTile extends ConsumerWidget {
             ),
           ],
           if (tag.date != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             _buildDetailRow(
               context,
               AppLocalizations.of(context)!.tagDetailsDate,
@@ -294,30 +293,32 @@ class TagListTile extends ConsumerWidget {
             ),
           ],
           if (tag.message != null && tag.message!.isNotEmpty) ...[
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             const Divider(),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               AppLocalizations.of(context)!.tagDetailsMessage,
               role: TextRole.detail,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: SelectableText(
-                tag.message!,
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  color: Theme.of(context).colorScheme.onSurface,
+              child: BaseInset(
+                all: Inset.normal,
+                child: SelectableText(
+                  tag.message!,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),
           ],
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           _buildActionButtons(context, ref),
         ],
       ),
@@ -337,9 +338,9 @@ class TagListTile extends ConsumerWidget {
         // pixels in `onSurfaceVariant` - so the swap changes the vocabulary,
         // not a pixel.
         BaseIcon(icon, tone: Tone.muted, scale: ControlScale.compact),
-        const SizedBox(width: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         BaseLabel('$label:', role: TextRole.detail, tone: Tone.muted),
-        const SizedBox(width: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         Expanded(child: BaseLabel(value, role: TextRole.body)),
       ],
     );

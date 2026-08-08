@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -13,6 +14,7 @@ import '../components/base_dropdown.dart';
 import '../../core/git/models/rebase_state.dart';
 import '../../core/git/models/branch.dart';
 import '../../core/navigation/navigation_item.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for Git rebase operations
 class RebaseDialog extends ConsumerStatefulWidget {
@@ -146,69 +148,71 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           children: [
             // Info banner
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  const Icon(PhosphorIconsRegular.info, size: 20),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.rebaseWillReplayCommits,
-                      role: TextRole.detail,
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        AppLocalizations.of(context)!.rebaseWillReplayCommits,
+                        role: TextRole.detail,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Current branch
             BaseLabel(
               AppLocalizations.of(context)!.currentBranch,
               role: TextRole.sectionTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.gitBranch,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  // The panel behind this line is `primaryContainer`; naming
-                  // its paired foreground is the container's business, so the
-                  // name of the branch says nothing about colour.
-                  DefaultTextStyle.merge(
-                    style: TextStyle(
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.gitBranch,
+                      size: 20,
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
-                    child: BaseLabel(
-                      currentBranch ?? 'Unknown',
-                      role: TextRole.body,
+                    const BaseGap(Proximity.related),
+                    // The panel behind this line is `primaryContainer`; naming
+                    // its paired foreground is the container's business, so the
+                    // name of the branch says nothing about colour.
+                    DefaultTextStyle.merge(
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      child: BaseLabel(
+                        currentBranch ?? 'Unknown',
+                        role: TextRole.body,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Target branch selection
             BaseLabel(
               AppLocalizations.of(context)!.rebaseOntoBranch,
               role: TextRole.sectionTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             _buildBranchDropdown(
               branches: availableBranches,
               selectedBranch: _selectedBranch,
@@ -217,7 +221,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 setState(() => _selectedBranch = branch);
               },
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Interactive option
             CheckboxListTile(
@@ -230,33 +234,34 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 setState(() => _interactive = value ?? false);
               },
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Warning
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
                 ).colorScheme.errorContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.warningCircle,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.rebaseWarning,
-                      role: TextRole.detail,
+              child: BaseInset(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.error,
                     ),
-                  ),
-                ],
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        AppLocalizations.of(context)!.rebaseWarning,
+                        role: TextRole.detail,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -274,46 +279,49 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       children: [
         // Status banner
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             color: state.hasConflicts
                 ? Theme.of(context).colorScheme.errorContainer
                 : Theme.of(context).colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    state.hasConflicts
-                        ? PhosphorIconsRegular.warningCircle
-                        : PhosphorIconsRegular.gitBranch,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
+          child: BaseInset(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
                       state.hasConflicts
-                          ? AppLocalizations.of(context)!.rebaseConflicts
-                          : AppLocalizations.of(context)!.rebaseInProgress,
-                      role: TextRole.sectionTitle,
+                          ? PhosphorIconsRegular.warningCircle
+                          : PhosphorIconsRegular.gitBranch,
+                      size: 20,
                     ),
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        state.hasConflicts
+                            ? AppLocalizations.of(context)!.rebaseConflicts
+                            : AppLocalizations.of(context)!.rebaseInProgress,
+                        role: TextRole.sectionTitle,
+                      ),
+                    ),
+                  ],
+                ),
+                if (state.progressText != null) ...[
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(
+                      context,
+                    )!.step(state.progressText ?? ''),
+                    role: TextRole.body,
                   ),
                 ],
-              ),
-              if (state.progressText != null) ...[
-                const SizedBox(height: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(context)!.step(state.progressText ?? ''),
-                  role: TextRole.body,
-                ),
               ],
-            ],
+            ),
           ),
         ),
-        const SizedBox(height: AppTheme.paddingM),
+        const BaseGap(Proximity.grouped),
 
         // Progress bar
         if (state.progress != null)
@@ -322,29 +330,30 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             minHeight: 8,
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
           ),
-        if (state.progress != null) const SizedBox(height: AppTheme.paddingL),
+        if (state.progress != null) const BaseGap(Proximity.separate),
 
         // Rebase info
         BaseLabel(
           AppLocalizations.of(context)!.rebaseOntoBranch,
           role: TextRole.sectionTitle,
         ),
-        const SizedBox(height: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
-          child: Row(
-            children: [
-              const Icon(PhosphorIconsRegular.gitBranch, size: 20),
-              const SizedBox(width: AppTheme.paddingS),
-              BaseLabel(state.ontoBranch ?? 'Unknown', role: TextRole.body),
-            ],
+          child: BaseInset(
+            child: Row(
+              children: [
+                const Icon(PhosphorIconsRegular.gitBranch, size: 20),
+                const BaseGap(Proximity.related),
+                BaseLabel(state.ontoBranch ?? 'Unknown', role: TextRole.body),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: AppTheme.paddingL),
+        const BaseGap(Proximity.separate),
 
         // Current commit
         if (state.currentCommit != null) ...[
@@ -352,62 +361,66 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             AppLocalizations.of(context)!.currentCommit,
             role: TextRole.sectionTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: BaseLabel(state.currentCommit!, role: TextRole.body),
+            child: BaseInset(
+              child: BaseLabel(state.currentCommit!, role: TextRole.body),
+            ),
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
         ],
 
         // Conflicts message
         if (state.hasConflicts) ...[
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(
                 context,
               ).colorScheme.errorContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BaseLabel(
-                      AppLocalizations.of(context)!.conflictsDetected,
-                      role: TextRole.body,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(context)!.resolveConflictsInChangesScreen,
-                  role: TextRole.detail,
-                ),
-                const SizedBox(height: AppTheme.paddingM),
-                BaseButton(
-                  label: AppLocalizations.of(context)!.goToChanges,
-                  variant: ButtonVariant.primary,
-                  leadingIcon: IconRole.fileCode,
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    ref.read(navigationDestinationProvider.notifier).state =
-                        AppDestination.changes;
-                  },
-                ),
-              ],
+            child: BaseInset(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.warningCircle,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const BaseGap(Proximity.related),
+                      BaseLabel(
+                        AppLocalizations.of(context)!.conflictsDetected,
+                        role: TextRole.body,
+                      ),
+                    ],
+                  ),
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(
+                      context,
+                    )!.resolveConflictsInChangesScreen,
+                    role: TextRole.detail,
+                  ),
+                  const BaseGap(Proximity.grouped),
+                  BaseButton(
+                    label: AppLocalizations.of(context)!.goToChanges,
+                    variant: ButtonVariant.primary,
+                    leadingIcon: IconRole.fileCode,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      ref.read(navigationDestinationProvider.notifier).state =
+                          AppDestination.changes;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -415,7 +428,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         // A fixed gap, not a Spacer: BaseDialog scrolls its content, so the
         // Column has unbounded height and a flex child (Spacer builds an
         // Expanded) throws instead of spacing.
-        const SizedBox(height: AppTheme.paddingL),
+        const BaseGap(Proximity.separate),
 
         // Instructions
         if (!state.hasConflicts) ...[
@@ -423,7 +436,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             AppLocalizations.of(context)!.rebaseIsInProgress,
             role: TextRole.detail,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             '• ${AppLocalizations.of(context)!.abortToCancelAndReturnToOriginalState}',
             role: TextRole.detail,
@@ -447,12 +460,12 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.error(error.toString()),
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel('', role: TextRole.detail, align: TextAlign.center),
         ],
       ),
@@ -478,7 +491,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 const Icon(PhosphorIconsRegular.cloud, size: 16)
               else
                 const Icon(PhosphorIconsRegular.gitBranch, size: 16),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               Text(branch.name),
             ],
           ),

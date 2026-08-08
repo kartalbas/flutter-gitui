@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -11,7 +11,9 @@ import '../../core/git/models/merge_conflict.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_list_item.dart';
 import '../../shared/components/base_dialog.dart';
+import '../../shared/components/base_icon.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_layout.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/widgets/base_dismiss_scope.dart';
 import '../../shared/widgets/base_focus_region.dart';
@@ -172,7 +174,9 @@ class _ConflictResolutionScreenState
                 size: 64,
                 color: context.gitColors.added,
               ),
-              const SizedBox(height: AppTheme.paddingL),
+              // A hero glyph and the headline under it are two groups inside
+              // one region: `separate`, Material's 24.
+              const BaseGap(Proximity.separate),
               BaseLabel(
                 AppLocalizations.of(context)!.dialogTitleNoMergeInProgress,
                 role: TextRole.pageTitle,
@@ -226,7 +230,7 @@ class _ConflictResolutionScreenState
                     : () => _showAbortDialog(context),
                 tooltip: AppLocalizations.of(context)!.tooltipAbortMerge,
               ),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
             ],
           ),
           body: conflicts.isEmpty
@@ -286,21 +290,25 @@ class _ConflictResolutionScreenState
       children: [
         // Header
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+          // The header's fill stays: it is the surface, and the surface leaves
+          // with its member. How far it holds its content off its own edge is
+          // the language's question - `Inset.normal`, Material's 16.
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Row(
-            children: [
-              const Icon(PhosphorIconsRegular.warning, size: 20),
-              const SizedBox(width: AppTheme.paddingS),
-              Expanded(
-                child: BaseLabel(
-                  AppLocalizations.of(context)!.conflictsToResolve(
-                    conflicts.where((c) => !c.isResolved).length,
+          child: BaseInset(
+            child: Row(
+              children: [
+                const BaseIcon(IconRole.warning),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: BaseLabel(
+                    AppLocalizations.of(context)!.conflictsToResolve(
+                      conflicts.where((c) => !c.isResolved).length,
+                    ),
+                    role: TextRole.sectionTitle,
                   ),
-                  role: TextRole.sectionTitle,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
 
@@ -370,76 +378,82 @@ class _ConflictResolutionScreenState
       children: [
         // File header
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Row(
-            children: [
-              const Icon(PhosphorIconsRegular.fileText),
-              const SizedBox(width: AppTheme.paddingS),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BaseLabel(conflict.filePath, role: TextRole.itemTitle),
-                    BaseLabel(conflict.typeDisplay, role: TextRole.detail),
-                  ],
+          child: BaseInset(
+            child: Row(
+              children: [
+                const Icon(PhosphorIconsRegular.fileText),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BaseLabel(conflict.filePath, role: TextRole.itemTitle),
+                      BaseLabel(conflict.typeDisplay, role: TextRole.detail),
+                    ],
+                  ),
                 ),
-              ),
-              if (conflict.isResolved) ...[
-                Icon(
-                  PhosphorIconsRegular.checkCircle,
-                  color: context.gitColors.added,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(context)!.resolved,
-                  role: TextRole.micro,
-                ),
+                if (conflict.isResolved) ...[
+                  Icon(
+                    PhosphorIconsRegular.checkCircle,
+                    color: context.gitColors.added,
+                  ),
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(context)!.resolved,
+                    role: TextRole.micro,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
 
-        if (_errorMessage != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppTheme.paddingL,
-              AppTheme.paddingL,
-              AppTheme.paddingL,
-              0,
-            ),
+        // The banner used to say "24 on three sides and nothing below" as one
+        // four-sided number. Said as what it is, that is two statements: the
+        // header above and the banner are two groups inside one region, and
+        // the banner itself is inset from the pane's sides. No per-side rung
+        // is minted for it - that would be the token bag returning one side
+        // at a time.
+        if (_errorMessage != null) ...<Widget>[
+          const BaseGap(Proximity.separate),
+          BaseInset(
+            x: Inset.roomy,
+            y: Inset.none,
             child: Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.warningCircle,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      _errorMessage!,
-                      role: TextRole.body,
-                      tone: Tone.danger,
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      color: Theme.of(context).colorScheme.error,
                     ),
-                  ),
-                ],
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        _errorMessage!,
+                        role: TextRole.body,
+                        tone: Tone.danger,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+        ],
 
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppTheme.paddingL,
-            AppTheme.paddingL,
-            AppTheme.paddingL,
-            AppTheme.paddingM,
-          ),
+        // The same restatement: a section apart from what precedes it, inset
+        // from the pane's sides, and one group's distance from the choices it
+        // introduces.
+        const BaseGap(Proximity.separate),
+        BaseInset(
+          x: Inset.roomy,
+          y: Inset.none,
           child: Align(
             alignment: AlignmentDirectional.centerStart,
             child: BaseLabel(
@@ -450,6 +464,7 @@ class _ConflictResolutionScreenState
             ),
           ),
         ),
+        const BaseGap(Proximity.grouped),
 
         // Resolution options: one Tab stop with a roving highlight; arrows
         // walk the choices and Enter applies the highlighted one. The manual
@@ -528,47 +543,48 @@ class _ConflictResolutionScreenState
   }
 
   Widget _buildResolutionFooter(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingL),
+    return BaseInset(
+      all: Inset.roomy,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Manual resolution info
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
               border: Border.all(color: Theme.of(context).colorScheme.outline),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(PhosphorIconsRegular.info, size: 20),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BaseLabel(
-                      AppLocalizations.of(context)!.manualResolution,
-                      role: TextRole.sectionTitle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppTheme.paddingS),
-                BaseLabel(
-                  AppLocalizations.of(
-                    context,
-                  )!.dialogContentManualResolutionInfo,
-                  role: TextRole.detail,
-                ),
-              ],
+            child: BaseInset(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const BaseIcon(IconRole.info),
+                      const BaseGap(Proximity.related),
+                      BaseLabel(
+                        AppLocalizations.of(context)!.manualResolution,
+                        role: TextRole.sectionTitle,
+                      ),
+                    ],
+                  ),
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(
+                      context,
+                    )!.dialogContentManualResolutionInfo,
+                    role: TextRole.detail,
+                  ),
+                ],
+              ),
             ),
           ),
 
           if (_isResolving) ...[
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
             const Center(child: CircularProgressIndicator()),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Center(
               child: Text(
                 AppLocalizations.of(context)!.resolvingConflict,
@@ -586,8 +602,12 @@ class _ConflictResolutionScreenState
 
   Widget _buildNoConflicts(BuildContext context, MergeState mergeState) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingXL),
+      // An empty state is a deliberately generous surface: `Inset.roomy`.
+      // It used to say 32 here and 24 at every comparable empty state in the
+      // application, which was one meaning said with two numbers; Material
+      // answers the meaning with 24.
+      child: BaseInset(
+        all: Inset.roomy,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -596,12 +616,15 @@ class _ConflictResolutionScreenState
               size: 64,
               color: context.gitColors.added,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
             BaseLabel(
               AppLocalizations.of(context)!.allConflictsResolved,
               role: TextRole.pageTitle,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            // The headline and the sentence explaining it are two parts of
+            // one statement: `related`, exactly as in every other empty state
+            // of the application.
+            const BaseGap(Proximity.related),
             // The explanation under an empty or error state's headline is
             // ordinary prose — the headline above is what stands out — so it
             // is `body` here exactly as it is in every other empty state of
@@ -615,14 +638,21 @@ class _ConflictResolutionScreenState
               role: TextRole.body,
               align: TextAlign.center,
             ),
-            const SizedBox(height: AppTheme.paddingXL),
+            // The verbal statement and the actions offered under it are two
+            // groups inside the one empty-state region: `separate`, the word
+            // every other empty state uses at this boundary. It is not
+            // `sectioned` - a message and its own call to action are not two
+            // regions about different subjects.
+            const BaseGap(Proximity.separate),
             BaseButton(
               label: AppLocalizations.of(context)!.continueMerge,
               variant: ButtonVariant.primary,
               leadingIcon: IconRole.check,
               onPressed: () => _continueMerge(context),
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            // Sibling actions in one run are members of one group:
+            // `grouped`, the vocabulary's own exemplar for a run of actions.
+            const BaseGap(Proximity.grouped),
             BaseButton(
               label: AppLocalizations.of(context)!.abortMerge,
               variant: ButtonVariant.tertiary,
@@ -637,43 +667,44 @@ class _ConflictResolutionScreenState
 
   Widget _buildContinueBar(BuildContext context, MergeState mergeState) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
         color: context.gitColors.added.withValues(alpha: 0.1),
         border: Border(
           top: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
       ),
-      child: Row(
-        children: [
-          Icon(
-            PhosphorIconsRegular.checkCircle,
-            color: context.gitColors.added,
-          ),
-          const SizedBox(width: AppTheme.paddingM),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BaseLabel(
-                  AppLocalizations.of(context)!.allConflictsResolved,
-                  role: TextRole.sectionTitle,
-                ),
-                BaseLabel(
-                  AppLocalizations.of(context)!.readyToContinueMerge,
-                  role: TextRole.detail,
-                ),
-              ],
+      child: BaseInset(
+        child: Row(
+          children: [
+            Icon(
+              PhosphorIconsRegular.checkCircle,
+              color: context.gitColors.added,
             ),
-          ),
-          BaseButton(
-            label: AppLocalizations.of(context)!.continueMerge,
-            variant: ButtonVariant.primary,
-            leadingIcon: IconRole.check,
-            onPressed: () => _continueMerge(context),
-          ),
-        ],
+            const BaseGap(Proximity.grouped),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BaseLabel(
+                    AppLocalizations.of(context)!.allConflictsResolved,
+                    role: TextRole.sectionTitle,
+                  ),
+                  BaseLabel(
+                    AppLocalizations.of(context)!.readyToContinueMerge,
+                    role: TextRole.detail,
+                  ),
+                ],
+              ),
+            ),
+            BaseButton(
+              label: AppLocalizations.of(context)!.continueMerge,
+              variant: ButtonVariant.primary,
+              leadingIcon: IconRole.check,
+              onPressed: () => _continueMerge(context),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -39,6 +39,7 @@ import 'widgets/repository_list_item.dart';
 import 'widgets/repositories_filter_chips.dart';
 import 'widgets/repositories_empty_state.dart';
 import 'repository_multi_select_provider.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Repositories screen - Workspace repositories and quick actions
 class RepositoriesScreen extends ConsumerStatefulWidget {
@@ -247,7 +248,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                           );
                         },
                       ),
-                      const SizedBox(width: AppTheme.paddingM),
+                      const BaseGap(Proximity.grouped),
                     ]
                   : null,
               moreMenuItems: [
@@ -308,8 +309,8 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                   ),
               ],
             ),
-            body: Padding(
-              padding: const EdgeInsets.all(AppTheme.paddingL),
+            body: BaseInset(
+              all: Inset.roomy,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -331,7 +332,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                       filteredRepositories: filteredRepositories,
                       selectedRepositories: selectedRepositories,
                     ),
-                    const SizedBox(height: AppTheme.paddingM),
+                    const BaseGap(Proximity.grouped),
                   ],
 
                   // Content
@@ -375,7 +376,6 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
               ).colorScheme.primary.withValues(alpha: 0.1),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingXL),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(AppTheme.radiusL),
@@ -385,20 +385,23 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                       strokeAlign: BorderSide.strokeAlignInside,
                     ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        PhosphorIconsBold.folderOpen,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(height: AppTheme.paddingM),
-                      BaseLabel(
-                        AppLocalizations.of(context)!.dropFoldersHere,
-                        role: TextRole.pageTitle,
-                      ),
-                    ],
+                  child: BaseInset(
+                    all: Inset.roomy,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          PhosphorIconsBold.folderOpen,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const BaseGap(Proximity.grouped),
+                        BaseLabel(
+                          AppLocalizations.of(context)!.dropFoldersHere,
+                          role: TextRole.pageTitle,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

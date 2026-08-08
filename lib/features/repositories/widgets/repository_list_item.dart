@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 import '../../../shared/components/base_animated_widgets.dart';
 
 import '../../../generated/app_localizations.dart';
@@ -18,6 +18,7 @@ import '../../../core/extensions/date_time_extensions.dart';
 import '../repository_batch_error_provider.dart';
 import 'sync_on_double_tap.dart';
 import '../../../shared/dialogs/batch_result_dialog.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// List item widget displaying a workspace repository in a compact row format
 class RepositoryListItem extends ConsumerWidget {
@@ -88,7 +89,7 @@ class RepositoryListItem extends ConsumerWidget {
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   visualDensity: VisualDensity.compact,
                 ),
-                const SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
               ],
             )
           : null,
@@ -112,7 +113,7 @@ class RepositoryListItem extends ConsumerWidget {
               ),
 
               // Status badges or loading indicator
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
 
               // Batch operation result icon
               _buildBatchResultIcon(context, ref),
@@ -157,7 +158,7 @@ class RepositoryListItem extends ConsumerWidget {
 
                       // Behind (pull)
                       if (status.hasIncoming) ...[
-                        const SizedBox(width: AppTheme.paddingXS),
+                        const BaseGap(Proximity.hairline),
                         _buildCompactBadge(
                           context,
                           PhosphorIconsRegular.arrowDown,
@@ -169,7 +170,7 @@ class RepositoryListItem extends ConsumerWidget {
 
                       // Ahead (push)
                       if (status.hasOutgoing) ...[
-                        const SizedBox(width: AppTheme.paddingXS),
+                        const BaseGap(Proximity.hairline),
                         _buildCompactBadge(
                           context,
                           PhosphorIconsRegular.arrowUp,
@@ -181,7 +182,7 @@ class RepositoryListItem extends ConsumerWidget {
 
                       // Uncommitted
                       if (status.hasUncommittedChanges) ...[
-                        const SizedBox(width: AppTheme.paddingXS),
+                        const BaseGap(Proximity.hairline),
                         _buildCompactBadge(
                           context,
                           PhosphorIconsRegular.pencilSimple,
@@ -200,7 +201,7 @@ class RepositoryListItem extends ConsumerWidget {
                           !status.hasUncommittedChanges &&
                           status.exists &&
                           status.isValidGit) ...[
-                        const SizedBox(width: AppTheme.paddingXS),
+                        const BaseGap(Proximity.hairline),
                         if (status.needsSignIn)
                           _buildCompactBadge(
                             context,
@@ -248,7 +249,7 @@ class RepositoryListItem extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.paddingXS),
+          const BaseGap(Proximity.hairline),
 
           // Branch and path
           Row(
@@ -264,13 +265,13 @@ class RepositoryListItem extends ConsumerWidget {
                   scale: ControlScale.compact,
                   tone: Tone.accent,
                 ),
-                const SizedBox(width: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   status.currentBranch!,
                   role: TextRole.detail,
                   tone: Tone.accent,
                 ),
-                const SizedBox(width: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
               ],
 
               // Where the remote lives, so a row that needs a sign-in also
@@ -284,7 +285,7 @@ class RepositoryListItem extends ConsumerWidget {
               // different colour systems on one line.
               if (status.remoteIdentity case final identity?) ...[
                 Icon(PhosphorIconsRegular.cloud, size: AppTheme.iconXS),
-                const SizedBox(width: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 Tooltip(
                   message: status.remoteUrl ?? identity.host,
                   child: BaseLabel(
@@ -295,11 +296,11 @@ class RepositoryListItem extends ConsumerWidget {
                     tone: Tone.muted,
                   ),
                 ),
-                const SizedBox(width: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
               ],
 
               Icon(PhosphorIconsRegular.folder, size: AppTheme.iconXS),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               Flexible(
                 child: BaseLabel(
                   repository.path,
@@ -308,9 +309,9 @@ class RepositoryListItem extends ConsumerWidget {
                   maxLines: 1,
                 ),
               ),
-              const SizedBox(width: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               Icon(PhosphorIconsRegular.clock, size: AppTheme.iconXS),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               Flexible(
                 child: BaseLabel(
                   repository.lastAccessed.toDisplayString(
@@ -326,7 +327,7 @@ class RepositoryListItem extends ConsumerWidget {
 
           // Description
           if (repository.description != null) ...[
-            const SizedBox(height: AppTheme.paddingXS),
+            const BaseGap(Proximity.hairline),
             BaseLabel(
               repository.description!,
               role: TextRole.detail,
@@ -422,12 +423,19 @@ class RepositoryListItem extends ConsumerWidget {
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.error;
 
-    return GestureDetector(
-      onTap: () => _showBatchResultDialog(context, ref, batchResult),
-      child: Padding(
-        padding: const EdgeInsets.only(right: AppTheme.paddingXS),
-        child: Icon(icon, size: 14, color: color),
-      ),
+    // The mark's trailing space was a one-sided padding, which is a gap
+    // wearing a padding idiom. The enclosing row cannot own it, because it
+    // does not know whether this builder returned a mark or nothing, so the
+    // mark and its gap travel together.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        GestureDetector(
+          onTap: () => _showBatchResultDialog(context, ref, batchResult),
+          child: Icon(icon, size: 14, color: color),
+        ),
+        const BaseGap(Proximity.hairline),
+      ],
     );
   }
 
@@ -472,7 +480,7 @@ class RepositoryListItem extends ConsumerWidget {
         children: [
           Icon(icon, size: 12, color: color),
           if (label != null) ...[
-            const SizedBox(width: 3),
+            const BaseGap(Proximity.hairline),
             // Deliberately still the old label: this helper's Color parameter
             // also paints the badge's fill, border and icon, so it can only
             // become a Tone when the whole badge moves onto `surfaces.badge`

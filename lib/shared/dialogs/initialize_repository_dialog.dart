@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
@@ -15,6 +15,7 @@ import '../components/base_text_field.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for initializing a new Git repository
 class InitializeRepositoryDialog extends ConsumerStatefulWidget {
@@ -56,7 +57,7 @@ class _InitializeRepositoryDialogState
               AppLocalizations.of(context)!.createNewGitRepository,
               role: TextRole.body,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Directory path
             BaseTextField(
@@ -68,20 +69,21 @@ class _InitializeRepositoryDialogState
               enabled: !_isInitializing,
               autofocus: true,
             ),
-            if (!kIsWeb && !_isInitializing)
+            // The space above the button belongs BETWEEN it and the field, so
+            // it is said as a gap rather than as the button's own top padding.
+            if (!kIsWeb && !_isInitializing) ...<Widget>[
+              const BaseGap(Proximity.related),
               Align(
                 alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: AppTheme.paddingS),
-                  child: BaseButton(
-                    label: AppLocalizations.of(context)!.browse,
-                    variant: ButtonVariant.tertiary,
-                    leadingIcon: IconRole.folderOpen,
-                    onPressed: _browsePath,
-                  ),
+                child: BaseButton(
+                  label: AppLocalizations.of(context)!.browse,
+                  variant: ButtonVariant.tertiary,
+                  leadingIcon: IconRole.folderOpen,
+                  onPressed: _browsePath,
                 ),
               ),
-            const SizedBox(height: AppTheme.paddingM),
+            ],
+            const BaseGap(Proximity.grouped),
 
             // Initial branch name
             BaseTextField(
@@ -91,7 +93,7 @@ class _InitializeRepositoryDialogState
               prefixIcon: IconRole.gitBranch,
               enabled: !_isInitializing,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Bare repository option
             SwitchListTile(
@@ -115,66 +117,68 @@ class _InitializeRepositoryDialogState
             ),
 
             // Info card
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  const Icon(PhosphorIconsRegular.info, size: 20),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.initializeRepositoryInfo(
-                        _bare
-                            ? ''
-                            : AppLocalizations.of(
-                                context,
-                              )!.initializeRepositoryInfoBare,
+              child: BaseInset(
+                child: Row(
+                  children: [
+                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        AppLocalizations.of(context)!.initializeRepositoryInfo(
+                          _bare
+                              ? ''
+                              : AppLocalizations.of(
+                                  context,
+                                )!.initializeRepositoryInfoBare,
+                        ),
+                        role: TextRole.detail,
                       ),
-                      role: TextRole.detail,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
             // Error message
             if (_errorMessage != null) ...[
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    Expanded(
-                      child: BaseLabel(
-                        _errorMessage!,
-                        role: TextRole.body,
-                        tone: Tone.danger,
+                child: BaseInset(
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.warningCircle,
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                    ),
-                  ],
+                      const BaseGap(Proximity.related),
+                      Expanded(
+                        child: BaseLabel(
+                          _errorMessage!,
+                          role: TextRole.body,
+                          tone: Tone.danger,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
 
             // Progress indicator
             if (_isInitializing) ...[
-              const SizedBox(height: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
               const LinearProgressIndicator(),
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               BaseLabel(
                 AppLocalizations.of(context)!.initializingRepository,
                 role: TextRole.body,

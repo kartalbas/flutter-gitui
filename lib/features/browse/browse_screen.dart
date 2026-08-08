@@ -4,13 +4,14 @@ import '../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, Proximity, TextRole;
 import 'package:path/path.dart' as path;
 
 import '../../generated/app_localizations.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_layout.dart';
 import '../../shared/components/base_speed_dial.dart';
 import '../../shared/utils/search_parser.dart';
 import '../../shared/widgets/base_dismiss_scope.dart';
@@ -144,8 +145,12 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
           // resort stay with the shell.
           body: BaseFocusRegionHost(
             debugLabel: 'BrowseScreen.regions',
-            child: Padding(
-              padding: const EdgeInsets.all(AppTheme.paddingL),
+            // The screen holds its panes off the window's edge at the
+            // generous distance every screen of the application uses:
+            // `Inset.roomy`, which Material answers with the 24 this line
+            // used to name.
+            child: BaseInset(
+              all: Inset.roomy,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -155,7 +160,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     debugLabel: 'BrowseScreen.toolbarRegion',
                     child: _buildToolbar(context),
                   ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  // The toolbar and the panes under it are members of one
+                  // group: `grouped`, Material's 16.
+                  const BaseGap(Proximity.grouped),
                   // Main content
                   Expanded(
                     child: NotificationListener<ScrollNotification>(
@@ -305,148 +312,153 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingS),
+      // The toolbar's fill stays: it is the surface. How tightly the strip
+      // holds its controls is the language's question - `tight`, the 8 this
+      // container named.
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
       ),
-      child: Row(
-        children: [
-          // Search field
-          Expanded(child: searchField),
+      child: BaseInset(
+        all: Inset.tight,
+        child: Row(
+          children: [
+            // Search field
+            Expanded(child: searchField),
 
-          const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
 
-          // Search mode toggle
-          SegmentedButton<SearchMode>(
-            segments: [
-              ButtonSegment(
-                value: SearchMode.simple,
-                label: const BaseLabel('Aa', role: TextRole.micro),
-                tooltip: 'Simple search (case-insensitive)',
-              ),
-              ButtonSegment(
-                value: SearchMode.glob,
-                label: const BaseLabel('*', role: TextRole.micro),
-                tooltip: 'Glob pattern (*.json, *ABN*/file)',
-              ),
-              ButtonSegment(
-                value: SearchMode.regex,
-                label: const BaseLabel('.*', role: TextRole.micro),
-                tooltip: 'Regular expression',
-              ),
-            ],
-            selected: {_searchMode},
-            onSelectionChanged: (Set<SearchMode> selection) {
-              setState(() {
-                _searchMode = selection.first;
-              });
-            },
-          ),
-
-          const SizedBox(width: AppTheme.paddingS),
-
-          // View mode toggle
-          SegmentedButton<BrowseViewMode>(
-            segments: [
-              ButtonSegment(
-                value: BrowseViewMode.history,
-                icon: Icon(
-                  PhosphorIconsRegular.clockCounterClockwise,
-                  size: 18,
+            // Search mode toggle
+            SegmentedButton<SearchMode>(
+              segments: [
+                ButtonSegment(
+                  value: SearchMode.simple,
+                  label: const BaseLabel('Aa', role: TextRole.micro),
+                  tooltip: 'Simple search (case-insensitive)',
                 ),
-                label: BaseLabel(
-                  AppLocalizations.of(context)!.history,
-                  role: TextRole.control,
+                ButtonSegment(
+                  value: SearchMode.glob,
+                  label: const BaseLabel('*', role: TextRole.micro),
+                  tooltip: 'Glob pattern (*.json, *ABN*/file)',
                 ),
-              ),
-              ButtonSegment(
-                value: BrowseViewMode.blame,
-                icon: Icon(PhosphorIconsRegular.users, size: 18),
-                label: BaseLabel(
-                  AppLocalizations.of(context)!.blame,
-                  role: TextRole.control,
+                ButtonSegment(
+                  value: SearchMode.regex,
+                  label: const BaseLabel('.*', role: TextRole.micro),
+                  tooltip: 'Regular expression',
                 ),
-              ),
-              ButtonSegment(
-                value: BrowseViewMode.preview,
-                icon: Icon(PhosphorIconsRegular.eye, size: 18),
-                label: BaseLabel(
-                  AppLocalizations.of(context)!.preview,
-                  role: TextRole.control,
-                ),
-              ),
-            ],
-            selected: {viewMode},
-            onSelectionChanged: (Set<BrowseViewMode> selection) {
-              ref
-                  .read(configProvider.notifier)
-                  .setBrowseViewMode(selection.first);
-            },
-          ),
+              ],
+              selected: {_searchMode},
+              onSelectionChanged: (Set<SearchMode> selection) {
+                setState(() {
+                  _searchMode = selection.first;
+                });
+              },
+            ),
 
-          const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
 
-          // Options menu
-          BasePopupMenuButton<void>(
-            icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
-            tooltip: AppLocalizations.of(context)!.viewOptions,
-            itemBuilder: (context) {
-              return <PopupMenuEntry<void>>[
-                CheckedPopupMenuItem<void>(
-                  checked: showHidden,
-                  onTap: () {
-                    ref
-                        .read(configProvider.notifier)
-                        .setShowHiddenFiles(!showHidden);
-                  },
-                  child: BaseLabel(
-                    AppLocalizations.of(context)!.showHiddenFiles,
+            // View mode toggle
+            SegmentedButton<BrowseViewMode>(
+              segments: [
+                ButtonSegment(
+                  value: BrowseViewMode.history,
+                  icon: Icon(
+                    PhosphorIconsRegular.clockCounterClockwise,
+                    size: 18,
+                  ),
+                  label: BaseLabel(
+                    AppLocalizations.of(context)!.history,
                     role: TextRole.control,
                   ),
                 ),
-                CheckedPopupMenuItem<void>(
-                  checked: showIgnored,
-                  onTap: () {
-                    ref
-                        .read(configProvider.notifier)
-                        .setShowIgnoredFiles(!showIgnored);
-                  },
-                  child: BaseLabel(
-                    AppLocalizations.of(context)!.showIgnoredFiles,
+                ButtonSegment(
+                  value: BrowseViewMode.blame,
+                  icon: Icon(PhosphorIconsRegular.users, size: 18),
+                  label: BaseLabel(
+                    AppLocalizations.of(context)!.blame,
                     role: TextRole.control,
                   ),
                 ),
-                const PopupMenuDivider(),
-                PopupMenuItem<void>(
-                  onTap: () {
-                    // Access the tree view state and expand all
-                    final treeState = _treeViewKey.currentState as dynamic;
-                    if (treeState != null) {
-                      treeState.expandAll();
-                    }
-                  },
-                  child: BaseLabel(
-                    AppLocalizations.of(context)!.expandAll,
+                ButtonSegment(
+                  value: BrowseViewMode.preview,
+                  icon: Icon(PhosphorIconsRegular.eye, size: 18),
+                  label: BaseLabel(
+                    AppLocalizations.of(context)!.preview,
                     role: TextRole.control,
                   ),
                 ),
-                PopupMenuItem<void>(
-                  onTap: () {
-                    // Access the tree view state and collapse all
-                    final treeState = _treeViewKey.currentState as dynamic;
-                    if (treeState != null) {
-                      treeState.collapseAll();
-                    }
-                  },
-                  child: BaseLabel(
-                    AppLocalizations.of(context)!.collapseAll,
-                    role: TextRole.control,
+              ],
+              selected: {viewMode},
+              onSelectionChanged: (Set<BrowseViewMode> selection) {
+                ref
+                    .read(configProvider.notifier)
+                    .setBrowseViewMode(selection.first);
+              },
+            ),
+
+            const BaseGap(Proximity.related),
+
+            // Options menu
+            BasePopupMenuButton<void>(
+              icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
+              tooltip: AppLocalizations.of(context)!.viewOptions,
+              itemBuilder: (context) {
+                return <PopupMenuEntry<void>>[
+                  CheckedPopupMenuItem<void>(
+                    checked: showHidden,
+                    onTap: () {
+                      ref
+                          .read(configProvider.notifier)
+                          .setShowHiddenFiles(!showHidden);
+                    },
+                    child: BaseLabel(
+                      AppLocalizations.of(context)!.showHiddenFiles,
+                      role: TextRole.control,
+                    ),
                   ),
-                ),
-              ];
-            },
-          ),
-        ],
+                  CheckedPopupMenuItem<void>(
+                    checked: showIgnored,
+                    onTap: () {
+                      ref
+                          .read(configProvider.notifier)
+                          .setShowIgnoredFiles(!showIgnored);
+                    },
+                    child: BaseLabel(
+                      AppLocalizations.of(context)!.showIgnoredFiles,
+                      role: TextRole.control,
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem<void>(
+                    onTap: () {
+                      // Access the tree view state and expand all
+                      final treeState = _treeViewKey.currentState as dynamic;
+                      if (treeState != null) {
+                        treeState.expandAll();
+                      }
+                    },
+                    child: BaseLabel(
+                      AppLocalizations.of(context)!.expandAll,
+                      role: TextRole.control,
+                    ),
+                  ),
+                  PopupMenuItem<void>(
+                    onTap: () {
+                      // Access the tree view state and collapse all
+                      final treeState = _treeViewKey.currentState as dynamic;
+                      if (treeState != null) {
+                        treeState.collapseAll();
+                      }
+                    },
+                    child: BaseLabel(
+                      AppLocalizations.of(context)!.collapseAll,
+                      role: TextRole.control,
+                    ),
+                  ),
+                ];
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

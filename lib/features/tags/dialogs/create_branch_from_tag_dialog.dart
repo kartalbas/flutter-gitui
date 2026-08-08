@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Dialog for creating a branch from a tag
 class CreateBranchFromTagDialog extends StatefulWidget {
@@ -51,36 +52,38 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
         children: [
           // Tag info
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusS),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  PhosphorIconsRegular.tag,
-                  size: AppTheme.iconS,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BaseLabel(
-                        l10n.sourceTag,
-                        role: TextRole.micro,
-                        tone: Tone.muted,
-                      ),
-                      BaseLabel(widget.tagName, role: TextRole.body),
-                    ],
+            child: BaseInset(
+              all: Inset.normal,
+              child: Row(
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.tag,
+                    size: AppTheme.iconS,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                ),
-              ],
+                  const BaseGap(Proximity.related),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(
+                          l10n.sourceTag,
+                          role: TextRole.micro,
+                          tone: Tone.muted,
+                        ),
+                        BaseLabel(widget.tagName, role: TextRole.body),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
 
           // Branch name input
           BaseTextField(
@@ -96,7 +99,7 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
               });
             },
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Checkout option
           CheckboxListTile(

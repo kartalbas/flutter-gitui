@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -11,8 +11,8 @@ import '../../core/git/git_providers.dart';
 import '../../core/git/models/blame.dart';
 import '../components/base_label.dart';
 import '../components/base_viewer_dialog.dart';
-import '../theme/app_theme.dart';
 import '../components/base_card.dart';
+import '../components/base_layout.dart';
 
 /// Blame dialog for viewing file blame information
 class BlameDialog extends ConsumerWidget {
@@ -64,7 +64,7 @@ class BlameDialog extends ConsumerWidget {
     final groups = _groupLinesByCommit(blame.lines);
 
     return BaseCard(
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       content: ListView.builder(
         itemCount: groups.length,
         itemBuilder: (context, index) {
@@ -142,17 +142,21 @@ class BlameDialog extends ConsumerWidget {
                     role: TextRole.detail,
                     tone: Tone.accent,
                   ),
-                  const SizedBox(height: AppTheme.paddingXS),
+                  const BaseGap(Proximity.hairline),
                   // Author
                   BaseLabel(firstLine.author, role: TextRole.itemTitle),
-                  const SizedBox(height: 2),
+                  // The author and the date are two halves of one statement,
+                  // which is what hairline says. It used to be a literal 2 and
+                  // the same pairing is 4 elsewhere in the application: one
+                  // meaning said with two numbers, unified upward here.
+                  const BaseGap(Proximity.hairline),
                   // Date
                   BaseLabel(
                     timeago.format(firstLine.authorTime),
                     role: TextRole.detail,
                     tone: Tone.muted,
                   ),
-                  const SizedBox(height: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   // Summary
                   BaseLabel(
                     firstLine.summary,
@@ -217,7 +221,7 @@ class BlameDialog extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(PhosphorIconsRegular.userList, size: 48),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(
             AppLocalizations.of(context)!.couldNotLoadBlame,
             role: TextRole.pageTitle,
@@ -237,7 +241,7 @@ class BlameDialog extends ConsumerWidget {
             size: 48,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           Text(error),
         ],
       ),

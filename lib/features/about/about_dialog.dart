@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_dialog.dart';
@@ -8,6 +9,7 @@ import '../../shared/components/base_label.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../core/services/version_service.dart';
 import '../../core/services/build_info.dart';
+import '../../shared/components/base_layout.dart';
 
 class AppAboutDialog extends HookConsumerWidget {
   const AppAboutDialog({super.key});
@@ -53,18 +55,18 @@ class AppAboutDialog extends HookConsumerWidget {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  const BaseGap(Proximity.grouped),
                   BaseLabel('Flutter GitUI', role: TextRole.pageTitle),
-                  const SizedBox(height: AppTheme.paddingXS),
+                  const BaseGap(Proximity.hairline),
                   BaseLabel('Version ${version.value}', role: TextRole.detail),
-                  const SizedBox(height: AppTheme.paddingXS),
+                  const BaseGap(Proximity.hairline),
                   BaseLabel(
                     'Build: ${BuildInfo.displayCommit}',
                     role: TextRole.detail,
                     align: TextAlign.center,
                   ),
                   if (BuildInfo.displayDate.isNotEmpty) ...[
-                    const SizedBox(height: 2),
+                    const BaseGap(Proximity.hairline),
                     BaseLabel(
                       BuildInfo.displayDate,
                       role: TextRole.detail,
@@ -74,7 +76,7 @@ class AppAboutDialog extends HookConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Description
             Center(
@@ -85,14 +87,14 @@ class AppAboutDialog extends HookConsumerWidget {
               ),
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             const Divider(),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Technology stack
             Center(child: BaseLabel('Built with', role: TextRole.sectionTitle)),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Center(
               child: Wrap(
                 spacing: AppTheme.paddingS,
@@ -105,10 +107,10 @@ class AppAboutDialog extends HookConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             const Divider(),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
           ],
         ),
       ),

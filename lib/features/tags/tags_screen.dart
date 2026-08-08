@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, Proximity, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -34,6 +35,7 @@ import 'widgets/tags_empty_state.dart';
 import 'widgets/tags_active_filters.dart';
 import 'widgets/tags_batch_operations_bar.dart';
 import 'services/tags_service.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Tags screen - Tag management
 class TagsScreen extends ConsumerStatefulWidget {
@@ -252,8 +254,8 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     ),
                   ],
                 ),
-          body: Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingL),
+          body: BaseInset(
+            all: Inset.roomy,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -341,8 +343,8 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
         ),
 
         // Search and filter bar
-        Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+        BaseInset(
+          all: Inset.normal,
           child: Column(
             children: [
               Row(
@@ -371,7 +373,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   BaseIconButton(
                     // One role, one mark; "the filter is engaged" travels
                     // as `isSelected` and the skin decides the weight.
@@ -381,7 +383,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     onPressed: () => _showAdvancedFiltersDialog(context, tags),
                     variant: ButtonVariant.secondary,
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   BasePopupMenuButton<TagSortBy>(
                     icon: const Icon(PhosphorIconsRegular.sortAscending),
                     tooltip: AppLocalizations.of(context)!.sortTags,
@@ -401,7 +403,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.sortNameAZ,
@@ -425,7 +427,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.sortNameZA,
@@ -450,7 +452,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.sortDateNewest,
@@ -474,7 +476,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.sortDateOldest,
@@ -499,7 +501,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(
@@ -525,7 +527,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(
@@ -543,7 +545,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   BasePopupMenuButton<TagGroupBy>(
                     icon: Icon(
                       _groupBy != TagGroupBy.none
@@ -570,7 +572,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.noGrouping,
@@ -591,7 +593,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.byPrefix,
@@ -612,7 +614,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.byVersion,
@@ -636,7 +638,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.byAuthor,
@@ -657,7 +659,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                   : PhosphorIconsRegular.circle,
                               size: 16,
                             ),
-                            const SizedBox(width: AppTheme.paddingS),
+                            const BaseGap(Proximity.related),
                             Expanded(
                               child: BaseLabel(
                                 AppLocalizations.of(context)!.byDate,
@@ -673,10 +675,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                 ],
               ),
               if (_hasActiveFilters()) ...[
-                const SizedBox(height: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 _buildActiveFiltersRow(),
               ],
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               // Filter chips
               TagFilterChips(
                 allTags: typeFilterCandidates,
@@ -693,10 +695,6 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
         // Tag count header
         Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingM,
-            vertical: AppTheme.paddingS,
-          ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             border: Border(
@@ -705,33 +703,37 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
               ),
             ),
           ),
-          child: Row(
-            children: [
-              const Icon(PhosphorIconsRegular.tag, size: AppTheme.iconS),
-              const SizedBox(width: AppTheme.paddingS),
-              BaseLabel(
-                '${filteredAndSortedTags.length} ${filteredAndSortedTags.length == 1 ? 'Tag' : 'Tags'}',
-                role: TextRole.sectionTitle,
-              ),
-              if (_searchQuery.isNotEmpty ||
-                  _filterType != TagFilterType.all) ...[
-                const SizedBox(width: AppTheme.paddingS),
+          child: BaseInset(
+            x: Inset.normal,
+            y: Inset.tight,
+            child: Row(
+              children: [
+                const Icon(PhosphorIconsRegular.tag, size: AppTheme.iconS),
+                const BaseGap(Proximity.related),
                 BaseLabel(
-                  AppLocalizations.of(context)!.ofTotal(tags.length),
-                  role: TextRole.detail,
+                  '${filteredAndSortedTags.length} ${filteredAndSortedTags.length == 1 ? 'Tag' : 'Tags'}',
+                  role: TextRole.sectionTitle,
                 ),
+                if (_searchQuery.isNotEmpty ||
+                    _filterType != TagFilterType.all) ...[
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(context)!.ofTotal(tags.length),
+                    role: TextRole.detail,
+                  ),
+                ],
+                const Spacer(),
+                if (localOnlyTags.isNotEmpty)
+                  BaseButton(
+                    label: AppLocalizations.of(
+                      context,
+                    )!.pushCount(localOnlyTags.length),
+                    variant: ButtonVariant.secondary,
+                    leadingIcon: IconRole.upload,
+                    onPressed: () => _pushAllTags(context),
+                  ),
               ],
-              const Spacer(),
-              if (localOnlyTags.isNotEmpty)
-                BaseButton(
-                  label: AppLocalizations.of(
-                    context,
-                  )!.pushCount(localOnlyTags.length),
-                  variant: ButtonVariant.secondary,
-                  leadingIcon: IconRole.upload,
-                  onPressed: () => _pushAllTags(context),
-                ),
-            ],
+            ),
           ),
         ),
 

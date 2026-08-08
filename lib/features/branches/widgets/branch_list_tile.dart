@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_badge.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
@@ -73,7 +74,7 @@ class BranchListTile extends ConsumerWidget {
                     : BaseLabel(branch.shortName, role: TextRole.body),
               ),
               if (branch.isCurrent) ...[
-                const SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 BaseBadge(
                   label: AppLocalizations.of(context)!.current,
                   size: BadgeSize.small,
@@ -81,18 +82,25 @@ class BranchListTile extends ConsumerWidget {
                 ),
               ],
               if (branch.isProtected) ...[
-                const SizedBox(width: AppTheme.paddingS),
-                Icon(
-                  PhosphorIconsRegular.lock,
-                  size: AppTheme.iconS,
-                  color: colorScheme.onSurfaceVariant,
+                const BaseGap(Proximity.related),
+                // "This branch is protected", said beside the name it
+                // qualifies: a dense row-level mark, which is
+                // `ControlScale.compact`, and secondary to the name it sits
+                // beside, which is `Tone.muted`. Material answers both with the
+                // 16 pixels and the `onSurfaceVariant` this site spelled out.
+                const BaseIcon(
+                  IconRole.lock,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
                 ),
               ],
             ],
           ),
           // Subtitle with commit message and tracking
           if (branch.lastCommitMessage != null) ...[
-            const SizedBox(height: AppTheme.paddingXS),
+            // A title and the line that qualifies it are two halves of one
+            // thing: `hairline`, Material's 4.
+            const BaseGap(Proximity.hairline),
             BaseLabel(
               branch.lastCommitMessage!,
               role: TextRole.detail,
@@ -100,15 +108,22 @@ class BranchListTile extends ConsumerWidget {
             ),
           ],
           if (branch.hasUpstream) ...[
-            const SizedBox(height: 2),
+            // The same relationship the line above states, said with the same
+            // word rather than with a second number: this row and the one it
+            // follows are two halves of one description of the branch.
+            const BaseGap(Proximity.hairline),
             Row(
               children: [
-                Icon(
-                  PhosphorIconsRegular.arrowsLeftRight,
-                  size: 12,
-                  color: colorScheme.onSurfaceVariant,
+                // The inline-metadata mark beside a detail line, at the one
+                // scale the whole application uses for that job. It was drawn
+                // here at 12 and at 16 two screens away, which was one meaning
+                // said with two numbers; `compact` is the meaning.
+                const BaseIcon(
+                  IconRole.arrowsLeftRight,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
                 ),
-                const SizedBox(width: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 // Three states of one branch against its remote. The middle arm
                 // reached for `colorScheme.secondary` only because Material has
                 // no warning role at all, which is the giveaway that a meaning

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/models/tag.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_date_field.dart';
 import '../../../shared/components/base_dropdown.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Date range filter options
 enum DateRangeFilter { all, today, lastWeek, lastMonth, lastYear, custom }
@@ -84,7 +85,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
           children: [
             // Date Range Filter
             BaseLabel(loc.dateRange, role: TextRole.sectionTitle),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseDropdown<DateRangeFilter>(
               initialValue: _dateFilter,
               prefixIcon: IconRole.calendar,
@@ -103,7 +104,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
               },
             ),
             if (_dateFilter == DateRangeFilter.custom) ...[
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               Row(
                 children: [
                   Expanded(
@@ -116,7 +117,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
                       lastDate: DateTime.now(),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.paddingM),
+                  const BaseGap(Proximity.grouped),
                   Expanded(
                     child: BaseDateField(
                       label: loc.endDate,
@@ -130,11 +131,11 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
                 ],
               ),
             ],
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Author Filter
             BaseLabel(loc.authorTagger, role: TextRole.sectionTitle),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             if (authors.isNotEmpty)
               BaseDropdown<String?>(
                 initialValue: _authorFilter,
@@ -160,7 +161,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
               )
             else
               BaseLabel(loc.noAuthorsFound, role: TextRole.body),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Regex Search Toggle
             SwitchListTile(

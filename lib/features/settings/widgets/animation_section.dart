@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -11,6 +11,7 @@ import '../../../core/config/config_providers.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import 'settings_section.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Animation/performance section for settings screen
 class AnimationSection extends ConsumerWidget {
@@ -72,33 +73,37 @@ class AnimationSection extends ConsumerWidget {
             },
           ),
         ),
-        // Info card
-        Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingM,
-            vertical: AppTheme.paddingS,
-          ),
-          padding: const EdgeInsets.all(AppTheme.paddingS),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                PhosphorIconsRegular.info,
-                size: AppTheme.iconM,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+        // Info card. Its margin is the distance between the card and the
+        // section around it, which is an inset owed by the container rather
+        // than a second padding inside the card.
+        BaseInset(
+          x: Inset.normal,
+          y: Inset.tight,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            ),
+            child: BaseInset(
+              all: Inset.tight,
+              child: Row(
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.info,
+                    size: AppTheme.iconM,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const BaseGap(Proximity.related),
+                  Expanded(
+                    child: BaseLabel(
+                      l10n.animationSpeedInfo,
+                      role: TextRole.detail,
+                      tone: Tone.muted,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppTheme.paddingS),
-              Expanded(
-                child: BaseLabel(
-                  l10n.animationSpeedInfo,
-                  role: TextRole.detail,
-                  tone: Tone.muted,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ],

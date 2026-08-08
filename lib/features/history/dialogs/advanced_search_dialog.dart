@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_filter_chip.dart';
@@ -103,7 +105,9 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               prefixIcon: IconRole.magnifyingGlass,
               autofocus: true,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            // A field and the options qualifying it are members of one
+            // group: `grouped`, Material's 16.
+            const BaseGap(Proximity.grouped),
 
             // Search options
             Wrap(
@@ -135,14 +139,15 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            // Two groups inside one form: `separate`, Material's 24.
+            const BaseGap(Proximity.separate),
 
             // Specific filters
             _buildSectionTitle(AppLocalizations.of(context)!.specificFilters),
 
             // Author dropdown
             _buildAuthorDropdown(context),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             BaseTextField(
               controller: _filePathController,
@@ -150,7 +155,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               hintText: AppLocalizations.of(context)!.filterByFilePathExample,
               prefixIcon: IconRole.file,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             BaseTextField(
               controller: _hashController,
@@ -158,7 +163,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               hintText: AppLocalizations.of(context)!.filterByCommitHashPrefix,
               prefixIcon: IconRole.hash,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Date range
             _buildSectionTitle(AppLocalizations.of(context)!.dateRangeSection),
@@ -171,7 +176,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                     onChanged: (date) => setState(() => _fromDate = date),
                   ),
                 ),
-                const SizedBox(width: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
                 Expanded(
                   child: BaseDateField(
                     label: AppLocalizations.of(context)!.toDate,
@@ -181,7 +186,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Quick date filters
             Wrap(
@@ -244,11 +249,19 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
   }
 
   Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
-      // The brand tint said nothing a section header was not already saying,
-      // so it disappears rather than being renamed as a meaning.
-      child: BaseLabel(title, role: TextRole.sectionTitle),
+    // A section header and the fields under it are two parts of one
+    // statement, which is a GAP after the header rather than a one-sided
+    // padding around it - the same relationship every other form in the
+    // application states, said with the same word.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        // The brand tint said nothing a section header was not already
+        // saying, so it disappears rather than being renamed as a meaning.
+        BaseLabel(title, role: TextRole.sectionTitle),
+        const BaseGap(Proximity.related),
+      ],
     );
   }
 

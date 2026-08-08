@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Result of a Git command execution
 class GitCommandResult {
@@ -158,11 +159,12 @@ ${widget.result.fullOutput}
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Auto-close countdown banner
-          if (_remainingSeconds > 0 && !_keepOpen)
+          // Auto-close countdown banner. Its bottom margin was a one-sided
+          // inset, which is a gap wearing a padding idiom: the distance
+          // belongs between the banner and the section below it, so the
+          // column states it and the banner states none.
+          if (_remainingSeconds > 0 && !_keepOpen) ...<Widget>[
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingS),
-              margin: const EdgeInsets.only(bottom: AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusS),
@@ -171,42 +173,47 @@ ${widget.result.fullOutput}
               // foreground once here; the label inside then says nothing
               // about colour, which is the arrangement that cannot be got
               // wrong.
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.clock,
-                      size: AppTheme.paddingM,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BaseLabel(
-                      AppLocalizations.of(
-                        context,
-                      )!.closingInSeconds(_remainingSeconds),
-                      role: TextRole.detail,
-                    ),
-                  ],
+              child: BaseInset(
+                all: Inset.tight,
+                child: DefaultTextStyle.merge(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.clock,
+                        size: AppTheme.iconS,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      const BaseGap(Proximity.related),
+                      BaseLabel(
+                        AppLocalizations.of(
+                          context,
+                        )!.closingInSeconds(_remainingSeconds),
+                        role: TextRole.detail,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+            const BaseGap(Proximity.grouped),
+          ],
           // Command executed
           _buildCommandSection(),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Execution details
           _buildExecutionDetails(),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Output section
           Flexible(child: _buildOutputSection()),
 
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Keep open checkbox (only for successful commands)
           if (result.isSuccess && widget.autoCloseOnSuccess)
@@ -247,30 +254,32 @@ ${widget.result.fullOutput}
 
   Widget _buildCommandSection() {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
         border: Border.all(color: Theme.of(context).colorScheme.outline),
       ),
-      child: Row(
-        children: [
-          Icon(
-            PhosphorIconsRegular.terminal,
-            size: AppTheme.iconS,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: AppTheme.paddingS),
-          Expanded(
-            child: SelectableText(
-              'git ${widget.result.command}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontFamily: 'monospace',
-                color: Theme.of(context).colorScheme.onSurface,
+      child: BaseInset(
+        all: Inset.normal,
+        child: Row(
+          children: [
+            Icon(
+              PhosphorIconsRegular.terminal,
+              size: AppTheme.iconS,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const BaseGap(Proximity.related),
+            Expanded(
+              child: SelectableText(
+                'git ${widget.result.command}',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'monospace',
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -285,7 +294,7 @@ ${widget.result.fullOutput}
               ? context.gitColors.added
               : context.gitColors.deleted,
         ),
-        const SizedBox(width: AppTheme.paddingS),
+        const BaseGap(Proximity.related),
         _buildDetailChip(
           AppLocalizations.of(context)!.time,
           '${widget.result.executionTime.inMilliseconds}ms',
@@ -297,28 +306,28 @@ ${widget.result.fullOutput}
 
   Widget _buildDetailChip(String label, String value, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingM,
-        vertical: AppTheme.paddingS,
-      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppTheme.radiusS),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          BaseLabel(label, role: TextRole.micro, tone: Tone.muted),
-          const SizedBox(width: AppTheme.paddingXS),
-          // Deliberately still the old label: this helper's Color parameter
-          // also paints the chip's fill, border and icon, so it can only
-          // become a Tone when the whole chip moves onto `surfaces.badge` in
-          // the surface sub-phase - the application cannot resolve a Tone to
-          // a Color for its own decoration, and the seam is right to forbid
-          // that.
-          LabelMediumLabel(value, color: color),
-        ],
+      child: BaseInset(
+        x: Inset.normal,
+        y: Inset.tight,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            BaseLabel(label, role: TextRole.micro, tone: Tone.muted),
+            const BaseGap(Proximity.hairline),
+            // Deliberately still the old label: this helper's Color parameter
+            // also paints the chip's fill, border and icon, so it can only
+            // become a Tone when the whole chip moves onto `surfaces.badge` in
+            // the surface sub-phase - the application cannot resolve a Tone to
+            // a Color for its own decoration, and the seam is right to forbid
+            // that.
+            LabelMediumLabel(value, color: color),
+          ],
+        ),
       ),
     );
   }
@@ -336,7 +345,7 @@ ${widget.result.fullOutput}
               size: AppTheme.iconXL * 2,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             BaseLabel(
               AppLocalizations.of(context)!.noOutput,
               role: TextRole.body,
@@ -348,7 +357,6 @@ ${widget.result.fullOutput}
     }
 
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
@@ -358,30 +366,36 @@ ${widget.result.fullOutput}
               : context.gitColors.deleted.withValues(alpha: 0.3),
         ),
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // STDOUT
-            if (result.stdout.isNotEmpty) ...[
-              BaseLabel('STDOUT', role: TextRole.micro, tone: Tone.gitAdded),
-              const SizedBox(height: AppTheme.paddingS),
-              BaseLabel(result.stdout, role: TextRole.detail),
-            ],
+      child: BaseInset(
+        all: Inset.normal,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // STDOUT
+              if (result.stdout.isNotEmpty) ...[
+                BaseLabel('STDOUT', role: TextRole.micro, tone: Tone.gitAdded),
+                const BaseGap(Proximity.related),
+                BaseLabel(result.stdout, role: TextRole.detail),
+              ],
 
-            // STDERR
-            if (result.stderr.isNotEmpty) ...[
-              if (result.stdout.isNotEmpty)
-                const SizedBox(height: AppTheme.paddingM),
-              BaseLabel('STDERR', role: TextRole.micro, tone: Tone.gitDeleted),
-              const SizedBox(height: AppTheme.paddingS),
-              BaseLabel(
-                result.stderr,
-                role: TextRole.detail,
-                tone: Tone.gitDeleted,
-              ),
+              // STDERR
+              if (result.stderr.isNotEmpty) ...[
+                if (result.stdout.isNotEmpty) const BaseGap(Proximity.grouped),
+                BaseLabel(
+                  'STDERR',
+                  role: TextRole.micro,
+                  tone: Tone.gitDeleted,
+                ),
+                const BaseGap(Proximity.related),
+                BaseLabel(
+                  result.stderr,
+                  role: TextRole.detail,
+                  tone: Tone.gitDeleted,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

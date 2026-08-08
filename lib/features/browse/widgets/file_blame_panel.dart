@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_viewer_dialog.dart';
@@ -183,8 +185,7 @@ class FileBlamePanel extends ConsumerWidget {
       preferBelow: false,
       child: InkWell(
         onTap: () => _showCommitDetails(context, line),
-        child: Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+        child: BaseInset(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -202,7 +203,7 @@ class FileBlamePanel extends ConsumerWidget {
                     // into a screen.
                     child: BaseLabel(line.authorInitials, role: TextRole.micro),
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   Expanded(
                     child: BaseLabel(
                       line.author,
@@ -213,17 +214,21 @@ class FileBlamePanel extends ConsumerWidget {
                 ],
               ),
 
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
 
               // Relative time
               Row(
                 children: [
-                  Icon(
-                    PhosphorIconsRegular.clock,
-                    size: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  // The inline-metadata mark beside a detail line, at the one
+                  // scale the application uses for that job everywhere:
+                  // `compact`. It was drawn here at 12 and at 16 in the branch
+                  // list, which was one meaning said with two numbers.
+                  const BaseIcon(
+                    IconRole.clock,
+                    scale: ControlScale.compact,
+                    tone: Tone.muted,
                   ),
-                  const SizedBox(width: AppTheme.paddingXS),
+                  const BaseGap(Proximity.hairline),
                   BaseLabel(
                     relativeTime,
                     role: TextRole.detail,
@@ -232,7 +237,7 @@ class FileBlamePanel extends ConsumerWidget {
                 ],
               ),
 
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
 
               // Commit hash (clickable)
               Container(
@@ -251,14 +256,14 @@ class FileBlamePanel extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
 
               // Commit summary (first line)
               BaseLabel(line.summary, role: TextRole.detail, maxLines: 2),
 
               // Line count indicator if group has multiple lines
               if (lineCount > 1) ...[
-                const SizedBox(height: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 BaseLabel(
                   AppLocalizations.of(context)!.linesCount(lineCount),
                   role: TextRole.micro,
@@ -273,11 +278,15 @@ class FileBlamePanel extends ConsumerWidget {
   }
 
   Widget _buildCodeLine(BuildContext context, BlameLine line) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingM,
-        vertical: 2,
-      ),
+    return BaseInset(
+      // A code line is as dense vertically as a row can be and reads at the
+      // ordinary distance from the gutter: the two axes genuinely answer
+      // differently, which is why `inset` takes them separately. The literal
+      // 2 becomes `tight` - Material's 8 - and the line grows by 6 pixels of
+      // height; the alternative was to keep a number no ladder in the
+      // application contains.
+      x: Inset.normal,
+      y: Inset.tight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -295,7 +304,7 @@ class FileBlamePanel extends ConsumerWidget {
             ),
           ),
 
-          const SizedBox(width: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Code content
           Expanded(
@@ -323,12 +332,15 @@ class FileBlamePanel extends ConsumerWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          // A hero glyph and the headline under it are two groups inside one
+          // region; the headline and its explanation are two parts of one
+          // statement.
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.emptyFile,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.noContent,
             role: TextRole.body,
@@ -348,14 +360,18 @@ class FileBlamePanel extends ConsumerWidget {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.errorLoadingBlame,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingXL),
+          const BaseGap(Proximity.related),
+          // The message is held off the pane's sides so a long error wraps
+          // instead of running edge to edge: `roomy`, which Material answers
+          // with 24 where this site said 32.
+          BaseInset(
+            x: Inset.roomy,
+            y: Inset.none,
             child: BaseLabel(
               error,
               role: TextRole.body,
@@ -490,16 +506,18 @@ ${line.summary}
   ) {
     return TableRow(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingS),
+        BaseInset(
+          x: Inset.none,
+          y: Inset.tight,
           child: BaseLabel('$label:', role: TextRole.sectionTitle),
         ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: AppTheme.paddingM,
-            top: AppTheme.paddingS,
-            bottom: AppTheme.paddingS,
-          ),
+        // The value column is indented from its label and set off vertically
+        // by the same amount as the label beside it. Said as two axes rather
+        // than as three sides, which is what `inset` can express without a
+        // per-side rung being minted for it.
+        BaseInset(
+          x: Inset.normal,
+          y: Inset.tight,
           child: SelectableText(
             value,
             style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
@@ -521,26 +539,31 @@ ${line.summary}
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildStatistics(context, blame),
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               BaseLabel(
                 AppLocalizations.of(context)!.contributors,
                 role: TextRole.sectionTitle,
               ),
-              const SizedBox(height: AppTheme.paddingS),
-              ...blame.uniqueAuthors.map((author) {
+              // A section title and the list under it are two parts of one
+              // statement; each row of that list is indented under it and
+              // separated from the row above. Two statements, two words -
+              // rather than one four-sided number saying both at once.
+              const BaseGap(Proximity.related),
+              ...blame.uniqueAuthors.expand((author) {
                 final lineCount = blame.linesByAuthor[author]?.length ?? 0;
                 final percentage = (lineCount / blame.totalLines * 100)
                     .toStringAsFixed(1);
-                return Padding(
-                  padding: const EdgeInsets.only(
-                    left: AppTheme.paddingM,
-                    top: AppTheme.paddingS,
+                return <Widget>[
+                  const BaseGap(Proximity.related),
+                  BaseInset(
+                    x: Inset.normal,
+                    y: Inset.none,
+                    child: BaseLabel(
+                      '• $author: $lineCount lines ($percentage%)',
+                      role: TextRole.body,
+                    ),
                   ),
-                  child: BaseLabel(
-                    '• $author: $lineCount lines ($percentage%)',
-                    role: TextRole.body,
-                  ),
-                );
+                ];
               }),
             ],
           ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -12,6 +12,7 @@ import '../../core/git/git_providers.dart';
 import '../components/base_dialog.dart';
 import '../../core/git/models/reflog_entry.dart';
 import '../components/base_list_item.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for viewing Git reflog
 class ReflogDialog extends ConsumerWidget {
@@ -66,12 +67,12 @@ class ReflogDialog extends ConsumerWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.noReflogEntries,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.referenceLogEmpty,
             role: TextRole.body,
@@ -91,12 +92,12 @@ class ReflogDialog extends ConsumerWidget {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.errorLoadingReflog,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             error.toString(),
             role: TextRole.detail,
@@ -113,27 +114,28 @@ class ReflogDialog extends ConsumerWidget {
       children: [
         // Info banner
         Container(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
-          child: Row(
-            children: [
-              const Icon(PhosphorIconsRegular.info, size: 20),
-              const SizedBox(width: AppTheme.paddingS),
-              Expanded(
-                child: BaseLabel(
-                  AppLocalizations.of(
-                    context,
-                  )!.reflogEntriesInfo(entries.length),
-                  role: TextRole.detail,
+          child: BaseInset(
+            child: Row(
+              children: [
+                const Icon(PhosphorIconsRegular.info, size: 20),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: BaseLabel(
+                    AppLocalizations.of(
+                      context,
+                    )!.reflogEntriesInfo(entries.length),
+                    role: TextRole.detail,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: AppTheme.paddingM),
+        const BaseGap(Proximity.grouped),
 
         // The list needs a bounded height: BaseDialog wraps the content in a
         // SingleChildScrollView, so a flex child would sit in an unbounded
@@ -186,7 +188,7 @@ class ReflogDialog extends ConsumerWidget {
             children: [
               // Hash (copyable)
               CopyableText(text: entry.shortHash, icon: IconRole.gitCommit),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               // Selector
               BaseLabel(
                 entry.selector,

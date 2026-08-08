@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../core/workspace/models/repository_status.dart';
 import '../../core/workspace/repository_status_provider.dart';
@@ -10,7 +10,7 @@ import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
-import '../theme/app_theme.dart';
+import '../components/base_layout.dart';
 
 /// How a single repository stands in the current sweep.
 enum _ActivityState { running, checked, failed, pending, local }
@@ -66,7 +66,7 @@ class BackgroundActivityDialog extends ConsumerWidget {
               role: TextRole.detail,
               tone: Tone.muted,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             Flexible(
               child: ListView.builder(
                 shrinkWrap: true,
@@ -146,20 +146,21 @@ class _ActivityRow extends StatelessWidget {
     // Where it lives answers the question a failure raises: which account.
     final identity = status?.remoteIdentity;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingXS),
+    return BaseInset(
+      x: Inset.none,
+      y: Inset.tight,
       child: Row(
         children: [
           BaseIcon(icon, scale: ControlScale.compact, tone: tone),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           // One line: this is one repository's row in a list of them, and a
           // long name that wrapped would make its row taller than the rest.
           Expanded(child: BaseLabel(name, role: TextRole.body, maxLines: 1)),
           if (identity != null) ...[
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(identity.label, role: TextRole.detail, tone: Tone.muted),
           ],
-          const SizedBox(width: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(label, role: TextRole.detail, tone: tone),
         ],
       ),

@@ -5,12 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_text_field.dart';
+import '../../shared/components/base_icon.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_layout.dart';
 import '../../shared/components/base_filter_chip.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_menu_item.dart';
@@ -281,8 +283,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             // focus of last resort to the shell.
             body: BaseFocusRegionHost(
               debugLabel: 'HistoryScreen.regions',
-              child: Padding(
-                padding: const EdgeInsets.all(AppTheme.paddingL),
+              // The screen holds its regions off the window's edge at the
+              // generous distance every screen uses: `Inset.roomy`.
+              child: BaseInset(
+                all: Inset.roomy,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -316,7 +320,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     HistorySearchFilter searchFilter,
   ) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+      // The band's fill and its rule stay: they are the surface.
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         border: Border(
@@ -325,107 +329,111 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ),
       ),
-      child: Column(
-        children: [
-          // Search bar row
-          Row(
-            children: [
-              Expanded(
-                // Arrows typed in the field move the commit list's highlight
-                // while the caret stays put, so narrowing and choosing a
-                // commit is one keyboard flow.
-                child: SearchFieldHandoff(
-                  controller: _listController,
-                  child: BaseTextField(
-                    controller: _searchController,
-                    hintText: AppLocalizations.of(
-                      context,
-                    )!.hintTextSearchCommits,
-                    prefixIcon: IconRole.magnifyingGlass,
-                    showClearButton: _searchController.text.isNotEmpty,
-                    onChanged: (query) {
-                      setState(() {}); // Update suffix icon
-                      // Filtering is pure over the loaded window and
-                      // never invokes git, but fuzzy-scoring every
-                      // loaded commit still stutters typing on large
-                      // windows, so bursts are coalesced.
-                      _searchDebounce?.cancel();
-                      if (query.isEmpty) {
-                        // Clearing restores the full history at once.
-                        _applySearch(query);
-                      } else {
-                        _searchDebounce = Timer(
-                          AppConstants.debounceMilliseconds,
-                          () {
-                            if (mounted) _applySearch(query);
-                          },
-                        );
-                      }
-                    },
+      child: BaseInset(
+        child: Column(
+          children: [
+            // Search bar row
+            Row(
+              children: [
+                Expanded(
+                  // Arrows typed in the field move the commit list's highlight
+                  // while the caret stays put, so narrowing and choosing a
+                  // commit is one keyboard flow.
+                  child: SearchFieldHandoff(
+                    controller: _listController,
+                    child: BaseTextField(
+                      controller: _searchController,
+                      hintText: AppLocalizations.of(
+                        context,
+                      )!.hintTextSearchCommits,
+                      prefixIcon: IconRole.magnifyingGlass,
+                      showClearButton: _searchController.text.isNotEmpty,
+                      onChanged: (query) {
+                        setState(() {}); // Update suffix icon
+                        // Filtering is pure over the loaded window and
+                        // never invokes git, but fuzzy-scoring every
+                        // loaded commit still stutters typing on large
+                        // windows, so bursts are coalesced.
+                        _searchDebounce?.cancel();
+                        if (query.isEmpty) {
+                          // Clearing restores the full history at once.
+                          _applySearch(query);
+                        } else {
+                          _searchDebounce = Timer(
+                            AppConstants.debounceMilliseconds,
+                            () {
+                              if (mounted) _applySearch(query);
+                            },
+                          );
+                        }
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppTheme.paddingM),
-              // Advanced search button
-              BaseIconButton(
-                icon: IconRole.faders,
-                tooltip: AppLocalizations.of(context)!.advancedSearch,
-                onPressed: () => _showAdvancedSearch(context),
-                variant: ButtonVariant.primary,
-              ),
-            ],
-          ),
-          const SizedBox(height: AppTheme.paddingS),
-
-          // Quick filter chips
-          Row(
-            children: [
-              Icon(
-                PhosphorIconsRegular.funnel,
-                size: 16,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: AppTheme.paddingS),
-              BaseLabel(
-                AppLocalizations.of(context)!.quickFilters,
-                role: TextRole.detail,
-                tone: Tone.muted,
-              ),
-              const SizedBox(width: AppTheme.paddingS),
-              Expanded(
-                child: Wrap(
-                  spacing: AppTheme.paddingS,
-                  children: [
-                    _buildQuickFilter(
-                      AppLocalizations.of(context)!.today,
-                      HistorySearchFilter.today(),
-                    ),
-                    _buildQuickFilter(
-                      AppLocalizations.of(context)!.thisWeek,
-                      HistorySearchFilter.thisWeek(),
-                    ),
-                    _buildQuickFilter(
-                      AppLocalizations.of(context)!.thisMonth,
-                      HistorySearchFilter.thisMonth(),
-                    ),
-                    _buildQuickFilter(
-                      AppLocalizations.of(context)!.last30Days,
-                      HistorySearchFilter.last30Days(),
-                    ),
-                    if (searchFilter.isNotEmpty)
-                      BaseActionChip(
-                        label: AppLocalizations.of(
-                          context,
-                        )!.clearFilters(searchFilter.activeFilterCount),
-                        icon: PhosphorIconsRegular.x,
-                        onPressed: _clearSearch,
-                      ),
-                  ],
+                const BaseGap(Proximity.grouped),
+                // Advanced search button
+                BaseIconButton(
+                  icon: IconRole.faders,
+                  tooltip: AppLocalizations.of(context)!.advancedSearch,
+                  onPressed: () => _showAdvancedSearch(context),
+                  variant: ButtonVariant.primary,
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const BaseGap(Proximity.related),
+
+            // Quick filter chips
+            Row(
+              children: [
+                // The label's own mark: dense, and secondary to the words it
+                // introduces.
+                const BaseIcon(
+                  IconRole.funnel,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
+                ),
+                const BaseGap(Proximity.related),
+                BaseLabel(
+                  AppLocalizations.of(context)!.quickFilters,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                ),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: Wrap(
+                    spacing: AppTheme.paddingS,
+                    children: [
+                      _buildQuickFilter(
+                        AppLocalizations.of(context)!.today,
+                        HistorySearchFilter.today(),
+                      ),
+                      _buildQuickFilter(
+                        AppLocalizations.of(context)!.thisWeek,
+                        HistorySearchFilter.thisWeek(),
+                      ),
+                      _buildQuickFilter(
+                        AppLocalizations.of(context)!.thisMonth,
+                        HistorySearchFilter.thisMonth(),
+                      ),
+                      _buildQuickFilter(
+                        AppLocalizations.of(context)!.last30Days,
+                        HistorySearchFilter.last30Days(),
+                      ),
+                      if (searchFilter.isNotEmpty)
+                        BaseActionChip(
+                          label: AppLocalizations.of(
+                            context,
+                          )!.clearFilters(searchFilter.activeFilterCount),
+                          icon: PhosphorIconsRegular.x,
+                          onPressed: _clearSearch,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -621,7 +629,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 children: [
                   // List header
                   Container(
-                    padding: const EdgeInsets.all(AppTheme.paddingL),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surfaceContainerLow,
                       border: Border(
@@ -630,37 +637,40 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         ),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          PhosphorIconsRegular.listBullets,
-                          size: AppTheme.iconS,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                        BaseLabel(
-                          searchFilter.isNotEmpty
-                              ? l10n.commitsMatchedOfLoaded(
-                                  commits.length,
-                                  loadedCount,
-                                )
-                              : l10n.commitsCount(commits.length),
-                          role: TextRole.sectionTitle,
-                        ),
-                        if (!deepMode &&
-                            searchFilter.isNotEmpty &&
-                            searchFilter.supportsDeepSearch &&
-                            (window?.hasMore ?? false)) ...[
-                          const Spacer(),
-                          BaseButton(
-                            label: l10n.historySearchAllHistory,
-                            variant: ButtonVariant.tertiary,
-                            size: ButtonSize.small,
-                            leadingIcon: IconRole.listMagnifyingGlass,
-                            onPressed: () => _startDeepSearch(),
+                    child: BaseInset(
+                      all: Inset.roomy,
+                      child: Row(
+                        children: [
+                          const BaseIcon(
+                            IconRole.listBullets,
+                            scale: ControlScale.compact,
+                            tone: Tone.accent,
                           ),
+                          const BaseGap(Proximity.related),
+                          BaseLabel(
+                            searchFilter.isNotEmpty
+                                ? l10n.commitsMatchedOfLoaded(
+                                    commits.length,
+                                    loadedCount,
+                                  )
+                                : l10n.commitsCount(commits.length),
+                            role: TextRole.sectionTitle,
+                          ),
+                          if (!deepMode &&
+                              searchFilter.isNotEmpty &&
+                              searchFilter.supportsDeepSearch &&
+                              (window?.hasMore ?? false)) ...[
+                            const Spacer(),
+                            BaseButton(
+                              label: l10n.historySearchAllHistory,
+                              variant: ButtonVariant.tertiary,
+                              size: ButtonSize.small,
+                              leadingIcon: IconRole.listMagnifyingGlass,
+                              onPressed: () => _startDeepSearch(),
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
 
@@ -789,7 +799,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                         Expanded(
                           child: CommitDetailsPanel(commit: selection.primary!),
                         ),
-                        const SizedBox(height: AppTheme.paddingS),
+                        // Two panes of one region: `related`, Material's 8.
+                        const BaseGap(Proximity.related),
                         Expanded(
                           child: FileTreePanel(
                             commitHash: selection.primary!.hash,

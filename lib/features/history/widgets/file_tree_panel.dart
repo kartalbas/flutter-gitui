@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, ControlScale, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_panel.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/utils/file_icon_utils.dart';
@@ -79,19 +81,21 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
     return BasePanel(
       title: Row(
         children: [
-          Icon(
-            PhosphorIconsRegular.tree,
-            size: AppTheme.iconS,
-            color: Theme.of(context).colorScheme.primary,
+          // A panel header's mark: dense, carrying the application's own
+          // colour rather than Material's `primary` slot.
+          const BaseIcon(
+            IconRole.tree,
+            scale: ControlScale.compact,
+            tone: Tone.accent,
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.labelChangedFiles,
             role: TextRole.sectionTitle,
           ),
         ],
       ),
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       content: changedFilesAsync.when(
         data: (files) {
           if (files.isEmpty) {
@@ -104,7 +108,9 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     size: AppTheme.iconXL,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  // The mark and the sentence under it are members of one
+                  // statement: `grouped`, Material's 16.
+                  const BaseGap(Proximity.grouped),
                   BaseLabel(
                     AppLocalizations.of(context)!.messageNoFilesChanged,
                     role: TextRole.body,
@@ -123,7 +129,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
             children: [
               // Statistics bar
               Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
+                // The bar's fill and its rule stay: they are the surface.
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   border: Border(
@@ -132,54 +138,56 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     ),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        _buildStatChip(
-                          context,
-                          PhosphorIconsRegular.plusCircle,
-                          stats.addedFiles.toString(),
-                          context.gitColors.added,
-                        ),
-                        const SizedBox(width: AppTheme.paddingM),
-                        _buildStatChip(
-                          context,
-                          PhosphorIconsRegular.pencilSimple,
-                          stats.modifiedFiles.toString(),
-                          context.gitColors.modified,
-                        ),
-                        const SizedBox(width: AppTheme.paddingM),
-                        _buildStatChip(
-                          context,
-                          PhosphorIconsRegular.minusCircle,
-                          stats.deletedFiles.toString(),
-                          context.gitColors.deleted,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppTheme.paddingS),
-                    Row(
-                      children: [
-                        BaseLabel(
-                          '${stats.totalFiles} ${stats.totalFiles == 1 ? AppLocalizations.of(context)!.labelFile : AppLocalizations.of(context)!.labelFiles}',
-                          role: TextRole.detail,
-                        ),
-                        const Spacer(),
-                        BaseLabel(
-                          '+${stats.totalAdditions}',
-                          role: TextRole.detail,
-                          tone: Tone.gitAdded,
-                        ),
-                        const SizedBox(width: AppTheme.paddingXS),
-                        BaseLabel(
-                          '-${stats.totalDeletions}',
-                          role: TextRole.detail,
-                          tone: Tone.gitDeleted,
-                        ),
-                      ],
-                    ),
-                  ],
+                child: BaseInset(
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          _buildStatChip(
+                            context,
+                            IconRole.plusCircle,
+                            stats.addedFiles.toString(),
+                            Tone.gitAdded,
+                          ),
+                          const BaseGap(Proximity.grouped),
+                          _buildStatChip(
+                            context,
+                            IconRole.pencilSimple,
+                            stats.modifiedFiles.toString(),
+                            Tone.gitModified,
+                          ),
+                          const BaseGap(Proximity.grouped),
+                          _buildStatChip(
+                            context,
+                            IconRole.minusCircle,
+                            stats.deletedFiles.toString(),
+                            Tone.gitDeleted,
+                          ),
+                        ],
+                      ),
+                      const BaseGap(Proximity.related),
+                      Row(
+                        children: [
+                          BaseLabel(
+                            '${stats.totalFiles} ${stats.totalFiles == 1 ? AppLocalizations.of(context)!.labelFile : AppLocalizations.of(context)!.labelFiles}',
+                            role: TextRole.detail,
+                          ),
+                          const Spacer(),
+                          BaseLabel(
+                            '+${stats.totalAdditions}',
+                            role: TextRole.detail,
+                            tone: Tone.gitAdded,
+                          ),
+                          const BaseGap(Proximity.hairline),
+                          BaseLabel(
+                            '-${stats.totalDeletions}',
+                            role: TextRole.detail,
+                            tone: Tone.gitDeleted,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -213,7 +221,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                 size: AppTheme.iconXL,
                 color: Theme.of(context).colorScheme.error,
               ),
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               BaseLabel(
                 AppLocalizations.of(context)!.errorLoadingData('files'),
                 role: TextRole.body,
@@ -228,15 +236,18 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
 
   Widget _buildStatChip(
     BuildContext context,
-    IconData icon,
+    IconRole icon,
     String count,
-    Color color,
+    Tone tone,
   ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: AppTheme.iconXS, color: color),
-        const SizedBox(width: AppTheme.paddingXS),
+        // "How many files were added" - a working-tree meaning, not a colour
+        // out of the git palette, and an inline-metadata mark at the one
+        // scale the application gives that job.
+        BaseIcon(icon, scale: ControlScale.compact, tone: tone),
+        const BaseGap(Proximity.hairline),
         BaseLabel(count, role: TextRole.detail),
       ],
     );
@@ -323,14 +334,14 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
           children: [
             // Expand/collapse icon for directories
             if (node.isDirectory) ...[
-              Icon(
-                node.isExpanded
-                    ? PhosphorIconsRegular.caretDown
-                    : PhosphorIconsRegular.caretRight,
-                size: AppTheme.iconXS,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              // The disclosure mark of a tree row: dense, and secondary to the
+              // name beside it.
+              BaseIcon(
+                node.isExpanded ? IconRole.caretDown : IconRole.caretRight,
+                scale: ControlScale.compact,
+                tone: Tone.muted,
               ),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
             ],
 
             // Folder/file icon
@@ -348,7 +359,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                   : (node.fileChange?.type.colorOf(context) ??
                         Theme.of(context).colorScheme.onSurface),
             ),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
 
             // Name
             Expanded(
@@ -357,7 +368,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
 
             // File change stats
             if (!node.isDirectory && node.fileChange != null) ...[
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
@@ -388,7 +399,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                 ),
               ),
               // File actions menu
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               PopupMenuButton<String>(
                 icon: const Icon(
                   PhosphorIconsRegular.dotsThreeVertical,

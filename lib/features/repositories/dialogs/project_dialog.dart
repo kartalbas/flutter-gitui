@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, Proximity, TextRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -9,6 +10,7 @@ import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../generated/app_localizations.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Result of the project dialog
 class ProjectDialogResult {
@@ -114,7 +116,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
           children: [
             // Project name
             BaseLabel(l10n.projectNameLabel, role: TextRole.control),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseTextField(
               controller: _nameController,
               hintText: l10n.enterProjectName,
@@ -128,11 +130,11 @@ class _ProjectDialogState extends State<ProjectDialog> {
               autofocus: true,
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Project description
             BaseLabel(l10n.projectDescriptionLabel, role: TextRole.control),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseTextField(
               controller: _descriptionController,
               hintText: l10n.enterProjectDescription,
@@ -140,117 +142,127 @@ class _ProjectDialogState extends State<ProjectDialog> {
               maxLines: 3,
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Color picker
             BaseLabel(l10n.projectColorLabel, role: TextRole.control),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Theme.of(context).colorScheme.outline,
                 ),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Wrap(
-                spacing: AppTheme.paddingS,
-                runSpacing: AppTheme.paddingS,
-                children: WorkspaceColors.defaults.map((color) {
-                  final isSelected =
-                      _selectedColor.toARGB32() == color.toARGB32();
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _selectedColor = color;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                    child: Container(
-                      width: AppTheme.iconXL * 2,
-                      height: AppTheme.iconXL * 2,
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                        border: isSelected
-                            ? Border.all(
-                                color: Theme.of(context).colorScheme.primary,
-                                width: 3,
+              child: BaseInset(
+                all: Inset.normal,
+                child: Wrap(
+                  spacing: AppTheme.paddingS,
+                  runSpacing: AppTheme.paddingS,
+                  children: WorkspaceColors.defaults.map((color) {
+                    final isSelected =
+                        _selectedColor.toARGB32() == color.toARGB32();
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedColor = color;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                      child: Container(
+                        width: AppTheme.iconXL * 2,
+                        height: AppTheme.iconXL * 2,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                          border: isSelected
+                              ? Border.all(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  width: 3,
+                                )
+                              : null,
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: color.withValues(alpha: 0.5),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: isSelected
+                            ? Icon(
+                                PhosphorIconsBold.check,
+                                color: _getContrastingColor(color),
+                                size: AppTheme.iconM,
                               )
                             : null,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: color.withValues(alpha: 0.5),
-                                  blurRadius: 8,
-                                  spreadRadius: 2,
-                                ),
-                              ]
-                            : null,
                       ),
-                      child: isSelected
-                          ? Icon(
-                              PhosphorIconsBold.check,
-                              color: _getContrastingColor(color),
-                              size: AppTheme.iconM,
-                            )
-                          : null,
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
 
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Preview
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
                 ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.info,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
-                  const SizedBox(width: AppTheme.paddingM),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BaseLabel(l10n.previewLabel, role: TextRole.micro),
-                        const SizedBox(height: AppTheme.paddingXS),
-                        Row(
-                          children: [
-                            Container(
-                              width: AppTheme.paddingXS,
-                              height: AppTheme.iconS,
-                              decoration: BoxDecoration(
-                                color: _selectedColor,
-                                borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusXS,
+              child: BaseInset(
+                all: Inset.normal,
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.info,
+                      size: AppTheme.iconS,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                    const BaseGap(Proximity.grouped),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BaseLabel(l10n.previewLabel, role: TextRole.micro),
+                          const BaseGap(Proximity.hairline),
+                          Row(
+                            children: [
+                              // The preview's colour stripe is a SHAPE, not
+                              // a spacing: it was spelled with a padding and
+                              // an icon token, which said nothing true about
+                              // it. Four by sixteen is the swatch's geometry
+                              // and it moves into `surfaces.badge` with the
+                              // hand-painted preview around it.
+                              Container(
+                                width: 4,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: _selectedColor,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusXS,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: AppTheme.paddingS),
-                            BaseLabel(
-                              _nameController.text.isEmpty
-                                  ? l10n.projectNamePreviewPlaceholder
-                                  : _nameController.text,
-                              role: TextRole.itemTitle,
-                            ),
-                          ],
-                        ),
-                      ],
+                              const BaseGap(Proximity.related),
+                              BaseLabel(
+                                _nameController.text.isEmpty
+                                    ? l10n.projectNamePreviewPlaceholder
+                                    : _nameController.text,
+                                role: TextRole.itemTitle,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

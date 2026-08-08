@@ -10,6 +10,8 @@ import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../core/workspace/models/repository_status.dart';
 import '../../../core/workspace/repository_status_provider.dart';
 import '../repository_multi_select_provider.dart';
+import '../../../shared/components/base_layout.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity;
 
 /// Filter chips and selection controls for repositories screen
 class RepositoriesFilterChips extends ConsumerWidget {
@@ -67,7 +69,7 @@ class RepositoriesFilterChips extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(width: AppTheme.paddingM),
+        const BaseGap(Proximity.grouped),
 
         // Select All / Deselect All
         if (selectableRepositories.isNotEmpty)

@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 
-import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_label.dart';
@@ -26,6 +25,7 @@ import 'widgets/animation_section.dart';
 import 'widgets/history_section.dart';
 import 'widgets/updates_section.dart';
 import 'widgets/config_and_logs_section.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Settings screen - Application configuration
 class SettingsScreen extends ConsumerWidget {
@@ -67,40 +67,46 @@ class SettingsScreen extends ConsumerWidget {
       // made the overflow button surface in the middle of the sequence; as a
       // group the form is sorted as one block that always sits below the bar.
       body: FocusTraversalGroup(
+        // A scroll view's padding is the inset its CONTENT owes the
+        // viewport's edge - it scrolls with the content, exactly as a
+        // `Padding` around the child does - so it is stated as one.
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.paddingL),
-          child: Column(
-            // A Column centers its children, while the ListView it replaces
-            // stretched every section card to the full width.
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GitConfigSection(
-                onSelectGitExecutable: () => _selectGitExecutable(context, ref),
-                onSelectTextEditor: () => _selectTextEditor(context, ref),
-                onDetectTools: () => _detectTools(context, ref),
-                onSelectDiffTool: () => _selectDiffTool(context, ref),
-                onSelectMergeTool: () => _selectMergeTool(context, ref),
-                onEditUserName: () => _editUserName(context, ref),
-                onEditUserEmail: () => _editUserEmail(context, ref),
-              ),
-              const SizedBox(height: AppTheme.paddingXL),
-              ThemeSection(
-                getColorSchemeName: (scheme) =>
-                    _getColorSchemeName(context, scheme),
-                getFontSizeName: (size) => _getFontSizeName(context, size),
-              ),
-              const SizedBox(height: AppTheme.paddingXL),
-              const AnimationSection(),
-              const SizedBox(height: AppTheme.paddingXL),
-              HistorySection(
-                onEditCommitHistoryLimit: () =>
-                    _editCommitHistoryLimit(context, ref),
-              ),
-              const SizedBox(height: AppTheme.paddingXL),
-              const UpdatesSection(),
-              const SizedBox(height: AppTheme.paddingXL),
-              const ConfigAndLogsSection(),
-            ],
+          child: BaseInset(
+            all: Inset.roomy,
+            child: Column(
+              // A Column centers its children, while the ListView it replaces
+              // stretched every section card to the full width.
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GitConfigSection(
+                  onSelectGitExecutable: () =>
+                      _selectGitExecutable(context, ref),
+                  onSelectTextEditor: () => _selectTextEditor(context, ref),
+                  onDetectTools: () => _detectTools(context, ref),
+                  onSelectDiffTool: () => _selectDiffTool(context, ref),
+                  onSelectMergeTool: () => _selectMergeTool(context, ref),
+                  onEditUserName: () => _editUserName(context, ref),
+                  onEditUserEmail: () => _editUserEmail(context, ref),
+                ),
+                const BaseGap(Proximity.sectioned),
+                ThemeSection(
+                  getColorSchemeName: (scheme) =>
+                      _getColorSchemeName(context, scheme),
+                  getFontSizeName: (size) => _getFontSizeName(context, size),
+                ),
+                const BaseGap(Proximity.sectioned),
+                const AnimationSection(),
+                const BaseGap(Proximity.sectioned),
+                HistorySection(
+                  onEditCommitHistoryLimit: () =>
+                      _editCommitHistoryLimit(context, ref),
+                ),
+                const BaseGap(Proximity.sectioned),
+                const UpdatesSection(),
+                const BaseGap(Proximity.sectioned),
+                const ConfigAndLogsSection(),
+              ],
+            ),
           ),
         ),
       ),

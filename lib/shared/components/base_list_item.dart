@@ -73,13 +73,28 @@ class BaseListItem extends StatefulWidget {
     this.onTap,
     this.onDoubleTap,
     this.onSecondaryTap,
-    this.padding = const EdgeInsetsDirectional.only(
-      start: AppTheme.paddingM,
-      end: AppTheme.paddingL,
-      top: AppTheme.paddingM,
-      bottom: AppTheme.paddingM,
-    ),
   });
+
+  /// The row's own geometry, and deliberately not a parameter.
+  ///
+  /// It is asymmetric — the trailing edge is set in further than the leading
+  /// one, because that is the side the trailing slot and the overflow anchor
+  /// sit on — and `Inset` cannot say a per-side inset by design: four per-side
+  /// rungs would be the token bag returning under a neutral label
+  /// (`docs/SKIN-CONTRACT-MEMBERS.md` §10). The geometry is therefore the
+  /// row's, not a caller's, and it travels into `surfaces.listRow` whole when
+  /// that member lands; the one call site that used to override it was a
+  /// screen deciding a row was denser than every other row in the application.
+  ///
+  /// It also cannot delegate to `layout.inset` where it stands: the padding is
+  /// applied by the [Ink] that paints the tile, so that hover and press state
+  /// layers cover it, and `Ink.padding` needs a value rather than a widget.
+  static const EdgeInsetsGeometry _tileInset = EdgeInsetsDirectional.only(
+    start: AppTheme.paddingM,
+    end: AppTheme.paddingL,
+    top: AppTheme.paddingM,
+    bottom: AppTheme.paddingM,
+  );
 
   /// Smallest height a row may occupy, the Material 3 one-line list-item
   /// height (`_defaultTileHeight`,
@@ -140,9 +155,6 @@ class BaseListItem extends StatefulWidget {
 
   /// Callback when item is right-clicked (context menu)
   final Function(Offset)? onSecondaryTap;
-
-  /// Internal padding
-  final EdgeInsetsGeometry padding;
 
   @override
   State<BaseListItem> createState() => _BaseListItemState();
@@ -313,7 +325,7 @@ class _BaseListItemState extends State<BaseListItem> {
                   color: backgroundColor,
                   border: border,
                 ),
-                padding: widget.padding,
+                padding: BaseListItem._tileInset,
                 // The tile's foreground is published to the whole row, not
                 // just to the content slot. A badge or a trailing label sits
                 // on the same tile as the title, and wrapping only `content`

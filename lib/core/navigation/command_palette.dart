@@ -13,6 +13,7 @@ import '../../shared/components/base_text_field.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/utils/fuzzy_match.dart';
 import 'git_commands.dart';
+import '../../shared/components/base_layout.dart';
 
 /// Command palette for searching and executing Git operations
 class CommandPalette extends ConsumerStatefulWidget {
@@ -158,9 +159,13 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
             ),
             child: Column(
               children: [
-                // Handle bar
+                // Handle bar. Its top margin was a one-sided inset, which is
+                // a gap wearing a padding idiom - the distance belongs
+                // between the sheet's edge and the grip, so the column says
+                // it and the grip says none. The 40x4 grip itself is a
+                // measured shape rather than a spacing rung.
+                const BaseGap(Proximity.related),
                 Container(
-                  margin: const EdgeInsets.only(top: AppTheme.paddingS),
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
@@ -172,8 +177,8 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                 ),
 
                 // Search field
-                Padding(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                BaseInset(
+                  all: Inset.normal,
                   child: BaseTextField(
                     controller: _controller,
                     focusNode: _focusNode,
@@ -190,10 +195,9 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
 
                 // Results count
                 if (_controller.text.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.paddingM,
-                    ),
+                  BaseInset(
+                    x: Inset.normal,
+                    y: Inset.none,
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: BaseLabel(
@@ -205,7 +209,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                     ),
                   ),
 
-                const SizedBox(height: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
 
                 // Command list
                 Expanded(
@@ -221,12 +225,12 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                                   context,
                                 ).colorScheme.onSurfaceVariant,
                               ),
-                              const SizedBox(height: AppTheme.paddingM),
+                              const BaseGap(Proximity.grouped),
                               BaseLabel(
                                 l10n.commandPaletteNoCommandsFound,
                                 role: TextRole.pageTitle,
                               ),
-                              const SizedBox(height: AppTheme.paddingS),
+                              const BaseGap(Proximity.related),
                               BaseLabel(
                                 l10n.commandPaletteTryDifferentSearchTerm,
                                 role: TextRole.detail,
@@ -284,7 +288,6 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
 
                 // Footer with tips
                 Container(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(
@@ -292,41 +295,44 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                       ),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      _buildKeyHint(
-                        context,
-                        '↑↓',
-                        l10n.commandPaletteHintNavigate,
-                      ),
-                      const SizedBox(width: AppTheme.paddingM),
-                      _buildKeyHint(
-                        context,
-                        '↵',
-                        l10n.commandPaletteHintExecute,
-                      ),
-                      const SizedBox(width: AppTheme.paddingM),
-                      _buildKeyHint(
-                        context,
-                        'Esc',
-                        l10n.commandPaletteHintClose,
-                      ),
-                      const SizedBox(width: AppTheme.paddingM),
-                      // The sheet is capped at Material 3's 640px, so at the
-                      // 800x600 minimum window the trailing count is the child
-                      // that yields: it takes whatever width the key hints
-                      // leave over and ellipsizes instead of overflowing.
-                      Expanded(
-                        child: BaseLabel(
-                          l10n.commandPaletteCommandsAvailable(
-                            GitCommands.all.length,
-                          ),
-                          role: TextRole.detail,
-                          align: TextAlign.end,
-                          maxLines: 1,
+                  child: BaseInset(
+                    all: Inset.normal,
+                    child: Row(
+                      children: [
+                        _buildKeyHint(
+                          context,
+                          '↑↓',
+                          l10n.commandPaletteHintNavigate,
                         ),
-                      ),
-                    ],
+                        const BaseGap(Proximity.grouped),
+                        _buildKeyHint(
+                          context,
+                          '↵',
+                          l10n.commandPaletteHintExecute,
+                        ),
+                        const BaseGap(Proximity.grouped),
+                        _buildKeyHint(
+                          context,
+                          'Esc',
+                          l10n.commandPaletteHintClose,
+                        ),
+                        const BaseGap(Proximity.grouped),
+                        // The sheet is capped at Material 3's 640px, so at the
+                        // 800x600 minimum window the trailing count is the child
+                        // that yields: it takes whatever width the key hints
+                        // leave over and ellipsizes instead of overflowing.
+                        Expanded(
+                          child: BaseLabel(
+                            l10n.commandPaletteCommandsAvailable(
+                              GitCommands.all.length,
+                            ),
+                            role: TextRole.detail,
+                            align: TextAlign.end,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -342,18 +348,18 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingS,
-            vertical: AppTheme.paddingXS,
-          ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
             border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
-          child: BaseLabel(key, role: TextRole.micro),
+          child: BaseInset(
+            x: Inset.tight,
+            y: Inset.tight,
+            child: BaseLabel(key, role: TextRole.micro),
+          ),
         ),
-        const SizedBox(width: AppTheme.paddingXS),
+        const BaseGap(Proximity.hairline),
         BaseLabel(label, role: TextRole.detail),
       ],
     );

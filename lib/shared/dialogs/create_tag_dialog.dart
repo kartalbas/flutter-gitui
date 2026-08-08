@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -12,6 +13,7 @@ import '../../core/git/models/commit.dart';
 import '../../core/git/models/tag.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
+import '../components/base_layout.dart';
 
 /// The app's single create-tag dialog.
 ///
@@ -104,25 +106,26 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
             children: [
               // Info banner
               Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(PhosphorIconsRegular.info, size: 20),
-                    const SizedBox(width: AppTheme.paddingS),
-                    Expanded(
-                      child: BaseLabel(
-                        l10n.createTagDialogDescription,
-                        role: TextRole.detail,
+                child: BaseInset(
+                  child: Row(
+                    children: [
+                      const Icon(PhosphorIconsRegular.info, size: 20),
+                      const BaseGap(Proximity.related),
+                      Expanded(
+                        child: BaseLabel(
+                          l10n.createTagDialogDescription,
+                          role: TextRole.detail,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
 
               // Template selector: prefill from a recent tag
               if (recentTags.isNotEmpty) ...[
@@ -158,7 +161,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                     }
                   },
                 ),
-                const SizedBox(height: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
               ],
 
               // Tag name. Keyed because the template selector above it and
@@ -184,18 +187,18 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 },
                 autofocus: true,
               ),
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
 
               // Target commit
               BaseLabel(l10n.targetCommit, role: TextRole.sectionTitle),
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               commitsAsync.when(
                 data: (commits) => _buildCommitDropdown(commits),
                 loading: () => const LinearProgressIndicator(),
                 error: (_, _) =>
                     BaseLabel(l10n.errorLoadingCommits, role: TextRole.body),
               ),
-              const SizedBox(height: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
 
               // Annotated tag option
               SwitchListTile(
@@ -209,7 +212,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                   setState(() => _isAnnotated = value);
                 },
               ),
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
 
               // Tag message (only for annotated tags)
               if (_isAnnotated) ...[
@@ -225,7 +228,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
               ],
             ],
           ),
@@ -269,7 +272,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _hashChip(context, commit.shortHash),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           Flexible(
             fit: FlexFit.loose,
             child: BaseLabel(commit.message, role: TextRole.body, maxLines: 1),
@@ -315,7 +318,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
           builder: (context) => Row(
             children: [
               const Icon(PhosphorIconsRegular.arrowUp, size: 16),
-              const SizedBox(width: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               BaseLabel(
                 AppLocalizations.of(context)!.headCurrentCommit,
                 role: TextRole.body,

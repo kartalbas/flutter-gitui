@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../core/hosting/hosted_repository.dart';
 import '../../core/hosting/hosting_providers.dart';
@@ -17,6 +17,7 @@ import '../controllers/item_navigation_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/keyboard_navigable_view.dart';
 import '../widgets/search_field_handoff.dart';
+import '../components/base_layout.dart';
 
 /// Picks a repository to clone from the hosts the workspace already uses.
 ///
@@ -166,7 +167,7 @@ class _SelectHostedRepositoryDialogState
                         for (final source in sources) Tab(text: source.label),
                       ],
                     ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  const BaseGap(Proximity.grouped),
                   // Arrows typed in the field move the list's highlight and
                   // Enter takes the highlighted repository while the caret
                   // stays in the field — the shared handoff, replacing the
@@ -187,7 +188,7 @@ class _SelectHostedRepositoryDialogState
                       },
                     ),
                   ),
-                  const SizedBox(height: AppTheme.paddingM),
+                  const BaseGap(Proximity.grouped),
                   Expanded(
                     child: sources.length == 1
                         ? _SourceResults(
@@ -244,7 +245,14 @@ class _SourceResults extends ConsumerWidget {
   final String query;
 
   /// Height of one result row, for keeping the highlight scrolled into view.
-  static const double _rowExtent = 56;
+  ///
+  /// 80 and no longer 56: the row stopped overriding `BaseListItem`'s own
+  /// geometry, so it is now the same two-line row the branch switcher shows and
+  /// takes the same extent. A fixed extent is measured layout the application
+  /// owns — the residue `docs/SKIN-CONTRACT.md` §1 names — so it has to state
+  /// the height the row actually occupies; left at 56 the second line would be
+  /// clipped.
+  static const double _rowExtent = 80;
 
   /// The dialog's navigation semantics, or null when this tab is not in
   /// front — only the visible tab is the one the keyboard drives.
@@ -256,18 +264,16 @@ class _SourceResults extends ConsumerWidget {
     required bool isSelected,
     required bool containerHasFocus,
   }) {
+    // A list row here is a list row anywhere: the geometry belongs to the row,
+    // not to the screen that shows it, so this dialog no longer restates it.
+    // It used to be denser than every other row in the application, which is a
+    // design decision that was living in a call site.
     return BaseListItem(
       isSelected: isSelected,
       containerHasFocus: containerHasFocus,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingM,
-        vertical: AppTheme.paddingS,
-      ),
-      leading: Icon(
-        repository.isPrivate
-            ? PhosphorIconsRegular.lock
-            : PhosphorIconsRegular.bookOpen,
-        size: AppTheme.iconS,
+      leading: BaseIcon(
+        repository.isPrivate ? IconRole.lock : IconRole.bookOpen,
+        scale: ControlScale.compact,
       ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -373,7 +379,7 @@ class _FailureMessage extends ConsumerWidget {
             size: AppTheme.iconXL,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(
             switch (result.failure!) {
               SourceFailure.credentialsMissing =>
@@ -388,7 +394,7 @@ class _FailureMessage extends ConsumerWidget {
             align: TextAlign.center,
           ),
           if (needsSignIn) ...[
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             // Signing in is offered rather than forced: the picker opening
             // must never make a credential helper take over the screen.
             BaseButton(
@@ -427,7 +433,7 @@ class _Message extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           BaseIcon(icon, scale: ControlScale.prominent, tone: tone),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(
             text,
             role: TextRole.body,

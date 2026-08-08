@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import '../../core/services/shell_service.dart';
 
 import '../../generated/app_localizations.dart';
@@ -10,9 +10,9 @@ import '../../core/diff/diff_tool_service.dart';
 import '../../core/diff/models/diff_tool.dart';
 import '../../core/services/logger_service.dart';
 import '../../core/utils/executable_path.dart';
-import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_dialog.dart';
+import '../components/base_layout.dart';
 
 /// Dialog to detect and select available tools on Linux
 class DetectToolsDialog extends StatefulWidget {
@@ -191,8 +191,8 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
           : null,
       content: _isDetecting
           ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(AppTheme.paddingXL),
+              child: BaseInset(
+                all: Inset.roomy,
                 child: CircularProgressIndicator(),
               ),
             )
@@ -224,8 +224,8 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
   Widget _buildContent(BuildContext context, AppLocalizations l10n) {
     if (_gitPath == null && _diffTools.isEmpty && _textEditors.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingXL),
+      return BaseInset(
+        all: Inset.roomy,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -234,13 +234,13 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
               size: 48,
               color: Theme.of(context).colorScheme.error,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
             BaseLabel(
               l10n.noToolsDetected,
               role: TextRole.body,
               tone: Tone.danger,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             BaseLabel(
               l10n.noToolsDetectedHint,
               role: TextRole.detail,
@@ -258,18 +258,21 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_gitPath != null) ...[
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppTheme.paddingL,
-                top: AppTheme.paddingM,
-                bottom: AppTheme.paddingS,
-              ),
+            // The header's own space is composed rather than carried as four
+            // per-side numbers: the gap above and below belongs BETWEEN the
+            // header and its neighbours, and only the indent belongs inside
+            // it. Per-side rungs would be the token bag returning.
+            const BaseGap(Proximity.grouped),
+            BaseInset(
+              x: Inset.roomy,
+              y: Inset.none,
               child: BaseLabel(
                 'Git Executable',
                 role: TextRole.sectionTitle,
                 tone: Tone.accent,
               ),
             ),
+            const BaseGap(Proximity.related),
             RadioListTile<String>(
               title: const BaseLabel('Use detected git', role: TextRole.body),
               subtitle: BaseLabel(
@@ -287,21 +290,20 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                 });
               },
             ),
-            const Divider(),
+            const BaseSeparator(),
           ],
           if (_diffTools.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppTheme.paddingL,
-                top: AppTheme.paddingM,
-                bottom: AppTheme.paddingS,
-              ),
+            const BaseGap(Proximity.grouped),
+            BaseInset(
+              x: Inset.roomy,
+              y: Inset.none,
               child: BaseLabel(
                 'Diff/Merge Tools (${_diffTools.length} found)',
                 role: TextRole.sectionTitle,
                 tone: Tone.accent,
               ),
             ),
+            const BaseGap(Proximity.related),
             ..._diffTools.map((tool) {
               return RadioListTile<DiffTool>(
                 title: BaseLabel(tool.displayName, role: TextRole.body),
@@ -323,19 +325,18 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
             }),
           ],
           if (_textEditors.isNotEmpty) ...[
-            const Divider(),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppTheme.paddingL,
-                top: AppTheme.paddingM,
-                bottom: AppTheme.paddingS,
-              ),
+            const BaseSeparator(),
+            const BaseGap(Proximity.grouped),
+            BaseInset(
+              x: Inset.roomy,
+              y: Inset.none,
               child: BaseLabel(
                 'Text Editors (${_textEditors.length} found)',
                 role: TextRole.sectionTitle,
                 tone: Tone.accent,
               ),
             ),
+            const BaseGap(Proximity.related),
             ..._textEditors.map((editor) {
               return RadioListTile<_DetectedEditor>(
                 title: BaseLabel(editor.name, role: TextRole.body),

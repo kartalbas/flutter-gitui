@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Error state for branches screen when loading fails
 class BranchesErrorState extends StatelessWidget {
@@ -23,7 +23,9 @@ class BranchesErrorState extends StatelessWidget {
             size: 48,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          // The glyph and the headline are members of one statement: `grouped`,
+          // which Material answers with the 16 pixels this line used to name.
+          const BaseGap(Proximity.grouped),
           // The error state's headline, at the same rung as every other one.
           BaseLabel(
             AppLocalizations.of(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../core/git/models/tag.dart';
 import '../tags_screen.dart';
+import '../../../shared/components/base_layout.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity;
 
 /// Filter chips widget for filtering tags by type
 class TagFilterChips extends StatelessWidget {
@@ -31,7 +32,7 @@ class TagFilterChips extends StatelessWidget {
             selected: selectedFilter == TagFilterType.all,
             onSelected: (selected) => onFilterChanged(TagFilterType.all),
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseFilterChip(
             label: 'Annotated',
             count: allTags.where((t) => t.isAnnotated).length,
@@ -39,7 +40,7 @@ class TagFilterChips extends StatelessWidget {
             selected: selectedFilter == TagFilterType.annotated,
             onSelected: (selected) => onFilterChanged(TagFilterType.annotated),
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseFilterChip(
             label: 'Lightweight',
             count: allTags.where((t) => t.isLightweight).length,

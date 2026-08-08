@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Inset;
 
 import '../../generated/app_localizations.dart';
+import '../../shared/components/base_icon.dart';
+import '../../shared/components/base_layout.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
@@ -154,8 +156,12 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
+      // The screen's body is deliberately generous with its content: a search
+      // field, a tab bar and a list, none of which should touch the window's
+      // edge. That is `Inset.roomy` - the question - where the 24 logical
+      // pixels it used to spell out were Material's answer to it.
+      body: BaseInset(
+        all: Inset.roomy,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -183,11 +189,19 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
               tabs: [
                 Tab(
                   text: l10n.localTab,
-                  icon: const Icon(PhosphorIconsRegular.folder, size: 16),
+                  // A tab's mark is a dense one: `compact`, the 16 pixels this
+                  // site named, and a glyph the skin picks.
+                  icon: const BaseIcon(
+                    IconRole.folder,
+                    scale: ControlScale.compact,
+                  ),
                 ),
                 Tab(
                   text: l10n.remoteTab,
-                  icon: const Icon(PhosphorIconsRegular.cloud, size: 16),
+                  icon: const BaseIcon(
+                    IconRole.cloud,
+                    scale: ControlScale.compact,
+                  ),
                 ),
               ],
             ),

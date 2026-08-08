@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, Proximity;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Batch operations bar for selected tags
 class TagsBatchOperationsBar extends StatelessWidget {
@@ -27,36 +28,38 @@ class TagsBatchOperationsBar extends StatelessWidget {
           top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
       ),
-      padding: const EdgeInsets.all(AppTheme.paddingM),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: BaseButton(
-                label: AppLocalizations.of(
-                  context,
-                )!.pushTagsCount(selectedCount),
-                leadingIcon: IconRole.upload,
-                onPressed: onPush,
-                variant: ButtonVariant.secondary,
-                size: ButtonSize.medium,
-                fullWidth: true,
+      child: BaseInset(
+        all: Inset.normal,
+        child: SafeArea(
+          child: Row(
+            children: [
+              Expanded(
+                child: BaseButton(
+                  label: AppLocalizations.of(
+                    context,
+                  )!.pushTagsCount(selectedCount),
+                  leadingIcon: IconRole.upload,
+                  onPressed: onPush,
+                  variant: ButtonVariant.secondary,
+                  size: ButtonSize.medium,
+                  fullWidth: true,
+                ),
               ),
-            ),
-            const SizedBox(width: AppTheme.paddingM),
-            Expanded(
-              child: BaseButton(
-                label: AppLocalizations.of(
-                  context,
-                )!.deleteTagsCount(selectedCount),
-                leadingIcon: IconRole.trash,
-                onPressed: onDelete,
-                variant: ButtonVariant.danger,
-                size: ButtonSize.medium,
-                fullWidth: true,
+              const BaseGap(Proximity.grouped),
+              Expanded(
+                child: BaseButton(
+                  label: AppLocalizations.of(
+                    context,
+                  )!.deleteTagsCount(selectedCount),
+                  leadingIcon: IconRole.trash,
+                  onPressed: onDelete,
+                  variant: ButtonVariant.danger,
+                  size: ButtonSize.medium,
+                  fullWidth: true,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

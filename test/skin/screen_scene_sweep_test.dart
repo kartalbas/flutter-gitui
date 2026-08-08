@@ -118,7 +118,7 @@ void main() {
       // the SKIN changes and why that is a measurement rather than a licence.
       expect(
         contractRenderedComponents(),
-        kSkinUnderTest == kBlueprintSkinId
+        _measuringAtDistance
             ? (kContractRenderedUnderBlueprint[scene.name] ??
                   kContractRenderedPerScene[scene.name])
             : kContractRenderedPerScene[scene.name],
@@ -245,6 +245,18 @@ void main() {
 /// rather than an impression, and the rise is exactly what the register exists
 /// to force somebody to write down.
 ///
+/// **P3c raised every one of them again, and that is the spacing collapse.**
+/// The gaps between things and the breathing room inside them were the last
+/// large population still written as Material's own numbers - 1,046
+/// `AppTheme.padding*` reads and 695 childless `SizedBox`es - and they became
+/// [BaseGap] and [BaseInset] asking for a [Proximity] and an [Inset]. Distance
+/// is the thing a screen states most often of all, so the rise is the largest
+/// so far and it is spread evenly: `repositories` from 21 to 53, `tags` from
+/// 13 to 29, `history` from 24 to 63. Nothing about the rendered pixels
+/// changed under Material - the five [Proximity] rungs resolve to the five
+/// steps the application already used - which is exactly the point: the
+/// numbers left application code without the screens moving.
+///
 /// Asserted as an exact number rather than a floor, in both directions. A drop
 /// is a regression - a component stopped reaching its skin. A rise is a
 /// migration, and it has to fail here so that the number is updated in the
@@ -256,34 +268,41 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // `BaseIcon`. It was the one mark in that bar a Fluent or macOS skin could
   // not have answered, sitting among actions the skin already drew.
   //
-  // 94 and not 103: the nine navigation-rail destination labels went back to
-  // bare `Text`s, deliberately. The rail owns that slot's typography - it
-  // lerps each label between its unselected and selected styles - so those
-  // labels are part of a larger member and convert with the shell chrome,
-  // the same carve-out BaseLabel documents for a button's words. See the
-  // comment at the call site (app_shell.dart) for the paint-path assert that
-  // made the misplacement visible.
-  'shell': 94,
-  'workspaces': 15,
-  'repositories': 21,
-  'changes': 18,
-  'history': 24,
-  'browse': 11,
-  'branches': 7,
-  'stashes': 8,
-  'tags': 13,
-  'settings': 78,
-  'merge_conflicts': 17,
+  // The nine navigation-rail destination labels are still bare `Text`s,
+  // deliberately. The rail owns that slot's typography - it lerps each label
+  // between its unselected and selected styles - so those labels are part of
+  // a larger member and convert with the shell chrome, the same carve-out
+  // BaseLabel documents for a button's words. See the comment at the call
+  // site (app_shell.dart) for the paint-path assert that made the
+  // misplacement visible.
+  'shell': 137,
+  'workspaces': 29,
+  'repositories': 53,
+  'changes': 28,
+  // 77 and not 63 because the last two rungs of the collapse landed after that
+  // number was written: the history screen's own remaining gaps, and - on every
+  // scene that draws one - `BaseCard` and `BasePanel` handing their content
+  // inset to `layout.inset` instead of resolving an `EdgeInsets` themselves. A
+  // surface's breathing room is now the skin's answer rather than the
+  // component's, so each card and panel on screen reaches its skin once more
+  // than it used to.
+  'history': 77,
+  'browse': 19,
+  'branches': 11,
+  'stashes': 13,
+  'tags': 29,
+  'settings': 113,
+  'merge_conflicts': 31,
 };
 
 /// The scenes whose count the SKIN changes, and by how much.
 ///
 /// The register above claims the number is skin-independent: application code
 /// plants the fences, so Material and the blueprint should agree, and a
-/// disagreement "would itself be a defect". The shell disagrees - 94 under
-/// Material, 93 under the blueprint - and the claim is right: the
-/// disagreement IS the defect, and it is one this programme already knows
-/// about by name.
+/// disagreement "would itself be a defect". The shell disagreed - 94 under
+/// Material, 93 under the blueprint, when this map was first written - and
+/// the claim is right: the disagreement IS the defect, and it is one this
+/// programme already knows about by name.
 ///
 /// Both numbers grew by 55 when the typography conversion turned every
 /// `Base*Label` into a `BaseLabel` reaching `type.text` (64 label sites landed
@@ -307,9 +326,39 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
 /// every other number is exact: when P5 moves the arithmetic into the skin
 /// this map becomes empty, and the day it does is visible. A NEW entry
 /// appearing here is a new leak of the same kind and has to be argued for.
+///
+/// **After P3c the disagreement became distance-conditional, and the entry
+/// records the stretched half of the T2 sweep.** Nothing about
+/// `visibleActionCount()` changed - it still divides the width it is handed
+/// by `itemExtent = 48`. What changed is on the other side of the division:
+/// the spacing around the bar's neighbours is now the skin's answer rather
+/// than the application's. At the resting distance the blueprint collapses
+/// every gap and inset to zero, the bar is handed at least the width every
+/// action needs at this window size - exactly as under Material - and both
+/// skins land on 137, which is why the map is consulted only on the
+/// stretched run (see [_measuringAtDistance]). At `DISTANCE=64` the same
+/// neighbours take 64-pixel gaps, the bar is handed less width, and it sheds
+/// one action: 136. A count that depends on the distance is precisely the
+/// design-dependence T2 exists to surface, and it is the already-named §1
+/// residue with P5 as its home - so the sweep asserts the measured number of
+/// each half instead of averaging the dependence away or deleting the entry
+/// that names it. When P5 moves the arithmetic into the skin, both halves
+/// agree, this map becomes empty, and the day it does is visible.
 const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
-  'shell': 93,
+  'shell': 136,
 };
+
+/// Whether this run is the blueprint stretched to a non-zero distance - the
+/// right-hand half of the T2 sweep.
+///
+/// Only that run consults [kContractRenderedUnderBlueprint]: at the resting
+/// distance the blueprint currently lands on the skin-independent counts, so
+/// the left-hand run keeps asserting [kContractRenderedPerScene] and a
+/// resting-state disagreement would fail by name instead of being absorbed
+/// by an entry measured under stretch.
+bool get _measuringAtDistance =>
+    kSkinUnderTest == kBlueprintSkinId &&
+    (int.tryParse(kSkinDistance) ?? 0) != 0;
 
 /// How many application widgets currently on screen render through a contract
 /// member.

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/git/models/commit.dart';
 import '../models/commit_graph.dart';
@@ -95,7 +98,9 @@ class CommitListItem extends ConsumerWidget {
           // it at 4.45 : 1 in the dark theme.
           BaseLabel(commit.shortSubject, role: TextRole.body, maxLines: 2),
 
-          const SizedBox(height: AppTheme.paddingXS),
+          // A subject and the lines qualifying it are two halves of one
+          // thing: `hairline`, Material's 4.
+          const BaseGap(Proximity.hairline),
 
           // Refs (branches, tags)
           if (commit.refs.isNotEmpty) ...[
@@ -144,7 +149,7 @@ class CommitListItem extends ConsumerWidget {
                 );
               }).toList(),
             ),
-            const SizedBox(height: AppTheme.paddingXS),
+            const BaseGap(Proximity.hairline),
           ],
 
           // Author and time. Both lines are secondary to the subject
@@ -159,8 +164,12 @@ class CommitListItem extends ConsumerWidget {
           // is what let the glyph and the word beside it drift apart.
           Row(
             children: [
-              Icon(PhosphorIconsRegular.user, size: AppTheme.iconXS),
-              const SizedBox(width: AppTheme.paddingXS),
+              // The inline-metadata marks of a row: one job, one scale. They
+              // were drawn at 12 here and at 16 in the branch list for the
+              // same job, which was one meaning said with two numbers;
+              // `compact` is the meaning and Material answers it with 16.
+              const BaseIcon(IconRole.user, scale: ControlScale.compact),
+              const BaseGap(Proximity.hairline),
               Flexible(
                 child: BaseLabel(
                   commit.author,
@@ -169,9 +178,9 @@ class CommitListItem extends ConsumerWidget {
                   maxLines: 1,
                 ),
               ),
-              const SizedBox(width: AppTheme.paddingS),
-              Icon(PhosphorIconsRegular.clock, size: AppTheme.iconXS),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.related),
+              const BaseIcon(IconRole.clock, scale: ControlScale.compact),
+              const BaseGap(Proximity.hairline),
               Flexible(
                 child: BaseLabel(
                   commit.authorDateDisplay(
@@ -185,7 +194,9 @@ class CommitListItem extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 2),
+          // The same relationship the line above states, said with the same
+          // word rather than with a second number.
+          const BaseGap(Proximity.hairline),
 
           // Short hash and current branch, the same statement one line down.
           Row(
@@ -196,9 +207,12 @@ class CommitListItem extends ConsumerWidget {
                 tone: Tone.muted,
               ),
               if (currentBranch != null) ...[
-                const SizedBox(width: AppTheme.paddingS),
-                Icon(PhosphorIconsRegular.gitBranch, size: 11),
-                const SizedBox(width: AppTheme.paddingXS),
+                const BaseGap(Proximity.related),
+                // The same inline-metadata mark as the row above, which used
+                // to be drawn at 11 - a number on no ladder in the
+                // application - for want of a word for the job.
+                const BaseIcon(IconRole.gitBranch, scale: ControlScale.compact),
+                const BaseGap(Proximity.hairline),
                 BaseLabel(currentBranch!, role: TextRole.micro),
               ],
             ],

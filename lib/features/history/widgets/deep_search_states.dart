@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Full-area state while git walks the entire history.
 ///
@@ -26,9 +27,13 @@ class DeepSearchRunningState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(),
-          const SizedBox(height: AppTheme.paddingL),
+          // The indicator and the headline under it are two groups inside one
+          // region, and so are the headline and the action offered under it:
+          // `separate` at both boundaries, exactly as in every other empty
+          // state of the application.
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.historySearchingAllHistory, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.separate),
           BaseButton(
             label: l10n.cancel,
             variant: ButtonVariant.secondary,
@@ -73,38 +78,44 @@ class DeepSearchResultsBanner extends StatelessWidget {
         : l10n.historyDeepSearchMatches(matchCount);
 
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+      // The band's fill and its rule stay: they are the surface. How far it
+      // holds its content off its own edge is the language's question.
       decoration: BoxDecoration(
         color: scheme.surfaceContainerLow,
         border: Border(bottom: BorderSide(color: scheme.outlineVariant)),
       ),
-      child: Row(
-        children: [
-          Icon(
-            PhosphorIconsRegular.listMagnifyingGlass,
-            size: AppTheme.iconS,
-            color: scheme.primary,
-          ),
-          const SizedBox(width: AppTheme.paddingS),
-          Expanded(child: BaseLabel(summary, role: TextRole.detail)),
-          if (onSearchChanges != null) ...[
+      child: BaseInset(
+        child: Row(
+          children: [
+            const BaseIcon(
+              IconRole.listMagnifyingGlass,
+              scale: ControlScale.compact,
+              tone: Tone.accent,
+            ),
+            const BaseGap(Proximity.related),
+            Expanded(child: BaseLabel(summary, role: TextRole.detail)),
+            if (onSearchChanges != null) ...[
+              BaseButton(
+                label: l10n.historyDeepSearchInChanges,
+                variant: ButtonVariant.tertiary,
+                size: ButtonSize.small,
+                leadingIcon: IconRole.magnifyingGlass,
+                onPressed: onSearchChanges,
+              ),
+              // Sibling actions in one run are members of one group:
+              // `grouped`, the vocabulary's own exemplar for a run of
+              // actions.
+              const BaseGap(Proximity.grouped),
+            ],
             BaseButton(
-              label: l10n.historyDeepSearchInChanges,
+              label: l10n.historyDeepSearchBack,
               variant: ButtonVariant.tertiary,
               size: ButtonSize.small,
-              leadingIcon: IconRole.magnifyingGlass,
-              onPressed: onSearchChanges,
+              leadingIcon: IconRole.x,
+              onPressed: onBack,
             ),
-            const SizedBox(width: AppTheme.paddingS),
           ],
-          BaseButton(
-            label: l10n.historyDeepSearchBack,
-            variant: ButtonVariant.tertiary,
-            size: ButtonSize.small,
-            leadingIcon: IconRole.x,
-            onPressed: onBack,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -127,9 +138,12 @@ class DeepSearchNoResultsState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          // A hero glyph and the headline under it are two groups inside one
+          // region; the headline and its explanation are two parts of one
+          // statement.
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             l10n.historyDeepSearchNoMatches,
             role: TextRole.body,
@@ -164,13 +178,16 @@ class DeepSearchFailedState extends StatelessWidget {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             l10n.historyDeepSearchFailed(error),
             role: TextRole.body,
             align: TextAlign.center,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          // The verbal statement and the action offered under it are two
+          // groups inside the one empty-state region: `separate`, the word
+          // every other empty state uses at this boundary.
+          const BaseGap(Proximity.separate),
           BaseButton(
             label: l10n.historyDeepSearchBack,
             variant: ButtonVariant.tertiary,

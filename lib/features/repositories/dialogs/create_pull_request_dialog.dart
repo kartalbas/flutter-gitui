@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../shared/theme/app_theme.dart';
@@ -11,6 +11,7 @@ import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_dropdown.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../core/git/models/branch.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Result of the create pull request dialog
 class CreatePullRequestResult {
@@ -204,7 +205,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     },
                   ),
                 ),
-                const SizedBox(width: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
                 // Toggle switch for source branch
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -252,7 +253,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               ],
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Base branch selection with search
             Row(
@@ -297,7 +298,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     },
                   ),
                 ),
-                const SizedBox(width: AppTheme.paddingM),
+                const BaseGap(Proximity.grouped),
                 // Toggle switch for target branch
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -345,11 +346,11 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               ],
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // PR Title
             BaseLabel(l10n.pullRequestTitleLabel, role: TextRole.control),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseTextField(
               controller: _titleController,
               hintText: l10n.enterPRTitle,
@@ -363,11 +364,11 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               autofocus: true,
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // PR Description
             BaseLabel(l10n.descriptionLabel, role: TextRole.control),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseTextField(
               controller: _descriptionController,
               hintText: l10n.enterPRDescription,
@@ -375,7 +376,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               maxLines: 5,
             ),
 
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Draft checkbox
             CheckboxListTile(
@@ -391,11 +392,10 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               controlAffinity: ListTileControlAffinity.leading,
             ),
 
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
 
             // Info message
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
@@ -404,25 +404,28 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               ),
               // The callout paints its own fill and states the paired
               // foreground once, here.
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.info,
-                      size: AppTheme.iconS,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    const SizedBox(width: AppTheme.paddingM),
-                    Expanded(
-                      child: BaseLabel(
-                        l10n.prInfoMessage,
-                        role: TextRole.detail,
+              child: BaseInset(
+                all: Inset.normal,
+                child: DefaultTextStyle.merge(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.info,
+                        size: AppTheme.iconS,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
-                    ),
-                  ],
+                      const BaseGap(Proximity.grouped),
+                      Expanded(
+                        child: BaseLabel(
+                          l10n.prInfoMessage,
+                          role: TextRole.detail,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

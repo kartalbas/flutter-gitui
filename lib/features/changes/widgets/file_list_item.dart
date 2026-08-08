@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
@@ -50,7 +51,13 @@ class FileListItem extends StatelessWidget {
         children: [
           // File path
           BaseLabel(file.path, role: TextRole.body, maxLines: 1),
-          const SizedBox(height: 2),
+          // The path and the status beneath it are two halves of one thing, so
+          // this is `hairline`. It was written as a literal 2 here and as
+          // `paddingXS` (4) at every comparable row in the application, which
+          // was one relationship said with two numbers; naming the
+          // relationship settles it at the skin's single answer, which under
+          // Material is 4.
+          const BaseGap(Proximity.hairline),
 
           // Status and old path for renames
           Row(
@@ -71,7 +78,7 @@ class FileListItem extends StatelessWidget {
 
               // Old path for renames
               if (isRenamed && file.oldPath != null) ...[
-                const SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 Flexible(
                   child: BaseLabel(
                     'from ${file.oldPath}',
@@ -90,38 +97,36 @@ class FileListItem extends StatelessWidget {
   }
 
   Widget _buildStatusIndicator(FileStatusType status, BuildContext context) {
-    IconData icon;
-
-    switch (status) {
-      case FileStatusType.added:
-        icon = PhosphorIconsRegular.plus;
-        break;
-      case FileStatusType.modified:
-        icon = PhosphorIconsRegular.pencilSimple;
-        break;
-      case FileStatusType.deleted:
-        icon = PhosphorIconsRegular.minus;
-        break;
-      case FileStatusType.renamed:
-        icon = PhosphorIconsRegular.arrowsLeftRight;
-        break;
-      case FileStatusType.copied:
-        icon = PhosphorIconsRegular.copy;
-        break;
-      case FileStatusType.untracked:
-        icon = PhosphorIconsRegular.filePlus;
-        break;
-      default:
-        icon = PhosphorIconsRegular.file;
-    }
+    // What happened to this file, as a mark rather than as a glyph: the switch
+    // names the IDEA and the skin picks the drawing, so a language with its
+    // own vocabulary for "added" is not stuck with Phosphor's plus.
+    final IconRole role = switch (status) {
+      FileStatusType.added => IconRole.plus,
+      FileStatusType.modified => IconRole.pencilSimple,
+      FileStatusType.deleted => IconRole.minus,
+      FileStatusType.renamed => IconRole.arrowsLeftRight,
+      FileStatusType.copied => IconRole.copy,
+      FileStatusType.untracked => IconRole.filePlus,
+      _ => IconRole.file,
+    };
 
     return Container(
+      // The wash behind the mark, its corner and its 6-pixel inset stay
+      // spelled out here on purpose: they are one micro-surface that becomes
+      // `surfaces.badge`, and a half-migrated surface whose mark is a meaning
+      // while its fill is still a `Color` would be two names for one thing.
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: status.colorOf(context).withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
       ),
-      child: Icon(icon, size: AppTheme.iconS, color: status.colorOf(context)),
+      // A row-level mark, which is `compact` - the 16 pixels this site named -
+      // carrying the working-tree meaning rather than the git palette's
+      // colour. `toneOf` differs from `colorOf` for exactly one status: an
+      // unmerged file reaches the conflict tone instead of borrowing the
+      // deletion colour, which is the substitution `file_status.dart` already
+      // records as the thing the vocabulary removes.
+      child: BaseIcon(role, scale: ControlScale.compact, tone: status.toneOf),
     );
   }
 
@@ -138,7 +143,7 @@ class FileListItem extends StatelessWidget {
             size: ButtonSize.small,
           ),
 
-        const SizedBox(width: AppTheme.paddingXS),
+        const BaseGap(Proximity.hairline),
 
         // Stage/Unstage button
         if (isStaged)
@@ -158,7 +163,7 @@ class FileListItem extends StatelessWidget {
 
         // Discard button (only for unstaged files)
         if (!isStaged && onDiscard != null) ...[
-          const SizedBox(width: AppTheme.paddingXS),
+          const BaseGap(Proximity.hairline),
           BaseIconButton(
             icon: IconRole.trash,
             tooltip: AppLocalizations.of(context)!.tooltipDiscardChanges,

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/theme/app_theme.dart';
 
 /// The last row of the history list: the one place that says whether the
@@ -47,22 +48,23 @@ class HistoryListFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final scheme = Theme.of(context).colorScheme;
 
     if (!hasMore) {
       // The affordance for "this is genuinely the end": non-interactive and
       // visually distinct from the loadable state.
-      return Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
+      return BaseInset(
+        all: Inset.roomy,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              PhosphorIconsRegular.flagCheckered,
-              size: AppTheme.iconS,
-              color: scheme.onSurfaceVariant,
+            // The terminal marker's glyph: a dense inline mark, secondary to
+            // the sentence beside it.
+            const BaseIcon(
+              IconRole.flagCheckered,
+              scale: ControlScale.compact,
+              tone: Tone.muted,
             ),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               l10n.historyBeginningOfHistory(loadedCount),
               role: TextRole.detail,
@@ -74,17 +76,21 @@ class HistoryListFooter extends StatelessWidget {
     }
 
     if (isLoadingMore) {
-      return Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingL),
+      return BaseInset(
+        all: Inset.roomy,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // The box the spinner is given is a CONSTRAINT rather than a rung:
+            // it says how much room the indicator gets, which is structure the
+            // blueprint must honour, so it keeps its measure until the
+            // progress member owns it.
             const SizedBox(
               width: AppTheme.iconS,
               height: AppTheme.iconS,
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               l10n.historyLoadingMoreCommits,
               role: TextRole.detail,
@@ -95,8 +101,7 @@ class HistoryListFooter extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+    return BaseInset(
       child: Column(
         children: [
           if (loadMoreError != null) ...[
@@ -106,7 +111,7 @@ class HistoryListFooter extends StatelessWidget {
               tone: Tone.danger,
               align: TextAlign.center,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
           ],
           BaseButton(
             label: loadMoreError == null
@@ -117,14 +122,14 @@ class HistoryListFooter extends StatelessWidget {
             leadingIcon: IconRole.caretDoubleDown,
             onPressed: onLoadMore,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             l10n.historyLoadedCount(loadedCount),
             role: TextRole.detail,
             tone: Tone.muted,
           ),
           if (searchActive && onSearchAllHistory != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseButton(
               label: l10n.historySearchAllHistory,
               variant: ButtonVariant.tertiary,

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
@@ -16,6 +17,7 @@ import '../components/base_list_item.dart';
 import '../controllers/item_navigation_controller.dart';
 import '../widgets/keyboard_navigable_view.dart';
 import '../widgets/search_field_handoff.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for switching between git branches (Ctrl+B).
 ///
@@ -133,7 +135,7 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
               },
             ),
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // iOS-style toggle for remote branches
           Container(
@@ -165,7 +167,7 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
               ],
             ),
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Branch list needs an explicit height: BaseDialog wraps the content
           // in a SingleChildScrollView, so a flex child would be unbounded.
@@ -257,6 +259,11 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           // Active indicator
           SizedBox(
             width: AppTheme.paddingL,
+            // Still a raw mark, and deliberately so: it is drawn at Phosphor
+            // BOLD, a role carries no weight (#249 conflict C3), and giving a
+            // weight up is a P3a decision recorded in the census ledger rather
+            // than a side effect of converting a SIZE. Its `AppTheme.iconS`
+            // read therefore survives this phase, named here.
             child: isCurrent
                 ? Icon(
                     PhosphorIconsBold.check,
@@ -265,13 +272,15 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
                   )
                 : null,
           ),
-          const SizedBox(width: AppTheme.paddingS),
-          // Remote indicator
+          const BaseGap(Proximity.related),
+          // Remote indicator. The mark used to state its size as
+          // `AppTheme.paddingM`, which is the spacing vocabulary standing in
+          // for the icon one; what it says is that a row-level mark is dense.
           if (branch.isRemote)
-            Icon(
-              PhosphorIconsRegular.cloud,
-              size: AppTheme.paddingM,
-              color: Theme.of(context).colorScheme.primary,
+            const BaseIcon(
+              IconRole.cloud,
+              scale: ControlScale.compact,
+              tone: Tone.accent,
             ),
         ],
       ),
@@ -336,10 +345,6 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.paddingS + AppTheme.paddingXS,
-          vertical: AppTheme.paddingXS,
-        ),
         decoration: BoxDecoration(
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
@@ -347,13 +352,22 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
         // The filled segment states the foreground that pairs with it; the word
         // inside says only what it is. The semibold was a second statement of
         // the same selection the fill already makes.
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            color: isSelected
-                ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
+        //
+        // The segment is dense, which is all Inset.tight says; it used to say
+        // `AppTheme.paddingS + AppTheme.paddingXS` across, which is the
+        // application doing arithmetic on a token and therefore deciding a
+        // length itself. This whole control is `controls.choiceGroup` once
+        // that member lands, and the rung goes with it.
+        child: BaseInset(
+          all: Inset.tight,
+          child: DefaultTextStyle.merge(
+            style: TextStyle(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            child: BaseLabel(label, role: TextRole.control),
           ),
-          child: BaseLabel(label, role: TextRole.control),
         ),
       ),
     );

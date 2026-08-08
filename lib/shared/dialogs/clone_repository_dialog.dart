@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -15,6 +15,7 @@ import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../components/base_dialog.dart';
 import 'select_hosted_repository_dialog.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for cloning a Git repository
 class CloneRepositoryDialog extends ConsumerStatefulWidget {
@@ -60,7 +61,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               AppLocalizations.of(context)!.cloneGitRepositoryFromUrl,
               role: TextRole.body,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
 
             // Repository URL. Looking one up is this field's own action, so it
             // sits inside it as the trailing icon rather than as a button
@@ -77,7 +78,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               autofocus: true,
               onChanged: (_) => _autoFillPath(),
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Destination path, with the folder picker as its trailing action.
             // The icon used to be decorative and a separate "Browse" button sat
@@ -92,7 +93,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               suffixTooltip: AppLocalizations.of(context)!.browse,
               enabled: !_isCloning,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Branch name (optional)
             BaseTextField(
@@ -102,7 +103,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               prefixIcon: IconRole.gitBranch,
               enabled: !_isCloning,
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
 
             // Shallow clone option
             SwitchListTile(
@@ -126,16 +127,16 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
             ),
 
             if (_shallowClone) ...[
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               Row(
                 children: [
                   const Icon(PhosphorIconsRegular.gitCommit, size: 20),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   BaseLabel(
                     AppLocalizations.of(context)!.depth,
                     role: TextRole.body,
                   ),
-                  const SizedBox(width: AppTheme.paddingM),
+                  const BaseGap(Proximity.grouped),
                   Expanded(
                     child: Slider(
                       value: _depth.toDouble(),
@@ -166,37 +167,38 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
 
             // Error message
             if (_errorMessage != null) ...[
-              const SizedBox(height: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               Container(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.errorContainer,
                   borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    Expanded(
-                      child: BaseLabel(
-                        _errorMessage!,
-                        role: TextRole.body,
-                        tone: Tone.danger,
+                child: BaseInset(
+                  child: Row(
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.warningCircle,
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                    ),
-                  ],
+                      const BaseGap(Proximity.related),
+                      Expanded(
+                        child: BaseLabel(
+                          _errorMessage!,
+                          role: TextRole.body,
+                          tone: Tone.danger,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
 
             // Progress indicator
             if (_isCloning) ...[
-              const SizedBox(height: AppTheme.paddingL),
+              const BaseGap(Proximity.separate),
               const LinearProgressIndicator(),
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               // The italic goes with the `TextStyle` that carried it: slanting
               // an aside is Material's answer to "this line is a remark about
               // what is happening, not part of the form", and another design

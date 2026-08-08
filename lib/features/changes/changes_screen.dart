@@ -2,12 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Proximity, TextRole;
 import 'package:file_picker/file_picker.dart';
 
 import '../../generated/app_localizations.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_layout.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/git/git_providers.dart';
@@ -114,53 +115,61 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                           ),
                         ),
                       ),
-                      padding: const EdgeInsets.all(AppTheme.paddingM),
-                      child: SafeArea(
-                        child: unstagedFiles.isEmpty
-                            ? // Only staged files - show single "Commit" button
-                              BaseButton(
-                                label: AppLocalizations.of(context)!.commit,
-                                leadingIcon: IconRole.check,
-                                onPressed: () =>
-                                    _commitStagedOnly(context, ref),
-                                variant: ButtonVariant.primary,
-                                size: ButtonSize.medium,
-                                fullWidth: true,
-                              )
-                            : // Both staged and unstaged - show two buttons
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: BaseButton(
-                                      label: AppLocalizations.of(
-                                        context,
-                                      )!.commit,
-                                      leadingIcon: IconRole.check,
-                                      onPressed: () =>
-                                          _commitStagedOnly(context, ref),
-                                      variant: ButtonVariant.secondary,
-                                      size: ButtonSize.medium,
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppTheme.paddingM),
-                                  Expanded(
-                                    child: BaseButton(
-                                      label: AppLocalizations.of(
-                                        context,
-                                      )!.stageAllAndCommit,
-                                      leadingIcon: IconRole.checkCircle,
-                                      onPressed: () => _handleCommit(
-                                        context,
-                                        ref,
-                                        unstagedFiles,
-                                        stagedFiles,
+                      // The bar's fill and its top rule stay spelled out: they
+                      // are the surface, and the surface leaves with its
+                      // member. Only how far the bar holds its buttons off its
+                      // own edge is the design language's question, and that is
+                      // `Inset.normal` - Material's 16.
+                      child: BaseInset(
+                        child: SafeArea(
+                          child: unstagedFiles.isEmpty
+                              ? // Only staged files - show single "Commit" button
+                                BaseButton(
+                                  label: AppLocalizations.of(context)!.commit,
+                                  leadingIcon: IconRole.check,
+                                  onPressed: () =>
+                                      _commitStagedOnly(context, ref),
+                                  variant: ButtonVariant.primary,
+                                  size: ButtonSize.medium,
+                                  fullWidth: true,
+                                )
+                              : // Both staged and unstaged - show two buttons
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: BaseButton(
+                                        label: AppLocalizations.of(
+                                          context,
+                                        )!.commit,
+                                        leadingIcon: IconRole.check,
+                                        onPressed: () =>
+                                            _commitStagedOnly(context, ref),
+                                        variant: ButtonVariant.secondary,
+                                        size: ButtonSize.medium,
                                       ),
-                                      variant: ButtonVariant.primary,
-                                      size: ButtonSize.medium,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    // Two actions of one bar, weighted apart
+                                    // rather than paired: `grouped`, 16.
+                                    const BaseGap(Proximity.grouped),
+                                    Expanded(
+                                      child: BaseButton(
+                                        label: AppLocalizations.of(
+                                          context,
+                                        )!.stageAllAndCommit,
+                                        leadingIcon: IconRole.checkCircle,
+                                        onPressed: () => _handleCommit(
+                                          context,
+                                          ref,
+                                          unstagedFiles,
+                                          stagedFiles,
+                                        ),
+                                        variant: ButtonVariant.primary,
+                                        size: ButtonSize.medium,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
                     ),
                   ),
@@ -187,7 +196,6 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           order: 1,
           debugLabel: 'ChangesScreen.actionsRegion',
           child: Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerLow,
               border: Border(
@@ -196,43 +204,50 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                 ),
               ),
             ),
-            child: Row(
-              children: [
-                BaseButton(
-                  label: AppLocalizations.of(context)!.stageAll,
-                  leadingIcon: IconRole.plus,
-                  onPressed: unstagedFiles.isNotEmpty
-                      ? () async => await _confirmStageAll(context, ref)
-                      : null,
-                  variant: ButtonVariant.secondary,
-                  size: ButtonSize.small,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                BaseButton(
-                  label: AppLocalizations.of(context)!.unstageAll,
-                  leadingIcon: IconRole.minus,
-                  onPressed: stagedFiles.isNotEmpty
-                      ? () async => await _confirmUnstageAll(context, ref)
-                      : null,
-                  variant: ButtonVariant.secondary,
-                  size: ButtonSize.small,
-                ),
-                const Spacer(),
-                BaseButton(
-                  label: AppLocalizations.of(context)!.tooltipDiscardAllChanges,
-                  leadingIcon: IconRole.trash,
-                  // Discarding restores tracked files from the index and
-                  // cannot reach untracked ones, which the unstaged list also
-                  // carries. Enabling on that whole list offered a
-                  // destructive action that did nothing once the only
-                  // difference was a new file.
-                  onPressed: unstagedFiles.any((file) => !file.isUntracked)
-                      ? () => _confirmDiscardAll(context, ref)
-                      : null,
-                  variant: ButtonVariant.dangerSecondary,
-                  size: ButtonSize.small,
-                ),
-              ],
+            child: BaseInset(
+              child: Row(
+                children: [
+                  BaseButton(
+                    label: AppLocalizations.of(context)!.stageAll,
+                    leadingIcon: IconRole.plus,
+                    onPressed: unstagedFiles.isNotEmpty
+                        ? () async => await _confirmStageAll(context, ref)
+                        : null,
+                    variant: ButtonVariant.secondary,
+                    size: ButtonSize.small,
+                  ),
+                  // Sibling actions in one run are members of one group:
+                  // `grouped`, the vocabulary's own exemplar for a run of
+                  // actions.
+                  const BaseGap(Proximity.grouped),
+                  BaseButton(
+                    label: AppLocalizations.of(context)!.unstageAll,
+                    leadingIcon: IconRole.minus,
+                    onPressed: stagedFiles.isNotEmpty
+                        ? () async => await _confirmUnstageAll(context, ref)
+                        : null,
+                    variant: ButtonVariant.secondary,
+                    size: ButtonSize.small,
+                  ),
+                  const Spacer(),
+                  BaseButton(
+                    label: AppLocalizations.of(
+                      context,
+                    )!.tooltipDiscardAllChanges,
+                    leadingIcon: IconRole.trash,
+                    // Discarding restores tracked files from the index and
+                    // cannot reach untracked ones, which the unstaged list also
+                    // carries. Enabling on that whole list offered a
+                    // destructive action that did nothing once the only
+                    // difference was a new file.
+                    onPressed: unstagedFiles.any((file) => !file.isUntracked)
+                        ? () => _confirmDiscardAll(context, ref)
+                        : null,
+                    variant: ButtonVariant.dangerSecondary,
+                    size: ButtonSize.small,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

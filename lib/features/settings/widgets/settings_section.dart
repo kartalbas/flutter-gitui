@@ -6,6 +6,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Base widget for settings sections with collapsible functionality
 class SettingsSection extends StatefulWidget {
@@ -106,14 +107,14 @@ class _SettingsSectionState extends State<SettingsSection>
   @override
   Widget build(BuildContext context) {
     return BaseCard(
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       header: InkWell(
         onTap: _toggleExpanded,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppTheme.radiusL),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+        child: BaseInset(
+          all: Inset.normal,
           child: Row(
             children: [
               // The section's own mark, resolved by the skin. Accent at the
@@ -127,7 +128,7 @@ class _SettingsSectionState extends State<SettingsSection>
                 tone: Tone.accent,
                 scale: ControlScale.prominent,
               ),
-              const SizedBox(width: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               Expanded(
                 child: BaseLabel(widget.title, role: TextRole.sectionTitle),
               ),

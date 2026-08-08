@@ -5,12 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/config_providers.dart';
@@ -223,10 +223,9 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
         actions: [
           if (!_isLoading && !_isBinary && _error == null) ...[
             // File info
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.paddingM,
-              ),
+            BaseInset(
+              x: Inset.normal,
+              y: Inset.none,
               child: Center(
                 child: BaseLabel(
                   AppLocalizations.of(
@@ -246,7 +245,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               onPressed: _openEnhancedViewer,
               variant: ButtonVariant.primary,
             ),
-          if (_hasEnhancedViewer()) const SizedBox(width: AppTheme.paddingS),
+          if (_hasEnhancedViewer()) const BaseGap(Proximity.related),
           BaseIconButton(
             icon: IconRole.arrowClockwise,
             tooltip: AppLocalizations.of(context)!.refresh,
@@ -279,12 +278,15 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               size: 64,
               color: Theme.of(context).colorScheme.error,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            // A hero glyph and the headline under it are two groups inside
+            // one region; the headline and its explanation are two parts of
+            // one statement.
+            const BaseGap(Proximity.separate),
             BaseLabel(
               AppLocalizations.of(context)!.labelCannotPreviewFile,
               role: TextRole.pageTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               errorMessage,
               role: TextRole.body,
@@ -305,17 +307,19 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               size: 64,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            const BaseGap(Proximity.separate),
             BaseLabel(
               AppLocalizations.of(context)!.labelBinaryFile,
               role: TextRole.pageTitle,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               AppLocalizations.of(context)!.labelThisFileCannotBePreviewed,
               role: TextRole.body,
             ),
-            const SizedBox(height: AppTheme.paddingXS),
+            // The sentence and the size that qualifies it are two halves of
+            // one thing: `hairline`.
+            const BaseGap(Proximity.hairline),
             BaseLabel(
               _formatFileSize(_fileSize),
               role: TextRole.detail,
@@ -338,7 +342,6 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
           children: [
             // Line numbers
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerLow,
                 border: Border(
@@ -350,14 +353,16 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               // Gutter and content scroll together through the single outer
               // scroll view, so a number always stays next to the line it
               // labels.
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: List.generate(
-                  _lineCount,
-                  (index) => BaseLabel(
-                    '${index + 1}',
-                    role: TextRole.body,
-                    tone: Tone.muted,
+              child: BaseInset(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: List.generate(
+                    _lineCount,
+                    (index) => BaseLabel(
+                      '${index + 1}',
+                      role: TextRole.body,
+                      tone: Tone.muted,
+                    ),
                   ),
                 ),
               ),
@@ -373,8 +378,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                       constraints: BoxConstraints(
                         minWidth: constraints.maxWidth,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppTheme.paddingM),
+                      child: BaseInset(
                         child: SelectableText(
                           _content,
                           style: GoogleFonts.getFont(

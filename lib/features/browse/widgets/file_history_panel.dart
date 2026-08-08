@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_viewer_dialog.dart';
@@ -66,9 +67,12 @@ class FileHistoryPanel extends ConsumerWidget {
               size: 64,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            // A hero glyph and the headline under it are two groups inside
+            // one region; the headline and its explanation are two parts of
+            // one statement.
+            const BaseGap(Proximity.separate),
             BaseLabel(l10n.emptyStateNoHistory, role: TextRole.pageTitle),
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(l10n.emptyStateNoHistoryMessage, role: TextRole.body),
           ],
         ),
@@ -78,8 +82,7 @@ class FileHistoryPanel extends ConsumerWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(AppTheme.paddingM),
       itemCount: commits.length,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppTheme.paddingS),
+      separatorBuilder: (context, index) => const BaseGap(Proximity.related),
       itemBuilder: (context, index) =>
           _buildCommitCard(context, commits[index]),
     );
@@ -87,12 +90,11 @@ class FileHistoryPanel extends ConsumerWidget {
 
   Widget _buildCommitCard(BuildContext context, GitCommit commit) {
     return BaseCard(
-      padding: EdgeInsets.zero,
+      inset: Inset.none,
       content: InkWell(
         onTap: () => _viewCommitDiff(context, commit),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.paddingM),
+        child: BaseInset(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -120,7 +122,7 @@ class FileHistoryPanel extends ConsumerWidget {
                       child: BaseLabel(commit.shortHash, role: TextRole.detail),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   Expanded(
                     child: BaseLabel(
                       commit.author,
@@ -128,7 +130,7 @@ class FileHistoryPanel extends ConsumerWidget {
                       maxLines: 1,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  const BaseGap(Proximity.related),
                   Flexible(
                     child: BaseLabel(
                       commit.authorDateDisplay(
@@ -141,11 +143,13 @@ class FileHistoryPanel extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppTheme.paddingS),
+              const BaseGap(Proximity.related),
               // Commit message
               BaseLabel(commit.subject, role: TextRole.body),
               if (commit.body.isNotEmpty) ...[
-                const SizedBox(height: AppTheme.paddingXS),
+                // A subject and the body that continues it are two halves of
+                // one thing: `hairline`.
+                const BaseGap(Proximity.hairline),
                 BaseLabel(
                   commit.body,
                   role: TextRole.detail,
@@ -170,12 +174,12 @@ class FileHistoryPanel extends ConsumerWidget {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.messageErrorLoadingHistory,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(error, role: TextRole.body, align: TextAlign.center),
         ],
       ),

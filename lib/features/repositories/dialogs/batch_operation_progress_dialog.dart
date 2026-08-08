@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
@@ -10,6 +10,7 @@ import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../generated/app_localizations.dart';
 import '../services/batch_operations_service.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Progress state for a single repository operation
 class RepositoryProgress {
@@ -215,7 +216,7 @@ class _BatchOperationProgressDialogState
                   borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
               ),
-              const SizedBox(width: AppTheme.paddingM),
+              const BaseGap(Proximity.grouped),
               BaseLabel(
                 '$completedCount / $totalCount',
                 role: TextRole.emphasis,
@@ -227,19 +228,18 @@ class _BatchOperationProgressDialogState
           // name of the one being worked on is pinned under the bar to keep a
           // slow repository distinguishable from a stalled run.
           if (_isRunning && _activeRepositoryPath != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               _progress[_activeRepositoryPath]!.repository.displayName,
               role: TextRole.detail,
             ),
           ],
 
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
 
           // Summary (shown when completed)
           if (!_isRunning) ...[
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingM),
               decoration: BoxDecoration(
                 color: _failureCount == 0
                     ? context.gitColors.added.withValues(alpha: 0.1)
@@ -253,51 +253,54 @@ class _BatchOperationProgressDialogState
                       : Theme.of(context).colorScheme.secondary,
                 ),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    _failureCount == 0
-                        ? PhosphorIconsBold.checkCircle
-                        : PhosphorIconsBold.warningCircle,
-                    color: _failureCount == 0
-                        ? context.gitColors.added
-                        : Theme.of(context).colorScheme.secondary,
-                  ),
-                  const SizedBox(width: AppTheme.paddingM),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BaseLabel(
-                          _failureCount == 0
-                              ? l10n.operationsCompleted(
-                                  _successCount,
-                                  _successCount + _failureCount,
-                                )
-                              : l10n.operationsCompletedWithErrors(
-                                  _successCount,
-                                  _failureCount,
-                                  _successCount + _failureCount,
-                                ),
-                          role: TextRole.sectionTitle,
-                        ),
-                        const SizedBox(height: AppTheme.paddingXS),
-                        BaseLabel(
-                          l10n.successCount(_successCount, _failureCount),
-                          role: TextRole.detail,
-                        ),
-                      ],
+              child: BaseInset(
+                all: Inset.normal,
+                child: Row(
+                  children: [
+                    Icon(
+                      _failureCount == 0
+                          ? PhosphorIconsBold.checkCircle
+                          : PhosphorIconsBold.warningCircle,
+                      color: _failureCount == 0
+                          ? context.gitColors.added
+                          : Theme.of(context).colorScheme.secondary,
                     ),
-                  ),
-                ],
+                    const BaseGap(Proximity.grouped),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          BaseLabel(
+                            _failureCount == 0
+                                ? l10n.operationsCompleted(
+                                    _successCount,
+                                    _successCount + _failureCount,
+                                  )
+                                : l10n.operationsCompletedWithErrors(
+                                    _successCount,
+                                    _failureCount,
+                                    _successCount + _failureCount,
+                                  ),
+                            role: TextRole.sectionTitle,
+                          ),
+                          const BaseGap(Proximity.hairline),
+                          BaseLabel(
+                            l10n.successCount(_successCount, _failureCount),
+                            role: TextRole.detail,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
           ],
 
           // Repository list with status
           BaseLabel(l10n.repositories, role: TextRole.sectionTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
 
           Container(
             constraints: const BoxConstraints(maxHeight: 300),
@@ -349,7 +352,7 @@ class _BatchOperationProgressDialogState
                           progress.success == true
                               ? PhosphorIconsBold.checkCircle
                               : PhosphorIconsBold.xCircle,
-                          size: AppTheme.paddingM,
+                          size: AppTheme.iconS,
                           color: progress.success == true
                               ? context.gitColors.added
                               : Theme.of(context).colorScheme.error,
@@ -382,8 +385,8 @@ class _BatchOperationProgressDialogState
       // row made a stalled run indistinguishable from a busy one.
       if (progress.repository.path == _activeRepositoryPath) {
         return SizedBox(
-          width: AppTheme.paddingM,
-          height: AppTheme.paddingM,
+          width: AppTheme.iconS,
+          height: AppTheme.iconS,
           child: CircularProgressIndicator(
             strokeWidth: 2,
             color: Theme.of(context).colorScheme.primary,
@@ -392,7 +395,7 @@ class _BatchOperationProgressDialogState
       }
       return Icon(
         PhosphorIconsRegular.circle,
-        size: AppTheme.paddingM,
+        size: AppTheme.iconS,
         color: Theme.of(context).colorScheme.outline,
       );
     }
@@ -402,7 +405,7 @@ class _BatchOperationProgressDialogState
       // so a neutral check avoids claiming success or failure prematurely.
       return Icon(
         PhosphorIconsRegular.checkCircle,
-        size: AppTheme.paddingM,
+        size: AppTheme.iconS,
         color: Theme.of(context).colorScheme.outline,
       );
     }
@@ -411,7 +414,7 @@ class _BatchOperationProgressDialogState
       progress.success == true
           ? PhosphorIconsRegular.checkCircle
           : PhosphorIconsRegular.xCircle,
-      size: AppTheme.paddingM,
+      size: AppTheme.iconS,
       color: progress.success == true
           ? context.gitColors.added
           : Theme.of(context).colorScheme.error,

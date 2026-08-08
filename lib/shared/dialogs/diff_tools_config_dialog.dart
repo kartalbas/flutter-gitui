@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
@@ -12,6 +12,7 @@ import '../theme/app_theme.dart';
 import '../../core/diff/diff_providers.dart';
 import '../../core/diff/models/diff_tool.dart';
 import '../../core/config/config_providers.dart';
+import '../components/base_layout.dart';
 
 /// Dialog for configuring external diff/merge tools
 class DiffToolsConfigDialog extends ConsumerStatefulWidget {
@@ -85,18 +86,18 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             size: 64,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.noDiffToolsFound,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.noExternalDiffMergeToolsDetected,
             role: TextRole.body,
             align: TextAlign.center,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           BaseLabel(
             AppLocalizations.of(context)!.installToolsSuchAs,
             role: TextRole.detail,
@@ -117,12 +118,12 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             size: 64,
             color: Theme.of(context).colorScheme.error,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
           BaseLabel(
             AppLocalizations.of(context)!.errorDetectingTools,
             role: TextRole.pageTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             error.toString(),
             role: TextRole.detail,
@@ -140,39 +141,40 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
         children: [
           // Info banner
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: Row(
-              children: [
-                const Icon(PhosphorIconsRegular.info, size: 20),
-                const SizedBox(width: AppTheme.paddingS),
-                Expanded(
-                  child: BaseLabel(
-                    AppLocalizations.of(
-                      context,
-                    )!.configureYourPreferredTools(tools.length),
-                    role: TextRole.detail,
+            child: BaseInset(
+              child: Row(
+                children: [
+                  const Icon(PhosphorIconsRegular.info, size: 20),
+                  const BaseGap(Proximity.related),
+                  Expanded(
+                    child: BaseLabel(
+                      AppLocalizations.of(
+                        context,
+                      )!.configureYourPreferredTools(tools.length),
+                      role: TextRole.detail,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
 
           // Diff Tool Selection
           BaseLabel(
             AppLocalizations.of(context)!.diffTool,
             role: TextRole.sectionTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.usedForComparingFileChanges,
             role: TextRole.detail,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           RadioGroup<DiffToolType?>(
             groupValue: _selectedDiffTool,
@@ -182,28 +184,24 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                 _hasChanges = true;
               });
             },
-            child: Column(
-              children: tools
-                  .map((tool) => _buildToolOption(context, tool))
-                  .toList(),
-            ),
+            child: Column(children: _toolOptions(context, tools)),
           ),
 
-          const SizedBox(height: AppTheme.paddingL),
-          const Divider(),
-          const SizedBox(height: AppTheme.paddingL),
+          const BaseGap(Proximity.separate),
+          const BaseSeparator(),
+          const BaseGap(Proximity.separate),
 
           // Merge Tool Selection
           BaseLabel(
             AppLocalizations.of(context)!.mergeTool,
             role: TextRole.sectionTitle,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
           BaseLabel(
             AppLocalizations.of(context)!.usedForResolvingMergeConflicts,
             role: TextRole.detail,
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           RadioGroup<DiffToolType?>(
             groupValue: _selectedMergeTool,
@@ -213,69 +211,75 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                 _hasChanges = true;
               });
             },
-            child: Column(
-              children: tools
-                  .map((tool) => _buildToolOption(context, tool))
-                  .toList(),
-            ),
+            child: Column(children: _toolOptions(context, tools)),
           ),
         ],
       ),
     );
   }
 
+  /// The tools as a run, with the closeness stated BETWEEN them.
+  ///
+  /// Each option used to carry its own bottom margin, which is a gap wearing a
+  /// padding idiom: the space belongs between two options, not inside one, and
+  /// the last option was left with a trailing margin nothing sat under.
+  List<Widget> _toolOptions(BuildContext context, List<DiffTool> tools) =>
+      <Widget>[
+        for (int i = 0; i < tools.length; i++) ...<Widget>[
+          if (i > 0) const BaseGap(Proximity.related),
+          _buildToolOption(context, tools[i]),
+        ],
+      ];
+
   Widget _buildToolOption(BuildContext context, DiffTool tool) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
-      child: BaseCard(
-        padding: EdgeInsets.zero,
-        content: RadioListTile<DiffToolType?>(
-          value: tool.type,
-          contentPadding: const EdgeInsets.all(AppTheme.paddingM),
-          secondary: Icon(_getToolIcon(tool.type), size: 32),
-          title: BaseLabel(tool.displayName, role: TextRole.itemTitle),
-          subtitle: Row(
-            children: [
-              Expanded(
-                child: BaseLabel(
-                  tool.executablePath,
-                  role: TextRole.detail,
-                  maxLines: 1,
+    return BaseCard(
+      inset: Inset.none,
+      content: RadioListTile<DiffToolType?>(
+        value: tool.type,
+        contentPadding: const EdgeInsets.all(AppTheme.paddingM),
+        secondary: Icon(_getToolIcon(tool.type), size: 32),
+        title: BaseLabel(tool.displayName, role: TextRole.itemTitle),
+        subtitle: Row(
+          children: [
+            Expanded(
+              child: BaseLabel(
+                tool.executablePath,
+                role: TextRole.detail,
+                maxLines: 1,
+              ),
+            ),
+            const BaseGap(Proximity.related),
+            // Available badge
+            if (tool.isAvailable)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.paddingS,
+                  vertical: AppTheme.paddingXS,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusL),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.check,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const BaseGap(Proximity.hairline),
+                    BaseLabel(
+                      AppLocalizations.of(context)!.available,
+                      role: TextRole.micro,
+                      tone: Tone.accent,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: AppTheme.paddingS),
-              // Available badge
-              if (tool.isAvailable)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.paddingS,
-                    vertical: AppTheme.paddingXS,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.check,
-                        size: 14,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: AppTheme.paddingXS),
-                      BaseLabel(
-                        AppLocalizations.of(context)!.available,
-                        role: TextRole.micro,
-                        tone: Tone.accent,
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

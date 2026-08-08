@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../core/git/models/commit.dart';
 
 /// Dialog for creating a branch from a commit in the history view.
@@ -51,41 +52,43 @@ class _CreateBranchFromCommitDialogState
         children: [
           // Source commit info
           Container(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppTheme.radiusS),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  PhosphorIconsRegular.gitCommit,
-                  size: AppTheme.iconS,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: AppTheme.paddingS),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BaseLabel(
-                        l10n.sourceCommit,
-                        role: TextRole.micro,
-                        tone: Tone.muted,
-                      ),
-                      BaseLabel(
-                        '${widget.commit.shortHash} '
-                        '${widget.commit.shortSubject}',
-                        role: TextRole.body,
-                        maxLines: 2,
-                      ),
-                    ],
+            child: BaseInset(
+              child: Row(
+                children: [
+                  const BaseIcon(
+                    IconRole.gitCommit,
+                    scale: ControlScale.compact,
+                    tone: Tone.muted,
                   ),
-                ),
-              ],
+                  const BaseGap(Proximity.related),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(
+                          l10n.sourceCommit,
+                          role: TextRole.micro,
+                          tone: Tone.muted,
+                        ),
+                        BaseLabel(
+                          '${widget.commit.shortHash} '
+                          '${widget.commit.shortSubject}',
+                          role: TextRole.body,
+                          maxLines: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          // Two groups inside one form: `separate`, Material's 24.
+          const BaseGap(Proximity.separate),
 
           // Branch name input
           BaseTextField(
@@ -101,7 +104,7 @@ class _CreateBranchFromCommitDialogState
               });
             },
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Checkout option
           CheckboxListTile(

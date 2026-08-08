@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -18,6 +18,7 @@ import '../../../core/extensions/date_time_extensions.dart';
 import '../repository_batch_error_provider.dart';
 import '../../../shared/dialogs/batch_result_dialog.dart';
 import 'sync_on_double_tap.dart';
+import '../../../shared/components/base_layout.dart';
 
 /// Card widget displaying a workspace repository
 class RepositoryCard extends ConsumerWidget {
@@ -87,19 +88,21 @@ class RepositoryCard extends ConsumerWidget {
           // Header with favorite and remove buttons
           Row(
             children: [
-              // Multi-selection checkbox
-              if (showCheckbox && isSelectable)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppTheme.paddingS),
-                  child: Checkbox(
-                    value: isMultiSelected,
-                    onChanged: onToggleSelection != null
-                        ? (_) => onToggleSelection!()
-                        : null,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                  ),
+              // Multi-selection checkbox. Its trailing space was a one-sided
+              // `EdgeInsets.only(right:)`, which is a gap wearing a padding
+              // idiom - the distance belongs between the box and what follows
+              // it, so the run states it rather than the box.
+              if (showCheckbox && isSelectable) ...<Widget>[
+                Checkbox(
+                  value: isMultiSelected,
+                  onChanged: onToggleSelection != null
+                      ? (_) => onToggleSelection!()
+                      : null,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
                 ),
+                const BaseGap(Proximity.related),
+              ],
               const Spacer(),
               // Batch operation result icon
               _buildBatchResultIcon(context, ref),
@@ -168,7 +171,7 @@ class RepositoryCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
 
           // Repository name
           // The selected-container pairing is gone from every label on this
@@ -180,7 +183,7 @@ class RepositoryCard extends ConsumerWidget {
             role: TextRole.itemTitle,
             maxLines: 1,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          const BaseGap(Proximity.related),
 
           // Path
           Row(
@@ -192,7 +195,7 @@ class RepositoryCard extends ConsumerWidget {
                     ? Theme.of(context).colorScheme.onSecondaryContainer
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               Flexible(
                 child: BaseLabel(
                   repository.path,
@@ -205,7 +208,7 @@ class RepositoryCard extends ConsumerWidget {
 
           // Current branch
           if (status.currentBranch != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Row(
               children: [
                 Icon(
@@ -215,7 +218,7 @@ class RepositoryCard extends ConsumerWidget {
                       ? Theme.of(context).colorScheme.onSecondaryContainer
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(width: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 Flexible(
                   child: BaseLabel(
                     status.currentBranch!,
@@ -231,7 +234,7 @@ class RepositoryCard extends ConsumerWidget {
           // what tells the user which account a repository needs - decisive
           // when its check failed for missing credentials.
           if (status.remoteIdentity case final identity?) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             Row(
               children: [
                 Icon(
@@ -241,7 +244,7 @@ class RepositoryCard extends ConsumerWidget {
                       ? Theme.of(context).colorScheme.onSecondaryContainer
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(width: AppTheme.paddingXS),
+                const BaseGap(Proximity.hairline),
                 Flexible(
                   child: Tooltip(
                     message: status.remoteUrl ?? identity.host,
@@ -260,7 +263,7 @@ class RepositoryCard extends ConsumerWidget {
 
           // Description if available
           if (repository.description != null) ...[
-            const SizedBox(height: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
             BaseLabel(
               repository.description!,
               role: TextRole.body,
@@ -269,7 +272,7 @@ class RepositoryCard extends ConsumerWidget {
           ],
 
           // Status badges - show loading or actual status
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           if (status.isGitNotConfigured)
             _buildStatusBadge(
               context,
@@ -282,15 +285,20 @@ class RepositoryCard extends ConsumerWidget {
             // Show loading indicator while analyzing
             Row(
               children: [
+                // The spinner stands in for the status mark beside it, so its
+                // box is GLYPH geometry and not a spacing rung; it was spelled
+                // with a padding token, which said nothing true about it. It
+                // moves into `controls.progress` at the inline extent, where a
+                // number is legal.
                 SizedBox(
-                  width: AppTheme.paddingM,
-                  height: AppTheme.paddingM,
+                  width: AppTheme.iconS,
+                  height: AppTheme.iconS,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
-                const SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 BaseLabel('Analyzing...', role: TextRole.detail),
               ],
             )
@@ -365,35 +373,37 @@ class RepositoryCard extends ConsumerWidget {
 
           // Invalid repo warning
           if (!isValid) ...[
-            const SizedBox(height: AppTheme.paddingM),
+            const BaseGap(Proximity.grouped),
             Container(
-              padding: const EdgeInsets.all(AppTheme.paddingS),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusS),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.warningCircle,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  Expanded(
-                    child: BaseLabel(
-                      'Invalid or missing repository',
-                      role: TextRole.detail,
-                      tone: Tone.danger,
+              child: BaseInset(
+                all: Inset.tight,
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      size: AppTheme.iconS,
+                      color: Theme.of(context).colorScheme.error,
                     ),
-                  ),
-                ],
+                    const BaseGap(Proximity.related),
+                    Expanded(
+                      child: BaseLabel(
+                        'Invalid or missing repository',
+                        role: TextRole.detail,
+                        tone: Tone.danger,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
 
           // Last accessed
-          const SizedBox(height: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           Row(
             children: [
               Icon(
@@ -403,7 +413,7 @@ class RepositoryCard extends ConsumerWidget {
                     ? Theme.of(context).colorScheme.onSecondaryContainer
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: AppTheme.paddingXS),
+              const BaseGap(Proximity.hairline),
               BaseLabel(
                 '${AppLocalizations.of(context)!.accessed} ${repository.lastAccessed.toDisplayString(Localizations.localeOf(context).languageCode)}',
                 role: TextRole.detail,
@@ -437,13 +447,21 @@ class RepositoryCard extends ConsumerWidget {
     // `test/shared/icons/icon_weight_census_test.dart`.
     final icon = isSuccess ? IconRole.checkCircle : IconRole.warningCircle;
 
-    return Padding(
-      padding: const EdgeInsets.only(right: AppTheme.paddingS),
-      child: BaseIconButton(
-        icon: icon,
-        onPressed: () => _showBatchResultDialog(context, ref, batchResult),
-        tooltip: isSuccess ? 'Operation successful' : 'Operation failed',
-      ),
+    // The mark's trailing space was a one-sided padding, which is a gap
+    // wearing a padding idiom. It cannot move to the enclosing header row,
+    // because that row does not know whether this builder returned a mark or
+    // nothing at all - so the mark carries its own gap and the pair travels
+    // together.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        BaseIconButton(
+          icon: icon,
+          onPressed: () => _showBatchResultDialog(context, ref, batchResult),
+          tooltip: isSuccess ? 'Operation successful' : 'Operation failed',
+        ),
+        const BaseGap(Proximity.related),
+      ],
     );
   }
 
@@ -561,6 +579,15 @@ class RepositoryCard extends ConsumerWidget {
     bool isSelected,
   ) {
     return Container(
+      // A hand-painted status pill is one of the micro-surfaces the census
+      // sends to `surfaces.badge` whole: its inset is the badge member's own
+      // geometry, not an `Inset` rung. `Inset` cannot state this pill's h8/v4
+      // (both axes take the same rung), and resolving `tight` symmetrically
+      // grew the pill 8 px taller inside a grid tile whose height
+      // `childAspectRatio: 1.2` fixes - a Column that already had no slack.
+      // The literal therefore stays with the drawing until the whole badge
+      // moves onto its member, exactly like the fill, border and radius
+      // beside it.
       padding: const EdgeInsets.symmetric(
         horizontal: AppTheme.paddingS,
         vertical: AppTheme.paddingXS,
@@ -576,7 +603,7 @@ class RepositoryCard extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: color),
-          const SizedBox(width: AppTheme.paddingXS),
+          const BaseGap(Proximity.hairline),
           // Deliberately still the old label: this helper's Color parameter
           // also paints the badge's fill, border and icon, so it can only
           // become a Tone when the whole badge moves onto `surfaces.badge` in

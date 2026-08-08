@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 import '../../generated/app_localizations.dart';
 
 import '../../shared/theme/app_theme.dart';
@@ -41,10 +42,10 @@ class SettingsScreen extends ConsumerWidget {
           // Reset to defaults (destructive action)
           PopupMenuItem(
             child: MenuItemContent(
-              icon: PhosphorIconsRegular.arrowCounterClockwise,
+              icon: IconRole.arrowCounterClockwise,
               label: l10n.resetToDefaults,
-              iconSize: AppTheme.iconM,
-              iconColor: Theme.of(context).colorScheme.error,
+              scale: ControlScale.normal,
+              tone: Tone.danger,
               labelColor: Theme.of(context).colorScheme.error,
             ),
             onTap: () => _confirmReset(context, ref),
@@ -573,7 +574,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultUserName,
-        icon: PhosphorIconsRegular.user,
+        icon: IconRole.user,
         onSubmit: () => Navigator.of(dialogContext).pop(name.trim()),
         content: BaseTextField(
           initialValue: name,
@@ -581,7 +582,7 @@ class SettingsScreen extends ConsumerWidget {
           autofocus: true,
           label: l10n.userName,
           hintText: l10n.userNameHint,
-          prefixIcon: PhosphorIconsRegular.user,
+          prefixIcon: IconRole.user,
         ),
         actions: [
           DialogAction(
@@ -624,7 +625,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultUserEmail,
-        icon: PhosphorIconsRegular.at,
+        icon: IconRole.at,
         onSubmit: () => Navigator.of(dialogContext).pop(email.trim()),
         content: BaseTextField(
           initialValue: email,
@@ -632,7 +633,7 @@ class SettingsScreen extends ConsumerWidget {
           autofocus: true,
           label: l10n.email,
           hintText: l10n.emailHint,
-          prefixIcon: PhosphorIconsRegular.at,
+          prefixIcon: IconRole.at,
         ),
         actions: [
           DialogAction(
@@ -677,7 +678,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => BaseDialog(
         title: l10n.defaultCommitLimit,
-        icon: PhosphorIconsRegular.listNumbers,
+        icon: IconRole.listNumbers,
         onSubmit: () {
           final value = int.tryParse(limit);
           if (value != null && value > 0) {
@@ -690,7 +691,7 @@ class SettingsScreen extends ConsumerWidget {
           autofocus: true,
           label: l10n.commits,
           hintText: l10n.commitsHint,
-          prefixIcon: PhosphorIconsRegular.listNumbers,
+          prefixIcon: IconRole.listNumbers,
         ),
         actions: [
           DialogAction(
@@ -724,7 +725,7 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => BaseDialog(
         title: l10n.resetSettings,
-        icon: PhosphorIconsRegular.warning,
+        icon: IconRole.warning,
         variant: DialogVariant.destructive,
         content: BodyMediumLabel(l10n.resetSettingsMessage),
         actions: [

@@ -20,6 +20,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
@@ -230,7 +232,7 @@ void main() {
           BaseButton(
             label: 'Icon',
             size: size,
-            leadingIcon: Icons.add,
+            leadingIcon: IconRole.plus,
             onPressed: () {},
           ),
         );
@@ -238,7 +240,9 @@ void main() {
         expectConformant(
           token: 'BaseButton.${size.name}.iconSize',
           component: 'BaseButton.${size.name}',
-          measured: tester.getSize(find.byIcon(Icons.add)).height,
+          measured: tester
+              .getSize(find.byIcon(MaterialGlyphs.of(IconRole.plus)))
+              .height,
           expected: oracle.iconSize!.resolve(const <WidgetState>{})!,
         );
       });
@@ -251,14 +255,14 @@ void main() {
         tester,
         BaseButton(
           label: 'Both',
-          leadingIcon: Icons.add,
-          trailingIcon: Icons.chevron_right,
+          leadingIcon: IconRole.plus,
+          trailingIcon: IconRole.caretRight,
           onPressed: () {},
         ),
       );
       expect(
-        tester.getSize(find.byIcon(Icons.chevron_right)),
-        tester.getSize(find.byIcon(Icons.add)),
+        tester.getSize(find.byIcon(MaterialGlyphs.of(IconRole.caretRight))),
+        tester.getSize(find.byIcon(MaterialGlyphs.of(IconRole.plus))),
       );
     });
   });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -95,7 +96,13 @@ class _ProjectDialogState extends State<ProjectDialog> {
       title: isEditing
           ? l10n.projectDialogEditTitle
           : l10n.projectDialogCreateTitle,
-      icon: PhosphorIconsBold.folder,
+      // Drawn at Phosphor BOLD before the conversion: same folder, heavier
+      // stroke. A role carries no weight (#249 conflict C3), so the header
+      // mark now takes the ordinary one. Recorded and pinned, with the
+      // measurement, by `test/shared/icons/icon_weight_census_test.dart`:
+      // 6 of the 72 `BaseDialog.icon` sites were bold, and the folder mark is
+      // drawn at the ordinary stroke 14 times elsewhere in the application.
+      icon: IconRole.folder,
       // The description field is multiline; Enter inside it writes a newline,
       // Enter anywhere else saves. _handleSave validates the form itself.
       onSubmit: _handleSave,
@@ -111,7 +118,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
             BaseTextField(
               controller: _nameController,
               hintText: l10n.enterProjectName,
-              prefixIcon: PhosphorIconsRegular.textT,
+              prefixIcon: IconRole.textT,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return l10n.enterProjectNameValidation;
@@ -129,7 +136,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
             BaseTextField(
               controller: _descriptionController,
               hintText: l10n.enterProjectDescription,
-              prefixIcon: PhosphorIconsRegular.textAlignLeft,
+              prefixIcon: IconRole.textAlignLeft,
               maxLines: 3,
             ),
 
@@ -257,9 +264,15 @@ class _ProjectDialogState extends State<ProjectDialog> {
         DialogAction(
           label: isEditing ? l10n.saveProjectButton : l10n.createProjectButton,
           role: DialogActionRole.affirmative,
-          icon: isEditing
-              ? PhosphorIconsBold.floppyDisk
-              : PhosphorIconsBold.plus,
+          // Both marks were written at Phosphor Bold before the conversion.
+          // The role deliberately carries no weight (#249 conflict C3), and
+          // the dialog's action slot renders through the standard button
+          // path, so they now take the button's ordinary stroke like every
+          // other button in the application. Of the 16 `DialogAction.icon`
+          // sites, 2 were bold and 14 were not; `plus` alone is drawn at the
+          // ordinary stroke 16 times elsewhere. Recorded and pinned by
+          // `test/shared/icons/icon_weight_census_test.dart`.
+          icon: isEditing ? IconRole.floppyDisk : IconRole.plus,
           onPressed: _handleSave,
         ),
       ],

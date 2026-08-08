@@ -13,6 +13,7 @@ import 'package:flutter_gitui/core/git/models/remote.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/dialogs/rename_remote_dialog.dart';
+import '../../skin/pump_under_skin.dart';
 
 const _remote = GitRemote(
   name: 'origin',
@@ -26,6 +27,9 @@ Future<void> _openDialog(
 ) async {
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

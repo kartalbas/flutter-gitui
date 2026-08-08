@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/shared/components/base_shrinking_row.dart';
+import '../../skin/pump_under_skin.dart';
 
 Future<void> _pump(
   WidgetTester tester, {
@@ -15,6 +16,9 @@ Future<void> _pump(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       home: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: availableWidth),

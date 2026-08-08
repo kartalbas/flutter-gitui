@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -22,7 +23,7 @@ class BehaviorSection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.behavior,
-      icon: PhosphorIconsRegular.sliders,
+      icon: IconRole.sliders,
       children: [
         SwitchListTile(
           secondary: const Icon(PhosphorIconsRegular.arrowsClockwise),
@@ -46,7 +47,8 @@ class BehaviorSection extends ConsumerWidget {
               ],
             ),
             trailing: BaseIconButton(
-              icon: PhosphorIconsRegular.pencil,
+              icon: IconRole.pencil,
+              tooltip: l10n.autoFetchInterval,
               onPressed: onEditAutoFetchInterval,
             ),
           ),

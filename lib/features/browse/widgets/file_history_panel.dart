@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
@@ -39,7 +40,7 @@ class FileHistoryPanel extends ConsumerWidget {
         ),
         actions: [
           BaseIconButton(
-            icon: PhosphorIconsRegular.arrowClockwise,
+            icon: IconRole.arrowClockwise,
             tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: () {
               ref.invalidate(fileHistoryProvider(filePath));
@@ -181,7 +182,7 @@ class FileHistoryPanel extends ConsumerWidget {
     BaseViewerDialog.show(
       context: context,
       dialog: BaseViewerDialog(
-        icon: PhosphorIconsRegular.gitCommit,
+        icon: IconRole.gitCommit,
         title: l10n.commitShortHash(commit.shortHash),
         subtitle: commit.subject,
         content: Row(

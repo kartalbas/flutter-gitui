@@ -238,7 +238,35 @@ final class MaterialControls implements SkinControls {
     // The glyph carries no size or colour: the style's `IconTheme` applies
     // both. `isSelected` passes through so the framework's own toggle support
     // maintains `WidgetState.selected` and the selected semantics.
-    final Widget mark = Icon(MaterialGlyphs.of(spec.icon));
+    //
+    // The WEIGHT is decided here, and this is the slot that knows enough to
+    // decide it. A role carries none by design (conflict C3), while the
+    // application has always said "this one is on" with a SOLID mark as well
+    // as a tint: a favourited repository's star and an engaged filter's
+    // funnel were written as `PhosphorIconsFill.*` at the call site, beside
+    // the very `isSelected` flag that arrives here as `spec.selected`. So the
+    // fill is not lost at the seam, it is re-decided on this side of it, by
+    // the member filling the slot - which is the same shape the census
+    // already gave `boldOf` for dense surfaces. `filledOf` answers with the
+    // ordinary mark for the roles that have no solid variant, so a selected
+    // control whose mark was never drawn solid is unaffected.
+    //
+    // **Two image baselines are stale because of this line** and have to be
+    // regenerated on Linux: `base_icon_button_selected_light.png` and
+    // `base_icon_button_selected_dark.png`. They were captured while the
+    // application built Material's `IconButton` itself and drew `Icon(icon)`
+    // verbatim, so they encode "selection does not change the mark" — which
+    // this application has always contradicted at three sites. The scene at
+    // `test/conformance/goldens/component_scenes.dart` carries the full
+    // reasoning, including why no edit to the scene can hold the baseline.
+    // The weight itself is asserted on every platform by
+    // `test/conformance/components/base_icon_button_conformance_test.dart`,
+    // so the images are not the only thing that knows.
+    final Widget mark = Icon(
+      (spec.selected ?? false)
+          ? MaterialGlyphs.filledOf(spec.icon)
+          : MaterialGlyphs.of(spec.icon),
+    );
     final Widget control = switch (_familyOf(spec.emphasis)) {
       _ButtonFamily.filled => IconButton.filled(
         onPressed: onPressed,
@@ -611,8 +639,13 @@ final class MaterialControls implements SkinControls {
                           : null,
                     ),
                     child: isSelected
+                        // The heavier stroke, because a tick sitting on a
+                        // saturated swatch has to survive the contrast: this
+                        // is the skin deciding a WEIGHT, which is exactly the
+                        // decision `IconRole` refuses to carry. Resolves to
+                        // the same mark the named constant used to hold.
                         ? Icon(
-                            MaterialGlyphs.selectedCheck,
+                            MaterialGlyphs.boldOf(IconRole.check),
                             color: _swatchForeground(swatch),
                             size: MaterialMetrics.iconM,
                           )

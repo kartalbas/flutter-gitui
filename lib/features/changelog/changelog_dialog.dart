@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
@@ -96,7 +97,7 @@ class ChangelogDialog extends HookConsumerWidget {
       includeSemantics: false,
       onKeyEvent: handlePagerKey,
       child: BaseViewerDialog(
-        icon: Icons.history,
+        icon: IconRole.clockCounterClockwise,
         title: 'Release History',
         widthFactor: 0.75,
         heightFactor: 0.85,
@@ -287,7 +288,7 @@ class ChangelogDialog extends HookConsumerWidget {
                           onPressed: hasOlder
                               ? () => currentIndex.value = releases.length - 1
                               : null,
-                          icon: Icons.first_page,
+                          icon: IconRole.caretLineLeft,
                           tooltip: 'Oldest version',
                           variant: ButtonVariant.primary,
                         ),
@@ -296,7 +297,7 @@ class ChangelogDialog extends HookConsumerWidget {
                           onPressed: hasOlder
                               ? () => currentIndex.value = index + 1
                               : null,
-                          icon: Icons.chevron_left,
+                          icon: IconRole.caretLeft,
                           tooltip: 'Older version',
                           variant: ButtonVariant.primary,
                         ),
@@ -326,7 +327,7 @@ class ChangelogDialog extends HookConsumerWidget {
                           onPressed: hasNewer
                               ? () => currentIndex.value = index - 1
                               : null,
-                          icon: Icons.chevron_right,
+                          icon: IconRole.caretRight,
                           tooltip: 'Newer version',
                           variant: ButtonVariant.primary,
                         ),
@@ -335,7 +336,7 @@ class ChangelogDialog extends HookConsumerWidget {
                           onPressed: hasNewer
                               ? () => currentIndex.value = 0
                               : null,
-                          icon: Icons.last_page,
+                          icon: IconRole.caretLineRight,
                           tooltip: 'Latest version',
                           variant: ButtonVariant.primary,
                         ),

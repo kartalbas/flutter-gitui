@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_animated_widgets.dart';
@@ -81,14 +83,14 @@ class StashListTile extends ConsumerWidget {
               PopupMenuItem(
                 value: 'apply',
                 child: MenuItemContent(
-                  icon: PhosphorIconsRegular.arrowBendDownLeft,
+                  icon: IconRole.arrowBendDownLeft,
                   label: AppLocalizations.of(context)!.apply,
                 ),
               ),
               PopupMenuItem(
                 value: 'pop',
                 child: MenuItemContent(
-                  icon: PhosphorIconsRegular.arrowBendUpLeft,
+                  icon: IconRole.arrowBendUpLeft,
                   label: AppLocalizations.of(context)!.pop,
                 ),
               ),
@@ -96,14 +98,14 @@ class StashListTile extends ConsumerWidget {
               PopupMenuItem(
                 value: 'branch',
                 child: MenuItemContent(
-                  icon: PhosphorIconsRegular.gitBranch,
+                  icon: IconRole.gitBranch,
                   label: AppLocalizations.of(context)!.menuItemCreateBranch,
                 ),
               ),
               PopupMenuItem(
                 value: 'diff',
                 child: MenuItemContent(
-                  icon: PhosphorIconsRegular.gitDiff,
+                  icon: IconRole.gitDiff,
                   label: AppLocalizations.of(context)!.menuItemViewDiff,
                 ),
               ),
@@ -111,9 +113,9 @@ class StashListTile extends ConsumerWidget {
               PopupMenuItem(
                 value: 'drop',
                 child: MenuItemContent(
-                  icon: PhosphorIconsRegular.trash,
+                  icon: IconRole.trash,
                   label: AppLocalizations.of(context)!.drop,
-                  iconColor: Theme.of(context).colorScheme.error,
+                  tone: Tone.danger,
                   labelColor: Theme.of(context).colorScheme.error,
                 ),
               ),
@@ -135,21 +137,21 @@ class StashListTile extends ConsumerWidget {
             context,
             AppLocalizations.of(context)!.reference,
             stash.ref,
-            PhosphorIconsRegular.tag,
+            IconRole.tag,
           ),
           const SizedBox(height: AppTheme.paddingS),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.createBranch,
             stash.branch,
-            PhosphorIconsRegular.gitBranch,
+            IconRole.gitBranch,
           ),
           const SizedBox(height: AppTheme.paddingS),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.commit,
             stash.shortHash,
-            PhosphorIconsRegular.gitCommit,
+            IconRole.gitCommit,
           ),
           const SizedBox(height: AppTheme.paddingS),
           _buildDetailRow(
@@ -158,7 +160,7 @@ class StashListTile extends ConsumerWidget {
             stash.timestampDisplay(
               Localizations.localeOf(context).languageCode,
             ),
-            PhosphorIconsRegular.clock,
+            IconRole.clock,
           ),
           const SizedBox(height: AppTheme.paddingM),
           _buildActionButtons(context, ref),
@@ -171,15 +173,15 @@ class StashListTile extends ConsumerWidget {
     BuildContext context,
     String label,
     String value,
-    IconData icon,
+    IconRole icon,
   ) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        // The row's mark, resolved by the skin. Muted at the compact scale is
+        // exactly what this row drew before the conversion - 16 logical
+        // pixels in `onSurfaceVariant` - so the swap changes the vocabulary,
+        // not a pixel.
+        BaseIcon(icon, tone: Tone.muted, scale: ControlScale.compact),
         const SizedBox(width: AppTheme.paddingS),
         BodySmallLabel(
           '$label:',
@@ -198,28 +200,28 @@ class StashListTile extends ConsumerWidget {
       children: [
         BaseButton(
           onPressed: () => _applyStash(context, ref),
-          leadingIcon: PhosphorIconsRegular.arrowBendDownLeft,
+          leadingIcon: IconRole.arrowBendDownLeft,
           label: AppLocalizations.of(context)!.apply,
           variant: ButtonVariant.primary,
           size: ButtonSize.small,
         ),
         BaseButton(
           onPressed: () => _popStash(context, ref),
-          leadingIcon: PhosphorIconsRegular.arrowBendUpLeft,
+          leadingIcon: IconRole.arrowBendUpLeft,
           label: AppLocalizations.of(context)!.pop,
           variant: ButtonVariant.primary,
           size: ButtonSize.small,
         ),
         BaseButton(
           onPressed: () => _showDiff(context, ref),
-          leadingIcon: PhosphorIconsRegular.gitDiff,
+          leadingIcon: IconRole.gitDiff,
           label: AppLocalizations.of(context)!.diff,
           variant: ButtonVariant.secondary,
           size: ButtonSize.small,
         ),
         BaseButton(
           onPressed: () => _createBranch(context, ref),
-          leadingIcon: PhosphorIconsRegular.gitBranch,
+          leadingIcon: IconRole.gitBranch,
           label: AppLocalizations.of(context)!.branch,
           variant: ButtonVariant.secondary,
           size: ButtonSize.small,
@@ -329,7 +331,7 @@ class StashListTile extends ConsumerWidget {
       context: context,
       ref: ref,
       action: DestructiveAction.dropStash,
-      icon: PhosphorIconsRegular.warningCircle,
+      icon: IconRole.warningCircle,
       title: l10n.dropStashDialog,
       message: l10n.dropStashConfirm(stash.ref),
       confirmLabel: l10n.drop,

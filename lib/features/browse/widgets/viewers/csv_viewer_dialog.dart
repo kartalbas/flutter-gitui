@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 import 'package:csv/csv.dart';
 
@@ -80,7 +81,7 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
     final fileName = path.basename(widget.filePath);
 
     return BaseViewerDialog(
-      icon: PhosphorIconsRegular.table,
+      icon: IconRole.table,
       title: 'CSV/Spreadsheet Viewer',
       subtitle: fileName,
       headerMetadata: !_isLoading && _error == null

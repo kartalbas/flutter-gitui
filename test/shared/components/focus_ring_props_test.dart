@@ -11,6 +11,7 @@ import 'package:flutter_gitui/shared/components/base_card.dart';
 import 'package:flutter_gitui/shared/components/base_list_item.dart';
 import 'package:flutter_gitui/shared/models/tree_node.dart';
 import 'package:flutter_gitui/shared/widgets/base_tree_item.dart';
+import '../../skin/pump_under_skin.dart';
 
 class _FileNode with TreeNodeMixin {
   @override
@@ -30,6 +31,9 @@ class _FileNode with TreeNodeMixin {
 }
 
 Widget _wrap(Widget child) => MaterialApp(
+  builder: (BuildContext context, Widget? child) =>
+      installSkinUnderTest(child ?? const SizedBox.shrink()),
+
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(body: child),

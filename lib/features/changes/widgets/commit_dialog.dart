@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -135,7 +136,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
 
     return BaseDialog(
       title: AppLocalizations.of(context)!.commitChanges,
-      icon: PhosphorIconsRegular.gitCommit,
+      icon: IconRole.gitCommit,
       // The message field is multiline, so Enter inside it writes a newline;
       // Enter anywhere else commits. _commit validates the form itself.
       onSubmit: _isCommitting ? null : _commit,
@@ -171,8 +172,8 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                     label: AppLocalizations.of(context)!.viewFiles,
                     variant: ButtonVariant.tertiary,
                     leadingIcon: _showStagedFiles
-                        ? PhosphorIconsRegular.caretUp
-                        : PhosphorIconsRegular.caretDown,
+                        ? IconRole.caretUp
+                        : IconRole.caretDown,
                     onPressed: stagedFiles.isEmpty
                         ? null
                         : () {
@@ -314,7 +315,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
               ? AppLocalizations.of(context)!.labelAmendCommit
               : AppLocalizations.of(context)!.commit,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.check,
+          icon: IconRole.check,
           isLoading: _isCommitting,
           onPressed: _commit,
         ),

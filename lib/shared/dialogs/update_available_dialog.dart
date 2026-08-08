@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -43,7 +44,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
 
     return BaseDialog(
       title: l10n.updateAvailableTitle,
-      icon: PhosphorIconsRegular.downloadSimple,
+      icon: IconRole.downloadSimple,
       variant: DialogVariant.normal,
       maxWidth: 600,
       onSubmit: _isDownloading ? null : _downloadAndInstall,
@@ -204,7 +205,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           DialogAction(
             label: l10n.updateDownloadOnly,
             role: DialogActionRole.neutral,
-            icon: PhosphorIconsRegular.arrowSquareOut,
+            icon: IconRole.arrowSquareOut,
             onPressed: _openDownloadInBrowser,
           ),
           DialogAction(
@@ -308,7 +309,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         context: context,
         builder: (context) => BaseDialog(
           title: l10n.updateOperationRunningTitle,
-          icon: PhosphorIconsRegular.warningCircle,
+          icon: IconRole.warningCircle,
           onSubmit: () => Navigator.of(context).pop(),
           content: BodyMediumLabel(l10n.updateOperationRunningBody),
           actions: [
@@ -328,7 +329,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         context: context,
         builder: (context) => BaseDialog(
           title: l10n.updateUnsavedInputTitle,
-          icon: PhosphorIconsRegular.warningCircle,
+          icon: IconRole.warningCircle,
           variant: DialogVariant.destructive,
           content: BodyMediumLabel(l10n.updateUnsavedInputBody),
           actions: [

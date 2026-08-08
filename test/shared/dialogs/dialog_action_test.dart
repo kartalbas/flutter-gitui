@@ -24,6 +24,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Pumps a dialog carrying [actions] and hands back the ColorScheme it was
 /// rendered against, so a colour assertion compares against the theme rather
@@ -36,6 +37,9 @@ Future<ColorScheme> _pumpActions(
   late ColorScheme colorScheme;
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
@@ -146,9 +147,7 @@ ${widget.result.fullOutput}
       title: result.isSuccess
           ? AppLocalizations.of(context)!.gitCommandSuccessful
           : AppLocalizations.of(context)!.gitCommandFailed,
-      icon: result.isSuccess
-          ? PhosphorIconsRegular.checkCircle
-          : PhosphorIconsRegular.xCircle,
+      icon: result.isSuccess ? IconRole.checkCircle : IconRole.xCircle,
       variant: result.isSuccess
           ? DialogVariant.normal
           : DialogVariant.destructive,
@@ -220,7 +219,7 @@ ${widget.result.fullOutput}
         DialogAction(
           label: AppLocalizations.of(context)!.copyOutput,
           role: DialogActionRole.neutral,
-          icon: PhosphorIconsRegular.copy,
+          icon: IconRole.copy,
           onPressed: _copyToClipboard,
         ),
 
@@ -229,7 +228,7 @@ ${widget.result.fullOutput}
         DialogAction(
           label: AppLocalizations.of(context)!.close,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.x,
+          icon: IconRole.x,
           onPressed: () => Navigator.of(context).pop(),
         ),
       ],

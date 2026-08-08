@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as p;
 
 import '../../../generated/app_localizations.dart';
@@ -928,7 +929,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
         builder: (context) {
           return BaseDialog(
             title: AppLocalizations.of(context)!.dialogTitleRenameFile,
-            icon: PhosphorIconsRegular.pencilSimple,
+            icon: IconRole.pencilSimple,
             onSubmit: () => Navigator.pop(context, controller.text),
             // Enter submits via the dialog's onSubmit; a second field-level
             // submit path would pop twice.
@@ -1042,7 +1043,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
               title: isSameDirectory
                   ? AppLocalizations.of(context)!.dialogTitleCopyFile
                   : AppLocalizations.of(context)!.dialogTitleFileExists,
-              icon: PhosphorIconsRegular.copySimple,
+              icon: IconRole.copySimple,
               variant: DialogVariant.confirmation,
               content: BodyMediumLabel(
                 isSameDirectory
@@ -1169,7 +1170,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (context) => BaseDialog(
-            icon: PhosphorIconsRegular.warning,
+            icon: IconRole.warning,
             title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
             variant: DialogVariant.destructive,
             content: BodyMediumLabel(

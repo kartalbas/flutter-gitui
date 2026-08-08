@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -41,7 +42,7 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
 
     return BaseDialog(
       title: l10n.createBranchFromTag,
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       onSubmit: _createBranch,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -84,7 +85,7 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
             controller: _branchNameController,
             label: l10n.branchName,
             hintText: l10n.branchNameHint,
-            prefixIcon: PhosphorIconsRegular.gitBranch,
+            prefixIcon: IconRole.gitBranch,
             autofocus: true,
             errorText: _errorMessage,
             onChanged: (value) {
@@ -122,7 +123,7 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
         DialogAction(
           label: l10n.createBranch,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.gitBranch,
+          icon: IconRole.gitBranch,
           onPressed: _createBranch,
         ),
       ],

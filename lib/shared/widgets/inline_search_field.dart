@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../controllers/item_navigation_controller.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
@@ -51,7 +51,7 @@ class InlineSearchField extends StatelessWidget {
     Widget field = BaseTextField(
       controller: controller,
       hintText: hintText,
-      prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+      prefixIcon: IconRole.magnifyingGlass,
       showClearButton: true,
       variant: TextFieldVariant.bordered,
       onChanged: (value) {

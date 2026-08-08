@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -205,18 +206,18 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     )!.selectedCount(_selectedTags.length),
                   ),
                   leading: BaseIconButton(
-                    icon: PhosphorIconsRegular.x,
+                    icon: IconRole.x,
                     tooltip: AppLocalizations.of(context)!.exitSelection,
                     onPressed: _exitSelectionMode,
                   ),
                   actions: [
                     BaseIconButton(
-                      icon: PhosphorIconsRegular.checkSquareOffset,
+                      icon: IconRole.checkSquareOffset,
                       tooltip: AppLocalizations.of(context)!.selectAll,
                       onPressed: () => _selectAllTags(tagsAsync.value ?? []),
                     ),
                     BaseIconButton(
-                      icon: PhosphorIconsRegular.square,
+                      icon: IconRole.square,
                       tooltip: AppLocalizations.of(context)!.clearSelection,
                       onPressed: () {
                         setState(() {
@@ -235,7 +236,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                       PopupMenuItem(
                         onTap: _enterSelectionMode,
                         child: MenuItemContent(
-                          icon: PhosphorIconsRegular.checkSquare,
+                          icon: IconRole.checkSquare,
                           label: AppLocalizations.of(context)!.selectTags,
                         ),
                       ),
@@ -244,7 +245,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                       const PopupMenuDivider(),
                     PopupMenuItem(
                       child: MenuItemContent(
-                        icon: PhosphorIconsRegular.downloadSimple,
+                        icon: IconRole.downloadSimple,
                         label: AppLocalizations.of(context)!.fetchTags,
                       ),
                       onTap: () => _fetchTags(context),
@@ -372,9 +373,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   BaseIconButton(
-                    icon: _hasActiveFilters()
-                        ? PhosphorIconsFill.funnel
-                        : PhosphorIconsRegular.funnel,
+                    // One role, one mark; "the filter is engaged" travels
+                    // as `isSelected` and the skin decides the weight.
+                    icon: IconRole.funnel,
                     isSelected: _hasActiveFilters(),
                     tooltip: AppLocalizations.of(context)!.advancedFilters,
                     onPressed: () => _showAdvancedFiltersDialog(context, tags),
@@ -714,7 +715,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     context,
                   )!.pushCount(localOnlyTags.length),
                   variant: ButtonVariant.secondary,
-                  leadingIcon: PhosphorIconsRegular.upload,
+                  leadingIcon: IconRole.upload,
                   onPressed: () => _pushAllTags(context),
                 ),
             ],
@@ -1061,7 +1062,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
           context: context,
           ref: ref,
           action: DestructiveAction.deleteRemoteTag,
-          icon: PhosphorIconsRegular.warningCircle,
+          icon: IconRole.warningCircle,
           title: l10n.deleteTagsDialog,
           message: l10n.deleteTagsFromRemoteConfirmMessage(
             _selectedTags.length,

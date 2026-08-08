@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -42,7 +42,7 @@ class _CreateBranchFromStashDialogState
     final l10n = AppLocalizations.of(context)!;
     return BaseDialog(
       title: l10n.createBranchFromStash,
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       variant: DialogVariant.normal,
       onSubmit: () => Navigator.of(context).pop(_branchNameController.text),
       content: Column(

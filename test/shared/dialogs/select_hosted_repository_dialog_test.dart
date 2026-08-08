@@ -15,6 +15,7 @@ import 'package:flutter_gitui/core/hosting/hosting_providers.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/dialogs/select_hosted_repository_dialog.dart';
+import '../../skin/pump_under_skin.dart';
 
 const _source = RepositorySource(
   host: 'github.com',
@@ -49,6 +50,9 @@ Future<void> _openDialog(
         ),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

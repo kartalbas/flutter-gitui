@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
@@ -44,7 +45,7 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
     final availableToolsAsync = ref.watch(availableDiffToolsProvider);
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.gear,
+      icon: IconRole.gear,
       title: AppLocalizations.of(context)!.configureDiffMergeTools,
       onSubmit: _hasChanges ? _saveSettings : null,
       content: availableToolsAsync.when(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
 
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
@@ -153,9 +154,9 @@ class QuickSettingsMenu extends ConsumerWidget {
         PopupMenuItem(
           value: 'full_settings',
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.gear,
+            icon: IconRole.gear,
             label: 'All Settings',
-            iconColor: Theme.of(context).colorScheme.primary,
+            tone: Tone.accent,
             labelColor: Theme.of(context).colorScheme.primary,
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:google_fonts/google_fonts.dart';
 import '../../generated/app_localizations.dart';
 
@@ -104,14 +105,14 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
           ),
           const Spacer(),
           BaseIconButton(
-            icon: PhosphorIconsRegular.trash,
+            icon: IconRole.trash,
             tooltip: l10n.clearLog,
             onPressed: () {
               ref.read(gitCommandLogProvider.notifier).clear();
             },
           ),
           BaseIconButton(
-            icon: PhosphorIconsRegular.x,
+            icon: IconRole.x,
             tooltip: l10n.close,
             onPressed: () {
               ref
@@ -135,7 +136,7 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
           Expanded(
             child: BaseTextField(
               hintText: l10n.search,
-              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+              prefixIcon: IconRole.magnifyingGlass,
               variant: TextFieldVariant.emphasized,
               showClearButton: true,
               onChanged: (value) => setState(() => _query = value),
@@ -294,7 +295,7 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     BaseIconButton(
-                      icon: PhosphorIconsRegular.copy,
+                      icon: IconRole.copy,
                       size: ButtonSize.small,
                       tooltip: l10n.tooltipCopyCommand,
                       onPressed: () {

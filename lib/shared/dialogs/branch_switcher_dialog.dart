@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -104,7 +105,14 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
     }
 
     return BaseDialog(
-      icon: PhosphorIconsBold.gitBranch,
+      // Drawn at Phosphor BOLD before the conversion: same branch mark,
+      // heavier stroke. A role carries no weight (#249 conflict C3) and
+      // nothing here is a state the skin could re-decide one from, so the
+      // header mark now takes the ordinary stroke — the same one the branch
+      // mark takes at 53 other sites, including the field prefix two rows
+      // below it. Recorded and pinned by
+      // `test/shared/icons/icon_weight_census_test.dart`.
+      icon: IconRole.gitBranch,
       title: AppLocalizations.of(context)!.switchBranch,
       // Enter checks out the highlighted branch from anywhere in the dialog.
       onSubmit: _matches.isEmpty ? null : _confirm,
@@ -118,7 +126,7 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
               controller: _searchController,
               autofocus: true,
               hintText: AppLocalizations.of(context)!.searchBranches,
-              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+              prefixIcon: IconRole.magnifyingGlass,
               onChanged: (value) {
                 setState(() => _searchQuery = value);
                 _resetHighlight();

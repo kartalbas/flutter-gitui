@@ -21,6 +21,7 @@ import 'package:flutter_gitui/core/utils/result.dart';
 import 'package:flutter_gitui/features/browse/browse_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/widgets/base_tree_item.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Git without git: the tree asks for ignored paths and the viewer pane for
 /// a selected file's history — both answered without a process.
@@ -72,6 +73,9 @@ void main() {
       ProviderScope(
         overrides: overrides(),
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const BrowseScreen(),
@@ -102,6 +106,9 @@ void main() {
       ProviderScope(
         overrides: overrides(),
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const Scaffold(body: SizedBox.shrink()),

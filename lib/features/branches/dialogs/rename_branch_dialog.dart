@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -40,7 +40,7 @@ class _RenameBranchDialogState extends State<RenameBranchDialog> {
     if (widget.branch.isProtected) {
       return BaseDialog(
         title: l10n.renameBranch(widget.branch.shortName),
-        icon: PhosphorIconsRegular.lock,
+        icon: IconRole.lock,
         variant: DialogVariant.normal,
         onSubmit: () => Navigator.of(context).pop(),
         content: const Text(
@@ -51,7 +51,7 @@ class _RenameBranchDialogState extends State<RenameBranchDialog> {
 
     return BaseDialog(
       title: l10n.renameBranch(widget.branch.shortName),
-      icon: PhosphorIconsRegular.pencil,
+      icon: IconRole.pencil,
       variant: DialogVariant.normal,
       onSubmit: () {
         if (_formKey.currentState!.validate()) {
@@ -64,7 +64,7 @@ class _RenameBranchDialogState extends State<RenameBranchDialog> {
           controller: _controller,
           autofocus: true,
           label: l10n.newBranchName,
-          prefixIcon: PhosphorIconsRegular.pencil,
+          prefixIcon: IconRole.pencil,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return l10n.enterBranchName;

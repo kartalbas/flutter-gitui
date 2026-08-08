@@ -4,6 +4,7 @@ import '../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 
 import '../../generated/app_localizations.dart';
@@ -293,7 +294,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     Widget searchField = BaseTextField(
       controller: _searchController,
       hintText: SearchParser.getHelpText(_searchMode),
-      prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+      prefixIcon: IconRole.magnifyingGlass,
       showClearButton: _searchController.text.isNotEmpty,
       onChanged: (_) => setState(() {}),
     );

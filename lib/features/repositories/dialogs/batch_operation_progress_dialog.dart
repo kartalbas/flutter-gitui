@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
@@ -188,10 +189,10 @@ class _BatchOperationProgressDialogState
     return BaseDialog(
       title: widget.title,
       icon: _isRunning
-          ? PhosphorIconsRegular.spinner
+          ? IconRole.spinner
           : _failureCount == 0
-          ? PhosphorIconsRegular.checkCircle
-          : PhosphorIconsRegular.warningCircle,
+          ? IconRole.checkCircle
+          : IconRole.warningCircle,
       variant: DialogVariant.normal,
       barrierDismissible: !_isRunning,
       onSubmit: _isRunning ? null : () => Navigator.of(context).pop(_results),

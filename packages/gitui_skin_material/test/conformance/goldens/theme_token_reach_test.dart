@@ -91,10 +91,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_gitui/core/config/app_config.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
+import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/components/base_filter_chip.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// The Material button family a [ButtonVariant] renders through, and with it
@@ -743,7 +745,7 @@ void main() {
               theme,
               BaseIconButton(
                 onPressed: _noop,
-                icon: PhosphorIconsRegular.trash,
+                icon: IconRole.trash,
                 tooltip: 'Delete',
                 variant: variant,
                 size: size,
@@ -959,6 +961,36 @@ double? _shapeCorner(ShapeBorder? shape) {
 /// The shared `pumpConformance` harness builds the theme itself, which is
 /// exactly what this suite must not do: the point here is to vary a theme
 /// token and watch the rendering follow.
+/// Puts [child] within reach of the Material skin WITHOUT re-theming it.
+///
+/// The `Base*` façades render through their contract members, so they need a
+/// [SkinScope] above them or they fail on a missing scope instead of being
+/// measured. What they must NOT get here is `chrome.wrapRoot`: this file's
+/// whole subject is whether a token configured in an ARBITRARY [ThemeData]
+/// reaches the rendered component, and a root treatment would install the
+/// skin's own theme over the one the test just pumped - every measurement
+/// would then report the skin's default corner and the token reach would look
+/// broken when it is not. `SkinScope`'s own constructor installs the scope and
+/// nothing else, which is exactly the half this file needs.
+Widget _reachable(Widget child, ThemeData theme) => SkinScope(
+  skin: const MaterialSkin(),
+  request: SkinRequest(
+    brightness: theme.brightness,
+    accentSeed: 0,
+    textScale: 1,
+    animationScale: 1,
+    monoFamily: 'JetBrains Mono',
+    uiFamily: 'Inter',
+  ),
+  dialogKeyboardHost: (BuildContext context, DialogSpec spec, Widget surface) =>
+      DialogKeyboardHost(
+        barrierDismissible: spec.barrierDismissible,
+        onSubmit: spec.onSubmit,
+        child: surface,
+      ),
+  child: child,
+);
+
 Future<void> _pump(WidgetTester tester, ThemeData theme, Widget child) async {
   GoogleFonts.config.allowRuntimeFetching = false;
   await tester.pumpWidget(
@@ -976,7 +1008,7 @@ Future<void> _pump(WidgetTester tester, ThemeData theme, Widget child) async {
       // transition simply had not finished. Zero makes each pump show exactly
       // the theme it was given.
       themeAnimationDuration: Duration.zero,
-      home: Scaffold(body: Center(child: child)),
+      home: Scaffold(body: Center(child: _reachable(child, theme))),
     ),
   );
   // The button's own implicit animations need the same treatment for the same

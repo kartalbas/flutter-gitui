@@ -59,6 +59,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_gitui/shared/widgets/inline_search_field.dart';
 import 'package:flutter_gitui/shared/widgets/overflow_action_bar.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import 'golden_scene.dart';
 
@@ -235,43 +236,43 @@ Widget _shellToolbar(BuildContext context) {
 /// explain an unavailable action rather than hiding it (#303).
 final List<ToolbarAction> _gitActions = <ToolbarAction>[
   ToolbarAction(
-    icon: PhosphorIconsRegular.arrowsClockwise,
+    icon: IconRole.arrowsClockwise,
     label: 'Fetch',
     tooltip: 'Fetch from remote',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.arrowDown,
+    icon: IconRole.arrowDown,
     label: 'Pull',
     tooltip: 'Pull from remote',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.arrowUp,
+    icon: IconRole.arrowUp,
     label: 'Push',
     tooltip: 'Push to remote',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.gitBranch,
+    icon: IconRole.gitBranch,
     label: 'Branch',
     tooltip: 'Create a branch',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.gitMerge,
+    icon: IconRole.gitMerge,
     label: 'Merge',
     tooltip: 'No branch selected',
     onPressed: null,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.tag,
+    icon: IconRole.tag,
     label: 'Tag',
     tooltip: 'Create a tag',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.archive,
+    icon: IconRole.archive,
     label: 'Stash',
     tooltip: 'Nothing to stash',
     onPressed: null,
@@ -280,19 +281,19 @@ final List<ToolbarAction> _gitActions = <ToolbarAction>[
 
 final List<ToolbarAction> _utilityActions = <ToolbarAction>[
   ToolbarAction(
-    icon: PhosphorIconsRegular.terminal,
+    icon: IconRole.terminal,
     label: 'Command log',
     tooltip: 'Command log',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.bell,
+    icon: IconRole.bell,
     label: 'Notifications',
     tooltip: 'Notifications',
     onPressed: _noop,
   ),
   ToolbarAction(
-    icon: PhosphorIconsRegular.downloadSimple,
+    icon: IconRole.downloadSimple,
     label: 'Update',
     tooltip: 'An update is available',
     onPressed: _noop,
@@ -405,7 +406,7 @@ Widget _tagsFilterBand() {
             ),
             const SizedBox(width: AppTheme.paddingS),
             BaseIconButton(
-              icon: PhosphorIconsFill.funnel,
+              icon: IconRole.funnel,
               isSelected: true,
               tooltip: 'Advanced filters',
               variant: ButtonVariant.secondary,

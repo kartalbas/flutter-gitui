@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../core/hosting/hosted_repository.dart';
 import '../../core/hosting/hosting_providers.dart';
@@ -136,7 +137,7 @@ class _SelectHostedRepositoryDialogState
     }
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.cloudArrowDown,
+      icon: IconRole.cloudArrowDown,
       title: 'Select repository',
       // Enter confirms the highlighted match from anywhere in the dialog.
       onSubmit: matches.isEmpty ? null : () => _confirm(matches),
@@ -173,7 +174,7 @@ class _SelectHostedRepositoryDialogState
                       controller: _searchController,
                       label: l10n.search,
                       hintText: 'Filter by name, owner or description',
-                      prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                      prefixIcon: IconRole.magnifyingGlass,
                       autofocus: true,
                       onChanged: (value) {
                         _query = value;
@@ -219,7 +220,7 @@ class _SelectHostedRepositoryDialogState
         DialogAction(
           label: l10n.ok,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.check,
+          icon: IconRole.check,
           enabled: matches.isNotEmpty,
           onPressed: () => _confirm(matches),
         ),
@@ -386,7 +387,7 @@ class _FailureMessage extends ConsumerWidget {
             // must never make a credential helper take over the screen.
             BaseButton(
               label: 'Sign in',
-              leadingIcon: PhosphorIconsRegular.signIn,
+              leadingIcon: IconRole.signIn,
               onPressed: () =>
                   ref.invalidate(sourceRepositoriesProvider(source)),
             ),

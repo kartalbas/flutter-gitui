@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../../core/git/models/remote.dart';
@@ -17,7 +17,7 @@ class PruneRemoteDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return BaseDialog(
       title: l10n.pruneRemote(remote.name),
-      icon: PhosphorIconsRegular.broom,
+      icon: IconRole.broom,
       variant: DialogVariant.confirmation,
       onSubmit: () => Navigator.of(context).pop(true),
       content: BodyMediumLabel(l10n.pruneRemoteConfirm(remote.name)),

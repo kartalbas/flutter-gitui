@@ -44,12 +44,12 @@ import 'base_menu_item.dart';
 ///   contextMenuItems: [
 ///     MenuAction(
 ///       label: 'Edit',
-///       icon: PhosphorIconsRegular.pencil,
+///       icon: IconRole.pencil,
 ///       onPressed: () => _edit(),
 ///     ),
 ///     MenuAction(
 ///       label: 'Delete',
-///       icon: PhosphorIconsRegular.trash,
+///       icon: IconRole.trash,
 ///       role: MenuActionRole.destructive,
 ///       onPressed: () => _delete(),
 ///     ),

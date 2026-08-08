@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -146,7 +147,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           // Create action always first
           PopupMenuItem(
             child: MenuItemContent(
-              icon: PhosphorIconsRegular.plus,
+              icon: IconRole.plus,
               label: l10n.createBranch,
             ),
             onTap: () => _showCreateBranchDialog(context),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -132,7 +133,7 @@ class NoSearchResultsState extends StatelessWidget {
           BaseButton(
             label: l10n.clearFiltersAction,
             variant: ButtonVariant.tertiary,
-            leadingIcon: PhosphorIconsRegular.x,
+            leadingIcon: IconRole.x,
             onPressed: onClearFilters,
           ),
           if (onSearchAllHistory != null) ...[
@@ -140,7 +141,7 @@ class NoSearchResultsState extends StatelessWidget {
             BaseButton(
               label: l10n.historySearchAllHistory,
               variant: ButtonVariant.secondary,
-              leadingIcon: PhosphorIconsRegular.listMagnifyingGlass,
+              leadingIcon: IconRole.listMagnifyingGlass,
               onPressed: onSearchAllHistory,
             ),
           ],

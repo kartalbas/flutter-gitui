@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -40,7 +40,7 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
     if (branch.isProtected) {
       return BaseDialog(
         title: l10n.deleteBranchDialog,
-        icon: PhosphorIconsRegular.lock,
+        icon: IconRole.lock,
         variant: DialogVariant.normal,
         onSubmit: () => Navigator.of(context).pop(),
         content: BodyMediumLabel(
@@ -51,7 +51,7 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
 
     return BaseDialog(
       title: l10n.deleteBranchDialog,
-      icon: PhosphorIconsRegular.warning,
+      icon: IconRole.warning,
       variant: DialogVariant.destructive,
       content: Column(
         mainAxisSize: MainAxisSize.min,

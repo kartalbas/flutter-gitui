@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -169,18 +171,18 @@ class ProjectSection extends ConsumerWidget {
                       PopupMenuItem(
                         value: 'edit',
                         child: MenuItemContent(
-                          icon: PhosphorIconsRegular.pencil,
+                          icon: IconRole.pencil,
                           label: AppLocalizations.of(context)!.editProject,
-                          iconSize: AppTheme.iconS,
+                          scale: ControlScale.compact,
                         ),
                       ),
                       PopupMenuItem(
                         value: 'delete',
                         child: MenuItemContent(
-                          icon: PhosphorIconsRegular.trash,
+                          icon: IconRole.trash,
                           label: AppLocalizations.of(context)!.deleteProject,
-                          iconSize: AppTheme.iconS,
-                          iconColor: Theme.of(context).colorScheme.error,
+                          scale: ControlScale.compact,
+                          tone: Tone.danger,
                           labelColor: Theme.of(context).colorScheme.error,
                         ),
                       ),

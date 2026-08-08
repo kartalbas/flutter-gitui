@@ -396,9 +396,17 @@ class _MaterialShellState extends State<_MaterialShell> {
               Icon(MaterialGlyphs.of(destination.icon)),
               destination.badgeCount,
             ),
-            // The selected mark is its own ROLE on the spec - "selected" is
-            // a different glyph in this application, not merely a different
-            // weight - so both states resolve through the one table.
+            // A KNOWN weight loss, and the note that used to sit here was
+            // wrong about it. The glyph census measured `navigation_item.dart`
+            // directly: all nine destinations name the SAME glyph in both
+            // states and separate them by weight alone - outline when the
+            // destination is merely available, solid when it is the one you
+            // are on. So `selectedIcon` carries no information `icon` does not,
+            // and resolving it through `of` draws the two states identically.
+            // The repair is `MaterialGlyphs.filledOf`, whose table exists for
+            // exactly these nine roles; it is deliberately not applied here,
+            // because the shell is wired at P5 and swapping it now would move
+            // a golden this sub-phase promised to leave alone.
             selectedIcon: _iconWithBadge(
               Icon(MaterialGlyphs.of(destination.selectedIcon)),
               destination.badgeCount,

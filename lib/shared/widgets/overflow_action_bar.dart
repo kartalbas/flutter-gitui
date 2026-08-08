@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show ControlScale, IconRole;
 
 import '../components/base_animated_widgets.dart';
 import '../components/base_button.dart';
+import '../components/base_icon.dart';
 import '../components/base_menu_item.dart';
 import '../theme/app_theme.dart';
 
@@ -16,7 +17,8 @@ class ToolbarAction {
     this.variant = ButtonVariant.secondary,
   });
 
-  final IconData icon;
+  /// The meaning of the action's mark; the skin chooses the glyph.
+  final IconRole icon;
 
   /// Shown next to the icon once the action moves into the overflow menu,
   /// where an icon alone would be a guess.
@@ -110,40 +112,70 @@ class OverflowActionBar extends StatelessWidget {
           children: [
             for (var index = 0; index < visible; index++) ...[
               if (index > 0) const SizedBox(width: spacing),
-              BaseIconButton(
-                icon: actions[index].icon,
-                tooltip: actions[index].tooltip,
-                onPressed: actions[index].onPressed,
-                size: ButtonSize.small,
-                variant: actions[index].variant,
+              // Loose, and that is the whole point: the count above was
+              // computed from [itemExtent], a number this file knows only
+              // because the Material icon button happens to lay out at 48 dp.
+              // A design language whose mark-only control is wider - the
+              // blueprint draws `[trash]` as words, which is exactly what it
+              // is for - would make that arithmetic wrong and the row would
+              // overflow, which is an exception rather than a layout. A loose
+              // flex fit hands each action at most its share and lets it
+              // shrink instead, and under Material it changes nothing at all:
+              // `visibleActionCount` only ever returns a count whose shares
+              // are already >= [itemExtent], so every button still renders at
+              // its natural width. The measured arithmetic itself belongs in
+              // the skin and moves there with this bar (SKIN-CONTRACT.md §1).
+              Flexible(
+                child: BaseIconButton(
+                  icon: actions[index].icon,
+                  tooltip: actions[index].tooltip,
+                  onPressed: actions[index].onPressed,
+                  size: ButtonSize.small,
+                  variant: actions[index].variant,
+                ),
               ),
             ],
             if (hidden.isNotEmpty) ...[
               if (visible > 0) const SizedBox(width: spacing),
-              BasePopupMenuButton<int>(
-                icon: const Icon(
-                  PhosphorIconsRegular.dotsThreeVertical,
-                  size: AppTheme.iconM,
-                ),
-                tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
-                itemBuilder: (context) => [
-                  for (var index = 0; index < hidden.length; index++)
-                    PopupMenuItem<int>(
-                      value: index,
-                      // A disabled entry keeps its tooltip's reason visible
-                      // rather than vanishing from the menu.
-                      enabled: hidden[index].onPressed != null,
-                      child: Tooltip(
-                        message: hidden[index].tooltip,
-                        child: MenuItemContent(
-                          icon: hidden[index].icon,
-                          label: hidden[index].label,
-                          iconSize: AppTheme.iconM,
+              // Loose for the same reason the actions are, and the blueprint
+              // proved the need rather than the argument doing it: the anchor
+              // reserves [menuExtent], another number this file knows only
+              // because Material's popup button happens to lay out at 48 dp,
+              // and under a language that draws the mark as words the row
+              // overflowed by 43 px the moment the anchor stopped being a
+              // fixed Phosphor glyph. Under Material nothing moves — the
+              // count `visibleActionCount` returns guarantees every share is
+              // already >= 48 — and the arithmetic itself still belongs in
+              // the skin (SKIN-CONTRACT.md §1).
+              Flexible(
+                child: BasePopupMenuButton<int>(
+                  // The anchor names its meaning like every action beside it.
+                  // Left as a raw Phosphor glyph it would have been the one
+                  // mark in this bar a Fluent or macOS skin could not answer:
+                  // every action drawn in the host language with a Phosphor
+                  // "more" mark sitting among them. `ControlScale.normal` is
+                  // this skin's 20 dp, which is the size that stood here.
+                  icon: const BaseIcon(IconRole.dotsThreeVertical),
+                  tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
+                  itemBuilder: (context) => [
+                    for (var index = 0; index < hidden.length; index++)
+                      PopupMenuItem<int>(
+                        value: index,
+                        // A disabled entry keeps its tooltip's reason visible
+                        // rather than vanishing from the menu.
+                        enabled: hidden[index].onPressed != null,
+                        child: Tooltip(
+                          message: hidden[index].tooltip,
+                          child: MenuItemContent(
+                            icon: hidden[index].icon,
+                            label: hidden[index].label,
+                            scale: ControlScale.normal,
+                          ),
                         ),
                       ),
-                    ),
-                ],
-                onSelected: (index) => hidden[index].onPressed?.call(),
+                  ],
+                  onSelected: (index) => hidden[index].onPressed?.call(),
+                ),
               ),
             ],
           ],

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 import 'package:photo_view/photo_view.dart';
 
@@ -21,7 +22,7 @@ class ImageViewerDialog extends StatelessWidget {
     final theme = Theme.of(context);
 
     return BaseViewerDialog(
-      icon: PhosphorIconsRegular.image,
+      icon: IconRole.image,
       title: 'Image Viewer',
       subtitle: fileName,
       backgroundColor: theme.colorScheme.scrim,

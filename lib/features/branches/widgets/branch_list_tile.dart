@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -117,7 +118,7 @@ class BranchListTile extends ConsumerWidget {
       ),
       trailing: isLocal && !branch.isCurrent
           ? BaseIconButton(
-              icon: PhosphorIconsRegular.arrowRight,
+              icon: IconRole.arrowRight,
               tooltip: AppLocalizations.of(context)!.checkout,
               onPressed: () => _checkoutBranch(context, ref),
             )
@@ -126,26 +127,26 @@ class BranchListTile extends ConsumerWidget {
         if (isLocal && !branch.isCurrent)
           MenuAction(
             label: AppLocalizations.of(context)!.checkout,
-            icon: PhosphorIconsRegular.arrowRight,
+            icon: IconRole.arrowRight,
             onPressed: () => _checkoutBranch(context, ref),
           ),
         if (isLocal && !branch.isProtected)
           MenuAction(
             label: AppLocalizations.of(context)!.rename,
-            icon: PhosphorIconsRegular.pencil,
+            icon: IconRole.pencil,
             onPressed: () => _renameBranch(context, ref),
           ),
         if (isLocal && !branch.isCurrent)
           MenuAction(
             label: AppLocalizations.of(context)!.mergeIntoCurrent,
-            icon: PhosphorIconsRegular.gitMerge,
+            icon: IconRole.gitMerge,
             onPressed: () => _mergeBranch(context, ref),
           ),
         // Checkout option for remote branches
         if (!isLocal)
           MenuAction(
             label: AppLocalizations.of(context)!.checkout,
-            icon: PhosphorIconsRegular.arrowRight,
+            icon: IconRole.arrowRight,
             onPressed: () => _checkoutBranch(context, ref),
           ),
         if (!branch.isCurrent && !branch.isProtected)
@@ -154,7 +155,7 @@ class BranchListTile extends ConsumerWidget {
           // language can express "destructive" its own way.
           MenuAction(
             label: 'Delete',
-            icon: PhosphorIconsRegular.trash,
+            icon: IconRole.trash,
             role: MenuActionRole.destructive,
             onPressed: () => _deleteBranch(context, ref),
           ),
@@ -250,7 +251,7 @@ class BranchListTile extends ConsumerWidget {
         context: context,
         ref: ref,
         action: DestructiveAction.deleteRemoteBranch,
-        icon: PhosphorIconsRegular.warning,
+        icon: IconRole.warning,
         title: l10n.deleteBranchDialog,
         message: l10n.deleteRemoteBranchConfirmMessage(
           branch.branchNameWithoutRemote,

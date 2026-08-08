@@ -113,10 +113,15 @@ void main() {
       }
 
       // How much of this screen the skin actually draws; see
-      // [kContractRenderedPerScene] for why an exact number and not a floor.
+      // [kContractRenderedPerScene] for why an exact number and not a floor,
+      // and [kContractRenderedUnderBlueprint] for the one scene whose count
+      // the SKIN changes and why that is a measurement rather than a licence.
       expect(
         contractRenderedComponents(),
-        kContractRenderedPerScene[scene.name],
+        kSkinUnderTest == kBlueprintSkinId
+            ? (kContractRenderedUnderBlueprint[scene.name] ??
+                  kContractRenderedPerScene[scene.name])
+            : kContractRenderedPerScene[scene.name],
         reason:
             'The ${scene.name} scene renders a different number of components '
             'through the contract than kContractRenderedPerScene records. If '
@@ -217,10 +222,18 @@ void main() {
 /// This is that comparison, written down. Every entry is the number of
 /// application widgets in that scene that reach their skin - one per
 /// `SkinScope.render`, which is the single fence every migrated `Base*`
-/// component plants. **All twelve are zero, and that is the honest statement of
-/// where P2 left the programme**: the seam is installed at the application root
-/// and in every test root, one component (`BaseDateField`) renders through it,
-/// and its four call sites are in two dialogs that no screen scene reaches.
+/// component plants.
+///
+/// **They were all zero when P2 ended, and P3a's icon conversion is what moved
+/// them.** The vocabulary conversion is what unblocked the façade: while
+/// `BaseButton.leadingIcon` was an `IconData` and `ButtonSpec.leading` an
+/// `IconRole`, no button could be wired through `controls.button` without a
+/// reverse glyph table in `lib/` - conflict C3 exactly. With the parameters
+/// speaking the contract's vocabulary, `BaseButton`, `BaseIconButton` and
+/// `BaseIcon` became façades over their members, and every screen that draws a
+/// button or a mark now reaches its skin. The shell and the settings screen
+/// dominate because they are almost entirely toolbar actions and rows of
+/// buttons.
 ///
 /// Asserted as an exact number rather than a floor, in both directions. A drop
 /// is a regression - a component stopped reaching its skin. A rise is a
@@ -228,17 +241,49 @@ void main() {
 /// commit that earned it; a floor of zero would let the register go stale and
 /// silently stop measuring, which is how the sweep got here in the first place.
 const Map<String, int> kContractRenderedPerScene = <String, int>{
-  'shell': 0,
-  'workspaces': 0,
-  'repositories': 0,
-  'changes': 0,
-  'history': 0,
-  'browse': 0,
-  'branches': 0,
-  'stashes': 0,
-  'tags': 0,
-  'settings': 0,
-  'merge_conflicts': 0,
+  // 39 and not 38 since the overflow bar's own "more" anchor stopped being a
+  // hand-written `Icon(PhosphorIconsRegular.dotsThreeVertical)` and became a
+  // `BaseIcon`. It was the one mark in that bar a Fluent or macOS skin could
+  // not have answered, sitting among actions the skin already drew.
+  'shell': 39,
+  'workspaces': 6,
+  'repositories': 9,
+  'changes': 4,
+  'history': 3,
+  'browse': 1,
+  'branches': 4,
+  'stashes': 2,
+  'tags': 3,
+  'settings': 31,
+  'merge_conflicts': 1,
+};
+
+/// The scenes whose count the SKIN changes, and by how much.
+///
+/// The register above claims the number is skin-independent: application code
+/// plants the fences, so Material and the blueprint should agree, and a
+/// disagreement "would itself be a defect". The shell disagrees - 39 under
+/// Material, 38 under the blueprint - and the claim is right: the
+/// disagreement IS the defect, and it is one this programme already knows
+/// about by name.
+///
+/// `OverflowActionBar.visibleActionCount()`
+/// (lib/shared/widgets/overflow_action_bar.dart:49-69) decides how many
+/// toolbar actions to draw by dividing the width it was given by
+/// `itemExtent = 48` - a number the application knows only because Material's
+/// mark-only control happens to lay out at 48 dp. Under a design language
+/// whose controls are wider, the neighbours in the same toolbar take more
+/// room, the bar is handed less width, and it draws one action fewer. That is
+/// application code deciding a layout from a design language's measurement,
+/// which is exactly the residue `docs/SKIN-CONTRACT.md` §1 names, with this
+/// very file as its worked example and P5 as its home.
+///
+/// It is recorded here rather than hidden behind a floor for the same reason
+/// every other number is exact: when P5 moves the arithmetic into the skin
+/// this map becomes empty, and the day it does is visible. A NEW entry
+/// appearing here is a new leak of the same kind and has to be argued for.
+const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
+  'shell': 38,
 };
 
 /// How many application widgets currently on screen render through a contract

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../core/config/config_providers.dart';
 import '../../core/git/destructive_action.dart';
@@ -38,7 +39,7 @@ Future<bool> confirmDestructive({
   required String title,
   required String message,
   String? confirmLabel,
-  IconData? icon,
+  IconRole? icon,
   String? confirmationToken,
 }) async {
   final tier = action.tier;
@@ -141,7 +142,7 @@ class _TypeToConfirmDialog extends StatefulWidget {
   final String message;
   final String confirmLabel;
   final String token;
-  final IconData? icon;
+  final IconRole? icon;
 
   @override
   State<_TypeToConfirmDialog> createState() => _TypeToConfirmDialogState();

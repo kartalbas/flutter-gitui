@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, ControlScale;
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 
@@ -392,35 +393,35 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                   PopupMenuItem(
                     value: 'view_diff',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.gitDiff,
+                      icon: IconRole.gitDiff,
                       label: AppLocalizations.of(context)!.viewDiff,
-                      iconSize: AppTheme.iconS,
+                      scale: ControlScale.compact,
                     ),
                   ),
                   PopupMenuItem(
                     value: 'download',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.download,
+                      icon: IconRole.download,
                       label: AppLocalizations.of(context)!.labelDownloadFile,
-                      iconSize: AppTheme.iconS,
+                      scale: ControlScale.compact,
                     ),
                   ),
                   PopupMenuItem(
                     value: 'open',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.textbox,
+                      icon: IconRole.textbox,
                       label: AppLocalizations.of(context)!.openInEditor,
-                      iconSize: AppTheme.iconS,
+                      scale: ControlScale.compact,
                     ),
                   ),
                   PopupMenuItem(
                     value: 'open_folder',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.folderOpen,
+                      icon: IconRole.folderOpen,
                       label: AppLocalizations.of(
                         context,
                       )!.labelDownloadAndOpenFolder,
-                      iconSize: AppTheme.iconS,
+                      scale: ControlScale.compact,
                     ),
                   ),
                 ],

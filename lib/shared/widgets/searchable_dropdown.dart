@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -220,7 +221,13 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                 children: [
                   if (_textController.text.isNotEmpty)
                     BaseIconButton(
-                      icon: Icons.clear,
+                      icon: IconRole.x,
+                      // A mark-only control names itself. Nothing named this
+                      // one before, which the required tooltip now makes
+                      // impossible to leave out.
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).deleteButtonTooltip,
                       size: ButtonSize.small,
                       onPressed: () {
                         _textController.clear();

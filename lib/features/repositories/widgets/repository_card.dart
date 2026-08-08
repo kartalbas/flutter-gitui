@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show ControlScale, IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -102,9 +103,11 @@ class RepositoryCard extends ConsumerWidget {
               // Batch operation result icon
               _buildBatchResultIcon(context, ref),
               BaseIconButton(
-                icon: repository.isFavorite
-                    ? PhosphorIconsFill.star
-                    : PhosphorIconsRegular.star,
+                // One role, one mark. The solid-versus-outline difference
+                // this drew by hand is a WEIGHT, and a weight is the skin's
+                // decision (#249 conflict C3): `isSelected` carries the fact
+                // across the seam, and the skin answers it.
+                icon: IconRole.star,
                 isSelected: repository.isFavorite,
                 onPressed: onToggleFavorite,
                 tooltip: repository.isFavorite
@@ -125,22 +128,22 @@ class RepositoryCard extends ConsumerWidget {
                       PopupMenuItem<String>(
                         value: 'open_in_editor',
                         child: MenuItemContent(
-                          icon: PhosphorIconsRegular.code,
+                          icon: IconRole.code,
                           label: AppLocalizations.of(
                             context,
                           )!.openFolderInEditor,
-                          iconSize: AppTheme.iconM,
+                          scale: ControlScale.normal,
                         ),
                       ),
                     if (status.hasRemote && onEditRemoteUrl != null)
                       PopupMenuItem<String>(
                         value: 'edit_remote_url',
                         child: MenuItemContent(
-                          icon: PhosphorIconsRegular.link,
+                          icon: IconRole.link,
                           label: AppLocalizations.of(
                             context,
                           )!.editRemoteUrl('origin'),
-                          iconSize: AppTheme.iconM,
+                          scale: ControlScale.normal,
                         ),
                       ),
                   ],
@@ -156,7 +159,7 @@ class RepositoryCard extends ConsumerWidget {
                   },
                 ),
               BaseIconButton(
-                icon: PhosphorIconsRegular.trash,
+                icon: IconRole.trash,
                 onPressed: onRemove,
                 tooltip: AppLocalizations.of(
                   context,
@@ -436,9 +439,17 @@ class RepositoryCard extends ConsumerWidget {
     }
 
     final isSuccess = batchResult.success;
-    final icon = isSuccess
-        ? PhosphorIconsBold.checkCircle
-        : PhosphorIconsBold.warningCircle;
+    // Both marks were drawn at Phosphor BOLD before the conversion and now
+    // take the ordinary stroke: an `IconButtonSpec` carries `selected`, which
+    // is a state, and nothing here is a state — the weight was the same on
+    // both branches of the ternary. The application draws this same
+    // "how did the operation end" mark at BOTH weights already:
+    // `git_output_dialog.dart` and `batch_operation_progress_dialog.dart:392`
+    // draw it at the ordinary stroke while `batch_result_dialog.dart` and
+    // `batch_operation_progress_dialog.dart:254` draw it bold, so the heavier
+    // stroke was never carrying the meaning. Recorded and pinned by
+    // `test/shared/icons/icon_weight_census_test.dart`.
+    final icon = isSuccess ? IconRole.checkCircle : IconRole.warningCircle;
 
     return Padding(
       padding: const EdgeInsets.only(right: AppTheme.paddingS),

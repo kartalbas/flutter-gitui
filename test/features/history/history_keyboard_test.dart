@@ -27,6 +27,7 @@ import 'package:flutter_gitui/features/history/widgets/deep_search_states.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 
 import 'support/scripted_git_service.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// The scripted service with the non-log calls the screen's panels make
 /// stubbed out, so no test ever shells out to git.
@@ -66,6 +67,9 @@ Future<void> _pumpHistory(
         currentBranchProvider.overrideWith((ref) async => 'main'),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const HistoryScreen(),

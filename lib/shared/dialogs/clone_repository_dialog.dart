@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -44,7 +45,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
   @override
   Widget build(BuildContext context) {
     return BaseDialog(
-      icon: PhosphorIconsRegular.downloadSimple,
+      icon: IconRole.downloadSimple,
       title: AppLocalizations.of(context)!.cloneRepository,
       // Enter clones, from any field; Esc cancels. The dialog must be
       // completable without reaching for the mouse.
@@ -66,8 +67,8 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               controller: _urlController,
               label: AppLocalizations.of(context)!.repositoryUrl,
               hintText: AppLocalizations.of(context)!.repositoryUrlHint,
-              prefixIcon: PhosphorIconsRegular.globe,
-              suffixIcon: PhosphorIconsRegular.cloudArrowDown,
+              prefixIcon: IconRole.globe,
+              suffixIcon: IconRole.cloudArrowDown,
               onSuffixTap: _selectHostedRepository,
               suffixTooltip: 'Browse repositories',
               enabled: !_isCloning,
@@ -83,8 +84,8 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               controller: _pathController,
               label: AppLocalizations.of(context)!.destinationPath,
               hintText: AppLocalizations.of(context)!.destinationPathHint,
-              prefixIcon: PhosphorIconsRegular.folder,
-              suffixIcon: kIsWeb ? null : PhosphorIconsRegular.folderOpen,
+              prefixIcon: IconRole.folder,
+              suffixIcon: kIsWeb ? null : IconRole.folderOpen,
               onSuffixTap: kIsWeb ? null : _browsePath,
               suffixTooltip: AppLocalizations.of(context)!.browse,
               enabled: !_isCloning,
@@ -96,7 +97,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               controller: _branchController,
               label: AppLocalizations.of(context)!.branchOptional,
               hintText: AppLocalizations.of(context)!.hintTextDefaultBranch,
-              prefixIcon: PhosphorIconsRegular.gitBranch,
+              prefixIcon: IconRole.gitBranch,
               enabled: !_isCloning,
             ),
             const SizedBox(height: AppTheme.paddingM),
@@ -208,7 +209,7 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
         DialogAction(
           label: AppLocalizations.of(context)!.clone,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.downloadSimple,
+          icon: IconRole.downloadSimple,
           enabled: !_isCloning,
           onPressed: _cloneRepository,
         ),

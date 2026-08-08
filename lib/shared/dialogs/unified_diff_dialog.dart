@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_parser.dart';
@@ -104,7 +105,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
     }
 
     return BaseViewerDialog(
-      icon: PhosphorIconsRegular.gitDiff,
+      icon: IconRole.gitDiff,
       title: title,
       subtitle: subtitle,
       headerActions: [
@@ -118,9 +119,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
         // Compact mode toggle (not for stash diffs - they're already simple)
         if (widget.stash == null)
           BaseIconButton(
-            icon: _compactMode
-                ? PhosphorIconsRegular.textOutdent
-                : PhosphorIconsRegular.textIndent,
+            icon: _compactMode ? IconRole.textOutdent : IconRole.textIndent,
             tooltip: _compactMode ? 'Compact View' : 'Normal View',
             onPressed: () async {
               setState(() {
@@ -202,7 +201,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
       BaseButton(
         label: l10n.labelCopyAll,
         variant: ButtonVariant.tertiary,
-        leadingIcon: PhosphorIconsRegular.copy,
+        leadingIcon: IconRole.copy,
         onPressed: () async {
           // Reuse the already-resolved diff instead of spawning a second git
           // process for content that is on screen.
@@ -232,7 +231,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
         BaseButton(
           label: l10n.labelOpenInExternalTool,
           variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.arrowSquareOut,
+          leadingIcon: IconRole.arrowSquareOut,
           onPressed: () async {
             // Launching the external tool outlives the route's exit
             // transition, so the messenger is captured while the dialog

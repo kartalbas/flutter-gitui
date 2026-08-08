@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -125,7 +126,12 @@ class _RepositorySwitcherDialogState
     }
 
     return BaseDialog(
-      icon: PhosphorIconsBold.gitCommit,
+      // Drawn at Phosphor BOLD before the conversion: same mark, heavier
+      // stroke. A role carries no weight (#249 conflict C3) and nothing here
+      // is a state, so the header mark now takes the ordinary stroke — the
+      // one this mark takes at 21 other sites. Recorded and pinned by
+      // `test/shared/icons/icon_weight_census_test.dart`.
+      icon: IconRole.gitCommit,
       title: AppLocalizations.of(context)!.switchRepository,
       // Enter opens the highlighted repository from anywhere in the dialog.
       onSubmit: _matches.isEmpty ? null : _confirm,
@@ -140,7 +146,7 @@ class _RepositorySwitcherDialogState
               controller: _searchController,
               autofocus: true,
               hintText: AppLocalizations.of(context)!.searchRepositories,
-              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+              prefixIcon: IconRole.magnifyingGlass,
               onChanged: (value) {
                 setState(() => _searchQuery = value);
                 _resetHighlight();

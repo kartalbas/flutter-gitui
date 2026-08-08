@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_gitui/shared/widgets/base_focus_region.dart';
+import '../../skin/pump_under_skin.dart';
 
 Widget _stop(String label) => Focus(
   debugLabel: label,
@@ -47,7 +48,13 @@ Future<void> _pumpHost(
   if (shortcuts != null) {
     child = CallbackShortcuts(bindings: shortcuts, child: child);
   }
-  await tester.pumpWidget(MaterialApp(home: child));
+  await tester.pumpWidget(
+    MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+      home: child,
+    ),
+  );
   // The host decides on its focus of last resort on the frame after the
   // autofocus pipeline settled; give it those frames.
   await tester.pump();

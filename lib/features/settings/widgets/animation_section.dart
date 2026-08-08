@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -35,7 +36,7 @@ class AnimationSection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.animations,
-      icon: PhosphorIconsRegular.filmStrip,
+      icon: IconRole.filmStrip,
       children: [
         BaseListItem(
           leading: const Icon(PhosphorIconsRegular.filmStrip),

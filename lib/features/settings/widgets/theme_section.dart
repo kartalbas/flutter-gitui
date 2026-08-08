@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../generated/app_localizations.dart';
 
@@ -39,7 +40,7 @@ class ThemeSection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.appearance,
-      icon: PhosphorIconsRegular.palette,
+      icon: IconRole.palette,
       children: [
         BaseListItem(
           leading: const Icon(PhosphorIconsRegular.palette),

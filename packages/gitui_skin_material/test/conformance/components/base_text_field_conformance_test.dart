@@ -35,6 +35,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
@@ -84,7 +86,7 @@ Widget _baseField({
   String? error,
   bool enabled = true,
   TextFieldVariant variant = TextFieldVariant.bordered,
-  IconData? prefixIcon,
+  IconRole? prefixIcon,
 }) {
   return SizedBox(
     width: _probeWidth,
@@ -428,12 +430,18 @@ void main() {
         find.byIcon(Icons.search),
       );
 
-      await pumpConformance(tester, _baseField(prefixIcon: Icons.search));
+      await pumpConformance(
+        tester,
+        _baseField(prefixIcon: IconRole.magnifyingGlass),
+      );
 
       expectConformant(
         token: 'BaseTextField.prefixIcon.size',
         component: 'BaseTextField',
-        measured: effectiveIconSize(tester, find.byIcon(Icons.search)),
+        measured: effectiveIconSize(
+          tester,
+          find.byIcon(MaterialGlyphs.of(IconRole.magnifyingGlass)),
+        ),
         expected: expected,
       );
     });

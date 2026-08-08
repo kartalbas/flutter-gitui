@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_menu_item.dart';
@@ -163,21 +165,21 @@ class TagListTile extends ConsumerWidget {
                     PopupMenuItem(
                       value: 'checkout',
                       child: MenuItemContent(
-                        icon: PhosphorIconsRegular.gitBranch,
+                        icon: IconRole.gitBranch,
                         label: AppLocalizations.of(context)!.checkout,
                       ),
                     ),
                     PopupMenuItem(
                       value: 'createBranch',
                       child: MenuItemContent(
-                        icon: PhosphorIconsRegular.gitBranch,
+                        icon: IconRole.gitBranch,
                         label: AppLocalizations.of(context)!.createBranch,
                       ),
                     ),
                     PopupMenuItem(
                       value: 'viewInHistory',
                       child: MenuItemContent(
-                        icon: PhosphorIconsRegular.clockCounterClockwise,
+                        icon: IconRole.clockCounterClockwise,
                         label: AppLocalizations.of(
                           context,
                         )!.viewCommitInHistory,
@@ -188,7 +190,7 @@ class TagListTile extends ConsumerWidget {
                       PopupMenuItem(
                         value: 'push',
                         child: MenuItemContent(
-                          icon: PhosphorIconsRegular.upload,
+                          icon: IconRole.upload,
                           label: AppLocalizations.of(context)!.push,
                         ),
                       ),
@@ -198,9 +200,9 @@ class TagListTile extends ConsumerWidget {
                     PopupMenuItem(
                       value: 'delete',
                       child: MenuItemContent(
-                        icon: PhosphorIconsRegular.trash,
+                        icon: IconRole.trash,
                         label: AppLocalizations.of(context)!.delete,
-                        iconColor: Theme.of(context).colorScheme.error,
+                        tone: Tone.danger,
                         labelColor: Theme.of(context).colorScheme.error,
                       ),
                     ),
@@ -255,14 +257,14 @@ class TagListTile extends ConsumerWidget {
             tag.isAnnotated
                 ? AppLocalizations.of(context)!.tagTypeAnnotated
                 : AppLocalizations.of(context)!.tagTypeLightweight,
-            PhosphorIconsRegular.tag,
+            IconRole.tag,
           ),
           const SizedBox(height: AppTheme.paddingS),
           _buildDetailRow(
             context,
             AppLocalizations.of(context)!.tagDetailsCommit,
             tag.shortHash,
-            PhosphorIconsRegular.gitCommit,
+            IconRole.gitCommit,
           ),
           if (tag.displayTagger != null) ...[
             const SizedBox(height: AppTheme.paddingS),
@@ -270,7 +272,7 @@ class TagListTile extends ConsumerWidget {
               context,
               AppLocalizations.of(context)!.tagDetailsTagger,
               tag.displayTagger!,
-              PhosphorIconsRegular.user,
+              IconRole.user,
             ),
           ],
           if (tag.date != null) ...[
@@ -279,7 +281,7 @@ class TagListTile extends ConsumerWidget {
               context,
               AppLocalizations.of(context)!.tagDetailsDate,
               tag.dateDisplay(Localizations.localeOf(context).languageCode),
-              PhosphorIconsRegular.calendar,
+              IconRole.calendar,
             ),
           ],
           if (tag.message != null && tag.message!.isNotEmpty) ...[
@@ -314,15 +316,15 @@ class TagListTile extends ConsumerWidget {
     BuildContext context,
     String label,
     String value,
-    IconData icon,
+    IconRole icon,
   ) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        // The row's mark, resolved by the skin. Muted at the compact scale is
+        // exactly what this row drew before the conversion - 16 logical
+        // pixels in `onSurfaceVariant` - so the swap changes the vocabulary,
+        // not a pixel.
+        BaseIcon(icon, tone: Tone.muted, scale: ControlScale.compact),
         const SizedBox(width: AppTheme.paddingS),
         BodySmallLabel(
           '$label:',
@@ -342,19 +344,19 @@ class TagListTile extends ConsumerWidget {
         BaseButton(
           label: AppLocalizations.of(context)!.checkout,
           variant: ButtonVariant.secondary,
-          leadingIcon: PhosphorIconsRegular.gitBranch,
+          leadingIcon: IconRole.gitBranch,
           onPressed: () => _checkoutTag(context, ref),
         ),
         BaseButton(
           label: AppLocalizations.of(context)!.createBranch,
           variant: ButtonVariant.secondary,
-          leadingIcon: PhosphorIconsRegular.gitBranch,
+          leadingIcon: IconRole.gitBranch,
           onPressed: () => _createBranchFromTag(context, ref),
         ),
         BaseButton(
           label: AppLocalizations.of(context)!.viewCommitInHistory,
           variant: ButtonVariant.secondary,
-          leadingIcon: PhosphorIconsRegular.clockCounterClockwise,
+          leadingIcon: IconRole.clockCounterClockwise,
           onPressed: () => _viewCommitInHistory(context, ref),
         ),
         // Only show push button if tag is unpushed and we have remotes
@@ -362,13 +364,13 @@ class TagListTile extends ConsumerWidget {
           BaseButton(
             label: AppLocalizations.of(context)!.push,
             variant: ButtonVariant.secondary,
-            leadingIcon: PhosphorIconsRegular.upload,
+            leadingIcon: IconRole.upload,
             onPressed: () => _pushTag(context, ref),
           ),
         BaseButton(
           label: AppLocalizations.of(context)!.delete,
           variant: ButtonVariant.dangerSecondary,
-          leadingIcon: PhosphorIconsRegular.trash,
+          leadingIcon: IconRole.trash,
           onPressed: () => _confirmDeleteTag(context, ref),
         ),
       ],
@@ -521,7 +523,7 @@ class TagListTile extends ConsumerWidget {
       action: willDeleteFromRemote
           ? DestructiveAction.deleteRemoteTag
           : DestructiveAction.deleteLocalTag,
-      icon: PhosphorIconsRegular.warningCircle,
+      icon: IconRole.warningCircle,
       title: l10n.dialogTitleDeleteTag,
       // Without remotes the tag can only be deleted locally, so the message
       // must not claim it will also be removed from a remote.

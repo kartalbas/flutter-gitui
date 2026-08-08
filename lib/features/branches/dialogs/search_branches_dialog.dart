@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -33,7 +33,7 @@ class _SearchBranchesDialogState extends State<SearchBranchesDialog> {
 
     return BaseDialog(
       title: l10n.searchBranchesDialog,
-      icon: PhosphorIconsRegular.magnifyingGlass,
+      icon: IconRole.magnifyingGlass,
       variant: DialogVariant.normal,
       // Enter applies the filter from anywhere in the dialog. The field's own
       // onSubmitted used to be the only path, so Enter died the moment focus
@@ -44,7 +44,7 @@ class _SearchBranchesDialogState extends State<SearchBranchesDialog> {
         controller: _queryController,
         autofocus: true,
         hintText: l10n.branchName,
-        prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+        prefixIcon: IconRole.magnifyingGlass,
         onSubmitted: (_) => _apply(),
       ),
       // Clear, Cancel, Search: the order advanced_search_dialog.dart already

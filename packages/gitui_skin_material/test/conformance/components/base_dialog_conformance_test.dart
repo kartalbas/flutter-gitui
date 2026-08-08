@@ -62,6 +62,8 @@ import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
@@ -122,7 +124,7 @@ Widget _oracleDialog({
 /// from the title into a measurement of the close button's height instead. The
 /// close button is measured on its own, in the tap-target group below.
 Widget _baseDialog({
-  IconData? icon,
+  IconRole? icon,
   DialogVariant variant = DialogVariant.normal,
   bool withActions = true,
   Widget? content,
@@ -528,13 +530,19 @@ void main() {
 
       await pumpConformanceDialog(
         tester,
-        _baseDialog(icon: Icons.help, variant: DialogVariant.confirmation),
+        _baseDialog(
+          icon: IconRole.question,
+          variant: DialogVariant.confirmation,
+        ),
       );
 
       expectConformant(
         token: 'BaseDialog.icon.size',
         component: 'BaseDialog',
-        measured: effectiveIconSize(tester, find.byIcon(Icons.help)),
+        measured: effectiveIconSize(
+          tester,
+          find.byIcon(MaterialGlyphs.of(IconRole.question)),
+        ),
         expected: expected,
       );
     });
@@ -542,7 +550,10 @@ void main() {
     testWidgets('colour (DLG-002)', (WidgetTester tester) async {
       await pumpConformanceDialog(
         tester,
-        _baseDialog(icon: Icons.help, variant: DialogVariant.confirmation),
+        _baseDialog(
+          icon: IconRole.question,
+          variant: DialogVariant.confirmation,
+        ),
       );
       final ThemeData theme = _theme(tester);
       // Pinned: the app's dialogTheme.iconColor overrides this token too, so
@@ -557,7 +568,7 @@ void main() {
         component: 'BaseDialog',
         measured: colorRoleName(
           theme.colorScheme,
-          _iconColor(tester, find.byIcon(Icons.help)),
+          _iconColor(tester, find.byIcon(MaterialGlyphs.of(IconRole.question))),
         ),
         expected: expected,
         unit: '',

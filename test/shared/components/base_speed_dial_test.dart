@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_speed_dial.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
+import '../../skin/pump_under_skin.dart';
 
 Future<void> _pumpDial(
   WidgetTester tester, {
@@ -19,6 +20,9 @@ Future<void> _pumpDial(
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       // The dial's own button names the next press ("Expand"/"Collapse") in
       // the user's language, so it reads AppLocalizations and needs the app's
       // delegates here just as every screen supplies them.
@@ -205,6 +209,9 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

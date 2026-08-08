@@ -12,6 +12,7 @@ import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/tag.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 GitTag _tag(String name) => GitTag(
   name: name,
@@ -34,6 +35,9 @@ void main() {
           remoteNamesProvider.overrideWith((ref) async => const <String>[]),
         ],
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const TagsScreen(),

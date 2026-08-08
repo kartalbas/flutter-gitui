@@ -8,11 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gitui/shared/components/base_panel.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
+import '../../skin/pump_under_skin.dart';
 
 void main() {
   Future<void> pumpPanel(WidgetTester tester, {bool initiallyExpanded = true}) {
     return tester.pumpWidget(
       MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         home: Scaffold(
           body: BasePanel(
             title: const Text('Panel'),

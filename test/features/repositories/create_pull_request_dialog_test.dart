@@ -15,6 +15,7 @@ import 'package:flutter_gitui/features/repositories/dialogs/create_pull_request_
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
+import '../../skin/pump_under_skin.dart';
 
 const _feature = GitBranch(
   name: 'feature',
@@ -38,6 +39,9 @@ Future<void> _openDialog(
 ) async {
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

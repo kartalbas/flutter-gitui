@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_dialog.dart';
@@ -23,9 +23,16 @@ class BatchResultDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSuccess = result.success;
-    final icon = isSuccess
-        ? PhosphorIconsBold.checkCircle
-        : PhosphorIconsBold.warningCircle;
+    // Both marks were drawn at Phosphor BOLD before the conversion and now
+    // take the ordinary stroke, because a role carries no weight (#249
+    // conflict C3) and `BaseDialog` has no state to re-decide one from.
+    // The sibling dialog that reports exactly the same thing —
+    // `git_output_dialog.dart`, "the git command succeeded / failed" — always
+    // drew its header mark at the ordinary stroke, and so does
+    // `batch_operation_progress_dialog.dart`, so this dialog was the odd one
+    // of three rather than the one carrying a distinction. Recorded and
+    // pinned by `test/shared/icons/icon_weight_census_test.dart`.
+    final icon = isSuccess ? IconRole.checkCircle : IconRole.warningCircle;
     final color = isSuccess
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.error;
@@ -90,7 +97,7 @@ class BatchResultDialog extends StatelessWidget {
         DialogAction(
           label: 'Copy',
           role: DialogActionRole.neutral,
-          icon: PhosphorIconsRegular.copy,
+          icon: IconRole.copy,
           onPressed: () {
             Clipboard.setData(ClipboardData(text: result.message));
             NotificationService.showSuccess(
@@ -109,7 +116,7 @@ class BatchResultDialog extends StatelessWidget {
         DialogAction(
           label: 'Dismiss',
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.x,
+          icon: IconRole.x,
           onPressed: () {
             onDismiss();
             Navigator.of(context).pop();

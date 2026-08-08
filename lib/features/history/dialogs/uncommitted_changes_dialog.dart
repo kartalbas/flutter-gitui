@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -18,7 +18,7 @@ class UncommittedChangesDialog extends StatelessWidget {
 
     return BaseDialog(
       title: l10n.uncommittedChanges,
-      icon: PhosphorIconsRegular.warning,
+      icon: IconRole.warning,
       variant: DialogVariant.confirmation,
       maxWidth: 400,
       onSubmit: () => Navigator.pop(context, true),

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -253,9 +255,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                 PopupMenuItem<String>(
                   value: 'add',
                   child: MenuItemContent(
-                    icon: PhosphorIconsRegular.plus,
+                    icon: IconRole.plus,
                     label: AppLocalizations.of(context)!.tooltipAddRepository,
-                    iconSize: 20,
+                    scale: ControlScale.normal,
                   ),
                   onTap: () => _openRepository(context, ref),
                 ),
@@ -264,9 +266,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                 PopupMenuItem<String>(
                   value: 'clone',
                   child: MenuItemContent(
-                    icon: PhosphorIconsRegular.downloadSimple,
+                    icon: IconRole.downloadSimple,
                     label: AppLocalizations.of(context)!.cloneRepository,
-                    iconSize: 20,
+                    scale: ControlScale.normal,
                   ),
                   onTap: () => _showCloneDialog(context),
                 ),
@@ -274,9 +276,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                 PopupMenuItem<String>(
                   value: 'init',
                   child: MenuItemContent(
-                    icon: PhosphorIconsRegular.folderPlus,
+                    icon: IconRole.folderPlus,
                     label: AppLocalizations.of(context)!.initializeRepository,
-                    iconSize: 20,
+                    scale: ControlScale.normal,
                   ),
                   onTap: () => _showInitDialog(context),
                 ),
@@ -285,9 +287,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                 PopupMenuItem<String>(
                   value: 'validate',
                   child: MenuItemContent(
-                    icon: PhosphorIconsRegular.checkCircle,
+                    icon: IconRole.checkCircle,
                     label: AppLocalizations.of(context)!.validateAll,
-                    iconSize: 20,
+                    scale: ControlScale.normal,
                   ),
                   onTap: () => _validateRepositories(ref),
                 ),
@@ -296,10 +298,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                   PopupMenuItem<String>(
                     value: 'clear',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.trash,
+                      icon: IconRole.trash,
                       label: AppLocalizations.of(context)!.clearAllRepositories,
-                      iconSize: 20,
-                      iconColor: Theme.of(context).colorScheme.error,
+                      scale: ControlScale.normal,
+                      tone: Tone.danger,
                       labelColor: Theme.of(context).colorScheme.error,
                     ),
                     onTap: () => _confirmClearAll(context, ref),
@@ -607,7 +609,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
           context: context,
           dialog: BaseDialog(
             title: AppLocalizations.of(context)!.webBrowserLimitation,
-            icon: PhosphorIconsRegular.globe,
+            icon: IconRole.globe,
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(
               AppLocalizations.of(
@@ -689,7 +691,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       context: context,
       dialog: BaseDialog(
         title: AppLocalizations.of(context)!.removeRepository,
-        icon: PhosphorIconsRegular.trash,
+        icon: IconRole.trash,
         variant: DialogVariant.destructive,
         content: BodyMediumLabel(
           'Remove "${repo.displayName}" from workspace?\n\n'
@@ -790,7 +792,7 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       context: context,
       dialog: BaseDialog(
         title: AppLocalizations.of(context)!.clearAllRepositories,
-        icon: PhosphorIconsRegular.warning,
+        icon: IconRole.warning,
         variant: DialogVariant.destructive,
         content: const BodyMediumLabel(
           'Remove all repositories from workspace?\n\n'

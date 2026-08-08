@@ -17,6 +17,7 @@ import 'package:flutter_gitui/features/browse/widgets/file_tree_view.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/widgets/base_tree_item.dart';
+import '../../skin/pump_under_skin.dart';
 
 void main() {
   late Directory repoDir;
@@ -35,6 +36,9 @@ void main() {
 
   Widget harness({Widget? aboveTree}) => ProviderScope(
     child: MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -82,6 +86,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const Scaffold(body: SizedBox.shrink()),

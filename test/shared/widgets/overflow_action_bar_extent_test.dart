@@ -9,12 +9,13 @@
 // yellow-and-black stripe on a narrow window.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/widgets/overflow_action_bar.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import '../../skin/pump_under_skin.dart';
 
 ToolbarAction _action(int index) => ToolbarAction(
-  icon: PhosphorIconsRegular.gitBranch,
+  icon: IconRole.gitBranch,
   label: 'Action $index',
   tooltip: 'Action $index',
   onPressed: () {},
@@ -27,6 +28,9 @@ Future<void> _pumpBar(
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       home: Scaffold(
         body: Align(
           alignment: Alignment.topLeft,

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_icon.dart';
 import '../../shared/components/base_list_item.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/theme/app_theme.dart';
@@ -176,7 +178,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                     controller: _controller,
                     focusNode: _focusNode,
                     hintText: l10n.hintTextCommandPalette,
-                    prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                    prefixIcon: IconRole.magnifyingGlass,
                     variant: TextFieldVariant.emphasized,
                     onSubmitted: (_) {
                       if (_filteredCommands.isNotEmpty) {
@@ -239,7 +241,18 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                             final l10n = AppLocalizations.of(context)!;
                             return BaseListItem(
                               isSelected: isSelected,
-                              leading: Icon(command.icon),
+                              // The command's mark, resolved by the skin. The
+                              // prominent scale is Material's own default
+                              // glyph size (24), which is exactly what the
+                              // bare `Icon(command.icon)` this replaces
+                              // rendered at under the row's ambient icon
+                              // theme, so the conversion changes the
+                              // vocabulary and not a pixel. The neutral tone
+                              // leaves the colour to the row, as before.
+                              leading: BaseIcon(
+                                command.icon,
+                                scale: ControlScale.prominent,
+                              ),
                               content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

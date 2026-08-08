@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -22,7 +23,7 @@ class HistorySection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.history,
-      icon: PhosphorIconsRegular.clockCounterClockwise,
+      icon: IconRole.clockCounterClockwise,
       children: [
         BaseListItem(
           leading: const Icon(PhosphorIconsRegular.listNumbers),
@@ -36,7 +37,7 @@ class HistorySection extends ConsumerWidget {
             ],
           ),
           trailing: BaseIconButton(
-            icon: PhosphorIconsRegular.pencil,
+            icon: IconRole.pencil,
             // Every icon-only control names its action, for the tooltip a
             // pointer user reads and for the label a keyboard or screen-reader
             // user hears when Tab lands here.

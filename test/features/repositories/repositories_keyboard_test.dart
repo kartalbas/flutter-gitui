@@ -19,6 +19,7 @@ import 'package:flutter_gitui/core/workspace/workspace_list_provider.dart';
 import 'package:flutter_gitui/core/workspace/workspace_provider.dart';
 import 'package:flutter_gitui/features/repositories/repositories_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Serves the scripted repositories and swallows the last-accessed write,
 /// which would otherwise reach the on-disk config from a test.
@@ -130,6 +131,9 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const RepositoriesScreen(),

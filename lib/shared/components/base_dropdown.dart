@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 
 import '../theme/app_theme.dart';
+import 'base_icon.dart';
 import 'base_menu_item.dart';
 import 'base_label.dart';
 import 'base_text_field.dart';
@@ -17,7 +19,9 @@ class BaseDropdown<T> extends StatelessWidget {
   final T? initialValue;
   final String? labelText;
   final String? hintText;
-  final IconData? prefixIcon;
+
+  /// The meaning of an optional leading mark; the skin chooses the glyph.
+  final IconRole? prefixIcon;
   final List<BaseDropdownItem<T>> items;
   final void Function(T?)? onChanged;
   final String? Function(T?)? validator;
@@ -62,9 +66,9 @@ class BaseDropdown<T> extends StatelessWidget {
         // the minimum interactive dimension, and 15 dp shorter than a
         // BaseTextField standing next to it in the same dialog.
         border: const OutlineInputBorder(),
-        prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, size: AppTheme.iconM)
-            : null,
+        prefixIcon: prefixIcon == null
+            ? null
+            : BaseIcon(prefixIcon!, scale: ControlScale.normal),
       ),
       items: items.map((item) {
         return DropdownMenuItem(
@@ -166,7 +170,9 @@ class SearchableBaseDropdown<T> extends StatefulWidget {
   final String? labelText;
   final String? hintText;
   final String? searchHintText;
-  final IconData? prefixIcon;
+
+  /// The meaning of an optional leading mark; the skin chooses the glyph.
+  final IconRole? prefixIcon;
   final List<SearchableDropdownItem<T>> items;
   final void Function(T?)? onChanged;
   final String? Function(T?)? validator;
@@ -296,10 +302,10 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
                   child: Row(
                     children: [
                       if (widget.prefixIcon != null) ...[
-                        Icon(
-                          widget.prefixIcon,
-                          size: AppTheme.iconS,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        BaseIcon(
+                          widget.prefixIcon!,
+                          scale: ControlScale.compact,
+                          tone: Tone.muted,
                         ),
                         const SizedBox(width: AppTheme.paddingS),
                       ],
@@ -312,12 +318,10 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Icon(
-                        _isOpen
-                            ? PhosphorIconsRegular.caretUp
-                            : PhosphorIconsRegular.caretDown,
-                        size: AppTheme.iconS,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      BaseIcon(
+                        _isOpen ? IconRole.caretUp : IconRole.caretDown,
+                        scale: ControlScale.compact,
+                        tone: Tone.muted,
                       ),
                     ],
                   ),
@@ -415,7 +419,7 @@ class _SearchableDropdownOverlayState<T>
                 controller: _searchController,
                 focusNode: _searchFocusNode,
                 hintText: widget.searchHintText,
-                prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                prefixIcon: IconRole.magnifyingGlass,
                 onChanged: (value) {
                   setState(() {
                     _searchQuery = value;

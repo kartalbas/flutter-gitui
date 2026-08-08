@@ -18,6 +18,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/components/base_dropdown.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
@@ -56,7 +58,7 @@ Widget _oracleDropdown({IconData? prefixIcon, String? label = 'Label'}) {
   );
 }
 
-Widget _baseDropdown({IconData? prefixIcon, String? label = 'Label'}) {
+Widget _baseDropdown({IconRole? prefixIcon, String? label = 'Label'}) {
   return SizedBox(
     width: _probeWidth,
     child: BaseDropdown<int>(
@@ -239,12 +241,18 @@ void main() {
         find.byIcon(Icons.search),
       );
 
-      await pumpConformance(tester, _baseDropdown(prefixIcon: Icons.search));
+      await pumpConformance(
+        tester,
+        _baseDropdown(prefixIcon: IconRole.magnifyingGlass),
+      );
 
       expectConformant(
         token: 'BaseDropdown.prefixIcon.size',
         component: 'BaseDropdown',
-        measured: effectiveIconSize(tester, find.byIcon(Icons.search)),
+        measured: effectiveIconSize(
+          tester,
+          find.byIcon(MaterialGlyphs.of(IconRole.magnifyingGlass)),
+        ),
         expected: expected,
       );
     });

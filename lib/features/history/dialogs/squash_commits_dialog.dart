@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../core/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -158,7 +159,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
 
     return BaseDialog(
       title: l10n.squashCommitsDialog,
-      icon: PhosphorIconsRegular.arrowsInLineVertical,
+      icon: IconRole.arrowsInLineVertical,
       variant: DialogVariant.normal,
       maxWidth: AppConstants.maxDialogWidth,
       // The message field is multiline, so Enter inside it writes a newline;

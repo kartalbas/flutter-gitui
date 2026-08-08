@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
@@ -352,8 +353,8 @@ class _AppShellState extends ConsumerState<AppShell> {
                             ),
                             child: BaseIconButton(
                               icon: isRailExtended
-                                  ? PhosphorIconsRegular.caretLeft
-                                  : PhosphorIconsRegular.caretRight,
+                                  ? IconRole.caretLeft
+                                  : IconRole.caretRight,
                               onPressed: () {
                                 ref
                                     .read(configProvider.notifier)
@@ -850,13 +851,13 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     return [
       ToolbarAction(
-        icon: PhosphorIconsRegular.magnifyingGlass,
+        icon: IconRole.magnifyingGlass,
         label: l10n.commandPaletteTooltip,
         tooltip: l10n.commandPaletteTooltip,
         onPressed: () => _showCommandPalette(context),
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.terminal,
+        icon: IconRole.terminal,
         label: l10n.toggleCommandLogTooltip,
         tooltip: l10n.toggleCommandLogTooltip,
         onPressed: () {
@@ -869,9 +870,18 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
       // A standing signal that an update is ready rather than a command, so it
       // keeps the primary emphasis it had as a standalone button.
+      //
+      // The mark is its own role and not `IconRole.downloadSimple`, which the
+      // "Clone repository" action in the same toolbar row names
+      // (`_buildGitActions` below). Both were written as `downloadSimple`
+      // before the conversion, but this one was drawn SOLID and that one as
+      // an outline, so collapsing them onto one role would have left the two
+      // buttons pixel-identical and the emphasis carrying the whole
+      // difference. The application says which MEANING this is; how loud the
+      // mark for it is stays the skin's answer.
       if (updateAvailable != null)
         ToolbarAction(
-          icon: PhosphorIconsFill.downloadSimple,
+          icon: IconRole.updateAvailable,
           label: l10n.updateReadyTooltip(updateAvailable.version),
           tooltip: l10n.updateReadyTooltip(updateAvailable.version),
           variant: ButtonVariant.primary,
@@ -904,7 +914,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     return [
       ToolbarAction(
-        icon: PhosphorIconsRegular.downloadSimple,
+        icon: IconRole.downloadSimple,
         label: l10n.cloneRepository,
         tooltip: l10n.cloneRepository,
         // Cloning brings a repository in rather than acting on one, so unlike
@@ -915,7 +925,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         ),
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.gitBranch,
+        icon: IconRole.gitBranch,
         label: l10n.createBranch,
         tooltip: _gitActionTooltip(
           context,
@@ -925,7 +935,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         onPressed: batchBlock == null ? () => _performCreateBranch(ref) : null,
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.gitPullRequest,
+        icon: IconRole.gitPullRequest,
         label: l10n.createPr,
         tooltip: _gitActionTooltip(
           context,
@@ -938,7 +948,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             : null,
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.gitMerge,
+        icon: IconRole.gitMerge,
         label: l10n.mergeBranches,
         tooltip: _gitActionTooltip(
           context,
@@ -951,7 +961,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             : null,
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.arrowClockwise,
+        icon: IconRole.arrowClockwise,
         label: l10n.fetch,
         tooltip: _gitActionTooltip(
           context,
@@ -961,7 +971,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         onPressed: batchBlock == null ? () => _performFetch(ref) : null,
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.arrowDown,
+        icon: IconRole.arrowDown,
         label: l10n.pull,
         tooltip: _gitActionTooltip(
           context,
@@ -971,7 +981,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         onPressed: batchBlock == null ? () => _performPull(ref) : null,
       ),
       ToolbarAction(
-        icon: PhosphorIconsRegular.arrowUp,
+        icon: IconRole.arrowUp,
         label: l10n.push,
         tooltip: _gitActionTooltip(
           context,

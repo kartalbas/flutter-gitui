@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../core/workspace/models/repository_status.dart';
 import '../../core/workspace/repository_status_provider.dart';
@@ -48,7 +49,7 @@ class BackgroundActivityDialog extends ConsumerWidget {
         .length;
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.pulse,
+      icon: IconRole.pulse,
       title: 'Background activity',
       onSubmit: () => Navigator.of(context).pop(),
       content: SizedBox(

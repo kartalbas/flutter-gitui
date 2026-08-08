@@ -11,6 +11,7 @@ import 'package:flutter_gitui/features/history/models/commit_graph.dart';
 import 'package:flutter_gitui/features/history/widgets/commit_list_item.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
+import '../../skin/pump_under_skin.dart';
 
 GitCommit commit(String hash, {List<String> parents = const []}) {
   final when = DateTime.utc(2026);
@@ -44,6 +45,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            builder: (BuildContext context, Widget? child) =>
+                installSkinUnderTest(child ?? const SizedBox.shrink()),
+
             theme: theme,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,

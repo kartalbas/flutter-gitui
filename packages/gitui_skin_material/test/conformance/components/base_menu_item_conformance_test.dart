@@ -32,6 +32,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/components/base_menu_item.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
@@ -67,14 +69,14 @@ Widget _baseMenu({bool withContent = false}) {
       BaseMenuItem<int>(
         value: 1,
         child: withContent
-            ? const MenuItemContent(icon: Icons.star, label: _enabled)
+            ? const MenuItemContent(icon: IconRole.star, label: _enabled)
             : const Text(_enabled),
       ),
       BaseMenuItem<int>(
         value: 2,
         enabled: false,
         child: withContent
-            ? const MenuItemContent(icon: Icons.star, label: _disabled)
+            ? const MenuItemContent(icon: IconRole.star, label: _disabled)
             : const Text(_disabled),
       ),
     ],
@@ -471,7 +473,14 @@ void main() {
       expectConformant(
         token: 'MenuItemContent.iconSize',
         component: 'MenuItemContent',
-        measured: effectiveIconSize(tester, find.byIcon(Icons.star).first),
+        // The oracle draws Material's own star; the component names the
+        // MEANING now, so the finder has to resolve the role the same way the
+        // skin does. Both marks are still measured for the same thing - how
+        // big the leading glyph of a menu row is.
+        measured: effectiveIconSize(
+          tester,
+          find.byIcon(MaterialGlyphs.of(IconRole.star)).first,
+        ),
         expected: expected,
       );
     });
@@ -491,7 +500,9 @@ void main() {
         component: 'MenuItemContent',
         measured:
             tester.getRect(find.text(_enabled)).left -
-            tester.getRect(find.byIcon(Icons.star).first).right,
+            tester
+                .getRect(find.byIcon(MaterialGlyphs.of(IconRole.star)).first)
+                .right,
         expected: expected,
       );
     });

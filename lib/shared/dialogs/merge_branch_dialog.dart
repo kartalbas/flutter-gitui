@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -42,7 +43,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
     final currentBranch = ref.watch(currentBranchProvider).value;
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.gitMerge,
+      icon: IconRole.gitMerge,
       title: AppLocalizations.of(context)!.merge,
       // Enter merges once a branch is chosen; Esc cancels.
       onSubmit: _isMerging || _selectedBranch == null ? null : _mergeBranch,
@@ -87,7 +88,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                   autofocus: true,
                   labelText: AppLocalizations.of(context)!.branchToMerge,
                   hintText: AppLocalizations.of(context)!.selectABranch,
-                  prefixIcon: PhosphorIconsRegular.gitBranch,
+                  prefixIcon: IconRole.gitBranch,
                   items: availableBranches.map((branch) {
                     return BaseDropdownItem<GitBranch>(
                       value: branch,
@@ -302,7 +303,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
         DialogAction(
           label: AppLocalizations.of(context)!.merge,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.gitMerge,
+          icon: IconRole.gitMerge,
           enabled: !_isMerging && _selectedBranch != null,
           onPressed: _mergeBranch,
         ),

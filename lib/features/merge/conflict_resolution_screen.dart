@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -217,7 +218,7 @@ class _ConflictResolutionScreenState
             actions: [
               // Abort merge button
               BaseIconButton(
-                icon: PhosphorIconsRegular.xCircle,
+                icon: IconRole.xCircle,
                 onPressed: _isResolving
                     ? null
                     : () => _showAbortDialog(context),
@@ -601,14 +602,14 @@ class _ConflictResolutionScreenState
             BaseButton(
               label: AppLocalizations.of(context)!.continueMerge,
               variant: ButtonVariant.primary,
-              leadingIcon: PhosphorIconsRegular.check,
+              leadingIcon: IconRole.check,
               onPressed: () => _continueMerge(context),
             ),
             const SizedBox(height: AppTheme.paddingM),
             BaseButton(
               label: AppLocalizations.of(context)!.abortMerge,
               variant: ButtonVariant.tertiary,
-              leadingIcon: PhosphorIconsRegular.xCircle,
+              leadingIcon: IconRole.xCircle,
               onPressed: () => _showAbortDialog(context),
             ),
           ],
@@ -650,7 +651,7 @@ class _ConflictResolutionScreenState
           BaseButton(
             label: AppLocalizations.of(context)!.continueMerge,
             variant: ButtonVariant.primary,
-            leadingIcon: PhosphorIconsRegular.check,
+            leadingIcon: IconRole.check,
             onPressed: () => _continueMerge(context),
           ),
         ],
@@ -698,7 +699,7 @@ class _ConflictResolutionScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => BaseDialog(
-        icon: PhosphorIconsRegular.gitMerge,
+        icon: IconRole.gitMerge,
         title: AppLocalizations.of(context)!.dialogTitleContinueMerge,
         onSubmit: () => Navigator.of(context).pop(true),
         content: BodyMediumLabel(
@@ -742,7 +743,7 @@ class _ConflictResolutionScreenState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => BaseDialog(
-        icon: PhosphorIconsRegular.warning,
+        icon: IconRole.warning,
         title: AppLocalizations.of(context)!.dialogTitleAbortMerge,
         content: BodyMediumLabel(
           AppLocalizations.of(context)!.dialogContentAbortMerge,

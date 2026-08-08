@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_button.dart';
@@ -109,7 +110,7 @@ class HistoryListFooter extends StatelessWidget {
                 : l10n.retry,
             variant: ButtonVariant.secondary,
             size: ButtonSize.small,
-            leadingIcon: PhosphorIconsRegular.caretDoubleDown,
+            leadingIcon: IconRole.caretDoubleDown,
             onPressed: onLoadMore,
           ),
           const SizedBox(height: AppTheme.paddingS),
@@ -123,7 +124,7 @@ class HistoryListFooter extends StatelessWidget {
               label: l10n.historySearchAllHistory,
               variant: ButtonVariant.tertiary,
               size: ButtonSize.small,
-              leadingIcon: PhosphorIconsRegular.listMagnifyingGlass,
+              leadingIcon: IconRole.listMagnifyingGlass,
               onPressed: onSearchAllHistory,
             ),
           ],

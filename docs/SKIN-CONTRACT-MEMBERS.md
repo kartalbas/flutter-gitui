@@ -1409,10 +1409,18 @@ report as leaks on day one unless the list is corrected.
 
 Stated so nobody mistakes an omission for an oversight.
 
-1. **`IconRole`'s 151 members are not enumerated here.** They are generated
+1. **`IconRole`'s members are not enumerated here.** They are generated
    mechanically at P3a from
    `grep -rhoE 'PhosphorIcons[A-Za-z]*\.[a-zA-Z0-9_]+' lib | sed 's/.*\.//' | sort -u`,
-   and the census does not change that count. What the census *does* settle is
+   and the census does not change that count. The generated 151 have since
+   become 156: `archive` and `bell` (drawn by the shell toolbar fixture, which
+   the census did not read), `caretLineLeft` and `caretLineRight` (the
+   changelog pager draws four marks and only two had a role), and
+   `updateAvailable` (the shell's standing update signal was the one Fill
+   usage that was not a control state, so collapsing it onto `downloadSimple`
+   made it identical to the Clone action in the same toolbar row). Each
+   carries its reason at the member; the conversion is not licensed to add a
+   sixth without one. What the census *does* settle is
    that the enum is the only icon seam, and that macOS maps it to
    `CupertinoIcons` rather than to SF Symbols, because `macos_ui` ships no SF
    Symbols and its own internal glyphs come from `CupertinoIcons` — keeping

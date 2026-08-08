@@ -15,6 +15,7 @@ import 'package:flutter_gitui/core/navigation/command_palette.dart';
 import 'package:flutter_gitui/core/navigation/navigation_item.dart';
 import 'package:flutter_gitui/features/history/history_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 const _railRegion = 'AppShell.railRegion';
 const _toolbarRegion = 'AppShell.toolbarRegion';
@@ -63,10 +64,18 @@ Future<void> _pumpShell(WidgetTester tester) async {
           (ref) => AppDestination.settings,
         ),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: AppShell(),
+        // This suite builds its own root on purpose - it inserts nothing
+        // between the navigator and the shell - but from the moment the
+        // shell's components render through the contract it still has to
+        // install the skin, exactly as pump_under_skin.dart documents: a
+        // migrated component below reaches its design language through
+        // SkinScope and fails loudly without one.
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+        home: const AppShell(),
       ),
     ),
   );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
@@ -42,7 +43,7 @@ class _InitializeRepositoryDialogState
   @override
   Widget build(BuildContext context) {
     return BaseDialog(
-      icon: PhosphorIconsRegular.plus,
+      icon: IconRole.plus,
       title: AppLocalizations.of(context)!.initializeRepository,
       onSubmit: _isInitializing ? null : _initializeRepository,
       content: SingleChildScrollView(
@@ -60,8 +61,8 @@ class _InitializeRepositoryDialogState
               controller: _pathController,
               label: AppLocalizations.of(context)!.directoryPath,
               hintText: AppLocalizations.of(context)!.directoryPathHint,
-              prefixIcon: PhosphorIconsRegular.folder,
-              suffixIcon: kIsWeb ? null : PhosphorIconsRegular.folderOpen,
+              prefixIcon: IconRole.folder,
+              suffixIcon: kIsWeb ? null : IconRole.folderOpen,
               enabled: !_isInitializing,
               autofocus: true,
             ),
@@ -73,7 +74,7 @@ class _InitializeRepositoryDialogState
                   child: BaseButton(
                     label: AppLocalizations.of(context)!.browse,
                     variant: ButtonVariant.tertiary,
-                    leadingIcon: PhosphorIconsRegular.folderOpen,
+                    leadingIcon: IconRole.folderOpen,
                     onPressed: _browsePath,
                   ),
                 ),
@@ -85,7 +86,7 @@ class _InitializeRepositoryDialogState
               controller: _branchController,
               label: AppLocalizations.of(context)!.initialBranchName,
               hintText: AppLocalizations.of(context)!.hintTextDefaultBranch,
-              prefixIcon: PhosphorIconsRegular.gitBranch,
+              prefixIcon: IconRole.gitBranch,
               enabled: !_isInitializing,
             ),
             const SizedBox(height: AppTheme.paddingM),
@@ -186,7 +187,7 @@ class _InitializeRepositoryDialogState
         DialogAction(
           label: AppLocalizations.of(context)!.initialize,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.plus,
+          icon: IconRole.plus,
           enabled: !_isInitializing,
           onPressed: _initializeRepository,
         ),

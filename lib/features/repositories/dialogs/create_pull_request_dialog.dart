@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../shared/theme/app_theme.dart';
@@ -136,7 +137,14 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
 
     return BaseDialog(
       title: l10n.createPullRequestDialogTitle,
-      icon: PhosphorIconsBold.gitPullRequest,
+      // Drawn at Phosphor BOLD before the conversion, like the affirmative
+      // action's mark further down. Same glyph, heavier stroke; a role
+      // carries no weight (#249 conflict C3) so both now take the ordinary
+      // one. Recorded and pinned, with the measurement, by
+      // `test/shared/icons/icon_weight_census_test.dart`: 6 of the 72
+      // `BaseDialog.icon` sites were bold, and the pull-request mark itself
+      // is drawn at the ordinary stroke everywhere else it appears.
+      icon: IconRole.gitPullRequest,
       // The description field is multiline; Enter inside it writes a newline,
       // Enter anywhere else creates. _handleCreate validates the form itself.
       onSubmit: _handleCreate,
@@ -156,7 +164,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     labelText: l10n.sourceBranchLabel,
                     hintText: l10n.selectSourceBranch,
                     searchHintText: l10n.searchBranches,
-                    prefixIcon: PhosphorIconsRegular.gitBranch,
+                    prefixIcon: IconRole.gitBranch,
                     displayStringForItem: (branch) => branch.name,
                     items: sourceBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
@@ -256,7 +264,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     labelText: l10n.targetBranchLabel,
                     hintText: l10n.selectTargetBranch,
                     searchHintText: l10n.searchBranches,
-                    prefixIcon: PhosphorIconsRegular.gitBranch,
+                    prefixIcon: IconRole.gitBranch,
                     displayStringForItem: (branch) => branch.name,
                     items: targetBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
@@ -345,7 +353,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             BaseTextField(
               controller: _titleController,
               hintText: l10n.enterPRTitle,
-              prefixIcon: PhosphorIconsRegular.textT,
+              prefixIcon: IconRole.textT,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return l10n.enterPRTitleValidation;
@@ -363,7 +371,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             BaseTextField(
               controller: _descriptionController,
               hintText: l10n.enterPRDescription,
-              prefixIcon: PhosphorIconsRegular.textAlignLeft,
+              prefixIcon: IconRole.textAlignLeft,
               maxLines: 5,
             ),
 
@@ -423,7 +431,11 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
         DialogAction(
           label: l10n.createPRButton,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsBold.gitPullRequest,
+          // Bold before the conversion; see the header mark above. Of the 16
+          // `DialogAction.icon` sites in the application, 2 were bold and 14
+          // were not, so the heavier stroke here was drift rather than a
+          // statement the action was making.
+          icon: IconRole.gitPullRequest,
           onPressed: _handleCreate,
         ),
       ],

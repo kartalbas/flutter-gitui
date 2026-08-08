@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_text_field.dart';
@@ -37,7 +37,7 @@ class _EditRemoteUrlDialogState extends State<EditRemoteUrlDialog> {
     final l10n = AppLocalizations.of(context)!;
     return BaseDialog(
       title: l10n.editRemoteUrl(widget.remote.name),
-      icon: PhosphorIconsRegular.link,
+      icon: IconRole.link,
       variant: DialogVariant.normal,
       onSubmit: () {
         if (_formKey.currentState!.validate()) {
@@ -49,7 +49,7 @@ class _EditRemoteUrlDialogState extends State<EditRemoteUrlDialog> {
         child: BaseTextField(
           controller: _controller,
           label: l10n.remoteUrlLabel,
-          prefixIcon: PhosphorIconsRegular.link,
+          prefixIcon: IconRole.link,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return l10n.enterUrl;

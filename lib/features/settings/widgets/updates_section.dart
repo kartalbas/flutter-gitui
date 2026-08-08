@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../generated/app_localizations.dart';
@@ -200,7 +201,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
     return SettingsSection(
       title: l10n.updates,
-      icon: PhosphorIconsRegular.downloadSimple,
+      icon: IconRole.downloadSimple,
       children: [
         // Current version
         Padding(
@@ -326,9 +327,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
                   ? l10n.checkingForUpdates
                   : l10n.checkForUpdates,
               variant: ButtonVariant.primary,
-              leadingIcon: isChecking
-                  ? null
-                  : PhosphorIconsRegular.arrowsClockwise,
+              leadingIcon: isChecking ? null : IconRole.arrowsClockwise,
               isLoading: isChecking,
               onPressed: isChecking ? null : _checkForUpdates,
               fullWidth: true,
@@ -346,7 +345,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           child: BaseButton(
             label: l10n.viewReleaseHistory,
             variant: ButtonVariant.secondary,
-            leadingIcon: PhosphorIconsRegular.clockCounterClockwise,
+            leadingIcon: IconRole.clockCounterClockwise,
             onPressed: () {
               ChangelogDialog.show(context);
             },

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
@@ -241,14 +242,14 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
           // Enhanced viewer button
           if (_hasEnhancedViewer())
             BaseIconButton(
-              icon: PhosphorIconsRegular.eye,
+              icon: IconRole.eye,
               tooltip: AppLocalizations.of(context)!.tooltipOpenEnhancedViewer,
               onPressed: _openEnhancedViewer,
               variant: ButtonVariant.primary,
             ),
           if (_hasEnhancedViewer()) const SizedBox(width: AppTheme.paddingS),
           BaseIconButton(
-            icon: PhosphorIconsRegular.arrowClockwise,
+            icon: IconRole.arrowClockwise,
             tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: _loadFileContent,
           ),

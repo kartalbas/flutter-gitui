@@ -129,8 +129,22 @@ class ChoiceOption<T> {
   /// The option's text, and its accessible name.
   final String label;
 
-  /// An optional leading glyph. [IconData] is language-neutral — Flutter's
-  /// Material, Cupertino and Fluent libraries all take it.
+  /// An optional leading glyph, still as `IconData` and NOT yet as an
+  /// `IconRole`.
+  ///
+  /// The doc comment that stood here said `IconData` is language-neutral
+  /// because Material, Cupertino and Fluent all accept the type. That is the
+  /// claim `IconRole`'s own documentation refutes: `IconData` is
+  /// TYPE-neutral but not IDENTITY-neutral, so accepting it here would let
+  /// every skin be handed Phosphor's glyphs forever — #249 conflict C3, the
+  /// hand-painted-lookalike failure displaced onto iconography.
+  ///
+  /// It stays `IconData` for one measured reason and not that one: this chip
+  /// draws its avatar at 18 dp (see `_chipAvatar`), and `ControlScale` has
+  /// three rungs — 16, 20 and 24 — none of which is 18. Converting before the
+  /// chip delegates to `controls.filterToggle` would therefore move the mark,
+  /// which the icon conversion is not allowed to do. The signature flips with
+  /// that delegation.
   final IconData? icon;
 }
 

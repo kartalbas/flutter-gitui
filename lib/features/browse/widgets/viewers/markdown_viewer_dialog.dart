@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 
 import '../../../../shared/components/base_viewer_dialog.dart';
@@ -63,7 +64,7 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
     final fileName = path.basename(widget.filePath);
 
     return BaseViewerDialog(
-      icon: PhosphorIconsRegular.fileText,
+      icon: IconRole.fileText,
       title: 'Markdown Viewer',
       subtitle: fileName,
       widthFactor: 0.85,

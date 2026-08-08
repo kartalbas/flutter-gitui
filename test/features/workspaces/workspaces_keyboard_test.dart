@@ -14,6 +14,7 @@ import 'package:flutter_gitui/core/workspace/selected_workspace_provider.dart';
 import 'package:flutter_gitui/core/workspace/workspace_list_provider.dart';
 import 'package:flutter_gitui/features/workspaces/workspaces_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 Workspace _workspace(String id, String name) => Workspace(
   id: id,
@@ -64,6 +65,9 @@ void main() {
           projectsViewModeProvider.overrideWith((ref) => ProjectsViewMode.list),
         ],
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const WorkspacesScreen(),

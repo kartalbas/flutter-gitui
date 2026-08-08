@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -89,7 +90,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     final recentTags = _recentTags(ref.watch(tagsProvider));
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.tag,
+      icon: IconRole.tag,
       title: l10n.createTag,
       // The message field is multiline; Enter inside it writes a newline,
       // Enter anywhere else creates. _createTag validates the form itself.
@@ -125,7 +126,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 BaseDropdown<GitTag?>(
                   labelText: l10n.useRecentTagAsTemplate,
                   hintText: l10n.selectTagTemplate,
-                  prefixIcon: PhosphorIconsRegular.tag,
+                  prefixIcon: IconRole.tag,
                   items: [
                     BaseDropdownItem<GitTag?>.simple(
                       value: null,
@@ -168,7 +169,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 controller: _tagNameController,
                 label: l10n.tagName,
                 hintText: l10n.tagNameHint,
-                prefixIcon: PhosphorIconsRegular.tag,
+                prefixIcon: IconRole.tag,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return l10n.enterTagName;

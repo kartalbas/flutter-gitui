@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -119,7 +120,7 @@ class BranchSwitcher extends ConsumerWidget {
               // Action buttons (disabled for protected branches)
               if (!branch.isProtected)
                 BaseIconButton(
-                  icon: PhosphorIconsRegular.pencilSimple,
+                  icon: IconRole.pencilSimple,
                   tooltip: l10n.renameBranch(branch.name),
                   size: ButtonSize.small,
                   onPressed: () {
@@ -131,7 +132,7 @@ class BranchSwitcher extends ConsumerWidget {
                   !branch
                       .isProtected) // Only show delete for non-current, non-protected branches
                 BaseIconButton(
-                  icon: PhosphorIconsRegular.trash,
+                  icon: IconRole.trash,
                   tooltip: l10n.deleteBranch,
                   size: ButtonSize.small,
                   onPressed: () {
@@ -149,9 +150,9 @@ class BranchSwitcher extends ConsumerWidget {
         PopupMenuItem<String>(
           value: 'delete_all_unprotected',
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.trash,
+            icon: IconRole.trash,
             label: l10n.deleteAllUnprotectedBranches,
-            iconColor: Theme.of(context).colorScheme.error,
+            tone: Tone.danger,
             labelColor: Theme.of(context).colorScheme.error,
           ),
         ),
@@ -312,7 +313,7 @@ class BranchSwitcher extends ConsumerWidget {
         context: context,
         ref: ref,
         action: DestructiveAction.deleteLocalBranch,
-        icon: PhosphorIconsRegular.trash,
+        icon: IconRole.trash,
         title: l10n.deleteAllUnprotectedBranches,
         // The bulk phrasing, not `forceDeleteWarning`: that one says "This
         // branch is not fully merged", which is the wrong sentence in front
@@ -515,7 +516,7 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
 
     return BaseDialog(
       title: l10n.deleteAllUnprotectedBranches,
-      icon: PhosphorIconsRegular.trash,
+      icon: IconRole.trash,
       variant: DialogVariant.destructive,
       content: Column(
         mainAxisSize: MainAxisSize.min,

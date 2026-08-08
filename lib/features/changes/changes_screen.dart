@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:file_picker/file_picker.dart';
 
 import '../../generated/app_localizations.dart';
@@ -55,7 +56,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         action: BaseButton(
           label: AppLocalizations.of(context)!.openRepository,
           variant: ButtonVariant.primary,
-          leadingIcon: PhosphorIconsRegular.folderOpen,
+          leadingIcon: IconRole.folderOpen,
           onPressed: () => _openRepository(context, ref),
         ),
       );
@@ -66,7 +67,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         title: Text(AppDestination.changes.label(context)),
         actions: [
           BaseIconButton(
-            icon: PhosphorIconsRegular.arrowsClockwise,
+            icon: IconRole.arrowsClockwise,
             tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: () {
               ref.read(gitActionsProvider).refreshStatus();
@@ -119,7 +120,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                             ? // Only staged files - show single "Commit" button
                               BaseButton(
                                 label: AppLocalizations.of(context)!.commit,
-                                leadingIcon: PhosphorIconsRegular.check,
+                                leadingIcon: IconRole.check,
                                 onPressed: () =>
                                     _commitStagedOnly(context, ref),
                                 variant: ButtonVariant.primary,
@@ -134,7 +135,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                                       label: AppLocalizations.of(
                                         context,
                                       )!.commit,
-                                      leadingIcon: PhosphorIconsRegular.check,
+                                      leadingIcon: IconRole.check,
                                       onPressed: () =>
                                           _commitStagedOnly(context, ref),
                                       variant: ButtonVariant.secondary,
@@ -147,8 +148,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                                       label: AppLocalizations.of(
                                         context,
                                       )!.stageAllAndCommit,
-                                      leadingIcon:
-                                          PhosphorIconsRegular.checkCircle,
+                                      leadingIcon: IconRole.checkCircle,
                                       onPressed: () => _handleCommit(
                                         context,
                                         ref,
@@ -200,7 +200,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
               children: [
                 BaseButton(
                   label: AppLocalizations.of(context)!.stageAll,
-                  leadingIcon: PhosphorIconsRegular.plus,
+                  leadingIcon: IconRole.plus,
                   onPressed: unstagedFiles.isNotEmpty
                       ? () async => await _confirmStageAll(context, ref)
                       : null,
@@ -210,7 +210,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                 const SizedBox(width: AppTheme.paddingS),
                 BaseButton(
                   label: AppLocalizations.of(context)!.unstageAll,
-                  leadingIcon: PhosphorIconsRegular.minus,
+                  leadingIcon: IconRole.minus,
                   onPressed: stagedFiles.isNotEmpty
                       ? () async => await _confirmUnstageAll(context, ref)
                       : null,
@@ -220,7 +220,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                 const Spacer(),
                 BaseButton(
                   label: AppLocalizations.of(context)!.tooltipDiscardAllChanges,
-                  leadingIcon: PhosphorIconsRegular.trash,
+                  leadingIcon: IconRole.trash,
                   // Discarding restores tracked files from the index and
                   // cannot reach untracked ones, which the unstaged list also
                   // carries. Enabling on that whole list offered a
@@ -273,7 +273,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
             title: AppLocalizations.of(
               context,
             )!.dialogTitleWebBrowserLimitation,
-            icon: PhosphorIconsRegular.globe,
+            icon: IconRole.globe,
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(
               AppLocalizations.of(
@@ -321,7 +321,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         context: context,
         dialog: BaseDialog(
           title: AppLocalizations.of(context)!.stageAllAndCommit,
-          icon: PhosphorIconsRegular.warningCircle,
+          icon: IconRole.warningCircle,
           variant: DialogVariant.confirmation,
           onSubmit: () => Navigator.of(context).pop(true),
           content: BodyMediumLabel(
@@ -383,7 +383,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       context: context,
       ref: ref,
       action: DestructiveAction.discardFile,
-      icon: PhosphorIconsRegular.arrowCounterClockwise,
+      icon: IconRole.arrowCounterClockwise,
       title: AppLocalizations.of(context)!.discardChangesQuestion,
       message: AppLocalizations.of(
         context,
@@ -405,7 +405,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       context: context,
       ref: ref,
       action: DestructiveAction.deleteUntrackedFile,
-      icon: PhosphorIconsRegular.trash,
+      icon: IconRole.trash,
       title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
       message: AppLocalizations.of(context)!.dialogContentDeleteFile(file.path),
       confirmLabel: AppLocalizations.of(context)!.delete,
@@ -430,7 +430,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       await showDialog(
         context: context,
         builder: (dialogContext) => BaseDialog(
-          icon: PhosphorIconsRegular.warningCircle,
+          icon: IconRole.warningCircle,
           title: AppLocalizations.of(
             context,
           )!.dialogTitleWindowsReservedFilename,
@@ -469,7 +469,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => BaseDialog(
-        icon: PhosphorIconsRegular.plus,
+        icon: IconRole.plus,
         title: AppLocalizations.of(context)!.stageAllChangesQuestion,
         variant: DialogVariant.confirmation,
         onSubmit: () => Navigator.of(context).pop(true),
@@ -510,7 +510,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => BaseDialog(
-        icon: PhosphorIconsRegular.minus,
+        icon: IconRole.minus,
         title: AppLocalizations.of(context)!.unstageAllChangesQuestion,
         variant: DialogVariant.confirmation,
         onSubmit: () => Navigator.of(context).pop(true),
@@ -542,7 +542,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       context: context,
       ref: ref,
       action: DestructiveAction.discardAll,
-      icon: PhosphorIconsRegular.trash,
+      icon: IconRole.trash,
       title: AppLocalizations.of(context)!.discardAllChangesQuestion,
       message: AppLocalizations.of(context)!.discardAllChangesConfirm,
       confirmLabel: AppLocalizations.of(context)!.discardAll,

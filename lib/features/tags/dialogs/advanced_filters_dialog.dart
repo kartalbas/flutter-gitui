@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -66,7 +67,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
 
     return BaseDialog(
       title: loc.advancedFiltersDialog,
-      icon: PhosphorIconsRegular.funnel,
+      icon: IconRole.funnel,
       variant: DialogVariant.normal,
       maxWidth: 500,
       onSubmit: () => Navigator.of(context).pop({
@@ -86,7 +87,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
             const SizedBox(height: AppTheme.paddingS),
             BaseDropdown<DateRangeFilter>(
               initialValue: _dateFilter,
-              prefixIcon: PhosphorIconsRegular.calendar,
+              prefixIcon: IconRole.calendar,
               items: DateRangeFilter.values.map((filter) {
                 return BaseDropdownItem<DateRangeFilter>.simple(
                   value: filter,
@@ -137,7 +138,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
             if (authors.isNotEmpty)
               BaseDropdown<String?>(
                 initialValue: _authorFilter,
-                prefixIcon: PhosphorIconsRegular.user,
+                prefixIcon: IconRole.user,
                 hintText: loc.allAuthors,
                 items: [
                   BaseDropdownItem<String?>.simple(

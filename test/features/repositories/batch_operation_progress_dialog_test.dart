@@ -15,6 +15,7 @@ import 'package:flutter_gitui/core/workspace/models/workspace_repository.dart';
 import 'package:flutter_gitui/features/repositories/dialogs/batch_operation_progress_dialog.dart';
 import 'package:flutter_gitui/features/repositories/services/batch_operations_service.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 typedef ProgressCallback =
     void Function(WorkspaceRepository repository, int, int, String);
@@ -33,6 +34,9 @@ Future<void> _pumpDialog(
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: BatchOperationProgressDialog(

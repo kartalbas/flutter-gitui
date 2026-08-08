@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -59,7 +60,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
     final currentBranch = ref.watch(currentBranchProvider).value;
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.gitMerge,
+      icon: IconRole.gitMerge,
       title: AppLocalizations.of(context)!.mergeBranches,
       // Enter merges once both branches are chosen; Esc cancels.
       onSubmit: _isMerging || _sourceBranch == null || _targetBranch == null
@@ -144,7 +145,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                             hintText: AppLocalizations.of(
                               context,
                             )!.selectSourceBranch,
-                            prefixIcon: PhosphorIconsRegular.gitBranch,
+                            prefixIcon: IconRole.gitBranch,
                             items: filteredSourceBranches.map((branch) {
                               return BaseDropdownItem(
                                 value: branch,
@@ -282,7 +283,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                             hintText: AppLocalizations.of(
                               context,
                             )!.selectTargetBranch,
-                            prefixIcon: PhosphorIconsRegular.gitBranch,
+                            prefixIcon: IconRole.gitBranch,
                             items: availableTargetBranches.map((branch) {
                               return BaseDropdownItem(
                                 value: branch,
@@ -751,8 +752,8 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
               : AppLocalizations.of(context)!.rebase,
           role: DialogActionRole.affirmative,
           icon: _strategy == MergeStrategy.merge
-              ? PhosphorIconsRegular.gitMerge
-              : PhosphorIconsRegular.gitBranch,
+              ? IconRole.gitMerge
+              : IconRole.gitBranch,
           enabled:
               !_isMerging && _sourceBranch != null && _targetBranch != null,
           onPressed: _mergeBranches,

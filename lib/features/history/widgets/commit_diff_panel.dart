@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -55,7 +56,7 @@ class CommitDiffPanel extends ConsumerWidget {
       actions: [
         if (filePath != null)
           BaseIconButton(
-            icon: PhosphorIconsRegular.arrowSquareOut,
+            icon: IconRole.arrowSquareOut,
             tooltip: l10n.viewDiff,
             size: ButtonSize.small,
             onPressed: () => showCommitFileDiffDialog(

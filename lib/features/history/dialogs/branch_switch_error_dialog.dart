@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -22,7 +22,7 @@ class BranchSwitchErrorDialog extends StatelessWidget {
 
     return BaseDialog(
       title: l10n.branchSwitchFailed,
-      icon: PhosphorIconsRegular.xCircle,
+      icon: IconRole.xCircle,
       variant: DialogVariant.destructive,
       maxWidth: 400,
       // Red styling for attention only; the single action is OK, so Enter

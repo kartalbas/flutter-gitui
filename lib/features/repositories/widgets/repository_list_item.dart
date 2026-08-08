@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show ControlScale, IconRole;
 import '../../../shared/components/base_animated_widgets.dart';
 
 import '../../../generated/app_localizations.dart';
@@ -357,9 +358,9 @@ class RepositoryListItem extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           BaseIconButton(
-            icon: repository.isFavorite
-                ? PhosphorIconsFill.star
-                : PhosphorIconsRegular.star,
+            // One role, one mark; the weight is the skin's, reached
+            // through `isSelected`. See repository_card.dart for the reason.
+            icon: IconRole.star,
             isSelected: repository.isFavorite,
             onPressed: onToggleFavorite,
             tooltip: repository.isFavorite
@@ -367,7 +368,7 @@ class RepositoryListItem extends ConsumerWidget {
                 : AppLocalizations.of(context)!.tooltipAddToFavorites,
           ),
           BaseIconButton(
-            icon: PhosphorIconsRegular.trash,
+            icon: IconRole.trash,
             onPressed: onRemove,
             tooltip: AppLocalizations.of(context)!.tooltipRemoveFromWorkspace,
           ),
@@ -390,20 +391,20 @@ class RepositoryListItem extends ConsumerWidget {
                   PopupMenuItem<String>(
                     value: 'open_in_editor',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.code,
+                      icon: IconRole.code,
                       label: AppLocalizations.of(context)!.openFolderInEditor,
-                      iconSize: AppTheme.iconM,
+                      scale: ControlScale.normal,
                     ),
                   ),
                 if (status.hasRemote && onEditRemoteUrl != null)
                   PopupMenuItem<String>(
                     value: 'edit_remote_url',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.link,
+                      icon: IconRole.link,
                       label: AppLocalizations.of(
                         context,
                       )!.editRemoteUrl('origin'),
-                      iconSize: AppTheme.iconM,
+                      scale: ControlScale.normal,
                     ),
                   ),
               ],

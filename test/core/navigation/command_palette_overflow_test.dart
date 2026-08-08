@@ -16,6 +16,7 @@ import 'package:flutter_gitui/core/constants/app_constants.dart';
 import 'package:flutter_gitui/core/navigation/command_palette.dart';
 import 'package:flutter_gitui/core/navigation/git_commands.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 void main() {
   testWidgets(
@@ -32,6 +33,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            builder: (BuildContext context, Widget? child) =>
+                installSkinUnderTest(child ?? const SizedBox.shrink()),
+
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: const Scaffold(body: SizedBox.expand()),

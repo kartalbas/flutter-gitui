@@ -2093,14 +2093,15 @@ class _MaterialTreeRowState extends State<_MaterialTreeRow> {
                 Icon(
                   // A KNOWN weight loss, recorded here rather than hidden: the
                   // file and status trees have always drawn their folder and
-                  // file marks at Phosphor BOLD, and this draws them at the
-                  // ordinary weight because `MaterialGlyphs` carries one const
-                  // table and Flutter's icon tree-shaker rejects an `IconData`
-                  // assembled from a codepoint at runtime. It is one line to
-                  // undo - swap the lookup - the moment the bold table
-                  // `material_glyphs.dart` already anticipates is generated,
-                  // and it is a weight rather than a glyph, so nothing the row
-                  // says changes in the meantime.
+                  // file marks at Phosphor BOLD - the glyph census counts 21
+                  // such references in `file_icon_utils.dart` alone and three
+                  // more in `base_tree_item.dart` - and this draws them at the
+                  // ordinary weight. The table it was waiting for now exists:
+                  // the swap is `MaterialGlyphs.boldOf`, one line. It is held
+                  // back only because the tree is covered by goldens that
+                  // cannot be regenerated on Windows, and it is a weight
+                  // rather than a glyph, so nothing the row SAYS changes while
+                  // it waits.
                   MaterialGlyphs.of(node.leading!),
                   size: MaterialSurfaces._treeGlyphSize,
                   // A branch of the tree is the accent, because the hierarchy

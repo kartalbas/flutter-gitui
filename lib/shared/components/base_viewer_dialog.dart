@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 import '../../generated/app_localizations.dart';
 import 'base_dialog.dart' show DialogKeyboardHost;
 import '../../shared/theme/app_theme.dart';
 import 'base_button.dart';
+import 'base_icon.dart';
 import 'base_label.dart';
 
 /// Base component for full-screen viewer dialogs.
@@ -17,12 +19,12 @@ import 'base_label.dart';
 /// Example usage:
 /// ```dart
 /// BaseViewerDialog(
-///   icon: PhosphorIconsRegular.gitDiff,
+///   icon: IconRole.gitDiff,
 ///   title: 'Commit Diff',
 ///   subtitle: 'abc1234: file.dart',
 ///   headerActions: [
 ///     BaseIconButton(
-///       icon: PhosphorIconsRegular.textIndent,
+///       icon: IconRole.textIndent,
 ///       tooltip: 'Toggle compact',
 ///       onPressed: () {},
 ///     ),
@@ -63,8 +65,9 @@ class BaseViewerDialog extends StatelessWidget {
   /// Optional subtitle (e.g., file path, description)
   final String? subtitle;
 
-  /// Optional icon in header
-  final IconData? icon;
+  /// The meaning of an optional mark in the header; the skin chooses the
+  /// glyph.
+  final IconRole? icon;
 
   /// Main content (takes full available space)
   final Widget content;
@@ -144,11 +147,15 @@ class BaseViewerDialog extends StatelessWidget {
                 child: Row(
                   children: [
                     if (icon != null) ...[
-                      Icon(
-                        icon,
-                        color: headerBackgroundColor != null
-                            ? theme.colorScheme.onPrimary
-                            : theme.colorScheme.primary,
+                      // `prominent` is the 24 dp rung the ambient icon
+                      // theme already gave this mark; the tone is the meaning
+                      // the two spelled-out colours carried.
+                      BaseIcon(
+                        icon!,
+                        scale: ControlScale.prominent,
+                        tone: headerBackgroundColor != null
+                            ? Tone.onAccent
+                            : Tone.accent,
                       ),
                       const SizedBox(width: AppTheme.paddingS),
                     ],
@@ -183,7 +190,7 @@ class BaseViewerDialog extends StatelessWidget {
                       const SizedBox(width: AppTheme.paddingS),
                     ],
                     BaseIconButton(
-                      icon: PhosphorIconsRegular.x,
+                      icon: IconRole.x,
                       tooltip: l10n.close,
                       onPressed: () => Navigator.of(context).pop(),
                     ),

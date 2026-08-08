@@ -22,6 +22,7 @@ import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/dialogs/create_tag_dialog.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Records tag creations instead of running git, so the tests can assert an
 /// invalid form never reaches the service and a valid one targets the right
@@ -83,6 +84,9 @@ Future<void> _openDialog(
         tagsProvider.overrideWith((ref) async => tags),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

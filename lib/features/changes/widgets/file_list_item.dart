@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -128,7 +129,7 @@ class FileListItem extends StatelessWidget {
         // Diff button
         if (onDiff != null)
           BaseIconButton(
-            icon: PhosphorIconsRegular.gitDiff,
+            icon: IconRole.gitDiff,
             tooltip: AppLocalizations.of(context)!.tooltipViewDiff,
             onPressed: onDiff,
             size: ButtonSize.small,
@@ -139,14 +140,14 @@ class FileListItem extends StatelessWidget {
         // Stage/Unstage button
         if (isStaged)
           BaseIconButton(
-            icon: PhosphorIconsRegular.minus,
+            icon: IconRole.minus,
             tooltip: AppLocalizations.of(context)!.tooltipUnstage,
             onPressed: onUnstage,
             size: ButtonSize.small,
           )
         else
           BaseIconButton(
-            icon: PhosphorIconsRegular.plus,
+            icon: IconRole.plus,
             tooltip: AppLocalizations.of(context)!.tooltipStage,
             onPressed: onStage,
             size: ButtonSize.small,
@@ -156,7 +157,7 @@ class FileListItem extends StatelessWidget {
         if (!isStaged && onDiscard != null) ...[
           const SizedBox(width: AppTheme.paddingXS),
           BaseIconButton(
-            icon: PhosphorIconsRegular.trash,
+            icon: IconRole.trash,
             tooltip: AppLocalizations.of(context)!.tooltipDiscardChanges,
             onPressed: onDiscard,
             size: ButtonSize.small,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_animated_widgets.dart';
@@ -78,7 +79,7 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
         // Search (if provided - though most screens use inline search now)
         if (onSearch != null) ...[
           BaseIconButton(
-            icon: PhosphorIconsRegular.magnifyingGlass,
+            icon: IconRole.magnifyingGlass,
             tooltip: l10n.search,
             onPressed: onSearch,
           ),
@@ -88,7 +89,7 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
         // Refresh (if provided)
         if (onRefresh != null) ...[
           BaseIconButton(
-            icon: PhosphorIconsRegular.arrowsClockwise,
+            icon: IconRole.arrowsClockwise,
             tooltip: l10n.refresh,
             onPressed: onRefresh,
           ),

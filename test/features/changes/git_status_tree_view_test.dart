@@ -18,6 +18,7 @@ import 'package:flutter_gitui/core/git/models/file_status.dart';
 import 'package:flutter_gitui/core/utils/result.dart';
 import 'package:flutter_gitui/features/changes/widgets/git_status_tree_view.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Serves canned diffs without launching git, so the diff panel can load.
 class _FakeGitService extends GitService {
@@ -66,6 +67,9 @@ Future<void> _pumpChangesTree(WidgetTester tester, List<String> log) async {
         ),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

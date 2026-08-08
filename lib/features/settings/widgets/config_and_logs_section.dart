@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -27,7 +27,7 @@ class ConfigAndLogsSection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.configAndLogs,
-      icon: PhosphorIconsRegular.folder,
+      icon: IconRole.folder,
       children: [
         Padding(
           padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -41,7 +41,7 @@ class ConfigAndLogsSection extends ConsumerWidget {
                     ? () => _openAppLog(context, textEditor)
                     : null,
                 label: l10n.openAppLog,
-                leadingIcon: PhosphorIconsRegular.fileText,
+                leadingIcon: IconRole.fileText,
                 variant: ButtonVariant.secondary,
               ),
               // Open git.log
@@ -50,28 +50,28 @@ class ConfigAndLogsSection extends ConsumerWidget {
                     ? () => _openGitLog(context, textEditor)
                     : null,
                 label: l10n.openGitLog,
-                leadingIcon: PhosphorIconsRegular.gitBranch,
+                leadingIcon: IconRole.gitBranch,
                 variant: ButtonVariant.secondary,
               ),
               // Open user flutter-gitui folder
               BaseButton(
                 onPressed: () => _openConfigFolder(context, textEditor),
                 label: l10n.openConfigFolder,
-                leadingIcon: PhosphorIconsRegular.folderOpen,
+                leadingIcon: IconRole.folderOpen,
                 variant: ButtonVariant.secondary,
               ),
               // Delete app.log
               BaseButton(
                 onPressed: () => _deleteAppLog(context),
                 label: l10n.deleteAppLog,
-                leadingIcon: PhosphorIconsRegular.trash,
+                leadingIcon: IconRole.trash,
                 variant: ButtonVariant.danger,
               ),
               // Delete git.log
               BaseButton(
                 onPressed: () => _deleteGitLog(context),
                 label: l10n.deleteGitLog,
-                leadingIcon: PhosphorIconsRegular.trash,
+                leadingIcon: IconRole.trash,
                 variant: ButtonVariant.danger,
               ),
             ],
@@ -241,7 +241,7 @@ class ConfigAndLogsSection extends ConsumerWidget {
       final confirmed = await BaseDialog.show<bool>(
         context: context,
         dialog: BaseDialog(
-          icon: PhosphorIconsRegular.trash,
+          icon: IconRole.trash,
           title: l10n.deleteAppLog,
           variant: DialogVariant.destructive,
           content: const BodyMediumLabel(
@@ -302,7 +302,7 @@ class ConfigAndLogsSection extends ConsumerWidget {
       final confirmed = await BaseDialog.show<bool>(
         context: context,
         dialog: BaseDialog(
-          icon: PhosphorIconsRegular.trash,
+          icon: IconRole.trash,
           title: l10n.deleteGitLog,
           variant: DialogVariant.destructive,
           content: const BodyMediumLabel(

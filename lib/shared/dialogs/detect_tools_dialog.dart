@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../core/services/shell_service.dart';
 
 import '../../generated/app_localizations.dart';
@@ -174,7 +175,7 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
     return BaseDialog(
       title: l10n.detectTools,
-      icon: PhosphorIconsRegular.magnifyingGlass,
+      icon: IconRole.magnifyingGlass,
       onSubmit:
           (_selectedGit != null ||
               _selectedDiffTool != null ||

@@ -15,6 +15,7 @@ import 'package:flutter_gitui/core/git/models/file_status.dart';
 import 'package:flutter_gitui/features/changes/widgets/commit_dialog.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Records commit calls instead of touching git, so the tests can assert an
 /// invalid message never reaches the action layer.
@@ -39,6 +40,9 @@ Future<void> _openDialog(WidgetTester tester, List<String> committed) async {
         stagedFilesProvider.overrideWith((ref) => const <FileStatus>[]),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -178,7 +179,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
 
     return BaseDialog(
       title: l10n.createBranchDialogTitle,
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       variant: DialogVariant.normal,
       maxWidth: 600,
       onSubmit: _createBranch,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
 import 'base_button.dart';
+import 'base_icon.dart';
 
 /// How loudly a text field asserts itself on the surface it sits on.
 ///
@@ -50,7 +51,7 @@ enum TextFieldVariant {
 /// BaseTextField(
 ///   label: 'Branch name',
 ///   hintText: 'Enter branch name',
-///   prefixIcon: PhosphorIconsRegular.gitBranch,
+///   prefixIcon: IconRole.gitBranch,
 ///   showClearButton: true,
 ///   onChanged: (value) => print(value),
 /// )
@@ -62,7 +63,7 @@ enum TextFieldVariant {
 ///   label: 'Password',
 ///   obscureText: true,
 ///   showPasswordToggle: true,
-///   prefixIcon: PhosphorIconsRegular.lock,
+///   prefixIcon: IconRole.lock,
 /// )
 /// ```
 ///
@@ -70,7 +71,7 @@ enum TextFieldVariant {
 /// ```dart
 /// BaseTextField(
 ///   hintText: 'Search repositories...',
-///   prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+///   prefixIcon: IconRole.magnifyingGlass,
 ///   showClearButton: true,
 ///   variant: TextFieldVariant.emphasized,
 /// )
@@ -136,11 +137,11 @@ class BaseTextField extends StatefulWidget {
   /// Error text (shown below field in red, overrides helperText)
   final String? errorText;
 
-  /// Leading icon (optional)
-  final IconData? prefixIcon;
+  /// The meaning of an optional leading mark.
+  final IconRole? prefixIcon;
 
-  /// Trailing icon (optional)
-  final IconData? suffixIcon;
+  /// The meaning of an optional trailing mark.
+  final IconRole? suffixIcon;
 
   /// Makes [suffixIcon] the field's action - a picker, a lookup, a generator.
   ///
@@ -308,9 +309,7 @@ class _BaseTextFieldState extends State<BaseTextField> {
     if (widget.showPasswordToggle && widget.obscureText) {
       // Password toggle takes priority
       suffixIconWidget = BaseIconButton(
-        icon: _obscureText
-            ? PhosphorIconsRegular.eye
-            : PhosphorIconsRegular.eyeSlash,
+        icon: _obscureText ? IconRole.eye : IconRole.eyeSlash,
         onPressed: _togglePasswordVisibility,
         tooltip: _obscureText ? l10n.showPassword : l10n.hidePassword,
         size: ButtonSize.small,
@@ -318,7 +317,7 @@ class _BaseTextFieldState extends State<BaseTextField> {
     } else if (widget.showClearButton && _hasText) {
       // Clear button
       suffixIconWidget = BaseIconButton(
-        icon: PhosphorIconsRegular.x,
+        icon: IconRole.x,
         onPressed: _clearText,
         tooltip: l10n.clear,
         size: ButtonSize.small,
@@ -327,11 +326,15 @@ class _BaseTextFieldState extends State<BaseTextField> {
       // An action that belongs to this field belongs inside it; only a suffix
       // without a handler stays decorative.
       suffixIconWidget = widget.onSuffixTap == null
-          ? Icon(widget.suffixIcon, size: AppTheme.iconM)
+          ? BaseIcon(widget.suffixIcon!)
           : BaseIconButton(
               icon: widget.suffixIcon!,
               onPressed: widget.enabled ? widget.onSuffixTap : null,
-              tooltip: widget.suffixTooltip,
+              // A mark-only control has to name itself, and every call site
+              // that gives the suffix a handler already names it. The label
+              // is the honest fallback if one ever does not: it says which
+              // field the action belongs to rather than inventing a verb.
+              tooltip: widget.suffixTooltip ?? widget.label ?? '',
               size: ButtonSize.small,
             );
     }
@@ -361,9 +364,9 @@ class _BaseTextFieldState extends State<BaseTextField> {
       hintText: widget.hintText,
       helperText: widget.helperText,
       errorText: widget.errorText,
-      prefixIcon: widget.prefixIcon != null
-          ? Icon(widget.prefixIcon, size: AppTheme.iconM)
-          : null,
+      prefixIcon: widget.prefixIcon == null
+          ? null
+          : BaseIcon(widget.prefixIcon!),
       suffixIcon: suffixIconWidget,
     );
 

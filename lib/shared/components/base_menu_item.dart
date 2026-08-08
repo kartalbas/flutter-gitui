@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
+
+import 'base_icon.dart';
 
 /// One entry in a menu, expressed as data rather than as a widget.
 ///
@@ -60,9 +64,9 @@ enum MenuActionRole {
 /// One invokable entry in a menu.
 ///
 /// Everything on it survives a change of design language: a `String`, an
-/// [IconData] (which Flutter's Material, Cupertino and Fluent libraries all
-/// accept), a callback, a role and a flag. Nothing here names a Material
-/// class, a colour or a size.
+/// [IconRole] (a MEANING rather than a glyph, so the mark and its weight stay
+/// the skin's to choose), a callback, a role and a flag. Nothing here names a
+/// Material class, a colour or a size.
 final class MenuAction extends MenuEntry {
   const MenuAction({
     required this.label,
@@ -75,11 +79,11 @@ final class MenuAction extends MenuEntry {
   /// The entry's text, and its accessible name.
   final String label;
 
-  /// The entry's leading glyph. Required rather than optional because every
-  /// menu in this app is icon-led and a single glyphless row inside an
-  /// otherwise aligned column reads as a rendering fault; which *glyph* is
-  /// right per design language stays a skin's decision.
-  final IconData icon;
+  /// The meaning of the entry's leading mark. Required rather than optional
+  /// because every menu in this app is mark-led and a single markless row
+  /// inside an otherwise aligned column reads as a rendering fault; which
+  /// *glyph* stands for the meaning stays the skin's decision.
+  final IconRole icon;
 
   /// What the entry does. Null disables it, exactly as on a button, so a call
   /// site that already computes `condition ? callback : null` needs no
@@ -134,7 +138,7 @@ List<PopupMenuEntry<int>> materialMenuEntries(
             child: MenuItemContent(
               icon: entry.icon,
               label: entry.label,
-              iconColor: emphasiseAsDestructive ? colorScheme.error : null,
+              tone: emphasiseAsDestructive ? Tone.danger : Tone.neutral,
               labelColor: emphasiseAsDestructive ? colorScheme.error : null,
             ),
           ),
@@ -201,17 +205,26 @@ class MenuItemContent extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
-    this.iconColor,
+    this.tone = Tone.neutral,
     this.labelColor,
-    this.iconSize = 16,
+    this.scale = ControlScale.compact,
     this.spacing = 8,
   });
 
-  final IconData icon;
+  /// The meaning of the leading mark.
+  final IconRole icon;
   final String label;
-  final Color? iconColor;
+
+  /// What the mark means. [Tone.neutral] leaves the colour to whatever the
+  /// enclosing menu item has already published, which is what a null
+  /// `iconColor` did and what keeps a disabled entry looking disabled.
+  final Tone tone;
   final Color? labelColor;
-  final double iconSize;
+
+  /// How much room the mark is entitled to. `compact` is the 16 dp rung this
+  /// component has always drawn; the overflow bar and the repositories screen
+  /// ask for `normal`, which is the 20 dp rung they spelled out as a number.
+  final ControlScale scale;
   final double spacing;
 
   @override
@@ -221,7 +234,7 @@ class MenuItemContent extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(icon, size: iconSize, color: iconColor),
+        BaseIcon(icon, tone: tone, scale: scale),
         SizedBox(width: spacing),
         Expanded(
           // ignore: avoid_text_with_style

@@ -22,6 +22,7 @@ import 'package:flutter_gitui/features/branches/dialogs/search_branches_dialog.d
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Opens the dialog over a host page and reports what it returned:
 /// the typed query, `''` when the filter was cleared, `null` when cancelled.
@@ -31,6 +32,9 @@ Future<void> _openDialog(
 ) async {
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

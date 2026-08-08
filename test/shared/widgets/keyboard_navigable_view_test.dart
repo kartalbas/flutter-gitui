@@ -12,6 +12,7 @@ import 'package:flutter_gitui/shared/controllers/item_navigation_controller.dart
 import 'package:flutter_gitui/shared/controllers/tree_view_controller.dart';
 import 'package:flutter_gitui/shared/models/tree_node.dart';
 import 'package:flutter_gitui/shared/widgets/keyboard_navigable_view.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Renders an item as "index|S|F" where S/F flag selection and container
 /// focus, so every assertion reads a user-visible outcome off the tree.
@@ -49,6 +50,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: KeyboardNavigableListView(
               controller: controller,
@@ -91,6 +95,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: SizedBox(
               height: 300,
@@ -135,6 +142,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: Column(
               children: [
@@ -185,6 +195,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: KeyboardNavigableListView(
               controller: controller,
@@ -223,6 +236,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: KeyboardNavigableListView(
               controller: controller,
@@ -278,6 +294,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: KeyboardNavigableGridView(
               controller: controller,
@@ -348,6 +367,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: KeyboardNavigableTreeView<_TreeNode>(
               controller: controller,

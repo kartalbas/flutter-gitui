@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 import '../../shared/theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import 'base_button.dart';
+import 'base_icon.dart';
 import 'base_label.dart';
 
 /// Component for displaying text that can be copied to clipboard.
@@ -15,7 +18,7 @@ import 'base_label.dart';
 /// ```dart
 /// CopyableText(
 ///   text: 'a1b2c3d4e5f6',
-///   icon: PhosphorIconsRegular.gitCommit,
+///   icon: IconRole.gitCommit,
 ///   isMonospace: true,
 /// )
 /// ```
@@ -24,7 +27,7 @@ import 'base_label.dart';
 /// ```dart
 /// CopyableText(
 ///   text: commit.hash,
-///   icon: PhosphorIconsRegular.gitCommit,
+///   icon: IconRole.gitCommit,
 ///   isMonospace: true,
 ///   maxLines: 1,
 /// )
@@ -34,7 +37,7 @@ import 'base_label.dart';
 /// ```dart
 /// CopyableText(
 ///   text: '/path/to/very/long/file/name.txt',
-///   icon: PhosphorIconsRegular.file,
+///   icon: IconRole.file,
 ///   isMonospace: true,
 ///   overflow: TextOverflow.ellipsis,
 /// )
@@ -60,7 +63,8 @@ class CopyableText extends StatefulWidget {
   final TextStyle? style;
 
   /// Optional leading icon
-  final IconData? icon;
+  /// The meaning of an optional leading mark; the skin chooses the glyph.
+  final IconRole? icon;
 
   /// Use monospace font (for hashes, paths, etc.)
   final bool isMonospace;
@@ -138,10 +142,10 @@ class _CopyableTextState extends State<CopyableText> {
             children: [
               // Leading icon
               if (widget.icon != null) ...[
-                Icon(
-                  widget.icon,
-                  size: 16,
-                  color: colorScheme.onSurfaceVariant,
+                BaseIcon(
+                  widget.icon!,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
                 ),
                 SizedBox(width: AppTheme.paddingS),
               ],
@@ -207,7 +211,7 @@ class _CopyableTextState extends State<CopyableText> {
                     width: AppTheme.paddingL,
                     height: AppTheme.paddingL,
                     child: BaseIconButton(
-                      icon: PhosphorIconsRegular.copy,
+                      icon: IconRole.copy,
                       onPressed: _copyToClipboard,
                       tooltip: AppLocalizations.of(
                         context,

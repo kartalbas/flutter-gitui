@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -42,14 +43,14 @@ class FileBlamePanel extends ConsumerWidget {
         ),
         actions: [
           BaseIconButton(
-            icon: PhosphorIconsRegular.info,
+            icon: IconRole.info,
             tooltip: AppLocalizations.of(context)!.tooltipBlameStatistics,
             onPressed: () => blameAsync.value != null
                 ? _showBlameInfo(context, blameAsync.value!)
                 : null,
           ),
           BaseIconButton(
-            icon: PhosphorIconsRegular.arrowClockwise,
+            icon: IconRole.arrowClockwise,
             tooltip: AppLocalizations.of(context)!.refresh,
             onPressed: () {
               ref.invalidate(fileBlameProvider(filePath));
@@ -396,7 +397,7 @@ ${line.summary}
       BaseViewerDialog.show(
         context: context,
         dialog: BaseViewerDialog(
-          icon: PhosphorIconsRegular.gitCommit,
+          icon: IconRole.gitCommit,
           title: l10n.commitShortHash(line.shortHash),
           subtitle: commit.subject,
           content: Row(

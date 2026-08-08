@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -30,7 +31,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
     final bisectStateAsync = ref.watch(bisectStateProvider);
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       title: AppLocalizations.of(context)!.gitBisect,
       // While a bisect runs, Good/Bad/Skip are peers with no single primary,
       // so Enter stays inert in that state.
@@ -263,7 +264,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               child: BaseButton(
                 label: AppLocalizations.of(context)!.good,
                 variant: ButtonVariant.success,
-                leadingIcon: PhosphorIconsRegular.check,
+                leadingIcon: IconRole.check,
                 onPressed: () => _markCommit(BisectStep.good),
                 fullWidth: true,
               ),
@@ -273,7 +274,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               child: BaseButton(
                 label: AppLocalizations.of(context)!.bad,
                 variant: ButtonVariant.danger,
-                leadingIcon: PhosphorIconsRegular.x,
+                leadingIcon: IconRole.x,
                 onPressed: () => _markCommit(BisectStep.bad),
                 fullWidth: true,
               ),
@@ -283,7 +284,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               child: BaseButton(
                 label: AppLocalizations.of(context)!.skip,
                 variant: ButtonVariant.secondary,
-                leadingIcon: PhosphorIconsRegular.skipForward,
+                leadingIcon: IconRole.skipForward,
                 onPressed: () => _markCommit(BisectStep.skip),
                 fullWidth: true,
               ),

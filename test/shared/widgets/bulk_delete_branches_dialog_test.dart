@@ -30,6 +30,7 @@ import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/widgets/branch_switcher.dart';
+import '../../skin/pump_under_skin.dart';
 
 GitBranch _branch(String name) => GitBranch(
   name: name,
@@ -54,6 +55,9 @@ Future<_Session> _openDialog(WidgetTester tester) async {
   final session = _Session();
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(

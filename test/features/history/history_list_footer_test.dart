@@ -9,8 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/features/history/widgets/history_list_footer.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 Widget harness(Widget child) => MaterialApp(
+  builder: (BuildContext context, Widget? child) =>
+      installSkinUnderTest(child ?? const SizedBox.shrink()),
+
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(body: child),

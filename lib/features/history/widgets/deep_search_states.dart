@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_button.dart';
@@ -30,7 +31,7 @@ class DeepSearchRunningState extends StatelessWidget {
           BaseButton(
             label: l10n.cancel,
             variant: ButtonVariant.secondary,
-            leadingIcon: PhosphorIconsRegular.x,
+            leadingIcon: IconRole.x,
             onPressed: onCancel,
           ),
         ],
@@ -90,7 +91,7 @@ class DeepSearchResultsBanner extends StatelessWidget {
               label: l10n.historyDeepSearchInChanges,
               variant: ButtonVariant.tertiary,
               size: ButtonSize.small,
-              leadingIcon: PhosphorIconsRegular.magnifyingGlass,
+              leadingIcon: IconRole.magnifyingGlass,
               onPressed: onSearchChanges,
             ),
             const SizedBox(width: AppTheme.paddingS),
@@ -99,7 +100,7 @@ class DeepSearchResultsBanner extends StatelessWidget {
             label: l10n.historyDeepSearchBack,
             variant: ButtonVariant.tertiary,
             size: ButtonSize.small,
-            leadingIcon: PhosphorIconsRegular.x,
+            leadingIcon: IconRole.x,
             onPressed: onBack,
           ),
         ],
@@ -170,7 +171,7 @@ class DeepSearchFailedState extends StatelessWidget {
           BaseButton(
             label: l10n.historyDeepSearchBack,
             variant: ButtonVariant.tertiary,
-            leadingIcon: PhosphorIconsRegular.x,
+            leadingIcon: IconRole.x,
             onPressed: onBack,
           ),
         ],

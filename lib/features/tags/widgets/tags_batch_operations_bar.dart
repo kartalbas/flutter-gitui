@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -36,7 +36,7 @@ class TagsBatchOperationsBar extends StatelessWidget {
                 label: AppLocalizations.of(
                   context,
                 )!.pushTagsCount(selectedCount),
-                leadingIcon: PhosphorIconsRegular.upload,
+                leadingIcon: IconRole.upload,
                 onPressed: onPush,
                 variant: ButtonVariant.secondary,
                 size: ButtonSize.medium,
@@ -49,7 +49,7 @@ class TagsBatchOperationsBar extends StatelessWidget {
                 label: AppLocalizations.of(
                   context,
                 )!.deleteTagsCount(selectedCount),
-                leadingIcon: PhosphorIconsRegular.trash,
+                leadingIcon: IconRole.trash,
                 onPressed: onDelete,
                 variant: ButtonVariant.danger,
                 size: ButtonSize.medium,

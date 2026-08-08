@@ -60,6 +60,7 @@ import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../support/conformance_harness.dart';
 import 'golden_scene.dart';
@@ -142,10 +143,8 @@ List<GoldenScene> _buttonScenes() {
           onPressed: _noop,
           label: 'Commit',
           size: _sizes[column],
-          leadingIcon: row == 1 || row == 3 ? PhosphorIconsRegular.check : null,
-          trailingIcon: row == 2 || row == 3
-              ? PhosphorIconsRegular.arrowRight
-              : null,
+          leadingIcon: row == 1 || row == 3 ? IconRole.check : null,
+          trailingIcon: row == 2 || row == 3 ? IconRole.arrowRight : null,
           // The spinner animates indefinitely. `settleScene` advances a fixed
           // 400 ms rather than settling, so the baseline captures it at a
           // reproducible phase instead of hanging the test.
@@ -168,7 +167,7 @@ List<GoldenScene> _buttonScenes() {
               label: 'Full width ${_sizeName(size)}',
               size: size,
               fullWidth: true,
-              leadingIcon: PhosphorIconsRegular.floppyDisk,
+              leadingIcon: IconRole.floppyDisk,
             ),
         ],
       ),
@@ -219,7 +218,7 @@ List<GoldenScene> _iconButtonScenes() {
         rowHeaders: _variants.map(_variantName).toList(),
         cell: (int row, int column) => BaseIconButton(
           onPressed: _noop,
-          icon: PhosphorIconsRegular.trash,
+          icon: IconRole.trash,
           tooltip: 'Delete',
           variant: _variants[row],
           size: _sizes[column],
@@ -234,7 +233,7 @@ List<GoldenScene> _iconButtonScenes() {
         rowHeaders: _variants.map(_variantName).toList(),
         cell: (int row, int column) => BaseIconButton(
           onPressed: null,
-          icon: PhosphorIconsRegular.trash,
+          icon: IconRole.trash,
           tooltip: 'Delete',
           variant: _variants[row],
           size: _sizes[column],
@@ -246,6 +245,29 @@ List<GoldenScene> _iconButtonScenes() {
       // `isSelected` is the only state that is neither driven nor implied by
       // `onPressed`, and the register requires the selected tint to disappear
       // under disabled — which is only checkable if both appear in one image.
+      //
+      // **THIS SCENE'S TWO BASELINES ARE STALE AND HAVE TO BE REGENERATED ON
+      // LINUX**: `base_icon_button_selected_light.png` and
+      // `base_icon_button_selected_dark.png`. They were captured while
+      // `BaseIconButton` built Material's `IconButton` directly and drew
+      // `Icon(icon)` verbatim, so the two selected columns baked an OUTLINED
+      // star into the image — an encoding of "selection does not change the
+      // mark" that this application contradicts and always did.
+      // `MaterialControls.iconButton` now resolves `MaterialGlyphs.filledOf`
+      // when `spec.selected` is true, which is Material 3's own toggle
+      // behaviour and is what keeps the favourite star on a repository card
+      // and the engaged funnel on the tags screen solid, exactly as they were
+      // written before the conversion. Those two columns therefore draw a
+      // SOLID star now.
+      //
+      // The move is not avoidable by editing this scene: any role whose
+      // filled variant equals its ordinary one draws a different mark from
+      // the star and moves the image just the same, and dropping the fill to
+      // hold the baseline would un-draw three marks the application has
+      // always painted solid and move `screen_tags_filter_band` instead. Two
+      // baselines is the cheapest correct answer, and the weight is asserted
+      // on EVERY platform by `base_icon_button_conformance_test.dart` so a
+      // stale image can never be the only thing that knows.
       build: (BuildContext context) => _matrix(
         context,
         columnHeaders: const <String>[
@@ -256,7 +278,7 @@ List<GoldenScene> _iconButtonScenes() {
         rowHeaders: _variants.map(_variantName).toList(),
         cell: (int row, int column) => BaseIconButton(
           onPressed: column == 2 ? null : _noop,
-          icon: PhosphorIconsRegular.star,
+          icon: IconRole.star,
           tooltip: 'Favorite',
           variant: _variants[row],
           isSelected: column != 0,
@@ -276,12 +298,12 @@ List<GoldenScene> _iconButtonScenes() {
             BaseIconButton(
               key: kDrivenControlKey,
               onPressed: _noop,
-              icon: PhosphorIconsRegular.arrowsClockwise,
+              icon: IconRole.arrowsClockwise,
               tooltip: 'Refresh',
             ),
             BaseIconButton(
               onPressed: _noop,
-              icon: PhosphorIconsRegular.arrowsClockwise,
+              icon: IconRole.arrowsClockwise,
               tooltip: 'Refresh',
             ),
           ],
@@ -346,13 +368,13 @@ List<GoldenScene> _fieldScenes() {
         cell: (int row, int column) => _field(switch (row) {
           0 => const BaseTextField(
             label: 'Search',
-            prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+            prefixIcon: IconRole.magnifyingGlass,
             initialValue: 'fix(ui)',
           ),
           1 => BaseTextField(
             label: 'Repository',
             initialValue: 'D:/repos/example',
-            suffixIcon: PhosphorIconsRegular.folder,
+            suffixIcon: IconRole.folder,
             suffixTooltip: 'Browse',
             onSuffixTap: _noop,
           ),
@@ -414,7 +436,7 @@ List<GoldenScene> _fieldScenes() {
             labelText: row == 1 ? null : 'Base branch',
             hintText: 'Choose a branch',
             initialValue: row == 1 ? null : 'main',
-            prefixIcon: row == 2 ? PhosphorIconsRegular.gitBranch : null,
+            prefixIcon: row == 2 ? IconRole.gitBranch : null,
             // A null `onChanged` is how a DropdownButtonFormField is disabled,
             // matching the `onPressed: null` convention of the buttons.
             onChanged: row == 3 ? null : (String? value) {},
@@ -523,13 +545,13 @@ List<GoldenScene> _containerScenes() {
               actions: <Widget>[
                 BaseIconButton(
                   onPressed: _noop,
-                  icon: PhosphorIconsRegular.arrowsClockwise,
+                  icon: IconRole.arrowsClockwise,
                   tooltip: 'Refresh',
                   size: ButtonSize.small,
                 ),
                 BaseIconButton(
                   onPressed: _noop,
-                  icon: PhosphorIconsRegular.funnel,
+                  icon: IconRole.funnel,
                   tooltip: 'Filter',
                   size: ButtonSize.small,
                 ),
@@ -612,7 +634,7 @@ List<GoldenScene> _containerScenes() {
                     ),
                     trailing: BaseIconButton(
                       onPressed: _noop,
-                      icon: PhosphorIconsRegular.x,
+                      icon: IconRole.x,
                       tooltip: 'Unstage',
                       size: ButtonSize.small,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -39,7 +40,7 @@ class GitConfigSection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.gitConfiguration,
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       children: [
         // Tool auto-detection button (Windows and Linux)
         if (onDetectTools != null) ...[
@@ -48,7 +49,7 @@ class GitConfigSection extends ConsumerWidget {
             child: BaseButton(
               label: l10n.searchToolsAutoDetect,
               variant: ButtonVariant.primary,
-              leadingIcon: PhosphorIconsRegular.magnifyingGlass,
+              leadingIcon: IconRole.magnifyingGlass,
               onPressed: onDetectTools,
               fullWidth: true,
             ),
@@ -81,7 +82,7 @@ class GitConfigSection extends ConsumerWidget {
             children: [
               if (git.executablePath != null)
                 BaseIconButton(
-                  icon: PhosphorIconsRegular.x,
+                  icon: IconRole.x,
                   tooltip: l10n.clear,
                   size: ButtonSize.small,
                   onPressed: () {
@@ -91,7 +92,7 @@ class GitConfigSection extends ConsumerWidget {
                   },
                 ),
               BaseIconButton(
-                icon: PhosphorIconsRegular.folder,
+                icon: IconRole.folder,
                 tooltip: l10n.browse,
                 onPressed: onSelectGitExecutable,
               ),
@@ -125,7 +126,7 @@ class GitConfigSection extends ConsumerWidget {
             children: [
               if (tools.textEditor != null)
                 BaseIconButton(
-                  icon: PhosphorIconsRegular.x,
+                  icon: IconRole.x,
                   tooltip: l10n.clear,
                   size: ButtonSize.small,
                   onPressed: () {
@@ -135,7 +136,7 @@ class GitConfigSection extends ConsumerWidget {
                   },
                 ),
               BaseIconButton(
-                icon: PhosphorIconsRegular.folder,
+                icon: IconRole.folder,
                 tooltip: l10n.browse,
                 onPressed: onSelectTextEditor,
               ),
@@ -169,7 +170,7 @@ class GitConfigSection extends ConsumerWidget {
             children: [
               if (tools.diffTool != null)
                 BaseIconButton(
-                  icon: PhosphorIconsRegular.x,
+                  icon: IconRole.x,
                   tooltip: l10n.clear,
                   size: ButtonSize.small,
                   onPressed: () {
@@ -177,7 +178,7 @@ class GitConfigSection extends ConsumerWidget {
                   },
                 ),
               BaseIconButton(
-                icon: PhosphorIconsRegular.folder,
+                icon: IconRole.folder,
                 tooltip: l10n.browse,
                 onPressed: onSelectDiffTool,
               ),
@@ -211,7 +212,7 @@ class GitConfigSection extends ConsumerWidget {
             children: [
               if (tools.mergeTool != null)
                 BaseIconButton(
-                  icon: PhosphorIconsRegular.x,
+                  icon: IconRole.x,
                   tooltip: l10n.clear,
                   size: ButtonSize.small,
                   onPressed: () {
@@ -219,7 +220,7 @@ class GitConfigSection extends ConsumerWidget {
                   },
                 ),
               BaseIconButton(
-                icon: PhosphorIconsRegular.folder,
+                icon: IconRole.folder,
                 tooltip: l10n.browse,
                 onPressed: onSelectMergeTool,
               ),
@@ -242,7 +243,7 @@ class GitConfigSection extends ConsumerWidget {
             ],
           ),
           trailing: BaseIconButton(
-            icon: PhosphorIconsRegular.pencil,
+            icon: IconRole.pencil,
             tooltip: l10n.edit,
             onPressed: onEditUserName,
           ),
@@ -262,7 +263,7 @@ class GitConfigSection extends ConsumerWidget {
             ],
           ),
           trailing: BaseIconButton(
-            icon: PhosphorIconsRegular.pencil,
+            icon: IconRole.pencil,
             tooltip: l10n.edit,
             onPressed: onEditUserEmail,
           ),

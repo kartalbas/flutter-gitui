@@ -8,10 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_select_all_button.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import '../../skin/pump_under_skin.dart';
 
 Future<void> _pump(WidgetTester tester, Widget child) {
   return tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: Center(child: child)),

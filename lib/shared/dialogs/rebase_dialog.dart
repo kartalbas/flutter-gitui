@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -32,7 +33,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
     final currentBranchAsync = ref.watch(currentBranchProvider);
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       title: AppLocalizations.of(context)!.rebaseBranch,
       // Idle: Enter starts the rebase once a target is chosen. Conflicts:
       // Enter continues (the labeled primary). Otherwise Enter is inert.
@@ -371,7 +372,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 BaseButton(
                   label: AppLocalizations.of(context)!.goToChanges,
                   variant: ButtonVariant.primary,
-                  leadingIcon: PhosphorIconsRegular.fileCode,
+                  leadingIcon: IconRole.fileCode,
                   onPressed: () {
                     Navigator.of(context).pop();
                     ref.read(navigationDestinationProvider.notifier).state =
@@ -433,7 +434,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
     return BaseDropdown<String>(
       initialValue: selectedBranch,
       hintText: hint,
-      prefixIcon: PhosphorIconsRegular.gitBranch,
+      prefixIcon: IconRole.gitBranch,
       items: branches.map((branch) {
         return BaseDropdownItem<String>(
           value: branch.name,

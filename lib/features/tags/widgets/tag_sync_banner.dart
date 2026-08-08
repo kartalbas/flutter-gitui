@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -69,7 +70,7 @@ class TagSyncBanner extends StatelessWidget {
           if (localOnlyCount > 0)
             BaseButton(
               onPressed: onPushAll,
-              leadingIcon: PhosphorIconsRegular.upload,
+              leadingIcon: IconRole.upload,
               label: AppLocalizations.of(context)!.pushAll,
               variant: ButtonVariant.primary,
               size: ButtonSize.small,
@@ -79,7 +80,7 @@ class TagSyncBanner extends StatelessWidget {
           if (remoteOnlyCount > 0)
             BaseButton(
               onPressed: onFetchAll,
-              leadingIcon: PhosphorIconsRegular.downloadSimple,
+              leadingIcon: IconRole.downloadSimple,
               label: AppLocalizations.of(context)!.fetchAll,
               variant: ButtonVariant.primary,
               size: ButtonSize.small,

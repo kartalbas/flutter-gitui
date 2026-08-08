@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../generated/app_localizations.dart';
 
 import '../theme/app_theme.dart';
@@ -21,7 +22,9 @@ class EmptyStateWidget extends StatelessWidget {
   // Structured single action (preferred)
   final String? actionLabel;
   final VoidCallback? onActionPressed;
-  final IconData? actionIcon;
+
+  /// The meaning of the single action's mark.
+  final IconRole? actionIcon;
 
   // Multiple structured actions
   final List<EmptyStateAction>? actions;
@@ -50,7 +53,7 @@ class EmptyStateWidget extends StatelessWidget {
       // Structured single action - always BaseButton primary
       actionWidget = BaseButton(
         onPressed: onActionPressed,
-        leadingIcon: actionIcon ?? PhosphorIconsRegular.plus,
+        leadingIcon: actionIcon ?? IconRole.plus,
         label: actionLabel!,
         variant: ButtonVariant.primary,
       );
@@ -169,7 +172,7 @@ class ErrorState extends StatelessWidget {
       action: onRetry != null
           ? BaseButton(
               onPressed: onRetry!,
-              leadingIcon: PhosphorIconsRegular.arrowClockwise,
+              leadingIcon: IconRole.arrowClockwise,
               label: l10n.retry,
               variant: ButtonVariant.primary,
             )
@@ -207,7 +210,9 @@ class LoadingState extends StatelessWidget {
 /// Ensures consistent button styling across all empty states.
 class EmptyStateAction {
   final String label;
-  final IconData icon;
+
+  /// The meaning of the action's mark; the skin chooses the glyph.
+  final IconRole icon;
   final VoidCallback onPressed;
   final bool isPrimary;
 

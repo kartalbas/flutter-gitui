@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/shared/widgets/base_dismiss_scope.dart';
+import '../../skin/pump_under_skin.dart';
 
 void main() {
   late int outerDismissed;
@@ -27,6 +28,9 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         home: Scaffold(
           // A recorder above both scopes: whatever they ignore lands here,
           // proving the key bubbled through rather than vanishing.
@@ -100,6 +104,9 @@ void main() {
     final second = FocusNode(debugLabel: 'second');
     await tester.pumpWidget(
       MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         home: Scaffold(
           body: Column(
             children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -69,7 +70,21 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
   @override
   Widget build(BuildContext context) {
     return BaseDialog(
-      icon: PhosphorIconsBold.magnifyingGlass,
+      // Drawn at Phosphor BOLD before the conversion: the same magnifying
+      // glass, heavier stroke. A role carries no weight by design (#249
+      // conflict C3) and `BaseDialog` resolves it at the ordinary stroke, so
+      // this site's stroke changed. It is one of the twelve the whole
+      // application has, each of them recorded and pinned by
+      // `test/shared/icons/icon_weight_census_test.dart`, which also carries
+      // the measurement behind the decision.
+      //
+      // The measurement, for this site: `BaseDialog.icon` had 72 call sites,
+      // 6 of them bold. And this dialog draws the magnifying glass three
+      // times — bold here, ordinary as the query field's prefix and ordinary
+      // again on its own Search button — so the heavier stroke was never
+      // saying anything the other two were not. That is why the weight is let
+      // go rather than smuggled back across the seam as a flag.
+      icon: IconRole.magnifyingGlass,
       title: AppLocalizations.of(context)!.advancedSearch,
       maxWidth: 800,
       onSubmit: _applySearch,
@@ -85,7 +100,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               hintText: AppLocalizations.of(
                 context,
               )!.searchInCommitOrAuthorOrHash,
-              prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+              prefixIcon: IconRole.magnifyingGlass,
               autofocus: true,
             ),
             const SizedBox(height: AppTheme.paddingM),
@@ -133,7 +148,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               controller: _filePathController,
               label: AppLocalizations.of(context)!.filePathLabel,
               hintText: AppLocalizations.of(context)!.filterByFilePathExample,
-              prefixIcon: PhosphorIconsRegular.file,
+              prefixIcon: IconRole.file,
             ),
             const SizedBox(height: AppTheme.paddingM),
 
@@ -141,7 +156,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
               controller: _hashController,
               label: AppLocalizations.of(context)!.commitHashLabel,
               hintText: AppLocalizations.of(context)!.filterByCommitHashPrefix,
-              prefixIcon: PhosphorIconsRegular.hash,
+              prefixIcon: IconRole.hash,
             ),
             const SizedBox(height: AppTheme.paddingL),
 
@@ -175,28 +190,28 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
                 BaseButton(
                   label: AppLocalizations.of(context)!.today,
                   variant: ButtonVariant.tertiary,
-                  leadingIcon: PhosphorIconsRegular.calendar,
+                  leadingIcon: IconRole.calendar,
                   onPressed: () =>
                       _applyQuickFilter(HistorySearchFilter.today()),
                 ),
                 BaseButton(
                   label: AppLocalizations.of(context)!.thisWeek,
                   variant: ButtonVariant.tertiary,
-                  leadingIcon: PhosphorIconsRegular.calendar,
+                  leadingIcon: IconRole.calendar,
                   onPressed: () =>
                       _applyQuickFilter(HistorySearchFilter.thisWeek()),
                 ),
                 BaseButton(
                   label: AppLocalizations.of(context)!.thisMonth,
                   variant: ButtonVariant.tertiary,
-                  leadingIcon: PhosphorIconsRegular.calendar,
+                  leadingIcon: IconRole.calendar,
                   onPressed: () =>
                       _applyQuickFilter(HistorySearchFilter.thisMonth()),
                 ),
                 BaseButton(
                   label: AppLocalizations.of(context)!.last30Days,
                   variant: ButtonVariant.tertiary,
-                  leadingIcon: PhosphorIconsRegular.calendar,
+                  leadingIcon: IconRole.calendar,
                   onPressed: () =>
                       _applyQuickFilter(HistorySearchFilter.last30Days()),
                 ),
@@ -221,7 +236,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
         DialogAction(
           label: AppLocalizations.of(context)!.advancedSearchButton,
           role: DialogActionRole.affirmative,
-          icon: PhosphorIconsRegular.magnifyingGlass,
+          icon: IconRole.magnifyingGlass,
           onPressed: _applySearch,
         ),
       ],
@@ -309,7 +324,7 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
           initialValue: _selectedAuthor,
           labelText: AppLocalizations.of(context)!.authorLabel,
           hintText: AppLocalizations.of(context)!.filterByAuthorNameOrEmail,
-          prefixIcon: PhosphorIconsRegular.user,
+          prefixIcon: IconRole.user,
           items: [
             BaseDropdownItem<String?>.simple(
               value: null,
@@ -335,13 +350,13 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
       },
       loading: () => BaseDropdown<String?>(
         labelText: AppLocalizations.of(context)!.authorLabel,
-        prefixIcon: PhosphorIconsRegular.user,
+        prefixIcon: IconRole.user,
         items: const [],
         onChanged: null,
       ),
       error: (error, stack) => BaseDropdown<String?>(
         labelText: AppLocalizations.of(context)!.authorLabel,
-        prefixIcon: PhosphorIconsRegular.user,
+        prefixIcon: IconRole.user,
         items: const [],
         onChanged: null,
       ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -339,7 +340,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                     hintText: AppLocalizations.of(
                       context,
                     )!.hintTextSearchCommits,
-                    prefixIcon: PhosphorIconsRegular.magnifyingGlass,
+                    prefixIcon: IconRole.magnifyingGlass,
                     showClearButton: _searchController.text.isNotEmpty,
                     onChanged: (query) {
                       setState(() {}); // Update suffix icon
@@ -366,7 +367,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               const SizedBox(width: AppTheme.paddingM),
               // Advanced search button
               BaseIconButton(
-                icon: PhosphorIconsRegular.faders,
+                icon: IconRole.faders,
                 tooltip: AppLocalizations.of(context)!.advancedSearch,
                 onPressed: () => _showAdvancedSearch(context),
                 variant: ButtonVariant.primary,
@@ -652,8 +653,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                             label: l10n.historySearchAllHistory,
                             variant: ButtonVariant.tertiary,
                             size: ButtonSize.small,
-                            leadingIcon:
-                                PhosphorIconsRegular.listMagnifyingGlass,
+                            leadingIcon: IconRole.listMagnifyingGlass,
                             onPressed: () => _startDeepSearch(),
                           ),
                         ],
@@ -950,15 +950,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     return [
       BaseMenuItem(
         value: _CommitContextAction.copySha,
-        child: MenuItemContent(
-          icon: PhosphorIconsRegular.copy,
-          label: l10n.copySha,
-        ),
+        child: MenuItemContent(icon: IconRole.copy, label: l10n.copySha),
       ),
       BaseMenuItem(
         value: _CommitContextAction.copyMessage,
         child: MenuItemContent(
-          icon: PhosphorIconsRegular.chatText,
+          icon: IconRole.chatText,
           label: l10n.copyCommitMessage,
         ),
       ),
@@ -966,30 +963,27 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         BaseMenuItem(
           value: _CommitContextAction.createBranch,
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.gitBranch,
+            icon: IconRole.gitBranch,
             label: l10n.createBranchFromCommit,
           ),
         ),
         BaseMenuItem(
           value: _CommitContextAction.createTag,
-          child: MenuItemContent(
-            icon: PhosphorIconsRegular.tag,
-            label: l10n.createTag,
-          ),
+          child: MenuItemContent(icon: IconRole.tag, label: l10n.createTag),
         ),
       ],
       if (count == 2)
         BaseMenuItem(
           value: _CommitContextAction.compare,
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.gitDiff,
+            icon: IconRole.gitDiff,
             label: l10n.compareCommits,
           ),
         ),
       BaseMenuItem(
         value: _CommitContextAction.cherryPick,
         child: MenuItemContent(
-          icon: PhosphorIconsRegular.arrowBendDownRight,
+          icon: IconRole.arrowBendDownRight,
           label: l10n.cherryPick,
         ),
       ),
@@ -1001,9 +995,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         BaseMenuItem(
           value: _CommitContextAction.squash,
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.arrowsInLineVertical,
+            icon: IconRole.arrowsInLineVertical,
             label: l10n.squashCommits,
-            iconColor: errorColor,
+            tone: Tone.danger,
             labelColor: errorColor,
           ),
         ),
@@ -1011,18 +1005,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         BaseMenuItem(
           value: _CommitContextAction.revert,
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.arrowCounterClockwise,
+            icon: IconRole.arrowCounterClockwise,
             label: l10n.revert,
-            iconColor: errorColor,
+            tone: Tone.danger,
             labelColor: errorColor,
           ),
         ),
         BaseMenuItem(
           value: _CommitContextAction.reset,
           child: MenuItemContent(
-            icon: PhosphorIconsRegular.arrowCounterClockwise,
+            icon: IconRole.arrowCounterClockwise,
             label: l10n.resetToHere,
-            iconColor: errorColor,
+            tone: Tone.danger,
             labelColor: errorColor,
           ),
         ),
@@ -1333,7 +1327,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       context: context,
       ref: ref,
       action: DestructiveAction.forcePush,
-      icon: PhosphorIconsRegular.warningCircle,
+      icon: IconRole.warningCircle,
       title: l10n.forcePush,
       message:
           '${l10n.forcePushConfirmMessage(upstream)}\n\n'

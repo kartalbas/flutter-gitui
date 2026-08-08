@@ -13,6 +13,7 @@ import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
+import '../../skin/pump_under_skin.dart';
 
 Future<void> _pumpOpener(
   WidgetTester tester,
@@ -20,6 +21,9 @@ Future<void> _pumpOpener(
 ) async {
   await tester.pumpWidget(
     MaterialApp(
+      builder: (BuildContext context, Widget? child) =>
+          installSkinUnderTest(child ?? const SizedBox.shrink()),
+
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
@@ -113,6 +117,9 @@ void main() {
       var submits = 0;
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: BaseDialog(

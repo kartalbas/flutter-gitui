@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -33,7 +34,7 @@ class StashesEmptyState extends StatelessWidget {
           const SizedBox(height: AppTheme.paddingL),
           BaseButton(
             onPressed: onCreateStash,
-            leadingIcon: PhosphorIconsRegular.floppyDisk,
+            leadingIcon: IconRole.floppyDisk,
             label: AppLocalizations.of(context)!.createStash,
             variant: ButtonVariant.primary,
           ),

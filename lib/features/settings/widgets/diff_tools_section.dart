@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -32,7 +33,7 @@ class DiffToolsSection extends ConsumerWidget {
 
     return SettingsSection(
       title: l10n.diffAndMergeTools,
-      icon: PhosphorIconsRegular.gitDiff,
+      icon: IconRole.gitDiff,
       children: [
         availableToolsAsync.when(
           data: (availableTools) {
@@ -64,7 +65,7 @@ class DiffToolsSection extends ConsumerWidget {
                     children: [
                       if (tools.customDiffToolPath != null)
                         BaseIconButton(
-                          icon: PhosphorIconsRegular.x,
+                          icon: IconRole.x,
                           tooltip: l10n.clear,
                           size: ButtonSize.small,
                           onPressed: () async {
@@ -75,7 +76,7 @@ class DiffToolsSection extends ConsumerWidget {
                           },
                         ),
                       BaseIconButton(
-                        icon: PhosphorIconsRegular.folder,
+                        icon: IconRole.folder,
                         tooltip: l10n.browseForDiffTool,
                         onPressed: onSelectCustomDiffTool,
                       ),
@@ -108,7 +109,7 @@ class DiffToolsSection extends ConsumerWidget {
                     children: [
                       if (tools.customMergeToolPath != null)
                         BaseIconButton(
-                          icon: PhosphorIconsRegular.x,
+                          icon: IconRole.x,
                           tooltip: l10n.clear,
                           size: ButtonSize.small,
                           onPressed: () async {
@@ -119,7 +120,7 @@ class DiffToolsSection extends ConsumerWidget {
                           },
                         ),
                       BaseIconButton(
-                        icon: PhosphorIconsRegular.folder,
+                        icon: IconRole.folder,
                         tooltip: l10n.browseForMergeTool,
                         onPressed: onSelectCustomMergeTool,
                       ),

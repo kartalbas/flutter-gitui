@@ -28,6 +28,7 @@ import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/merge_conflict.dart';
 import 'package:flutter_gitui/features/merge/conflict_resolution_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// The screen the user came from, so "Escape leaves the screen" is something
 /// the test can see rather than infer.
@@ -113,6 +114,9 @@ Future<void> _pumpConflictScreen(
         ),
       ],
       child: MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         navigatorKey: navigatorKey,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,

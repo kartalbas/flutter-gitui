@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -85,7 +86,7 @@ class WorkspaceCard extends StatelessWidget {
                   PopupMenuItem(
                     value: 'edit',
                     child: MenuItemContent(
-                      icon: PhosphorIconsRegular.pencil,
+                      icon: IconRole.pencil,
                       label: AppLocalizations.of(context)!.edit,
                     ),
                   ),
@@ -93,9 +94,9 @@ class WorkspaceCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'delete',
                       child: MenuItemContent(
-                        icon: PhosphorIconsRegular.trash,
+                        icon: IconRole.trash,
                         label: AppLocalizations.of(context)!.delete,
-                        iconColor: Theme.of(context).colorScheme.error,
+                        tone: Tone.danger,
                         labelColor: Theme.of(context).colorScheme.error,
                       ),
                     ),

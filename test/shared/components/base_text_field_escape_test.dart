@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/widgets/base_dismiss_scope.dart';
+import '../../skin/pump_under_skin.dart';
 
 void main() {
   testWidgets(
@@ -22,6 +23,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
@@ -66,6 +70,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

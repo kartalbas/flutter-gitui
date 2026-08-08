@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import '../theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -24,13 +25,13 @@ import '../components/base_button.dart';
 ///             actions: [
 ///               BatchAction(
 ///                 label: l10n.push,
-///                 icon: PhosphorIconsRegular.upload,
+///                 icon: IconRole.upload,
 ///                 onPressed: () => _pushSelectedTags(),
 ///                 enabled: _canPushSelected(),
 ///               ),
 ///               BatchAction(
 ///                 label: l10n.delete,
-///                 icon: PhosphorIconsRegular.trash,
+///                 icon: IconRole.trash,
 ///                 onPressed: () => _deleteSelectedTags(),
 ///                 isDestructive: true,
 ///               ),
@@ -118,7 +119,7 @@ class BatchOperationsBar extends StatelessWidget {
             BaseButton(
               label: l10n.clearSelection,
               variant: ButtonVariant.tertiary,
-              leadingIcon: PhosphorIconsRegular.x,
+              leadingIcon: IconRole.x,
               onPressed: onClear,
             ),
           ],
@@ -131,7 +132,9 @@ class BatchOperationsBar extends StatelessWidget {
 /// Represents a single batch action button
 class BatchAction {
   final String label;
-  final IconData icon;
+
+  /// The meaning of the action's mark; the skin chooses the glyph.
+  final IconRole icon;
   final VoidCallback onPressed;
   final bool enabled;
   final bool isDestructive;

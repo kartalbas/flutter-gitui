@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Tone;
 import '../../generated/app_localizations.dart';
 import '../../core/constants/constants.dart';
 import '../../shared/theme/app_theme.dart';
 import '../utils/keyboard_guards.dart';
 import 'base_button.dart';
+import 'base_icon.dart';
 import 'base_label.dart';
 
 /// Dialog visual variants
@@ -71,11 +73,12 @@ enum DialogActionRole {
 /// widget.
 ///
 /// Everything here is language-neutral: a string, a callback, a role, two
-/// flags and an [IconData] (which Flutter's Material, Cupertino and Fluent
-/// libraries all accept). Nothing in it names a Material class, a colour or a
-/// size, so each design language can render the same action its own way — put
-/// it on the other side of the row, stretch it to equal width, or turn it into
-/// a `CupertinoDialogAction` with the alert's dividers.
+/// flags and an [IconRole] — a MEANING rather than a glyph, so the mark and
+/// its weight stay the skin's to choose (#249 conflict C3). Nothing in it
+/// names a Material class, a colour or a size, so each design language can
+/// render the same action its own way — put it on the other side of the row,
+/// stretch it to equal width, or turn it into a `CupertinoDialogAction` with
+/// the alert's dividers.
 class DialogAction {
   const DialogAction({
     required this.label,
@@ -101,10 +104,9 @@ class DialogAction {
   /// exists.
   final DialogActionRole role;
 
-  /// An optional leading glyph. [IconData] is the one visual value that
-  /// survives the language change unharmed — all three libraries take it —
-  /// though which *glyph* is right per language remains a skin's decision.
-  final IconData? icon;
+  /// The meaning of an optional leading mark. Which glyph stands for it, at
+  /// which weight and in which colour, is the skin's answer.
+  final IconRole? icon;
 
   /// Whether the action may run right now. Distinct from a null [onPressed]
   /// only in how it reads at the call site: a dialog whose confirm button
@@ -169,7 +171,7 @@ bool focusedEditableKeepsEnter() => focusedEditableOwnsKey(
 ///     title: 'Delete branch?',
 ///     content: Text('This action cannot be undone.'),
 ///     variant: DialogVariant.destructive,
-///     icon: PhosphorIconsRegular.warning,
+///     icon: IconRole.warning,
 ///     actions: [
 ///       DialogAction(
 ///         label: 'Cancel',
@@ -230,8 +232,8 @@ class BaseDialog extends StatelessWidget {
   /// Dialog variant (visual style)
   final DialogVariant variant;
 
-  /// Optional icon in title area
-  final IconData? icon;
+  /// The meaning of an optional mark in the title area.
+  final IconRole? icon;
 
   /// Maximum dialog width
   final double maxWidth;
@@ -314,9 +316,15 @@ class BaseDialog extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
-    // Determine icon and color based on variant
-    IconData? variantIcon = icon;
-    Color? iconColor;
+    // Determine the mark and what it means, from the variant.
+    //
+    // The colour is no longer a `Color` but a [Tone]: "this dialog is
+    // destructive" is a meaning, and `colorScheme.error` was Material's answer
+    // to it written down in application code. `Tone.danger` asks the question
+    // and the skin answers it — with `colorScheme.error` under Material, which
+    // is why nothing on screen moves.
+    IconRole? variantIcon = icon;
+    Tone iconTone = Tone.accent;
     Color titleColor;
 
     if (icon == null) {
@@ -326,13 +334,13 @@ class BaseDialog extends StatelessWidget {
           titleColor = colorScheme.onSurface;
           break;
         case DialogVariant.confirmation:
-          variantIcon = PhosphorIconsRegular.question;
-          iconColor = colorScheme.primary;
+          variantIcon = IconRole.question;
+          iconTone = Tone.accent;
           titleColor = colorScheme.onSurface;
           break;
         case DialogVariant.destructive:
-          variantIcon = PhosphorIconsRegular.warning;
-          iconColor = colorScheme.error;
+          variantIcon = IconRole.warning;
+          iconTone = Tone.danger;
           titleColor = colorScheme.error;
           break;
       }
@@ -340,15 +348,15 @@ class BaseDialog extends StatelessWidget {
       // Custom icon provided
       switch (variant) {
         case DialogVariant.normal:
-          iconColor = colorScheme.primary;
+          iconTone = Tone.accent;
           titleColor = colorScheme.onSurface;
           break;
         case DialogVariant.confirmation:
-          iconColor = colorScheme.primary;
+          iconTone = Tone.accent;
           titleColor = colorScheme.onSurface;
           break;
         case DialogVariant.destructive:
-          iconColor = colorScheme.error;
+          iconTone = Tone.danger;
           titleColor = colorScheme.error;
           break;
       }
@@ -414,10 +422,13 @@ class BaseDialog extends StatelessWidget {
                           // (flutter/lib/src/material/dialog.dart:818), so the
                           // size comes from the theme. The 28 that stood here
                           // was on no icon scale at all.
-                          Icon(
+                          // `prominent` is the 24 dp rung, which is the size
+                          // that stood here; the tone is the meaning the
+                          // colour used to spell out.
+                          BaseIcon(
                             variantIcon,
-                            size: AppTheme.iconL,
-                            color: iconColor,
+                            scale: ControlScale.prominent,
+                            tone: iconTone,
                           ),
                           SizedBox(width: AppTheme.paddingM),
                         },
@@ -427,7 +438,7 @@ class BaseDialog extends StatelessWidget {
                         if (barrierDismissible) ...{
                           SizedBox(width: AppTheme.paddingM),
                           BaseIconButton(
-                            icon: PhosphorIconsRegular.x,
+                            icon: IconRole.x,
                             tooltip: l10n.close,
                             onPressed: () => Navigator.of(context).pop(),
                           ),

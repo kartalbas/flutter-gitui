@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:file_picker/file_picker.dart';
 import '../../generated/app_localizations.dart';
 
@@ -95,7 +95,10 @@ class GitCommand {
   /// Key for localized description (e.g., 'commandCloneRepositoryDesc')
   final String descriptionKey;
 
-  final IconData icon;
+  /// The mark that stands for this command in the palette, named by MEANING
+  /// (#249, conflict C3): the command says which idea it is, and the active
+  /// skin decides which glyph draws that idea.
+  final IconRole icon;
   final CommandCategory category;
   final String? shortcut;
   final void Function(BuildContext context, WidgetRef ref) onExecute;
@@ -292,7 +295,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCloneRepository',
       descriptionKey: 'commandCloneRepositoryDesc',
-      icon: PhosphorIconsRegular.downloadSimple,
+      icon: IconRole.downloadSimple,
       category: CommandCategory.repository,
       onExecute: (context, ref) {
         showCloneRepositoryDialog(context);
@@ -301,7 +304,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandOpenRepository',
       descriptionKey: 'commandOpenRepositoryDesc',
-      icon: PhosphorIconsRegular.folderOpen,
+      icon: IconRole.folderOpen,
       category: CommandCategory.repository,
       shortcut: 'Ctrl+O',
       onExecute: (context, ref) async {
@@ -338,7 +341,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandInitializeRepository',
       descriptionKey: 'commandInitializeRepositoryDesc',
-      icon: PhosphorIconsRegular.plus,
+      icon: IconRole.plus,
       category: CommandCategory.repository,
       onExecute: (context, ref) {
         showInitializeRepositoryDialog(context);
@@ -351,7 +354,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCommitChanges',
       descriptionKey: 'commandCommitChangesDesc',
-      icon: PhosphorIconsRegular.check,
+      icon: IconRole.check,
       category: CommandCategory.changes,
       shortcut: 'C',
       onExecute: (context, ref) {
@@ -362,7 +365,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandAmendLastCommit',
       descriptionKey: 'commandAmendLastCommitDesc',
-      icon: PhosphorIconsRegular.pencilSimple,
+      icon: IconRole.pencilSimple,
       category: CommandCategory.changes,
       onExecute: (context, ref) async {
         final l10n = AppLocalizations.of(context);
@@ -372,7 +375,7 @@ class GitCommands {
           context: context,
           ref: ref,
           action: DestructiveAction.amend,
-          icon: PhosphorIconsRegular.pencilSimple,
+          icon: IconRole.pencilSimple,
           title: l10n.amendLastCommitDialog,
           message: l10n.amendLastCommitConfirm,
           confirmLabel: l10n.amend,
@@ -400,7 +403,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandStageAllFiles',
       descriptionKey: 'commandStageAllFilesDesc',
-      icon: PhosphorIconsRegular.checkSquare,
+      icon: IconRole.checkSquare,
       category: CommandCategory.changes,
       shortcut: 'Ctrl+A',
       onExecute: (context, ref) async {
@@ -418,7 +421,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandUnstageAllFiles',
       descriptionKey: 'commandUnstageAllFilesDesc',
-      icon: PhosphorIconsRegular.square,
+      icon: IconRole.square,
       category: CommandCategory.changes,
       onExecute: (context, ref) async {
         try {
@@ -435,7 +438,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandDiscardAllChanges',
       descriptionKey: 'commandDiscardAllChangesDesc',
-      icon: PhosphorIconsRegular.trash,
+      icon: IconRole.trash,
       category: CommandCategory.changes,
       onExecute: (context, ref) async {
         final l10n = AppLocalizations.of(context);
@@ -445,7 +448,7 @@ class GitCommands {
           context: context,
           ref: ref,
           action: DestructiveAction.discardAll,
-          icon: PhosphorIconsRegular.trash,
+          icon: IconRole.trash,
           title: l10n.discardAllChangesDialog,
           message: l10n.discardAllChangesConfirm,
           confirmLabel: l10n.discardAll,
@@ -471,7 +474,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandViewCommitHistory',
       descriptionKey: 'commandViewCommitHistoryDesc',
-      icon: PhosphorIconsRegular.clockCounterClockwise,
+      icon: IconRole.clockCounterClockwise,
       category: CommandCategory.history,
       shortcut: 'H',
       onExecute: (context, ref) {
@@ -482,7 +485,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandViewFileHistory',
       descriptionKey: 'commandViewFileHistoryDesc',
-      icon: PhosphorIconsRegular.fileText,
+      icon: IconRole.fileText,
       category: CommandCategory.history,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -492,7 +495,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCompareBranches',
       descriptionKey: 'commandCompareBranchesDesc',
-      icon: PhosphorIconsRegular.gitDiff,
+      icon: IconRole.gitDiff,
       category: CommandCategory.history,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -506,7 +509,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCreateBranch',
       descriptionKey: 'commandCreateBranchDesc',
-      icon: PhosphorIconsRegular.gitBranch,
+      icon: IconRole.gitBranch,
       category: CommandCategory.branches,
       shortcut: 'Ctrl+B',
       onExecute: (context, ref) {
@@ -517,7 +520,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCheckoutBranch',
       descriptionKey: 'commandCheckoutBranchDesc',
-      icon: PhosphorIconsRegular.arrowsLeftRight,
+      icon: IconRole.arrowsLeftRight,
       category: CommandCategory.branches,
       shortcut: 'B',
       onExecute: (context, ref) {
@@ -528,7 +531,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandRenameBranch',
       descriptionKey: 'commandRenameBranchDesc',
-      icon: PhosphorIconsRegular.textT,
+      icon: IconRole.textT,
       category: CommandCategory.branches,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -538,7 +541,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandDeleteBranch',
       descriptionKey: 'commandDeleteBranchDesc',
-      icon: PhosphorIconsRegular.trash,
+      icon: IconRole.trash,
       category: CommandCategory.branches,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -548,7 +551,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandMergeBranch',
       descriptionKey: 'commandMergeBranchDesc',
-      icon: PhosphorIconsRegular.gitMerge,
+      icon: IconRole.gitMerge,
       category: CommandCategory.branches,
       shortcut: 'M',
       onExecute: (context, ref) async {
@@ -563,7 +566,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandRebaseBranch',
       descriptionKey: 'commandRebaseBranchDesc',
-      icon: PhosphorIconsRegular.arrowsCounterClockwise,
+      icon: IconRole.arrowsCounterClockwise,
       category: CommandCategory.branches,
       shortcut: 'R',
       onExecute: (context, ref) async {
@@ -577,7 +580,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandFetchFromRemote',
       descriptionKey: 'commandFetchFromRemoteDesc',
-      icon: PhosphorIconsRegular.downloadSimple,
+      icon: IconRole.downloadSimple,
       category: CommandCategory.remotes,
       shortcut: 'F',
       onExecute: (context, ref) {
@@ -587,7 +590,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandPullChanges',
       descriptionKey: 'commandPullChangesDesc',
-      icon: PhosphorIconsRegular.arrowDown,
+      icon: IconRole.arrowDown,
       category: CommandCategory.remotes,
       shortcut: 'Ctrl+P',
       onExecute: (context, ref) {
@@ -597,7 +600,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandPullWithRebase',
       descriptionKey: 'commandPullWithRebaseDesc',
-      icon: PhosphorIconsRegular.arrowDown,
+      icon: IconRole.arrowDown,
       category: CommandCategory.remotes,
       // Unlike the plain pull above, --rebase replays local commits onto the
       // fetched upstream and therefore rewrites history, so it asks first like
@@ -611,7 +614,7 @@ class GitCommands {
           context: context,
           ref: ref,
           action: DestructiveAction.rebase,
-          icon: PhosphorIconsRegular.arrowDown,
+          icon: IconRole.arrowDown,
           title: l10n.commandPullWithRebase,
           message: l10n.rebaseWarning,
           confirmLabel: l10n.rebase,
@@ -625,7 +628,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandPushChanges',
       descriptionKey: 'commandPushChangesDesc',
-      icon: PhosphorIconsRegular.arrowUp,
+      icon: IconRole.arrowUp,
       category: CommandCategory.remotes,
       shortcut: 'Ctrl+Shift+P',
       onExecute: (context, ref) {
@@ -639,7 +642,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandStashChanges',
       descriptionKey: 'commandStashChangesDesc',
-      icon: PhosphorIconsRegular.package,
+      icon: IconRole.package,
       category: CommandCategory.stashes,
       shortcut: 'S',
       onExecute: (context, ref) {
@@ -650,7 +653,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandPopStash',
       descriptionKey: 'commandPopStashDesc',
-      icon: PhosphorIconsRegular.arrowUUpLeft,
+      icon: IconRole.arrowUUpLeft,
       category: CommandCategory.stashes,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -660,7 +663,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandApplyStash',
       descriptionKey: 'commandApplyStashDesc',
-      icon: PhosphorIconsRegular.arrowDown,
+      icon: IconRole.arrowDown,
       category: CommandCategory.stashes,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -670,7 +673,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandViewAllStashes',
       descriptionKey: 'commandViewAllStashesDesc',
-      icon: PhosphorIconsRegular.listBullets,
+      icon: IconRole.listBullets,
       category: CommandCategory.stashes,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -684,7 +687,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCreateTag',
       descriptionKey: 'commandCreateTagDesc',
-      icon: PhosphorIconsRegular.tag,
+      icon: IconRole.tag,
       category: CommandCategory.tags,
       shortcut: 'T',
       onExecute: (context, ref) async {
@@ -694,7 +697,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandDeleteTag',
       descriptionKey: 'commandDeleteTagDesc',
-      icon: PhosphorIconsRegular.trash,
+      icon: IconRole.trash,
       category: CommandCategory.tags,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -704,7 +707,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandPushTag',
       descriptionKey: 'commandPushTagDesc',
-      icon: PhosphorIconsRegular.arrowUp,
+      icon: IconRole.arrowUp,
       category: CommandCategory.tags,
       onExecute: (context, ref) {
         ref.read(navigationDestinationProvider.notifier).state =
@@ -718,7 +721,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandStartBisect',
       descriptionKey: 'commandStartBisectDesc',
-      icon: PhosphorIconsRegular.magnifyingGlass,
+      icon: IconRole.magnifyingGlass,
       category: CommandCategory.advanced,
       onExecute: (context, ref) async {
         await showBisectDialog(context);
@@ -727,7 +730,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandViewReflog',
       descriptionKey: 'commandViewReflogDesc',
-      icon: PhosphorIconsRegular.clockCounterClockwise,
+      icon: IconRole.clockCounterClockwise,
       category: CommandCategory.advanced,
       onExecute: (context, ref) async {
         await showReflogDialog(context);
@@ -736,7 +739,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCherryPickCommit',
       descriptionKey: 'commandCherryPickCommitDesc',
-      icon: PhosphorIconsRegular.arrowBendDownRight,
+      icon: IconRole.arrowBendDownRight,
       category: CommandCategory.advanced,
       onExecute: (context, ref) async {
         final l10n = AppLocalizations.of(context);
@@ -746,7 +749,7 @@ class GitCommands {
           context: context,
           dialog: BaseDialog(
             title: l10n.cherryPickCommitDialog,
-            icon: PhosphorIconsRegular.arrowBendDownRight,
+            icon: IconRole.arrowBendDownRight,
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.cherryPickCommitInstructions),
             actions: [
@@ -765,7 +768,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandRevertCommit',
       descriptionKey: 'commandRevertCommitDesc',
-      icon: PhosphorIconsRegular.arrowCounterClockwise,
+      icon: IconRole.arrowCounterClockwise,
       category: CommandCategory.advanced,
       onExecute: (context, ref) async {
         final l10n = AppLocalizations.of(context);
@@ -775,7 +778,7 @@ class GitCommands {
           context: context,
           dialog: BaseDialog(
             title: l10n.revertCommitDialog,
-            icon: PhosphorIconsRegular.arrowCounterClockwise,
+            icon: IconRole.arrowCounterClockwise,
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.revertCommitInstructions),
             actions: [
@@ -794,7 +797,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandResetToCommit',
       descriptionKey: 'commandResetToCommitDesc',
-      icon: PhosphorIconsRegular.arrowCounterClockwise,
+      icon: IconRole.arrowCounterClockwise,
       category: CommandCategory.advanced,
       onExecute: (context, ref) async {
         final l10n = AppLocalizations.of(context);
@@ -804,7 +807,7 @@ class GitCommands {
           context: context,
           dialog: BaseDialog(
             title: l10n.resetToCommitDialog,
-            icon: PhosphorIconsRegular.arrowCounterClockwise,
+            icon: IconRole.arrowCounterClockwise,
             onSubmit: () => Navigator.of(context).pop(),
             content: BodyMediumLabel(l10n.resetToCommitInstructions),
             actions: [
@@ -823,7 +826,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandCleanWorkingDirectory',
       descriptionKey: 'commandCleanWorkingDirectoryDesc',
-      icon: PhosphorIconsRegular.broom,
+      icon: IconRole.broom,
       category: CommandCategory.advanced,
       onExecute: (context, ref) async {
         final l10n = AppLocalizations.of(context);
@@ -846,7 +849,7 @@ class GitCommands {
             context: context,
             ref: ref,
             action: DestructiveAction.cleanWorkingDirectory,
-            icon: PhosphorIconsRegular.warningCircle,
+            icon: IconRole.warningCircle,
             title: l10n.cleanWorkingDirectoryDialog,
             message: l10n.cleanWorkingDirectoryConfirm,
             confirmLabel: l10n.clean,
@@ -881,7 +884,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandOpenSettings',
       descriptionKey: 'commandOpenSettingsDesc',
-      icon: PhosphorIconsRegular.gear,
+      icon: IconRole.gear,
       category: CommandCategory.settings,
       shortcut: 'Ctrl+,',
       onExecute: (context, ref) {
@@ -892,7 +895,7 @@ class GitCommands {
     GitCommand(
       titleKey: 'commandConfigureDiffTools',
       descriptionKey: 'commandConfigureDiffToolsDesc',
-      icon: PhosphorIconsRegular.gitDiff,
+      icon: IconRole.gitDiff,
       category: CommandCategory.settings,
       onExecute: (context, ref) async {
         await showDiffToolsConfigDialog(context);

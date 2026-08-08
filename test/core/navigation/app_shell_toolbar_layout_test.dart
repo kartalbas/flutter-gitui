@@ -28,6 +28,7 @@ import 'package:flutter_gitui/shared/widgets/branch_switcher.dart';
 import 'package:flutter_gitui/shared/widgets/overflow_action_bar.dart';
 import 'package:flutter_gitui/shared/widgets/repository_switcher.dart';
 import 'package:flutter_gitui/shared/widgets/workspace_switcher.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Serves the scripted repositories and swallows the last-accessed write,
 /// which would otherwise reach the on-disk config from a test.
@@ -161,10 +162,18 @@ Future<void> _pumpShell(WidgetTester tester, {double width = 870}) async {
           (ref) => AppDestination.workspaces,
         ),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: AppShell(),
+        // This suite builds its own root on purpose - it measures the shell
+        // at an exact window size - but from the moment the shell's
+        // components render through the contract it still has to install the
+        // skin, exactly as pump_under_skin.dart documents: a migrated
+        // component below reaches its design language through SkinScope and
+        // fails loudly without one.
+        builder: (BuildContext context, Widget? child) =>
+            installSkinUnderTest(child ?? const SizedBox.shrink()),
+        home: const AppShell(),
       ),
     ),
   );

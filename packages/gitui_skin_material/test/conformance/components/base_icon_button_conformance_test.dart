@@ -24,6 +24,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
 import '../support/expect_conformant.dart';
@@ -116,12 +118,27 @@ ThemeData _theme(WidgetTester tester) =>
 
 /// The rendered glyph's color, taken from the RichText the Icon paints, so
 /// the style's IconTheme propagation is part of the measurement.
-Color? _renderedIconColor(WidgetTester tester, IconData icon) {
+Color? _renderedIconColor(
+  WidgetTester tester,
+  IconRole role, {
+  bool selected = false,
+}) {
   final RichText glyph = tester.widget<RichText>(
-    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    find.descendant(
+      of: find.byIcon(_glyphOf(role, selected: selected)),
+      matching: find.byType(RichText),
+    ),
   );
   return glyph.text.style?.color;
 }
+
+/// The mark this skin draws for [role], at the weight a selected control
+/// takes. The component names a MEANING now, so a finder that wants the
+/// rendered glyph has to resolve it the same way the member does - including
+/// the solid variant a selected toggle takes, which is what the application's
+/// favourite star and engaged filter have always drawn.
+IconData _glyphOf(IconRole role, {bool selected = false}) =>
+    selected ? MaterialGlyphs.filledOf(role) : MaterialGlyphs.of(role);
 
 /// The style the rebuilt component hands to its IconButton.
 ButtonStyle _style(WidgetTester tester) =>
@@ -140,7 +157,12 @@ void main() {
       for (final ButtonVariant variant in ButtonVariant.values) {
         await pumpConformance(
           tester,
-          BaseIconButton(icon: Icons.add, variant: variant, onPressed: () {}),
+          BaseIconButton(
+            tooltip: 'Probe',
+            icon: IconRole.plus,
+            variant: variant,
+            onPressed: () {},
+          ),
         );
         expect(
           find.descendant(
@@ -159,14 +181,15 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.add,
+          tooltip: 'Probe',
+          icon: IconRole.plus,
           variant: ButtonVariant.primary,
           onPressed: () {},
         ),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       expect(_container(tester).color, scheme.primary);
-      expect(_renderedIconColor(tester, Icons.add), scheme.onPrimary);
+      expect(_renderedIconColor(tester, IconRole.plus), scheme.onPrimary);
     });
 
     testWidgets('danger fills with the error roles', (
@@ -175,14 +198,15 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.delete,
+          tooltip: 'Probe',
+          icon: IconRole.trash,
           variant: ButtonVariant.danger,
           onPressed: () {},
         ),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       expect(_container(tester).color, scheme.error);
-      expect(_renderedIconColor(tester, Icons.delete), scheme.onError);
+      expect(_renderedIconColor(tester, IconRole.trash), scheme.onError);
     });
 
     for (final Brightness brightness in Brightness.values) {
@@ -192,7 +216,8 @@ void main() {
         await pumpConformance(
           tester,
           BaseIconButton(
-            icon: Icons.check,
+            tooltip: 'Probe',
+            icon: IconRole.check,
             variant: ButtonVariant.success,
             onPressed: () {},
           ),
@@ -203,7 +228,7 @@ void main() {
             : GitSemanticColors.dark;
         expect(_container(tester).color, gitColors.added);
         expect(
-          _renderedIconColor(tester, Icons.check),
+          _renderedIconColor(tester, IconRole.check),
           GitSemanticColors.foregroundOn(gitColors.added),
         );
       });
@@ -214,7 +239,8 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.edit,
+          tooltip: 'Probe',
+          icon: IconRole.pencil,
           variant: ButtonVariant.secondary,
           onPressed: () {},
         ),
@@ -225,7 +251,10 @@ void main() {
       // outlined icon button already does the right thing per state
       // (outline enabled, onSurface at 12% disabled; icon_button.dart:1561).
       expect(_containerSide(tester).color, scheme.outline);
-      expect(_renderedIconColor(tester, Icons.edit), scheme.onSurfaceVariant);
+      expect(
+        _renderedIconColor(tester, IconRole.pencil),
+        scheme.onSurfaceVariant,
+      );
     });
 
     testWidgets('dangerSecondary outlines with error, disabled border stays '
@@ -233,7 +262,8 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.close,
+          tooltip: 'Probe',
+          icon: IconRole.x,
           variant: ButtonVariant.dangerSecondary,
           onPressed: () {},
         ),
@@ -241,7 +271,7 @@ void main() {
       final ColorScheme scheme = _theme(tester).colorScheme;
       expect(_container(tester).color, _m3TransparentContainer);
       expect(_containerSide(tester).color, scheme.error);
-      expect(_renderedIconColor(tester, Icons.close), scheme.error);
+      expect(_renderedIconColor(tester, IconRole.x), scheme.error);
       // The error tint must never survive into the disabled treatment.
       expect(
         _style(
@@ -259,7 +289,12 @@ void main() {
       ]) {
         await pumpConformance(
           tester,
-          BaseIconButton(icon: Icons.menu, variant: variant, onPressed: () {}),
+          BaseIconButton(
+            tooltip: 'Probe',
+            icon: IconRole.list,
+            variant: variant,
+            onPressed: () {},
+          ),
         );
         final ColorScheme scheme = _theme(tester).colorScheme;
         expect(
@@ -273,7 +308,7 @@ void main() {
           reason: '${variant.name} must not carry a border',
         );
         expect(
-          _renderedIconColor(tester, Icons.menu),
+          _renderedIconColor(tester, IconRole.list),
           _m3Foreground(scheme),
           reason: '${variant.name} must use the stock standard foreground',
         );
@@ -286,7 +321,12 @@ void main() {
       testWidgets('container size (${size.name})', (WidgetTester tester) async {
         await pumpConformance(
           tester,
-          BaseIconButton(icon: Icons.add, size: size, onPressed: () {}),
+          BaseIconButton(
+            tooltip: 'Probe',
+            icon: IconRole.plus,
+            size: size,
+            onPressed: () {},
+          ),
         );
         final Size box = _containerBox(tester);
         expect(box.width, box.height, reason: 'the container must be square');
@@ -302,7 +342,7 @@ void main() {
     testWidgets('corner radius', (WidgetTester tester) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () {}),
+        BaseIconButton(tooltip: 'Probe', icon: IconRole.plus, onPressed: () {}),
       );
       expectConformant(
         token: 'BaseIconButton.shape',
@@ -318,12 +358,17 @@ void main() {
       testWidgets('glyph size (${size.name})', (WidgetTester tester) async {
         await pumpConformance(
           tester,
-          BaseIconButton(icon: Icons.add, size: size, onPressed: () {}),
+          BaseIconButton(
+            tooltip: 'Probe',
+            icon: IconRole.plus,
+            size: size,
+            onPressed: () {},
+          ),
         );
         expectConformant(
           token: 'BaseIconButton.${size.name}.iconSize',
           component: 'BaseIconButton.${size.name}',
-          measured: tester.getSize(find.byIcon(Icons.add)).height,
+          measured: tester.getSize(find.byIcon(_glyphOf(IconRole.plus))).height,
           expected: _m3IconSize,
         );
       });
@@ -335,7 +380,7 @@ void main() {
         'foreground', (WidgetTester tester) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () {}),
+        BaseIconButton(tooltip: 'Probe', icon: IconRole.plus, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       final Color measured = _style(
@@ -348,7 +393,7 @@ void main() {
         expected: colorRoleName(scheme, _m3Foreground(scheme)),
         unit: '',
       );
-      expect(_renderedIconColor(tester, Icons.add), measured);
+      expect(_renderedIconColor(tester, IconRole.plus), measured);
     });
   });
 
@@ -357,10 +402,18 @@ void main() {
         'only, not the state layers', (WidgetTester tester) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.star, isSelected: true, onPressed: () {}),
+        BaseIconButton(
+          tooltip: 'Probe',
+          icon: IconRole.star,
+          isSelected: true,
+          onPressed: () {},
+        ),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
-      expect(_renderedIconColor(tester, Icons.star), scheme.primary);
+      expect(
+        _renderedIconColor(tester, IconRole.star, selected: true),
+        scheme.primary,
+      );
       // The overlay keeps deriving from the variant foreground with the M3
       // opacities, so the selected treatment never changes the button
       // chrome. Both sides go through colorRoleName because styleFrom
@@ -382,10 +435,15 @@ void main() {
     ) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.star, isSelected: false, onPressed: () {}),
+        BaseIconButton(
+          tooltip: 'Probe',
+          icon: IconRole.star,
+          isSelected: false,
+          onPressed: () {},
+        ),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
-      expect(_renderedIconColor(tester, Icons.star), _m3Foreground(scheme));
+      expect(_renderedIconColor(tester, IconRole.star), _m3Foreground(scheme));
     });
 
     testWidgets('the selected tint never survives into disabled', (
@@ -395,12 +453,14 @@ void main() {
       // flag — must show the M3 disabled foreground, whatever the flag says.
       final List<BaseIconButton> disabledSelected = <BaseIconButton>[
         const BaseIconButton(
-          icon: Icons.star,
+          tooltip: 'Probe',
+          icon: IconRole.star,
           isSelected: true,
           onPressed: null,
         ),
         BaseIconButton(
-          icon: Icons.star,
+          tooltip: 'Probe',
+          icon: IconRole.star,
           isSelected: true,
           isDisabled: true,
           onPressed: () {},
@@ -410,11 +470,103 @@ void main() {
         await pumpConformance(tester, button);
         final ColorScheme scheme = _theme(tester).colorScheme;
         expect(
-          _renderedIconColor(tester, Icons.star),
+          _renderedIconColor(tester, IconRole.star, selected: true),
           _m3DisabledForeground(scheme),
           reason: 'the selected tint must never survive into disabled',
         );
       }
+    });
+  });
+
+  // The image baselines cannot run outside Linux, so on Windows and macOS the
+  // only thing that knows what a selected toggle draws is this group. It runs
+  // everywhere and reads the `IconData` the widget tree actually carries,
+  // which is what makes a stale `base_icon_button_selected_*.png` a caught
+  // discrepancy rather than a silent one.
+  group('the selected mark, on every platform', () {
+    /// The `IconData` the rendered `Icon` under [finder] carries.
+    IconData renderedGlyph(WidgetTester tester) =>
+        tester.widget<Icon>(find.byType(Icon)).icon!;
+
+    testWidgets('a selected toggle draws the SOLID mark', (
+      WidgetTester tester,
+    ) async {
+      await pumpConformance(
+        tester,
+        BaseIconButton(
+          tooltip: 'Favorite',
+          icon: IconRole.star,
+          isSelected: true,
+          onPressed: () {},
+        ),
+      );
+      final IconData drawn = renderedGlyph(tester);
+      expect(
+        drawn,
+        MaterialGlyphs.filledOf(IconRole.star),
+        reason:
+            'A repository card writes `isSelected: repository.isFavorite` '
+            'beside `IconRole.star` and drew `PhosphorIconsFill.star` before '
+            'the conversion. The state is what crosses the seam; the solid '
+            'mark is this skin re-deciding the weight from it.',
+      );
+      expect(
+        drawn.fontFamily,
+        'PhosphorFill',
+        reason:
+            'Phosphor encodes its weights as three fonts at ONE codepoint, so '
+            'a codepoint-only assertion would pass the ordinary mark.',
+      );
+      expect(drawn, isNot(MaterialGlyphs.of(IconRole.star)));
+    });
+
+    testWidgets('an unselected toggle draws the ordinary mark', (
+      WidgetTester tester,
+    ) async {
+      await pumpConformance(
+        tester,
+        BaseIconButton(
+          tooltip: 'Favorite',
+          icon: IconRole.star,
+          isSelected: false,
+          onPressed: () {},
+        ),
+      );
+      final IconData drawn = renderedGlyph(tester);
+      expect(drawn, MaterialGlyphs.of(IconRole.star));
+      expect(drawn.fontFamily, 'PhosphorRegular');
+    });
+
+    testWidgets('a control that is not a toggle at all draws the ordinary '
+        'mark', (WidgetTester tester) async {
+      await pumpConformance(
+        tester,
+        BaseIconButton(icon: IconRole.star, tooltip: 'Probe', onPressed: () {}),
+      );
+      expect(
+        renderedGlyph(tester).fontFamily,
+        'PhosphorRegular',
+        reason:
+            'A null `selected` means "this is not a toggle", which is a third '
+            'state and must not be read as "on".',
+      );
+    });
+
+    testWidgets('a selected mark with no solid variant is unaffected', (
+      WidgetTester tester,
+    ) async {
+      // `filledOf` falls back to the ordinary mark, so switching a toggle on
+      // must not invent a weight for a role the application never drew solid.
+      await pumpConformance(
+        tester,
+        BaseIconButton(
+          tooltip: 'Probe',
+          icon: IconRole.trash,
+          isSelected: true,
+          onPressed: () {},
+        ),
+      );
+      expect(renderedGlyph(tester), MaterialGlyphs.of(IconRole.trash));
     });
   });
 
@@ -425,7 +577,8 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.add,
+          tooltip: 'Probe',
+          icon: IconRole.plus,
           variant: ButtonVariant.primary,
           isDisabled: true,
           onPressed: () {},
@@ -442,7 +595,10 @@ void main() {
       expectConformant(
         token: 'BaseIconButton.disabled.foregroundColor',
         component: 'BaseIconButton.disabled',
-        measured: colorRoleName(scheme, _renderedIconColor(tester, Icons.add)!),
+        measured: colorRoleName(
+          scheme,
+          _renderedIconColor(tester, IconRole.plus)!,
+        ),
         expected: colorRoleName(scheme, _m3DisabledForeground(scheme)),
         unit: '',
       );
@@ -455,7 +611,8 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.add,
+          tooltip: 'Probe',
+          icon: IconRole.plus,
           isDisabled: true,
           onPressed: () => pressed++,
         ),
@@ -472,7 +629,7 @@ void main() {
     ) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () {}),
+        BaseIconButton(tooltip: 'Probe', icon: IconRole.plus, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       final ButtonStyle style = _style(tester);
@@ -498,7 +655,7 @@ void main() {
     testWidgets('hover paints the M3 state layer', (WidgetTester tester) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () {}),
+        BaseIconButton(tooltip: 'Probe', icon: IconRole.plus, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       final Color overlay = _m3Overlay(scheme, WidgetState.hovered);
@@ -509,7 +666,7 @@ void main() {
     testWidgets('press paints the M3 state layer', (WidgetTester tester) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () {}),
+        BaseIconButton(tooltip: 'Probe', icon: IconRole.plus, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       final Color overlay = _m3Overlay(scheme, WidgetState.pressed);
@@ -539,7 +696,7 @@ void main() {
     ) async {
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () {}),
+        BaseIconButton(tooltip: 'Probe', icon: IconRole.plus, onPressed: () {}),
       );
       final ColorScheme scheme = _theme(tester).colorScheme;
       final Color overlay = _m3Overlay(scheme, WidgetState.focused);
@@ -562,7 +719,11 @@ void main() {
       int pressed = 0;
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, onPressed: () => pressed++),
+        BaseIconButton(
+          tooltip: 'Probe',
+          icon: IconRole.plus,
+          onPressed: () => pressed++,
+        ),
       );
       await focusFirstWithTab(tester);
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -583,7 +744,7 @@ void main() {
         await pumpConformance(
           tester,
           BaseIconButton(
-            icon: Icons.add,
+            icon: IconRole.plus,
             tooltip: 'Add',
             size: size,
             onPressed: () {},
@@ -600,7 +761,7 @@ void main() {
       final SemanticsHandle handle = tester.ensureSemantics();
       await pumpConformance(
         tester,
-        BaseIconButton(icon: Icons.add, tooltip: 'Add', onPressed: () {}),
+        BaseIconButton(icon: IconRole.plus, tooltip: 'Add', onPressed: () {}),
       );
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       expect(find.byTooltip('Add'), findsOneWidget);
@@ -613,7 +774,8 @@ void main() {
       await pumpConformance(
         tester,
         BaseIconButton(
-          icon: Icons.add,
+          tooltip: 'Probe',
+          icon: IconRole.plus,
           size: ButtonSize.small,
           onPressed: () {},
         ),

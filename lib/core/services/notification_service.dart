@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_button.dart';
@@ -64,7 +65,7 @@ class NotificationService {
             // Open log files button (if text editor configured)
             if (textEditor != null && Logger.logFilePath != null)
               BaseIconButton(
-                icon: Icons.description,
+                icon: IconRole.fileText,
                 tooltip: 'Open log files',
                 size: ButtonSize.small,
                 onPressed: () async {
@@ -153,7 +154,7 @@ class NotificationService {
             // Open log files button (if text editor configured)
             if (textEditor != null && Logger.logFilePath != null)
               BaseIconButton(
-                icon: Icons.description,
+                icon: IconRole.fileText,
                 tooltip: 'Open log files',
                 size: ButtonSize.small,
                 onPressed: () async {
@@ -227,7 +228,7 @@ class _CopyButtonState extends State<_CopyButton> {
   @override
   Widget build(BuildContext context) {
     return BaseIconButton(
-      icon: _copied ? Icons.check : Icons.content_copy,
+      icon: _copied ? IconRole.check : IconRole.copy,
       tooltip: _copied ? 'Copied to clipboard' : widget.tooltip,
       size: ButtonSize.small,
       onPressed: _copy,

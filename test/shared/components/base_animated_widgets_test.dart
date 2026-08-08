@@ -8,12 +8,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
+import '../../skin/pump_under_skin.dart';
 
 void main() {
   group('BaseDropdownButton', () {
     Future<void> pumpDropdown(WidgetTester tester, {String? tooltip}) {
       return tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: BaseDropdownButton<int>(
               value: 1,
@@ -57,6 +61,9 @@ void main() {
     }) async {
       await tester.pumpWidget(
         MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           home: Scaffold(
             body: BaseSwitch(
               value: false,

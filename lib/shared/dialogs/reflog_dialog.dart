@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -20,7 +21,7 @@ class ReflogDialog extends ConsumerWidget {
     final reflogAsync = ref.watch(reflogProvider);
 
     return BaseDialog(
-      icon: PhosphorIconsRegular.clockCounterClockwise,
+      icon: IconRole.clockCounterClockwise,
       title: AppLocalizations.of(context)!.gitReflog,
       onSubmit: () => Navigator.of(context).pop(),
       content: reflogAsync.when(
@@ -167,7 +168,7 @@ class ReflogDialog extends ConsumerWidget {
               CopyableText(
                 text: entry.shortHash,
                 isMonospace: true,
-                icon: PhosphorIconsRegular.gitCommit,
+                icon: IconRole.gitCommit,
               ),
               const SizedBox(width: AppTheme.paddingS),
               // Selector

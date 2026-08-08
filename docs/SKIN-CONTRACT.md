@@ -108,7 +108,8 @@ prevent it. §2.8 achieves the same guarantee with an opaque host object.
 
 **C3 — Does `IconData` cross the line?**
 Decided: **no.** `IconRole` is a 151-member enum, one per glyph the application
-uses today (measured:
+uses today — 156 as built, the five additions and their reasons being recorded
+at the members themselves and in `SKIN-CONTRACT-MEMBERS.md` §12 (measured:
 `grep -rhoE 'PhosphorIcons[A-Za-z]*\.[a-zA-Z0-9_]+' lib | sed 's/.*\.//' | sort -u`
 → 151 distinct names across 917 references). The design that kept `IconData`
 lost because `IconData` is *type*-neutral but not *identity*-neutral: keeping it

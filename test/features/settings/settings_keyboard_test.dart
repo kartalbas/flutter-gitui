@@ -32,6 +32,7 @@ import 'package:flutter_gitui/features/settings/widgets/settings_section.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
+import '../../skin/pump_under_skin.dart';
 
 /// Keeps every setting change in memory.
 ///
@@ -215,6 +216,9 @@ void main() {
           configProvider.overrideWith((ref) => _InMemoryConfigNotifier(ref)),
         ],
         child: MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const SettingsScreen(),

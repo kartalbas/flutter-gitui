@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_dialog.dart';
@@ -27,7 +28,7 @@ class AppAboutDialog extends HookConsumerWidget {
 
     return BaseDialog(
       title: 'About Flutter GitUI',
-      icon: Icons.info_outline,
+      icon: IconRole.info,
       variant: DialogVariant.normal,
       onSubmit: () => Navigator.of(context).pop(),
       content: SingleChildScrollView(

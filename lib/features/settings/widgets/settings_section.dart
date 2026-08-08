@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_label.dart';
 
 /// Base widget for settings sections with collapsible functionality
 class SettingsSection extends StatefulWidget {
   final String title;
-  final IconData icon;
+
+  /// The mark that names this section, as a MEANING rather than a glyph
+  /// (#249, conflict C3): the eight sections say which idea labels them, and
+  /// the active skin decides which mark stands for that idea.
+  final IconRole icon;
   final List<Widget> children;
   final bool initiallyExpanded;
 
@@ -111,20 +116,25 @@ class _SettingsSectionState extends State<SettingsSection>
           padding: const EdgeInsets.all(AppTheme.paddingM),
           child: Row(
             children: [
-              Icon(
+              // The section's own mark, resolved by the skin. Accent at the
+              // prominent scale is exactly what this header drew before the
+              // conversion - `AppTheme.iconL` (24) in `colorScheme.primary` -
+              // so the swap changes the vocabulary, not a pixel; the identity
+              // is asserted by
+              // test/features/icon_conversion_pixel_identity_test.dart.
+              BaseIcon(
                 widget.icon,
-                size: AppTheme.iconL,
-                color: Theme.of(context).colorScheme.primary,
+                tone: Tone.accent,
+                scale: ControlScale.prominent,
               ),
               const SizedBox(width: AppTheme.paddingM),
               Expanded(child: TitleLargeLabel(widget.title)),
               RotationTransition(
                 turns: _iconRotation,
-                child: Icon(
-                  PhosphorIconsRegular.caretDown,
-                  size: AppTheme.iconM,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                // The expand caret, muted at the ordinary scale - the same
+                // `AppTheme.iconM` (20) in `onSurfaceVariant` it has always
+                // been, now said in the contract's words.
+                child: const BaseIcon(IconRole.caretDown, tone: Tone.muted),
               ),
             ],
           ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -100,7 +100,7 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
           // Create action always first
           PopupMenuItem(
             child: MenuItemContent(
-              icon: PhosphorIconsRegular.plus,
+              icon: IconRole.plus,
               label: AppLocalizations.of(context)!.createStash,
             ),
             onTap: () => _showCreateStashDialog(context),
@@ -109,9 +109,9 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
           // Clear All action
           PopupMenuItem(
             child: MenuItemContent(
-              icon: PhosphorIconsRegular.trash,
+              icon: IconRole.trash,
               label: AppLocalizations.of(context)!.clearAll,
-              iconColor: Theme.of(context).colorScheme.error,
+              tone: Tone.danger,
               labelColor: Theme.of(context).colorScheme.error,
             ),
             onTap: () => _confirmClearAllStashes(context),
@@ -247,7 +247,7 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
       context: context,
       ref: ref,
       action: DestructiveAction.clearStashes,
-      icon: PhosphorIconsRegular.warningCircle,
+      icon: IconRole.warningCircle,
       title: l10n.clearAllStashesDialog,
       message: l10n.clearAllStashesConfirm,
       confirmLabel: l10n.clearAll,

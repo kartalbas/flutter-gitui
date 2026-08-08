@@ -75,24 +75,28 @@ Material-*named* type unnameable — it just cannot carry this claim.
 ### Migration Classifiers
 
 These rules measure a migration that is under way instead of guarding an
-invariant. Every site they report is legal code today, so they are **off by
-default** and they are **deleted when their migration lands** — a migration lint
-that outlives its migration becomes noise nobody dares remove, because nobody
-remembers what question it was answering.
+invariant, and they are **deleted when their migration lands** — a migration
+lint that outlives its migration becomes noise nobody dares remove, because
+nobody remembers what question it was answering.
 
 | Rule | Detects | Suggests |
 |------|---------|----------|
 | `token_read_is_mechanical` | Every `AppTheme.*` length read in `package:flutter_gitui/**` that a codemod cannot move on its own: a token inside an arithmetic expression (**design-bearing** — the application, not the skin, decided a length), and a bare token sitting in none of the seven positions the codemod rewrites (**unplaced** — `SizedBox` `width:`/`height:`, an `EdgeInsets`/`Radius`/`BorderRadius` argument, `size:`, `spacing:`, `runSpacing:`, `iconSize:`). Bare tokens in those positions are silent: a script moves them. First run: **1,230 mechanical : 49 design-bearing : 39 unplaced** out of 1,318 reads. | For a design-bearing read, pick the `Proximity`/`Inset` rung the expression really means, or move the measured layout into the skin, where numbers are legal. For an unplaced read, either widen the codemod's closed set (and `docs/SKIN-CONTRACT.md` §5.2 with it) or treat it as design-bearing. **Migration-only: deleted at P6 of #249**, when the last `AppTheme.*` read is gone. |
 
-Turn a classifier on for a measurement — it is off in CI on purpose, so that
-`dart run custom_lint --fatal-infos --fatal-warnings` keeps measuring the rules
-that *are* invariants:
-
-```yaml
-custom_lint:
-  rules:
-    - token_read_is_mechanical
-```
+`token_read_is_mechanical` is **armed** — it runs under the plain
+`dart run custom_lint`, like every other rule here. It shipped off by default
+so it could exist mid-migration without reddening CI, but that left the
+default command never *asking* it, and an unasked question reports a zero
+that means nothing (the defect that shipped an unenforced format check twice,
+#385/#388). What keeps the armed rule green while the P5-bound remainder
+still exists is the **two-way token-read register**,
+`lib/token_read_register.dart`: every remaining read has an entry naming its
+file, its site line and the contract member it waits for (or the missing
+vocabulary word), an unregistered read is an error, and a registered entry
+whose site is now clean is an error too — stale — so the register can only
+shrink, and only deliberately. `test/token_read_register_gate_test.dart` in
+the application package proves both directions and pins the shrink-only
+total.
 
 ## Installation
 

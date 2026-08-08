@@ -2,6 +2,8 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
+import '../../token_read_register.dart';
+
 /// Classifies every `AppTheme.*` length read in the application's `lib/` as
 /// either MECHANICAL — a codemod can move it without a human — or as a read a
 /// human has to judge, and reports only the latter.
@@ -66,17 +68,35 @@ import 'package:custom_lint_builder/custom_lint_builder.dart';
 /// and 5 mentions inside comments, and 1,340 − 22 = 1,318 reconciles exactly.
 /// Rerun the rule rather than trusting this paragraph; that is what it is for.
 ///
-/// **Off by default**, which is deliberate and is the reason it can ship
-/// mid-migration at all. Every site it reports is legal code today; P3 has not
-/// reached any of them. A rule that fires in CI would turn
-/// `dart run custom_lint --fatal-infos --fatal-warnings` red on the very
-/// codebase it is supposed to be measuring. Turn it on for a measurement with:
+/// **Armed since the 2026-08-09 census, and reconciled against an executable
+/// register.** The rule shipped off by default so it could exist
+/// mid-migration without reddening CI — but that left the default command
+/// never *asking* it, and "zero diagnostics" from a question never put is
+/// neither success nor breakage. It is the same defect that shipped an
+/// unenforced format check twice (#385, #388): a gate nobody has watched fail
+/// is not a gate. So the rule now runs under the plain
+/// `dart run custom_lint`, and beside it stands
+/// `lib/token_read_register.dart` — the same executable-register pattern as
+/// the Material skin's `docs/deviation_register.yaml` — naming every read
+/// that is allowed to remain and the P5 contract member it is waiting for
+/// (or, for the few meanings the vocabulary cannot say yet, the missing word
+/// itself).
 ///
-/// ```yaml
-/// custom_lint:
-///   rules:
-///     - token_read_is_mechanical
-/// ```
+/// The register fails in **both directions**. A read the classifier reports
+/// that has no register entry is reported at its site, exactly as before. A
+/// register entry whose site the classifier no longer reports is reported
+/// too, as STALE — so the register can only shrink, and it must shrink
+/// deliberately: converting a read and deleting its entry is one reviewed
+/// change. `enabledByDefault` is the arming mechanism rather than an
+/// `analysis_options.yaml` entry because the flag is how the package's other
+/// 28 rules arm themselves, and because a config entry would be a second
+/// place where one deleted line silently puts the question back to never
+/// being asked.
+///
+/// The classification itself is untouched: nothing here narrows the scope,
+/// lowers the severity, or whitelists a position. The register is the only
+/// mechanism through which a report may be absent, and every absence is a
+/// named, counted, reasoned entry.
 ///
 /// Scope is the application's own `lib/` — `package:flutter_gitui/**` — because
 /// that is the population §5.2's numbers describe and the population P3c has to
@@ -86,10 +106,13 @@ import 'package:custom_lint_builder/custom_lint_builder.dart';
 class TokenReadIsMechanical extends DartLintRule {
   const TokenReadIsMechanical() : super(code: _designBearingCode);
 
-  /// A migration classifier reports on code that is legal today, so it must not
-  /// fire unless somebody asked it to. See the class doc for how to ask.
+  /// Armed: the plain `dart run custom_lint` asks this rule, and the
+  /// register beside it (`lib/token_read_register.dart`) is what keeps the
+  /// answer green while the P5-bound remainder still exists. See the class
+  /// doc for why the flag, not an `analysis_options.yaml` entry, is the
+  /// arming mechanism.
   @override
-  bool get enabledByDefault => false;
+  bool get enabledByDefault => true;
 
   static const _designBearingCode = LintCode(
     name: 'token_read_is_mechanical',
@@ -119,6 +142,24 @@ class TokenReadIsMechanical extends DartLintRule {
         'Either the position belongs in the codemod\'s closed set - add it '
         'there and to SKIN-CONTRACT.md §5.2 - or this read needs a human, like '
         'a design-bearing one. Migration-only rule: it is deleted at P6.',
+  );
+
+  /// The register's second direction, reported under the same rule name for
+  /// the same reason. A stale entry is an error because an excuse list that
+  /// tolerates satisfied excuses stops being a count of anything: the
+  /// register may only shrink, and it shrinks in the same change that
+  /// converts the read.
+  static const _staleCode = LintCode(
+    name: 'token_read_is_mechanical',
+    problemMessage:
+        'STALE REGISTER ENTRY: the token-read register allows {0} read(s) at '
+        'site "{1}" in this file, but the classifier now finds only {2}. A '
+        'converted read must take its register entry with it.',
+    correctionMessage:
+        'Shrink or delete the entry in lint_rules/flutter_gitui_lint/lib/'
+        'token_read_register.dart (and lower the shrink-only total pinned by '
+        'test/token_read_register_gate_test.dart) in the same change that '
+        'converted the read.',
   );
 
   /// The application package. Its `lib/` is the migration surface §5.2 counts.
@@ -175,9 +216,17 @@ class TokenReadIsMechanical extends DartLintRule {
   ) {
     if (!_isApplicationLibrary(resolver)) return;
 
+    // Classification is per node, but the register's two-way check is per
+    // file, so the reads are collected here and reconciled once the visitor
+    // has walked the whole unit. The post-run callback is guaranteed to fire
+    // after every node listener: custom_lint registers the AST visitor as a
+    // post-run callback during `startUp`, before `run` adds this one, and the
+    // callbacks run in FIFO order.
+    final List<_FoundRead> found = [];
+
     context.registry.addPrefixedIdentifier((node) {
       if (node.prefix.name != _tokenHolder) return;
-      _report(node, reporter);
+      _collect(node, found);
     });
 
     context.registry.addPropertyAccess((node) {
@@ -192,8 +241,77 @@ class TokenReadIsMechanical extends DartLintRule {
         _ => null,
       };
       if (targetName != _tokenHolder) return;
-      _report(node, reporter);
+      _collect(node, found);
     });
+
+    context.addPostRunCallback(() {
+      _reconcileAndReport(resolver, reporter, found);
+    });
+  }
+
+  /// Reconciles the file's collected reads against the token-read register
+  /// and reports both directions: a read without an entry at its own node,
+  /// and an entry without its reads as STALE at the top of the file (the
+  /// site the entry names no longer exists, so there is no better anchor).
+  ///
+  /// A file with no reads and no entries passes through in one map lookup;
+  /// this runs on every application library precisely so that a registered
+  /// file whose last read was converted still gets its stale report.
+  void _reconcileAndReport(
+    CustomLintResolver resolver,
+    DiagnosticReporter reporter,
+    List<_FoundRead> found,
+  ) {
+    final String file = _registerKey(resolver);
+    final String content = resolver.source.contents.data;
+    final lineInfo = resolver.lineInfo;
+
+    String lineTextAt(int offset) {
+      final int line = lineInfo.getLocation(offset).lineNumber;
+      final int start = lineInfo.getOffsetOfLine(line - 1);
+      final int end = line < lineInfo.lineCount
+          ? lineInfo.getOffsetOfLine(line)
+          : content.length;
+      return content.substring(start, end).trim();
+    }
+
+    final TokenReadReconciliation result = reconcileTokenReads(
+      file: file,
+      readLineTexts: [for (final read in found) lineTextAt(read.node.offset)],
+    );
+
+    for (final int index in result.unregistered) {
+      final _FoundRead read = found[index];
+      reporter.atNode(
+        read.node,
+        read.placement == _Placement.designBearing
+            ? _designBearingCode
+            : _unplacedCode,
+      );
+    }
+
+    for (final StaleTokenRead stale in result.stale) {
+      reporter.atOffset(
+        offset: 0,
+        length: 1,
+        diagnosticCode: _staleCode,
+        arguments: [stale.entry.reads, stale.entry.site, stale.found],
+      );
+    }
+  }
+
+  /// The repo-relative key (`lib/...`, forward slashes) register entries use
+  /// for [resolver]'s file, handling both URI forms for the same reason
+  /// [_isApplicationLibrary] does: deciding on only one of them silently
+  /// reconciles nothing in the other.
+  static String _registerKey(CustomLintResolver resolver) {
+    final Uri uri = resolver.source.uri;
+    if (uri.scheme == 'package' && uri.pathSegments.isNotEmpty) {
+      return 'lib/${uri.pathSegments.skip(1).join('/')}';
+    }
+    final String path = resolver.path.replaceAll(r'\', '/');
+    final int lib = path.lastIndexOf('/lib/');
+    return lib >= 0 ? path.substring(lib + 1) : path;
   }
 
   /// True for a file in the application's own `lib/`, which is the population
@@ -217,7 +335,7 @@ class TokenReadIsMechanical extends DartLintRule {
     return path.contains('/lib/');
   }
 
-  void _report(Expression read, DiagnosticReporter reporter) {
+  void _collect(Expression read, List<_FoundRead> found) {
     // Only the length constants are in scope. Resolving the static type rather
     // than matching member names keeps `AppTheme.availableFonts`,
     // `AppTheme.lightTheme` and the animation getters out of the census without
@@ -228,9 +346,9 @@ class TokenReadIsMechanical extends DartLintRule {
 
     switch (_classify(read)) {
       case _Placement.designBearing:
-        reporter.atNode(read, _designBearingCode);
+        found.add(_FoundRead(read, _Placement.designBearing));
       case _Placement.unplaced:
-        reporter.atNode(read, _unplacedCode);
+        found.add(_FoundRead(read, _Placement.unplaced));
       case _Placement.mechanical:
         break;
     }
@@ -350,6 +468,15 @@ class TokenReadIsMechanical extends DartLintRule {
     }
     return null;
   }
+}
+
+/// One non-mechanical read, held until the whole file is visited so the
+/// register can be reconciled per file rather than per node.
+class _FoundRead {
+  const _FoundRead(this.node, this.placement);
+
+  final Expression node;
+  final _Placement placement;
 }
 
 /// Where one token read sits, and therefore who has to move it.

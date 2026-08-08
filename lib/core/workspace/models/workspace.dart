@@ -140,6 +140,17 @@ class Workspace {
   /// throwing; storing the index outright - and deleting this palette - is
   /// the `controls.seriesPicker` conversion's job, because only then does the
   /// application stop being able to enumerate the swatches at all.
+  ///
+  /// This is now the LAST copy of that palette. The identical twelve values in
+  /// `project.dart` went with the dead `Project` model they belonged to, and
+  /// the ten in `quick_settings_menu.dart` were never this palette at all (see
+  /// the note there). What still keeps this one alive is not the index - three
+  /// call sites already say `Tone.series(colorIndex)` - but the thirteen sites
+  /// that need the raw `Color` in hand for a surface FILL or BORDER
+  /// (`workspace_card.dart`, `workspace_list_item.dart`,
+  /// `project_section.dart`, and the swatch grid in `project_dialog.dart`).
+  /// Those have nowhere to put a tone, so the palette goes when they become
+  /// `SkinSurfaces` members and the grid becomes `controls.seriesPicker`.
   int get colorIndex => WorkspaceColors.defaults.indexOf(color);
 
   @override

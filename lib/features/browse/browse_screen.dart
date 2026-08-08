@@ -147,8 +147,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
             debugLabel: 'BrowseScreen.regions',
             // The screen holds its panes off the window's edge at the
             // generous distance every screen of the application uses:
-            // `Inset.roomy`, which Material answers with the 24 this line
-            // used to name.
+            // `Inset.roomy`.
             child: BaseInset(
               all: Inset.roomy,
               child: Column(
@@ -313,8 +312,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
     return Container(
       // The toolbar's fill stays: it is the surface. How tightly the strip
-      // holds its controls is the language's question - `tight`, the 8 this
-      // container named.
+      // holds its controls is the language's question - `tight`.
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
       ),
@@ -356,15 +354,20 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
             const BaseGap(Proximity.related),
 
-            // View mode toggle
+            // View mode toggle. Each segment's mark is sized by the control
+            // it lives in - M3's segmented button hands its icons 18 dp
+            // through its own IconTheme (ButtonStyleButton wraps its child in
+            // the resolved iconSize) - and 18 is on no `ControlScale` rung,
+            // so naming a scale here would override the control's own answer
+            // and shrink the mark. The site therefore states no size at all:
+            // the glyph stays a raw `Icon` the control measures, until the
+            // segmented control itself is a member and carries its marks as
+            // roles.
             SegmentedButton<BrowseViewMode>(
               segments: [
                 ButtonSegment(
                   value: BrowseViewMode.history,
-                  icon: Icon(
-                    PhosphorIconsRegular.clockCounterClockwise,
-                    size: 18,
-                  ),
+                  icon: const Icon(PhosphorIconsRegular.clockCounterClockwise),
                   label: BaseLabel(
                     AppLocalizations.of(context)!.history,
                     role: TextRole.control,
@@ -372,7 +375,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 ),
                 ButtonSegment(
                   value: BrowseViewMode.blame,
-                  icon: Icon(PhosphorIconsRegular.users, size: 18),
+                  icon: const Icon(PhosphorIconsRegular.users),
                   label: BaseLabel(
                     AppLocalizations.of(context)!.blame,
                     role: TextRole.control,
@@ -380,7 +383,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 ),
                 ButtonSegment(
                   value: BrowseViewMode.preview,
-                  icon: Icon(PhosphorIconsRegular.eye, size: 18),
+                  icon: const Icon(PhosphorIconsRegular.eye),
                   label: BaseLabel(
                     AppLocalizations.of(context)!.preview,
                     role: TextRole.control,

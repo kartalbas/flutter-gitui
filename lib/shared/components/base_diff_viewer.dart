@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset, TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show Inset, Proximity, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
@@ -10,6 +11,7 @@ import '../../core/diff/diff_parser.dart';
 import '../theme/app_theme.dart';
 import 'base_label.dart';
 import 'base_card.dart';
+import 'base_layout.dart';
 import 'base_speed_dial.dart';
 
 enum DiffViewMode {
@@ -192,12 +194,21 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    // Not `EmptyStateWidget`: this state has no explaining sentence, and the
+    // widget renders its message line unconditionally - handing it '' painted
+    // a blank body line and its gap under the title, re-tinted the mark and
+    // moved two distances. The construction stays by hand, pixel for pixel,
+    // until the empty-state surface is a member that can carry "no message".
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // The hero mark of an empty state keeps its measure and its ambient
+          // colour as literals: no `ControlScale` rung reaches a state's
+          // artwork, and a `Tone` can only reach a mark through `BaseIcon`.
           const Icon(Icons.description_outlined, size: AppTheme.iconXL * 2),
-          const SizedBox(height: AppTheme.paddingM),
+          // The mark and the headline are members of one group.
+          const BaseGap(Proximity.grouped),
           BaseLabel(
             AppLocalizations.of(context)!.noChanges,
             role: TextRole.pageTitle,

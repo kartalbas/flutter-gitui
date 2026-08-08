@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Inset;
 import '../controllers/item_navigation_controller.dart';
-import '../theme/app_theme.dart';
+import '../components/base_layout.dart';
 import '../components/base_text_field.dart';
 import 'search_field_handoff.dart';
 
@@ -64,9 +64,8 @@ class InlineSearchField extends StatelessWidget {
     if (navigationController case final navigation?) {
       field = SearchFieldHandoff(controller: navigation, child: field);
     }
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
-      child: field,
-    );
+    // The search band is a region of the screen in its own right, so it owes
+    // its field the ordinary reading distance from the panel's edges.
+    return BaseInset(all: Inset.normal, child: field);
   }
 }

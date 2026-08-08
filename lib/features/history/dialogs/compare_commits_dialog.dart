@@ -83,6 +83,10 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // An empty state's hero mark keeps its measure and its
+                  // colour: no rung of `ControlScale` reaches it, and a tone
+                  // can only reach a mark through `BaseIcon`. See
+                  // history_empty_states.dart.
                   Icon(
                     PhosphorIconsRegular.gitCommit,
                     size: AppTheme.iconXL,

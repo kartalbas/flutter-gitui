@@ -44,15 +44,14 @@ class ImageViewerDialog extends StatelessWidget {
         heroAttributes: PhotoViewHeroAttributes(tag: filePath),
       ),
       // The caption strip under the image is set in from the dialog's edge at
-      // the ordinary reading distance. It used to say 12, which is no rung of
-      // any ladder in the application; `Inset.normal` is the meaning and
-      // Material answers it with 16.
+      // the ordinary reading distance. It used to name a number that is no
+      // rung of any ladder in the application; `Inset.normal` is the meaning.
       footer: BaseInset(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // A mark inside a caption line: `compact`, the 16 pixels this site
-            // named, and muted because it is secondary to the image above.
+            // A mark inside a caption line: `compact`, and muted because it is
+            // secondary to the image above.
             const BaseIcon(
               IconRole.mouseSimple,
               scale: ControlScale.compact,

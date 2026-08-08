@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show Inset, Proximity, TextRole;
 
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
+import '../components/base_layout.dart';
 import '../models/tree_node.dart';
 import 'double_tap_tracker.dart';
 
@@ -122,6 +124,11 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
         // every single tap until the 300 ms double-tap window closes.
         onTap: _handleTap,
         child: Container(
+          // Left alone deliberately. The leading edge is the row's own inset
+          // plus one indent per level of the tree, and how tall a tree row is
+          // is the point of a tree - neither is something the inset rungs can
+          // say, and rounding either would change how much of the tree fits
+          // on screen. See the P3d report.
           padding: EdgeInsets.only(
             left: depth * indentPerLevel + AppTheme.paddingS,
             right: AppTheme.paddingS,
@@ -160,7 +167,9 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                 // Optional leading widget (e.g., checkbox)
                 if (leadingWidget != null) ...[
                   leadingWidget,
-                  const SizedBox(width: AppTheme.paddingXS),
+                  // A checkbox and the row it ticks are two halves of one
+                  // thing, touching.
+                  const BaseGap(Proximity.hairline),
                 ],
 
                 // Expand/collapse icon for directories
@@ -169,8 +178,10 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                     onTap: onExpandToggle ?? onTap,
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
+                      // The caret reaches as close to the edge of its own tap
+                      // target as it can: the row's height is the point.
+                      child: BaseInset(
+                        all: Inset.hairline,
                         child: Icon(
                           node.isExpanded
                               ? PhosphorIconsRegular.caretDown
@@ -184,9 +195,15 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                     ),
                   )
                 else
+                  // Not a gap: this reserves the extent of the caret a file
+                  // row does not have, so that files line up under folders.
+                  // The vocabulary has no way to say "as wide as the control
+                  // that is missing" - see the P3d report.
                   const SizedBox(width: AppTheme.paddingM),
 
-                const SizedBox(width: AppTheme.paddingXS),
+                // The expand control and the mark naming the node are two
+                // halves of one row, touching.
+                const BaseGap(Proximity.hairline),
 
                 // File/folder icon
                 Icon(
@@ -204,7 +221,9 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                                 : null)),
                 ),
 
-                const SizedBox(width: AppTheme.paddingS),
+                // The mark and the name it stands for are two parts of one
+                // statement.
+                const BaseGap(Proximity.related),
 
                 // File name. One line, because a tree row is a row: a name
                 // that wrapped would push every row below it down the panel.
@@ -214,7 +233,9 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
 
                 // Optional trailing widget (e.g., status badge, menu)
                 if (trailingWidget != null) ...[
-                  const SizedBox(width: AppTheme.paddingS),
+                  // The name and what the row says about it are two parts of
+                  // one statement.
+                  const BaseGap(Proximity.related),
                   trailingWidget,
                 ],
               ],

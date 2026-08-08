@@ -112,6 +112,12 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
           SnackBar(
             content: Row(
               children: [
+                // The mark and its `onError` stay together with the fill
+                // below. `onError` is the paired foreground of a surface that
+                // is still a hand-painted `Color`, and `Tone.onAccent` is the
+                // ACCENT's pairing - saying it here would paint an
+                // on-primary foreground over an error fill. Both halves leave
+                // together when the notice becomes a skin member.
                 Icon(
                   PhosphorIconsRegular.warningCircle,
                   color: Theme.of(context).colorScheme.onError,
@@ -303,8 +309,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   ).colorScheme.primary.withValues(alpha: 0.3),
                 ),
               ),
-              // The tip is a dense note rather than a card: `tight`, which is
-              // the 8 pixels this container named.
+              // The tip is a dense note rather than a card: `tight`.
               child: BaseInset(
                 all: Inset.tight,
                 child: Row(

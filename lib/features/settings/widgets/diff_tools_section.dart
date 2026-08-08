@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
 import '../../../core/diff/diff_providers.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
@@ -41,7 +41,13 @@ class DiffToolsSection extends ConsumerWidget {
             return Column(
               children: [
                 BaseListItem(
-                  leading: const Icon(PhosphorIconsRegular.magnifyingGlass),
+                  // The row's own mark. The prominent scale is what a bare `Icon`
+                  // rendered at under the row's ambient icon theme, and the neutral
+                  // tone leaves the colour to the row, as before.
+                  leading: const BaseIcon(
+                    IconRole.magnifyingGlass,
+                    scale: ControlScale.prominent,
+                  ),
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -90,7 +96,10 @@ class DiffToolsSection extends ConsumerWidget {
                   ),
                 ),
                 BaseListItem(
-                  leading: const Icon(PhosphorIconsRegular.gitMerge),
+                  leading: const BaseIcon(
+                    IconRole.gitMerge,
+                    scale: ControlScale.prominent,
+                  ),
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -143,9 +152,14 @@ class DiffToolsSection extends ConsumerWidget {
             content: BaseLabel(l10n.loadingAvailableTools, role: TextRole.body),
           ),
           error: (error, stack) => BaseListItem(
-            leading: Icon(
-              PhosphorIconsRegular.warning,
-              color: Theme.of(context).colorScheme.error,
+            // Tone.invalid, not Tone.danger: the tool list could not be read
+            // and the section cannot say which tools exist until it is, but
+            // nothing was destroyed - the same reading the two labels below
+            // already use for an unset tool path.
+            leading: const BaseIcon(
+              IconRole.warning,
+              tone: Tone.invalid,
+              scale: ControlScale.prominent,
             ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

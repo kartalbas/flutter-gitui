@@ -2,13 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
@@ -130,7 +130,9 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               const BaseGap(Proximity.related),
               Row(
                 children: [
-                  const Icon(PhosphorIconsRegular.gitCommit, size: 20),
+                  // The mark that names the depth control, at the ordinary
+                  // size: it belongs to the row it labels.
+                  const BaseIcon(IconRole.gitCommit),
                   const BaseGap(Proximity.related),
                   BaseLabel(
                     AppLocalizations.of(context)!.depth,
@@ -176,10 +178,15 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                 child: BaseInset(
                   child: Row(
                     children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      // The mark says what the message beside it already says,
+                      // so it says it the same way: `colorScheme.error` was
+                      // Material's answer to the danger this label had already
+                      // named. It stated no size at all and took whatever the
+                      // dialog's ambient theme handed it; the other banner mark
+                      // in this same dialog asks for the ordinary size, so the
+                      // difference was drift rather than a distinction and both
+                      // now say the same rung.
+                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                       const BaseGap(Proximity.related),
                       Expanded(
                         child: BaseLabel(

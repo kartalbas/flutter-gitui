@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../core/workspace/default_workspace_text.dart';
@@ -82,9 +83,15 @@ class WorkspaceCard extends StatelessWidget {
               ),
               const Spacer(),
               BasePopupMenuButton<String>(
-                icon: Icon(
-                  PhosphorIconsRegular.dotsThreeVertical,
-                  color: project.color,
+                // The overflow mark acts on this workspace, so it takes the
+                // workspace's own place in the skin's series - the same word
+                // the list row states for the workspace's name. The prominent
+                // scale is what the bare mark drew under the ambient icon
+                // theme.
+                icon: BaseIcon(
+                  IconRole.dotsThreeVertical,
+                  tone: Tone.series(project.colorIndex),
+                  scale: ControlScale.prominent,
                 ),
                 itemBuilder: (context) => [
                   PopupMenuItem(
@@ -138,10 +145,12 @@ class WorkspaceCard extends StatelessWidget {
           // Repository count
           Row(
             children: [
-              Icon(
-                PhosphorIconsRegular.gitCommit,
-                size: AppTheme.iconS,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              // The mark repeats what the count beside it says and is
+              // secondary to it, at the dense scale this footer reads at.
+              const BaseIcon(
+                IconRole.gitCommit,
+                scale: ControlScale.compact,
+                tone: Tone.muted,
               ),
               const BaseGap(Proximity.related),
               BaseLabel(

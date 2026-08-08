@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../theme/app_theme.dart';
@@ -151,7 +152,10 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               child: BaseInset(
                 child: Row(
                   children: [
-                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    // The mark of an ordinary notice, at the ordinary size: it
+                    // belongs to the line beside it rather than standing over
+                    // it.
+                    const BaseIcon(IconRole.info),
                     const BaseGap(Proximity.related),
                     Expanded(
                       child: BaseLabel(
@@ -225,7 +229,11 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               children: [
                 Row(
                   children: [
-                    const Icon(PhosphorIconsRegular.gitBranch, size: 20),
+                    // The mark of the status banner's headline, at the ordinary
+                    // size: it belongs to the line beside it. It names no
+                    // colour, so it keeps taking the one the banner around it
+                    // publishes.
+                    const BaseIcon(IconRole.gitBranch),
                     const BaseGap(Proximity.related),
                     Expanded(
                       child: BaseLabel(

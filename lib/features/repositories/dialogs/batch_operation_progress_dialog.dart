@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
@@ -410,14 +411,14 @@ class _BatchOperationProgressDialogState
       );
     }
 
-    return Icon(
-      progress.success == true
-          ? PhosphorIconsRegular.checkCircle
-          : PhosphorIconsRegular.xCircle,
-      size: AppTheme.iconS,
-      color: progress.success == true
-          ? context.gitColors.added
-          : Theme.of(context).colorScheme.error,
+    // The outcome the run reached for this repository, at the dense scale the
+    // list reads at. Tone.invalid rather than Tone.danger for the failure, the
+    // same reading the row's own status line above already uses: the operation
+    // did not complete and needs attention, but nothing was destroyed.
+    return BaseIcon(
+      progress.success == true ? IconRole.checkCircle : IconRole.xCircle,
+      scale: ControlScale.compact,
+      tone: progress.success == true ? Tone.success : Tone.invalid,
     );
   }
 }

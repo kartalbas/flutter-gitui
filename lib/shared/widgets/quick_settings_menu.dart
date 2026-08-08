@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../theme/app_theme.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_layout.dart';
 import '../../generated/app_localizations.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/config_providers.dart';
@@ -25,21 +27,22 @@ class QuickSettingsMenu extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return BasePopupMenuButton<String>(
-      icon: const Icon(PhosphorIconsRegular.gear, size: 20),
+      icon: const BaseIcon(IconRole.gear),
       tooltip: l10n.tooltipQuickSettings,
       offset: const Offset(0, 40),
       itemBuilder: (context) => [
         // Theme Mode Section
-        PopupMenuItem(
+        const PopupMenuItem(
           enabled: false,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingL,
-            vertical: AppTheme.paddingS,
-          ),
-          child: BaseLabel(
-            'THEME MODE',
-            role: TextRole.micro,
-            tone: Tone.muted,
+          padding: EdgeInsets.zero,
+          child: BaseInset(
+            x: Inset.roomy,
+            y: Inset.tight,
+            child: BaseLabel(
+              'THEME MODE',
+              role: TextRole.micro,
+              tone: Tone.muted,
+            ),
           ),
         ),
         _buildThemeModeItem(
@@ -66,13 +69,18 @@ class QuickSettingsMenu extends ConsumerWidget {
         const PopupMenuDivider(),
 
         // Font Size Section
-        PopupMenuItem(
+        const PopupMenuItem(
           enabled: false,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingL,
-            vertical: AppTheme.paddingS,
+          padding: EdgeInsets.zero,
+          child: BaseInset(
+            x: Inset.roomy,
+            y: Inset.tight,
+            child: BaseLabel(
+              'FONT SIZE',
+              role: TextRole.micro,
+              tone: Tone.muted,
+            ),
           ),
-          child: BaseLabel('FONT SIZE', role: TextRole.micro, tone: Tone.muted),
         ),
         _buildFontSizeItem(context, 'Tiny', AppFontSize.tiny, fontSize),
         _buildFontSizeItem(context, 'Small', AppFontSize.small, fontSize),
@@ -81,16 +89,17 @@ class QuickSettingsMenu extends ConsumerWidget {
         const PopupMenuDivider(),
 
         // Color Scheme Section
-        PopupMenuItem(
+        const PopupMenuItem(
           enabled: false,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingL,
-            vertical: AppTheme.paddingS,
-          ),
-          child: BaseLabel(
-            'COLOR SCHEME',
-            role: TextRole.micro,
-            tone: Tone.muted,
+          padding: EdgeInsets.zero,
+          child: BaseInset(
+            x: Inset.roomy,
+            y: Inset.tight,
+            child: BaseLabel(
+              'COLOR SCHEME',
+              role: TextRole.micro,
+              tone: Tone.muted,
+            ),
           ),
         ),
         _buildColorSchemeItem(
@@ -254,7 +263,7 @@ class QuickSettingsMenu extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(width: AppTheme.paddingM),
+          const BaseGap(Proximity.grouped),
           Expanded(
             // The checkmark to the right is what says "this is the one in
             // force" — the fact `MenuCheckable.checked` will carry once this
@@ -263,11 +272,11 @@ class QuickSettingsMenu extends ConsumerWidget {
             child: BaseLabel(label, role: TextRole.control),
           ),
           if (isSelected) ...[
-            const SizedBox(width: AppTheme.paddingM),
-            Icon(
-              Icons.check,
-              size: 16,
-              color: Theme.of(context).colorScheme.primary,
+            const BaseGap(Proximity.grouped),
+            const BaseIcon(
+              IconRole.check,
+              scale: ControlScale.compact,
+              tone: Tone.accent,
             ),
           ],
         ],
@@ -275,6 +284,25 @@ class QuickSettingsMenu extends ConsumerWidget {
     );
   }
 
+  /// The seed colour that identifies one selectable [AppColorScheme].
+  ///
+  /// **These ten hex values are NOT the skin's colour series and must not be
+  /// converted into `Tone.series(n)`.** They look like it from a distance -
+  /// eight of the ten also appear in `MaterialInk.seriesPalette` - and they
+  /// are a different statement: `Tone.series(n)` names "the nth identity
+  /// colour of whatever design language is running", whereas each value here
+  /// names the seed of ONE Material scheme the user is choosing between
+  /// (`AppTheme._mapColorScheme` maps each to its `FlexScheme`). Two of them,
+  /// deep purple `0xFF673AB7` and deep orange `0xFFFF5722`, are not in the
+  /// series at all, and the orders differ - so indexing into the series would
+  /// draw the wrong swatch beside eight of the ten names and an arbitrary one
+  /// beside the other two.
+  ///
+  /// The vocabulary has no word for "the colour that identifies this theme
+  /// choice", which is a missing member rather than a rounding job: the swatch
+  /// belongs to a theme picker the contract does not yet carry, and it stays a
+  /// literal until it does. Recorded here rather than folded into the nearest
+  /// available rung, which is how a palette becomes wrong quietly.
   Color _getColorForScheme(AppColorScheme scheme) {
     switch (scheme) {
       case AppColorScheme.deepPurple:

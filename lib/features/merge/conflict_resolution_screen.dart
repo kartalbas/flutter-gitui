@@ -169,6 +169,11 @@ class _ConflictResolutionScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // The hero glyph of a state that fills this screen. It stays a
+              // raw `Icon`: `ControlScale`'s largest rung is the ordinary size
+              // of a control's mark, and the artwork that fills an empty
+              // region is a different order of thing, so naming the nearest
+              // rung would shrink this to a toolbar glyph.
               Icon(
                 PhosphorIconsRegular.checkCircle,
                 size: 64,
@@ -247,6 +252,10 @@ class _ConflictResolutionScreenState
                         child: _buildConflictList(context, conflicts),
                       ),
                     ),
+                    // Not `BaseSeparator`: the pane rule at `width: 1` is a
+                    // measurement - it takes no layout space, so the panes
+                    // meet - which the separator member deliberately does not
+                    // carry. It leaves with the split-pane member.
                     const VerticalDivider(width: 1),
 
                     // Conflict details (right panel)
@@ -409,12 +418,12 @@ class _ConflictResolutionScreenState
           ),
         ),
 
-        // The banner used to say "24 on three sides and nothing below" as one
-        // four-sided number. Said as what it is, that is two statements: the
-        // header above and the banner are two groups inside one region, and
-        // the banner itself is inset from the pane's sides. No per-side rung
-        // is minted for it - that would be the token bag returning one side
-        // at a time.
+        // The banner used to say one four-sided number: generous on three
+        // sides and nothing below. Said as what it is, that is two
+        // statements - the header above and the banner are two groups inside
+        // one region, and the banner itself is inset from the pane's sides.
+        // No per-side rung is minted for it; that would be the token bag
+        // returning one side at a time.
         if (_errorMessage != null) ...<Widget>[
           const BaseGap(Proximity.separate),
           BaseInset(
@@ -428,6 +437,13 @@ class _ConflictResolutionScreenState
               child: BaseInset(
                 child: Row(
                   children: [
+                    // The banner's mark keeps its `Color`. `Tone` has a word
+                    // for something that destroys, one for a doubt and one
+                    // for a value the user must correct, and none of the
+                    // three is "the command you asked for came back with an
+                    // error" - which is what this banner says. The label
+                    // beside it already reaches for `danger`; the mark does
+                    // not follow it there, so the gap stays visible.
                     Icon(
                       PhosphorIconsRegular.warningCircle,
                       color: Theme.of(context).colorScheme.error,
@@ -474,6 +490,11 @@ class _ConflictResolutionScreenState
           child: KeyboardNavigableListView(
             controller: _resolutionController,
             itemCount: choices.length,
+            // The same inset from the pane's sides the two blocks above take,
+            // said as a number because it is the scroll view's own content
+            // padding: `KeyboardNavigableListView` takes `EdgeInsets`, and a
+            // `BaseInset` around the list would inset the viewport rather
+            // than its contents.
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingL),
             itemBuilder: (context, index, isSelected, containerHasFocus) =>
                 _buildResolutionOption(
@@ -585,6 +606,12 @@ class _ConflictResolutionScreenState
             const BaseGap(Proximity.separate),
             const Center(child: CircularProgressIndicator()),
             const BaseGap(Proximity.related),
+            // Still a hand-built style, and the italic is why. `TextRole` says
+            // what a line is FOR and `Tone` says what it MEANS; neither says
+            // "set this apart as provisional", which is the whole of what the
+            // italic is doing on a line that exists only while a git command
+            // is in flight. Moving the colour alone would take the italic with
+            // it, so the read stays until there is a word for the slant.
             Center(
               child: Text(
                 AppLocalizations.of(context)!.resolvingConflict,
@@ -603,14 +630,17 @@ class _ConflictResolutionScreenState
   Widget _buildNoConflicts(BuildContext context, MergeState mergeState) {
     return Center(
       // An empty state is a deliberately generous surface: `Inset.roomy`.
-      // It used to say 32 here and 24 at every comparable empty state in the
-      // application, which was one meaning said with two numbers; Material
-      // answers the meaning with 24.
+      // This one and every comparable empty state in the application used to
+      // say that meaning with two different numbers; naming it settles both
+      // on the skin's single answer.
       child: BaseInset(
         all: Inset.roomy,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // The same hero glyph as the no-merge state above, and it stays
+            // a literal for the same reason: no rung is the size of an empty
+            // region's artwork.
             Icon(
               PhosphorIconsRegular.checkCircle,
               size: 64,
@@ -628,7 +658,7 @@ class _ConflictResolutionScreenState
             // The explanation under an empty or error state's headline is
             // ordinary prose — the headline above is what stands out — so it
             // is `body` here exactly as it is in every other empty state of
-            // the application. Reading its old 15 px as "this must stand out"
+            // the application. Reading its old size as "this must stand out"
             // and answering with a weight put two contradictory statements on
             // one line wherever the same site also said "secondary".
             BaseLabel(

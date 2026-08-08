@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 import '../components/base_animated_widgets.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_layout.dart';
 import '../components/country_flag.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
@@ -115,7 +118,8 @@ class LanguageSelector extends ConsumerWidget {
             children: [
               // Flag icon
               _buildFlagIcon(context, option, isSelected),
-              const SizedBox(width: AppTheme.paddingM),
+              // The flag and the name are members of one menu entry.
+              const BaseGap(Proximity.grouped),
               // Language name
               // The entry says only what it is; that it is the chosen one is
               // said by the checkmark beside it, which is the fact
@@ -126,7 +130,12 @@ class LanguageSelector extends ConsumerWidget {
               Expanded(child: BaseLabel(option.name, role: TextRole.control)),
               // Checkmark for selected
               if (isSelected) ...[
-                const SizedBox(width: AppTheme.paddingM),
+                // The name and the mark that says it is the chosen one are
+                // members of one menu entry.
+                const BaseGap(Proximity.grouped),
+                // Left as a Phosphor constant deliberately: the heavier stroke
+                // is a fact `IconRole` cannot carry, so converting the mark
+                // would drop it silently. See the P3d report.
                 Icon(
                   PhosphorIconsBold.check,
                   size: AppTheme.iconM,
@@ -186,13 +195,9 @@ class LanguageSelector extends ConsumerWidget {
 
   /// Build language badge button with flag icon
   Widget _buildLanguageBadge(BuildContext context, LanguageOption option) {
-    // For system default, use globe icon from PhosphorIcons
+    // For system default, use the globe mark
     if (option.countryCode == null) {
-      return Icon(
-        PhosphorIconsRegular.globe,
-        size: 20,
-        color: Theme.of(context).colorScheme.onSurface,
-      );
+      return const BaseIcon(IconRole.globe);
     }
 
     // For language flags, show the SVG flag with softly rounded corners
@@ -224,12 +229,10 @@ class LanguageSelector extends ConsumerWidget {
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
-        child: Icon(
-          PhosphorIconsRegular.globe,
-          size: 16,
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.onSurface,
+        child: BaseIcon(
+          IconRole.globe,
+          scale: ControlScale.compact,
+          tone: isSelected ? Tone.accent : Tone.neutral,
         ),
       );
     }

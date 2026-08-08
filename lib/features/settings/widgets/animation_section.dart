@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/config/config_providers.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import 'settings_section.dart';
@@ -41,7 +41,13 @@ class AnimationSection extends ConsumerWidget {
       icon: IconRole.filmStrip,
       children: [
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.filmStrip),
+          // The row's own mark. The prominent scale is what a bare `Icon`
+          // rendered at under the row's ambient icon theme, and the neutral
+          // tone leaves the colour to the row, as before.
+          leading: const BaseIcon(
+            IconRole.filmStrip,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -88,11 +94,10 @@ class AnimationSection extends ConsumerWidget {
               all: Inset.tight,
               child: Row(
                 children: [
-                  Icon(
-                    PhosphorIconsRegular.info,
-                    size: AppTheme.iconM,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  // The callout's mark says the same thing as the sentence
+                  // beside it and is secondary to it, which is what the muted
+                  // tone at the ordinary scale states.
+                  const BaseIcon(IconRole.info, tone: Tone.muted),
                   const BaseGap(Proximity.related),
                   Expanded(
                     child: BaseLabel(

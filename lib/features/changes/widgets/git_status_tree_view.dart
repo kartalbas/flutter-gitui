@@ -291,8 +291,7 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                 children: [
                   // The panel header's mark: a dense header glyph carrying the
                   // application's own colour, which is `compact` and
-                  // `Tone.accent` - the 16 pixels and the `primary` this site
-                  // used to spell out.
+                  // `Tone.accent`.
                   const BaseIcon(
                     IconRole.tree,
                     scale: ControlScale.compact,
@@ -356,6 +355,18 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                         maxLines: 1,
                       ),
                     ),
+                    // How much of this file is in the index, as a mark. The
+                    // ticked and the dashed box are drawn BOLD on purpose -
+                    // the weight census (icon_weight_census_test.dart) records
+                    // this file as one of the surfaces still waiting to be
+                    // answered with `MaterialGlyphs.boldOf` when the tree
+                    // migrates - and a weight is the one thing `IconRole`
+                    // deliberately cannot carry, so the mark stays a raw
+                    // `Icon` naming Phosphor's bold constant until the status
+                    // tree becomes a member and the skin re-decides the
+                    // weight on its side of the seam. Its colour is stranded
+                    // with it: a `Tone` can only reach a mark through
+                    // `BaseIcon`, which cannot say the weight.
                     Icon(
                       _selectedFile!.isPartiallyStaged
                           ? PhosphorIconsBold.minusSquare
@@ -439,6 +450,9 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
       depth: depth,
       isSelected: isSelected,
       containerHasFocus: containerHasFocus,
+      // One level of nesting, which is a `Proximity` and not a length - but
+      // `BaseTreeItem` still takes a number here, so the rung cannot be stated
+      // until that component's own parameter becomes one.
       indentPerLevel: AppTheme.paddingM,
       onTap: () {
         // The navigable view's own listener claims keyboard focus on the
@@ -454,6 +468,11 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
               widget.onToggleStage?.call(node.fileStatus!, node.isFullyStaged);
             }
           : null,
+      // The same statement one pane over: how much of this file is in the
+      // index, as a dense row-level mark. Bold for the same reason the panel
+      // header's mark above is: the weight is deliberate, the census guards
+      // it, and only the skin can carry it across the seam once the tree is
+      // a member.
       leadingWidget: !node.isDirectory
           ? Icon(
               node.isPartiallyStaged
@@ -529,6 +548,13 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // The headline mark of a failure that fills this pane, and it
+                // stays a raw `Icon` for the same two reasons the changes
+                // screen's error state does: `ControlScale`'s largest rung is
+                // the ordinary size of a control's mark rather than the size
+                // of an error's artwork, and `Tone.danger` means "this
+                // destroys something you cannot get back", which a diff that
+                // failed to load is not saying.
                 Icon(
                   PhosphorIconsRegular.warningCircle,
                   size: AppTheme.iconXL,

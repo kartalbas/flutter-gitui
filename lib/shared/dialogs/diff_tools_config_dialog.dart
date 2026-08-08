@@ -6,6 +6,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_card.dart';
 import '../theme/app_theme.dart';
@@ -148,7 +149,9 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             child: BaseInset(
               child: Row(
                 children: [
-                  const Icon(PhosphorIconsRegular.info, size: 20),
+                  // The mark of an ordinary notice, at the ordinary size: it
+                  // belongs to the line beside it rather than standing over it.
+                  const BaseIcon(IconRole.info),
                   const BaseGap(Proximity.related),
                   Expanded(
                     child: BaseLabel(
@@ -252,6 +255,12 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             // Available badge
             if (tool.isAvailable)
               Container(
+                // The badge's inset stays a literal: across it is `tight`
+                // exactly, but its vertical 4 is on no `Inset` rung, and
+                // rounding it up would grow the badge 8px taller. Its check
+                // mark stays a literal beside it - 14 sits between two glyph
+                // rungs the same way. Both wait for `surfaces.badge`, whose
+                // skin owns a badge's measure and the mark inside it.
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppTheme.paddingS,
                   vertical: AppTheme.paddingXS,

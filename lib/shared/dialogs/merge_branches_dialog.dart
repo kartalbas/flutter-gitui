@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Proximity, TextRole, Tone;
 
@@ -156,11 +155,17 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                 value: branch,
                                 builder: (context) => Row(
                                   children: [
-                                    Icon(
+                                    // A dense mark inside a menu entry: the row
+                                    // is one line tall and the mark is part of
+                                    // the line. The literal it used to state
+                                    // sits on no icon scale at all, and every
+                                    // other inline mark in this dialog already
+                                    // says the dense rung.
+                                    BaseIcon(
                                       branch.isRemote
-                                          ? PhosphorIconsRegular.cloud
-                                          : PhosphorIconsRegular.gitBranch,
-                                      size: 14,
+                                          ? IconRole.cloud
+                                          : IconRole.gitBranch,
+                                      scale: ControlScale.compact,
                                     ),
                                     const BaseGap(Proximity.related),
                                     // A menu entry is one line tall; a long
@@ -308,11 +313,13 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                 value: branch,
                                 builder: (context) => Row(
                                   children: [
-                                    Icon(
+                                    // The same dense mark as the source
+                                    // picker's entries, said the same way.
+                                    BaseIcon(
                                       branch.isRemote
-                                          ? PhosphorIconsRegular.cloud
-                                          : PhosphorIconsRegular.gitBranch,
-                                      size: 14,
+                                          ? IconRole.cloud
+                                          : IconRole.gitBranch,
+                                      scale: ControlScale.compact,
                                     ),
                                     const BaseGap(Proximity.related),
                                     // A menu entry is one line tall; a long
@@ -717,7 +724,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
               child: BaseInset(
                 child: Row(
                   children: [
-                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    // The mark of an ordinary notice, at the ordinary size: it
+                    // belongs to the line beside it rather than standing over
+                    // it.
+                    const BaseIcon(IconRole.info),
                     const BaseGap(Proximity.related),
                     Expanded(
                       child: BaseLabel(
@@ -757,10 +767,15 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 child: BaseInset(
                   child: Row(
                     children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      // The mark says what the message beside it already says,
+                      // so it says it the same way: `colorScheme.error` was
+                      // Material's answer to the danger this label had already
+                      // named. It stated no size at all and took whatever the
+                      // dialog's ambient theme handed it; the info banner a few
+                      // lines above asks for the ordinary size, so the
+                      // difference was drift rather than a distinction and both
+                      // now say the same rung.
+                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                       const BaseGap(Proximity.related),
                       Expanded(
                         child: BaseLabel(
@@ -1007,18 +1022,16 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        // The segment paints itself when it is the chosen one, so it says which
-        // foreground goes with that fill; the word inside states only what it
-        // is. Selection is a fact `RowSelection` will carry once this becomes a
-        // contract member, and a fact does not need to be repeated as a colour
-        // at the call site.
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            color: isSelected
-                ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          child: BaseLabel(label, role: TextRole.micro),
+        // The chosen segment is painted in the accent, so its word is the
+        // foreground that goes ON the accent; the segment beside it is present
+        // but secondary to the one that is chosen. Those are the two meanings
+        // `onPrimary` and `onSurfaceVariant` were Material's answers to, and
+        // the word can now carry them itself instead of being handed a
+        // `TextStyle` from outside.
+        child: BaseLabel(
+          label,
+          role: TextRole.micro,
+          tone: isSelected ? Tone.onAccent : Tone.muted,
         ),
       ),
     );

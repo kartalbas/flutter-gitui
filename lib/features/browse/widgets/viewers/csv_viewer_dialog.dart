@@ -99,6 +99,10 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // An error state's hero mark keeps its measure and its
+                  // colour: no rung of `ControlScale` reaches it, and a tone
+                  // can only reach a mark through `BaseIcon`. See
+                  // history_empty_states.dart.
                   Icon(
                     PhosphorIconsRegular.warningCircle,
                     size: 48,
@@ -142,9 +146,8 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
       _columnCount,
       (index) => DataColumn(
         // A column heading is a dense cell rather than a card: `tight`, the
-        // rung that swallows the 8-and-4 pair this site used to spell out per
-        // axis. Material answers it with 8 on both, so the heading gains 4
-        // pixels of height and the column keeps its width.
+        // rung that swallows the two different numbers this site used to spell
+        // out per axis for one statement.
         label: BaseInset(
           all: Inset.tight,
           // A column heading names one thing the rows below are instances

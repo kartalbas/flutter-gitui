@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -55,10 +55,16 @@ class GitConfigSection extends ConsumerWidget {
               fullWidth: true,
             ),
           ),
-          const Divider(),
+          const BaseSeparator(),
         ],
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.fileCode),
+          // The row's own mark. The prominent scale is what a bare `Icon`
+          // rendered at under the row's ambient icon theme, and the neutral
+          // tone leaves the colour to the row, as before.
+          leading: const BaseIcon(
+            IconRole.fileCode,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -103,9 +109,12 @@ class GitConfigSection extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(),
+        const BaseSeparator(),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.textT),
+          leading: const BaseIcon(
+            IconRole.textT,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -147,9 +156,12 @@ class GitConfigSection extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(),
+        const BaseSeparator(),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.gitDiff),
+          leading: const BaseIcon(
+            IconRole.gitDiff,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -189,9 +201,12 @@ class GitConfigSection extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(),
+        const BaseSeparator(),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.gitMerge),
+          leading: const BaseIcon(
+            IconRole.gitMerge,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -231,9 +246,9 @@ class GitConfigSection extends ConsumerWidget {
             ],
           ),
         ),
-        const Divider(),
+        const BaseSeparator(),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.user),
+          leading: const BaseIcon(IconRole.user, scale: ControlScale.prominent),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -252,7 +267,7 @@ class GitConfigSection extends ConsumerWidget {
           ),
         ),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.at),
+          leading: const BaseIcon(IconRole.at, scale: ControlScale.prominent),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

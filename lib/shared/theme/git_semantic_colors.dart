@@ -2,6 +2,26 @@ import 'package:flutter/material.dart';
 
 /// Brightness-aware semantic colours for git state.
 ///
+/// **A resolution table with a known end date, not a design.** What a git state
+/// MEANS is now said with the eight `Tone.git*` members, and the skin answers
+/// them - `MaterialInk.foreground` resolves `Tone.gitAdded` and its seven
+/// siblings out of `MaterialGitPalette`, which carries these same values on the
+/// skin's side of the seam. This extension survives beside that only for the
+/// sites that still need a raw `Color` in hand: the surface FILLS, the tints
+/// and the borders which have no way to name a tone, because the contract
+/// deliberately exposes no application-side tone-to-colour door (no facet
+/// returns a `Color`, and `no_value_in_contract` is what keeps it that way).
+/// `FileStatusType.colorOf` beside `FileStatusType.toneOf` is the same pairing
+/// one layer down, with the same end date: both go when those surfaces become
+/// `SkinSurfaces` members and take their fills with them.
+///
+/// The four branch roles (`branchLocal`, `branchRemote`, `branchTag`,
+/// `branchStash`) are gone: they had no reader left in the application and no
+/// `Tone.git*` counterpart to become, so they were eight hex values naming
+/// nothing. [laneColors] has no counterpart either and is NOT deletable - the
+/// commit graph reads it - because `Tone.series` is one series and this is a
+/// second, independent one. See the conversion notes for #249.
+///
 /// One fixed hex per role cannot satisfy WCAG 2.1 AA on both a near-white and
 /// a near-black surface, so each role carries a light and a dark value and the
 /// theme registers the preset matching its brightness. Values are derived from
@@ -21,10 +41,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
     required this.renamed,
     required this.untracked,
     required this.conflict,
-    required this.branchLocal,
-    required this.branchRemote,
-    required this.branchTag,
-    required this.branchStash,
     required this.laneColors,
   });
 
@@ -46,18 +62,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
   /// Merge conflicts.
   final Color conflict;
 
-  /// Local branches.
-  final Color branchLocal;
-
-  /// Remote branches.
-  final Color branchRemote;
-
-  /// Tags.
-  final Color branchTag;
-
-  /// Stashes.
-  final Color branchStash;
-
   /// Commit-graph lane cycle. Lanes are 2 px lines, so these meet the 3:1
   /// non-text threshold rather than the 4.5:1 text threshold.
   final List<Color> laneColors;
@@ -70,10 +74,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
     renamed: Color(0xFF005794),
     untracked: Color(0xFF555656),
     conflict: Color(0xFFA40040),
-    branchLocal: Color(0xFF006318),
-    branchRemote: Color(0xFF005794),
-    branchTag: Color(0xFF7D4800),
-    branchStash: Color(0xFF8C10A1),
     laneColors: [
       Color(0xFF0082D9), // Blue
       Color(0xFF2C9136), // Green
@@ -94,10 +94,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
     renamed: Color(0xFF58ACFF),
     untracked: Color(0xFFA8A8A8),
     conflict: Color(0xFFFF7E98),
-    branchLocal: Color(0xFF59BC5B),
-    branchRemote: Color(0xFF58ACFF),
-    branchTag: Color(0xFFFF9800),
-    branchStash: Color(0xFFED76FD),
     laneColors: [
       Color(0xFF2196F3), // Blue
       Color(0xFF4CAF50), // Green
@@ -128,10 +124,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
     Color? renamed,
     Color? untracked,
     Color? conflict,
-    Color? branchLocal,
-    Color? branchRemote,
-    Color? branchTag,
-    Color? branchStash,
     List<Color>? laneColors,
   }) {
     return GitSemanticColors(
@@ -141,10 +133,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
       renamed: renamed ?? this.renamed,
       untracked: untracked ?? this.untracked,
       conflict: conflict ?? this.conflict,
-      branchLocal: branchLocal ?? this.branchLocal,
-      branchRemote: branchRemote ?? this.branchRemote,
-      branchTag: branchTag ?? this.branchTag,
-      branchStash: branchStash ?? this.branchStash,
       laneColors: laneColors ?? this.laneColors,
     );
   }
@@ -159,10 +147,6 @@ class GitSemanticColors extends ThemeExtension<GitSemanticColors> {
       renamed: Color.lerp(renamed, other.renamed, t)!,
       untracked: Color.lerp(untracked, other.untracked, t)!,
       conflict: Color.lerp(conflict, other.conflict, t)!,
-      branchLocal: Color.lerp(branchLocal, other.branchLocal, t)!,
-      branchRemote: Color.lerp(branchRemote, other.branchRemote, t)!,
-      branchTag: Color.lerp(branchTag, other.branchTag, t)!,
-      branchStash: Color.lerp(branchStash, other.branchStash, t)!,
       laneColors: [
         for (var i = 0; i < laneColors.length; i++)
           Color.lerp(

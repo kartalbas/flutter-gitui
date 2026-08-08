@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show ControlScale, IconRole, Proximity, TextRole;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
@@ -113,7 +114,10 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                 child: BaseInset(
                   child: Row(
                     children: [
-                      const Icon(PhosphorIconsRegular.info, size: 20),
+                      // The mark of an ordinary notice, at the ordinary size:
+                      // it belongs to the line beside it rather than standing
+                      // over it.
+                      const BaseIcon(IconRole.info),
                       const BaseGap(Proximity.related),
                       Expanded(
                         child: BaseLabel(
@@ -317,7 +321,9 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
           value: 'HEAD',
           builder: (context) => Row(
             children: [
-              const Icon(PhosphorIconsRegular.arrowUp, size: 16),
+              // A dense mark inside a menu entry: the row is one line tall and
+              // the mark is part of the line.
+              const BaseIcon(IconRole.arrowUp, scale: ControlScale.compact),
               const BaseGap(Proximity.related),
               BaseLabel(
                 AppLocalizations.of(context)!.headCurrentCommit,

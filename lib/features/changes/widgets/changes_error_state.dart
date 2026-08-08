@@ -18,6 +18,13 @@ class ChangesErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // The error state's hero glyph stays a raw `Icon`, and for two
+          // reasons rather than one. Its size has no rung: `ControlScale`'s
+          // largest step is the ordinary size of a control's mark, and the
+          // artwork filling an empty region is a different order of thing.
+          // Its colour has no word either - `Tone.danger` is "this destroys
+          // something you cannot get back", which is not what a failed status
+          // read is saying. Neither is rounded to its nearest neighbour.
           Icon(
             PhosphorIconsRegular.warningCircle,
             size: 64,

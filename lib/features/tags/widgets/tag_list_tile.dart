@@ -224,31 +224,34 @@ class TagListTile extends ConsumerWidget {
 
   Widget _buildLocalBadge(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingS,
-        vertical: 2,
-      ),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(AppTheme.radiusS),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            PhosphorIconsRegular.upload,
-            size: 12,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
-          ),
-          const BaseGap(Proximity.hairline),
-          Text(
-            AppLocalizations.of(context)!.local,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+      // A badge sits barely in from its edge across, and down the page it is
+      // as close to the edge as its word stays legible: the badge's height is
+      // the point, because it rides beside a tag name in a list row.
+      child: BaseInset(
+        x: Inset.tight,
+        y: Inset.hairline,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              PhosphorIconsRegular.upload,
+              size: 12,
               color: Theme.of(context).colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
             ),
-          ),
-        ],
+            const BaseGap(Proximity.hairline),
+            Text(
+              AppLocalizations.of(context)!.local,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -294,7 +297,7 @@ class TagListTile extends ConsumerWidget {
           ],
           if (tag.message != null && tag.message!.isNotEmpty) ...[
             const BaseGap(Proximity.grouped),
-            const Divider(),
+            const BaseSeparator(),
             const BaseGap(Proximity.related),
             BaseLabel(
               AppLocalizations.of(context)!.tagDetailsMessage,
@@ -308,12 +311,16 @@ class TagListTile extends ConsumerWidget {
               ),
               child: BaseInset(
                 all: Inset.normal,
-                child: SelectableText(
+                // An annotated tag's message is quoted verbatim from the
+                // repository, so its line breaks and its alignment are part
+                // of what it says - which is what TextRole.code names. The
+                // monospace family this site spelled out was one design
+                // language's answer to that, and the user's own choice of
+                // diff font now reaches it through the skin.
+                child: BaseLabel(
                   tag.message!,
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                  role: TextRole.code,
+                  selectable: true,
                 ),
               ),
             ),

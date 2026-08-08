@@ -242,6 +242,14 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                             child: Column(
                               children: widget.commit.parents.map((parent) {
                                 return Padding(
+                                  // Left as a literal on purpose. The space
+                                  // belongs BELOW each parent, the last one
+                                  // included, so it is a trailing margin a
+                                  // child owns rather than a gap between two
+                                  // named neighbours - and the composition the
+                                  // vocabulary prescribes for a per-side
+                                  // padding drops the trailing one. Reported
+                                  // rather than rounded onto a rung.
                                   padding: const EdgeInsets.only(bottom: 6),
                                   child: CopyableText(
                                     text: parent,
@@ -265,11 +273,22 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                               runSpacing: 6,
                               children: widget.commit.refs.map((ref) {
                                 final isTag = ref.contains('tag:');
+                                // Hoisted so the glyph each branch names stays
+                                // one readable reference; the census that
+                                // guards mark identity reads these by name.
+                                final IconData refGlyph = isTag
+                                    ? PhosphorIconsRegular.tag
+                                    : PhosphorIconsRegular.gitBranch;
                                 return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppTheme.paddingS,
-                                    vertical: AppTheme.paddingXS,
-                                  ),
+                                  // The pill's fill, border and corner stay:
+                                  // they are the surface. How far it holds its
+                                  // content off its own edge is the language's
+                                  // question, and a pill inside a details card
+                                  // is barely set in on both axes: `tight`.
+                                  // Its dense twin in the commit list answers
+                                  // the vertical axis differently on purpose -
+                                  // there the pill's height is a list row's
+                                  // height, and here it is a card's content.
                                   decoration: BoxDecoration(
                                     color: isTag
                                         ? Theme.of(
@@ -309,27 +328,43 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                                               context,
                                             ).colorScheme.onSecondaryContainer,
                                     ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          isTag
-                                              ? PhosphorIconsRegular.tag
-                                              : PhosphorIconsRegular.gitBranch,
-                                          size: 12,
-                                          color: isTag
-                                              ? Theme.of(context)
-                                                    .colorScheme
-                                                    .onTertiaryContainer
-                                              : Theme.of(context)
-                                                    .colorScheme
-                                                    .onSecondaryContainer,
-                                        ),
-                                        const SizedBox(
-                                          width: AppTheme.paddingXS,
-                                        ),
-                                        BaseLabel(ref, role: TextRole.micro),
-                                      ],
+                                    // The pill's inset stays a literal:
+                                    // across it is `tight` exactly, but its
+                                    // vertical 4 is on no `Inset` rung, and
+                                    // rounding it up would grow every ref
+                                    // pill 8px taller. Both halves wait for
+                                    // `surfaces.badge`.
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppTheme.paddingS,
+                                        vertical: AppTheme.paddingXS,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // The glyph keeps its explicit size
+                                          // and colour: the colour is the
+                                          // pairing the chip's own fill
+                                          // demands, and it leaves with that
+                                          // fill rather than with this sweep.
+                                          Icon(
+                                            refGlyph,
+                                            size: 12,
+                                            color: isTag
+                                                ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onTertiaryContainer
+                                                : Theme.of(context)
+                                                      .colorScheme
+                                                      .onSecondaryContainer,
+                                          ),
+                                          // A glyph and the name beside it are
+                                          // two halves of one thing:
+                                          // `hairline`.
+                                          const BaseGap(Proximity.hairline),
+                                          BaseLabel(ref, role: TextRole.micro),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -382,6 +417,9 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
 
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Padding(
+      // The same trailing margin as the parent list above, and left for the
+      // same reason: the row owns the space under itself, which no rung of
+      // either distance vocabulary can be owned by one child.
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

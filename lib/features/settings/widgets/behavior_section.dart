@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
 import 'settings_section.dart';
@@ -26,7 +28,10 @@ class BehaviorSection extends ConsumerWidget {
       icon: IconRole.sliders,
       children: [
         SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.arrowsClockwise),
+          secondary: const BaseIcon(
+            IconRole.arrowsClockwise,
+            scale: ControlScale.prominent,
+          ),
           title: Text(l10n.autoFetch),
           subtitle: Text(l10n.autoFetchDescription),
           value: behavior.autoFetch,
@@ -36,7 +41,13 @@ class BehaviorSection extends ConsumerWidget {
         ),
         if (behavior.autoFetch)
           BaseListItem(
-            leading: const Icon(PhosphorIconsRegular.timer),
+            // The row's own mark. The prominent scale is what a bare `Icon`
+            // rendered at under the row's ambient icon theme, and the neutral
+            // tone leaves the colour to the row, as before.
+            leading: const BaseIcon(
+              IconRole.timer,
+              scale: ControlScale.prominent,
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -53,9 +64,12 @@ class BehaviorSection extends ConsumerWidget {
               onPressed: onEditAutoFetchInterval,
             ),
           ),
-        const Divider(),
+        const BaseSeparator(),
         SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.arrowUp),
+          secondary: const BaseIcon(
+            IconRole.arrowUp,
+            scale: ControlScale.prominent,
+          ),
           title: Text(l10n.confirmPush),
           subtitle: Text(l10n.confirmPushDescription),
           value: behavior.confirmPush,
@@ -64,7 +78,10 @@ class BehaviorSection extends ConsumerWidget {
           },
         ),
         SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.warningDiamond),
+          secondary: const BaseIcon(
+            IconRole.warningDiamond,
+            scale: ControlScale.prominent,
+          ),
           title: Text(l10n.confirmDestructiveActions),
           subtitle: Text(l10n.confirmDestructiveActionsDescription),
           value: behavior.confirmDestructiveActions,

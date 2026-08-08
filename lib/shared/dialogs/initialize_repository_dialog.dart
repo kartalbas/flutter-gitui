@@ -2,12 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../theme/app_theme.dart';
@@ -126,7 +126,10 @@ class _InitializeRepositoryDialogState
               child: BaseInset(
                 child: Row(
                   children: [
-                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    // The mark of an ordinary notice, at the ordinary size: it
+                    // belongs to the line beside it rather than standing over
+                    // it.
+                    const BaseIcon(IconRole.info),
                     const BaseGap(Proximity.related),
                     Expanded(
                       child: BaseLabel(
@@ -156,10 +159,15 @@ class _InitializeRepositoryDialogState
                 child: BaseInset(
                   child: Row(
                     children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      // The mark says what the message beside it already says,
+                      // so it says it the same way: `colorScheme.error` was
+                      // Material's answer to the danger this label had already
+                      // named. It stated no size at all and took whatever the
+                      // dialog's ambient theme handed it; the info banner a few
+                      // lines above asks for the ordinary size, so the
+                      // difference was drift rather than a distinction and both
+                      // now say the same rung.
+                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                       const BaseGap(Proximity.related),
                       Expanded(
                         child: BaseLabel(

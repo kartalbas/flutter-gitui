@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/config_providers.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import 'settings_section.dart';
@@ -43,7 +44,13 @@ class ThemeSection extends ConsumerWidget {
       icon: IconRole.palette,
       children: [
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.palette),
+          // The row's own mark. The prominent scale is what a bare `Icon`
+          // rendered at under the row's ambient icon theme, and the neutral
+          // tone leaves the colour to the row, as before.
+          leading: const BaseIcon(
+            IconRole.palette,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -76,7 +83,10 @@ class ThemeSection extends ConsumerWidget {
           ),
         ),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.textAa),
+          leading: const BaseIcon(
+            IconRole.textAa,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -103,7 +113,10 @@ class ThemeSection extends ConsumerWidget {
           ),
         ),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.textT),
+          leading: const BaseIcon(
+            IconRole.textT,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -130,7 +143,10 @@ class ThemeSection extends ConsumerWidget {
           ),
         ),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.codeSimple),
+          leading: const BaseIcon(
+            IconRole.codeSimple,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -157,7 +173,10 @@ class ThemeSection extends ConsumerWidget {
           ),
         ),
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.textT),
+          leading: const BaseIcon(
+            IconRole.textT,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

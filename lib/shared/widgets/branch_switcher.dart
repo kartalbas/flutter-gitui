@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../components/base_badge.dart';
+import '../components/base_icon.dart';
+import '../components/base_layout.dart';
 import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
 import '../components/base_dialog.dart';
@@ -109,15 +111,17 @@ class BranchSwitcher extends ConsumerWidget {
                 ),
               ),
               // Protected branch lock icon
-              if (branch.isProtected)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppTheme.paddingS),
-                  child: Icon(
-                    PhosphorIconsRegular.lock,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              if (branch.isProtected) ...[
+                const BaseIcon(
+                  IconRole.lock,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
                 ),
+                // The lock and the row actions beside it are two parts of one
+                // entry; the trailing padding was that space wearing a padding
+                // idiom.
+                const BaseGap(Proximity.related),
+              ],
               // Action buttons (disabled for protected branches)
               if (!branch.isProtected)
                 BaseIconButton(
@@ -527,7 +531,8 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
             l10n.branchesSelectedForDeletion(_selectedCount),
             role: TextRole.body,
           ),
-          const SizedBox(height: AppTheme.paddingS),
+          // The count and the list it counts are two parts of one statement.
+          const BaseGap(Proximity.related),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 300),
             child: SingleChildScrollView(
@@ -591,12 +596,17 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
           // last one, at the same rhythm and one gap below the branches, is
           // the one that arms `git branch -D` over the whole selection.
           if (unmergedSelected > 0) ...[
-            const SizedBox(height: AppTheme.paddingM),
+            // The list of branches and the warning about them are members of
+            // one dialog body.
+            const BaseGap(Proximity.grouped),
             BaseLabel(
               l10n.unmergedBranchesWillBeSkipped(unmergedSelected),
               role: TextRole.body,
             ),
-            const SizedBox(height: AppTheme.paddingS),
+            // The sentence and the opt-in it explains are one statement, and
+            // that closeness is what keeps the checkbox from reading as just
+            // another row.
+            const BaseGap(Proximity.related),
             _forceOptIn(context, l10n),
           ],
         ],
@@ -648,48 +658,60 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
   Widget _forceOptIn(BuildContext context, AppLocalizations l10n) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingS),
       decoration: BoxDecoration(
         color: colorScheme.error.withValues(alpha: 0.08),
         border: Border.all(color: colorScheme.error.withValues(alpha: 0.4)),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),
       ),
-      // The tile paints its hover, focus and pressed state layers on the
-      // nearest Material, so inside a decorated box it needs one of its own or
-      // those layers land behind the tint and stay invisible - the same reason
-      // BaseCard carries one (shared/components/base_card.dart).
-      child: Material(
-        type: MaterialType.transparency,
-        child: CheckboxListTile(
-          key: BulkDeleteBranchesDialog.forceCheckboxKey,
-          value: _force,
-          onChanged: (value) => setState(() => _force = value ?? false),
-          activeColor: colorScheme.error,
-          title: Row(
-            children: [
-              Icon(
-                PhosphorIconsBold.warning,
-                size: AppTheme.iconS,
-                color: colorScheme.error,
-              ),
-              const SizedBox(width: AppTheme.paddingS),
-              Expanded(
-                child: BaseLabel(
-                  l10n.forceDelete,
-                  role: TextRole.control,
-                  tone: Tone.danger,
+      // The block is barely set in from its own border: it is a dense
+      // checkbox row, not a card.
+      child: BaseInset(
+        all: Inset.tight,
+        // The tile paints its hover, focus and pressed state layers on the
+        // nearest Material, so inside a decorated box it needs one of its own
+        // or those layers land behind the tint and stay invisible - the same
+        // reason BaseCard carries one (shared/components/base_card.dart).
+        child: Material(
+          type: MaterialType.transparency,
+          child: CheckboxListTile(
+            key: BulkDeleteBranchesDialog.forceCheckboxKey,
+            value: _force,
+            onChanged: (value) => setState(() => _force = value ?? false),
+            activeColor: colorScheme.error,
+            title: Row(
+              children: [
+                // Left as a Phosphor constant deliberately. This block is
+                // built to look nothing like the branch rows above it, and the
+                // heavier stroke is part of that treatment - which is a fact
+                // `IconRole` cannot carry, because a role names the mark and
+                // the skin re-decides its weight. Converting it here would
+                // drop the weight silently. See the P3d report.
+                Icon(
+                  PhosphorIconsBold.warning,
+                  size: AppTheme.iconS,
+                  color: colorScheme.error,
                 ),
-              ),
-            ],
+                // The warning mark and the words it qualifies are two halves
+                // of one statement.
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: BaseLabel(
+                    l10n.forceDelete,
+                    role: TextRole.control,
+                    tone: Tone.danger,
+                  ),
+                ),
+              ],
+            ),
+            subtitle: BaseLabel(
+              l10n.forceDeleteBranchesWarning,
+              role: TextRole.detail,
+              tone: Tone.danger,
+            ),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
           ),
-          subtitle: BaseLabel(
-            l10n.forceDeleteBranchesWarning,
-            role: TextRole.detail,
-            tone: Tone.danger,
-          ),
-          dense: true,
-          contentPadding: EdgeInsets.zero,
-          controlAffinity: ListTileControlAffinity.leading,
         ),
       ),
     );

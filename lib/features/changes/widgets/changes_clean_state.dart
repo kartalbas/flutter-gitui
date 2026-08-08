@@ -17,6 +17,13 @@ class ChangesCleanState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // An empty state's hero glyph stays a raw `Icon`: `ControlScale`'s
+          // largest rung is the ordinary size of a control's mark, and the
+          // artwork that fills an empty region is a different order of thing.
+          // Naming the nearest rung would shrink this to a toolbar glyph, so
+          // the literal stays until the vocabulary has the word - and the
+          // colour stays with it, because a tone can only be said through
+          // `BaseIcon`, which would drag the missing rung in behind it.
           Icon(
             PhosphorIconsRegular.checkCircle,
             size: 64,

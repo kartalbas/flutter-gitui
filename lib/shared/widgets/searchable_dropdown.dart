@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
+import '../components/base_layout.dart';
 import '../components/base_button.dart';
 
 /// A searchable dropdown that allows users to filter options by typing
@@ -144,8 +145,11 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                   ? Builder(
                       builder: (context) {
                         final l10n = AppLocalizations.of(context)!;
-                        return Padding(
-                          padding: const EdgeInsets.all(AppTheme.paddingM),
+                        // The empty answer stands in place of the whole list,
+                        // so it takes the ordinary reading distance from the
+                        // overlay's edges rather than a row's tighter one.
+                        return BaseInset(
+                          all: Inset.normal,
                           child: BaseLabel(
                             l10n.emptyStateNoResultsFound,
                             role: TextRole.body,
@@ -155,6 +159,11 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                       },
                     )
                   : ListView.builder(
+                      // A viewport's own padding is a property rather than a
+                      // widget, and a field decoration's is too (see
+                      // `contentPadding` below): neither can take a
+                      // `BaseInset` until the scrollable and the field are
+                      // members themselves.
                       padding: const EdgeInsets.symmetric(
                         vertical: AppTheme.paddingS,
                       ),
@@ -167,21 +176,24 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                         return InkWell(
                           onTap: () => _selectItem(item),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingM,
-                              vertical: AppTheme.paddingS,
-                            ),
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primaryContainer
                                       .withValues(alpha: 0.3)
                                 : null,
-                            // The tinted container behind the entry already
-                            // says "this is the chosen one"; tinting the words
-                            // as well was the same statement made twice, and
-                            // the second time as a colour.
-                            child: BaseLabel(
-                              widget.displayStringForOption(item),
-                              role: TextRole.body,
+                            // An entry reads at the list's ordinary distance
+                            // across and barely set in down the page, because
+                            // how many entries fit at once is the point.
+                            child: BaseInset(
+                              x: Inset.normal,
+                              y: Inset.tight,
+                              // The tinted container behind the entry already
+                              // says "this is the chosen one"; tinting the
+                              // words as well was the same statement made
+                              // twice, and the second time as a colour.
+                              child: BaseLabel(
+                                widget.displayStringForOption(item),
+                                role: TextRole.body,
+                              ),
                             ),
                           ),
                         );
@@ -241,7 +253,8 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                     _isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: AppTheme.paddingS),
+                  // The trailing marks and the field's own edge.
+                  const BaseGap(Proximity.related),
                 ],
               ),
               border: OutlineInputBorder(

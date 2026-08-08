@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
@@ -26,7 +27,13 @@ class HistorySection extends ConsumerWidget {
       icon: IconRole.clockCounterClockwise,
       children: [
         BaseListItem(
-          leading: const Icon(PhosphorIconsRegular.listNumbers),
+          // The row's own mark. The prominent scale is what a bare `Icon`
+          // rendered at under the row's ambient icon theme, and the neutral
+          // tone leaves the colour to the row, as before.
+          leading: const BaseIcon(
+            IconRole.listNumbers,
+            scale: ControlScale.prominent,
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -47,7 +54,10 @@ class HistorySection extends ConsumerWidget {
           ),
         ),
         SwitchListTile(
-          secondary: const Icon(PhosphorIconsRegular.graph),
+          secondary: const BaseIcon(
+            IconRole.graph,
+            scale: ControlScale.prominent,
+          ),
           title: Text(l10n.showCommitGraph),
           subtitle: Text(l10n.showCommitGraphDescription),
           value: history.showCommitGraph,

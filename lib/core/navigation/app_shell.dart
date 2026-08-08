@@ -432,7 +432,10 @@ class _AppShellState extends ConsumerState<AppShell> {
                     ),
                   ),
 
-                  // Vertical divider
+                  // Not `BaseSeparator`: the rail's edge rule at `width: 1`
+                  // is a measurement - the rule takes no layout space, so the
+                  // panes meet - which the separator member deliberately does
+                  // not carry. It leaves with the shell chrome.
                   const VerticalDivider(thickness: 1, width: 1),
 
                   // Main content area

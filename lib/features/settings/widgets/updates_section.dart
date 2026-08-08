@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -210,10 +209,13 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           all: Inset.normal,
           child: Row(
             children: [
-              Icon(
-                PhosphorIconsRegular.package,
-                size: AppTheme.iconS,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              // The mark repeats what the words beside it already say, so it
+              // is secondary to them and takes the dense scale this row reads
+              // at.
+              const BaseIcon(
+                IconRole.package,
+                scale: ControlScale.compact,
+                tone: Tone.muted,
               ),
               const BaseGap(Proximity.related),
               BaseLabel(
@@ -227,14 +229,20 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           ),
         ),
 
-        const Divider(),
+        const BaseSeparator(),
 
         if (managedInstall != null)
           // Naming the manager and the reason is the whole point of keeping
           // "suppressed" apart from "up to date": without it the section would
           // simply be missing its controls, which reads as a defect.
           BaseListItem(
-            leading: const Icon(PhosphorIconsRegular.storefront),
+            // The row's own mark. The prominent scale is what a bare `Icon`
+            // rendered at under the row's ambient icon theme, and the neutral
+            // tone leaves the colour to the row, as before.
+            leading: const BaseIcon(
+              IconRole.storefront,
+              scale: ControlScale.prominent,
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -252,7 +260,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
         else ...[
           // How often the app may look for updates on its own
           BaseListItem(
-            leading: const Icon(PhosphorIconsRegular.arrowsClockwise),
+            leading: const BaseIcon(
+              IconRole.arrowsClockwise,
+              scale: ControlScale.prominent,
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -289,7 +300,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
           // Background download of a found update; installing stays manual
           SwitchListTile(
-            secondary: const Icon(PhosphorIconsRegular.cloudArrowDown),
+            secondary: const BaseIcon(
+              IconRole.cloudArrowDown,
+              scale: ControlScale.prominent,
+            ),
             title: Text(l10n.autoDownloadUpdates),
             subtitle: Text(l10n.autoDownloadUpdatesDescription),
             value: updates.autoDownload,
@@ -301,7 +315,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           // When the last check ran and what it concluded; a failed background
           // check surfaces here and in the log instead of in a popup.
           BaseListItem(
-            leading: const Icon(PhosphorIconsRegular.clock),
+            leading: const BaseIcon(
+              IconRole.clock,
+              scale: ControlScale.prominent,
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -337,7 +354,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             ),
           ),
 
-          const Divider(),
+          const BaseSeparator(),
 
           // Check for Updates button
           BaseInset(

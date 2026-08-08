@@ -372,6 +372,14 @@ class _FailureMessage extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // The hero mark of a state standing in place of the result list. It
+          // keeps its measure as a literal for the reason every empty state's
+          // mark does: `ControlScale`'s loudest rung is the size of a
+          // control's glyph, not of a state's artwork, and its colour is
+          // stranded with it because a `Tone` can only reach a mark through
+          // `BaseIcon`. The sibling `_Message` below says `prominent` for the
+          // same job - one meaning, two sizes, recorded here rather than
+          // settled by shrinking this one; the empty-state member decides.
           Icon(
             needsSignIn
                 ? PhosphorIconsRegular.signIn

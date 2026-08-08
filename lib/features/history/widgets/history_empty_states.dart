@@ -19,6 +19,15 @@ class NoCommitsState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // The hero mark of an empty state, and the one thing on this screen
+          // the vocabulary cannot say. `ControlScale` asks how much room a
+          // CONTROL is entitled to and tops out at the size of a button's
+          // glyph; this mark is not inside a control, it IS the region's
+          // content. Naming the loudest rung available would shrink it to a
+          // third and turn an empty state into a blank one, so the glyph keeps
+          // its measure - and its colour with it, because a tone can only
+          // reach a mark through `BaseIcon` - until the empty-state surface
+          // becomes a member and takes both.
           Icon(
             PhosphorIconsRegular.gitCommit,
             size: 64,

@@ -89,7 +89,7 @@ class AppAboutDialog extends HookConsumerWidget {
 
             const BaseGap(Proximity.separate),
 
-            const Divider(),
+            const BaseSeparator(),
             const BaseGap(Proximity.grouped),
 
             // Technology stack
@@ -109,7 +109,7 @@ class AppAboutDialog extends HookConsumerWidget {
             ),
             const BaseGap(Proximity.grouped),
 
-            const Divider(),
+            const BaseSeparator(),
             const BaseGap(Proximity.grouped),
           ],
         ),

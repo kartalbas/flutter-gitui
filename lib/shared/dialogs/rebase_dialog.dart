@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show ControlScale, IconRole, Proximity, TextRole;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../theme/app_theme.dart';
@@ -155,7 +156,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               child: BaseInset(
                 child: Row(
                   children: [
-                    const Icon(PhosphorIconsRegular.info, size: 20),
+                    // The mark of an ordinary notice, at the ordinary size: it
+                    // belongs to the line beside it rather than standing over
+                    // it.
+                    const BaseIcon(IconRole.info),
                     const BaseGap(Proximity.related),
                     Expanded(
                       child: BaseLabel(
@@ -291,11 +295,14 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               children: [
                 Row(
                   children: [
-                    Icon(
+                    // The mark of the status banner's headline, at the ordinary
+                    // size: it belongs to the line beside it. It names no
+                    // colour, so it keeps taking the one the banner around it
+                    // publishes.
+                    BaseIcon(
                       state.hasConflicts
-                          ? PhosphorIconsRegular.warningCircle
-                          : PhosphorIconsRegular.gitBranch,
-                      size: 20,
+                          ? IconRole.warningCircle
+                          : IconRole.gitBranch,
                     ),
                     const BaseGap(Proximity.related),
                     Expanded(
@@ -346,7 +353,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           child: BaseInset(
             child: Row(
               children: [
-                const Icon(PhosphorIconsRegular.gitBranch, size: 20),
+                // The mark that names the branch beside it, at the ordinary
+                // size: the two are one line.
+                const BaseIcon(IconRole.gitBranch),
                 const BaseGap(Proximity.related),
                 BaseLabel(state.ontoBranch ?? 'Unknown', role: TextRole.body),
               ],
@@ -487,10 +496,13 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           value: branch.name,
           builder: (context) => Row(
             children: [
-              if (branch.isRemote)
-                const Icon(PhosphorIconsRegular.cloud, size: 16)
-              else
-                const Icon(PhosphorIconsRegular.gitBranch, size: 16),
+              // A dense mark inside a menu entry: the row is one line tall and
+              // the mark is part of the line rather than something standing
+              // beside it.
+              BaseIcon(
+                branch.isRemote ? IconRole.cloud : IconRole.gitBranch,
+                scale: ControlScale.compact,
+              ),
               const BaseGap(Proximity.related),
               Text(branch.name),
             ],

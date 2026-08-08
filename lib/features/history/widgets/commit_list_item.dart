@@ -72,6 +72,12 @@ class CommitListItem extends ConsumerWidget {
               width: CommitGraphRowPainter.leadingWidthFor(graphLaneCount),
             )
           : Padding(
+              // Not a rung, and deliberately not rounded onto one: this nudges
+              // the dot down so its centre meets the cap height of the subject
+              // line beside it. That is an optical alignment against one line
+              // of text, which is neither a gap between two neighbours nor a
+              // container's breathing room, and `BaseInset` has no per-side
+              // form to say it with. It waits for the row surface.
               padding: const EdgeInsets.only(top: 2),
               child: Container(
                 width: 12,
@@ -109,6 +115,15 @@ class CommitListItem extends ConsumerWidget {
               runSpacing: 4,
               children: commit.refs.map((ref) {
                 return Container(
+                  // The badge's fill, border and corner stay: they are the
+                  // surface. Its inset and its internal gap stay literals
+                  // too: 6 sits between `hairline` and `tight` on a ladder
+                  // that skips it - the same between-the-rungs distance
+                  // file_list_item.dart's status badge records - and this
+                  // badge rides inside the densest list in the application,
+                  // so rounding either number would widen every ref chip.
+                  // Both wait for `surfaces.badge`, whose skin owns a
+                  // badge's measure.
                   padding: const EdgeInsets.symmetric(
                     horizontal: 6,
                     vertical: 2,
@@ -132,6 +147,11 @@ class CommitListItem extends ConsumerWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // The glyph keeps its explicit size and colour
+                        // because it is painted ON the badge's own fill: the
+                        // pairing that colour states is the surface's, and
+                        // it leaves with the surface rather than with this
+                        // sweep.
                         Icon(
                           ref.contains('tag:')
                               ? PhosphorIconsRegular.tag
@@ -167,7 +187,7 @@ class CommitListItem extends ConsumerWidget {
               // The inline-metadata marks of a row: one job, one scale. They
               // were drawn at 12 here and at 16 in the branch list for the
               // same job, which was one meaning said with two numbers;
-              // `compact` is the meaning and Material answers it with 16.
+              // `compact` is the meaning.
               const BaseIcon(IconRole.user, scale: ControlScale.compact),
               const BaseGap(Proximity.hairline),
               Flexible(

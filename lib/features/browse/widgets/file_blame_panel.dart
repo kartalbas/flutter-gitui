@@ -241,6 +241,12 @@ class FileBlamePanel extends ConsumerWidget {
 
               // Commit hash (clickable)
               Container(
+                // The chip's fill and corner stay: they are the surface. Its
+                // inset stays a literal: 6 sits between `hairline` and
+                // `tight` on a ladder that skips it, and the chip rides the
+                // blame gutter, where a line's height is how much code fits
+                // on the screen - rounding either axis would resize every
+                // gutter chip. It waits for `surfaces.badge`.
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.secondaryContainer,
@@ -324,6 +330,9 @@ class FileBlamePanel extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // An empty state's hero mark keeps its measure and its colour: no
+          // rung of `ControlScale` reaches it, and a tone can only reach a
+          // mark through `BaseIcon`. See history_empty_states.dart.
           Icon(
             PhosphorIconsRegular.file,
             size: 64,
@@ -364,8 +373,7 @@ class FileBlamePanel extends ConsumerWidget {
           ),
           const BaseGap(Proximity.related),
           // The message is held off the pane's sides so a long error wraps
-          // instead of running edge to edge: `roomy`, which Material answers
-          // with 24 where this site said 32.
+          // instead of running edge to edge: `roomy`.
           BaseInset(
             x: Inset.roomy,
             y: Inset.none,

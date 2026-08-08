@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../theme/app_theme.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_layout.dart';
 import '../components/base_card.dart';
 import '../dialogs/background_activity_dialog.dart';
 import '../../core/services/progress_service.dart';
@@ -42,6 +45,10 @@ class _BackgroundProgressLabel extends StatelessWidget {
         ),
         onTap: () => showBackgroundActivityDialog(context),
         child: Padding(
+          // Left alone deliberately: the caption reads at the ordinary
+          // distance across, but down the page it is a thin strip floating
+          // over the content, and no inset rung sits between "as close as
+          // legible" and "barely set in". See the P3d report.
           padding: const EdgeInsets.symmetric(
             horizontal: AppTheme.paddingM,
             vertical: AppTheme.paddingXS,
@@ -50,7 +57,9 @@ class _BackgroundProgressLabel extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               BaseLabel(text, role: TextRole.detail, tone: Tone.muted),
-              const SizedBox(width: AppTheme.paddingXS),
+              // The caption and the mark that says it can be opened are two
+              // halves of one affordance.
+              const BaseGap(Proximity.hairline),
               Icon(
                 PhosphorIconsRegular.caretRight,
                 size: 12,
@@ -115,8 +124,10 @@ class ProgressOverlay extends ConsumerWidget {
         ),
         // Progress dialog
         Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingL),
+          // The blocking card floats over the whole window and keeps
+          // deliberately clear of its edges.
+          child: BaseInset(
+            all: Inset.roomy,
             child: BaseCard(
               content: Container(
                 constraints: const BoxConstraints(minWidth: 400, maxWidth: 500),
@@ -127,8 +138,13 @@ class ProgressOverlay extends ConsumerWidget {
                     // Operation name
                     Row(
                       children: [
-                        const Icon(PhosphorIconsRegular.circleNotch, size: 24),
-                        const SizedBox(width: AppTheme.paddingM),
+                        const BaseIcon(
+                          IconRole.circleNotch,
+                          scale: ControlScale.prominent,
+                        ),
+                        // The activity mark and the name of the work are
+                        // members of one heading.
+                        const BaseGap(Proximity.grouped),
                         Expanded(
                           child: BaseLabel(
                             progress.operationName,
@@ -137,7 +153,9 @@ class ProgressOverlay extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppTheme.paddingL),
+                    // The heading and the measurement under it are two groups
+                    // of one card.
+                    const BaseGap(Proximity.separate),
 
                     // Progress bar
                     if (!progress.isIndeterminate) ...[
@@ -146,7 +164,9 @@ class ProgressOverlay extends ConsumerWidget {
                         minHeight: 8,
                         borderRadius: BorderRadius.circular(AppTheme.radiusS),
                       ),
-                      const SizedBox(height: AppTheme.paddingM),
+                      // The bar and the numbers that read it out belong to one
+                      // group.
+                      const BaseGap(Proximity.grouped),
                       // Progress text
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -170,7 +190,9 @@ class ProgressOverlay extends ConsumerWidget {
 
                     // Status message
                     if (progress.statusMessage != null) ...[
-                      const SizedBox(height: AppTheme.paddingM),
+                      // The measurement and the line saying what it is doing
+                      // right now belong to one group.
+                      const BaseGap(Proximity.grouped),
                       BaseLabel(
                         progress.statusMessage!,
                         role: TextRole.detail,

@@ -62,6 +62,9 @@ class FileHistoryPanel extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // An empty state's hero mark keeps its measure and its colour: no
+            // rung of `ControlScale` reaches it, and a tone can only reach a
+            // mark through `BaseIcon`. See history_empty_states.dart.
             Icon(
               PhosphorIconsRegular.clockCounterClockwise,
               size: 64,
@@ -103,6 +106,14 @@ class FileHistoryPanel extends ConsumerWidget {
                 children: [
                   // Hash badge
                   Container(
+                    // The badge's fill and corner stay: they are the surface.
+                    // Its inset stays a literal too: across it is `tight`
+                    // exactly, but down the page a badge keeps itself to the
+                    // height of the card row it leads, and 4 sits between
+                    // `hairline` and `tight` on a ladder that skips it -
+                    // naming either rung would move the whole first row of
+                    // every commit card. Both halves wait for
+                    // `surfaces.badge`, whose skin owns a badge's measure.
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppTheme.paddingS,
                       vertical: AppTheme.paddingXS,

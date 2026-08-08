@@ -91,6 +91,16 @@ class OverflowActionBar extends StatelessWidget {
   /// `test/shared/widgets/overflow_action_bar_extent_test.dart`.
   static const double menuExtent = 48;
 
+  /// The distance between two actions, and the same number the fitting
+  /// arithmetic above budgets for.
+  ///
+  /// It stays a length rather than becoming a [Proximity] rung, and that is
+  /// the point: the two `SizedBox`es below and `visibleActionCount` are ONE
+  /// statement, and a rung would let the drawn gap and the budgeted gap
+  /// disagree the moment a skin answers the rung with anything but this
+  /// number - the bar would then overflow the width it just proved it fits
+  /// in. The whole arithmetic belongs in the skin and moves there with this
+  /// bar (SKIN-CONTRACT.md §1); until it does, the gap follows the budget.
   static const double spacing = AppTheme.paddingS;
 
   final List<ToolbarAction> actions;

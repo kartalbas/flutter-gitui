@@ -70,14 +70,16 @@ class BatchResultDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppTheme.radiusS),
               border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
             ),
+            // Command output, which is what the monospace family and the
+            // spelled-out `onSurface` between them were saying: alignment is
+            // meaning here, and the ink is this surface's ordinary foreground.
+            // The hand-set ramp step goes with them: which step this text
+            // lands on is the role's answer, not this dialog's.
             child: BaseInset(
-              child: SelectableText(
+              child: BaseLabel(
                 result.message,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontFamily: 'monospace',
-                ),
+                role: TextRole.code,
+                selectable: true,
               ),
             ),
           ),

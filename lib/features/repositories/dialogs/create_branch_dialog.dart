@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -204,10 +204,13 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                        size: 20,
+                      // Tone.invalid, not Tone.danger: the branch name the
+                      // user typed was rejected and has to be corrected
+                      // before the dialog can proceed, and nothing has been
+                      // destroyed.
+                      const BaseIcon(
+                        IconRole.warningCircle,
+                        tone: Tone.invalid,
                       ),
                       const BaseGap(Proximity.grouped),
                       Expanded(
@@ -323,10 +326,12 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
               itemBuilder: (context, index) {
                 final repo = widget.repositories[index];
                 return BaseListItem(
-                  leading: Icon(
-                    PhosphorIconsRegular.folderSimple,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.primary,
+                  // The accent marks the repositories the branch will be
+                  // created in, at the dense scale a preview list reads at.
+                  leading: const BaseIcon(
+                    IconRole.folderSimple,
+                    scale: ControlScale.compact,
+                    tone: Tone.accent,
                   ),
                   content: BaseLabel(repo.displayName, role: TextRole.body),
                 );

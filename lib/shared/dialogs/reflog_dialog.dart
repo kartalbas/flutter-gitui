@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 import '../components/copyable_text.dart';
@@ -121,7 +122,9 @@ class ReflogDialog extends ConsumerWidget {
           child: BaseInset(
             child: Row(
               children: [
-                const Icon(PhosphorIconsRegular.info, size: 20),
+                // The mark of an ordinary notice, at the ordinary size: it
+                // belongs to the line beside it rather than standing over it.
+                const BaseIcon(IconRole.info),
                 const BaseGap(Proximity.related),
                 Expanded(
                   child: BaseLabel(
@@ -146,6 +149,9 @@ class ReflogDialog extends ConsumerWidget {
           child: ListView.separated(
             shrinkWrap: true,
             itemCount: entries.length,
+            // Not `BaseSeparator`: `height: 1` is a measurement - a rule
+            // between dense rows that takes no layout space - which the
+            // separator member deliberately does not carry.
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final entry = entries[index];
@@ -160,10 +166,6 @@ class ReflogDialog extends ConsumerWidget {
   Widget _buildReflogItem(BuildContext context, ReflogEntry entry) {
     return BaseListItem(
       leading: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.paddingS,
-          vertical: AppTheme.paddingXS,
-        ),
         decoration: BoxDecoration(
           color: _getActionColor(
             entry.actionType,
@@ -176,6 +178,16 @@ class ReflogDialog extends ConsumerWidget {
         // stays a `Color` for now because the same value paints the wash, and
         // until this chip is `surfaces.badge` at P3d there is no contract
         // member that can tint a surface from a `Tone`.
+        //
+        // The chip's inset stays a literal: across it is `tight` exactly,
+        // but its vertical 4 is on no `Inset` rung - rounding it up to
+        // `tight` would grow every reflog row's leading chip 8px taller.
+        // Both halves wait for `surfaces.badge`, whose skin owns a badge's
+        // measure.
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.paddingS,
+          vertical: AppTheme.paddingXS,
+        ),
         child: DefaultTextStyle.merge(
           style: TextStyle(color: _getActionColor(entry.actionType, context)),
           child: BaseLabel(entry.actionType, role: TextRole.detail),

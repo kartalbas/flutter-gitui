@@ -349,9 +349,13 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        // The filled segment states the foreground that pairs with it; the word
-        // inside says only what it is. The semibold was a second statement of
-        // the same selection the fill already makes.
+        // The chosen segment is painted in the accent, so its word is the
+        // foreground that goes ON the accent; the segment beside it is present
+        // but secondary to the one that is chosen. Those are the two meanings
+        // `onPrimary` and `onSurfaceVariant` were Material's answers to, and
+        // the word carries them itself now instead of being handed a
+        // `TextStyle` from outside. The semibold that used to sit here was a
+        // second statement of the same selection the fill already makes.
         //
         // The segment is dense, which is all Inset.tight says; it used to say
         // `AppTheme.paddingS + AppTheme.paddingXS` across, which is the
@@ -360,13 +364,10 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
         // that member lands, and the rung goes with it.
         child: BaseInset(
           all: Inset.tight,
-          child: DefaultTextStyle.merge(
-            style: TextStyle(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            child: BaseLabel(label, role: TextRole.control),
+          child: BaseLabel(
+            label,
+            role: TextRole.control,
+            tone: isSelected ? Tone.onAccent : Tone.muted,
           ),
         ),
       ),

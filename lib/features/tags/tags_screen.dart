@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole;
+    show ControlScale, IconRole, Inset, Proximity, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/base_dismiss_scope.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../shared/components/base_animated_widgets.dart';
+import '../../shared/components/base_icon.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_menu_item.dart';
@@ -410,9 +410,14 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.sortAscending,
-                              size: 16,
+                            // The mark that shows which way this entry
+                            // orders the list: a row-level hint beside the
+                            // words the user operates, so it takes the dense
+                            // rung the whole menu uses. The five entries
+                            // below say the same thing with the same word.
+                            const BaseIcon(
+                              IconRole.sortAscending,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -434,9 +439,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.sortDescending,
-                              size: 16,
+                            const BaseIcon(
+                              IconRole.sortDescending,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -459,9 +464,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.sortDescending,
-                              size: 16,
+                            const BaseIcon(
+                              IconRole.sortDescending,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -483,9 +488,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.sortAscending,
-                              size: 16,
+                            const BaseIcon(
+                              IconRole.sortAscending,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -510,9 +515,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.sortAscending,
-                              size: 16,
+                            const BaseIcon(
+                              IconRole.sortAscending,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -536,9 +541,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.sortDescending,
-                              size: 16,
+                            const BaseIcon(
+                              IconRole.sortDescending,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -600,7 +605,14 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(PhosphorIconsRegular.textAa, size: 16),
+                            // The mark naming what this entry groups by,
+                            // beside the words the user operates: the same
+                            // dense row-level rung the sort menu takes, and
+                            // the three entries below say it too.
+                            const BaseIcon(
+                              IconRole.textAa,
+                              scale: ControlScale.compact,
+                            ),
                           ],
                         ),
                       ),
@@ -621,9 +633,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(
-                              PhosphorIconsRegular.gitBranch,
-                              size: 16,
+                            const BaseIcon(
+                              IconRole.gitBranch,
+                              scale: ControlScale.compact,
                             ),
                           ],
                         ),
@@ -645,7 +657,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(PhosphorIconsRegular.user, size: 16),
+                            const BaseIcon(
+                              IconRole.user,
+                              scale: ControlScale.compact,
+                            ),
                           ],
                         ),
                       ),
@@ -666,7 +681,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                                 role: TextRole.body,
                               ),
                             ),
-                            const Icon(PhosphorIconsRegular.calendar, size: 16),
+                            const BaseIcon(
+                              IconRole.calendar,
+                              scale: ControlScale.compact,
+                            ),
                           ],
                         ),
                       ),
@@ -708,7 +726,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             y: Inset.tight,
             child: Row(
               children: [
-                const Icon(PhosphorIconsRegular.tag, size: AppTheme.iconS),
+                // The count header's own mark, sitting inside a dense strip
+                // whose height is the point: the row-level rung, not the
+                // ordinary one a standalone glyph would take.
+                const BaseIcon(IconRole.tag, scale: ControlScale.compact),
                 const BaseGap(Proximity.related),
                 BaseLabel(
                   '${filteredAndSortedTags.length} ${filteredAndSortedTags.length == 1 ? 'Tag' : 'Tags'}',

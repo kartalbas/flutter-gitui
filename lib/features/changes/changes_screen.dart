@@ -148,8 +148,8 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
                                         size: ButtonSize.medium,
                                       ),
                                     ),
-                                    // Two actions of one bar, weighted apart
-                                    // rather than paired: `grouped`, 16.
+                                    // Two actions of one bar: members of one
+                                    // group, not two halves of one gesture.
                                     const BaseGap(Proximity.grouped),
                                     Expanded(
                                       child: BaseButton(

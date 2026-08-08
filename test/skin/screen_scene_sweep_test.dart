@@ -263,11 +263,6 @@ void main() {
 /// commit that earned it; a floor of zero would let the register go stale and
 /// silently stop measuring, which is how the sweep got here in the first place.
 const Map<String, int> kContractRenderedPerScene = <String, int>{
-  // 39 and not 38 since the overflow bar's own "more" anchor stopped being a
-  // hand-written `Icon(PhosphorIconsRegular.dotsThreeVertical)` and became a
-  // `BaseIcon`. It was the one mark in that bar a Fluent or macOS skin could
-  // not have answered, sitting among actions the skin already drew.
-  //
   // The nine navigation-rail destination labels are still bare `Text`s,
   // deliberately. The rail owns that slot's typography - it lerps each label
   // between its unselected and selected styles - so those labels are part of
@@ -275,23 +270,28 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // BaseLabel documents for a button's words. See the comment at the call
   // site (app_shell.dart) for the paint-path assert that made the
   // misplacement visible.
-  'shell': 137,
-  'workspaces': 29,
-  'repositories': 53,
-  'changes': 28,
-  // 77 and not 63 because the last two rungs of the collapse landed after that
-  // number was written: the history screen's own remaining gaps, and - on every
-  // scene that draws one - `BaseCard` and `BasePanel` handing their content
-  // inset to `layout.inset` instead of resolving an `EdgeInsets` themselves. A
-  // surface's breathing room is now the skin's answer rather than the
-  // component's, so each card and panel on screen reaches its skin once more
-  // than it used to.
-  'history': 77,
-  'browse': 19,
-  'branches': 11,
-  'stashes': 13,
-  'tags': 29,
-  'settings': 113,
+  //
+  // P3d raised most of these once more, and the rise is three things at
+  // once: the last wave of the spacing and icon conversion landing on the
+  // shell, the changes tree, the history panels, the stash, tag and branch
+  // lists and the settings form; `BaseSeparator` finally being adopted for
+  // every plain `Divider()` outside the component layer (the settings
+  // sections alone account for most of that screen's rise); and the review
+  // pass taking a handful BACK - the status tree's bold staging marks, the
+  // ref/hash/stats badges' between-the-rungs insets and the empty states'
+  // hero marks returned to literals rather than staying rounded onto rungs
+  // that moved their pixels, which is why some numbers rose by less than the
+  // conversion first measured.
+  'shell': 175,
+  'workspaces': 31,
+  'repositories': 55,
+  'changes': 39,
+  'history': 80,
+  'browse': 24,
+  'branches': 15,
+  'stashes': 17,
+  'tags': 34,
+  'settings': 141,
   'merge_conflicts': 31,
 };
 
@@ -345,7 +345,11 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
 /// that names it. When P5 moves the arithmetic into the skin, both halves
 /// agree, this map becomes empty, and the day it does is visible.
 const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
-  'shell': 136,
+  // Exactly one less than the register's shell entry, and it must stay
+  // exactly one less: the difference IS the single toolbar action
+  // `visibleActionCount()` sheds at the stretched distance, so this number
+  // moves in lockstep whenever the shell's own count moves.
+  'shell': 174,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

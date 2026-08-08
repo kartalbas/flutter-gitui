@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Proximity, TextRole, Tone;
 
@@ -190,10 +189,13 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                 child: BaseInset(
                   child: Row(
                     children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      // The error banner's mark, at the same rung as the
+                      // identical banner in the clone, initialize and merge
+                      // dialogs: one meaning, one scale, and that scale is
+                      // the ordinary one. What it means is that the selection
+                      // this dialog was opened on cannot be squashed, which
+                      // is `danger` rather than a colour slot.
+                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                       const BaseGap(Proximity.grouped),
                       Expanded(
                         child: BaseLabel(errorMessage, role: TextRole.body),
@@ -274,8 +276,8 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
               child: Row(
                 children: [
                   // A note's own mark: dense, and carrying the application's
-                  // colour. It was drawn at 18 here - a number on no ladder in
-                  // the application - for want of a word for the job.
+                  // colour. It named a number on no ladder in the application,
+                  // for want of a word for the job.
                   const BaseIcon(
                     IconRole.info,
                     scale: ControlScale.compact,

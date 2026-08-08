@@ -48,7 +48,7 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
             BaseLabel(confirmMessage, role: TextRole.body),
             if (widget.hasRemotes) ...[
               const BaseGap(Proximity.separate),
-              const Divider(),
+              const BaseSeparator(),
               const BaseGap(Proximity.grouped),
               CheckboxListTile(
                 value: _deleteFromRemote,

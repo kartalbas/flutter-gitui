@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:google_fonts/google_fonts.dart';
 import '../../generated/app_localizations.dart';
 
 import '../theme/app_theme.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_layout.dart';
 import '../components/base_card.dart';
 import '../components/base_button.dart';
 import '../components/base_filter_chip.dart';
@@ -65,6 +67,10 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
       child: Column(
         children: [
           _buildHeader(context, logs.length),
+          // Not `BaseSeparator`: these two rules are the panel's own chrome,
+          // and `height: 1` is a measurement - the rule takes no layout space
+          // of its own - that the separator member deliberately does not
+          // carry. They leave with the panel when it becomes a member.
           const Divider(height: 1),
           _buildFilterBar(context, logs),
           const Divider(height: 1),
@@ -82,30 +88,38 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
 
   Widget _buildHeader(BuildContext context, int logCount) {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingM),
+    // The panel header is a region of its own and owes its row the ordinary
+    // reading distance from the panel's edges.
+    return BaseInset(
+      all: Inset.normal,
       child: Row(
         children: [
-          const Icon(PhosphorIconsRegular.terminal, size: 20),
-          const SizedBox(width: AppTheme.paddingS),
+          const BaseIcon(IconRole.terminal),
+          // The mark and the name of the panel are two halves of one heading.
+          const BaseGap(Proximity.related),
           BaseLabel('Git Command Log', role: TextRole.sectionTitle),
-          const SizedBox(width: AppTheme.paddingS),
+          // The heading and the count that qualifies it are two parts of one
+          // statement.
+          const BaseGap(Proximity.related),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.paddingS,
-              vertical: 2,
-            ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(AppTheme.radiusL),
             ),
-            // The pill states the foreground that pairs with its own fill; the
-            // count inside it just reads that.
-            child: DefaultTextStyle.merge(
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+            // A pill is barely set in across and reaches as close to its own
+            // edge as it can down the page, because it has to stay the height
+            // of the line it sits on.
+            child: BaseInset(
+              x: Inset.tight,
+              y: Inset.hairline,
+              // The pill states the foreground that pairs with its own fill;
+              // the count inside it just reads that.
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+                child: BaseLabel(logCount.toString(), role: TextRole.micro),
               ),
-              child: BaseLabel(logCount.toString(), role: TextRole.micro),
             ),
           ),
           const Spacer(),
@@ -134,8 +148,10 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
     final l10n = AppLocalizations.of(context)!;
     final failureCount = logs.where((log) => log.isFailure).length;
 
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.paddingS),
+    // The filter band is a dense strip between two rules, so it is barely set
+    // in from them.
+    return BaseInset(
+      all: Inset.tight,
       child: Row(
         children: [
           Expanded(
@@ -147,7 +163,9 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
               onChanged: (value) => setState(() => _query = value),
             ),
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          // The query and the filter that narrows it further are members of
+          // one filter band.
+          const BaseGap(Proximity.related),
           BaseFilterChip(
             label: l10n.failed,
             icon: PhosphorIconsRegular.xCircle,
@@ -172,9 +190,11 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
             size: AppTheme.iconXL * 2,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          // The mark and the words it introduces are two groups of one state.
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.emptyStateNoCommandsYet, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          // The headline and the sentence explaining it are one statement.
+          const BaseGap(Proximity.related),
           BaseLabel(
             l10n.emptyStateNoCommandsYetMessage,
             role: TextRole.body,
@@ -196,9 +216,11 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
             size: AppTheme.iconXL * 2,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppTheme.paddingL),
+          // The mark and the words it introduces are two groups of one state.
+          const BaseGap(Proximity.separate),
           BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
-          const SizedBox(height: AppTheme.paddingS),
+          // The headline and the sentence explaining it are one statement.
+          const BaseGap(Proximity.related),
           BaseLabel(
             l10n.emptyStateTryAdjustingSearchCriteria,
             role: TextRole.body,
@@ -215,6 +237,10 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
     final groups = groupConsecutiveCommandLogs(logs.reversed.toList());
 
     return ListView.builder(
+      // A viewport's own padding is a property, not a widget: wrapping the
+      // list in one would clip the scroll at the padding's edge instead of
+      // letting content run under it, so this cannot become a `BaseInset`
+      // until the scrollable itself is a member.
       padding: const EdgeInsets.all(AppTheme.paddingS),
       itemCount: groups.length,
       itemBuilder: (context, index) {
@@ -251,204 +277,259 @@ class _LogEntryCardState extends State<_LogEntryCard> {
     final hasOutput = group.entries.any((entry) => entry.fullOutput.isNotEmpty);
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
-      child: BaseCard(
-        inset: Inset.none,
-        content: InkWell(
-          onTap: hasOutput
-              ? () => setState(() => _isExpanded = !_isExpanded)
-              : null,
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          child: Padding(
-            padding: const EdgeInsets.all(AppTheme.paddingM),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Success stays quiet, failure takes the theme error role
-                    // so a failed push is visible without expanding anything.
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Icon(
-                        isFailure
-                            ? PhosphorIconsRegular.xCircle
-                            : PhosphorIconsRegular.checkCircle,
-                        size: AppTheme.iconS,
-                        color: isFailure
-                            ? colorScheme.error
-                            : context.gitColors.added,
-                      ),
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    // The command is the headline; everything else is meta.
-                    Expanded(
-                      child: BaseLabel(
-                        log.command,
-                        // A git command line is code by the role's own
-                        // definition, and the monospace family it takes is now
-                        // the one the user chose rather than a family name
-                        // written into this file.
-                        role: TextRole.code,
-                        tone: isFailure ? Tone.danger : Tone.neutral,
-                        maxLines: _isExpanded ? null : 2,
-                      ),
-                    ),
-                    const SizedBox(width: AppTheme.paddingS),
-                    BaseIconButton(
-                      icon: IconRole.copy,
-                      size: ButtonSize.small,
-                      tooltip: l10n.tooltipCopyCommand,
-                      onPressed: () {
-                        Clipboard.setData(ClipboardData(text: log.command));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.commandCopiedToClipboard),
-                            duration: Duration(seconds: 1),
-                          ),
-                        );
-                      },
-                    ),
-                    if (hasOutput) ...[
-                      const SizedBox(width: AppTheme.paddingXS),
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppTheme.paddingS),
-                        child: Icon(
-                          _isExpanded
-                              ? PhosphorIconsRegular.caretUp
-                              : PhosphorIconsRegular.caretDown,
-                          size: AppTheme.iconS,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: AppTheme.paddingXS),
-                // Meta row, aligned under the command headline.
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: AppTheme.paddingM + AppTheme.paddingS,
-                  ),
-                  child: Row(
+    // The card's trailing bottom padding was the space between one run of the
+    // log and the next wearing a padding idiom, so the run states it: the card
+    // owns nothing, and the gap sits between it and whatever follows.
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        BaseCard(
+          inset: Inset.none,
+          content: InkWell(
+            onTap: hasOutput
+                ? () => setState(() => _isExpanded = !_isExpanded)
+                : null,
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+            // One entry is a small region of its own inside the card, at the
+            // ordinary reading distance from its edges.
+            child: BaseInset(
+              all: Inset.normal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (group.count > 1) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppTheme.paddingXS,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusS,
-                            ),
-                          ),
-                          child: DefaultTextStyle.merge(
-                            style: TextStyle(
-                              color: colorScheme.onSecondaryContainer,
-                            ),
-                            child: BaseLabel(
-                              'x${group.count}',
-                              role: TextRole.micro,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                      ],
-                      if (isFailure) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppTheme.paddingXS,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.errorContainer,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusS,
-                            ),
-                          ),
-                          child: DefaultTextStyle.merge(
-                            style: TextStyle(
-                              color: colorScheme.onErrorContainer,
-                            ),
-                            child: BaseLabel(
-                              '${l10n.failed} (${log.exitCode})',
-                              role: TextRole.micro,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                      ],
-                      Flexible(
-                        child: BaseLabel(
-                          log.timestampDisplay(
-                            Localizations.localeOf(context).languageCode,
-                          ),
-                          role: TextRole.micro,
-                          tone: Tone.muted,
-                          // A timestamp is one line; the `Flexible` around it
-                          // exists to let it shrink, not to let it wrap.
-                          maxLines: 1,
+                      // Success stays quiet, failure takes the danger tone so
+                      // a failed push is visible without expanding anything.
+                      // The nudge above the mark is optical alignment against
+                      // the first line of the command, not an inset, and the
+                      // vocabulary has no word for it - see the report.
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: BaseIcon(
+                          isFailure ? IconRole.xCircle : IconRole.checkCircle,
+                          scale: ControlScale.compact,
+                          tone: isFailure ? Tone.danger : Tone.success,
                         ),
                       ),
-                      if (log.duration != null) ...[
-                        const SizedBox(width: AppTheme.paddingS),
-                        BaseLabel(
-                          '${log.duration!.inMilliseconds}ms',
-                          role: TextRole.micro,
-                          tone: Tone.muted,
+                      // The outcome mark and the command it judges are two
+                      // halves of one statement.
+                      const BaseGap(Proximity.related),
+                      // The command is the headline; everything else is meta.
+                      Expanded(
+                        child: BaseLabel(
+                          log.command,
+                          // A git command line is code by the role's own
+                          // definition, and the monospace family it takes is
+                          // now the one the user chose rather than a family
+                          // name written into this file.
+                          role: TextRole.code,
+                          tone: isFailure ? Tone.danger : Tone.neutral,
+                          maxLines: _isExpanded ? null : 2,
+                        ),
+                      ),
+                      // The command and the actions on it are members of one
+                      // row.
+                      const BaseGap(Proximity.related),
+                      BaseIconButton(
+                        icon: IconRole.copy,
+                        size: ButtonSize.small,
+                        tooltip: l10n.tooltipCopyCommand,
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: log.command));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.commandCopiedToClipboard),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                      ),
+                      if (hasOutput) ...[
+                        // Two marks of one control cluster, touching.
+                        const BaseGap(Proximity.hairline),
+                        // Optical alignment again: the caret is dropped onto
+                        // the command's first line rather than set in from an
+                        // edge.
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: AppTheme.paddingS,
+                          ),
+                          child: BaseIcon(
+                            _isExpanded ? IconRole.caretUp : IconRole.caretDown,
+                            scale: ControlScale.compact,
+                          ),
                         ),
                       ],
                     ],
                   ),
-                ),
-                // Output (expandable); a collapsed burst lists every run so
-                // grouping never hides an individual run's output.
-                if (_isExpanded && hasOutput) ...[
-                  const SizedBox(height: AppTheme.paddingS),
-                  const Divider(),
-                  for (final entry in group.entries)
-                    if (entry.fullOutput.isNotEmpty) ...[
-                      if (group.count > 1) ...[
-                        const SizedBox(height: AppTheme.paddingS),
-                        BaseLabel(
-                          entry.timestampDisplay(
-                            Localizations.localeOf(context).languageCode,
+                  // The command and the facts about that run are two halves of
+                  // one entry.
+                  const BaseGap(Proximity.hairline),
+                  // Meta row, aligned under the command headline. The leading
+                  // padding is that alignment - the extent of the outcome mark
+                  // and the gap after it - rather than the row's own inset, so
+                  // it stays a measurement until the entry becomes a member.
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: AppTheme.paddingM + AppTheme.paddingS,
+                    ),
+                    child: Row(
+                      children: [
+                        if (group.count > 1) ...[
+                          Container(
+                            // A count pill keeps its own tight horizontal
+                            // measure, which no rung names - see the report.
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingXS,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusS,
+                              ),
+                            ),
+                            child: DefaultTextStyle.merge(
+                              style: TextStyle(
+                                color: colorScheme.onSecondaryContainer,
+                              ),
+                              child: BaseLabel(
+                                'x${group.count}',
+                                role: TextRole.micro,
+                              ),
+                            ),
                           ),
-                          role: TextRole.micro,
-                          tone: Tone.muted,
+                          // Two facts about the same run, side by side.
+                          const BaseGap(Proximity.related),
+                        ],
+                        if (isFailure) ...[
+                          Container(
+                            // Same pill measure as the count beside it.
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppTheme.paddingXS,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.errorContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusS,
+                              ),
+                            ),
+                            child: DefaultTextStyle.merge(
+                              style: TextStyle(
+                                color: colorScheme.onErrorContainer,
+                              ),
+                              child: BaseLabel(
+                                '${l10n.failed} (${log.exitCode})',
+                                role: TextRole.micro,
+                              ),
+                            ),
+                          ),
+                          // Two facts about the same run, side by side.
+                          const BaseGap(Proximity.related),
+                        ],
+                        Flexible(
+                          child: BaseLabel(
+                            log.timestampDisplay(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                            role: TextRole.micro,
+                            tone: Tone.muted,
+                            // A timestamp is one line; the `Flexible` around
+                            // it exists to let it shrink, not to let it wrap.
+                            maxLines: 1,
+                          ),
+                        ),
+                        if (log.duration != null) ...[
+                          // When it ran and how long it took are two facts of
+                          // one line.
+                          const BaseGap(Proximity.related),
+                          BaseLabel(
+                            '${log.duration!.inMilliseconds}ms',
+                            role: TextRole.micro,
+                            tone: Tone.muted,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  // Output (expandable); a collapsed burst lists every run so
+                  // grouping never hides an individual run's output.
+                  if (_isExpanded && hasOutput) ...[
+                    // The entry's own facts and the output it reveals are two
+                    // parts of one card.
+                    const BaseGap(Proximity.related),
+                    const BaseSeparator(),
+                    for (final entry in group.entries)
+                      if (entry.fullOutput.isNotEmpty) ...[
+                        if (group.count > 1) ...[
+                          // One run of the burst and the next.
+                          const BaseGap(Proximity.related),
+                          BaseLabel(
+                            entry.timestampDisplay(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                            role: TextRole.micro,
+                            tone: Tone.muted,
+                          ),
+                        ],
+                        // The run and the output it produced are two parts of
+                        // one statement.
+                        const BaseGap(Proximity.related),
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusS,
+                            ),
+                          ),
+                          // The output block is a region of its own inside the
+                          // entry and reads at the ordinary distance from its
+                          // own edges.
+                          child: BaseInset(
+                            all: Inset.normal,
+                            // A dense repeating code surface, one step SMALLER
+                            // than `TextRole.code`: the site distinguishes the
+                            // command headline (code, bodyMedium) from the
+                            // output under it (labelMedium), and the
+                            // vocabulary has one word for code, so naming the
+                            // role here would grow every output line ~16% -
+                            // the same class of regression the blame view's
+                            // inset took (#426), one axis over. The block is a
+                            // code-block surface: its fill, corner, inset and
+                            // type step all belong to the member it is waiting
+                            // for, and the style stays written out until that
+                            // member exists.
+                            child: SelectableText(
+                              entry.fullOutput,
+                              style: GoogleFonts.getFont(
+                                'JetBrains Mono',
+                                textStyle: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.copyWith(
+                                      color: entry.isFailure
+                                          ? colorScheme.error
+                                          : colorScheme.onSurface,
+                                    ),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
-                      const SizedBox(height: AppTheme.paddingS),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(AppTheme.paddingM),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                        ),
-                        child: SelectableText(
-                          entry.fullOutput,
-                          style: GoogleFonts.getFont(
-                            'JetBrains Mono',
-                            textStyle: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: entry.isFailure
-                                      ? colorScheme.error
-                                      : colorScheme.onSurface,
-                                ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        // One run of the log and the next.
+        const BaseGap(Proximity.related),
+      ],
     );
   }
 }

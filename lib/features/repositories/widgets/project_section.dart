@@ -8,6 +8,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../core/workspace/default_workspace_text.dart';
@@ -88,15 +89,16 @@ class ProjectSection extends ConsumerWidget {
                   ),
                   const BaseGap(Proximity.grouped),
 
-                  // Expand/Collapse icon
-                  Icon(
-                    isExpanded
-                        ? PhosphorIconsRegular.caretDown
-                        : PhosphorIconsRegular.caretRight,
-                    size: AppTheme.iconM,
-                    color: isUnassigned
-                        ? Theme.of(context).colorScheme.onSurface
-                        : project!.color,
+                  // Expand/Collapse icon. It belongs to the workspace whose
+                  // header it opens, so it takes that workspace's place in the
+                  // skin's series - the same word the name and the count below
+                  // already use - and the ordinary foreground where there is no
+                  // workspace to belong to.
+                  BaseIcon(
+                    isExpanded ? IconRole.caretDown : IconRole.caretRight,
+                    tone: isUnassigned
+                        ? Tone.neutral
+                        : Tone.series(project!.colorIndex),
                   ),
                   const BaseGap(Proximity.related),
 
@@ -166,10 +168,12 @@ class ProjectSection extends ConsumerWidget {
                   if (!isUnassigned) ...[
                     const BaseGap(Proximity.related),
                     BasePopupMenuButton<String>(
-                      icon: Icon(
-                        PhosphorIconsRegular.dotsThreeVertical,
-                        size: AppTheme.iconM,
-                        color: project!.color,
+                      // The overflow mark acts on this workspace, so it wears
+                      // the workspace's own place in the skin's series like
+                      // everything else in the header.
+                      icon: BaseIcon(
+                        IconRole.dotsThreeVertical,
+                        tone: Tone.series(project!.colorIndex),
                       ),
                       itemBuilder: (context) => [
                         PopupMenuItem(

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
 import '../theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_animated_widgets.dart';
 import '../components/base_button.dart';
+import '../components/base_icon.dart';
+import '../components/base_layout.dart';
 
 /// Standardized app bar for all screens
 ///
@@ -25,8 +26,8 @@ import '../components/base_button.dart';
 ///         PopupMenuItem(
 ///           child: Row(
 ///             children: [
-///               Icon(PhosphorIconsRegular.plus),
-///               SizedBox(width: AppTheme.paddingM),
+///               BaseIcon(IconRole.plus),
+///               BaseGap(Proximity.grouped),
 ///               Text(l10n.createTag),
 ///             ],
 ///           ),
@@ -37,8 +38,8 @@ import '../components/base_button.dart';
 ///         PopupMenuItem(
 ///           child: Row(
 ///             children: [
-///               Icon(PhosphorIconsRegular.downloadSimple),
-///               SizedBox(width: AppTheme.paddingM),
+///               BaseIcon(IconRole.downloadSimple),
+///               BaseGap(Proximity.grouped),
 ///               Text(l10n.fetchFromRemote),
 ///             ],
 ///           ),
@@ -83,7 +84,8 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
             tooltip: l10n.search,
             onPressed: onSearch,
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          // Two commands of one action bar, side by side.
+          const BaseGap(Proximity.related),
         ],
 
         // Refresh (if provided)
@@ -93,7 +95,8 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
             tooltip: l10n.refresh,
             onPressed: onRefresh,
           ),
-          const SizedBox(width: AppTheme.paddingS),
+          // Two commands of one action bar, side by side.
+          const BaseGap(Proximity.related),
         ],
 
         // Additional actions (if provided)
@@ -102,16 +105,17 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
         // More menu (always present) - uses BasePopupMenuButton for centralized animation control
         BasePopupMenuButton(
-          icon: const Icon(
-            PhosphorIconsRegular.dotsThreeVertical,
-            size: AppTheme.iconM,
-          ),
+          // The anchor names its meaning like every action beside it; the
+          // `iconSize` below is the button's own box, which the skin does not
+          // own yet, so it stays a number until the popup button migrates.
+          icon: const BaseIcon(IconRole.dotsThreeVertical),
           iconSize: AppTheme.iconM,
           tooltip: l10n.moreActions,
           itemBuilder: (context) => moreMenuItems,
         ),
 
-        const SizedBox(width: AppTheme.paddingS),
+        // The last command and the bar's trailing edge.
+        const BaseGap(Proximity.related),
       ],
     );
   }

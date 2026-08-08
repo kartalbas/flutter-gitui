@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 
-import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
+import '../components/base_layout.dart';
 
 /// Reusable empty state widget for displaying empty states throughout the app
 ///
@@ -63,8 +63,11 @@ class EmptyStateWidget extends StatelessWidget {
       actionWidget = Column(
         mainAxisSize: MainAxisSize.min,
         children: actions!.map((emptyStateAction) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingS),
+          // Each way out of the empty state is set off from the one above it;
+          // across, the button already owns its own width.
+          return BaseInset(
+            x: Inset.none,
+            y: Inset.tight,
             child: BaseButton(
               onPressed: emptyStateAction.onPressed,
               leadingIcon: emptyStateAction.icon,
@@ -82,8 +85,10 @@ class EmptyStateWidget extends StatelessWidget {
     }
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.paddingXL),
+      // An empty state stands in place of a region's whole content, so it is
+      // deliberately generous about how far it keeps from that region's edges.
+      child: BaseInset(
+        all: Inset.roomy,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -92,9 +97,12 @@ class EmptyStateWidget extends StatelessWidget {
               size: iconSize,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: AppTheme.paddingL),
+            // The mark and the words it introduces are two groups of one
+            // state, not two halves of one statement.
+            const BaseGap(Proximity.separate),
             BaseLabel(title, role: TextRole.pageTitle, align: TextAlign.center),
-            const SizedBox(height: AppTheme.paddingS),
+            // The headline and the sentence explaining it are one statement.
+            const BaseGap(Proximity.related),
             BaseLabel(
               message,
               role: TextRole.body,
@@ -102,7 +110,9 @@ class EmptyStateWidget extends StatelessWidget {
               align: TextAlign.center,
             ),
             if (actionWidget != null) ...[
-              const SizedBox(height: AppTheme.paddingL),
+              // What the user can do about it is a different group from what
+              // is being explained.
+              const BaseGap(Proximity.separate),
               actionWidget,
             ],
           ],
@@ -197,7 +207,9 @@ class LoadingState extends StatelessWidget {
         children: [
           const CircularProgressIndicator(),
           if (message != null) ...[
-            const SizedBox(height: AppTheme.paddingL),
+            // The spinner and what it is waiting for are two groups of one
+            // state, matching the mark-and-headline rhythm above.
+            const BaseGap(Proximity.separate),
             BaseLabel(message!, role: TextRole.body),
           ],
         ],

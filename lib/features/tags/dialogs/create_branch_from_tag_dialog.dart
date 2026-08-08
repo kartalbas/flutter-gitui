@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
@@ -60,10 +60,13 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
               all: Inset.normal,
               child: Row(
                 children: [
-                  Icon(
-                    PhosphorIconsRegular.tag,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  // The mark on the strip that names the tag this branch will
+                  // start from: a dense row-level glyph, and secondary to the
+                  // tag name it introduces rather than competing with it.
+                  const BaseIcon(
+                    IconRole.tag,
+                    scale: ControlScale.compact,
+                    tone: Tone.muted,
                   ),
                   const BaseGap(Proximity.related),
                   Expanded(

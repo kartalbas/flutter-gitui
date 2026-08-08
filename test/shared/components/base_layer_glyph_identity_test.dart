@@ -22,14 +22,25 @@
 /// `pencil` to `pencilSimple`, loses a mark or grows one fails here.
 ///
 /// It is generated from `git show HEAD:<file>` rather than typed, and it
-/// carries exactly **one** deliberate difference from the pre-conversion
-/// count, recorded so that it cannot pass as an accident:
-/// `searchable_dropdown.dart` drew its clear affordance with Material's
-/// `Icons.clear`, which is not in the settled 151-name table at all; it had to
-/// become a role for `BaseIconButton.icon` to accept it, and it became
-/// `IconRole.x` because this application already answers "clear this field"
-/// with `x` in `base_text_field.dart`. That is a judgement, it is the only one
-/// in this area, and it is the reason the tally reads 80 references where the
+/// carries exactly **two** deliberate differences from the pre-conversion
+/// count, each recorded so that it cannot pass as an accident. Both are the
+/// same judgement made twice: a site drew a mark with Material's `Icons.*`,
+/// which is not in the settled 151-name table at all and therefore counted as
+/// no mark here, and something forced it to become a role.
+///
+///  * `searchable_dropdown.dart` drew its clear affordance with `Icons.clear`;
+///    it had to become a role for `BaseIconButton.icon` to accept it, and it
+///    became `IconRole.x` because this application already answers "clear this
+///    field" with `x` in `base_text_field.dart`.
+///  * `quick_settings_menu.dart` marked the colour scheme in force with
+///    `Icons.check`, tinted `colorScheme.primary`. That tint is `Tone.accent`
+///    said as a value, and the only door a tone goes through is `BaseIcon`,
+///    which takes an `IconRole` and nothing else - so the colour conversion is
+///    what forced this one. It became `IconRole.check` because
+///    `language_selector.dart` already answers "this is the one in force" with
+///    `check`, three rows away in the same menu bar.
+///
+/// Those two are the reason the tally reads 81 references where the
 /// pre-conversion tree read 79.
 ///
 /// **Two - the skin maps the mark back to the identical glyph.** The second
@@ -109,14 +120,16 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 80 references', () {
+  test('the census still accounts for all 81 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of an 80-entry diff.
+    // agreeing and this says so in one line instead of an 81-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 80);
+    expect(total, 81);
+    // Still 39 distinct marks: the reference `quick_settings_menu.dart` gained
+    // is `check`, which `language_selector.dart` already drew.
     expect(_marksInCensus().length, 39);
   });
 
@@ -508,11 +521,10 @@ const Map<String, String> _kDrawnHeavier = <String, String>{
 const List<String> _kDrawnSolidWhenSelected = <String>['star', 'funnel'];
 
 /// Every mark named in `lib/shared/components/` and `lib/shared/widgets/`, per
-/// file: 80 references over 39 distinct marks in 25 files.
+/// file: 81 references over 39 distinct marks in 25 files.
 ///
 /// Generated from `git show HEAD:<file>` at the commit the conversion started
-/// from, with the single documented exception recorded at the top of this
-/// file. The counts are per MARK and not per weight, because that is the axis
+/// from, with the two documented exceptions recorded at the top of this file. The counts are per MARK and not per weight, because that is the axis
 /// the conversion must not move.
 const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
   'lib/shared/components/base_dialog.dart': <String, int>{
@@ -605,6 +617,18 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'circleNotch': 1,
   },
   'lib/shared/widgets/quick_settings_menu.dart': <String, int>{
+    // The second deliberate difference from the pre-conversion count, and the
+    // same shape as the `searchable_dropdown.dart` one recorded above. The
+    // colour-scheme row marked its chosen entry with Material's `Icons.check`,
+    // which is not in the settled 151-name table, so it counted as no mark at
+    // all here. The colour conversion is what forced it to become a role: that
+    // checkmark was tinted `colorScheme.primary`, which is `Tone.accent` said
+    // as a value, and the only door a tone goes through is `BaseIcon` - which
+    // takes an `IconRole` and nothing else. It became `IconRole.check` because
+    // this application already answers "this is the one in force" with `check`
+    // in `language_selector.dart`, which draws the same affordance three rows
+    // away in the same menu bar.
+    'check': 1,
     'desktop': 1,
     'gear': 2,
     'moon': 1,

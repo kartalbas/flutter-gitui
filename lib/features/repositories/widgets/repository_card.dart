@@ -7,6 +7,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import '../../../shared/components/base_menu_item.dart';
@@ -122,10 +123,9 @@ class RepositoryCard extends ConsumerWidget {
               if (onOpenInEditor != null ||
                   (status.hasRemote && onEditRemoteUrl != null))
                 BasePopupMenuButton<String>(
-                  icon: const Icon(
-                    PhosphorIconsRegular.dotsThreeVertical,
-                    size: AppTheme.iconM,
-                  ),
+                  // The overflow mark takes the ordinary scale and leaves its
+                  // colour to the header row it sits in, as it always did.
+                  icon: const BaseIcon(IconRole.dotsThreeVertical),
                   tooltip: AppLocalizations.of(context)!.moreActions,
                   itemBuilder: (context) => [
                     if (onOpenInEditor != null)

@@ -72,10 +72,6 @@ void main() {
           'renamed': colors.renamed,
           'untracked': colors.untracked,
           'conflict': colors.conflict,
-          'branchLocal': colors.branchLocal,
-          'branchRemote': colors.branchRemote,
-          'branchTag': colors.branchTag,
-          'branchStash': colors.branchStash,
         };
 
         // 1) Text roles: 4.5:1 on every plain surface (SC 1.4.3).

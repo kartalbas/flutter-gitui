@@ -103,6 +103,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // An empty state's hero mark keeps its measure and its
+                  // colour: no rung of `ControlScale` reaches it, and a tone
+                  // can only reach a mark through `BaseIcon`. See
+                  // history_empty_states.dart.
                   Icon(
                     PhosphorIconsRegular.files,
                     size: AppTheme.iconXL,
@@ -318,6 +322,14 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
         );
       },
       child: Container(
+        // Four sides saying three different things at once, and only one of
+        // them is a rung. The leading side is the row's DEPTH in the tree,
+        // which is structure computed per row rather than a distance the skin
+        // may choose; the vertical pair is the dense-row density; the trailing
+        // side is breathing room before the row's own actions. `BaseInset` has
+        // two axes and no per-side form, and the selection fill this padding
+        // sits inside spans the indent, so the composition that would separate
+        // them moves the highlight. Left whole, and reported.
         padding: EdgeInsets.only(
           left: depth * AppTheme.paddingM,
           top: 2,
@@ -344,7 +356,12 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
               const BaseGap(Proximity.hairline),
             ],
 
-            // Folder/file icon
+            // Folder/file icon. The glyph is chosen at run time from the
+            // file's extension, so it is an `IconData` no `IconRole` names -
+            // and a mark that cannot be a `BaseIcon` cannot carry a tone
+            // either, which is why the brand colour on the folder branch is
+            // still written as a colour here. Both move together when the
+            // glyph table becomes roles.
             Icon(
               node.isDirectory
                   ? (node.isExpanded
@@ -370,6 +387,13 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
             if (!node.isDirectory && node.fileChange != null) ...[
               const BaseGap(Proximity.related),
               Container(
+                // The badge's fill and corner stay: they are the surface.
+                // Its inset and internal gap stay literals: 6 and 2 both sit
+                // between rungs on ladders that skip them - the same
+                // between-the-rungs distance file_list_item.dart's status
+                // badge records - and its height is the tree row's height,
+                // so rounding either number would resize every stats badge.
+                // Both wait for `surfaces.badge`.
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -401,9 +425,13 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
               // File actions menu
               const BaseGap(Proximity.hairline),
               PopupMenuButton<String>(
-                icon: const Icon(
-                  PhosphorIconsRegular.dotsThreeVertical,
-                  size: AppTheme.iconXS,
+                // A row-level action's glyph, which is what `compact` names.
+                // It was drawn here at the ladder step reserved for
+                // non-interactive inline indicators, which is not what this
+                // is: it is the row's own affordance.
+                icon: const BaseIcon(
+                  IconRole.dotsThreeVertical,
+                  scale: ControlScale.compact,
                 ),
                 tooltip: AppLocalizations.of(context)!.tooltipFileActions,
                 padding: EdgeInsets.zero,

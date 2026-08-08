@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -179,21 +180,31 @@ ${widget.result.fullOutput}
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.clock,
-                        size: AppTheme.iconS,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                      const BaseGap(Proximity.related),
-                      BaseLabel(
-                        AppLocalizations.of(
-                          context,
-                        )!.closingInSeconds(_remainingSeconds),
-                        role: TextRole.detail,
-                      ),
-                    ],
+                  // The glyph is published exactly the way the words above it
+                  // are - once, by the surface that paints underneath both -
+                  // so the mark inside only has to say which idea it stands
+                  // for and how much room it is owed. The colour leaves with
+                  // the fill it pairs with when this banner becomes a member.
+                  child: IconTheme.merge(
+                    data: IconThemeData(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    child: Row(
+                      children: [
+                        // A countdown mark sitting inside one line of text.
+                        const BaseIcon(
+                          IconRole.clock,
+                          scale: ControlScale.compact,
+                        ),
+                        const BaseGap(Proximity.related),
+                        BaseLabel(
+                          AppLocalizations.of(
+                            context,
+                          )!.closingInSeconds(_remainingSeconds),
+                          role: TextRole.detail,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -263,19 +274,23 @@ ${widget.result.fullOutput}
         all: Inset.normal,
         child: Row(
           children: [
-            Icon(
-              PhosphorIconsRegular.terminal,
-              size: AppTheme.iconS,
-              color: Theme.of(context).colorScheme.primary,
+            // The mark that says the line beside it is a command, drawn in
+            // the application's own accent. It sits inside one line of text,
+            // which is what decides how much room it is owed.
+            const BaseIcon(
+              IconRole.terminal,
+              scale: ControlScale.compact,
+              tone: Tone.accent,
             ),
             const BaseGap(Proximity.related),
             Expanded(
-              child: SelectableText(
+              // The command git was actually given. Alignment is meaning here
+              // rather than style, and the user copies this line, so it is
+              // said as code and stays selectable.
+              child: BaseLabel(
                 'git ${widget.result.command}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontFamily: 'monospace',
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                role: TextRole.code,
+                selectable: true,
               ),
             ),
           ],

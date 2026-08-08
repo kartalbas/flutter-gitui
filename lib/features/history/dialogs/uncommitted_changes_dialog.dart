@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -22,8 +22,9 @@ class UncommittedChangesDialog extends StatelessWidget {
       variant: DialogVariant.confirmation,
       maxWidth: 400,
       onSubmit: () => Navigator.pop(context, true),
-      content: BodyMediumLabel(
+      content: BaseLabel(
         l10n.youHaveUncommittedChanges(changeCount, pluralForm),
+        role: TextRole.body,
       ),
       actions: [
         DialogAction(

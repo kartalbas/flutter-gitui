@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../../core/config/app_config.dart';
@@ -80,12 +81,7 @@ class BaseSwitcher extends StatelessWidget {
               // (ellipsized) rather than overflowing; when unconstrained the
               // loose fit leaves the natural width untouched.
               Flexible(
-                child: BodyMediumLabel(
-                  label,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: BaseLabel(label, role: TextRole.body, maxLines: 1),
               ),
               if (showDropdown) ...[
                 const SizedBox(width: AppTheme.paddingS),

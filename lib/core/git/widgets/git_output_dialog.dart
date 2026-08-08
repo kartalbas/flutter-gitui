@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
@@ -166,21 +167,30 @@ ${widget.result.fullOutput}
                 color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusS),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.clock,
-                    size: AppTheme.paddingM,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  const SizedBox(width: AppTheme.paddingS),
-                  BodySmallLabel(
-                    AppLocalizations.of(
-                      context,
-                    )!.closingInSeconds(_remainingSeconds),
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ],
+              // The banner paints its own fill, so it states the paired
+              // foreground once here; the label inside then says nothing
+              // about colour, which is the arrangement that cannot be got
+              // wrong.
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.clock,
+                      size: AppTheme.paddingM,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: AppTheme.paddingS),
+                    BaseLabel(
+                      AppLocalizations.of(
+                        context,
+                      )!.closingInSeconds(_remainingSeconds),
+                      role: TextRole.detail,
+                    ),
+                  ],
+                ),
               ),
             ),
           // Command executed
@@ -299,11 +309,14 @@ ${widget.result.fullOutput}
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          LabelSmallLabel(
-            label,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          BaseLabel(label, role: TextRole.micro, tone: Tone.muted),
           const SizedBox(width: AppTheme.paddingXS),
+          // Deliberately still the old label: this helper's Color parameter
+          // also paints the chip's fill, border and icon, so it can only
+          // become a Tone when the whole chip moves onto `surfaces.badge` in
+          // the surface sub-phase - the application cannot resolve a Tone to
+          // a Color for its own decoration, and the seam is right to forbid
+          // that.
           LabelMediumLabel(value, color: color),
         ],
       ),
@@ -324,9 +337,10 @@ ${widget.result.fullOutput}
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingM),
-            BodyLargeLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.noOutput,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.body,
+              tone: Tone.muted,
             ),
           ],
         ),
@@ -350,21 +364,22 @@ ${widget.result.fullOutput}
           children: [
             // STDOUT
             if (result.stdout.isNotEmpty) ...[
-              LabelSmallLabel('STDOUT', color: context.gitColors.added),
+              BaseLabel('STDOUT', role: TextRole.micro, tone: Tone.gitAdded),
               const SizedBox(height: AppTheme.paddingS),
-              BodySmallLabel(
-                result.stdout,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+              BaseLabel(result.stdout, role: TextRole.detail),
             ],
 
             // STDERR
             if (result.stderr.isNotEmpty) ...[
               if (result.stdout.isNotEmpty)
                 const SizedBox(height: AppTheme.paddingM),
-              LabelSmallLabel('STDERR', color: context.gitColors.deleted),
+              BaseLabel('STDERR', role: TextRole.micro, tone: Tone.gitDeleted),
               const SizedBox(height: AppTheme.paddingS),
-              BodySmallLabel(result.stderr, color: context.gitColors.deleted),
+              BaseLabel(
+                result.stderr,
+                role: TextRole.detail,
+                tone: Tone.gitDeleted,
+              ),
             ],
           ],
         ),

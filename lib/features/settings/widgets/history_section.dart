@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -30,9 +30,10 @@ class HistorySection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.defaultCommitLimit),
-              BodySmallLabel(
+              BaseLabel(l10n.defaultCommitLimit, role: TextRole.body),
+              BaseLabel(
                 l10n.defaultCommitLimitDescription(history.defaultCommitLimit),
+                role: TextRole.detail,
               ),
             ],
           ),

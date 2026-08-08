@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
@@ -85,16 +86,21 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.noDiffToolsFound),
+          BaseLabel(
+            AppLocalizations.of(context)!.noDiffToolsFound,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.noExternalDiffMergeToolsDetected,
-            textAlign: TextAlign.center,
+            role: TextRole.body,
+            align: TextAlign.center,
           ),
           const SizedBox(height: AppTheme.paddingM),
-          BodySmallLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.installToolsSuchAs,
-            textAlign: TextAlign.center,
+            role: TextRole.detail,
+            align: TextAlign.center,
           ),
         ],
       ),
@@ -112,9 +118,16 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.errorDetectingTools),
+          BaseLabel(
+            AppLocalizations.of(context)!.errorDetectingTools,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(error.toString(), textAlign: TextAlign.center),
+          BaseLabel(
+            error.toString(),
+            role: TextRole.detail,
+            align: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -137,10 +150,11 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                 const Icon(PhosphorIconsRegular.info, size: 20),
                 const SizedBox(width: AppTheme.paddingS),
                 Expanded(
-                  child: BodySmallLabel(
+                  child: BaseLabel(
                     AppLocalizations.of(
                       context,
                     )!.configureYourPreferredTools(tools.length),
+                    role: TextRole.detail,
                   ),
                 ),
               ],
@@ -149,10 +163,14 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           const SizedBox(height: AppTheme.paddingL),
 
           // Diff Tool Selection
-          TitleMediumLabel(AppLocalizations.of(context)!.diffTool),
+          BaseLabel(
+            AppLocalizations.of(context)!.diffTool,
+            role: TextRole.sectionTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.usedForComparingFileChanges,
+            role: TextRole.detail,
           ),
           const SizedBox(height: AppTheme.paddingM),
 
@@ -176,10 +194,14 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           const SizedBox(height: AppTheme.paddingL),
 
           // Merge Tool Selection
-          TitleMediumLabel(AppLocalizations.of(context)!.mergeTool),
+          BaseLabel(
+            AppLocalizations.of(context)!.mergeTool,
+            role: TextRole.sectionTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.usedForResolvingMergeConflicts,
+            role: TextRole.detail,
           ),
           const SizedBox(height: AppTheme.paddingM),
 
@@ -211,14 +233,14 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           value: tool.type,
           contentPadding: const EdgeInsets.all(AppTheme.paddingM),
           secondary: Icon(_getToolIcon(tool.type), size: 32),
-          title: TitleSmallLabel(tool.displayName),
+          title: BaseLabel(tool.displayName, role: TextRole.itemTitle),
           subtitle: Row(
             children: [
               Expanded(
-                child: LabelMediumLabel(
+                child: BaseLabel(
                   tool.executablePath,
+                  role: TextRole.detail,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingS),
@@ -244,9 +266,10 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: AppTheme.paddingXS),
-                      LabelMediumLabel(
+                      BaseLabel(
                         AppLocalizations.of(context)!.available,
-                        color: Theme.of(context).colorScheme.primary,
+                        role: TextRole.micro,
+                        tone: Tone.accent,
                       ),
                     ],
                   ),

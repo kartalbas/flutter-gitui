@@ -390,10 +390,17 @@ class MenuItemContentTwoLine extends StatelessWidget {
   }
 }
 
-/// Base component for simple text labels in buttons and other clickable elements
+/// A menu entry's words, at Material's `bodyLarge`.
 ///
-/// Use this for button labels to ensure consistent font scaling with user preferences.
-/// This automatically uses the theme's text styles and respects the global font size.
+/// **Part of the migration bridge, and it leaves with it.** Its replacement is
+/// `BaseLabel(text, role: TextRole.control)`: a menu entry, a button label and
+/// a field label are all "text the user operates", which is one job and
+/// therefore one role. This class is why they disagreed — it drew menu entries
+/// at `bodyLarge` while every button label was `labelLarge`, one rung smaller,
+/// for no reason anybody wrote down.
+///
+/// It is kept only until the call sites outside `lib/shared/` have converted;
+/// see `base_label_legacy.dart` for the rest of the bridge and why it exists.
 class MenuItemLabel extends StatelessWidget {
   const MenuItemLabel(
     this.text, {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
@@ -48,7 +49,7 @@ class _BackgroundProgressLabel extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              LabelMediumLabel(text, color: colorScheme.onSurfaceVariant),
+              BaseLabel(text, role: TextRole.detail, tone: Tone.muted),
               const SizedBox(width: AppTheme.paddingXS),
               Icon(
                 PhosphorIconsRegular.caretRight,
@@ -129,7 +130,10 @@ class ProgressOverlay extends ConsumerWidget {
                         const Icon(PhosphorIconsRegular.circleNotch, size: 24),
                         const SizedBox(width: AppTheme.paddingM),
                         Expanded(
-                          child: TitleLargeLabel(progress.operationName),
+                          child: BaseLabel(
+                            progress.operationName,
+                            role: TextRole.pageTitle,
+                          ),
                         ),
                       ],
                     ),
@@ -147,11 +151,13 @@ class ProgressOverlay extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          BodyMediumLabel(
+                          BaseLabel(
                             '${progress.currentStep} of ${progress.totalSteps}',
+                            role: TextRole.body,
                           ),
-                          BodyMediumLabel(
+                          BaseLabel(
                             '${(progress.progress * 100).toStringAsFixed(0)}%',
+                            role: TextRole.body,
                           ),
                         ],
                       ),
@@ -165,10 +171,10 @@ class ProgressOverlay extends ConsumerWidget {
                     // Status message
                     if (progress.statusMessage != null) ...[
                       const SizedBox(height: AppTheme.paddingM),
-                      BodySmallLabel(
+                      BaseLabel(
                         progress.statusMessage!,
+                        role: TextRole.detail,
                         maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ],

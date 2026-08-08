@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 
 import '../../shared/theme/app_theme.dart';
@@ -157,12 +157,13 @@ class SettingsScreen extends ConsumerWidget {
               builder: (dialogContext) => BaseDialog(
                 title: l10n.invalidGitExecutable,
                 onSubmit: () => Navigator.of(dialogContext).pop(),
-                content: BodyMediumLabel(
+                content: BaseLabel(
                   l10n.invalidGitExecutableMessage(
                     selectedPath,
                     output,
                     output,
                   ),
+                  role: TextRole.body,
                 ),
                 actions: [
                   // A result sheet with nothing to answer: acknowledging it
@@ -184,11 +185,12 @@ class SettingsScreen extends ConsumerWidget {
             builder: (dialogContext) => BaseDialog(
               title: l10n.executionFailed,
               onSubmit: () => Navigator.of(dialogContext).pop(),
-              content: BodyMediumLabel(
+              content: BaseLabel(
                 l10n.executionFailedMessage(
                   selectedPath,
                   processResult.stderr.toString(),
                 ),
+                role: TextRole.body,
               ),
               actions: [
                 // Likewise a result sheet: acknowledging it is all there is.
@@ -209,8 +211,9 @@ class SettingsScreen extends ConsumerWidget {
             builder: (dialogContext) => BaseDialog(
               title: l10n.validationError,
               onSubmit: () => Navigator.of(dialogContext).pop(),
-              content: BodyMediumLabel(
+              content: BaseLabel(
                 l10n.validationErrorMessage(selectedPath, e.toString()),
+                role: TextRole.body,
               ),
               actions: [
                 // Likewise a result sheet: acknowledging it is all there is.
@@ -294,7 +297,10 @@ class SettingsScreen extends ConsumerWidget {
                     .read(configProvider.notifier)
                     .setTextEditor(selectedPath, version: version);
               },
-              content: BodyMediumLabel(l10n.unknownTextEditorMessage(fileName)),
+              content: BaseLabel(
+                l10n.unknownTextEditorMessage(fileName),
+                role: TextRole.body,
+              ),
               actions: [
                 DialogAction(
                   onPressed: () => Navigator.of(dialogContext).pop(),
@@ -727,7 +733,7 @@ class SettingsScreen extends ConsumerWidget {
         title: l10n.resetSettings,
         icon: IconRole.warning,
         variant: DialogVariant.destructive,
-        content: BodyMediumLabel(l10n.resetSettingsMessage),
+        content: BaseLabel(l10n.resetSettingsMessage, role: TextRole.body),
         actions: [
           DialogAction(
             onPressed: () => Navigator.of(dialogContext).pop(false),

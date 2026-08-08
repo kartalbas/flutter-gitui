@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -67,15 +68,16 @@ class _CreateBranchFromCommitDialogState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LabelSmallLabel(
+                      BaseLabel(
                         l10n.sourceCommit,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        role: TextRole.micro,
+                        tone: Tone.muted,
                       ),
-                      BodyMediumLabel(
+                      BaseLabel(
                         '${widget.commit.shortHash} '
                         '${widget.commit.shortSubject}',
+                        role: TextRole.body,
                         maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -109,10 +111,14 @@ class _CreateBranchFromCommitDialogState
                 _checkout = value ?? true;
               });
             },
-            title: BodyMediumLabel(l10n.checkoutBranchAfterCreation),
-            subtitle: BodySmallLabel(
+            title: BaseLabel(
+              l10n.checkoutBranchAfterCreation,
+              role: TextRole.body,
+            ),
+            subtitle: BaseLabel(
               l10n.checkoutBranchAfterCreationHint,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
             contentPadding: EdgeInsets.zero,
             dense: true,

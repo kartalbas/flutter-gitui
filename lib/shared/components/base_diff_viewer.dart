@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
@@ -197,7 +198,10 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
         children: [
           const Icon(Icons.description_outlined, size: AppTheme.iconXL * 2),
           const SizedBox(height: AppTheme.paddingM),
-          TitleMediumLabel(AppLocalizations.of(context)!.noChanges),
+          BaseLabel(
+            AppLocalizations.of(context)!.noChanges,
+            role: TextRole.pageTitle,
+          ),
         ],
       ),
     );
@@ -255,17 +259,25 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
     final colorScheme = Theme.of(context).colorScheme;
     Color? backgroundColor;
     Color? textColor;
+    // What the line IS, for the one piece of it that has already crossed onto
+    // the contract: the +/- prefix. The `textColor` beside it still has to be a
+    // `Color` because the content below is a raw `SelectableText` carrying the
+    // user's own diff font, and that whole construction moves into
+    // `surfaces.codeLine` at P3d rather than being half-migrated here.
+    Tone prefixTone = Tone.neutral;
     String prefix = '';
 
     switch (line.type) {
       case DiffLineType.addition:
         backgroundColor = context.gitColors.added.withValues(alpha: 0.12);
         textColor = context.gitColors.added;
+        prefixTone = Tone.gitAdded;
         prefix = '+';
         break;
       case DiffLineType.deletion:
         backgroundColor = context.gitColors.deleted.withValues(alpha: 0.12);
         textColor = context.gitColors.deleted;
+        prefixTone = Tone.gitDeleted;
         prefix = '-';
         break;
       case DiffLineType.header:
@@ -316,25 +328,31 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
                     line.type == DiffLineType.deletion)) ...[
               SizedBox(
                 width: AppTheme.iconXL + AppTheme.paddingM + AppTheme.paddingXS,
-                child: BodySmallLabel(
+                child: BaseLabel(
                   line.oldLineNumber?.toString() ?? '',
-                  color: colorScheme.onSurfaceVariant,
-                  textAlign: TextAlign.right,
+                  // A gutter number is code: what makes a column of them
+                  // readable is that every digit occupies the same width, which
+                  // is alignment carrying meaning rather than a style choice.
+                  role: TextRole.code,
+                  tone: Tone.muted,
+                  align: TextAlign.right,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingS),
               SizedBox(
                 width: AppTheme.iconXL + AppTheme.paddingM + AppTheme.paddingXS,
-                child: BodySmallLabel(
+                child: BaseLabel(
                   line.newLineNumber?.toString() ?? '',
-                  color: colorScheme.onSurfaceVariant,
-                  textAlign: TextAlign.right,
+                  role: TextRole.code,
+                  tone: Tone.muted,
+                  align: TextAlign.right,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingS),
             ],
             // Prefix indicator
-            if (prefix.isNotEmpty) BodyMediumLabel(prefix, color: textColor),
+            if (prefix.isNotEmpty)
+              BaseLabel(prefix, role: TextRole.code, tone: prefixTone),
             const SizedBox(width: AppTheme.paddingXS),
             // Line content
             Expanded(
@@ -385,10 +403,11 @@ class _BaseDiffViewerState extends State<BaseDiffViewer> {
             if (widget.showLineNumbers) ...[
               SizedBox(
                 width: AppTheme.iconXL + AppTheme.paddingM + AppTheme.paddingXS,
-                child: BodySmallLabel(
+                child: BaseLabel(
                   lineNumber.toString(),
-                  color: colorScheme.onSurfaceVariant,
-                  textAlign: TextAlign.right,
+                  role: TextRole.code,
+                  tone: Tone.muted,
+                  align: TextAlign.right,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingS + AppTheme.paddingXS),

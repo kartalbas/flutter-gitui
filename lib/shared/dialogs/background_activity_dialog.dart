@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole, Tone;
 
 import '../../core/workspace/models/repository_status.dart';
 import '../../core/workspace/repository_status_provider.dart';
 import '../../core/workspace/workspace_provider.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 
@@ -58,11 +59,12 @@ class BackgroundActivityDialog extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BodySmallLabel(
+            BaseLabel(
               running == 0
                   ? 'Nothing is running right now.'
                   : '$running of ${rows.length} repositories are being checked.',
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
             const SizedBox(height: AppTheme.paddingM),
             Flexible(
@@ -115,33 +117,28 @@ class _ActivityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final state = _stateOf(status);
 
-    final (IconData icon, Color color, String label) = switch (state) {
+    // What the row's state MEANS, said once for the mark and the words
+    // together. The `Color` this record used to carry was the same statement
+    // written as Material's answer to it, and it was written twice — once into
+    // a glyph and once into a label — which is how the two drift apart.
+    final (IconRole icon, Tone tone, String label) = switch (state) {
       _ActivityState.running => (
-        PhosphorIconsRegular.circleNotch,
-        colorScheme.primary,
+        IconRole.circleNotch,
+        Tone.accent,
         'Checking…',
       ),
-      _ActivityState.checked => (
-        PhosphorIconsRegular.checkCircle,
-        colorScheme.primary,
-        'Checked',
-      ),
+      _ActivityState.checked => (IconRole.checkCircle, Tone.accent, 'Checked'),
       _ActivityState.failed => (
-        PhosphorIconsRegular.warningCircle,
-        colorScheme.error,
+        IconRole.warningCircle,
+        Tone.danger,
         _failureLabel(status!),
       ),
-      _ActivityState.local => (
-        PhosphorIconsRegular.hardDrives,
-        colorScheme.onSurfaceVariant,
-        'Local only',
-      ),
+      _ActivityState.local => (IconRole.hardDrives, Tone.muted, 'Local only'),
       _ActivityState.pending => (
-        PhosphorIconsRegular.clockCountdown,
-        colorScheme.onSurfaceVariant,
+        IconRole.clockCountdown,
+        Tone.muted,
         'Not checked',
       ),
     };
@@ -153,17 +150,17 @@ class _ActivityRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingXS),
       child: Row(
         children: [
-          Icon(icon, size: AppTheme.iconS, color: color),
+          BaseIcon(icon, scale: ControlScale.compact, tone: tone),
           const SizedBox(width: AppTheme.paddingS),
-          Expanded(
-            child: BodyMediumLabel(name, overflow: TextOverflow.ellipsis),
-          ),
+          // One line: this is one repository's row in a list of them, and a
+          // long name that wrapped would make its row taller than the rest.
+          Expanded(child: BaseLabel(name, role: TextRole.body, maxLines: 1)),
           if (identity != null) ...[
             const SizedBox(width: AppTheme.paddingS),
-            BodySmallLabel(identity.label, color: colorScheme.onSurfaceVariant),
+            BaseLabel(identity.label, role: TextRole.detail, tone: Tone.muted),
           ],
           const SizedBox(width: AppTheme.paddingM),
-          BodySmallLabel(label, color: color),
+          BaseLabel(label, role: TextRole.detail, tone: tone),
         ],
       ),
     );

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -28,7 +28,10 @@ class BranchSwitchErrorDialog extends StatelessWidget {
       // Red styling for attention only; the single action is OK, so Enter
       // dismisses like any informational dialog.
       onSubmit: () => Navigator.pop(context),
-      content: BodyMediumLabel(l10n.failedToSwitchToBranch(branchName, error)),
+      content: BaseLabel(
+        l10n.failedToSwitchToBranch(branchName, error),
+        role: TextRole.body,
+      ),
       actions: [
         DialogAction(
           label: l10n.ok,

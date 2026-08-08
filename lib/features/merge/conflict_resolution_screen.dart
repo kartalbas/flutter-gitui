@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -172,8 +173,9 @@ class _ConflictResolutionScreenState
                 color: context.gitColors.added,
               ),
               const SizedBox(height: AppTheme.paddingL),
-              TitleLargeLabel(
+              BaseLabel(
                 AppLocalizations.of(context)!.dialogTitleNoMergeInProgress,
+                role: TextRole.pageTitle,
               ),
             ],
           ),
@@ -252,10 +254,11 @@ class _ConflictResolutionScreenState
                         child: selectedConflict != null
                             ? _buildConflictDetails(context, selectedConflict)
                             : Center(
-                                child: BodyMediumLabel(
+                                child: BaseLabel(
                                   AppLocalizations.of(
                                     context,
                                   )!.dialogContentSelectConflict,
+                                  role: TextRole.body,
                                 ),
                               ),
                       ),
@@ -290,10 +293,11 @@ class _ConflictResolutionScreenState
               const Icon(PhosphorIconsRegular.warning, size: 20),
               const SizedBox(width: AppTheme.paddingS),
               Expanded(
-                child: TitleSmallLabel(
+                child: BaseLabel(
                   AppLocalizations.of(context)!.conflictsToResolve(
                     conflicts.where((c) => !c.isResolved).length,
                   ),
+                  role: TextRole.sectionTitle,
                 ),
               ),
             ],
@@ -325,24 +329,19 @@ class _ConflictResolutionScreenState
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // BaseLabel rather than a styled Text: the row publishes
-                    // the foreground its selected tile needs, and a `Text`
-                    // whose style names `onSurface` puts the unselected role
-                    // straight back on it - 4.13 : 1 in the dark theme. The
-                    // label keeps the weight and the strike-through and takes
-                    // the colour from the row.
+                    // Neither the weight nor the strike-through is written
+                    // here any more, and both absences are the point. "This
+                    // row is the one you are acting on" is the row's own
+                    // selection state, which BaseListItem already carries;
+                    // "this conflict is dealt with" is Tone.muted, and
+                    // whether a design language answers that by striking the
+                    // text through is the language's answer, not a screen's.
                     BaseLabel(
                       conflict.fileName,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        decoration: conflict.isResolved
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
+                      role: TextRole.body,
+                      tone: conflict.isResolved ? Tone.muted : Tone.neutral,
                     ),
-                    BodySmallLabel(conflict.typeDisplay),
+                    BaseLabel(conflict.typeDisplay, role: TextRole.detail),
                   ],
                 ),
                 trailing: conflict.isResolved
@@ -381,8 +380,8 @@ class _ConflictResolutionScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TitleSmallLabel(conflict.filePath),
-                    BodySmallLabel(conflict.typeDisplay),
+                    BaseLabel(conflict.filePath, role: TextRole.itemTitle),
+                    BaseLabel(conflict.typeDisplay, role: TextRole.detail),
                   ],
                 ),
               ),
@@ -392,7 +391,10 @@ class _ConflictResolutionScreenState
                   color: context.gitColors.added,
                 ),
                 const SizedBox(width: AppTheme.paddingS),
-                LabelMediumLabel(AppLocalizations.of(context)!.resolved),
+                BaseLabel(
+                  AppLocalizations.of(context)!.resolved,
+                  role: TextRole.micro,
+                ),
               ],
             ],
           ),
@@ -420,9 +422,10 @@ class _ConflictResolutionScreenState
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       _errorMessage!,
-                      color: Theme.of(context).colorScheme.error,
+                      role: TextRole.body,
+                      tone: Tone.danger,
                     ),
                   ),
                 ],
@@ -439,10 +442,11 @@ class _ConflictResolutionScreenState
           ),
           child: Align(
             alignment: AlignmentDirectional.centerStart,
-            child: TitleMediumLabel(
+            child: BaseLabel(
               AppLocalizations.of(
                 context,
               )!.dialogContentChooseResolutionStrategy,
+              role: TextRole.sectionTitle,
             ),
           ),
         ),
@@ -508,7 +512,10 @@ class _ConflictResolutionScreenState
       leading: Icon(icon),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [TitleSmallLabel(title), BodySmallLabel(subtitle)],
+        children: [
+          BaseLabel(title, role: TextRole.itemTitle),
+          BaseLabel(subtitle, role: TextRole.detail),
+        ],
       ),
       trailing: const Icon(PhosphorIconsRegular.arrowRight),
       // A click moves the same highlight the arrows move and then applies it,
@@ -541,16 +548,18 @@ class _ConflictResolutionScreenState
                   children: [
                     const Icon(PhosphorIconsRegular.info, size: 20),
                     const SizedBox(width: AppTheme.paddingS),
-                    TitleSmallLabel(
+                    BaseLabel(
                       AppLocalizations.of(context)!.manualResolution,
+                      role: TextRole.sectionTitle,
                     ),
                   ],
                 ),
                 const SizedBox(height: AppTheme.paddingS),
-                BodySmallLabel(
+                BaseLabel(
                   AppLocalizations.of(
                     context,
                   )!.dialogContentManualResolutionInfo,
+                  role: TextRole.detail,
                 ),
               ],
             ),
@@ -588,15 +597,23 @@ class _ConflictResolutionScreenState
               color: context.gitColors.added,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            HeadlineMediumLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.allConflictsResolved,
+              role: TextRole.pageTitle,
             ),
             const SizedBox(height: AppTheme.paddingM),
-            BodyLargeLabel(
+            // The explanation under an empty or error state's headline is
+            // ordinary prose — the headline above is what stands out — so it
+            // is `body` here exactly as it is in every other empty state of
+            // the application. Reading its old 15 px as "this must stand out"
+            // and answering with a weight put two contradictory statements on
+            // one line wherever the same site also said "secondary".
+            BaseLabel(
               AppLocalizations.of(
                 context,
               )!.dialogContentAllMergeConflictsResolved,
-              textAlign: TextAlign.center,
+              role: TextRole.body,
+              align: TextAlign.center,
             ),
             const SizedBox(height: AppTheme.paddingXL),
             BaseButton(
@@ -639,11 +656,13 @@ class _ConflictResolutionScreenState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TitleSmallLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.allConflictsResolved,
+                  role: TextRole.sectionTitle,
                 ),
-                BodySmallLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.readyToContinueMerge,
+                  role: TextRole.detail,
                 ),
               ],
             ),
@@ -702,8 +721,9 @@ class _ConflictResolutionScreenState
         icon: IconRole.gitMerge,
         title: AppLocalizations.of(context)!.dialogTitleContinueMerge,
         onSubmit: () => Navigator.of(context).pop(true),
-        content: BodyMediumLabel(
+        content: BaseLabel(
           AppLocalizations.of(context)!.dialogContentContinueMerge,
+          role: TextRole.body,
         ),
         actions: [
           DialogAction(
@@ -745,8 +765,9 @@ class _ConflictResolutionScreenState
       builder: (context) => BaseDialog(
         icon: IconRole.warning,
         title: AppLocalizations.of(context)!.dialogTitleAbortMerge,
-        content: BodyMediumLabel(
+        content: BaseLabel(
           AppLocalizations.of(context)!.dialogContentAbortMerge,
+          role: TextRole.body,
         ),
         actions: [
           DialogAction(

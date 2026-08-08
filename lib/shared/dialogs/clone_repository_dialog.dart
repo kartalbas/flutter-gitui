@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -55,8 +56,9 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BodyMediumLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.cloneGitRepositoryFromUrl,
+              role: TextRole.body,
             ),
             const SizedBox(height: AppTheme.paddingL),
 
@@ -112,11 +114,13 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                         _shallowClone = value;
                       });
                     },
-              title: BodyMediumLabel(
+              title: BaseLabel(
                 AppLocalizations.of(context)!.shallowClone,
+                role: TextRole.body,
               ),
-              subtitle: BodySmallLabel(
+              subtitle: BaseLabel(
                 AppLocalizations.of(context)!.shallowCloneDescription,
+                role: TextRole.detail,
               ),
               contentPadding: EdgeInsets.zero,
             ),
@@ -127,7 +131,10 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                 children: [
                   const Icon(PhosphorIconsRegular.gitCommit, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
-                  BodyMediumLabel(AppLocalizations.of(context)!.depth),
+                  BaseLabel(
+                    AppLocalizations.of(context)!.depth,
+                    role: TextRole.body,
+                  ),
                   const SizedBox(width: AppTheme.paddingM),
                   Expanded(
                     child: Slider(
@@ -147,9 +154,10 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                   ),
                   SizedBox(
                     width: 50,
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       _depth.toString(),
-                      textAlign: TextAlign.center,
+                      role: TextRole.body,
+                      align: TextAlign.center,
                     ),
                   ),
                 ],
@@ -173,9 +181,10 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: BodyMediumLabel(
+                      child: BaseLabel(
                         _errorMessage!,
-                        color: Theme.of(context).colorScheme.error,
+                        role: TextRole.body,
+                        tone: Tone.danger,
                       ),
                     ),
                   ],
@@ -188,12 +197,15 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               const SizedBox(height: AppTheme.paddingL),
               const LinearProgressIndicator(),
               const SizedBox(height: AppTheme.paddingS),
+              // The italic goes with the `TextStyle` that carried it: slanting
+              // an aside is Material's answer to "this line is a remark about
+              // what is happening, not part of the form", and another design
+              // language answers the same question with a colour or a size.
+              // `TextRole.detail` asks it instead.
               BaseLabel(
                 AppLocalizations.of(context)!.cloningRepository,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                textAlign: TextAlign.center,
+                role: TextRole.detail,
+                align: TextAlign.center,
               ),
             ],
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
@@ -215,7 +216,10 @@ class _BatchOperationProgressDialogState
                 ),
               ),
               const SizedBox(width: AppTheme.paddingM),
-              TitleMediumLabel('$completedCount / $totalCount'),
+              BaseLabel(
+                '$completedCount / $totalCount',
+                role: TextRole.emphasis,
+              ),
             ],
           ),
 
@@ -224,8 +228,9 @@ class _BatchOperationProgressDialogState
           // slow repository distinguishable from a stalled run.
           if (_isRunning && _activeRepositoryPath != null) ...[
             const SizedBox(height: AppTheme.paddingS),
-            BodySmallLabel(
+            BaseLabel(
               _progress[_activeRepositoryPath]!.repository.displayName,
+              role: TextRole.detail,
             ),
           ],
 
@@ -263,7 +268,7 @@ class _BatchOperationProgressDialogState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TitleSmallLabel(
+                        BaseLabel(
                           _failureCount == 0
                               ? l10n.operationsCompleted(
                                   _successCount,
@@ -274,10 +279,12 @@ class _BatchOperationProgressDialogState
                                   _failureCount,
                                   _successCount + _failureCount,
                                 ),
+                          role: TextRole.sectionTitle,
                         ),
                         const SizedBox(height: AppTheme.paddingXS),
-                        BodySmallLabel(
+                        BaseLabel(
                           l10n.successCount(_successCount, _failureCount),
+                          role: TextRole.detail,
                         ),
                       ],
                     ),
@@ -289,7 +296,7 @@ class _BatchOperationProgressDialogState
           ],
 
           // Repository list with status
-          TitleSmallLabel(l10n.repositories),
+          BaseLabel(l10n.repositories, role: TextRole.sectionTitle),
           const SizedBox(height: AppTheme.paddingS),
 
           Container(
@@ -324,12 +331,16 @@ class _BatchOperationProgressDialogState
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BodyMediumLabel(repo.displayName),
-                      LabelMediumLabel(
+                      BaseLabel(repo.displayName, role: TextRole.body),
+                      // Tone.invalid, not Tone.danger: this repository did
+                      // not complete and needs attention, but nothing was
+                      // destroyed.
+                      BaseLabel(
                         statusText,
-                        color: progress.error != null
-                            ? Theme.of(context).colorScheme.error
-                            : null,
+                        role: TextRole.detail,
+                        tone: progress.error != null
+                            ? Tone.invalid
+                            : Tone.neutral,
                       ),
                     ],
                   ),

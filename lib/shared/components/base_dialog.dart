@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 import '../../core/constants/constants.dart';
 import '../../shared/theme/app_theme.dart';
@@ -312,8 +312,6 @@ class BaseDialog extends StatelessWidget {
       return true;
     }());
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
 
     // Determine the mark and what it means, from the variant.
@@ -325,23 +323,28 @@ class BaseDialog extends StatelessWidget {
     // is why nothing on screen moves.
     IconRole? variantIcon = icon;
     Tone iconTone = Tone.accent;
-    Color titleColor;
+    // The title says the same thing the mark beside it says, so it is now the
+    // same kind of statement: a [Tone] rather than a `Color`. `Tone.neutral` is
+    // literally "whatever this surface's ordinary foreground is", which is what
+    // `colorScheme.onSurface` was spelling out longhand at four of these six
+    // arms — saying nothing twice.
+    Tone titleTone;
 
     if (icon == null) {
       switch (variant) {
         case DialogVariant.normal:
           variantIcon = null;
-          titleColor = colorScheme.onSurface;
+          titleTone = Tone.neutral;
           break;
         case DialogVariant.confirmation:
           variantIcon = IconRole.question;
           iconTone = Tone.accent;
-          titleColor = colorScheme.onSurface;
+          titleTone = Tone.neutral;
           break;
         case DialogVariant.destructive:
           variantIcon = IconRole.warning;
           iconTone = Tone.danger;
-          titleColor = colorScheme.error;
+          titleTone = Tone.danger;
           break;
       }
     } else {
@@ -349,15 +352,15 @@ class BaseDialog extends StatelessWidget {
       switch (variant) {
         case DialogVariant.normal:
           iconTone = Tone.accent;
-          titleColor = colorScheme.onSurface;
+          titleTone = Tone.neutral;
           break;
         case DialogVariant.confirmation:
           iconTone = Tone.accent;
-          titleColor = colorScheme.onSurface;
+          titleTone = Tone.neutral;
           break;
         case DialogVariant.destructive:
           iconTone = Tone.danger;
-          titleColor = colorScheme.error;
+          titleTone = Tone.danger;
           break;
       }
     }
@@ -433,7 +436,11 @@ class BaseDialog extends StatelessWidget {
                           SizedBox(width: AppTheme.paddingM),
                         },
                         Expanded(
-                          child: HeadlineSmallLabel(title, color: titleColor),
+                          child: BaseLabel(
+                            title,
+                            role: TextRole.pageTitle,
+                            tone: titleTone,
+                          ),
                         ),
                         if (barrierDismissible) ...{
                           SizedBox(width: AppTheme.paddingM),

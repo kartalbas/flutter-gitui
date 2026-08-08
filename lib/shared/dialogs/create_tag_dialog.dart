@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -114,7 +114,10 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
                     const Icon(PhosphorIconsRegular.info, size: 20),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: BodySmallLabel(l10n.createTagDialogDescription),
+                      child: BaseLabel(
+                        l10n.createTagDialogDescription,
+                        role: TextRole.detail,
+                      ),
                     ),
                   ],
                 ),
@@ -184,19 +187,23 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
               const SizedBox(height: AppTheme.paddingM),
 
               // Target commit
-              TitleSmallLabel(l10n.targetCommit),
+              BaseLabel(l10n.targetCommit, role: TextRole.sectionTitle),
               const SizedBox(height: AppTheme.paddingS),
               commitsAsync.when(
                 data: (commits) => _buildCommitDropdown(commits),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) => BodyMediumLabel(l10n.errorLoadingCommits),
+                error: (_, _) =>
+                    BaseLabel(l10n.errorLoadingCommits, role: TextRole.body),
               ),
               const SizedBox(height: AppTheme.paddingL),
 
               // Annotated tag option
               SwitchListTile(
-                title: BodyMediumLabel(l10n.annotatedTag),
-                subtitle: BodySmallLabel(l10n.includeMessageWithTag),
+                title: BaseLabel(l10n.annotatedTag, role: TextRole.body),
+                subtitle: BaseLabel(
+                  l10n.includeMessageWithTag,
+                  role: TextRole.detail,
+                ),
                 value: _isAnnotated,
                 onChanged: (value) {
                   setState(() => _isAnnotated = value);
@@ -251,7 +258,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppTheme.radiusS),
       ),
-      child: LabelMediumLabel(shortHash),
+      child: BaseLabel(shortHash, role: TextRole.detail),
     );
   }
 
@@ -265,11 +272,7 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
           const SizedBox(width: AppTheme.paddingS),
           Flexible(
             fit: FlexFit.loose,
-            child: BodyMediumLabel(
-              commit.message,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+            child: BaseLabel(commit.message, role: TextRole.body, maxLines: 1),
           ),
         ],
       ),
@@ -313,7 +316,10 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
             children: [
               const Icon(PhosphorIconsRegular.arrowUp, size: 16),
               const SizedBox(width: AppTheme.paddingS),
-              BodyMediumLabel(AppLocalizations.of(context)!.headCurrentCommit),
+              BaseLabel(
+                AppLocalizations.of(context)!.headCurrentCommit,
+                role: TextRole.body,
+              ),
             ],
           ),
         ),

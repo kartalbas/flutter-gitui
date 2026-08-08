@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
@@ -23,11 +24,13 @@ class BranchesErrorState extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingM),
-          TitleMediumLabel(
+          // The error state's headline, at the same rung as every other one.
+          BaseLabel(
             AppLocalizations.of(
               context,
             )!.errorLoadingBranches(error.toString()),
-            textAlign: TextAlign.center,
+            role: TextRole.pageTitle,
+            align: TextAlign.center,
           ),
         ],
       ),

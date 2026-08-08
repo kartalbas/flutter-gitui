@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -48,7 +49,7 @@ class FileListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // File path
-          BodyMediumLabel(file.path, overflow: TextOverflow.ellipsis),
+          BaseLabel(file.path, role: TextRole.body, maxLines: 1),
           const SizedBox(height: 2),
 
           // Status and old path for renames
@@ -61,9 +62,10 @@ class FileListItem extends StatelessWidget {
                   color: status.colorOf(context).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
-                child: LabelSmallLabel(
+                child: BaseLabel(
                   status.displayName,
-                  color: status.colorOf(context),
+                  role: TextRole.micro,
+                  tone: status.toneOf,
                 ),
               ),
 
@@ -71,10 +73,11 @@ class FileListItem extends StatelessWidget {
               if (isRenamed && file.oldPath != null) ...[
                 const SizedBox(width: AppTheme.paddingS),
                 Flexible(
-                  child: BodySmallLabel(
+                  child: BaseLabel(
                     'from ${file.oldPath}',
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    overflow: TextOverflow.ellipsis,
+                    role: TextRole.detail,
+                    tone: Tone.muted,
+                    maxLines: 1,
                   ),
                 ),
               ],

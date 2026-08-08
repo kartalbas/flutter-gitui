@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -64,7 +65,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(l10n.saveChangesToStash),
+          BaseLabel(l10n.saveChangesToStash, role: TextRole.body),
           const SizedBox(height: AppTheme.paddingM),
           BaseTextField(
             controller: _messageController,
@@ -88,8 +89,11 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                 }
               });
             },
-            title: BodyMediumLabel(l10n.stashAllFiles),
-            subtitle: BodySmallLabel(l10n.stashAllFilesToggle),
+            title: BaseLabel(l10n.stashAllFiles, role: TextRole.body),
+            subtitle: BaseLabel(
+              l10n.stashAllFilesToggle,
+              role: TextRole.detail,
+            ),
             dense: true,
             contentPadding: EdgeInsets.zero,
           ),
@@ -99,11 +103,12 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
             const SizedBox(height: AppTheme.paddingM),
             Row(
               children: [
-                TitleSmallLabel(
+                BaseLabel(
                   l10n.selectFilesToStash(
                     _selectedFiles.length,
                     allStatuses.length,
                   ),
+                  role: TextRole.sectionTitle,
                 ),
                 const Spacer(),
                 BaseButton(
@@ -154,10 +159,11 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                         }
                       });
                     },
-                    title: BodyMediumLabel(file.path),
-                    subtitle: LabelMediumLabel(
+                    title: BaseLabel(file.path, role: TextRole.body),
+                    subtitle: BaseLabel(
                       file.primaryStatus.displayName,
-                      color: file.primaryStatus.colorOf(context),
+                      role: TextRole.detail,
+                      tone: file.primaryStatus.toneOf,
                     ),
                     dense: true,
                     contentPadding: const EdgeInsets.symmetric(
@@ -169,9 +175,10 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
             ),
           ] else if (!_stashAllFiles && allStatuses.isEmpty) ...[
             const SizedBox(height: AppTheme.paddingM),
-            BodySmallLabel(
+            BaseLabel(
               l10n.noFilesToStash,
-              color: Theme.of(context).colorScheme.error,
+              role: TextRole.detail,
+              tone: Tone.danger,
             ),
           ],
 
@@ -183,7 +190,7 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                 _includeUntracked = value ?? false;
               });
             },
-            title: BodyMediumLabel(l10n.includeUntrackedFiles),
+            title: BaseLabel(l10n.includeUntrackedFiles, role: TextRole.body),
             dense: true,
             contentPadding: EdgeInsets.zero,
           ),
@@ -194,8 +201,11 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                 _keepIndex = value ?? false;
               });
             },
-            title: BodyMediumLabel(l10n.keepStagedChanges),
-            subtitle: BodySmallLabel(l10n.keepStagedChangesSubtitle),
+            title: BaseLabel(l10n.keepStagedChanges, role: TextRole.body),
+            subtitle: BaseLabel(
+              l10n.keepStagedChangesSubtitle,
+              role: TextRole.detail,
+            ),
             dense: true,
             contentPadding: EdgeInsets.zero,
           ),

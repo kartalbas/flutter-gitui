@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:file_picker/file_picker.dart';
 import '../../generated/app_localizations.dart';
 
@@ -751,7 +751,10 @@ class GitCommands {
             title: l10n.cherryPickCommitDialog,
             icon: IconRole.arrowBendDownRight,
             onSubmit: () => Navigator.of(context).pop(),
-            content: BodyMediumLabel(l10n.cherryPickCommitInstructions),
+            content: BaseLabel(
+              l10n.cherryPickCommitInstructions,
+              role: TextRole.body,
+            ),
             actions: [
               // An instruction sheet with nothing to answer: acknowledging it
               // is what completes it, which is what onSubmit fires too.
@@ -780,7 +783,10 @@ class GitCommands {
             title: l10n.revertCommitDialog,
             icon: IconRole.arrowCounterClockwise,
             onSubmit: () => Navigator.of(context).pop(),
-            content: BodyMediumLabel(l10n.revertCommitInstructions),
+            content: BaseLabel(
+              l10n.revertCommitInstructions,
+              role: TextRole.body,
+            ),
             actions: [
               // An instruction sheet with nothing to answer: acknowledging it
               // is what completes it, which is what onSubmit fires too.
@@ -809,7 +815,10 @@ class GitCommands {
             title: l10n.resetToCommitDialog,
             icon: IconRole.arrowCounterClockwise,
             onSubmit: () => Navigator.of(context).pop(),
-            content: BodyMediumLabel(l10n.resetToCommitInstructions),
+            content: BaseLabel(
+              l10n.resetToCommitInstructions,
+              role: TextRole.body,
+            ),
             actions: [
               // An instruction sheet with nothing to answer: acknowledging it
               // is what completes it, which is what onSubmit fires too.

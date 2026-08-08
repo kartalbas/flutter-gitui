@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -44,7 +44,7 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BodyMediumLabel(confirmMessage),
+            BaseLabel(confirmMessage, role: TextRole.body),
             if (widget.hasRemotes) ...[
               const SizedBox(height: AppTheme.paddingL),
               const Divider(),
@@ -56,8 +56,11 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
                     _deleteFromRemote = value ?? false;
                   });
                 },
-                title: BodyMediumLabel(loc.alsoDeleteFromRemote),
-                subtitle: BodySmallLabel(loc.deleteFromRemoteSubtitle),
+                title: BaseLabel(loc.alsoDeleteFromRemote, role: TextRole.body),
+                subtitle: BaseLabel(
+                  loc.deleteFromRemoteSubtitle,
+                  role: TextRole.detail,
+                ),
                 contentPadding: EdgeInsets.zero,
               ),
             ],

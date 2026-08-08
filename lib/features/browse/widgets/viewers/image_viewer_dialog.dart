@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:photo_view/photo_view.dart';
 
@@ -21,13 +22,19 @@ class ImageViewerDialog extends StatelessWidget {
     final file = File(filePath);
     final theme = Theme.of(context);
 
+    // The three scrim fills this used to hand `BaseViewerDialog` are gone.
+    // They painted the dialog, its header and its footer near-black while the
+    // component paired the header's text with `colorScheme.onPrimary` — black
+    // ink on a black header, 1.06 : 1 in six of the ten dark schemes and
+    // 1.61 : 1 in light. A fill and the ink that pairs with it are one
+    // decision, and this screen was taking half of it; the chrome is now the
+    // theme's, which pairs itself. The image still sits on a dark backdrop
+    // below, which is `PhotoView`'s own and is where the darkness was
+    // actually doing work.
     return BaseViewerDialog(
       icon: IconRole.image,
       title: 'Image Viewer',
       subtitle: fileName,
-      backgroundColor: theme.colorScheme.scrim,
-      headerBackgroundColor: theme.colorScheme.scrim.withValues(alpha: 0.7),
-      footerBackgroundColor: theme.colorScheme.scrim.withValues(alpha: 0.7),
       content: PhotoView(
         imageProvider: FileImage(file),
         backgroundDecoration: BoxDecoration(color: theme.colorScheme.scrim),
@@ -47,9 +54,12 @@ class ImageViewerDialog extends StatelessWidget {
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             const SizedBox(width: AppTheme.paddingS),
-            BodySmallLabel(
+            // The caption is secondary to the image above it. The 0.7 was
+            // that statement said a second time, in a number.
+            const BaseLabel(
               'Scroll to zoom • Drag to pan',
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
           ],
         ),

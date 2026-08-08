@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:file_picker/file_picker.dart';
 
 import '../../generated/app_localizations.dart';
@@ -275,10 +275,11 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
             )!.dialogTitleWebBrowserLimitation,
             icon: IconRole.globe,
             onSubmit: () => Navigator.of(context).pop(),
-            content: BodyMediumLabel(
+            content: BaseLabel(
               AppLocalizations.of(
                 context,
               )!.dialogContentWebBrowserLimitationChanges,
+              role: TextRole.body,
             ),
             actions: [
               // A report with nothing to answer: acknowledging it completes
@@ -324,11 +325,12 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           icon: IconRole.warningCircle,
           variant: DialogVariant.confirmation,
           onSubmit: () => Navigator.of(context).pop(true),
-          content: BodyMediumLabel(
+          content: BaseLabel(
             AppLocalizations.of(context)!.dialogContentStageAllAndCommit(
               unstagedFiles.length,
               unstagedFiles.length == 1 ? '' : 's',
             ),
+            role: TextRole.body,
           ),
           actions: [
             DialogAction(
@@ -473,11 +475,12 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         title: AppLocalizations.of(context)!.stageAllChangesQuestion,
         variant: DialogVariant.confirmation,
         onSubmit: () => Navigator.of(context).pop(true),
-        content: BodyMediumLabel(
+        content: BaseLabel(
           AppLocalizations.of(context)!.dialogContentStageAllFiles(
             unstagedFiles.length,
             unstagedFiles.length == 1 ? '' : 's',
           ),
+          role: TextRole.body,
         ),
         actions: [
           DialogAction(
@@ -514,8 +517,9 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
         title: AppLocalizations.of(context)!.unstageAllChangesQuestion,
         variant: DialogVariant.confirmation,
         onSubmit: () => Navigator.of(context).pop(true),
-        content: BodyMediumLabel(
+        content: BaseLabel(
           'Unstage all ${stagedFiles.length} staged file${stagedFiles.length == 1 ? '' : 's'}?',
+          role: TextRole.body,
         ),
         actions: [
           DialogAction(

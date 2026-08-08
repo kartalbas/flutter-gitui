@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -10,7 +11,6 @@ import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/branch.dart';
 import '../components/base_dialog.dart';
-import '../components/base_menu_item.dart';
 import '../components/base_dropdown.dart';
 
 /// Dialog for merging two branches (select both source and target)
@@ -71,8 +71,9 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BodyMediumLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.selectSourceAndTargetBranches,
+              role: TextRole.body,
             ),
             const SizedBox(height: AppTheme.paddingL),
 
@@ -100,8 +101,9 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                       ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.noOtherBranchesAvailable,
+                      role: TextRole.body,
                     ),
                   );
                 }
@@ -158,10 +160,14 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                       size: 14,
                                     ),
                                     const SizedBox(width: AppTheme.paddingS),
+                                    // A menu entry is one line tall; a long
+                                    // branch name states its cap here and the
+                                    // skin decides how the line ends.
                                     Expanded(
-                                      child: MenuItemLabel(
+                                      child: BaseLabel(
                                         branch.name,
-                                        overflow: TextOverflow.ellipsis,
+                                        role: TextRole.control,
+                                        maxLines: 1,
                                       ),
                                     ),
                                     if (branch.name == currentBranch) ...[
@@ -179,11 +185,21 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                             AppTheme.radiusS,
                                           ),
                                         ),
-                                        child: LabelSmallLabel(
-                                          AppLocalizations.of(context)!.current,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimaryContainer,
+                                        // The pill states the foreground its
+                                        // own fill pairs with; the word inside
+                                        // reads it.
+                                        child: DefaultTextStyle.merge(
+                                          style: TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer,
+                                          ),
+                                          child: BaseLabel(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.current,
+                                            role: TextRole.micro,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -296,10 +312,14 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                       size: 14,
                                     ),
                                     const SizedBox(width: AppTheme.paddingS),
+                                    // A menu entry is one line tall; a long
+                                    // branch name states its cap here and the
+                                    // skin decides how the line ends.
                                     Expanded(
-                                      child: MenuItemLabel(
+                                      child: BaseLabel(
                                         branch.name,
-                                        overflow: TextOverflow.ellipsis,
+                                        role: TextRole.control,
+                                        maxLines: 1,
                                       ),
                                     ),
                                     if (branch.name == currentBranch) ...[
@@ -317,11 +337,21 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                             AppTheme.radiusS,
                                           ),
                                         ),
-                                        child: LabelSmallLabel(
-                                          AppLocalizations.of(context)!.current,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimaryContainer,
+                                        // The pill states the foreground its
+                                        // own fill pairs with; the word inside
+                                        // reads it.
+                                        child: DefaultTextStyle.merge(
+                                          style: TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer,
+                                          ),
+                                          child: BaseLabel(
+                                            AppLocalizations.of(
+                                              context,
+                                            )!.current,
+                                            role: TextRole.micro,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -416,66 +446,71 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                             ).colorScheme.primary.withValues(alpha: 0.3),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  PhosphorIconsRegular.info,
-                                  size: AppTheme.iconS,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(width: AppTheme.paddingS),
-                                Expanded(
-                                  child: TitleSmallLabel(
-                                    'Merging to remote branch',
+                        // The panel is painted in `primaryContainer`, so it
+                        // publishes the foreground that pairs with it once,
+                        // here, instead of four lines below each naming it.
+                        child: DefaultTextStyle.merge(
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onPrimaryContainer,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    PhosphorIconsRegular.info,
+                                    size: AppTheme.iconS,
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.primary,
                                   ),
+                                  const SizedBox(width: AppTheme.paddingS),
+                                  Expanded(
+                                    child: BaseLabel(
+                                      'Merging to remote branch',
+                                      role: TextRole.sectionTitle,
+                                      tone: Tone.accent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: AppTheme.paddingS),
+                              BaseLabel(
+                                'This will perform the following steps:\n'
+                                '1. Fetch latest changes from remote\n'
+                                '2. Create/update local tracking branch\n'
+                                '3. Merge ${_sourceBranch?.name ?? 'source'} into local branch\n'
+                                '4. ${_pushAfterMerge ? 'Push changes to remote' : 'Keep changes local (you can push later)'}',
+                                role: TextRole.detail,
+                              ),
+                              const SizedBox(height: AppTheme.paddingM),
+                              CheckboxListTile(
+                                value: _pushAfterMerge,
+                                onChanged: _isMerging
+                                    ? null
+                                    : (value) {
+                                        setState(() {
+                                          _pushAfterMerge = value ?? true;
+                                        });
+                                      },
+                                title: BaseLabel(
+                                  'Push to remote after merge',
+                                  role: TextRole.body,
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: AppTheme.paddingS),
-                            BodySmallLabel(
-                              'This will perform the following steps:\n'
-                              '1. Fetch latest changes from remote\n'
-                              '2. Create/update local tracking branch\n'
-                              '3. Merge ${_sourceBranch?.name ?? 'source'} into local branch\n'
-                              '4. ${_pushAfterMerge ? 'Push changes to remote' : 'Keep changes local (you can push later)'}',
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                            ),
-                            const SizedBox(height: AppTheme.paddingM),
-                            CheckboxListTile(
-                              value: _pushAfterMerge,
-                              onChanged: _isMerging
-                                  ? null
-                                  : (value) {
-                                      setState(() {
-                                        _pushAfterMerge = value ?? true;
-                                      });
-                                    },
-                              title: BodyMediumLabel(
-                                'Push to remote after merge',
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
+                                subtitle: BaseLabel(
+                                  _pushAfterMerge
+                                      ? 'Changes will be immediately visible on remote'
+                                      : 'You can review and push manually later',
+                                  role: TextRole.detail,
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                                dense: true,
                               ),
-                              subtitle: BodySmallLabel(
-                                _pushAfterMerge
-                                    ? 'Changes will be immediately visible on remote'
-                                    : 'You can review and push manually later',
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                              dense: true,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -483,17 +518,21 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 );
               },
               loading: () => const LinearProgressIndicator(),
-              error: (error, _) => BodyMediumLabel(
+              error: (error, _) => BaseLabel(
                 AppLocalizations.of(
                   context,
                 )!.errorLoadingBranches(error.toString()),
-                color: Theme.of(context).colorScheme.error,
+                role: TextRole.body,
+                tone: Tone.danger,
               ),
             ),
             const SizedBox(height: AppTheme.paddingL),
 
             // Strategy selector
-            TitleSmallLabel(AppLocalizations.of(context)!.strategy),
+            BaseLabel(
+              AppLocalizations.of(context)!.strategy,
+              role: TextRole.sectionTitle,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             SegmentedButton<MergeStrategy>(
               segments: [
@@ -527,7 +566,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
 
             // Merge/Rebase options (conditional based on strategy)
             if (_strategy == MergeStrategy.merge) ...[
-              TitleSmallLabel(AppLocalizations.of(context)!.mergeOptions),
+              BaseLabel(
+                AppLocalizations.of(context)!.mergeOptions,
+                role: TextRole.sectionTitle,
+              ),
               const SizedBox(height: AppTheme.paddingS),
 
               // Fast-forward only
@@ -589,7 +631,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                 contentPadding: EdgeInsets.zero,
               ),
             ] else if (_strategy == MergeStrategy.rebase) ...[
-              TitleSmallLabel(AppLocalizations.of(context)!.rebaseOptions),
+              BaseLabel(
+                AppLocalizations.of(context)!.rebaseOptions,
+                role: TextRole.sectionTitle,
+              ),
               const SizedBox(height: AppTheme.paddingS),
 
               // Interactive rebase
@@ -670,7 +715,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       _sourceBranch != null && _targetBranch != null
                           ? (_strategy == MergeStrategy.merge
                                 ? AppLocalizations.of(
@@ -688,6 +733,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                           : AppLocalizations.of(
                               context,
                             )!.selectBothBranchesToMerge,
+                      role: TextRole.body,
                     ),
                   ),
                 ],
@@ -711,9 +757,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: BodyMediumLabel(
+                      child: BaseLabel(
                         _errorMessage!,
-                        color: Theme.of(context).colorScheme.error,
+                        role: TextRole.body,
+                        tone: Tone.danger,
                       ),
                     ),
                   ],
@@ -726,14 +773,15 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
               const SizedBox(height: AppTheme.paddingL),
               const LinearProgressIndicator(),
               const SizedBox(height: AppTheme.paddingS),
+              // The italic leaves with the `TextStyle`: slanting an aside is
+              // Material's answer to "this is a remark about what is
+              // happening", and `TextRole.detail` is the question.
               BaseLabel(
                 _strategy == MergeStrategy.merge
                     ? AppLocalizations.of(context)!.mergingBranches
                     : AppLocalizations.of(context)!.rebasingBranches,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                textAlign: TextAlign.center,
+                role: TextRole.detail,
+                align: TextAlign.center,
               ),
             ],
           ],
@@ -952,11 +1000,18 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        child: LabelSmallLabel(
-          label,
-          color: isSelected
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onSurfaceVariant,
+        // The segment paints itself when it is the chosen one, so it says which
+        // foreground goes with that fill; the word inside states only what it
+        // is. Selection is a fact `RowSelection` will carry once this becomes a
+        // contract member, and a fact does not need to be repeated as a colour
+        // at the call site.
+        child: DefaultTextStyle.merge(
+          style: TextStyle(
+            color: isSelected
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          child: BaseLabel(label, role: TextRole.micro),
         ),
       ),
     );

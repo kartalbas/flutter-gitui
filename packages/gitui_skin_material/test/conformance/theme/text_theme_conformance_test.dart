@@ -14,6 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/components/base_label.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -69,18 +70,20 @@ void main() {
     testWidgets('pumpConformance renders under the real app theme (light)', (
       WidgetTester tester,
     ) async {
-      await pumpConformance(tester, const TitleMediumLabel('Sample'));
-
-      final ThemeData theme = Theme.of(
-        tester.element(find.byType(TitleMediumLabel)),
+      await pumpConformance(
+        tester,
+        const BaseLabel('Sample', role: TextRole.sectionTitle),
       );
+
+      final ThemeData theme = Theme.of(tester.element(find.byType(BaseLabel)));
       expect(theme.brightness, Brightness.light);
       expect(
         describeTextRole(theme, renderedLabelText(tester).style),
         startsWith('titleMedium'),
         reason:
-            'a TitleMediumLabel pumped through the harness must resolve to '
-            "the app theme's titleMedium role",
+            'a sectionTitle pumped through the harness must resolve to the '
+            "app theme's titleMedium role, which is this skin's answer for "
+            'the role',
       );
 
       // Drain timers scheduled by google_fonts so teardown sees none pending.
@@ -92,20 +95,19 @@ void main() {
     ) async {
       await pumpConformance(
         tester,
-        const TitleMediumLabel('Sample'),
+        const BaseLabel('Sample', role: TextRole.sectionTitle),
         brightness: Brightness.dark,
       );
 
-      final ThemeData theme = Theme.of(
-        tester.element(find.byType(TitleMediumLabel)),
-      );
+      final ThemeData theme = Theme.of(tester.element(find.byType(BaseLabel)));
       expect(theme.brightness, Brightness.dark);
       expect(
         describeTextRole(theme, renderedLabelText(tester).style),
         startsWith('titleMedium'),
         reason:
-            'a TitleMediumLabel pumped through the harness must resolve to '
-            "the app theme's titleMedium role",
+            'a sectionTitle pumped through the harness must resolve to the '
+            "app theme's titleMedium role, which is this skin's answer for "
+            'the role',
       );
 
       // Drain timers scheduled by google_fonts so teardown sees none pending.

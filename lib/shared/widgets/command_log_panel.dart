@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:google_fonts/google_fonts.dart';
 import '../../generated/app_localizations.dart';
 
@@ -87,7 +88,7 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
         children: [
           const Icon(PhosphorIconsRegular.terminal, size: 20),
           const SizedBox(width: AppTheme.paddingS),
-          TitleMediumLabel('Git Command Log'),
+          BaseLabel('Git Command Log', role: TextRole.sectionTitle),
           const SizedBox(width: AppTheme.paddingS),
           Container(
             padding: const EdgeInsets.symmetric(
@@ -98,9 +99,13 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
               color: Theme.of(context).colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(AppTheme.radiusL),
             ),
-            child: LabelMediumLabel(
-              logCount.toString(),
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            // The pill states the foreground that pairs with its own fill; the
+            // count inside it just reads that.
+            child: DefaultTextStyle.merge(
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+              child: BaseLabel(logCount.toString(), role: TextRole.micro),
             ),
           ),
           const Spacer(),
@@ -168,11 +173,12 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.emptyStateNoCommandsYet),
+          BaseLabel(l10n.emptyStateNoCommandsYet, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             l10n.emptyStateNoCommandsYetMessage,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.body,
+            tone: Tone.muted,
           ),
         ],
       ),
@@ -191,11 +197,12 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.emptyStateNoResultsFound),
+          BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             l10n.emptyStateTryAdjustingSearchCriteria,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.body,
+            tone: Tone.muted,
           ),
         ],
       ),
@@ -244,11 +251,6 @@ class _LogEntryCardState extends State<_LogEntryCard> {
     final hasOutput = group.entries.any((entry) => entry.fullOutput.isNotEmpty);
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final commandStyle = GoogleFonts.getFont(
-      'JetBrains Mono',
-      textStyle: Theme.of(context).textTheme.bodyMedium,
-    );
-
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
       child: BaseCard(
@@ -285,12 +287,13 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                     Expanded(
                       child: BaseLabel(
                         log.command,
-                        style: commandStyle,
-                        color: isFailure
-                            ? colorScheme.error
-                            : colorScheme.onSurface,
+                        // A git command line is code by the role's own
+                        // definition, and the monospace family it takes is now
+                        // the one the user chose rather than a family name
+                        // written into this file.
+                        role: TextRole.code,
+                        tone: isFailure ? Tone.danger : Tone.neutral,
                         maxLines: _isExpanded ? null : 2,
-                        overflow: _isExpanded ? null : TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: AppTheme.paddingS),
@@ -342,9 +345,14 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                               AppTheme.radiusS,
                             ),
                           ),
-                          child: LabelSmallLabel(
-                            'x${group.count}',
-                            color: colorScheme.onSecondaryContainer,
+                          child: DefaultTextStyle.merge(
+                            style: TextStyle(
+                              color: colorScheme.onSecondaryContainer,
+                            ),
+                            child: BaseLabel(
+                              'x${group.count}',
+                              role: TextRole.micro,
+                            ),
                           ),
                         ),
                         const SizedBox(width: AppTheme.paddingS),
@@ -361,27 +369,36 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                               AppTheme.radiusS,
                             ),
                           ),
-                          child: LabelSmallLabel(
-                            '${l10n.failed} (${log.exitCode})',
-                            color: colorScheme.onErrorContainer,
+                          child: DefaultTextStyle.merge(
+                            style: TextStyle(
+                              color: colorScheme.onErrorContainer,
+                            ),
+                            child: BaseLabel(
+                              '${l10n.failed} (${log.exitCode})',
+                              role: TextRole.micro,
+                            ),
                           ),
                         ),
                         const SizedBox(width: AppTheme.paddingS),
                       ],
                       Flexible(
-                        child: LabelSmallLabel(
+                        child: BaseLabel(
                           log.timestampDisplay(
                             Localizations.localeOf(context).languageCode,
                           ),
-                          color: colorScheme.onSurfaceVariant,
-                          overflow: TextOverflow.ellipsis,
+                          role: TextRole.micro,
+                          tone: Tone.muted,
+                          // A timestamp is one line; the `Flexible` around it
+                          // exists to let it shrink, not to let it wrap.
+                          maxLines: 1,
                         ),
                       ),
                       if (log.duration != null) ...[
                         const SizedBox(width: AppTheme.paddingS),
-                        LabelSmallLabel(
+                        BaseLabel(
                           '${log.duration!.inMilliseconds}ms',
-                          color: colorScheme.onSurfaceVariant,
+                          role: TextRole.micro,
+                          tone: Tone.muted,
                         ),
                       ],
                     ],
@@ -396,11 +413,12 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                     if (entry.fullOutput.isNotEmpty) ...[
                       if (group.count > 1) ...[
                         const SizedBox(height: AppTheme.paddingS),
-                        LabelSmallLabel(
+                        BaseLabel(
                           entry.timestampDisplay(
                             Localizations.localeOf(context).languageCode,
                           ),
-                          color: colorScheme.onSurfaceVariant,
+                          role: TextRole.micro,
+                          tone: Tone.muted,
                         ),
                       ],
                       const SizedBox(height: AppTheme.paddingS),

@@ -135,7 +135,7 @@ abstract final class MaterialSpacing {
 
 /// How this skin turns a [Tone] into a colour.
 ///
-/// Sixteen named tones plus the series, resolved against the ambient
+/// Seventeen named tones plus the series, resolved against the ambient
 /// `ColorScheme` where Material has a slot for the meaning and against this
 /// skin's own git palette where it has none. "This file is staged" is not a
 /// question any design language answers, which is exactly why [Tone] carries
@@ -148,10 +148,15 @@ abstract final class MaterialInk {
     if (tone.seriesIndex != null) return series(tone.seriesIndex!);
     return switch (tone.name) {
       'neutral' => colors.onSurface,
-      'muted' => colors.onSurfaceVariant,
+      'muted' => _muted(context, colors),
       'accent' => colors.primary,
       'onAccent' => colors.onPrimary,
       'danger' => colors.error,
+      // Invalid and danger land on the same role under Material, which has no
+      // separate validation colour. Recorded rather than hidden - Fluent
+      // answers "this value is missing or rejected" with a field validation
+      // style, not with its critical colour, and will separate them.
+      'invalid' => colors.error,
       // Warning and success are the git palette's, not the scheme's: Material
       // 3 has no warning or success role at all, and this application already
       // answered both with the git colours that carry the same meaning - a
@@ -173,6 +178,40 @@ abstract final class MaterialInk {
       'gitStaged' => git.added,
       _ => colors.onSurface,
     };
+  }
+
+  /// "Secondary to what it sits beside", resolved against the surface the text
+  /// actually sits on rather than against the page.
+  ///
+  /// [Tone.muted] is the one named tone whose meaning is RELATIVE — its own
+  /// doc says "present, but secondary to WHAT IT SITS BESIDE" — and resolving
+  /// it to a fixed `onSurfaceVariant` made it absolute. That is fine on the
+  /// page, where `onSurfaceVariant` is exactly Material's supporting-text
+  /// role, and wrong the moment the surface is not the page: a selected list
+  /// row swaps its tile for `secondaryContainer` and publishes
+  /// `onSecondaryContainer` through its `DefaultTextStyle`, and a muted label
+  /// inside it would paint the page's supporting ink over a tonal container -
+  /// 2.86 : 1 in the dark theme, the same class of defect
+  /// `BaseListItem.readableForeground` exists to prevent.
+  ///
+  /// So: where the surface has published nothing of its own, muted is
+  /// Material's supporting role. Where it HAS published a foreground, muted
+  /// collapses onto it - and that is Material's own answer rather than a
+  /// compromise, because M3 gives a tonal container exactly one on-colour and
+  /// no quieter variant of it. This is what lets a call site say "this line is
+  /// secondary" once and have it be true on both the selected and the
+  /// unselected row, which is the thing the vocabulary could not say before.
+  ///
+  /// Measured, not assumed: under this application's themes the ambient
+  /// foreground is `colorScheme.onSurface` on a `Scaffold` body, inside a
+  /// `Card`, inside a bare `Material` and inside a `ListTile`, in both
+  /// brightnesses. The only publishers of anything else are the surfaces that
+  /// paint a tonal fill, which is precisely the case this exists for.
+  static Color _muted(BuildContext context, ColorScheme colors) {
+    final Color? published = DefaultTextStyle.of(context).style.color;
+    return published == null || published == colors.onSurface
+        ? colors.onSurfaceVariant
+        : published;
   }
 
   /// The nth colour of this skin's generated series.

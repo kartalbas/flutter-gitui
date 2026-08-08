@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../generated/app_localizations.dart';
 
@@ -47,8 +47,11 @@ class ThemeSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.colorScheme),
-              BodySmallLabel(getColorSchemeName(ui.colorScheme)),
+              BaseLabel(l10n.colorScheme, role: TextRole.body),
+              BaseLabel(
+                getColorSchemeName(ui.colorScheme),
+                role: TextRole.detail,
+              ),
             ],
           ),
           trailing: DropdownButton<AppColorScheme>(
@@ -59,7 +62,10 @@ class ThemeSection extends ConsumerWidget {
             items: AppColorScheme.values.map((scheme) {
               return DropdownMenuItem(
                 value: scheme,
-                child: BodyMediumLabel(getColorSchemeName(scheme)),
+                child: BaseLabel(
+                  getColorSchemeName(scheme),
+                  role: TextRole.body,
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -74,8 +80,8 @@ class ThemeSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.fontFamily),
-              BodySmallLabel(currentFont),
+              BaseLabel(l10n.fontFamily, role: TextRole.body),
+              BaseLabel(currentFont, role: TextRole.detail),
             ],
           ),
           trailing: DropdownButton<String>(
@@ -86,7 +92,7 @@ class ThemeSection extends ConsumerWidget {
             items: AppTheme.availableFonts.map((font) {
               return DropdownMenuItem(
                 value: font,
-                child: BodyMediumLabel(font),
+                child: BaseLabel(font, role: TextRole.body),
               );
             }).toList(),
             onChanged: (value) {
@@ -101,8 +107,8 @@ class ThemeSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.fontSize),
-              BodySmallLabel(getFontSizeName(ui.fontSize)),
+              BaseLabel(l10n.fontSize, role: TextRole.body),
+              BaseLabel(getFontSizeName(ui.fontSize), role: TextRole.detail),
             ],
           ),
           trailing: DropdownButton<AppFontSize>(
@@ -113,7 +119,7 @@ class ThemeSection extends ConsumerWidget {
             items: AppFontSize.values.map((size) {
               return DropdownMenuItem(
                 value: size,
-                child: BodyMediumLabel(getFontSizeName(size)),
+                child: BaseLabel(getFontSizeName(size), role: TextRole.body),
               );
             }).toList(),
             onChanged: (value) {
@@ -128,8 +134,8 @@ class ThemeSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.previewFontFamily),
-              BodySmallLabel(currentPreviewFont),
+              BaseLabel(l10n.previewFontFamily, role: TextRole.body),
+              BaseLabel(currentPreviewFont, role: TextRole.detail),
             ],
           ),
           trailing: DropdownButton<String>(
@@ -140,7 +146,7 @@ class ThemeSection extends ConsumerWidget {
             items: AppTheme.availableMonospaceFonts.map((font) {
               return DropdownMenuItem(
                 value: font,
-                child: BodyMediumLabel(font),
+                child: BaseLabel(font, role: TextRole.body),
               );
             }).toList(),
             onChanged: (value) {
@@ -155,8 +161,11 @@ class ThemeSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.previewFontSize),
-              BodySmallLabel(getFontSizeName(ui.previewFontSize)),
+              BaseLabel(l10n.previewFontSize, role: TextRole.body),
+              BaseLabel(
+                getFontSizeName(ui.previewFontSize),
+                role: TextRole.detail,
+              ),
             ],
           ),
           trailing: DropdownButton<AppFontSize>(
@@ -167,7 +176,7 @@ class ThemeSection extends ConsumerWidget {
             items: AppFontSize.values.map((size) {
               return DropdownMenuItem(
                 value: size,
-                child: BodyMediumLabel(getFontSizeName(size)),
+                child: BaseLabel(getFontSizeName(size), role: TextRole.body),
               );
             }).toList(),
             onChanged: (value) {

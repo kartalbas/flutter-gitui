@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole, Tone;
 
 import '../../core/hosting/hosted_repository.dart';
 import '../../core/hosting/hosting_providers.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_button.dart';
 import '../components/base_dialog.dart';
+import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_list_item.dart';
 import '../components/base_text_field.dart';
@@ -146,9 +148,10 @@ class _SelectHostedRepositoryDialogState
         height: 460,
         child: sources.isEmpty
             ? const Center(
-                child: BodyMediumLabel(
+                child: BaseLabel(
                   'No browsable host yet. Add a repository from a supported '
                   'provider first, then its repositories can be listed here.',
+                  role: TextRole.body,
                 ),
               )
             : Column(
@@ -270,13 +273,12 @@ class _SourceResults extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          BodyMediumLabel(repository.fullName, overflow: TextOverflow.ellipsis),
+          // One line, exactly like the description beneath it: both are rows in
+          // a list the user scans, and a wrapping name would make one row twice
+          // the height of its neighbours.
+          BaseLabel(repository.fullName, role: TextRole.body, maxLines: 1),
           if (repository.description case final description?)
-            BodySmallLabel(
-              description,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            BaseLabel(description, role: TextRole.detail, maxLines: 1),
         ],
       ),
       onTap: () => Navigator.of(context).pop(repository),
@@ -290,7 +292,7 @@ class _SourceResults extends ConsumerWidget {
     return asyncRepositories.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _Message(
-        icon: PhosphorIconsRegular.warningCircle,
+        icon: IconRole.warningCircle,
         text: 'Could not list ${source.label}: $error',
         isError: true,
       ),
@@ -305,7 +307,7 @@ class _SourceResults extends ConsumerWidget {
         final matches = filterRepositories(result.repositories, query);
         if (matches.isEmpty) {
           return _Message(
-            icon: PhosphorIconsRegular.magnifyingGlass,
+            icon: IconRole.magnifyingGlass,
             text: result.repositories.isEmpty
                 ? 'This account can see no repositories on ${source.label}.'
                 : 'Nothing matches "$query".',
@@ -372,15 +374,19 @@ class _FailureMessage extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingM),
-          BodyMediumLabel(switch (result.failure!) {
-            SourceFailure.credentialsMissing =>
-              'No sign-in stored for ${source.host}.',
-            SourceFailure.authenticationRejected =>
-              'The stored sign-in for ${source.host} was refused.',
-            SourceFailure.requestFailed =>
-              'Could not reach ${source.host}.'
-                  '${result.detail == null ? '' : '\n${result.detail}'}',
-          }, textAlign: TextAlign.center),
+          BaseLabel(
+            switch (result.failure!) {
+              SourceFailure.credentialsMissing =>
+                'No sign-in stored for ${source.host}.',
+              SourceFailure.authenticationRejected =>
+                'The stored sign-in for ${source.host} was refused.',
+              SourceFailure.requestFailed =>
+                'Could not reach ${source.host}.'
+                    '${result.detail == null ? '' : '\n${result.detail}'}',
+            },
+            role: TextRole.body,
+            align: TextAlign.center,
+          ),
           if (needsSignIn) ...[
             const SizedBox(height: AppTheme.paddingM),
             // Signing in is offered rather than forced: the picker opening
@@ -405,22 +411,29 @@ class _Message extends StatelessWidget {
     this.isError = false,
   });
 
-  final IconData icon;
+  /// The meaning of the mark above the words; the skin chooses the glyph.
+  final IconRole icon;
   final String text;
   final bool isError;
 
   @override
   Widget build(BuildContext context) {
-    final color = isError
-        ? Theme.of(context).colorScheme.error
-        : Theme.of(context).colorScheme.onSurfaceVariant;
+    // One statement, made once and read by both the mark and the words. The
+    // `Color` local that stood here was Material's answer to the same question
+    // `isError` already asks, and it had to be handed to two widgets by hand.
+    final Tone tone = isError ? Tone.danger : Tone.muted;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: AppTheme.iconXL, color: color),
+          BaseIcon(icon, scale: ControlScale.prominent, tone: tone),
           const SizedBox(height: AppTheme.paddingM),
-          BodyMediumLabel(text, textAlign: TextAlign.center, color: color),
+          BaseLabel(
+            text,
+            role: TextRole.body,
+            tone: tone,
+            align: TextAlign.center,
+          ),
         ],
       ),
     );

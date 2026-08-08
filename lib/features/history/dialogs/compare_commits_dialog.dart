@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -66,9 +67,10 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
 
           if (snapshot.hasError) {
             return Center(
-              child: BodyMediumLabel(
+              child: BaseLabel(
                 l10n.errorLoadingData('commits'),
-                color: Theme.of(context).colorScheme.error,
+                role: TextRole.body,
+                tone: Tone.danger,
               ),
             );
           }
@@ -85,9 +87,10 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: AppTheme.paddingM),
-                  BodyMediumLabel(
+                  BaseLabel(
                     l10n.noCommitsInRange,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    role: TextRole.body,
+                    tone: Tone.muted,
                   ),
                 ],
               ),
@@ -97,9 +100,10 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodySmallLabel(
+              BaseLabel(
                 l10n.commitsCount(commits.length),
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
               const SizedBox(height: AppTheme.paddingS),
               Expanded(
@@ -129,17 +133,14 @@ class _CompareCommitRow extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(
-            commit.shortSubject,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          BaseLabel(commit.shortSubject, role: TextRole.body, maxLines: 2),
           const SizedBox(height: AppTheme.paddingXS),
           Row(
             children: [
-              LabelMediumLabel(
+              BaseLabel(
                 commit.shortHash,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
               const SizedBox(width: AppTheme.paddingS),
               Icon(
@@ -149,20 +150,22 @@ class _CompareCommitRow extends StatelessWidget {
               ),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   commit.author,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                  maxLines: 1,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   commit.authorDateDisplay(
                     Localizations.localeOf(context).languageCode,
                   ),
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                  maxLines: 1,
                 ),
               ),
             ],

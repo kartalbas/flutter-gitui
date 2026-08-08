@@ -64,17 +64,20 @@ class StashListTile extends ConsumerWidget {
             backgroundColor: stash.isLatest
                 ? context.gitColors.added.withValues(alpha: 0.2)
                 : Theme.of(context).colorScheme.surfaceContainerHighest,
-            child: TitleSmallLabel(
+            // Tone.accent, not the git-added green this badge used to borrow:
+            // the latest stash is not "added", it is the one `git stash pop`
+            // will take, which is exactly what the accent says.
+            child: BaseLabel(
               stash.index.toString(),
-              color: stash.isLatest
-                  ? context.gitColors.added
-                  : Theme.of(context).colorScheme.onSurface,
+              role: TextRole.micro,
+              tone: stash.isLatest ? Tone.accent : Tone.neutral,
             ),
           ),
-          title: TitleMediumLabel(stash.displayTitle),
-          subtitle: BodySmallLabel(
+          title: BaseLabel(stash.displayTitle, role: TextRole.itemTitle),
+          subtitle: BaseLabel(
             'on ${stash.branch} • ${stash.timestampDisplay(Localizations.localeOf(context).languageCode)}',
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.detail,
+            tone: Tone.muted,
           ),
           trailing: BasePopupMenuButton<String>(
             icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
@@ -183,12 +186,9 @@ class StashListTile extends ConsumerWidget {
         // not a pixel.
         BaseIcon(icon, tone: Tone.muted, scale: ControlScale.compact),
         const SizedBox(width: AppTheme.paddingS),
-        BodySmallLabel(
-          '$label:',
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        BaseLabel('$label:', role: TextRole.detail, tone: Tone.muted),
         const SizedBox(width: AppTheme.paddingS),
-        Expanded(child: BodyMediumLabel(value)),
+        Expanded(child: BaseLabel(value, role: TextRole.body)),
       ],
     );
   }

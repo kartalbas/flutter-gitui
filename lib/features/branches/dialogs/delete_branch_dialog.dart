@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -43,8 +44,9 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
         icon: IconRole.lock,
         variant: DialogVariant.normal,
         onSubmit: () => Navigator.of(context).pop(),
-        content: BodyMediumLabel(
+        content: BaseLabel(
           'Cannot delete protected branch "${branch.shortName}". This branch is protected from deletion.',
+          role: TextRole.body,
         ),
       );
     }
@@ -57,20 +59,27 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(l10n.deleteBranchConfirm(branch.shortName)),
+          BaseLabel(
+            l10n.deleteBranchConfirm(branch.shortName),
+            role: TextRole.body,
+          ),
           const SizedBox(height: AppTheme.paddingS),
           CheckboxListTile(
             value: _force,
             onChanged: (value) => setState(() => _force = value ?? false),
-            title: BodyMediumLabel(l10n.forceDelete),
+            title: BaseLabel(l10n.forceDelete, role: TextRole.body),
             dense: true,
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
           ),
           if (_force)
-            BodySmallLabel(
+            // A force delete discards unmerged commits, which is destruction
+            // the user cannot undo by repeating the gesture - Tone.danger's
+            // definition word for word.
+            BaseLabel(
               l10n.forceDeleteWarning,
-              color: Theme.of(context).colorScheme.error,
+              role: TextRole.detail,
+              tone: Tone.danger,
             ),
         ],
       ),

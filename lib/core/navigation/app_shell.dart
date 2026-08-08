@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
@@ -331,11 +332,10 @@ class _AppShellState extends ConsumerState<AppShell> {
                                 ),
                                 if (isRailExtended) ...[
                                   const SizedBox(height: AppTheme.paddingS),
-                                  TitleMediumLabel(
+                                  BaseLabel(
                                     AppLocalizations.of(context)!.appTitle,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
+                                    role: TextRole.sectionTitle,
+                                    tone: Tone.accent,
                                   ),
                                 ],
                               ],
@@ -400,7 +400,28 @@ class _AppShellState extends ConsumerState<AppShell> {
                             Icon(dest.iconSelected),
                             badgeCount,
                           ),
-                          label: BodyMediumLabel(dest.label(context)),
+                          // Deliberately a bare Text, not a BaseLabel, and
+                          // **this moves a rendered size**: the rail styles
+                          // its own labels with `labelMedium`, so each
+                          // destination now draws at 12 px where the
+                          // `BodyMediumLabel` that used to be here pinned 13
+                          // (measured under both application themes; the
+                          // tracking and line height move with it, 0.5/1.33
+                          // against 0.25/1.43). That is the correct owner
+                          // answering: the rail lerps this slot between its
+                          // unselected and selected styles, so the text is
+                          // part of a larger member and belongs to the shell
+                          // chrome's own conversion at P4 - the same carve-out
+                          // BaseLabel's doc names for a button's words. Until
+                          // then, six destinations render one rung smaller,
+                          // which is a declared consequence of handing the
+                          // slot back rather than an oversight. A role-styled
+                          // label here also re-lays out under the animating
+                          // inherited colour and trips Flutter's paint-only
+                          // fast path (TextPainter.paint,
+                          // assert(debugSize == size)), which is how the
+                          // misplacement was found.
+                          label: Text(dest.label(context)),
                         );
                       }).toList(),
                     ),
@@ -587,75 +608,85 @@ class _AppShellState extends ConsumerState<AppShell> {
                                     color: Theme.of(
                                       context,
                                     ).colorScheme.errorContainer,
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          PhosphorIconsBold.warning,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.error,
-                                        ),
-                                        const SizedBox(
-                                          width: AppTheme.paddingM,
-                                        ),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              TitleMediumLabel(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.requiredSettingsMissing,
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onErrorContainer,
-                                              ),
-                                              const SizedBox(
-                                                height: AppTheme.paddingXS,
-                                              ),
-                                              BodySmallLabel(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.pleaseConfigureSettings(
-                                                  missingSettings
-                                                      .map(
-                                                        (
-                                                          s,
-                                                        ) => _requiredSettingLabel(
-                                                          AppLocalizations.of(
-                                                            context,
-                                                          )!,
-                                                          s,
-                                                        ),
-                                                      )
-                                                      .join(', '),
-                                                ),
-                                                color: Theme.of(
-                                                  context,
-                                                ).colorScheme.onErrorContainer,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        if (destination !=
-                                            AppDestination.settings)
-                                          BaseButton(
-                                            label: AppLocalizations.of(
+                                    // The banner paints its own fill, so it
+                                    // states the foreground that pairs with
+                                    // it once, here, instead of each label
+                                    // inside restating it. Left unstated the
+                                    // two labels would inherit the page's
+                                    // `onSurface` and paint it over an error
+                                    // container.
+                                    child: DefaultTextStyle.merge(
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onErrorContainer,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            PhosphorIconsBold.warning,
+                                            color: Theme.of(
                                               context,
-                                            )!.goToSettings,
-                                            variant: ButtonVariant.danger,
-                                            onPressed: () {
-                                              ref
-                                                  .read(
-                                                    navigationDestinationProvider
-                                                        .notifier,
-                                                  )
-                                                  .state = AppDestination
-                                                  .settings;
-                                            },
+                                            ).colorScheme.error,
                                           ),
-                                      ],
+                                          const SizedBox(
+                                            width: AppTheme.paddingM,
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                BaseLabel(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.requiredSettingsMissing,
+                                                  role: TextRole.sectionTitle,
+                                                ),
+                                                const SizedBox(
+                                                  height: AppTheme.paddingXS,
+                                                ),
+                                                BaseLabel(
+                                                  AppLocalizations.of(
+                                                    context,
+                                                  )!.pleaseConfigureSettings(
+                                                    missingSettings
+                                                        .map(
+                                                          (
+                                                            s,
+                                                          ) => _requiredSettingLabel(
+                                                            AppLocalizations.of(
+                                                              context,
+                                                            )!,
+                                                            s,
+                                                          ),
+                                                        )
+                                                        .join(', '),
+                                                  ),
+                                                  role: TextRole.detail,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          if (destination !=
+                                              AppDestination.settings)
+                                            BaseButton(
+                                              label: AppLocalizations.of(
+                                                context,
+                                              )!.goToSettings,
+                                              variant: ButtonVariant.danger,
+                                              onPressed: () {
+                                                ref
+                                                    .read(
+                                                      navigationDestinationProvider
+                                                          .notifier,
+                                                    )
+                                                    .state = AppDestination
+                                                    .settings;
+                                              },
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 // Content

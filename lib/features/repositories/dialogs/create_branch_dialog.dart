@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -10,7 +11,6 @@ import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../generated/app_localizations.dart';
-import '../../../shared/components/base_menu_item.dart';
 
 /// Branch prefix options
 enum BranchPrefix {
@@ -194,28 +194,32 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.warningCircle,
-                    color: Theme.of(context).colorScheme.error,
-                    size: 20,
-                  ),
-                  const SizedBox(width: AppTheme.paddingM),
-                  Expanded(
-                    child: MenuItemLabel(
-                      _errorMessage!,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+              // The callout paints its own fill and states the paired
+              // foreground once, here.
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      color: Theme.of(context).colorScheme.error,
+                      size: 20,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppTheme.paddingM),
+                    Expanded(
+                      child: BaseLabel(_errorMessage!, role: TextRole.control),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: AppTheme.paddingM),
           ],
 
           // Branch prefix selector
-          TitleSmallLabel(l10n.branchPrefixLabel),
+          BaseLabel(l10n.branchPrefixLabel, role: TextRole.sectionTitle),
           const SizedBox(height: AppTheme.paddingS),
 
           // One group, not a hand-assembled row of chips: picking a prefix is
@@ -270,20 +274,21 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                LabelSmallLabel(
+                BaseLabel(
                   l10n.fullBranchNameLabel,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.micro,
+                  tone: Tone.muted,
                 ),
                 const SizedBox(height: AppTheme.paddingXS),
-                TitleMediumLabel(
+                // Muted while nothing has been typed - a placeholder, whose
+                // half-alpha was the same statement said twice - and the
+                // accent once the preview names the branch that will exist.
+                BaseLabel(
                   fullBranchName.isEmpty
                       ? l10n.enterBranchNameLabel
                       : fullBranchName,
-                  color: fullBranchName.isEmpty
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
-                      : Theme.of(context).colorScheme.primary,
+                  role: TextRole.itemTitle,
+                  tone: fullBranchName.isEmpty ? Tone.muted : Tone.accent,
                 ),
               ],
             ),
@@ -292,8 +297,9 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
           const SizedBox(height: AppTheme.paddingL),
 
           // Repository list
-          TitleSmallLabel(
+          BaseLabel(
             l10n.willCreateInRepositories(widget.repositories.length),
+            role: TextRole.sectionTitle,
           ),
           const SizedBox(height: AppTheme.paddingS),
 
@@ -314,7 +320,7 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
                     size: 16,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  content: BodyMediumLabel(repo.displayName),
+                  content: BaseLabel(repo.displayName, role: TextRole.body),
                 );
               },
             ),
@@ -330,8 +336,11 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
                 _setUpstream = value ?? false;
               });
             },
-            title: BodyMediumLabel(l10n.setUpstreamLabel),
-            subtitle: BodySmallLabel(l10n.setUpstreamDescription),
+            title: BaseLabel(l10n.setUpstreamLabel, role: TextRole.body),
+            subtitle: BaseLabel(
+              l10n.setUpstreamDescription,
+              role: TextRole.detail,
+            ),
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
           ),
@@ -343,8 +352,14 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
                 _checkout = value ?? false;
               });
             },
-            title: BodyMediumLabel(l10n.checkoutAfterCreationLabel),
-            subtitle: BodySmallLabel(l10n.checkoutAfterCreationDescription),
+            title: BaseLabel(
+              l10n.checkoutAfterCreationLabel,
+              role: TextRole.body,
+            ),
+            subtitle: BaseLabel(
+              l10n.checkoutAfterCreationDescription,
+              role: TextRole.detail,
+            ),
             dense: true,
             controlAffinity: ListTileControlAffinity.leading,
           ),

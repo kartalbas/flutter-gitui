@@ -5,7 +5,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -394,9 +394,9 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(height: AppTheme.paddingM),
-                      TitleLargeLabel(
+                      BaseLabel(
                         AppLocalizations.of(context)!.dropFoldersHere,
-                        color: Theme.of(context).colorScheme.primary,
+                        role: TextRole.pageTitle,
                       ),
                     ],
                   ),
@@ -611,10 +611,11 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
             title: AppLocalizations.of(context)!.webBrowserLimitation,
             icon: IconRole.globe,
             onSubmit: () => Navigator.of(context).pop(),
-            content: BodyMediumLabel(
+            content: BaseLabel(
               AppLocalizations.of(
                 context,
               )!.dialogContentWebBrowserLimitationRepositories,
+              role: TextRole.body,
             ),
             actions: [
               DialogAction(
@@ -693,9 +694,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
         title: AppLocalizations.of(context)!.removeRepository,
         icon: IconRole.trash,
         variant: DialogVariant.destructive,
-        content: BodyMediumLabel(
+        content: BaseLabel(
           'Remove "${repo.displayName}" from workspace?\n\n'
           'This will not delete any files.',
+          role: TextRole.body,
         ),
         actions: [
           DialogAction(
@@ -794,9 +796,10 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
         title: AppLocalizations.of(context)!.clearAllRepositories,
         icon: IconRole.warning,
         variant: DialogVariant.destructive,
-        content: const BodyMediumLabel(
+        content: const BaseLabel(
           'Remove all repositories from workspace?\n\n'
           'This will not delete any files.',
+          role: TextRole.body,
         ),
         actions: [
           DialogAction(

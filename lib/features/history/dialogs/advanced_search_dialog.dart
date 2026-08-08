@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -246,10 +246,9 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.paddingS),
-      child: TitleSmallLabel(
-        title,
-        color: Theme.of(context).colorScheme.primary,
-      ),
+      // The brand tint said nothing a section header was not already saying,
+      // so it disappears rather than being renamed as a meaning.
+      child: BaseLabel(title, role: TextRole.sectionTitle),
     );
   }
 

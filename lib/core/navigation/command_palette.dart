@@ -196,10 +196,11 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                     ),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: BodySmallLabel(
+                      child: BaseLabel(
                         l10n.commandPaletteResultsCount(
                           _filteredCommands.length,
                         ),
+                        role: TextRole.detail,
                       ),
                     ),
                   ),
@@ -221,12 +222,14 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                                 ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(height: AppTheme.paddingM),
-                              TitleMediumLabel(
+                              BaseLabel(
                                 l10n.commandPaletteNoCommandsFound,
+                                role: TextRole.pageTitle,
                               ),
                               const SizedBox(height: AppTheme.paddingS),
-                              BodySmallLabel(
+                              BaseLabel(
                                 l10n.commandPaletteTryDifferentSearchTerm,
+                                role: TextRole.detail,
                               ),
                             ],
                           ),
@@ -256,8 +259,14 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                               content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  BodyMediumLabel(command.getTitle(l10n)),
-                                  BodySmallLabel(command.getDescription(l10n)),
+                                  BaseLabel(
+                                    command.getTitle(l10n),
+                                    role: TextRole.body,
+                                  ),
+                                  BaseLabel(
+                                    command.getDescription(l10n),
+                                    role: TextRole.detail,
+                                  ),
                                 ],
                               ),
                               trailing: command.shortcut != null
@@ -308,13 +317,13 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                       // that yields: it takes whatever width the key hints
                       // leave over and ellipsizes instead of overflowing.
                       Expanded(
-                        child: BodySmallLabel(
+                        child: BaseLabel(
                           l10n.commandPaletteCommandsAvailable(
                             GitCommands.all.length,
                           ),
-                          textAlign: TextAlign.end,
+                          role: TextRole.detail,
+                          align: TextAlign.end,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -342,10 +351,10 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
             border: Border.all(color: Theme.of(context).colorScheme.outline),
           ),
-          child: LabelSmallLabel(key),
+          child: BaseLabel(key, role: TextRole.micro),
         ),
         const SizedBox(width: AppTheme.paddingXS),
-        BodySmallLabel(label),
+        BaseLabel(label, role: TextRole.detail),
       ],
     );
   }

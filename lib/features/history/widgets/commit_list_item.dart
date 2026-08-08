@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -92,11 +93,7 @@ class CommitListItem extends ConsumerWidget {
           // that clears 4.5 : 1 on the selected tile. Naming
           // `onSecondaryContainer` here reinstated the M3 pairing that misses
           // it at 4.45 : 1 in the dark theme.
-          BodyMediumLabel(
-            commit.shortSubject,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          BaseLabel(commit.shortSubject, role: TextRole.body, maxLines: 2),
 
           const SizedBox(height: AppTheme.paddingXS),
 
@@ -120,26 +117,29 @@ class CommitListItem extends ConsumerWidget {
                       ).colorScheme.secondary.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        ref.contains('tag:')
-                            ? PhosphorIconsRegular.tag
-                            : PhosphorIconsRegular.gitBranch,
-                        size: 10,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSecondaryContainer,
-                      ),
-                      const SizedBox(width: 2),
-                      LabelSmallLabel(
-                        ref,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSecondaryContainer,
-                      ),
-                    ],
+                  // The chip is painted here, so the pairing is stated
+                  // here: its label reads the foreground rather than naming
+                  // one, and cannot disagree with the glyph beside it.
+                  child: DefaultTextStyle.merge(
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          ref.contains('tag:')
+                              ? PhosphorIconsRegular.tag
+                              : PhosphorIconsRegular.gitBranch,
+                          size: 10,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSecondaryContainer,
+                        ),
+                        const SizedBox(width: 2),
+                        BaseLabel(ref, role: TextRole.micro),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
@@ -147,44 +147,39 @@ class CommitListItem extends ConsumerWidget {
             const SizedBox(height: AppTheme.paddingXS),
           ],
 
-          // Author and time
+          // Author and time. Both lines are secondary to the subject
+          // above them, which is what `Tone.muted` says — and it says it
+          // once, for both row states, because the skin resolves "secondary"
+          // against whatever foreground the row has published. The two
+          // glyphs no longer restate the row's selection state either:
+          // `BaseListItem` publishes an `IconTheme` (base_list_item.dart:328)
+          // that already carries `onSurfaceVariant` on an unselected row and
+          // a contrast-corrected on-colour on a selected one, so the ternary
+          // here was the row's own answer copied out by hand — and the copy
+          // is what let the glyph and the word beside it drift apart.
           Row(
             children: [
-              Icon(
-                PhosphorIconsRegular.user,
-                size: AppTheme.iconXS,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.onSecondaryContainer
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              Icon(PhosphorIconsRegular.user, size: AppTheme.iconXS),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   commit.author,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSecondaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                  maxLines: 1,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingS),
-              Icon(
-                PhosphorIconsRegular.clock,
-                size: AppTheme.iconXS,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.onSecondaryContainer
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              Icon(PhosphorIconsRegular.clock, size: AppTheme.iconXS),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   commit.authorDateDisplay(
                     Localizations.localeOf(context).languageCode,
                   ),
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSecondaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                  maxLines: 1,
                 ),
               ),
             ],
@@ -192,24 +187,19 @@ class CommitListItem extends ConsumerWidget {
 
           const SizedBox(height: 2),
 
-          // Short hash and current branch. The metadata line is deliberately
-          // one step quieter than the subject, so an unselected row keeps
-          // `onSurfaceVariant`; a selected row hands that decision back to
-          // BaseListItem, which resolves both the text and the glyph against
-          // the tile it paints.
+          // Short hash and current branch, the same statement one line down.
           Row(
             children: [
-              LabelMediumLabel(
+              BaseLabel(
                 commit.shortHash,
-                color: isSelected
-                    ? null
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
               if (currentBranch != null) ...[
                 const SizedBox(width: AppTheme.paddingS),
                 Icon(PhosphorIconsRegular.gitBranch, size: 11),
                 const SizedBox(width: AppTheme.paddingXS),
-                LabelMediumLabel(currentBranch!),
+                BaseLabel(currentBranch!, role: TextRole.micro),
               ],
             ],
           ),

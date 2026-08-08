@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -40,14 +41,15 @@ class CommitDiffPanel extends ConsumerWidget {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: AppTheme.paddingS),
-          TitleSmallLabel(l10n.commitDiff),
+          BaseLabel(l10n.commitDiff, role: TextRole.sectionTitle),
           if (filePath != null) ...[
             const SizedBox(width: AppTheme.paddingS),
             Expanded(
-              child: BodySmallLabel(
+              child: BaseLabel(
                 filePath,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                overflow: TextOverflow.ellipsis,
+                role: TextRole.detail,
+                tone: Tone.muted,
+                maxLines: 1,
               ),
             ),
           ],
@@ -70,15 +72,23 @@ class CommitDiffPanel extends ConsumerWidget {
       content: fileAsync.when(
         data: (path) => path == null
             ? _CenteredNote(
-                icon: PhosphorIconsRegular.files,
+                mark: Icon(
+                  PhosphorIconsRegular.files,
+                  size: AppTheme.iconXL,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 message: l10n.messageNoFilesChanged,
               )
             : _CommitFileDiff(commitHash: commitHash, filePath: path),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => _CenteredNote(
-          icon: PhosphorIconsRegular.warningCircle,
+          mark: Icon(
+            PhosphorIconsRegular.warningCircle,
+            size: AppTheme.iconXL,
+            color: Theme.of(context).colorScheme.error,
+          ),
           message: l10n.errorLoadingData('diff'),
-          color: Theme.of(context).colorScheme.error,
+          tone: Tone.danger,
         ),
       ),
     );
@@ -114,33 +124,49 @@ class _CommitFileDiff extends ConsumerWidget {
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => _CenteredNote(
-        icon: PhosphorIconsRegular.warningCircle,
+        mark: Icon(
+          PhosphorIconsRegular.warningCircle,
+          size: AppTheme.iconXL,
+          color: Theme.of(context).colorScheme.error,
+        ),
         message: l10n.errorLoadingData('diff'),
-        color: Theme.of(context).colorScheme.error,
+        tone: Tone.danger,
       ),
     );
   }
 }
 
+/// A mark over a sentence, in the middle of the panel.
+///
+/// The colour parameter this used to carry was the caller's MEANING wearing a
+/// `Color`: "nothing went wrong, this is just empty" or "this failed". Said as
+/// a meaning it is a [Tone], and the skin decides what that looks like.
+///
+/// The mark arrives already built rather than as a [Tone] of its own, because
+/// the only application-legal way to draw one from a tone is `BaseIcon`, whose
+/// three scales top out at 24 while an empty state's mark is 32. Rather than
+/// shrink a glyph inside a phase about typography, the mark stays where the
+/// application already decided it and moves when the empty-state surface does.
 class _CenteredNote extends StatelessWidget {
-  final IconData icon;
+  final Widget mark;
   final String message;
-  final Color? color;
+  final Tone tone;
 
-  const _CenteredNote({required this.icon, required this.message, this.color});
+  const _CenteredNote({
+    required this.mark,
+    required this.message,
+    this.tone = Tone.muted,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor =
-        color ?? Theme.of(context).colorScheme.onSurfaceVariant;
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: AppTheme.iconXL, color: effectiveColor),
+          mark,
           const SizedBox(height: AppTheme.paddingM),
-          BodyMediumLabel(message, color: effectiveColor),
+          BaseLabel(message, role: TextRole.body, tone: tone),
         ],
       ),
     );

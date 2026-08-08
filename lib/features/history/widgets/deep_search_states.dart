@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_button.dart';
@@ -26,7 +27,7 @@ class DeepSearchRunningState extends StatelessWidget {
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.historySearchingAllHistory),
+          BaseLabel(l10n.historySearchingAllHistory, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingM),
           BaseButton(
             label: l10n.cancel,
@@ -85,7 +86,7 @@ class DeepSearchResultsBanner extends StatelessWidget {
             color: scheme.primary,
           ),
           const SizedBox(width: AppTheme.paddingS),
-          Expanded(child: BodySmallLabel(summary)),
+          Expanded(child: BaseLabel(summary, role: TextRole.detail)),
           if (onSearchChanges != null) ...[
             BaseButton(
               label: l10n.historyDeepSearchInChanges,
@@ -127,11 +128,12 @@ class DeepSearchNoResultsState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.emptyStateNoResultsFound),
+          BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             l10n.historyDeepSearchNoMatches,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.body,
+            tone: Tone.muted,
           ),
         ],
       ),
@@ -163,9 +165,10 @@ class DeepSearchFailedState extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          BodyMediumLabel(
+          BaseLabel(
             l10n.historyDeepSearchFailed(error),
-            textAlign: TextAlign.center,
+            role: TextRole.body,
+            align: TextAlign.center,
           ),
           const SizedBox(height: AppTheme.paddingM),
           BaseButton(

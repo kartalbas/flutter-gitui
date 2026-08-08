@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:path/path.dart' as path;
 import 'package:csv/csv.dart';
 
@@ -85,7 +85,10 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
       title: 'CSV/Spreadsheet Viewer',
       subtitle: fileName,
       headerMetadata: !_isLoading && _error == null
-          ? BodySmallLabel('$_rowCount rows × $_columnCount columns')
+          ? BaseLabel(
+              '$_rowCount rows × $_columnCount columns',
+              role: TextRole.detail,
+            )
           : null,
       content: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -138,8 +141,11 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
             horizontal: AppTheme.paddingS,
             vertical: AppTheme.paddingXS,
           ),
-          child: TitleSmallLabel(
+          // A column heading names one thing the rows below are instances
+          // of, which is itemTitle rather than the name of a region.
+          child: BaseLabel(
             index < firstRow.length ? firstRow[index]?.toString() ?? '' : '',
+            role: TextRole.itemTitle,
           ),
         ),
       ),

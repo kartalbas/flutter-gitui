@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
@@ -32,10 +33,7 @@ class FileHistoryPanel extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(AppLocalizations.of(context)!.fileHistory),
-            BodySmallLabel(
-              fileName,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            BaseLabel(fileName, role: TextRole.detail, tone: Tone.muted),
           ],
         ),
         actions: [
@@ -69,9 +67,9 @@ class FileHistoryPanel extends ConsumerWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(l10n.emptyStateNoHistory),
+            BaseLabel(l10n.emptyStateNoHistory, role: TextRole.pageTitle),
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(l10n.emptyStateNoHistoryMessage),
+            BaseLabel(l10n.emptyStateNoHistoryMessage, role: TextRole.body),
           ],
         ),
       );
@@ -111,40 +109,48 @@ class FileHistoryPanel extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.secondaryContainer,
                       borderRadius: BorderRadius.circular(AppTheme.radiusS),
                     ),
-                    child: BodySmallLabel(
-                      commit.shortHash,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    // The badge paints its own fill and states the
+                    // foreground that pairs with it.
+                    child: DefaultTextStyle.merge(
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
+                      ),
+                      child: BaseLabel(commit.shortHash, role: TextRole.detail),
                     ),
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       commit.author,
-                      overflow: TextOverflow.ellipsis,
+                      role: TextRole.body,
+                      maxLines: 1,
                     ),
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Flexible(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       commit.authorDateDisplay(
                         Localizations.localeOf(context).languageCode,
                       ),
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      overflow: TextOverflow.ellipsis,
+                      role: TextRole.detail,
+                      tone: Tone.muted,
+                      maxLines: 1,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppTheme.paddingS),
               // Commit message
-              BodyMediumLabel(commit.subject),
+              BaseLabel(commit.subject, role: TextRole.body),
               if (commit.body.isNotEmpty) ...[
                 const SizedBox(height: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   commit.body,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
                   maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],
@@ -165,11 +171,12 @@ class FileHistoryPanel extends ConsumerWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.messageErrorLoadingHistory,
+            role: TextRole.pageTitle,
           ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(error, textAlign: TextAlign.center),
+          BaseLabel(error, role: TextRole.body, align: TextAlign.center),
         ],
       ),
     );

@@ -81,7 +81,29 @@ enum Inset {
 /// onto its own ramp. `docs/SKIN-CONTRACT.md` decision D3 records that the
 /// collapse from fifteen to nine changes rendered sizes once, deliberately.
 enum TextRole {
-  /// The name of a screen or of a dialog. One per surface.
+  /// The loudest line in a region: what this screen, dialog or panel is
+  /// about. At most one per region.
+  ///
+  /// Deliberately "region" and not "surface", because the application reaches
+  /// for this in two places and calling it a page title made a skin read only
+  /// one of them. It names a screen or a dialog - and it is also the headline
+  /// of the empty or the error state that stands IN PLACE OF a region's
+  /// content ("No repositories yet", "Could not read this file"), which is
+  /// where roughly four of every five uses are. A bisect dialog therefore
+  /// renders it twice at once: its own name at the top, and the headline of
+  /// the empty state filling its body.
+  ///
+  /// **So a skin must not answer this with window or title-bar chrome.** It
+  /// appears in the middle of a panel, and a macOS skin stamping its
+  /// sheet-title treatment on every empty state would be wrong four times out
+  /// of five - the substitution failure `docs/SKIN-CONTRACT-MEMBERS.md` §10
+  /// names, arriving through a role's DOC rather than through its name. A
+  /// dialog's own title is chrome, and it stops coming through this role the
+  /// moment `BaseDialog` renders through `overlays.dialog`: the title is a
+  /// slot on `DialogSpec`, and a skin gets to draw THAT in its title idiom.
+  /// `lib/shared/components/base_dialog.dart` is the one site still spending
+  /// this role on chrome, and it is spending it there because its component
+  /// has not migrated yet.
   pageTitle,
 
   /// The name of a region inside a screen: a panel header, a settings section.
@@ -94,6 +116,12 @@ enum TextRole {
   body,
 
   /// Prose that must stand out from the prose beside it.
+  ///
+  /// Its opposite is [Tone.muted], which says "present, but secondary to what
+  /// it sits beside" - so the two cannot be said about the same line, and
+  /// `BaseLabel` asserts that they are not. An empty state's explanation is
+  /// NOT this: the headline above it is what stands out, and the explanation
+  /// is [body]. That pairing is how the contradiction got in.
   emphasis,
 
   /// Supporting detail: a path, an author, a date, a byte count.
@@ -310,7 +338,7 @@ enum NoticeLifetime {
 /// exists: once the skin owns the length, the application cannot enumerate the
 /// swatches itself.
 ///
-/// Sixteen named tones plus the series. The eight git tones are here because
+/// Seventeen named tones plus the series. The eight git tones are here because
 /// no design language has a slot for "this file is staged" - each skin answers
 /// them from its own palette, which is also the fix for the fixed hex values
 /// that are identical in light and dark and fail WCAG AA in light mode (#341).
@@ -353,6 +381,19 @@ final class Tone {
 
   /// This may not be what the user intended.
   static const Tone warning = Tone._('warning');
+
+  /// The value here is missing or rejected, and the user must fix it before
+  /// continuing.
+  ///
+  /// Not [danger]: an unset git executable destroys nothing, and danger's
+  /// whole definition is "this destroys something the user cannot get back by
+  /// repeating the gesture". Not [warning] either, which is "this may not be
+  /// what you intended" - an empty required field is not a doubt, it is a
+  /// fact to be corrected. Material happens to answer both this and [danger]
+  /// with `colorScheme.error`; Fluent answers it with a field validation
+  /// style rather than `InfoBarSeverity.error`, which is the proof this is a
+  /// meaning and not a colour.
+  static const Tone invalid = Tone._('invalid');
 
   /// This finished, and it finished well.
   static const Tone success = Tone._('success');

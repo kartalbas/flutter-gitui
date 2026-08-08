@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../../core/services/shell_service.dart';
 
 import '../../generated/app_localizations.dart';
@@ -234,15 +235,17 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            BodyMediumLabel(
+            BaseLabel(
               l10n.noToolsDetected,
-              color: Theme.of(context).colorScheme.error,
+              role: TextRole.body,
+              tone: Tone.danger,
             ),
             const SizedBox(height: AppTheme.paddingM),
-            BodySmallLabel(
+            BaseLabel(
               l10n.noToolsDetectedHint,
-              textAlign: TextAlign.center,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
+              align: TextAlign.center,
             ),
           ],
         ),
@@ -261,16 +264,18 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                 top: AppTheme.paddingM,
                 bottom: AppTheme.paddingS,
               ),
-              child: TitleSmallLabel(
+              child: BaseLabel(
                 'Git Executable',
-                color: Theme.of(context).colorScheme.primary,
+                role: TextRole.sectionTitle,
+                tone: Tone.accent,
               ),
             ),
             RadioListTile<String>(
-              title: const BodyMediumLabel('Use detected git'),
-              subtitle: BodySmallLabel(
+              title: const BaseLabel('Use detected git', role: TextRole.body),
+              subtitle: BaseLabel(
                 _gitPath!,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
               value: _gitPath!,
               // ignore: deprecated_member_use
@@ -291,17 +296,19 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                 top: AppTheme.paddingM,
                 bottom: AppTheme.paddingS,
               ),
-              child: TitleSmallLabel(
+              child: BaseLabel(
                 'Diff/Merge Tools (${_diffTools.length} found)',
-                color: Theme.of(context).colorScheme.primary,
+                role: TextRole.sectionTitle,
+                tone: Tone.accent,
               ),
             ),
             ..._diffTools.map((tool) {
               return RadioListTile<DiffTool>(
-                title: BodyMediumLabel(tool.displayName),
-                subtitle: BodySmallLabel(
+                title: BaseLabel(tool.displayName, role: TextRole.body),
+                subtitle: BaseLabel(
                   tool.executablePath,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
                 ),
                 value: tool,
                 // ignore: deprecated_member_use
@@ -323,17 +330,19 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
                 top: AppTheme.paddingM,
                 bottom: AppTheme.paddingS,
               ),
-              child: TitleSmallLabel(
+              child: BaseLabel(
                 'Text Editors (${_textEditors.length} found)',
-                color: Theme.of(context).colorScheme.primary,
+                role: TextRole.sectionTitle,
+                tone: Tone.accent,
               ),
             ),
             ..._textEditors.map((editor) {
               return RadioListTile<_DetectedEditor>(
-                title: BodyMediumLabel(editor.name),
-                subtitle: BodySmallLabel(
+                title: BaseLabel(editor.name, role: TextRole.body),
+                subtitle: BaseLabel(
                   editor.path,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
                 ),
                 value: editor,
                 // ignore: deprecated_member_use

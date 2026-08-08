@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../shared/theme/app_theme.dart';
@@ -8,7 +9,6 @@ import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_dropdown.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../core/git/models/branch.dart';
 
@@ -348,7 +348,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // PR Title
-            LabelLargeLabel(l10n.pullRequestTitleLabel),
+            BaseLabel(l10n.pullRequestTitleLabel, role: TextRole.control),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _titleController,
@@ -366,7 +366,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // PR Description
-            LabelLargeLabel(l10n.descriptionLabel),
+            BaseLabel(l10n.descriptionLabel, role: TextRole.control),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _descriptionController,
@@ -402,21 +402,28 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                 ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.info,
-                    size: AppTheme.iconS,
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
-                  const SizedBox(width: AppTheme.paddingM),
-                  Expanded(
-                    child: BodySmallLabel(
-                      l10n.prInfoMessage,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+              // The callout paints its own fill and states the paired
+              // foreground once, here.
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.info,
+                      size: AppTheme.iconS,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppTheme.paddingM),
+                    Expanded(
+                      child: BaseLabel(
+                        l10n.prInfoMessage,
+                        role: TextRole.detail,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -515,12 +522,16 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        child: MenuItemLabel(
+        // Tone.onAccent when selected, because THIS toggle paints its own
+        // accent fill three lines up - the exact case the tone's doc names.
+        // Both the hand-painted fill and the tone leave together when the
+        // toggle becomes a proper choice control. The bold-when-selected is
+        // gone: selection is already stated by the fill, and weight was the
+        // same fact said twice.
+        child: BaseLabel(
           label,
-          color: isSelected
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          role: TextRole.control,
+          tone: isSelected ? Tone.onAccent : Tone.muted,
         ),
       ),
     );

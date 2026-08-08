@@ -52,14 +52,14 @@ import 'package:flutter_gitui/features/tags/widgets/tag_filter_chips.dart';
 import 'package:flutter_gitui/features/tags/widgets/tags_batch_operations_bar.dart';
 import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
-import 'package:flutter_gitui/shared/components/base_menu_item.dart';
+import 'package:flutter_gitui/shared/components/base_label.dart';
 import 'package:flutter_gitui/shared/components/base_shrinking_row.dart';
 import 'package:flutter_gitui/shared/components/base_switcher.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_gitui/shared/widgets/inline_search_field.dart';
 import 'package:flutter_gitui/shared/widgets/overflow_action_bar.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import 'golden_scene.dart';
 
@@ -470,8 +470,14 @@ final List<GitTag> _tags = <GitTag>[
 
 List<PopupMenuEntry<int>> _sortMenuItems(BuildContext context) {
   return <PopupMenuEntry<int>>[
-    const PopupMenuItem<int>(value: 0, child: MenuItemLabel('Name A-Z')),
-    const PopupMenuItem<int>(value: 1, child: MenuItemLabel('Newest first')),
+    const PopupMenuItem<int>(
+      value: 0,
+      child: BaseLabel('Name A-Z', role: TextRole.control),
+    ),
+    const PopupMenuItem<int>(
+      value: 1,
+      child: BaseLabel('Newest first', role: TextRole.control),
+    ),
   ];
 }
 

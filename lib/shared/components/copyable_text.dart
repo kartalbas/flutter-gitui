@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 import '../../shared/theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import 'base_button.dart';
@@ -14,43 +14,25 @@ import 'base_label.dart';
 /// Shows a copy button on hover. Displays "Copied!" feedback.
 /// Useful for commit hashes, branch names, file paths, etc.
 ///
+/// Everything it shows is [TextRole.code], and that is no longer a switch the
+/// caller flips. The three parameters that used to decide it — a `TextStyle`, a
+/// `bool isMonospace` and a `TextOverflow` — were three design decisions
+/// crossing an application API to answer one question the component already
+/// knows the answer to: what this widget exists for is exactly the role's own
+/// definition, "diffs, hashes, paths, command output", where alignment is
+/// meaning rather than style. Every call site passed `isMonospace: true`
+/// anyway, so the flag was recording a decision nobody was making.
+///
 /// Example usage:
 /// ```dart
-/// CopyableText(
-///   text: 'a1b2c3d4e5f6',
-///   icon: IconRole.gitCommit,
-///   isMonospace: true,
-/// )
-/// ```
-///
-/// Commit hash example:
-/// ```dart
-/// CopyableText(
-///   text: commit.hash,
-///   icon: IconRole.gitCommit,
-///   isMonospace: true,
-///   maxLines: 1,
-/// )
-/// ```
-///
-/// File path example:
-/// ```dart
-/// CopyableText(
-///   text: '/path/to/very/long/file/name.txt',
-///   icon: IconRole.file,
-///   isMonospace: true,
-///   overflow: TextOverflow.ellipsis,
-/// )
+/// CopyableText(text: 'a1b2c3d4e5f6', icon: IconRole.gitCommit)
 /// ```
 class CopyableText extends StatefulWidget {
   const CopyableText({
     super.key,
     required this.text,
-    this.style,
     this.icon,
-    this.isMonospace = false,
     this.maxLines = 1,
-    this.overflow = TextOverflow.ellipsis,
     this.showCopyButton = true,
     this.selectOnClick = false,
     this.copiedMessage = 'Copied!',
@@ -59,21 +41,14 @@ class CopyableText extends StatefulWidget {
   /// Text to display and copy
   final String text;
 
-  /// Text style (default to theme bodyMedium or bodyMedium with monospace font)
-  final TextStyle? style;
-
   /// Optional leading icon
   /// The meaning of an optional leading mark; the skin chooses the glyph.
   final IconRole? icon;
 
-  /// Use monospace font (for hashes, paths, etc.)
-  final bool isMonospace;
-
-  /// Maximum lines to display
+  /// Maximum lines to display. What happens at the last one is the skin's
+  /// truncation idiom — Material ellipsizes at the end, AppKit truncates a path
+  /// in the middle — which is why there is no `overflow` beside it.
   final int maxLines;
-
-  /// Text overflow behavior
-  final TextOverflow overflow;
 
   /// Show copy button on hover
   final bool showCopyButton;
@@ -152,26 +127,11 @@ class _CopyableTextState extends State<CopyableText> {
 
               // Text content
               Flexible(
-                child: widget.isMonospace
-                    ? BaseLabel(
-                        widget.text,
-                        style:
-                            widget.style ??
-                            TextStyle(
-                              fontFamily: 'monospace',
-                              fontFeatures: [
-                                const FontFeature.tabularFigures(),
-                              ],
-                              fontSize: theme.textTheme.bodyMedium?.fontSize,
-                            ),
-                        maxLines: widget.maxLines,
-                        overflow: widget.overflow,
-                      )
-                    : BodyMediumLabel(
-                        widget.text,
-                        maxLines: widget.maxLines,
-                        overflow: widget.overflow,
-                      ),
+                child: BaseLabel(
+                  widget.text,
+                  role: TextRole.code,
+                  maxLines: widget.maxLines,
+                ),
               ),
 
               // Copy button or copied feedback

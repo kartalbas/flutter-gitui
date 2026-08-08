@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -21,7 +21,7 @@ class CheckoutTagDialog extends StatelessWidget {
       icon: IconRole.gitBranch,
       variant: DialogVariant.confirmation,
       onSubmit: () => Navigator.of(context).pop(true),
-      content: BodyMediumLabel(confirmMessage),
+      content: BaseLabel(confirmMessage, role: TextRole.body),
       actions: [
         DialogAction(
           label: loc.cancel,

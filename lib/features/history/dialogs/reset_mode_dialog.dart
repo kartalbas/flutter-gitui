@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -28,7 +28,7 @@ class ResetModeDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(l10n.resetCurrentBranchTo),
+          BaseLabel(l10n.resetCurrentBranchTo, role: TextRole.body),
           const SizedBox(height: AppTheme.paddingS),
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -48,12 +48,15 @@ class ResetModeDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BodyMediumLabel(
+                      BaseLabel(
                         commit.shortSubject,
+                        role: TextRole.body,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      BodySmallLabel('${commit.shortHash} by ${commit.author}'),
+                      BaseLabel(
+                        '${commit.shortHash} by ${commit.author}',
+                        role: TextRole.detail,
+                      ),
                     ],
                   ),
                 ),
@@ -61,9 +64,9 @@ class ResetModeDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleSmallLabel(l10n.chooseResetMode),
+          BaseLabel(l10n.chooseResetMode, role: TextRole.sectionTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(l10n.branchPointerWillMove),
+          BaseLabel(l10n.branchPointerWillMove, role: TextRole.detail),
         ],
       ),
       // Soft, mixed and hard are three different resets, not one action with

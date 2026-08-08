@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:path/path.dart' as p;
 
 import '../../../generated/app_localizations.dart';
@@ -681,7 +681,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       listenable: _treeController,
       builder: (context, _) {
         if (_treeController.flattenedNodes.isEmpty) {
-          return const Center(child: BodyMediumLabel('No files'));
+          return const Center(
+            child: BaseLabel('No files', role: TextRole.body),
+          );
         }
         return KeyboardNavigableTreeView<FileTreeNode>(
           controller: _treeController,
@@ -1045,7 +1047,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
                   : AppLocalizations.of(context)!.dialogTitleFileExists,
               icon: IconRole.copySimple,
               variant: DialogVariant.confirmation,
-              content: BodyMediumLabel(
+              content: BaseLabel(
                 isSameDirectory
                     ? AppLocalizations.of(
                         context,
@@ -1053,6 +1055,7 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
                     : AppLocalizations.of(
                         context,
                       )!.dialogContentFileExistsDestination(fileName),
+                role: TextRole.body,
               ),
               actions: [
                 DialogAction(
@@ -1173,8 +1176,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
             icon: IconRole.warning,
             title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
             variant: DialogVariant.destructive,
-            content: BodyMediumLabel(
+            content: BaseLabel(
               AppLocalizations.of(context)!.dialogContentDeleteFile(fileName),
+              role: TextRole.body,
             ),
             actions: [
               DialogAction(

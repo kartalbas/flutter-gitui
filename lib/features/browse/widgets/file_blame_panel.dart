@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -35,10 +36,7 @@ class FileBlamePanel extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(AppLocalizations.of(context)!.blame),
-            BodySmallLabel(
-              fileName,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            BaseLabel(fileName, role: TextRole.detail, tone: Tone.muted),
           ],
         ),
         actions: [
@@ -199,16 +197,17 @@ class FileBlamePanel extends ConsumerWidget {
                     backgroundColor: Theme.of(
                       context,
                     ).colorScheme.primaryContainer,
-                    child: LabelSmallLabel(
-                      line.authorInitials,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
+                    // The avatar's fill decides its own foreground; saying
+                    // the pairing here was Material's on-colour model leaking
+                    // into a screen.
+                    child: BaseLabel(line.authorInitials, role: TextRole.micro),
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       line.author,
-                      overflow: TextOverflow.ellipsis,
+                      role: TextRole.detail,
+                      maxLines: 1,
                     ),
                   ),
                 ],
@@ -225,9 +224,10 @@ class FileBlamePanel extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: AppTheme.paddingXS),
-                  LabelMediumLabel(
+                  BaseLabel(
                     relativeTime,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    role: TextRole.detail,
+                    tone: Tone.muted,
                   ),
                 ],
               ),
@@ -241,27 +241,28 @@ class FileBlamePanel extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(AppTheme.radiusS),
                 ),
-                child: LabelSmallLabel(
-                  line.shortHash,
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                // The chip paints its own fill and states the foreground
+                // that pairs with it; the hash inside reads it.
+                child: DefaultTextStyle.merge(
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
+                  child: BaseLabel(line.shortHash, role: TextRole.micro),
                 ),
               ),
 
               const SizedBox(height: AppTheme.paddingS),
 
               // Commit summary (first line)
-              LabelMediumLabel(
-                line.summary,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              BaseLabel(line.summary, role: TextRole.detail, maxLines: 2),
 
               // Line count indicator if group has multiple lines
               if (lineCount > 1) ...[
                 const SizedBox(height: AppTheme.paddingS),
-                LabelSmallLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.linesCount(lineCount),
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.micro,
+                  tone: Tone.muted,
                 ),
               ],
             ],
@@ -283,12 +284,14 @@ class FileBlamePanel extends ConsumerWidget {
           // Line number
           SizedBox(
             width: 50,
-            child: BodySmallLabel(
+            // "Secondary", said once. The alpha on top was the same
+            // statement a second time, in numbers - and how faint secondary
+            // text is belongs to the skin.
+            child: BaseLabel(
               line.lineNumber.toString(),
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-              textAlign: TextAlign.right,
+              role: TextRole.detail,
+              tone: Tone.muted,
+              align: TextAlign.right,
             ),
           ),
 
@@ -321,9 +324,15 @@ class FileBlamePanel extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.emptyFile),
+          BaseLabel(
+            AppLocalizations.of(context)!.emptyFile,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(AppLocalizations.of(context)!.noContent),
+          BaseLabel(
+            AppLocalizations.of(context)!.noContent,
+            role: TextRole.body,
+          ),
         ],
       ),
     );
@@ -340,11 +349,18 @@ class FileBlamePanel extends ConsumerWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.errorLoadingBlame),
+          BaseLabel(
+            AppLocalizations.of(context)!.errorLoadingBlame,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingXL),
-            child: BodyMediumLabel(error, textAlign: TextAlign.center),
+            child: BaseLabel(
+              error,
+              role: TextRole.body,
+              align: TextAlign.center,
+            ),
           ),
         ],
       ),
@@ -476,7 +492,7 @@ ${line.summary}
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: AppTheme.paddingS),
-          child: TitleSmallLabel('$label:'),
+          child: BaseLabel('$label:', role: TextRole.sectionTitle),
         ),
         Padding(
           padding: const EdgeInsets.only(
@@ -506,7 +522,10 @@ ${line.summary}
             children: [
               _buildStatistics(context, blame),
               const SizedBox(height: AppTheme.paddingM),
-              TitleSmallLabel(AppLocalizations.of(context)!.contributors),
+              BaseLabel(
+                AppLocalizations.of(context)!.contributors,
+                role: TextRole.sectionTitle,
+              ),
               const SizedBox(height: AppTheme.paddingS),
               ...blame.uniqueAuthors.map((author) {
                 final lineCount = blame.linesByAuthor[author]?.length ?? 0;
@@ -517,8 +536,9 @@ ${line.summary}
                     left: AppTheme.paddingM,
                     top: AppTheme.paddingS,
                   ),
-                  child: BodyMediumLabel(
+                  child: BaseLabel(
                     '• $author: $lineCount lines ($percentage%)',
+                    role: TextRole.body,
                   ),
                 );
               }),

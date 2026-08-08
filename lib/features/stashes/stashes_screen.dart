@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -177,7 +178,10 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
         Expanded(
           child: filteredStashes.isEmpty
               ? Center(
-                  child: BodyLargeLabel('No stashes match "$_searchQuery"'),
+                  child: BaseLabel(
+                    'No stashes match "$_searchQuery"',
+                    role: TextRole.body,
+                  ),
                 )
               : KeyboardNavigableListView(
                   controller: _listController,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_button.dart';
@@ -62,9 +63,10 @@ class HistoryListFooter extends StatelessWidget {
               color: scheme.onSurfaceVariant,
             ),
             const SizedBox(width: AppTheme.paddingS),
-            BodySmallLabel(
+            BaseLabel(
               l10n.historyBeginningOfHistory(loadedCount),
-              color: scheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
           ],
         ),
@@ -83,9 +85,10 @@ class HistoryListFooter extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
             const SizedBox(width: AppTheme.paddingS),
-            BodySmallLabel(
+            BaseLabel(
               l10n.historyLoadingMoreCommits,
-              color: scheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
           ],
         ),
@@ -97,10 +100,11 @@ class HistoryListFooter extends StatelessWidget {
       child: Column(
         children: [
           if (loadMoreError != null) ...[
-            BodySmallLabel(
+            BaseLabel(
               l10n.historyLoadMoreFailed(loadMoreError!),
-              color: scheme.error,
-              textAlign: TextAlign.center,
+              role: TextRole.detail,
+              tone: Tone.danger,
+              align: TextAlign.center,
             ),
             const SizedBox(height: AppTheme.paddingS),
           ],
@@ -114,9 +118,10 @@ class HistoryListFooter extends StatelessWidget {
             onPressed: onLoadMore,
           ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
+          BaseLabel(
             l10n.historyLoadedCount(loadedCount),
-            color: scheme.onSurfaceVariant,
+            role: TextRole.detail,
+            tone: Tone.muted,
           ),
           if (searchActive && onSearchAllHistory != null) ...[
             const SizedBox(height: AppTheme.paddingS),

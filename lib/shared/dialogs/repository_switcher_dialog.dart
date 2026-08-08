@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -164,9 +165,10 @@ class _RepositorySwitcherDialogState
             child: filteredRepos.isEmpty
                 ? Center(
                     heightFactor: 2,
-                    child: BodyLargeLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.noRepositoriesFound,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      role: TextRole.body,
+                      tone: Tone.muted,
                     ),
                   )
                 // A navigable collection: one Tab stop with the roving
@@ -220,15 +222,15 @@ class _RepositorySwitcherDialogState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            BodyMediumLabel(
+                            BaseLabel(
                               repo.displayName,
+                              role: TextRole.body,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            LabelMediumLabel(
+                            BaseLabel(
                               repo.path,
+                              role: TextRole.detail,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                             if (!repo.isValidGitRepo)
                               Row(
@@ -239,11 +241,12 @@ class _RepositorySwitcherDialogState
                                     color: Theme.of(context).colorScheme.error,
                                   ),
                                   const SizedBox(width: AppTheme.paddingXS),
-                                  LabelMediumLabel(
+                                  BaseLabel(
                                     AppLocalizations.of(
                                       context,
                                     )!.invalidRepository,
-                                    color: Theme.of(context).colorScheme.error,
+                                    role: TextRole.detail,
+                                    tone: Tone.danger,
                                   ),
                                 ],
                               ),

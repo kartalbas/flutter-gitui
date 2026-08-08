@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -67,11 +68,12 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      LabelSmallLabel(
+                      BaseLabel(
                         l10n.sourceTag,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        role: TextRole.micro,
+                        tone: Tone.muted,
                       ),
-                      BodyMediumLabel(widget.tagName),
+                      BaseLabel(widget.tagName, role: TextRole.body),
                     ],
                   ),
                 ),
@@ -104,10 +106,14 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
                 _checkout = value ?? true;
               });
             },
-            title: BodyMediumLabel(l10n.checkoutBranchAfterCreation),
-            subtitle: BodySmallLabel(
+            title: BaseLabel(
+              l10n.checkoutBranchAfterCreation,
+              role: TextRole.body,
+            ),
+            subtitle: BaseLabel(
               l10n.checkoutBranchAfterCreationHint,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
             contentPadding: EdgeInsets.zero,
             dense: true,

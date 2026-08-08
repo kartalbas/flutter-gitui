@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -34,7 +35,7 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: AppTheme.paddingS),
-          TitleSmallLabel(l10n.commitDetails),
+          BaseLabel(l10n.commitDetails, role: TextRole.sectionTitle),
         ],
       ),
       actions: const [],
@@ -63,9 +64,12 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: AppTheme.paddingS),
-                        TitleSmallLabel(
+                        // The brand tint this header spelled out said
+                        // nothing the header was not already saying by being a
+                        // section title, so it goes rather than being renamed.
+                        BaseLabel(
                           l10n.commitMessage,
-                          color: Theme.of(context).colorScheme.primary,
+                          role: TextRole.sectionTitle,
                         ),
                       ],
                     ),
@@ -109,11 +113,12 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: AppTheme.paddingS),
-                      BodyMediumLabel(l10n.additionalDetails),
+                      BaseLabel(l10n.additionalDetails, role: TextRole.body),
                       const Spacer(),
-                      BodySmallLabel(
+                      BaseLabel(
                         _showDetails ? l10n.hide : l10n.show,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        role: TextRole.detail,
+                        tone: Tone.muted,
                       ),
                     ],
                   ),
@@ -205,7 +210,6 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                         PhosphorIconsRegular.hash,
                         child: CopyableText(
                           text: widget.commit.hash,
-                          isMonospace: true,
                           icon: IconRole.gitCommit,
                         ),
                       ),
@@ -227,7 +231,6 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                                 padding: const EdgeInsets.only(bottom: 6),
                                 child: CopyableText(
                                   text: parent,
-                                  isMonospace: true,
                                   icon: IconRole.gitCommit,
                                 ),
                               );
@@ -274,34 +277,42 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                                               .withValues(alpha: 0.3),
                                   ),
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      isTag
-                                          ? PhosphorIconsRegular.tag
-                                          : PhosphorIconsRegular.gitBranch,
-                                      size: 12,
-                                      color: isTag
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.onTertiaryContainer
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondaryContainer,
-                                    ),
-                                    const SizedBox(width: AppTheme.paddingXS),
-                                    LabelMediumLabel(
-                                      ref,
-                                      color: isTag
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.onTertiaryContainer
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondaryContainer,
-                                    ),
-                                  ],
+                                // "This ref is a tag rather than a branch" is a
+                                // fact about the CHIP, not about its text
+                                // colour — so the chip chooses the fill and
+                                // states the foreground that pairs with it,
+                                // once, and its label says nothing about
+                                // colour at all.
+                                child: DefaultTextStyle.merge(
+                                  style: TextStyle(
+                                    color: isTag
+                                        ? Theme.of(
+                                            context,
+                                          ).colorScheme.onTertiaryContainer
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondaryContainer,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isTag
+                                            ? PhosphorIconsRegular.tag
+                                            : PhosphorIconsRegular.gitBranch,
+                                        size: 12,
+                                        color: isTag
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.onTertiaryContainer
+                                            : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondaryContainer,
+                                      ),
+                                      const SizedBox(width: AppTheme.paddingXS),
+                                      BaseLabel(ref, role: TextRole.micro),
+                                    ],
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -332,9 +343,13 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
           children: [
             Icon(icon, size: 14, color: Theme.of(context).colorScheme.primary),
             const SizedBox(width: AppTheme.paddingS),
-            LabelLargeLabel(
+            BaseLabel(
               title,
-              color: Theme.of(context).colorScheme.primary,
+              role: TextRole.sectionTitle,
+              // "This is the configured, resolved value" - the meaning the
+              // brand colour was standing in for beside its red-when-unset
+              // siblings.
+              tone: Tone.accent,
             ),
           ],
         ),
@@ -352,10 +367,7 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
         children: [
           SizedBox(
             width: 50,
-            child: BodySmallLabel(
-              label,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            child: BaseLabel(label, role: TextRole.detail, tone: Tone.muted),
           ),
           const SizedBox(width: AppTheme.paddingM),
           Expanded(

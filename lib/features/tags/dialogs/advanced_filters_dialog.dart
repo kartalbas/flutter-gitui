@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -83,7 +83,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Date Range Filter
-            TitleSmallLabel(loc.dateRange),
+            BaseLabel(loc.dateRange, role: TextRole.sectionTitle),
             const SizedBox(height: AppTheme.paddingS),
             BaseDropdown<DateRangeFilter>(
               initialValue: _dateFilter,
@@ -133,7 +133,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Author Filter
-            TitleSmallLabel(loc.authorTagger),
+            BaseLabel(loc.authorTagger, role: TextRole.sectionTitle),
             const SizedBox(height: AppTheme.paddingS),
             if (authors.isNotEmpty)
               BaseDropdown<String?>(
@@ -159,7 +159,7 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
                 },
               )
             else
-              BodyMediumLabel(loc.noAuthorsFound),
+              BaseLabel(loc.noAuthorsFound, role: TextRole.body),
             const SizedBox(height: AppTheme.paddingL),
 
             // Regex Search Toggle
@@ -170,8 +170,11 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
                   _useRegex = value;
                 });
               },
-              title: BodyMediumLabel(loc.useRegularExpressions),
-              subtitle: BodySmallLabel(loc.enableRegexPatternMatching),
+              title: BaseLabel(loc.useRegularExpressions, role: TextRole.body),
+              subtitle: BaseLabel(
+                loc.enableRegexPatternMatching,
+                role: TextRole.detail,
+              ),
               secondary: const Icon(PhosphorIconsRegular.code),
               contentPadding: EdgeInsets.zero,
             ),

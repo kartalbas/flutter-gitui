@@ -86,6 +86,7 @@ import 'package:flutter_gitui/shared/components/base_list_item.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../support/conformance_harness.dart';
 
@@ -291,14 +292,17 @@ void main() {
         // arrangement the application never renders.
         await pumpConformance(
           tester,
-          const BaseCard(content: BodyMediumLabel(_label), isSelected: true),
+          const BaseCard(
+            content: BaseLabel(_label, role: TextRole.body),
+            isSelected: true,
+          ),
           brightness: brightness,
         );
         expectReadable(
           _foreground(tester),
           _cardContainer(tester),
           component: 'BaseCard',
-          state: 'selected, content is a BodyMediumLabel',
+          state: 'selected, content is a body label',
           brightness: brightness,
         );
       });
@@ -345,7 +349,7 @@ void main() {
           await pumpConformance(
             tester,
             BaseCard(
-              content: const BodyMediumLabel(_label),
+              content: const BaseLabel(_label, role: TextRole.body),
               isSelected: true,
               customBackgroundColor: container,
             ),
@@ -396,7 +400,7 @@ void main() {
         await pumpConformance(
           tester,
           const BaseListItem(
-            content: BodyMediumLabel(_label),
+            content: BaseLabel(_label, role: TextRole.body),
             isSelected: true,
           ),
           brightness: brightness,
@@ -405,7 +409,7 @@ void main() {
           _foreground(tester),
           _listItemContainer(tester),
           component: 'BaseListItem',
-          state: 'selected, content is a BodyMediumLabel',
+          state: 'selected, content is a body label',
           brightness: brightness,
         );
       });
@@ -426,9 +430,9 @@ void main() {
           await pumpConformance(
             tester,
             const BaseListItem(
-              content: BodyMediumLabel(_label),
-              badge: BodySmallLabel('M'),
-              trailing: BodyMediumLabel('HEAD'),
+              content: BaseLabel(_label, role: TextRole.body),
+              badge: BaseLabel('M', role: TextRole.detail),
+              trailing: BaseLabel('HEAD', role: TextRole.body),
               isSelected: true,
             ),
             brightness: brightness,
@@ -462,7 +466,7 @@ void main() {
             tester,
             BaseListItem(
               leading: const Icon(Icons.folder),
-              content: const BodyMediumLabel(_label),
+              content: const BaseLabel(_label, role: TextRole.body),
               isSelected: selected,
               isMultiSelected: multi,
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
@@ -36,7 +37,17 @@ class FileStatusBadge extends StatelessWidget {
             : color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppTheme.radiusS),
       ),
-      child: LabelSmallLabel(code, color: color),
+      // The badge states its own foreground and the code reads it, rather than
+      // the two of them naming the same `Color` twice. [color] itself stays a
+      // `Color` for now on purpose: it paints the wash behind the code as well
+      // as the code, and until the badge is `surfaces.badge` at P3d there is no
+      // contract member that can tint a surface from a `Tone` — a half-migrated
+      // badge whose text is a meaning and whose fill is still a value would be
+      // two names for one thing.
+      child: DefaultTextStyle.merge(
+        style: TextStyle(color: color),
+        child: BaseLabel(code, role: TextRole.micro),
+      ),
     );
   }
 }

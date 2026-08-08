@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -59,34 +60,40 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
               color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  PhosphorIconsRegular.package,
-                  size: 24,
-                  color: theme.colorScheme.onPrimaryContainer,
-                ),
-                const SizedBox(width: AppTheme.paddingM),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TitleSmallLabel(
-                        l10n.updateVersionHeading(widget.updateInfo.version),
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                      const SizedBox(height: AppTheme.paddingXS),
-                      BodySmallLabel(
-                        l10n.updateReleasedOn(
-                          _formatDate(context, widget.updateInfo.releaseDate),
-                          widget.updateInfo.fileSizeFormatted,
-                        ),
-                        color: theme.colorScheme.onPrimaryContainer,
-                      ),
-                    ],
+            // The panel names the foreground that pairs with its own fill, so
+            // the two lines inside it do not have to name it again — and cannot
+            // disagree with it.
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: theme.colorScheme.onPrimaryContainer),
+              child: Row(
+                children: [
+                  Icon(
+                    PhosphorIconsRegular.package,
+                    size: 24,
+                    color: theme.colorScheme.onPrimaryContainer,
                   ),
-                ),
-              ],
+                  const SizedBox(width: AppTheme.paddingM),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(
+                          l10n.updateVersionHeading(widget.updateInfo.version),
+                          role: TextRole.sectionTitle,
+                        ),
+                        const SizedBox(height: AppTheme.paddingXS),
+                        BaseLabel(
+                          l10n.updateReleasedOn(
+                            _formatDate(context, widget.updateInfo.releaseDate),
+                            widget.updateInfo.fileSizeFormatted,
+                          ),
+                          role: TextRole.detail,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -94,7 +101,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
 
           // Changelog
           if (widget.updateInfo.changelog.isNotEmpty) ...[
-            TitleSmallLabel(l10n.updateWhatsNew),
+            BaseLabel(l10n.updateWhatsNew, role: TextRole.sectionTitle),
             const SizedBox(height: AppTheme.paddingS),
             Container(
               constraints: const BoxConstraints(maxHeight: 300),
@@ -105,7 +112,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
                 border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: SingleChildScrollView(
-                child: BodyMediumLabel(widget.updateInfo.changelog),
+                child: BaseLabel(
+                  widget.updateInfo.changelog,
+                  role: TextRole.body,
+                ),
               ),
             ),
             const SizedBox(height: AppTheme.paddingL),
@@ -113,9 +123,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
 
           // Download progress
           if (_isDownloading) ...[
-            LabelMediumLabel(
+            BaseLabel(
               l10n.updateDownloadingProgress,
-              color: theme.colorScheme.primary,
+              role: TextRole.detail,
+              tone: Tone.accent,
             ),
             const SizedBox(height: AppTheme.paddingS),
             LinearProgressIndicator(
@@ -123,9 +134,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
             ),
             const SizedBox(height: AppTheme.paddingS),
-            BodySmallLabel(
+            BaseLabel(
               '${(_downloadProgress * 100).toStringAsFixed(0)}%',
-              color: theme.colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
           ],
 
@@ -147,9 +159,13 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
-                      _errorMessage!,
-                      color: theme.colorScheme.onErrorContainer,
+                    // The error panel states its own paired foreground; the
+                    // message inside reads it.
+                    child: DefaultTextStyle.merge(
+                      style: TextStyle(
+                        color: theme.colorScheme.onErrorContainer,
+                      ),
+                      child: BaseLabel(_errorMessage!, role: TextRole.detail),
                     ),
                   ),
                 ],
@@ -180,9 +196,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
                         _dontShowAgain = !_dontShowAgain;
                       });
                     },
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       l10n.updateDontShowAgain,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      role: TextRole.detail,
+                      tone: Tone.muted,
                     ),
                   ),
                 ),
@@ -311,7 +328,10 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           title: l10n.updateOperationRunningTitle,
           icon: IconRole.warningCircle,
           onSubmit: () => Navigator.of(context).pop(),
-          content: BodyMediumLabel(l10n.updateOperationRunningBody),
+          content: BaseLabel(
+            l10n.updateOperationRunningBody,
+            role: TextRole.body,
+          ),
           actions: [
             DialogAction(
               label: l10n.ok,
@@ -331,7 +351,7 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
           title: l10n.updateUnsavedInputTitle,
           icon: IconRole.warningCircle,
           variant: DialogVariant.destructive,
-          content: BodyMediumLabel(l10n.updateUnsavedInputBody),
+          content: BaseLabel(l10n.updateUnsavedInputBody, role: TextRole.body),
           actions: [
             DialogAction(
               label: l10n.cancel,

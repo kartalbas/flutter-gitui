@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -118,25 +119,15 @@ class WorkspaceCard extends StatelessWidget {
           const SizedBox(height: AppTheme.paddingM),
 
           // Project name
-          TitleLargeLabel(
+          BaseLabel(
             project.displayName(l10n),
-            color: isSelected
-                ? Theme.of(context).colorScheme.onSecondaryContainer
-                : Theme.of(context).colorScheme.onSurface,
+            role: TextRole.itemTitle,
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
 
           if (description != null) ...[
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(
-              description,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onSecondaryContainer
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            BaseLabel(description, role: TextRole.body, maxLines: 2),
           ],
 
           const SizedBox(height: AppTheme.paddingM),
@@ -150,11 +141,12 @@ class WorkspaceCard extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingS),
-              BodySmallLabel(
+              BaseLabel(
                 AppLocalizations.of(
                   context,
                 )!.repositoriesCount(project.repositoryPaths.length),
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
             ],
           ),

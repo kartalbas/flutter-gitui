@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
@@ -261,7 +262,10 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
 
     if (flattenedNodes.isEmpty) {
       return Center(
-        child: BodyMediumLabel(AppLocalizations.of(context)!.noChanges),
+        child: BaseLabel(
+          AppLocalizations.of(context)!.noChanges,
+          role: TextRole.body,
+        ),
       );
     }
 
@@ -288,7 +292,19 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: AppTheme.paddingS),
-                  const TitleSmallLabel('Changed Files'),
+                  // Flexible, because a section title is a rung larger than
+                  // the panel header used to be and this pane is one third of
+                  // the window: at the 800 px minimum the application allows
+                  // (AppConstants.minWindowWidth) an unflexed title overflows
+                  // its header instead of truncating. The diff panel's title
+                  // beside it already says the same thing.
+                  const Flexible(
+                    child: BaseLabel(
+                      'Changed Files',
+                      role: TextRole.sectionTitle,
+                      maxLines: 1,
+                    ),
+                  ),
                 ],
               ),
               padding: EdgeInsets.zero,
@@ -325,9 +341,12 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: TitleSmallLabel(
+                      // The name of one object - the file whose diff is
+                      // on screen - rather than the name of the region.
+                      child: BaseLabel(
                         _selectedFile!.path,
-                        overflow: TextOverflow.ellipsis,
+                        role: TextRole.itemTitle,
+                        maxLines: 1,
                       ),
                     ),
                     Icon(
@@ -342,12 +361,13 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
                           : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: AppTheme.paddingXS),
-                    BodySmallLabel(
+                    BaseLabel(
                       _selectedFile!.isPartiallyStaged
                           ? 'Partially staged'
                           : _selectedFile!.isStaged
                           ? 'Staged'
                           : 'Unstaged',
+                      role: TextRole.detail,
                     ),
                   ],
                 ),
@@ -506,9 +526,10 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
                   color: Theme.of(context).colorScheme.error,
                 ),
                 const SizedBox(height: AppTheme.paddingM),
-                BodyMediumLabel(
+                BaseLabel(
                   'Error loading diff: ${snapshot.error}',
-                  color: Theme.of(context).colorScheme.error,
+                  role: TextRole.body,
+                  tone: Tone.danger,
                 ),
               ],
             ),

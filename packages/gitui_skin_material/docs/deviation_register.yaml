@@ -580,8 +580,9 @@ deviations:
   # entries affected say so.
   #
   # BaseDialog's padding, action spacing, action alignment, elevation, surface
-  # role, surface tint, barrier, title role, content role and icon size all
-  # measure the M3 value, so nothing about them is registered here.
+  # role, surface tint, barrier, content role and icon size all measure the
+  # M3 value, so nothing about them is registered here. The title role stopped
+  # conforming when the typography collapse landed - see DLG-005.
 
   - id: DLG-001
     component: BaseDialog
@@ -703,6 +704,29 @@ deviations:
       label is a line nobody can scan. The declared width is still capped at
       90% of the window, so a dialog can never outgrow a small screen.
     registered: 2026-08-07
+
+  - id: DLG-005
+    component: BaseDialog
+    property: titleTextStyle
+    spec_value: "headlineSmall (fontSize 22.0, weight FontWeight.w400)"
+    app_value: "titleLarge (fontSize 20.0, weight FontWeight.w400)"
+    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/dialog.dart:1988 (_DialogDefaultsM3.titleTextStyle, textTheme.headlineSmall)"
+    rationale: >
+      The typography collapse (#249 P3b) draws every dialog title through the
+      application's `TextRole.pageTitle`, which this skin maps to titleLarge.
+      One role now answers "the name of a surface" everywhere it is asked, so
+      the modal dialog's title lands on the same 20 px as every screen title,
+      every empty-state headline and the viewer dialog's header - which
+      already deviated to titleLarge for its own reasons (VIEW-002), so the
+      application's two dialog shapes finally agree about what a title is.
+      Keeping headlineSmall here would have made the modal title the single
+      22 px line left in the application, a size that exists on no other
+      surface after the collapse - a distinction Material 3 draws because its
+      phone dialog is a full-attention takeover, and one this dense desktop
+      app has never drawn. The spec value is pinned from `_DialogDefaultsM3`
+      rather than measured, because the app's `dialogTheme.titleTextStyle`
+      overrides it - see DLG-001.
+    registered: 2026-08-08
 
   # BaseViewerDialog (lib/shared/components/base_viewer_dialog.dart), the app's
   # second dialog shape: a fixed fraction of the window holding a diff, a table

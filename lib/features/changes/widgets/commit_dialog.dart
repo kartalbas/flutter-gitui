@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -11,7 +12,6 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/services/exit_guard.dart';
 import '../../../shared/components/base_button.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/widgets/file_status_badge.dart';
 
 /// Dialog for committing staged changes
@@ -116,8 +116,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                 ),
                 const SizedBox(width: AppTheme.paddingS),
                 Expanded(
-                  child: MenuItemLabel(
+                  child: BaseLabel(
                     AppLocalizations.of(context)!.commitFailed(e.toString()),
+                    role: TextRole.control,
                   ),
                 ),
               ],
@@ -161,11 +162,12 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: AppTheme.paddingS),
-                  BodyMediumLabel(
+                  BaseLabel(
                     AppLocalizations.of(context)!.messageFilesStaged(
                       stagedFiles.length,
                       stagedFiles.length == 1 ? '' : 's',
                     ),
+                    role: TextRole.body,
                   ),
                   const Spacer(),
                   BaseButton(
@@ -208,10 +210,10 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                           ),
                           const SizedBox(width: AppTheme.paddingS),
                           Expanded(
-                            child: BodySmallLabel(
+                            child: BaseLabel(
                               file.path,
+                              role: TextRole.detail,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -225,7 +227,10 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Commit message field
-            TitleSmallLabel(AppLocalizations.of(context)!.labelCommitMessage),
+            BaseLabel(
+              AppLocalizations.of(context)!.labelCommitMessage,
+              role: TextRole.sectionTitle,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _messageController,
@@ -260,8 +265,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
               title: Text(
                 AppLocalizations.of(context)!.checkboxAmendLastCommit,
               ),
-              subtitle: BodySmallLabel(
+              subtitle: BaseLabel(
                 AppLocalizations.of(context)!.checkboxAmendLastCommitSubtitle,
+                role: TextRole.detail,
               ),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.leading,
@@ -292,9 +298,10 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.tipCommitMessage,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      role: TextRole.detail,
+                      tone: Tone.muted,
                     ),
                   ),
                 ],

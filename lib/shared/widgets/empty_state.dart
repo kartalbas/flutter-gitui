@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 
 import '../theme/app_theme.dart';
@@ -92,12 +93,13 @@ class EmptyStateWidget extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(title, textAlign: TextAlign.center),
+            BaseLabel(title, role: TextRole.pageTitle, align: TextAlign.center),
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(
+            BaseLabel(
               message,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              textAlign: TextAlign.center,
+              role: TextRole.body,
+              tone: Tone.muted,
+              align: TextAlign.center,
             ),
             if (actionWidget != null) ...[
               const SizedBox(height: AppTheme.paddingL),
@@ -196,7 +198,7 @@ class LoadingState extends StatelessWidget {
           const CircularProgressIndicator(),
           if (message != null) ...[
             const SizedBox(height: AppTheme.paddingL),
-            BodyMediumLabel(message!),
+            BaseLabel(message!, role: TextRole.body),
           ],
         ],
       ),

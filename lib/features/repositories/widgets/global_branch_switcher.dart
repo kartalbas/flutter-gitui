@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_switcher.dart';
@@ -120,22 +121,21 @@ class GlobalBranchSwitcher extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                BodyMediumLabel(
-                  branchInfo.branchName,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                BaseLabel(branchInfo.branchName, role: TextRole.body),
                 const SizedBox(height: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   'Switch ${branchInfo.repositoryCount} of ${branchInfo.totalRepositories} repos:',
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
                 ),
                 const SizedBox(height: 2),
                 ...branchInfo.repositoryNames.map(
                   (repoName) => Padding(
                     padding: const EdgeInsets.only(top: 2),
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       '• $repoName',
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      role: TextRole.detail,
+                      tone: Tone.muted,
                     ),
                   ),
                 ),

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -385,9 +386,10 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingS),
-              BodySmallLabel(
+              BaseLabel(
                 AppLocalizations.of(context)!.quickFilters,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
               const SizedBox(width: AppTheme.paddingS),
               Expanded(
@@ -636,13 +638,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           color: Theme.of(context).colorScheme.primary,
                         ),
                         const SizedBox(width: AppTheme.paddingS),
-                        TitleSmallLabel(
+                        BaseLabel(
                           searchFilter.isNotEmpty
                               ? l10n.commitsMatchedOfLoaded(
                                   commits.length,
                                   loadedCount,
                                 )
                               : l10n.commitsCount(commits.length),
+                          role: TextRole.sectionTitle,
                         ),
                         if (!deepMode &&
                             searchFilter.isNotEmpty &&

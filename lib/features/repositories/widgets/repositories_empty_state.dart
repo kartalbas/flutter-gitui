@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -31,11 +32,15 @@ class RepositoriesEmptyState extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          HeadlineMediumLabel(AppLocalizations.of(context)!.noRepositoriesYet),
+          BaseLabel(
+            AppLocalizations.of(context)!.noRepositoriesYet,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyLargeLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.addRepositoryToGetStarted,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.body,
+            tone: Tone.muted,
           ),
           const SizedBox(height: AppTheme.paddingXL),
           Wrap(
@@ -97,9 +102,13 @@ class _ActionCard extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: AppTheme.paddingM),
-            TitleMediumLabel(title, textAlign: TextAlign.center),
+            BaseLabel(title, role: TextRole.pageTitle, align: TextAlign.center),
             const SizedBox(height: AppTheme.paddingS),
-            BodySmallLabel(description, textAlign: TextAlign.center),
+            BaseLabel(
+              description,
+              role: TextRole.detail,
+              align: TextAlign.center,
+            ),
           ],
         ),
       ),

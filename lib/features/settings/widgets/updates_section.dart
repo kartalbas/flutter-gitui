@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../generated/app_localizations.dart';
@@ -214,12 +215,13 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingS),
-              BodyMediumLabel(
+              BaseLabel(
                 l10n.currentVersion,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.body,
+                tone: Tone.muted,
               ),
               const Spacer(),
-              LabelLargeLabel(_currentVersion ?? l10n.loading),
+              BaseLabel(_currentVersion ?? l10n.loading, role: TextRole.body),
             ],
           ),
         ),
@@ -235,8 +237,14 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BodyMediumLabel(managedInstall.managedByLine(l10n)),
-                BodySmallLabel(managedInstall.explanation(l10n)),
+                BaseLabel(
+                  managedInstall.managedByLine(l10n),
+                  role: TextRole.body,
+                ),
+                BaseLabel(
+                  managedInstall.explanation(l10n),
+                  role: TextRole.detail,
+                ),
               ],
             ),
           )
@@ -247,8 +255,11 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BodyMediumLabel(l10n.updateCheckFrequency),
-                BodySmallLabel(_frequencyLabel(l10n, updates.checkFrequency)),
+                BaseLabel(l10n.updateCheckFrequency, role: TextRole.body),
+                BaseLabel(
+                  _frequencyLabel(l10n, updates.checkFrequency),
+                  role: TextRole.detail,
+                ),
               ],
             ),
             trailing: DropdownButton<UpdateCheckFrequency>(
@@ -259,7 +270,10 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
               items: UpdateCheckFrequency.values.map((frequency) {
                 return DropdownMenuItem(
                   value: frequency,
-                  child: BodyMediumLabel(_frequencyLabel(l10n, frequency)),
+                  child: BaseLabel(
+                    _frequencyLabel(l10n, frequency),
+                    role: TextRole.body,
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -290,28 +304,33 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BodyMediumLabel(l10n.lastUpdateCheck),
-                BodySmallLabel(_lastCheckSummary(l10n, updates)),
+                BaseLabel(l10n.lastUpdateCheck, role: TextRole.body),
+                BaseLabel(
+                  _lastCheckSummary(l10n, updates),
+                  role: TextRole.detail,
+                ),
                 // Rendered here rather than stored: the reason was persisted as
                 // a code, so this line follows whatever language is in force
                 // now, not the one that happened to be active when the check
                 // failed (#393).
                 if (updates.lastCheckOutcome == UpdateCheckOutcome.failed &&
                     updates.lastCheckFailure != null)
-                  BodySmallLabel(
+                  BaseLabel(
                     updates.lastCheckFailure!.message(l10n),
-                    color: Theme.of(context).colorScheme.error,
+                    role: TextRole.detail,
+                    tone: Tone.danger,
                   ),
                 // A release this build may not install itself is explained
                 // here rather than only in the message that follows the
                 // button, so a user who never presses it still finds out why
                 // no restart is being offered (#387).
                 if (manualUpdate != null)
-                  BodySmallLabel(
+                  BaseLabel(
                     manualUpdate.reason.message(
                       l10n,
                       manualUpdate.info.version,
                     ),
+                    role: TextRole.detail,
                   ),
               ],
             ),

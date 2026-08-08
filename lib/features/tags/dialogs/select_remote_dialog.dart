@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/controllers/item_navigation_controller.dart';
 import '../../../shared/widgets/keyboard_navigable_view.dart';
 
@@ -86,7 +87,10 @@ class _SelectRemoteDialogState extends State<SelectRemoteDialog> {
               BaseListItem(
                 isSelected: isSelected,
                 containerHasFocus: containerHasFocus,
-                content: MenuItemLabel(widget.remotes[index]),
+                content: BaseLabel(
+                  widget.remotes[index],
+                  role: TextRole.control,
+                ),
                 onTap: () => _pickIndex(index),
               ),
         ),

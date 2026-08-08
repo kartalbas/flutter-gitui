@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -44,18 +45,23 @@ class DiffToolsSection extends ConsumerWidget {
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BodyMediumLabel(l10n.preferredDiffTool),
-                      BodySmallLabel(
+                      BaseLabel(l10n.preferredDiffTool, role: TextRole.body),
+                      // Tone.invalid, not Tone.danger: an unset tool path
+                      // destroys nothing, it is a value the user must supply
+                      // before the feature works.
+                      BaseLabel(
                         tools.customDiffToolPath ?? l10n.diffToolNotSet,
-                        color: tools.customDiffToolPath == null
-                            ? Theme.of(context).colorScheme.error
-                            : null,
+                        role: TextRole.detail,
+                        tone: tools.customDiffToolPath == null
+                            ? Tone.invalid
+                            : Tone.neutral,
                       ),
                       if (tools.customDiffToolVersion != null) ...[
                         const SizedBox(height: AppTheme.paddingXS),
-                        BodySmallLabel(
+                        BaseLabel(
                           l10n.version(tools.customDiffToolVersion!),
-                          color: Theme.of(context).colorScheme.primary,
+                          role: TextRole.detail,
+                          tone: Tone.accent,
                         ),
                       ],
                     ],
@@ -88,18 +94,20 @@ class DiffToolsSection extends ConsumerWidget {
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BodyMediumLabel(l10n.preferredMergeTool),
-                      BodySmallLabel(
+                      BaseLabel(l10n.preferredMergeTool, role: TextRole.body),
+                      BaseLabel(
                         tools.customMergeToolPath ?? l10n.mergeToolNotSet,
-                        color: tools.customMergeToolPath == null
-                            ? Theme.of(context).colorScheme.error
-                            : null,
+                        role: TextRole.detail,
+                        tone: tools.customMergeToolPath == null
+                            ? Tone.invalid
+                            : Tone.neutral,
                       ),
                       if (tools.customMergeToolVersion != null) ...[
                         const SizedBox(height: AppTheme.paddingXS),
-                        BodySmallLabel(
+                        BaseLabel(
                           l10n.version(tools.customMergeToolVersion!),
-                          color: Theme.of(context).colorScheme.primary,
+                          role: TextRole.detail,
+                          tone: Tone.accent,
                         ),
                       ],
                     ],
@@ -132,7 +140,7 @@ class DiffToolsSection extends ConsumerWidget {
           },
           loading: () => BaseListItem(
             leading: const CircularProgressIndicator(),
-            content: BodyMediumLabel(l10n.loadingAvailableTools),
+            content: BaseLabel(l10n.loadingAvailableTools, role: TextRole.body),
           ),
           error: (error, stack) => BaseListItem(
             leading: Icon(
@@ -142,8 +150,8 @@ class DiffToolsSection extends ConsumerWidget {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BodyMediumLabel(l10n.failedToLoadTools(error)),
-                BodySmallLabel(error.toString()),
+                BaseLabel(l10n.failedToLoadTools(error), role: TextRole.body),
+                BaseLabel(error.toString(), role: TextRole.detail),
               ],
             ),
           ),

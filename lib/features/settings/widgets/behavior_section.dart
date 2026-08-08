@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -40,9 +40,10 @@ class BehaviorSection extends ConsumerWidget {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BodyMediumLabel(l10n.autoFetchInterval),
-                BodySmallLabel(
+                BaseLabel(l10n.autoFetchInterval, role: TextRole.body),
+                BaseLabel(
                   l10n.autoFetchIntervalMinutes(behavior.autoFetchInterval),
+                  role: TextRole.detail,
                 ),
               ],
             ),

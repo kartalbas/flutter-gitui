@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -130,8 +131,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       data: (commits) {
         if (commits.isEmpty) {
           return Center(
-            child: BodyLargeLabel(
+            child: BaseLabel(
               AppLocalizations.of(context)!.noCommitsAvailable,
+              role: TextRole.body,
             ),
           );
         }
@@ -151,10 +153,11 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(
                         context,
                       )!.bisectHelpsFindCommitThatIntroducedBug,
+                      role: TextRole.detail,
                     ),
                   ),
                 ],
@@ -163,8 +166,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Good commit selection
-            TitleSmallLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.goodCommitWhereBugWasNotPresent,
+              role: TextRole.sectionTitle,
             ),
             const SizedBox(height: AppTheme.paddingS),
             _buildCommitDropdown(
@@ -178,8 +182,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             const SizedBox(height: AppTheme.paddingM),
 
             // Bad commit selection
-            TitleSmallLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.badCommitWhereBugIsPresent,
+              role: TextRole.sectionTitle,
             ),
             const SizedBox(height: AppTheme.paddingS),
             _buildCommitDropdown(
@@ -197,7 +202,8 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: BodyMediumLabel('Error: $error')),
+      error: (error, _) =>
+          Center(child: BaseLabel('Error: $error', role: TextRole.body)),
     );
   }
 
@@ -220,19 +226,21 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                   const Icon(PhosphorIconsRegular.gitBranch, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: TitleMediumLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.bisectInProgress,
+                      role: TextRole.sectionTitle,
                     ),
                   ),
                 ],
               ),
               if (state.stepsRemaining != null) ...[
                 const SizedBox(height: AppTheme.paddingS),
-                BodyMediumLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.approximatelyStepsRemaining(
                     state.stepsRemaining.toString(),
                     state.stepsRemaining as Object,
                   ),
+                  role: TextRole.body,
                 ),
               ],
             ],
@@ -241,7 +249,10 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         const SizedBox(height: AppTheme.paddingL),
 
         // Current commit
-        TitleMediumLabel(AppLocalizations.of(context)!.currentCommit),
+        BaseLabel(
+          AppLocalizations.of(context)!.currentCommit,
+          role: TextRole.sectionTitle,
+        ),
         const SizedBox(height: AppTheme.paddingS),
         Container(
           padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -249,12 +260,18 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(AppTheme.radiusM),
           ),
-          child: BodyMediumLabel(state.currentCommit ?? 'Unknown'),
+          child: BaseLabel(
+            state.currentCommit ?? 'Unknown',
+            role: TextRole.body,
+          ),
         ),
         const SizedBox(height: AppTheme.paddingL),
 
         // Instructions
-        TitleSmallLabel(AppLocalizations.of(context)!.testThisCommitAndMark),
+        BaseLabel(
+          AppLocalizations.of(context)!.testThisCommitAndMark,
+          role: TextRole.sectionTitle,
+        ),
         const SizedBox(height: AppTheme.paddingM),
 
         // Action buttons
@@ -297,7 +314,10 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         // SingleChildScrollView, so a flex child would sit in an unbounded
         // Column and throw. The cap keeps the secondary list compact; its own
         // scroll view handles longer histories.
-        TitleSmallLabel(AppLocalizations.of(context)!.bisectHistory),
+        BaseLabel(
+          AppLocalizations.of(context)!.bisectHistory,
+          role: TextRole.sectionTitle,
+        ),
         const SizedBox(height: AppTheme.paddingS),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 200),
@@ -312,26 +332,28 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (state.goodCommits.isNotEmpty) ...[
-                    BodyMediumLabel(
+                    BaseLabel(
                       AppLocalizations.of(
                         context,
                       )!.goodCommits(state.goodCommits.length),
-                      color: context.gitColors.added,
+                      role: TextRole.body,
+                      tone: Tone.gitAdded,
                     ),
                     ...state.goodCommits.map(
-                      (hash) => BodySmallLabel('  $hash'),
+                      (hash) => BaseLabel('  $hash', role: TextRole.detail),
                     ),
                     const SizedBox(height: AppTheme.paddingS),
                   ],
                   if (state.badCommits.isNotEmpty) ...[
-                    BodyMediumLabel(
+                    BaseLabel(
                       AppLocalizations.of(
                         context,
                       )!.badCommits(state.badCommits.length),
-                      color: context.gitColors.deleted,
+                      role: TextRole.body,
+                      tone: Tone.gitDeleted,
                     ),
                     ...state.badCommits.map(
-                      (hash) => BodySmallLabel('  $hash'),
+                      (hash) => BaseLabel('  $hash', role: TextRole.detail),
                     ),
                   ],
                 ],
@@ -354,9 +376,15 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             color: context.gitColors.added,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.bisectComplete),
+          BaseLabel(
+            AppLocalizations.of(context)!.bisectComplete,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingM),
-          BodyMediumLabel(AppLocalizations.of(context)!.foundFirstBadCommit),
+          BaseLabel(
+            AppLocalizations.of(context)!.foundFirstBadCommit,
+            role: TextRole.body,
+          ),
           const SizedBox(height: AppTheme.paddingS),
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -389,11 +417,12 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.error(error.toString()),
+            role: TextRole.pageTitle,
           ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel('', textAlign: TextAlign.center),
+          BaseLabel('', role: TextRole.detail, align: TextAlign.center),
         ],
       ),
     );

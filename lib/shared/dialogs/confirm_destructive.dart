@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../core/config/config_providers.dart';
 import '../../core/git/destructive_action.dart';
@@ -95,7 +95,7 @@ Future<bool> confirmDestructive({
       // matches, and no key repeat can type a ref name.) Esc cancels either
       // way.
       onSubmit: destructive ? null : () => Navigator.of(context).pop(true),
-      content: BodyMediumLabel(message),
+      content: BaseLabel(message, role: TextRole.body),
       actions: [
         DialogAction(
           label: l10n.cancel,
@@ -206,9 +206,12 @@ class _TypeToConfirmDialogState extends State<_TypeToConfirmDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(widget.message),
+          BaseLabel(widget.message, role: TextRole.body),
           const SizedBox(height: AppTheme.paddingL),
-          BodyMediumLabel(l10n.typeToConfirmInstruction(widget.token)),
+          BaseLabel(
+            l10n.typeToConfirmInstruction(widget.token),
+            role: TextRole.body,
+          ),
           const SizedBox(height: AppTheme.paddingM),
           BaseTextField(
             controller: _controller,

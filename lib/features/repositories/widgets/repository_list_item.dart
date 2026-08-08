@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show ControlScale, IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole, Tone;
 import '../../../shared/components/base_animated_widgets.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_button.dart';
@@ -97,12 +99,15 @@ class RepositoryListItem extends ConsumerWidget {
           Row(
             children: [
               Flexible(
-                child: TitleMediumLabel(
+                // The selected-container pairing is gone from every label on
+                // this row: the row paints the selected container and
+                // publishes the matching foreground through its
+                // DefaultTextStyle, and a label that restated it was saying
+                // the surface's answer for it.
+                child: BaseLabel(
                   repository.displayName,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : null,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.itemTitle,
+                  maxLines: 1,
                 ),
               ),
 
@@ -248,93 +253,72 @@ class RepositoryListItem extends ConsumerWidget {
           // Branch and path
           Row(
             children: [
-              // Current branch
+              // Current branch. "This is the branch the repository is on"
+              // is `Tone.accent`, exactly as branch_list_tile.dart:66 says it
+              // for the identical fact; losing it here left the same meaning
+              // with two different answers in two rows of the same
+              // application.
               if (status.currentBranch != null) ...[
-                Icon(
-                  PhosphorIconsRegular.gitBranch,
-                  size: AppTheme.iconXS,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.primary,
+                BaseIcon(
+                  IconRole.gitBranch,
+                  scale: ControlScale.compact,
+                  tone: Tone.accent,
                 ),
                 const SizedBox(width: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   status.currentBranch!,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.primary,
+                  role: TextRole.detail,
+                  tone: Tone.accent,
                 ),
                 const SizedBox(width: AppTheme.paddingM),
               ],
 
               // Where the remote lives, so a row that needs a sign-in also
               // says which account it would need.
+              // Where the remote lives, the path and the last access are
+              // the row's supporting detail: secondary to the name above
+              // them, said once with `Tone.muted` for both row states. Their
+              // glyphs take the `IconTheme` the row publishes
+              // (base_list_item.dart:328) rather than restating the row's
+              // selection state, which is what had left glyph and word in two
+              // different colour systems on one line.
               if (status.remoteIdentity case final identity?) ...[
-                Icon(
-                  PhosphorIconsRegular.cloud,
-                  size: AppTheme.iconXS,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                Icon(PhosphorIconsRegular.cloud, size: AppTheme.iconXS),
                 const SizedBox(width: AppTheme.paddingXS),
                 Tooltip(
                   message: status.remoteUrl ?? identity.host,
-                  child: BodySmallLabel(
+                  child: BaseLabel(
                     identity.accountHint == null
                         ? identity.label
                         : '${identity.label} · ${identity.accountHint}',
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    role: TextRole.detail,
+                    tone: Tone.muted,
                   ),
                 ),
                 const SizedBox(width: AppTheme.paddingM),
               ],
 
-              Icon(
-                PhosphorIconsRegular.folder,
-                size: AppTheme.iconXS,
-                color: isSelected
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.onPrimaryContainer.withValues(alpha: 0.7)
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              Icon(PhosphorIconsRegular.folder, size: AppTheme.iconXS),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   repository.path,
-                  color: isSelected
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                  maxLines: 1,
                 ),
               ),
               const SizedBox(width: AppTheme.paddingM),
-              Icon(
-                PhosphorIconsRegular.clock,
-                size: AppTheme.iconXS,
-                color: isSelected
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.onPrimaryContainer.withValues(alpha: 0.7)
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              Icon(PhosphorIconsRegular.clock, size: AppTheme.iconXS),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   repository.lastAccessed.toDisplayString(
                     Localizations.localeOf(context).languageCode,
                   ),
-                  color: isSelected
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
-                  overflow: TextOverflow.ellipsis,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
+                  maxLines: 1,
                 ),
               ),
             ],
@@ -343,13 +327,10 @@ class RepositoryListItem extends ConsumerWidget {
           // Description
           if (repository.description != null) ...[
             const SizedBox(height: AppTheme.paddingXS),
-            BodySmallLabel(
+            BaseLabel(
               repository.description!,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onPrimaryContainer
-                  : null,
+              role: TextRole.detail,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ],
@@ -492,6 +473,12 @@ class RepositoryListItem extends ConsumerWidget {
           Icon(icon, size: 12, color: color),
           if (label != null) ...[
             const SizedBox(width: 3),
+            // Deliberately still the old label: this helper's Color parameter
+            // also paints the badge's fill, border and icon, so it can only
+            // become a Tone when the whole badge moves onto `surfaces.badge`
+            // in the surface sub-phase - the application cannot resolve a
+            // Tone to a Color for its own decoration, and the seam is right
+            // to forbid that.
             LabelSmallLabel(label, color: color),
           ],
         ],

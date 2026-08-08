@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -66,9 +67,15 @@ class ReflogDialog extends ConsumerWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.noReflogEntries),
+          BaseLabel(
+            AppLocalizations.of(context)!.noReflogEntries,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(AppLocalizations.of(context)!.referenceLogEmpty),
+          BaseLabel(
+            AppLocalizations.of(context)!.referenceLogEmpty,
+            role: TextRole.body,
+          ),
         ],
       ),
     );
@@ -85,9 +92,16 @@ class ReflogDialog extends ConsumerWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.errorLoadingReflog),
+          BaseLabel(
+            AppLocalizations.of(context)!.errorLoadingReflog,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(error.toString(), textAlign: TextAlign.center),
+          BaseLabel(
+            error.toString(),
+            role: TextRole.detail,
+            align: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -109,10 +123,11 @@ class ReflogDialog extends ConsumerWidget {
               const Icon(PhosphorIconsRegular.info, size: 20),
               const SizedBox(width: AppTheme.paddingS),
               Expanded(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   AppLocalizations.of(
                     context,
                   )!.reflogEntriesInfo(entries.length),
+                  role: TextRole.detail,
                 ),
               ),
             ],
@@ -154,9 +169,14 @@ class ReflogDialog extends ConsumerWidget {
           ).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        child: BodySmallLabel(
-          entry.actionType,
-          color: _getActionColor(entry.actionType, context),
+        // The chip is washed with the action's own colour and states it as its
+        // foreground; the action name inside reads that. `_getActionColor`
+        // stays a `Color` for now because the same value paints the wash, and
+        // until this chip is `surfaces.badge` at P3d there is no contract
+        // member that can tint a surface from a `Tone`.
+        child: DefaultTextStyle.merge(
+          style: TextStyle(color: _getActionColor(entry.actionType, context)),
+          child: BaseLabel(entry.actionType, role: TextRole.detail),
         ),
       ),
       content: Column(
@@ -165,24 +185,17 @@ class ReflogDialog extends ConsumerWidget {
           Row(
             children: [
               // Hash (copyable)
-              CopyableText(
-                text: entry.shortHash,
-                isMonospace: true,
-                icon: IconRole.gitCommit,
-              ),
+              CopyableText(text: entry.shortHash, icon: IconRole.gitCommit),
               const SizedBox(width: AppTheme.paddingS),
               // Selector
-              BodySmallLabel(
+              BaseLabel(
                 entry.selector,
-                color: Theme.of(context).colorScheme.primary,
+                role: TextRole.detail,
+                tone: Tone.accent,
               ),
             ],
           ),
-          BodySmallLabel(
-            entry.fullDescription,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          BaseLabel(entry.fullDescription, role: TextRole.detail, maxLines: 2),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../components/base_dialog.dart';
@@ -50,24 +51,13 @@ class BatchResultDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Repository name
-          BodySmallLabel(
-            'Repository',
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          BaseLabel('Repository', role: TextRole.detail, tone: Tone.muted),
           const SizedBox(height: AppTheme.paddingXS),
-          BodyMediumLabel(
-            repositoryName,
-            color: Theme.of(context).colorScheme.onSurface,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+          BaseLabel(repositoryName, role: TextRole.body, maxLines: 2),
           const SizedBox(height: AppTheme.paddingM),
 
           // Message
-          BodySmallLabel(
-            'Message',
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          BaseLabel('Message', role: TextRole.detail, tone: Tone.muted),
           const SizedBox(height: AppTheme.paddingXS),
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),

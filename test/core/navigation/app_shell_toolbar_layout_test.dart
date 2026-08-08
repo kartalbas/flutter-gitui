@@ -178,10 +178,26 @@ Future<void> _pumpShell(WidgetTester tester, {double width = 870}) async {
     ),
   );
 
-  // Let the deferred config validation and the global-branches future settle.
+  // Let the deferred config validation and the global-branches future land,
+  // then settle the shell before anything is measured.
+  //
+  // Settling rather than counting frames, and the reason arrived with #249's
+  // typography conversion. `Material` wraps its child in an
+  // `AnimatedDefaultTextStyle`, so the frames right after the config lands fall
+  // inside a text-style transition - and a label that renders through the
+  // contract INHERITS that style instead of stamping a colour of its own, which
+  // is exactly what lets a selected surface's foreground reach its content
+  // (`packages/gitui_skin_material/lib/src/facets/material_type.dart`). Three
+  // bare frames therefore painted paragraphs whose style differed from the
+  // previous frame's only in colour while their layout was still moving, and
+  // that is the case Flutter's own paint-only fast path asserts against
+  // (`TextPainter.paint`, `assert(debugSize == size)`).
+  //
+  // Nothing here ever wanted a half-finished transition: every rectangle this
+  // file measures is the resting one, and this state of the shell settles - it
+  // carries no indefinite indicator.
   await tester.pump(const Duration(milliseconds: 50));
-  await tester.pump();
-  await tester.pump();
+  await tester.pumpAndSettle();
 }
 
 void main() {

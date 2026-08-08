@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
-import '../components/base_menu_item.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
@@ -175,9 +175,10 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
               data: (_) {
                 if (_matches.isEmpty) {
                   return Center(
-                    child: BodyLargeLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.noBranchesFound,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      role: TextRole.body,
+                      tone: Tone.muted,
                     ),
                   );
                 }
@@ -196,11 +197,12 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stack) => Center(
-                child: BodyMediumLabel(
+                child: BaseLabel(
                   AppLocalizations.of(
                     context,
                   )!.errorLoadingBranches(error.toString()),
-                  color: Theme.of(context).colorScheme.error,
+                  role: TextRole.body,
+                  tone: Tone.danger,
                 ),
               ),
             ),
@@ -277,12 +279,12 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          BodyMediumLabel(branch.name),
+          BaseLabel(branch.name, role: TextRole.body),
           if (branch.lastCommitMessage != null)
-            LabelMediumLabel(
+            BaseLabel(
               branch.lastCommitMessage!,
+              role: TextRole.detail,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
         ],
       ),
@@ -342,12 +344,16 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),
-        child: MenuItemLabel(
-          label,
-          color: isSelected
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onSurfaceVariant,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        // The filled segment states the foreground that pairs with it; the word
+        // inside says only what it is. The semibold was a second statement of
+        // the same selection the fill already makes.
+        child: DefaultTextStyle.merge(
+          style: TextStyle(
+            color: isSelected
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          child: BaseLabel(label, role: TextRole.control),
         ),
       ),
     );

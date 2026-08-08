@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -145,11 +146,10 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                         final l10n = AppLocalizations.of(context)!;
                         return Padding(
                           padding: const EdgeInsets.all(AppTheme.paddingM),
-                          child: BodyMediumLabel(
+                          child: BaseLabel(
                             l10n.emptyStateNoResultsFound,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            role: TextRole.body,
+                            tone: Tone.muted,
                           ),
                         );
                       },
@@ -175,11 +175,13 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                                 ? Theme.of(context).colorScheme.primaryContainer
                                       .withValues(alpha: 0.3)
                                 : null,
-                            child: BodyMediumLabel(
+                            // The tinted container behind the entry already
+                            // says "this is the chosen one"; tinting the words
+                            // as well was the same statement made twice, and
+                            // the second time as a colour.
+                            child: BaseLabel(
                               widget.displayStringForOption(item),
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : null,
+                              role: TextRole.body,
                             ),
                           ),
                         );

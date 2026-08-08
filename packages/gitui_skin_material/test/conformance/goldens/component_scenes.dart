@@ -60,7 +60,7 @@ import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../support/conformance_harness.dart';
 import 'golden_scene.dart';
@@ -529,7 +529,10 @@ List<GoldenScene> _containerScenes() {
           SizedBox(
             width: 260,
             child: BasePanel(
-              title: const TitleSmallLabel('Staged changes'),
+              title: const BaseLabel(
+                'Staged changes',
+                role: TextRole.sectionTitle,
+              ),
               content: _panelBody(),
             ),
           ),
@@ -540,7 +543,10 @@ List<GoldenScene> _containerScenes() {
           SizedBox(
             width: 280,
             child: BasePanel(
-              title: const TitleSmallLabel('Staged changes'),
+              title: const BaseLabel(
+                'Staged changes',
+                role: TextRole.sectionTitle,
+              ),
               hasBorder: true,
               actions: <Widget>[
                 BaseIconButton(
@@ -566,7 +572,7 @@ List<GoldenScene> _containerScenes() {
           SizedBox(
             width: 240,
             child: BasePanel(
-              title: const TitleSmallLabel('History'),
+              title: const BaseLabel('History', role: TextRole.sectionTitle),
               isCollapsible: true,
               content: _panelBody(),
             ),
@@ -578,7 +584,7 @@ List<GoldenScene> _containerScenes() {
           SizedBox(
             width: 240,
             child: BasePanel(
-              title: const TitleSmallLabel('History'),
+              title: const BaseLabel('History', role: TextRole.sectionTitle),
               isCollapsible: true,
               initiallyExpanded: false,
               content: _panelBody(),
@@ -778,10 +784,21 @@ List<GoldenScene> _displayScenes() {
         ],
       ),
     ),
-    // The type scale is the app's most load-bearing token set and the one the
-    // issue found collapsed from fifteen sizes to five. Rendering every role
-    // with the same sample string turns "the hierarchy does not exist at
-    // runtime" into something visible at a glance.
+    // The nine roles the application's text actually takes, each drawn with the
+    // same word so that "these are nine distinguishable answers" is visible at
+    // a glance.
+    //
+    // It used to render the fifteen `Base*Label` classes, which was the right
+    // scene for the defect of the day: #341 found Material's ramp collapsed
+    // from fifteen sizes to five at runtime. That defect is fixed and now
+    // guarded arithmetically by `test/shared/theme/type_scale_test.dart`, which
+    // asserts every step at every font-size setting - a job a picture does
+    // worse than a number. What a picture is still the only witness for is the
+    // property this collapse must not break: that the nine roles the
+    // application can ASK for stay nine distinct answers under this skin. A row
+    // that silently matched its neighbour would mean a role had stopped
+    // meaning anything, and no size assertion elsewhere would notice, because
+    // the ramp itself would still be correct.
     GoldenScene(
       name: 'base_labels_type_scale',
       width: 760,
@@ -790,21 +807,18 @@ List<GoldenScene> _displayScenes() {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           for (final (String role, Widget label) in <(String, Widget)>[
-            ('displayLarge', const DisplayLargeLabel('Commit')),
-            ('displayMedium', const DisplayMediumLabel('Commit')),
-            ('displaySmall', const DisplaySmallLabel('Commit')),
-            ('headlineLarge', const HeadlineLargeLabel('Commit')),
-            ('headlineMedium', const HeadlineMediumLabel('Commit')),
-            ('headlineSmall', const HeadlineSmallLabel('Commit')),
-            ('titleLarge', const TitleLargeLabel('Commit')),
-            ('titleMedium', const TitleMediumLabel('Commit')),
-            ('titleSmall', const TitleSmallLabel('Commit')),
-            ('bodyLarge', const BodyLargeLabel('Commit')),
-            ('bodyMedium', const BodyMediumLabel('Commit')),
-            ('bodySmall', const BodySmallLabel('Commit')),
-            ('labelLarge', const LabelLargeLabel('Commit')),
-            ('labelMedium', const LabelMediumLabel('Commit')),
-            ('labelSmall', const LabelSmallLabel('Commit')),
+            ('pageTitle', const BaseLabel('Commit', role: TextRole.pageTitle)),
+            (
+              'sectionTitle',
+              const BaseLabel('Commit', role: TextRole.sectionTitle),
+            ),
+            ('itemTitle', const BaseLabel('Commit', role: TextRole.itemTitle)),
+            ('body', const BaseLabel('Commit', role: TextRole.body)),
+            ('emphasis', const BaseLabel('Commit', role: TextRole.emphasis)),
+            ('detail', const BaseLabel('Commit', role: TextRole.detail)),
+            ('micro', const BaseLabel('Commit', role: TextRole.micro)),
+            ('control', const BaseLabel('Commit', role: TextRole.control)),
+            ('code', const BaseLabel('Commit', role: TextRole.code)),
           ])
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
@@ -1079,8 +1093,8 @@ Widget _cardBody(String label) => Column(
   crossAxisAlignment: CrossAxisAlignment.start,
   spacing: AppTheme.paddingXS,
   children: <Widget>[
-    TitleSmallLabel(label),
-    const BodySmallLabel('12 commits ahead'),
+    BaseLabel(label, role: TextRole.itemTitle),
+    const BaseLabel('12 commits ahead', role: TextRole.detail),
   ],
 );
 
@@ -1090,8 +1104,8 @@ Widget _panelBody() => const Padding(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
-      BodySmallLabel('lib/main.dart'),
-      BodySmallLabel('lib/app.dart'),
+      BaseLabel('lib/main.dart', role: TextRole.detail),
+      BaseLabel('lib/app.dart', role: TextRole.detail),
     ],
   ),
 );
@@ -1099,8 +1113,15 @@ Widget _panelBody() => const Padding(
 Widget _listBody(String path) => Row(
   spacing: AppTheme.paddingS,
   children: <Widget>[
-    Expanded(child: BodyMediumLabel(path, overflow: TextOverflow.ellipsis)),
-    const BodySmallLabel('+12 -3'),
+    // `maxLines: 1` and no `overflow:`, and the pair is the point. The cap is
+    // the APPLICATION's fact — a list row is one line tall, and the row this
+    // scene draws was written that way — while what the last line looks like
+    // when the words run out of room is the skin's idiom, supplied by
+    // `MaterialType.text`. Dropping the cap along with the overflow would not
+    // have preserved the row: an ellipsis is only applied where the text is
+    // confined, so an uncapped path wraps and the row grows.
+    Expanded(child: BaseLabel(path, role: TextRole.body, maxLines: 1)),
+    const BaseLabel('+12 -3', role: TextRole.detail),
   ],
 );
 

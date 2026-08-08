@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 
 import '../theme/app_theme.dart';
 import 'base_icon.dart';
-import 'base_menu_item.dart';
 import 'base_label.dart';
 import 'base_text_field.dart';
 
@@ -104,8 +103,11 @@ class BaseDropdownItem<T> {
             Icon(icon, size: 14),
             const SizedBox(width: AppTheme.paddingS),
           ],
+          // One line, because a menu entry is a row: the line cap is the fact
+          // the application states, and how the skin truncates the last line
+          // is the skin's idiom.
           Expanded(
-            child: MenuItemLabel(label, overflow: TextOverflow.ellipsis),
+            child: BaseLabel(label, role: TextRole.control, maxLines: 1),
           ),
           if (trailing != null) ...[
             const SizedBox(width: AppTheme.paddingS),
@@ -117,13 +119,20 @@ class BaseDropdownItem<T> {
   }
 
   /// Create a dropdown item with icon, label, and optional badge
+  ///
+  /// The `badgeColor` / `badgeTextColor` pair this used to accept is gone. It
+  /// let a caller hand in a fill and a foreground as two independent `Color`s,
+  /// which is two design decisions crossing an application API and, worse, two
+  /// that can contradict each other — a caller could set the fill and leave the
+  /// text pairing behind. No call site ever passed either, so nothing is lost
+  /// today; when the badge becomes `surfaces.badge` at P3d it will carry a
+  /// single [Tone] and the skin will pair the foreground with the fill itself,
+  /// which is the one arrangement that cannot be got wrong.
   factory BaseDropdownItem.withBadge({
     required T value,
     required String label,
     IconData? icon,
     String? badgeText,
-    Color? badgeColor,
-    Color? badgeTextColor,
   }) {
     return BaseDropdownItem(
       value: value,
@@ -134,7 +143,7 @@ class BaseDropdownItem<T> {
             const SizedBox(width: AppTheme.paddingS),
           ],
           Expanded(
-            child: MenuItemLabel(label, overflow: TextOverflow.ellipsis),
+            child: BaseLabel(label, role: TextRole.control, maxLines: 1),
           ),
           if (badgeText != null) ...[
             const SizedBox(width: AppTheme.paddingS),
@@ -144,16 +153,20 @@ class BaseDropdownItem<T> {
                 vertical: 1,
               ),
               decoration: BoxDecoration(
-                color:
-                    badgeColor ??
-                    Theme.of(context).colorScheme.primaryContainer,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusS),
               ),
-              child: MenuItemLabel(
-                badgeText,
-                color:
-                    badgeTextColor ??
-                    Theme.of(context).colorScheme.onPrimaryContainer,
+              // The surface publishes the foreground it pairs with, and the
+              // label reads it. That is the whole of Material's on-colour model
+              // (`docs/SKIN-CONTRACT-MEMBERS.md` §10.2) and the reason the
+              // label itself now says nothing about colour: a container that
+              // states its own pairing cannot be given text that disagrees
+              // with it.
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+                child: BaseLabel(badgeText, role: TextRole.control),
               ),
             ),
           ],
@@ -274,7 +287,11 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.labelText != null) ...[
-                LabelMediumLabel(widget.labelText!),
+                // A field's own label is text the user operates, which is what
+                // `TextRole.control` names explicitly. It was drawn a rung
+                // below every other field label in the application; this is the
+                // disagreement being removed rather than a size being chosen.
+                BaseLabel(widget.labelText!, role: TextRole.control),
                 const SizedBox(height: AppTheme.paddingXS),
               ],
               InkWell(
@@ -310,12 +327,18 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
                         const SizedBox(width: AppTheme.paddingS),
                       ],
                       Expanded(
-                        child: BodyMediumLabel(
+                        child: BaseLabel(
                           displayText,
-                          color: selectedItem != null
-                              ? null
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                          overflow: TextOverflow.ellipsis,
+                          role: TextRole.body,
+                          // Nothing has been chosen yet, so this line is a
+                          // placeholder rather than a value.
+                          tone: selectedItem != null
+                              ? Tone.neutral
+                              : Tone.muted,
+                          // A closed field is one line tall whatever it holds;
+                          // wrapping here would grow the field as the user
+                          // picks a longer value.
+                          maxLines: 1,
                         ),
                       ),
                       BaseIcon(
@@ -329,9 +352,10 @@ class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
               ),
               if (formState.hasError) ...[
                 const SizedBox(height: AppTheme.paddingXS),
-                LabelSmallLabel(
+                BaseLabel(
                   formState.errorText ?? '',
-                  color: Theme.of(context).colorScheme.error,
+                  role: TextRole.detail,
+                  tone: Tone.danger,
                 ),
               ],
             ],
@@ -442,9 +466,10 @@ class _SearchableDropdownOverlayState<T>
                   ? Padding(
                       padding: const EdgeInsets.all(AppTheme.paddingL),
                       child: Center(
-                        child: BodySmallLabel(
+                        child: BaseLabel(
                           'No items found',
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          role: TextRole.detail,
+                          tone: Tone.muted,
                         ),
                       ),
                     )
@@ -507,12 +532,9 @@ class SearchableDropdownItem<T> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                MenuItemLabel(label, overflow: TextOverflow.ellipsis),
+                BaseLabel(label, role: TextRole.control, maxLines: 1),
                 if (subtitle != null)
-                  LabelSmallLabel(
-                    subtitle,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  BaseLabel(subtitle, role: TextRole.micro, tone: Tone.muted),
               ],
             ),
           ),

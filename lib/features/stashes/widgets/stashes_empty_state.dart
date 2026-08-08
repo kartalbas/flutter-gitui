@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -25,11 +25,15 @@ class StashesEmptyState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.noStashes),
+          BaseLabel(
+            AppLocalizations.of(context)!.noStashes,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.createStashToSaveWorkInProgress,
-            textAlign: TextAlign.center,
+            role: TextRole.body,
+            align: TextAlign.center,
           ),
           const SizedBox(height: AppTheme.paddingL),
           BaseButton(

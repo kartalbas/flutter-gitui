@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -23,9 +24,16 @@ class StashesErrorState extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.errorLoadingStashes),
+          BaseLabel(
+            AppLocalizations.of(context)!.errorLoadingStashes,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(error.toString(), textAlign: TextAlign.center),
+          BaseLabel(
+            error.toString(),
+            role: TextRole.detail,
+            align: TextAlign.center,
+          ),
         ],
       ),
     );

@@ -129,6 +129,19 @@ class Workspace {
     return repositoryPaths.contains(path);
   }
 
+  /// Which member of the skin's colour series this workspace wears.
+  ///
+  /// The model persists the colour as an ARGB value picked from
+  /// [WorkspaceColors.defaults], so the index is derived rather than stored.
+  /// `Tone.series` needs the index because the palette itself is the skin's
+  /// (`MaterialInk.seriesPalette` carries the same twelve values today, and a
+  /// different skin may carry others). A legacy value that is not in the
+  /// palette lands on the last slot via the series' modulo rather than
+  /// throwing; storing the index outright - and deleting this palette - is
+  /// the `controls.seriesPicker` conversion's job, because only then does the
+  /// application stop being able to enumerate the swatches at all.
+  int get colorIndex => WorkspaceColors.defaults.indexOf(color);
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

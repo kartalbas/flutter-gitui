@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
@@ -216,10 +217,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(AppLocalizations.of(context)!.filePreview),
-            BodySmallLabel(
-              fileName,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            BaseLabel(fileName, role: TextRole.detail, tone: Tone.muted),
           ],
         ),
         actions: [
@@ -230,11 +228,12 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                 horizontal: AppTheme.paddingM,
               ),
               child: Center(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   AppLocalizations.of(
                     context,
                   )!.messageFileInfo(_lineCount, _formatFileSize(_fileSize)),
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
                 ),
               ),
             ),
@@ -281,11 +280,16 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.labelCannotPreviewFile,
+              role: TextRole.pageTitle,
             ),
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(errorMessage, textAlign: TextAlign.center),
+            BaseLabel(
+              errorMessage,
+              role: TextRole.body,
+              align: TextAlign.center,
+            ),
           ],
         ),
       );
@@ -302,15 +306,20 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: AppTheme.paddingL),
-            TitleLargeLabel(AppLocalizations.of(context)!.labelBinaryFile),
+            BaseLabel(
+              AppLocalizations.of(context)!.labelBinaryFile,
+              role: TextRole.pageTitle,
+            ),
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.labelThisFileCannotBePreviewed,
+              role: TextRole.body,
             ),
             const SizedBox(height: AppTheme.paddingXS),
-            BodySmallLabel(
+            BaseLabel(
               _formatFileSize(_fileSize),
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
           ],
         ),
@@ -345,9 +354,10 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(
                   _lineCount,
-                  (index) => BodyMediumLabel(
+                  (index) => BaseLabel(
                     '${index + 1}',
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    role: TextRole.body,
+                    tone: Tone.muted,
                   ),
                 ),
               ),

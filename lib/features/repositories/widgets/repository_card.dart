@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show ControlScale, IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ControlScale, IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -170,13 +171,14 @@ class RepositoryCard extends ConsumerWidget {
           const SizedBox(height: AppTheme.paddingM),
 
           // Repository name
-          TitleLargeLabel(
+          // The selected-container pairing is gone from every label on this
+          // card: the card paints the selected container and publishes the
+          // matching foreground through its DefaultTextStyle, and a label
+          // that restated it was saying the surface's answer for it.
+          BaseLabel(
             repository.displayName,
-            color: isSelected
-                ? Theme.of(context).colorScheme.onSecondaryContainer
-                : Theme.of(context).colorScheme.onSurface,
+            role: TextRole.itemTitle,
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: AppTheme.paddingS),
 
@@ -192,13 +194,10 @@ class RepositoryCard extends ConsumerWidget {
               ),
               const SizedBox(width: AppTheme.paddingXS),
               Flexible(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   repository.path,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSecondaryContainer
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
                   maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -218,13 +217,10 @@ class RepositoryCard extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppTheme.paddingXS),
                 Flexible(
-                  child: BodyMediumLabel(
+                  child: BaseLabel(
                     status.currentBranch!,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onSecondaryContainer
-                        : Theme.of(context).colorScheme.onSurface,
+                    role: TextRole.body,
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -249,15 +245,12 @@ class RepositoryCard extends ConsumerWidget {
                 Flexible(
                   child: Tooltip(
                     message: status.remoteUrl ?? identity.host,
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       identity.accountHint == null
                           ? identity.label
                           : '${identity.label} · ${identity.accountHint}',
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.onSecondaryContainer
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                      role: TextRole.detail,
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -268,13 +261,10 @@ class RepositoryCard extends ConsumerWidget {
           // Description if available
           if (repository.description != null) ...[
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(
+            BaseLabel(
               repository.description!,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.onSecondaryContainer
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.body,
               maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
 
@@ -301,10 +291,7 @@ class RepositoryCard extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: AppTheme.paddingS),
-                BodySmallLabel(
-                  'Analyzing...',
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                BaseLabel('Analyzing...', role: TextRole.detail),
               ],
             )
           else
@@ -394,9 +381,10 @@ class RepositoryCard extends ConsumerWidget {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       'Invalid or missing repository',
-                      color: Theme.of(context).colorScheme.error,
+                      role: TextRole.detail,
+                      tone: Tone.danger,
                     ),
                   ),
                 ],
@@ -416,11 +404,9 @@ class RepositoryCard extends ConsumerWidget {
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingXS),
-              LabelMediumLabel(
+              BaseLabel(
                 '${AppLocalizations.of(context)!.accessed} ${repository.lastAccessed.toDisplayString(Localizations.localeOf(context).languageCode)}',
-                color: isSelected
-                    ? Theme.of(context).colorScheme.onSecondaryContainer
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
               ),
             ],
           ),
@@ -591,6 +577,12 @@ class RepositoryCard extends ConsumerWidget {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: AppTheme.paddingXS),
+          // Deliberately still the old label: this helper's Color parameter
+          // also paints the badge's fill, border and icon, so it can only
+          // become a Tone when the whole badge moves onto `surfaces.badge` in
+          // the surface sub-phase - the application cannot resolve a Tone to
+          // a Color for its own decoration, and the seam is right to forbid
+          // that.
           LabelMediumLabel(label, color: color),
         ],
       ),

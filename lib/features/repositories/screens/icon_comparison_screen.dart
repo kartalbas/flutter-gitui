@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
@@ -75,7 +76,12 @@ class IconComparisonScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const TitleLargeLabel('Repository Icon Options')),
+      appBar: AppBar(
+        title: const BaseLabel(
+          'Repository Icon Options',
+          role: TextRole.pageTitle,
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(AppTheme.paddingL),
         child: GridView.builder(
@@ -123,10 +129,7 @@ class _IconCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Icon name
-          TitleMediumLabel(
-            option.name,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          BaseLabel(option.name, role: TextRole.itemTitle),
           const SizedBox(height: AppTheme.paddingM),
 
           // Icons (regular and bold variants)
@@ -142,10 +145,7 @@ class _IconCard extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   const SizedBox(height: AppTheme.paddingXS),
-                  LabelSmallLabel(
-                    'Regular',
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  BaseLabel('Regular', role: TextRole.micro, tone: Tone.muted),
                 ],
               ),
               const SizedBox(width: AppTheme.paddingL),
@@ -158,10 +158,7 @@ class _IconCard extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: AppTheme.paddingXS),
-                  LabelSmallLabel(
-                    'Bold',
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                  BaseLabel('Bold', role: TextRole.micro, tone: Tone.muted),
                 ],
               ),
             ],
@@ -169,12 +166,12 @@ class _IconCard extends StatelessWidget {
           const SizedBox(height: AppTheme.paddingM),
 
           // Description
-          BodySmallLabel(
+          BaseLabel(
             option.description,
-            textAlign: TextAlign.center,
+            role: TextRole.detail,
+            align: TextAlign.center,
             maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            tone: Tone.muted,
           ),
         ],
       ),

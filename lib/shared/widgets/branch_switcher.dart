@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -522,7 +523,10 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BodyMediumLabel(l10n.branchesSelectedForDeletion(_selectedCount)),
+          BaseLabel(
+            l10n.branchesSelectedForDeletion(_selectedCount),
+            role: TextRole.body,
+          ),
           const SizedBox(height: AppTheme.paddingS),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 300),
@@ -543,7 +547,9 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
                     onChanged: (value) => _toggleBranch(branch, value ?? false),
                     title: Row(
                       children: [
-                        Expanded(child: BodyMediumLabel(branch.name)),
+                        Expanded(
+                          child: BaseLabel(branch.name, role: TextRole.body),
+                        ),
                         // The component layer's badge, not a hand-rolled
                         // pill: `BadgeVariant.success` and
                         // `BadgeVariant.danger` are already the green-on-tint
@@ -586,8 +592,9 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
           // the one that arms `git branch -D` over the whole selection.
           if (unmergedSelected > 0) ...[
             const SizedBox(height: AppTheme.paddingM),
-            BodyMediumLabel(
+            BaseLabel(
               l10n.unmergedBranchesWillBeSkipped(unmergedSelected),
+              role: TextRole.body,
             ),
             const SizedBox(height: AppTheme.paddingS),
             _forceOptIn(context, l10n),
@@ -667,16 +674,18 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
               ),
               const SizedBox(width: AppTheme.paddingS),
               Expanded(
-                child: LabelLargeLabel(
+                child: BaseLabel(
                   l10n.forceDelete,
-                  color: colorScheme.error,
+                  role: TextRole.control,
+                  tone: Tone.danger,
                 ),
               ),
             ],
           ),
-          subtitle: BodySmallLabel(
+          subtitle: BaseLabel(
             l10n.forceDeleteBranchesWarning,
-            color: colorScheme.error,
+            role: TextRole.detail,
+            tone: Tone.danger,
           ),
           dense: true,
           contentPadding: EdgeInsets.zero,

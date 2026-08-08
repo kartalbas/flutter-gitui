@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -52,11 +53,12 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BodyMediumLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.mergeABranchInto(
                 currentBranch ?? 'unknown',
                 currentBranch ?? 'unknown',
               ),
+              role: TextRole.body,
             ),
             const SizedBox(height: AppTheme.paddingL),
 
@@ -77,8 +79,9 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                       ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppTheme.radiusM),
                     ),
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.noOtherBranchesAvailable,
+                      role: TextRole.body,
                     ),
                   );
                 }
@@ -104,8 +107,9 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                           Text(branch.name),
                           if (branch.isRemote) ...[
                             const SizedBox(width: AppTheme.paddingS),
-                            BodySmallLabel(
+                            BaseLabel(
                               AppLocalizations.of(context)!.remote,
+                              role: TextRole.detail,
                             ),
                           ],
                         ],
@@ -122,17 +126,21 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                 );
               },
               loading: () => const LinearProgressIndicator(),
-              error: (error, _) => BodyMediumLabel(
+              error: (error, _) => BaseLabel(
                 AppLocalizations.of(
                   context,
                 )!.errorLoadingBranches(error.toString()),
-                color: Theme.of(context).colorScheme.error,
+                role: TextRole.body,
+                tone: Tone.danger,
               ),
             ),
             const SizedBox(height: AppTheme.paddingM),
 
             // Merge options
-            TitleSmallLabel(AppLocalizations.of(context)!.mergeOptions),
+            BaseLabel(
+              AppLocalizations.of(context)!.mergeOptions,
+              role: TextRole.sectionTitle,
+            ),
             const SizedBox(height: AppTheme.paddingS),
 
             // Fast-forward only
@@ -234,7 +242,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodyMediumLabel(
+                    child: BaseLabel(
                       _squash
                           ? AppLocalizations.of(
                               context,
@@ -242,6 +250,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                           : AppLocalizations.of(
                               context,
                             )!.thisWillMergeSelectedBranch,
+                      role: TextRole.body,
                     ),
                   ),
                 ],
@@ -265,9 +274,10 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: BodyMediumLabel(
+                      child: BaseLabel(
                         _errorMessage!,
-                        color: Theme.of(context).colorScheme.error,
+                        role: TextRole.body,
+                        tone: Tone.danger,
                       ),
                     ),
                   ],
@@ -280,14 +290,15 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
               const SizedBox(height: AppTheme.paddingL),
               const LinearProgressIndicator(),
               const SizedBox(height: AppTheme.paddingS),
+              // The italic leaves with the `TextStyle`: slanting an aside is
+              // Material's answer to "this is a remark about what is
+              // happening", and `TextRole.detail` is the question.
               BaseLabel(
                 AppLocalizations.of(
                   context,
                 )!.mergingBranch(_selectedBranch ?? 'branch'),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                textAlign: TextAlign.center,
+                role: TextRole.detail,
+                align: TextAlign.center,
               ),
             ],
           ],

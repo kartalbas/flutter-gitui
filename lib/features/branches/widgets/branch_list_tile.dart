@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -60,11 +61,16 @@ class BranchListTile extends ConsumerWidget {
             children: [
               Flexible(
                 child: branch.isCurrent
-                    ? TitleSmallLabel(
+                    ? BaseLabel(
                         branch.shortName,
-                        color: colorScheme.primary,
+                        role: TextRole.itemTitle,
+                        // "This is the branch you are on" - the one configured,
+                        // active thing in the list, which is what Tone.accent
+                        // says. The colour it lands on under Material is the
+                        // same `colorScheme.primary` this site spelled out.
+                        tone: Tone.accent,
                       )
-                    : BodyMediumLabel(branch.shortName),
+                    : BaseLabel(branch.shortName, role: TextRole.body),
               ),
               if (branch.isCurrent) ...[
                 const SizedBox(width: AppTheme.paddingS),
@@ -87,10 +93,10 @@ class BranchListTile extends ConsumerWidget {
           // Subtitle with commit message and tracking
           if (branch.lastCommitMessage != null) ...[
             const SizedBox(height: AppTheme.paddingXS),
-            BodySmallLabel(
+            BaseLabel(
               branch.lastCommitMessage!,
+              role: TextRole.detail,
               maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
           if (branch.hasUpstream) ...[
@@ -103,13 +109,19 @@ class BranchListTile extends ConsumerWidget {
                   color: colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: AppTheme.paddingXS),
-                BodySmallLabel(
+                // Three states of one branch against its remote. The middle arm
+                // reached for `colorScheme.secondary` only because Material has
+                // no warning role at all, which is the giveaway that a meaning
+                // was being approximated with whatever slot was free; said as a
+                // meaning it is Tone.warning, and the skin answers it.
+                BaseLabel(
                   '${branch.upstreamBranch} ${branch.trackingStatus ?? ""}',
-                  color: branch.isDiverged
-                      ? colorScheme.error
+                  role: TextRole.detail,
+                  tone: branch.isDiverged
+                      ? Tone.danger
                       : branch.isBehind
-                      ? colorScheme.secondary
-                      : context.gitColors.added,
+                      ? Tone.warning
+                      : Tone.success,
                 ),
               ],
             ),

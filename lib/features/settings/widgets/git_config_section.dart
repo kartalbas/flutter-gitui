@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -61,18 +62,21 @@ class GitConfigSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.gitExecutablePath),
-              BodySmallLabel(
+              BaseLabel(l10n.gitExecutablePath, role: TextRole.body),
+              // Tone.invalid, not Tone.danger: an unset executable destroys
+              // nothing, it is a value the user must supply before the
+              // feature works.
+              BaseLabel(
                 git.executablePath ?? l10n.gitExecutableNotSet,
-                color: git.executablePath == null
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                role: TextRole.detail,
+                tone: git.executablePath == null ? Tone.invalid : Tone.neutral,
               ),
               if (git.gitVersion != null) ...[
                 const SizedBox(height: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   l10n.gitVersion(git.gitVersion!),
-                  color: Theme.of(context).colorScheme.primary,
+                  role: TextRole.detail,
+                  tone: Tone.accent,
                 ),
               ],
             ],
@@ -105,18 +109,18 @@ class GitConfigSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.preferredTextEditor),
-              BodySmallLabel(
+              BaseLabel(l10n.preferredTextEditor, role: TextRole.body),
+              BaseLabel(
                 tools.textEditor ?? l10n.textEditorNotSet,
-                color: tools.textEditor == null
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                role: TextRole.detail,
+                tone: tools.textEditor == null ? Tone.invalid : Tone.neutral,
               ),
               if (tools.textEditorVersion != null) ...[
                 const SizedBox(height: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   l10n.version(tools.textEditorVersion!),
-                  color: Theme.of(context).colorScheme.primary,
+                  role: TextRole.detail,
+                  tone: Tone.accent,
                 ),
               ],
             ],
@@ -149,18 +153,18 @@ class GitConfigSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.diffToolTitle),
-              BodySmallLabel(
+              BaseLabel(l10n.diffToolTitle, role: TextRole.body),
+              BaseLabel(
                 tools.diffTool?.displayName ?? l10n.diffToolNotSet,
-                color: tools.diffTool == null
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                role: TextRole.detail,
+                tone: tools.diffTool == null ? Tone.invalid : Tone.neutral,
               ),
               if (tools.diffToolVersion != null) ...[
                 const SizedBox(height: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   l10n.version(tools.diffToolVersion!),
-                  color: Theme.of(context).colorScheme.primary,
+                  role: TextRole.detail,
+                  tone: Tone.accent,
                 ),
               ],
             ],
@@ -191,18 +195,18 @@ class GitConfigSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.mergeToolTitle),
-              BodySmallLabel(
+              BaseLabel(l10n.mergeToolTitle, role: TextRole.body),
+              BaseLabel(
                 tools.mergeTool?.displayName ?? l10n.mergeToolNotSet,
-                color: tools.mergeTool == null
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                role: TextRole.detail,
+                tone: tools.mergeTool == null ? Tone.invalid : Tone.neutral,
               ),
               if (tools.mergeToolVersion != null) ...[
                 const SizedBox(height: AppTheme.paddingXS),
-                BodySmallLabel(
+                BaseLabel(
                   l10n.version(tools.mergeToolVersion!),
-                  color: Theme.of(context).colorScheme.primary,
+                  role: TextRole.detail,
+                  tone: Tone.accent,
                 ),
               ],
             ],
@@ -233,12 +237,11 @@ class GitConfigSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.defaultUserName),
-              BodySmallLabel(
+              BaseLabel(l10n.defaultUserName, role: TextRole.body),
+              BaseLabel(
                 git.defaultUserName ?? l10n.userNameNotSet,
-                color: git.defaultUserName == null
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                role: TextRole.detail,
+                tone: git.defaultUserName == null ? Tone.invalid : Tone.neutral,
               ),
             ],
           ),
@@ -253,12 +256,13 @@ class GitConfigSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.defaultUserEmail),
-              BodySmallLabel(
+              BaseLabel(l10n.defaultUserEmail, role: TextRole.body),
+              BaseLabel(
                 git.defaultUserEmail ?? l10n.userEmailNotSet,
-                color: git.defaultUserEmail == null
-                    ? Theme.of(context).colorScheme.error
-                    : null,
+                role: TextRole.detail,
+                tone: git.defaultUserEmail == null
+                    ? Tone.invalid
+                    : Tone.neutral,
               ),
             ],
           ),

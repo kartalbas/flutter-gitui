@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -136,24 +137,27 @@ class BlameDialog extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Commit hash
-                  BodySmallLabel(
+                  BaseLabel(
                     firstLine.commitHash.substring(0, 7),
-                    color: colorScheme.primary,
+                    role: TextRole.detail,
+                    tone: Tone.accent,
                   ),
                   const SizedBox(height: AppTheme.paddingXS),
                   // Author
-                  TitleSmallLabel(firstLine.author),
+                  BaseLabel(firstLine.author, role: TextRole.itemTitle),
                   const SizedBox(height: 2),
                   // Date
-                  BodySmallLabel(
+                  BaseLabel(
                     timeago.format(firstLine.authorTime),
-                    color: colorScheme.onSurfaceVariant,
+                    role: TextRole.detail,
+                    tone: Tone.muted,
                   ),
                   const SizedBox(height: AppTheme.paddingS),
                   // Summary
-                  BodySmallLabel(
+                  BaseLabel(
                     firstLine.summary,
-                    color: colorScheme.onSurfaceVariant,
+                    role: TextRole.detail,
+                    tone: Tone.muted,
                     maxLines: 2,
                   ),
                 ],
@@ -175,10 +179,11 @@ class BlameDialog extends ConsumerWidget {
                         // Line number
                         SizedBox(
                           width: 50,
-                          child: BodySmallLabel(
+                          child: BaseLabel(
                             line.lineNumber.toString(),
-                            color: colorScheme.onSurfaceVariant,
-                            textAlign: TextAlign.right,
+                            role: TextRole.detail,
+                            tone: Tone.muted,
+                            align: TextAlign.right,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -213,7 +218,10 @@ class BlameDialog extends ConsumerWidget {
         children: [
           const Icon(PhosphorIconsRegular.userList, size: 48),
           const SizedBox(height: AppTheme.paddingM),
-          TitleMediumLabel(AppLocalizations.of(context)!.couldNotLoadBlame),
+          BaseLabel(
+            AppLocalizations.of(context)!.couldNotLoadBlame,
+            role: TextRole.pageTitle,
+          ),
         ],
       ),
     );

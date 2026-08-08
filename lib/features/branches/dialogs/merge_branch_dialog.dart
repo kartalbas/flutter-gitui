@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -26,8 +26,9 @@ class MergeBranchDialog extends ConsumerWidget {
       icon: IconRole.gitMerge,
       variant: DialogVariant.confirmation,
       onSubmit: () => Navigator.of(context).pop(true),
-      content: BodyMediumLabel(
+      content: BaseLabel(
         l10n.mergeBranchConfirm(branch.shortName, targetBranch),
+        role: TextRole.body,
       ),
       actions: [
         DialogAction(

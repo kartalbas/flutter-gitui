@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, ControlScale;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, ControlScale, TextRole, Tone;
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 
@@ -84,7 +85,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: AppTheme.paddingS),
-          TitleSmallLabel(AppLocalizations.of(context)!.labelChangedFiles),
+          BaseLabel(
+            AppLocalizations.of(context)!.labelChangedFiles,
+            role: TextRole.sectionTitle,
+          ),
         ],
       ),
       padding: EdgeInsets.zero,
@@ -101,9 +105,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: AppTheme.paddingM),
-                  BodyMediumLabel(
+                  BaseLabel(
                     AppLocalizations.of(context)!.messageNoFilesChanged,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    role: TextRole.body,
+                    tone: Tone.muted,
                   ),
                 ],
               ),
@@ -156,18 +161,21 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                     const SizedBox(height: AppTheme.paddingS),
                     Row(
                       children: [
-                        BodySmallLabel(
+                        BaseLabel(
                           '${stats.totalFiles} ${stats.totalFiles == 1 ? AppLocalizations.of(context)!.labelFile : AppLocalizations.of(context)!.labelFiles}',
+                          role: TextRole.detail,
                         ),
                         const Spacer(),
-                        BodySmallLabel(
+                        BaseLabel(
                           '+${stats.totalAdditions}',
-                          color: context.gitColors.added,
+                          role: TextRole.detail,
+                          tone: Tone.gitAdded,
                         ),
                         const SizedBox(width: AppTheme.paddingXS),
-                        BodySmallLabel(
+                        BaseLabel(
                           '-${stats.totalDeletions}',
-                          color: context.gitColors.deleted,
+                          role: TextRole.detail,
+                          tone: Tone.gitDeleted,
                         ),
                       ],
                     ),
@@ -206,9 +214,10 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                 color: Theme.of(context).colorScheme.error,
               ),
               const SizedBox(height: AppTheme.paddingM),
-              BodyMediumLabel(
+              BaseLabel(
                 AppLocalizations.of(context)!.errorLoadingData('files'),
-                color: Theme.of(context).colorScheme.error,
+                role: TextRole.body,
+                tone: Tone.danger,
               ),
             ],
           ),
@@ -228,7 +237,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       children: [
         Icon(icon, size: AppTheme.iconXS, color: color),
         const SizedBox(width: AppTheme.paddingXS),
-        BodySmallLabel(count),
+        BaseLabel(count, role: TextRole.detail),
       ],
     );
   }
@@ -343,7 +352,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
 
             // Name
             Expanded(
-              child: BodySmallLabel(node.name, overflow: TextOverflow.ellipsis),
+              child: BaseLabel(node.name, role: TextRole.detail, maxLines: 1),
             ),
 
             // File change stats
@@ -359,18 +368,20 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (node.fileChange!.additions > 0) ...[
-                      LabelSmallLabel(
+                      BaseLabel(
                         '+${node.fileChange!.additions}',
-                        color: context.gitColors.added,
+                        role: TextRole.micro,
+                        tone: Tone.gitAdded,
                       ),
                     ],
                     if (node.fileChange!.additions > 0 &&
                         node.fileChange!.deletions > 0)
                       const SizedBox(width: 2),
                     if (node.fileChange!.deletions > 0) ...[
-                      LabelSmallLabel(
+                      BaseLabel(
                         '-${node.fileChange!.deletions}',
-                        color: context.gitColors.deleted,
+                        role: TextRole.micro,
+                        tone: Tone.gitDeleted,
                       ),
                     ],
                   ],

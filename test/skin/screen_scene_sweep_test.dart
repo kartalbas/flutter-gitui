@@ -235,6 +235,16 @@ void main() {
 /// dominate because they are almost entirely toolbar actions and rows of
 /// buttons.
 ///
+/// **P3b roughly trebled every one of them, and that is the typography
+/// collapse.** The thirteen `Base*Label` classes named after Material's type
+/// scale became one `BaseLabel` asking for a [TextRole], so text - the thing a
+/// screen does far more of than anything else - now reaches the skin too.
+/// Screens that were almost all prose moved most: `history` from 3 to 24,
+/// `merge_conflicts` from 1 to 17, `browse` from 1 to 11. These are the numbers
+/// that make "how much of this screen does the skin actually draw" a fact
+/// rather than an impression, and the rise is exactly what the register exists
+/// to force somebody to write down.
+///
 /// Asserted as an exact number rather than a floor, in both directions. A drop
 /// is a regression - a component stopped reaching its skin. A rise is a
 /// migration, and it has to fail here so that the number is updated in the
@@ -245,27 +255,42 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // hand-written `Icon(PhosphorIconsRegular.dotsThreeVertical)` and became a
   // `BaseIcon`. It was the one mark in that bar a Fluent or macOS skin could
   // not have answered, sitting among actions the skin already drew.
-  'shell': 39,
-  'workspaces': 6,
-  'repositories': 9,
-  'changes': 4,
-  'history': 3,
-  'browse': 1,
-  'branches': 4,
-  'stashes': 2,
-  'tags': 3,
-  'settings': 31,
-  'merge_conflicts': 1,
+  //
+  // 94 and not 103: the nine navigation-rail destination labels went back to
+  // bare `Text`s, deliberately. The rail owns that slot's typography - it
+  // lerps each label between its unselected and selected styles - so those
+  // labels are part of a larger member and convert with the shell chrome,
+  // the same carve-out BaseLabel documents for a button's words. See the
+  // comment at the call site (app_shell.dart) for the paint-path assert that
+  // made the misplacement visible.
+  'shell': 94,
+  'workspaces': 15,
+  'repositories': 21,
+  'changes': 18,
+  'history': 24,
+  'browse': 11,
+  'branches': 7,
+  'stashes': 8,
+  'tags': 13,
+  'settings': 78,
+  'merge_conflicts': 17,
 };
 
 /// The scenes whose count the SKIN changes, and by how much.
 ///
 /// The register above claims the number is skin-independent: application code
 /// plants the fences, so Material and the blueprint should agree, and a
-/// disagreement "would itself be a defect". The shell disagrees - 39 under
-/// Material, 38 under the blueprint - and the claim is right: the
+/// disagreement "would itself be a defect". The shell disagrees - 94 under
+/// Material, 93 under the blueprint - and the claim is right: the
 /// disagreement IS the defect, and it is one this programme already knows
 /// about by name.
+///
+/// Both numbers grew by 55 when the typography conversion turned every
+/// `Base*Label` into a `BaseLabel` reaching `type.text` (64 label sites landed
+/// and the nine rail destination labels deliberately went back out - see the
+/// register comment above), and the DIFFERENCE stayed at exactly one. That is
+/// the useful part: the gap is still the single toolbar action the arithmetic
+/// below sheds, and not a second leak hiding inside a bigger number.
 ///
 /// `OverflowActionBar.visibleActionCount()`
 /// (lib/shared/widgets/overflow_action_bar.dart:49-69) decides how many
@@ -283,7 +308,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
 /// this map becomes empty, and the day it does is visible. A NEW entry
 /// appearing here is a new leak of the same kind and has to be argued for.
 const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
-  'shell': 38,
+  'shell': 93,
 };
 
 /// How many application widgets currently on screen render through a contract

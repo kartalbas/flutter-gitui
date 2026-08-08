@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -21,9 +22,15 @@ class ChangesCleanState extends StatelessWidget {
             color: context.gitColors.added,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.workingDirectoryClean),
+          BaseLabel(
+            AppLocalizations.of(context)!.workingDirectoryClean,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(AppLocalizations.of(context)!.noChangesToCommit),
+          BaseLabel(
+            AppLocalizations.of(context)!.noChangesToCommit,
+            role: TextRole.body,
+          ),
         ],
       ),
     );

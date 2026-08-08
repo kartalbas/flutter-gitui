@@ -36,8 +36,8 @@ import 'base_menu_item.dart';
 ///   content: Column(
 ///     crossAxisAlignment: CrossAxisAlignment.start,
 ///     children: [
-///       TitleMediumLabel('Title'),
-///       BodySmallLabel('Subtitle'),
+///       BaseLabel('Title', role: TextRole.itemTitle),
+///       BaseLabel('Subtitle', role: TextRole.detail),
 ///     ],
 ///   ),
 ///   badge: Badge(label: Text('5')),

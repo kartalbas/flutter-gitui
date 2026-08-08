@@ -27,12 +27,12 @@ import '../../shared/theme/app_theme.dart';
 /// BaseCard(
 ///   header: Padding(
 ///     padding: const EdgeInsets.all(AppTheme.paddingM),
-///     child: TitleLargeLabel('Card Header'),
+///     child: BaseLabel('Card Header', role: TextRole.sectionTitle),
 ///   ),
 ///   content: ListView(
 ///     children: [
-///       ListTile(title: BodyMediumLabel('Item 1')),
-///       ListTile(title: BodyMediumLabel('Item 2')),
+///       ListTile(title: BaseLabel('Item 1', role: TextRole.body)),
+///       ListTile(title: BaseLabel('Item 2', role: TextRole.body)),
 ///     ],
 ///   ),
 ///   footer: Padding(

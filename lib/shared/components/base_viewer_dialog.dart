@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 import 'base_dialog.dart' show DialogKeyboardHost;
 import '../../shared/theme/app_theme.dart';
@@ -54,9 +54,6 @@ class BaseViewerDialog extends StatelessWidget {
     this.onSubmit,
     this.widthFactor = 0.9,
     this.heightFactor = 0.9,
-    this.backgroundColor,
-    this.headerBackgroundColor,
-    this.footerBackgroundColor,
   });
 
   /// Dialog title
@@ -98,19 +95,31 @@ class BaseViewerDialog extends StatelessWidget {
   /// Height as factor of screen height (default 0.9)
   final double heightFactor;
 
-  /// Optional custom background color for dialog
-  final Color? backgroundColor;
-
-  /// Optional custom background color for header
-  final Color? headerBackgroundColor;
-
-  /// Optional custom background color for footer
-  final Color? footerBackgroundColor;
+  // `backgroundColor`, `headerBackgroundColor` and `footerBackgroundColor`
+  // used to sit here: three `Color`s crossing an application API, which is
+  // three design decisions taken in a screen. They are gone, and removing
+  // them is what fixes the defect they caused rather than moving it.
+  //
+  // A fill and the foreground that pairs with it are ONE decision, and this
+  // API let a caller take half of it. The one caller ever to pass them
+  // (`image_viewer_dialog.dart`) painted the header with
+  // `colorScheme.scrim.withValues(alpha: 0.7)` while this component paired
+  // the title with `colorScheme.onPrimary` — the on-colour of a fill nobody
+  // had painted. Measured across the ten `AppColorScheme` values: 1.61 : 1 in
+  // light and 1.06 : 1 in six of the ten dark schemes, i.e. black title on a
+  // near-black header. Nothing here could have got that right, because
+  // `lib/` has no way to ask what ink pairs with an arbitrary colour — only
+  // a skin can answer that (`MaterialInk.foregroundOn`), and the whole point
+  // of #249 is that it should be the one asked.
+  //
+  // So the viewer's chrome is now the ordinary dialog chrome every other
+  // viewer already uses, which the theme pairs correctly in both
+  // brightnesses. The image itself still sits on a dark backdrop, because
+  // that is `PhotoView.backgroundDecoration`'s job and it kept it.
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     // The same keyboard host BaseDialog uses, rather than a second copy of
     // the Esc/Enter handler: this component used to wrap itself in an eager
@@ -123,7 +132,6 @@ class BaseViewerDialog extends StatelessWidget {
       barrierDismissible: barrierDismissible,
       onSubmit: onSubmit,
       child: Dialog(
-        backgroundColor: backgroundColor,
         // The same 12 dp corner BaseDialog carries, and for the same reason:
         // see DLG-001/VIEW-001 in
         // packages/gitui_skin_material/docs/deviation_register.yaml. A viewer
@@ -138,24 +146,23 @@ class BaseViewerDialog extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
-              Container(
+              // Header. It paints nothing of its own, so the dialog's surface
+              // is what shows through and the theme's own pairing is what the
+              // labels inherit — which is the arrangement that cannot be got
+              // wrong, and the reason neither label below says anything about
+              // colour.
+              Padding(
                 padding: const EdgeInsets.all(AppTheme.paddingM),
-                decoration: headerBackgroundColor != null
-                    ? BoxDecoration(color: headerBackgroundColor)
-                    : null,
                 child: Row(
                   children: [
                     if (icon != null) ...[
-                      // `prominent` is the 24 dp rung the ambient icon
-                      // theme already gave this mark; the tone is the meaning
-                      // the two spelled-out colours carried.
+                      // `prominent` is the 24 dp rung the ambient icon theme
+                      // already gave this mark; `accent` is the meaning the
+                      // spelled-out colour carried.
                       BaseIcon(
                         icon!,
                         scale: ControlScale.prominent,
-                        tone: headerBackgroundColor != null
-                            ? Tone.onAccent
-                            : Tone.accent,
+                        tone: Tone.accent,
                       ),
                       const SizedBox(width: AppTheme.paddingS),
                     ],
@@ -163,21 +170,9 @@ class BaseViewerDialog extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          TitleLargeLabel(
-                            title,
-                            color: headerBackgroundColor != null
-                                ? theme.colorScheme.onPrimary
-                                : null,
-                          ),
+                          BaseLabel(title, role: TextRole.pageTitle),
                           if (subtitle != null)
-                            BodySmallLabel(
-                              subtitle!,
-                              color: headerBackgroundColor != null
-                                  ? theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.7,
-                                    )
-                                  : null,
-                            ),
+                            BaseLabel(subtitle!, role: TextRole.detail),
                         ],
                       ),
                     ),
@@ -202,13 +197,7 @@ class BaseViewerDialog extends StatelessWidget {
               Expanded(child: content),
 
               // Footer (custom widget like PDF navigation)
-              if (footer != null)
-                Container(
-                  decoration: footerBackgroundColor != null
-                      ? BoxDecoration(color: footerBackgroundColor)
-                      : null,
-                  child: footer,
-                ),
+              ?footer,
 
               // Actions (row of buttons)
               if (actions != null && actions!.isNotEmpty)

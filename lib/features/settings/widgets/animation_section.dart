@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -43,9 +44,10 @@ class AnimationSection extends ConsumerWidget {
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BodyMediumLabel(l10n.animationSpeed),
-              BodySmallLabel(
+              BaseLabel(l10n.animationSpeed, role: TextRole.body),
+              BaseLabel(
                 _getAnimationSpeedName(context, ui.animationSpeed),
+                role: TextRole.detail,
               ),
             ],
           ),
@@ -57,7 +59,10 @@ class AnimationSection extends ConsumerWidget {
             items: AppAnimationSpeed.values.map((speed) {
               return DropdownMenuItem(
                 value: speed,
-                child: BodyMediumLabel(_getAnimationSpeedName(context, speed)),
+                child: BaseLabel(
+                  _getAnimationSpeedName(context, speed),
+                  role: TextRole.body,
+                ),
               );
             }).toList(),
             onChanged: (value) {
@@ -87,9 +92,10 @@ class AnimationSection extends ConsumerWidget {
               ),
               const SizedBox(width: AppTheme.paddingS),
               Expanded(
-                child: BodySmallLabel(
+                child: BaseLabel(
                   l10n.animationSpeedInfo,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  role: TextRole.detail,
+                  tone: Tone.muted,
                 ),
               ),
             ],

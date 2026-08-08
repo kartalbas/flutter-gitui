@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -244,8 +244,9 @@ class ConfigAndLogsSection extends ConsumerWidget {
           icon: IconRole.trash,
           title: l10n.deleteAppLog,
           variant: DialogVariant.destructive,
-          content: const BodyMediumLabel(
+          content: const BaseLabel(
             'Are you sure you want to delete app.log? This action cannot be undone.',
+            role: TextRole.body,
           ),
           actions: [
             DialogAction(
@@ -305,8 +306,9 @@ class ConfigAndLogsSection extends ConsumerWidget {
           icon: IconRole.trash,
           title: l10n.deleteGitLog,
           variant: DialogVariant.destructive,
-          content: const BodyMediumLabel(
+          content: const BaseLabel(
             'Are you sure you want to delete git.log? This action cannot be undone.',
+            role: TextRole.body,
           ),
           actions: [
             DialogAction(

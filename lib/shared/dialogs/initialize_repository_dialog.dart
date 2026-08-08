@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
@@ -51,8 +52,9 @@ class _InitializeRepositoryDialogState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            BodyMediumLabel(
+            BaseLabel(
               AppLocalizations.of(context)!.createNewGitRepository,
+              role: TextRole.body,
             ),
             const SizedBox(height: AppTheme.paddingL),
 
@@ -101,11 +103,13 @@ class _InitializeRepositoryDialogState
                         _bare = value;
                       });
                     },
-              title: BodyMediumLabel(
+              title: BaseLabel(
                 AppLocalizations.of(context)!.bareRepository,
+                role: TextRole.body,
               ),
-              subtitle: BodySmallLabel(
+              subtitle: BaseLabel(
                 AppLocalizations.of(context)!.bareRepositoryDescription,
+                role: TextRole.detail,
               ),
               contentPadding: EdgeInsets.zero,
             ),
@@ -123,7 +127,7 @@ class _InitializeRepositoryDialogState
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.initializeRepositoryInfo(
                         _bare
                             ? ''
@@ -131,6 +135,7 @@ class _InitializeRepositoryDialogState
                                 context,
                               )!.initializeRepositoryInfoBare,
                       ),
+                      role: TextRole.detail,
                     ),
                   ),
                 ],
@@ -154,9 +159,10 @@ class _InitializeRepositoryDialogState
                     ),
                     const SizedBox(width: AppTheme.paddingS),
                     Expanded(
-                      child: BodyMediumLabel(
+                      child: BaseLabel(
                         _errorMessage!,
-                        color: Theme.of(context).colorScheme.error,
+                        role: TextRole.body,
+                        tone: Tone.danger,
                       ),
                     ),
                   ],
@@ -169,9 +175,10 @@ class _InitializeRepositoryDialogState
               const SizedBox(height: AppTheme.paddingL),
               const LinearProgressIndicator(),
               const SizedBox(height: AppTheme.paddingS),
-              BodyMediumLabel(
+              BaseLabel(
                 AppLocalizations.of(context)!.initializingRepository,
-                textAlign: TextAlign.center,
+                role: TextRole.body,
+                align: TextAlign.center,
               ),
             ],
           ],

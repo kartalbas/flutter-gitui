@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../core/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -176,25 +176,33 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    PhosphorIconsRegular.warningCircle,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(width: AppTheme.paddingM),
-                  Expanded(
-                    child: BodyMediumLabel(
-                      errorMessage,
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+              // The callout paints its own fill, so it states the paired
+              // foreground once here and the message inside says nothing
+              // about colour.
+              child: DefaultTextStyle.merge(
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.warningCircle,
+                      color: Theme.of(context).colorScheme.error,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppTheme.paddingM),
+                    Expanded(
+                      child: BaseLabel(errorMessage, role: TextRole.body),
+                    ),
+                  ],
+                ),
               ),
             ),
           const SizedBox(height: AppTheme.paddingM),
 
-          TitleSmallLabel(l10n.squashingCommitsCount(_selectedCommits.length)),
+          BaseLabel(
+            l10n.squashingCommitsCount(_selectedCommits.length),
+            role: TextRole.sectionTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
 
           // List of commits being squashed
@@ -218,13 +226,14 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BodyMediumLabel(
+                      BaseLabel(
                         commit.shortSubject,
+                        role: TextRole.body,
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      LabelMediumLabel(
+                      BaseLabel(
                         '${commit.shortHash} by ${commit.author}',
+                        role: TextRole.detail,
                       ),
                     ],
                   ),
@@ -235,7 +244,7 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
 
           const SizedBox(height: AppTheme.paddingL),
 
-          TitleSmallLabel(l10n.newCommitMessage),
+          BaseLabel(l10n.newCommitMessage, role: TextRole.sectionTitle),
           const SizedBox(height: AppTheme.paddingS),
 
           BaseTextField(
@@ -261,7 +270,12 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: AppTheme.paddingS),
-                Expanded(child: BodySmallLabel(l10n.squashCommitsInfo)),
+                Expanded(
+                  child: BaseLabel(
+                    l10n.squashCommitsInfo,
+                    role: TextRole.detail,
+                  ),
+                ),
               ],
             ),
           ),

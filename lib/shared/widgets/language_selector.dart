@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 import '../components/base_animated_widgets.dart';
-import '../components/base_menu_item.dart';
+import '../components/base_label.dart';
 import '../components/country_flag.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
@@ -116,15 +117,13 @@ class LanguageSelector extends ConsumerWidget {
               _buildFlagIcon(context, option, isSelected),
               const SizedBox(width: AppTheme.paddingM),
               // Language name
-              Expanded(
-                child: MenuItemLabel(
-                  option.name,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
+              // The entry says only what it is; that it is the chosen one is
+              // said by the checkmark beside it, which is the fact
+              // `MenuCheckable.checked` will carry when this menu becomes a
+              // contract member. The semibold and the accent tint were this
+              // call site answering "how does a language show 'checked'" —
+              // twice, on top of a checkmark that already says it.
+              Expanded(child: BaseLabel(option.name, role: TextRole.control)),
               // Checkmark for selected
               if (isSelected) ...[
                 const SizedBox(width: AppTheme.paddingM),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -48,8 +48,9 @@ class _CreateBranchFromStashDialogState
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BodyMediumLabel(
+          BaseLabel(
             l10n.createBranchFromStashDescription(widget.stash.ref),
+            role: TextRole.body,
           ),
           const SizedBox(height: AppTheme.paddingM),
           BaseTextField(

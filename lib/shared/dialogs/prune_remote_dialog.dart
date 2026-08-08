@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../core/git/models/remote.dart';
@@ -20,7 +20,10 @@ class PruneRemoteDialog extends StatelessWidget {
       icon: IconRole.broom,
       variant: DialogVariant.confirmation,
       onSubmit: () => Navigator.of(context).pop(true),
-      content: BodyMediumLabel(l10n.pruneRemoteConfirm(remote.name)),
+      content: BaseLabel(
+        l10n.pruneRemoteConfirm(remote.name),
+        role: TextRole.body,
+      ),
       actions: [
         DialogAction(
           label: l10n.cancel,

@@ -20,19 +20,19 @@ import '../../shared/theme/app_theme.dart';
 /// Example usage:
 /// ```dart
 /// BasePanel(
-///   title: TitleLargeLabel('Branches'),
+///   title: BaseLabel('Branches', role: TextRole.sectionTitle),
 ///   actions: [
 ///     IconButton(icon: Icon(PhosphorIconsRegular.plus), onPressed: () {}),
 ///   ],
 ///   content: ListView(children: [...]),
-///   footer: BodyMediumLabel('5 branches total'),
+///   footer: BaseLabel('5 branches total', role: TextRole.body),
 /// )
 /// ```
 ///
 /// Collapsible panel example:
 /// ```dart
 /// BasePanel(
-///   title: TitleLargeLabel('Settings'),
+///   title: BaseLabel('Settings', role: TextRole.sectionTitle),
 ///   isCollapsible: true,
 ///   initiallyExpanded: false,
 ///   content: Column(children: [...]),

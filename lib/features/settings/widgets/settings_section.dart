@@ -128,7 +128,9 @@ class _SettingsSectionState extends State<SettingsSection>
                 scale: ControlScale.prominent,
               ),
               const SizedBox(width: AppTheme.paddingM),
-              Expanded(child: TitleLargeLabel(widget.title)),
+              Expanded(
+                child: BaseLabel(widget.title, role: TextRole.sectionTitle),
+              ),
               RotationTransition(
                 turns: _iconRotation,
                 // The expand caret, muted at the ordinary scale - the same

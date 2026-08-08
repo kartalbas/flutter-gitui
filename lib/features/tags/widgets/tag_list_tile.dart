@@ -97,23 +97,29 @@ class TagListTile extends ConsumerWidget {
                           children: [
                             Row(
                               children: [
-                                Flexible(child: TitleMediumLabel(tag.name)),
+                                Flexible(
+                                  child: BaseLabel(
+                                    tag.name,
+                                    role: TextRole.itemTitle,
+                                  ),
+                                ),
                                 if (isLocalOnly) ...[
                                   const SizedBox(width: AppTheme.paddingS),
                                   _buildLocalBadge(context),
                                 ],
                               ],
                             ),
-                            BodyMediumLabel(
+                            BaseLabel(
                               tag.displayMessage,
+                              role: TextRole.body,
                               maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
                             if (tag.date != null)
-                              BodySmallLabel(
+                              BaseLabel(
                                 tag.dateDisplay(
                                   Localizations.localeOf(context).languageCode,
                                 ),
+                                role: TextRole.detail,
                               ),
                           ],
                         ),
@@ -135,7 +141,9 @@ class TagListTile extends ConsumerWidget {
                 ),
                 title: Row(
                   children: [
-                    Flexible(child: TitleMediumLabel(tag.name)),
+                    Flexible(
+                      child: BaseLabel(tag.name, role: TextRole.itemTitle),
+                    ),
                     if (isLocalOnly) ...[
                       const SizedBox(width: AppTheme.paddingS),
                       _buildLocalBadge(context),
@@ -145,16 +153,17 @@ class TagListTile extends ConsumerWidget {
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    BodyMediumLabel(
+                    BaseLabel(
                       tag.displayMessage,
+                      role: TextRole.body,
                       maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     if (tag.date != null)
-                      BodySmallLabel(
+                      BaseLabel(
                         tag.dateDisplay(
                           Localizations.localeOf(context).languageCode,
                         ),
+                        role: TextRole.detail,
                       ),
                   ],
                 ),
@@ -288,7 +297,10 @@ class TagListTile extends ConsumerWidget {
             const SizedBox(height: AppTheme.paddingM),
             const Divider(),
             const SizedBox(height: AppTheme.paddingS),
-            LabelMediumLabel(AppLocalizations.of(context)!.tagDetailsMessage),
+            BaseLabel(
+              AppLocalizations.of(context)!.tagDetailsMessage,
+              role: TextRole.detail,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -326,12 +338,9 @@ class TagListTile extends ConsumerWidget {
         // not a pixel.
         BaseIcon(icon, tone: Tone.muted, scale: ControlScale.compact),
         const SizedBox(width: AppTheme.paddingS),
-        BodySmallLabel(
-          '$label:',
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
+        BaseLabel('$label:', role: TextRole.detail, tone: Tone.muted),
         const SizedBox(width: AppTheme.paddingS),
-        Expanded(child: BodyMediumLabel(value)),
+        Expanded(child: BaseLabel(value, role: TextRole.body)),
       ],
     );
   }

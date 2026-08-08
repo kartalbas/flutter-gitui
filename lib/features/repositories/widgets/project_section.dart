@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, TextRole, Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -117,21 +117,22 @@ class ProjectSection extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TitleMediumLabel(
+                      BaseLabel(
                         isUnassigned
                             ? l10n.unassignedRepositories
                             : project!.displayName(l10n),
-                        color: isUnassigned
-                            ? Theme.of(context).colorScheme.onSurface
-                            : project!.color,
+                        role: TextRole.sectionTitle,
+                        tone: isUnassigned
+                            ? Tone.neutral
+                            : Tone.series(project!.colorIndex),
                       ),
                       if (!isUnassigned && description != null) ...{
                         const SizedBox(height: 2),
-                        BodySmallLabel(
+                        BaseLabel(
                           description,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          role: TextRole.detail,
+                          tone: Tone.muted,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       },
                     ],
@@ -150,11 +151,12 @@ class ProjectSection extends ConsumerWidget {
                         : project!.color.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(AppTheme.radiusL),
                   ),
-                  child: LabelLargeLabel(
+                  child: BaseLabel(
                     '$repositoryCount',
-                    color: isUnassigned
-                        ? Theme.of(context).colorScheme.onSurface
-                        : project!.color,
+                    role: TextRole.micro,
+                    tone: isUnassigned
+                        ? Tone.neutral
+                        : Tone.series(project!.colorIndex),
                   ),
                 ),
 

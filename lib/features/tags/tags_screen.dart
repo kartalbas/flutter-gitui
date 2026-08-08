@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -403,8 +403,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.sortNameAZ,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -426,8 +427,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.sortNameZA,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -450,8 +452,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.sortDateNewest,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -473,8 +476,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.sortDateOldest,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -497,10 +501,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(
                                   context,
                                 )!.sortVersionLowHigh,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -522,10 +527,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(
                                   context,
                                 )!.sortVersionHighLow,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -566,8 +572,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.noGrouping,
+                                role: TextRole.body,
                               ),
                             ),
                           ],
@@ -586,8 +593,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.byPrefix,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(PhosphorIconsRegular.textAa, size: 16),
@@ -606,8 +614,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.byVersion,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(
@@ -629,8 +638,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.byAuthor,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(PhosphorIconsRegular.user, size: 16),
@@ -649,8 +659,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                             ),
                             const SizedBox(width: AppTheme.paddingS),
                             Expanded(
-                              child: BodyMediumLabel(
+                              child: BaseLabel(
                                 AppLocalizations.of(context)!.byDate,
+                                role: TextRole.body,
                               ),
                             ),
                             const Icon(PhosphorIconsRegular.calendar, size: 16),
@@ -698,14 +709,16 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             children: [
               const Icon(PhosphorIconsRegular.tag, size: AppTheme.iconS),
               const SizedBox(width: AppTheme.paddingS),
-              TitleSmallLabel(
+              BaseLabel(
                 '${filteredAndSortedTags.length} ${filteredAndSortedTags.length == 1 ? 'Tag' : 'Tags'}',
+                role: TextRole.sectionTitle,
               ),
               if (_searchQuery.isNotEmpty ||
                   _filterType != TagFilterType.all) ...[
                 const SizedBox(width: AppTheme.paddingS),
-                BodySmallLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.ofTotal(tags.length),
+                  role: TextRole.detail,
                 ),
               ],
               const Spacer(),
@@ -739,7 +752,9 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
   /// Shown when the filters and the search leave no tag standing.
   Widget _buildNoMatchState() {
     _detachKeyboardNavigation();
-    return Center(child: BodyLargeLabel('No tags match your search'));
+    return Center(
+      child: BaseLabel('No tags match your search', role: TextRole.body),
+    );
   }
 
   /// Build grouped tag list with collapsible group headers
@@ -805,9 +820,10 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
             PhosphorIconsBold.folder,
             color: Theme.of(context).colorScheme.primary,
           ),
-          title: TitleMediumLabel(groupName),
-          subtitle: BodySmallLabel(
+          title: BaseLabel(groupName, role: TextRole.sectionTitle),
+          subtitle: BaseLabel(
             '${groupTags.length} ${groupTags.length == 1 ? 'tag' : 'tags'}',
+            role: TextRole.detail,
           ),
           children: groupTags.map((tag) {
             return TagListTile(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -65,9 +66,15 @@ class BatchOperationsToolbar extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onPrimary,
                 ),
                 const SizedBox(width: AppTheme.paddingS),
-                LabelLargeLabel(
+                // Tone.onAccent, not a dropped override: the count pill
+                // behind this text is painted with the accent by the
+                // application itself, which is the exact case the tone's doc
+                // names. It leaves with the pill when the badge surface
+                // migrates.
+                BaseLabel(
                   l10n.repositoriesSelected(selectedCount),
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  role: TextRole.emphasis,
+                  tone: Tone.onAccent,
                 ),
               ],
             ),

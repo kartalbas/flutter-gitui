@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -113,7 +113,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Project name
-            LabelLargeLabel(l10n.projectNameLabel),
+            BaseLabel(l10n.projectNameLabel, role: TextRole.control),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _nameController,
@@ -131,7 +131,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Project description
-            LabelLargeLabel(l10n.projectDescriptionLabel),
+            BaseLabel(l10n.projectDescriptionLabel, role: TextRole.control),
             const SizedBox(height: AppTheme.paddingS),
             BaseTextField(
               controller: _descriptionController,
@@ -143,7 +143,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Color picker
-            LabelLargeLabel(l10n.projectColorLabel),
+            BaseLabel(l10n.projectColorLabel, role: TextRole.control),
             const SizedBox(height: AppTheme.paddingS),
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -224,7 +224,7 @@ class _ProjectDialogState extends State<ProjectDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        LabelSmallLabel(l10n.previewLabel),
+                        BaseLabel(l10n.previewLabel, role: TextRole.micro),
                         const SizedBox(height: AppTheme.paddingXS),
                         Row(
                           children: [
@@ -239,10 +239,11 @@ class _ProjectDialogState extends State<ProjectDialog> {
                               ),
                             ),
                             const SizedBox(width: AppTheme.paddingS),
-                            TitleSmallLabel(
+                            BaseLabel(
                               _nameController.text.isEmpty
                                   ? l10n.projectNamePreviewPlaceholder
                                   : _nameController.text,
+                              role: TextRole.itemTitle,
                             ),
                           ],
                         ),

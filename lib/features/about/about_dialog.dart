@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_dialog.dart';
@@ -54,19 +54,21 @@ class AppAboutDialog extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: AppTheme.paddingM),
-                  HeadlineSmallLabel('Flutter GitUI'),
+                  BaseLabel('Flutter GitUI', role: TextRole.pageTitle),
                   const SizedBox(height: AppTheme.paddingXS),
-                  TitleSmallLabel('Version ${version.value}'),
+                  BaseLabel('Version ${version.value}', role: TextRole.detail),
                   const SizedBox(height: AppTheme.paddingXS),
-                  BodySmallLabel(
+                  BaseLabel(
                     'Build: ${BuildInfo.displayCommit}',
-                    textAlign: TextAlign.center,
+                    role: TextRole.detail,
+                    align: TextAlign.center,
                   ),
                   if (BuildInfo.displayDate.isNotEmpty) ...[
                     const SizedBox(height: 2),
-                    BodySmallLabel(
+                    BaseLabel(
                       BuildInfo.displayDate,
-                      textAlign: TextAlign.center,
+                      role: TextRole.detail,
+                      align: TextAlign.center,
                     ),
                   ],
                 ],
@@ -76,9 +78,10 @@ class AppAboutDialog extends HookConsumerWidget {
 
             // Description
             Center(
-              child: BodyMediumLabel(
+              child: BaseLabel(
                 'A cross-platform Git UI built with Flutter.',
-                textAlign: TextAlign.center,
+                role: TextRole.body,
+                align: TextAlign.center,
               ),
             ),
 
@@ -88,7 +91,7 @@ class AppAboutDialog extends HookConsumerWidget {
             const SizedBox(height: AppTheme.paddingM),
 
             // Technology stack
-            Center(child: TitleSmallLabel('Built with')),
+            Center(child: BaseLabel('Built with', role: TextRole.sectionTitle)),
             const SizedBox(height: AppTheme.paddingS),
             Center(
               child: Wrap(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
@@ -143,70 +144,81 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                   ),
                 )
               : null,
-          child: Row(
-            children: [
-              // Optional leading widget (e.g., checkbox)
-              if (leadingWidget != null) ...[
-                leadingWidget,
-                const SizedBox(width: AppTheme.paddingXS),
-              ],
+          // A selected row swaps its container for a tonal colour, so the row
+          // publishes the foreground that pairs with it and everything inside
+          // reads that instead of restating it. The row's name used to carry
+          // the pairing itself, which is Material's on-colour model
+          // (`docs/SKIN-CONTRACT-MEMBERS.md` §10.2) written out in application
+          // code — and a row where only some children remember to restate it is
+          // how half a selected row ends up at 4.13 : 1.
+          child: DefaultTextStyle.merge(
+            style: isSelected
+                ? TextStyle(color: colorScheme.onPrimaryContainer)
+                : null,
+            child: Row(
+              children: [
+                // Optional leading widget (e.g., checkbox)
+                if (leadingWidget != null) ...[
+                  leadingWidget,
+                  const SizedBox(width: AppTheme.paddingXS),
+                ],
 
-              // Expand/collapse icon for directories
-              if (node.isDirectory)
-                GestureDetector(
-                  onTap: onExpandToggle ?? onTap,
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: Icon(
-                        node.isExpanded
-                            ? PhosphorIconsRegular.caretDown
-                            : PhosphorIconsRegular.caretRight,
-                        size: 16,
-                        color: isSelected
-                            ? colorScheme.onPrimaryContainer
-                            : null,
+                // Expand/collapse icon for directories
+                if (node.isDirectory)
+                  GestureDetector(
+                    onTap: onExpandToggle ?? onTap,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Icon(
+                          node.isExpanded
+                              ? PhosphorIconsRegular.caretDown
+                              : PhosphorIconsRegular.caretRight,
+                          size: 16,
+                          color: isSelected
+                              ? colorScheme.onPrimaryContainer
+                              : null,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              else
-                const SizedBox(width: AppTheme.paddingM),
+                  )
+                else
+                  const SizedBox(width: AppTheme.paddingM),
 
-              const SizedBox(width: AppTheme.paddingXS),
+                const SizedBox(width: AppTheme.paddingXS),
 
-              // File/folder icon
-              Icon(
-                node.isDirectory
-                    ? (node.isExpanded
-                          ? PhosphorIconsBold.folderOpen
-                          : PhosphorIconsBold.folder)
-                    : (fileIcon ?? PhosphorIconsBold.file),
-                size: 18,
-                color: node.isDirectory
-                    ? colorScheme.primary
-                    : (fileIconColor ??
-                          (isSelected ? colorScheme.onPrimaryContainer : null)),
-              ),
-
-              const SizedBox(width: AppTheme.paddingS),
-
-              // File name
-              Expanded(
-                child: BodyMediumLabel(
-                  node.name,
-                  color: isSelected ? colorScheme.onPrimaryContainer : null,
-                  overflow: TextOverflow.ellipsis,
+                // File/folder icon
+                Icon(
+                  node.isDirectory
+                      ? (node.isExpanded
+                            ? PhosphorIconsBold.folderOpen
+                            : PhosphorIconsBold.folder)
+                      : (fileIcon ?? PhosphorIconsBold.file),
+                  size: 18,
+                  color: node.isDirectory
+                      ? colorScheme.primary
+                      : (fileIconColor ??
+                            (isSelected
+                                ? colorScheme.onPrimaryContainer
+                                : null)),
                 ),
-              ),
 
-              // Optional trailing widget (e.g., status badge, menu)
-              if (trailingWidget != null) ...[
                 const SizedBox(width: AppTheme.paddingS),
-                trailingWidget,
+
+                // File name. One line, because a tree row is a row: a name
+                // that wrapped would push every row below it down the panel.
+                Expanded(
+                  child: BaseLabel(node.name, role: TextRole.body, maxLines: 1),
+                ),
+
+                // Optional trailing widget (e.g., status badge, menu)
+                if (trailingWidget != null) ...[
+                  const SizedBox(width: AppTheme.paddingS),
+                  trailingWidget,
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

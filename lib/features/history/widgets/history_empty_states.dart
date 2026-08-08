@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -24,9 +25,9 @@ class NoCommitsState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.emptyStateNoCommits),
+          BaseLabel(l10n.emptyStateNoCommits, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(l10n.emptyStateNoCommitsMessage),
+          BaseLabel(l10n.emptyStateNoCommitsMessage, role: TextRole.body),
         ],
       ),
     );
@@ -51,9 +52,13 @@ class HistoryErrorState extends StatelessWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel('Error Loading History'),
+          const BaseLabel('Error Loading History', role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(error.toString(), textAlign: TextAlign.center),
+          BaseLabel(
+            error.toString(),
+            role: TextRole.detail,
+            align: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -77,11 +82,12 @@ class NoCommitSelectedState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.emptyStateNoCommitSelected),
+          BaseLabel(l10n.emptyStateNoCommitSelected, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             l10n.emptyStateNoCommitSelectedMessage,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.body,
+            tone: Tone.muted,
           ),
         ],
       ),
@@ -116,17 +122,19 @@ class NoSearchResultsState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(l10n.emptyStateNoResultsFound),
+          BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             l10n.emptyStateTryAdjustingSearchCriteria,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.body,
+            tone: Tone.muted,
           ),
           if (onSearchAllHistory != null) ...[
             const SizedBox(height: AppTheme.paddingS),
-            BodySmallLabel(
+            BaseLabel(
               l10n.historySearchCoversLoadedOnly,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              role: TextRole.detail,
+              tone: Tone.muted,
             ),
           ],
           const SizedBox(height: AppTheme.paddingM),

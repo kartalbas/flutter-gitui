@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import '../theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -78,12 +79,16 @@ class BatchOperationsBar extends StatelessWidget {
               color: colorScheme.primary,
             ),
             const SizedBox(width: AppTheme.paddingS),
+            // "N selected" is prose that has to stand out from the prose
+            // beside it, and the explicit bold was this call site answering
+            // that question with Material's weight. `TextRole.emphasis` asks
+            // the question instead: this language answers with a semibold, and
+            // a language that answers with a fill behind the words is equally
+            // right.
             BaseLabel(
               l10n.selectedCount(selectedCount),
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              color: colorScheme.primary,
+              role: TextRole.emphasis,
+              tone: Tone.accent,
             ),
 
             const Spacer(),

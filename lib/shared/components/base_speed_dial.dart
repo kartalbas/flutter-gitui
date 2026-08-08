@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../theme/app_theme.dart';
 import 'base_label.dart';
@@ -152,7 +153,10 @@ class _BaseSpeedDialState extends State<BaseSpeedDial> {
                                   AppTheme.paddingS + AppTheme.paddingXS,
                               vertical: AppTheme.paddingS,
                             ),
-                            child: BodySmallLabel(action.label),
+                            child: BaseLabel(
+                              action.label,
+                              role: TextRole.detail,
+                            ),
                           ),
                         ),
                         const SizedBox(

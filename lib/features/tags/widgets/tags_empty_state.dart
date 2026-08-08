@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -21,11 +22,15 @@ class TagsEmptyState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(AppLocalizations.of(context)!.noTags),
+          BaseLabel(
+            AppLocalizations.of(context)!.noTags,
+            role: TextRole.pageTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
-          BodyMediumLabel(
+          BaseLabel(
             'Tags mark specific points in your repository history.\nCreate tags from commits in the History view.',
-            textAlign: TextAlign.center,
+            role: TextRole.body,
+            align: TextAlign.center,
           ),
         ],
       ),

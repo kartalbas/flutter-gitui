@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -67,20 +68,17 @@ class WorkspaceListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Workspace name
-          TitleMediumLabel(
+          BaseLabel(
             project.displayName(l10n),
-            color: project.color,
-            overflow: TextOverflow.ellipsis,
+            role: TextRole.itemTitle,
+            tone: Tone.series(project.colorIndex),
+            maxLines: 1,
           ),
 
           // Description
           if (description != null) ...[
             const SizedBox(height: AppTheme.paddingXS),
-            BodySmallLabel(
-              description,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            BaseLabel(description, role: TextRole.detail, maxLines: 1),
           ],
 
           const SizedBox(height: AppTheme.paddingXS),
@@ -94,11 +92,12 @@ class WorkspaceListItem extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppTheme.paddingXS),
-              BodySmallLabel(
+              BaseLabel(
                 AppLocalizations.of(
                   context,
                 )!.repositoriesCount(project.repositoryPaths.length),
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                role: TextRole.detail,
+                tone: Tone.muted,
               ),
             ],
           ),

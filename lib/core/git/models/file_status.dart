@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Tone;
+
 import '../../../shared/theme/app_theme.dart';
 
 /// Git file status
@@ -66,6 +68,35 @@ enum FileStatusType {
         return colors.untracked;
     }
   }
+
+  /// What this status MEANS, for anything that says it in words.
+  ///
+  /// The sibling above is a meaning-to-colour map; this is the same map with
+  /// its answer left to the skin, which is the whole of #249 in one method. It
+  /// is not a duplicate of [colorOf] wearing a different type: the two differ
+  /// where [colorOf] had to approximate. An unmerged file is [Tone.gitConflicted]
+  /// here while [colorOf] returns the DELETE colour, because Material's palette
+  /// had no conflict slot the day that line was written and the strongest
+  /// available signal was borrowed — precisely the substitution the vocabulary
+  /// removes, and the reason a conflicted file now renders in the conflict
+  /// colour instead of the deletion one.
+  ///
+  /// [colorOf] survives beside it only for the fills and glyphs that have not
+  /// migrated yet, and goes with them.
+  Tone get toneOf => switch (this) {
+    FileStatusType.added => Tone.gitAdded,
+    FileStatusType.modified => Tone.gitModified,
+    FileStatusType.deleted => Tone.gitDeleted,
+    // A copy is a rename that kept its source, and git reports both with the
+    // same similarity index, so they share a meaning as well as a colour.
+    FileStatusType.renamed || FileStatusType.copied => Tone.gitRenamed,
+    FileStatusType.untracked => Tone.gitUntracked,
+    FileStatusType.ignored => Tone.gitIgnored,
+    FileStatusType.unmerged => Tone.gitConflicted,
+    // Nothing happened to it. "Untracked" is the quietest thing the vocabulary
+    // says, which is what this status wants and what colorOf already gave it.
+    FileStatusType.unchanged => Tone.gitUntracked,
+  };
 
   /// Short code (like Git uses)
   String get code {

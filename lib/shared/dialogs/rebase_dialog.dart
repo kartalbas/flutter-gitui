@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -134,8 +134,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
         if (availableBranches.isEmpty) {
           return Center(
-            child: BodyLargeLabel(
+            child: BaseLabel(
               AppLocalizations.of(context)!.noNodesAvailable,
+              role: TextRole.body,
             ),
           );
         }
@@ -155,8 +156,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   const Icon(PhosphorIconsRegular.info, size: 20),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.rebaseWillReplayCommits,
+                      role: TextRole.detail,
                     ),
                   ),
                 ],
@@ -165,7 +167,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Current branch
-            TitleSmallLabel(AppLocalizations.of(context)!.currentBranch),
+            BaseLabel(
+              AppLocalizations.of(context)!.currentBranch,
+              role: TextRole.sectionTitle,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             Container(
               padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -181,9 +186,17 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                   const SizedBox(width: AppTheme.paddingS),
-                  BodyMediumLabel(
-                    currentBranch ?? 'Unknown',
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  // The panel behind this line is `primaryContainer`; naming
+                  // its paired foreground is the container's business, so the
+                  // name of the branch says nothing about colour.
+                  DefaultTextStyle.merge(
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    child: BaseLabel(
+                      currentBranch ?? 'Unknown',
+                      role: TextRole.body,
+                    ),
                   ),
                 ],
               ),
@@ -191,7 +204,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             const SizedBox(height: AppTheme.paddingL),
 
             // Target branch selection
-            TitleSmallLabel(AppLocalizations.of(context)!.rebaseOntoBranch),
+            BaseLabel(
+              AppLocalizations.of(context)!.rebaseOntoBranch,
+              role: TextRole.sectionTitle,
+            ),
             const SizedBox(height: AppTheme.paddingS),
             _buildBranchDropdown(
               branches: availableBranches,
@@ -235,8 +251,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: BodySmallLabel(
+                    child: BaseLabel(
                       AppLocalizations.of(context)!.rebaseWarning,
+                      role: TextRole.detail,
                     ),
                   ),
                 ],
@@ -246,7 +263,8 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: BodyMediumLabel('Error: $error')),
+      error: (error, _) =>
+          Center(child: BaseLabel('Error: $error', role: TextRole.body)),
     );
   }
 
@@ -276,18 +294,20 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                   ),
                   const SizedBox(width: AppTheme.paddingS),
                   Expanded(
-                    child: TitleMediumLabel(
+                    child: BaseLabel(
                       state.hasConflicts
                           ? AppLocalizations.of(context)!.rebaseConflicts
                           : AppLocalizations.of(context)!.rebaseInProgress,
+                      role: TextRole.sectionTitle,
                     ),
                   ),
                 ],
               ),
               if (state.progressText != null) ...[
                 const SizedBox(height: AppTheme.paddingS),
-                BodyMediumLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.step(state.progressText ?? ''),
+                  role: TextRole.body,
                 ),
               ],
             ],
@@ -305,7 +325,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         if (state.progress != null) const SizedBox(height: AppTheme.paddingL),
 
         // Rebase info
-        TitleSmallLabel(AppLocalizations.of(context)!.rebaseOntoBranch),
+        BaseLabel(
+          AppLocalizations.of(context)!.rebaseOntoBranch,
+          role: TextRole.sectionTitle,
+        ),
         const SizedBox(height: AppTheme.paddingS),
         Container(
           padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -317,7 +340,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             children: [
               const Icon(PhosphorIconsRegular.gitBranch, size: 20),
               const SizedBox(width: AppTheme.paddingS),
-              BodyMediumLabel(state.ontoBranch ?? 'Unknown'),
+              BaseLabel(state.ontoBranch ?? 'Unknown', role: TextRole.body),
             ],
           ),
         ),
@@ -325,7 +348,10 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
         // Current commit
         if (state.currentCommit != null) ...[
-          TitleSmallLabel(AppLocalizations.of(context)!.currentCommit),
+          BaseLabel(
+            AppLocalizations.of(context)!.currentCommit,
+            role: TextRole.sectionTitle,
+          ),
           const SizedBox(height: AppTheme.paddingS),
           Container(
             padding: const EdgeInsets.all(AppTheme.paddingM),
@@ -333,7 +359,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
-            child: BodyMediumLabel(state.currentCommit!),
+            child: BaseLabel(state.currentCommit!, role: TextRole.body),
           ),
           const SizedBox(height: AppTheme.paddingL),
         ],
@@ -359,14 +385,16 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                       color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(width: AppTheme.paddingS),
-                    BodyMediumLabel(
+                    BaseLabel(
                       AppLocalizations.of(context)!.conflictsDetected,
+                      role: TextRole.body,
                     ),
                   ],
                 ),
                 const SizedBox(height: AppTheme.paddingS),
-                BodySmallLabel(
+                BaseLabel(
                   AppLocalizations.of(context)!.resolveConflictsInChangesScreen,
+                  role: TextRole.detail,
                 ),
                 const SizedBox(height: AppTheme.paddingM),
                 BaseButton(
@@ -391,13 +419,18 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
         // Instructions
         if (!state.hasConflicts) ...[
-          BodySmallLabel(AppLocalizations.of(context)!.rebaseIsInProgress),
-          const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel(
-            '• ${AppLocalizations.of(context)!.abortToCancelAndReturnToOriginalState}',
+          BaseLabel(
+            AppLocalizations.of(context)!.rebaseIsInProgress,
+            role: TextRole.detail,
           ),
-          BodySmallLabel(
+          const SizedBox(height: AppTheme.paddingS),
+          BaseLabel(
+            '• ${AppLocalizations.of(context)!.abortToCancelAndReturnToOriginalState}',
+            role: TextRole.detail,
+          ),
+          BaseLabel(
             '• ${AppLocalizations.of(context)!.waitForRebaseToCompleteAutomatically}',
+            role: TextRole.detail,
           ),
         ],
       ],
@@ -415,11 +448,12 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             color: Theme.of(context).colorScheme.error,
           ),
           const SizedBox(height: AppTheme.paddingL),
-          TitleLargeLabel(
+          BaseLabel(
             AppLocalizations.of(context)!.error(error.toString()),
+            role: TextRole.pageTitle,
           ),
           const SizedBox(height: AppTheme.paddingS),
-          BodySmallLabel('', textAlign: TextAlign.center),
+          BaseLabel('', role: TextRole.detail, align: TextAlign.center),
         ],
       ),
     );

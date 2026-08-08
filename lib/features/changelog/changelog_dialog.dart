@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
@@ -146,9 +147,9 @@ class ChangelogDialog extends HookConsumerWidget {
                             size: 20,
                           ),
                           const SizedBox(width: AppTheme.paddingS),
-                          TitleLargeLabel(
+                          BaseLabel(
                             'Version ${release.version}',
-                            color: Theme.of(context).colorScheme.primary,
+                            role: TextRole.pageTitle,
                           ),
                           if (index == 0) ...[
                             const SizedBox(width: AppTheme.paddingS),
@@ -163,9 +164,16 @@ class ChangelogDialog extends HookConsumerWidget {
                                   AppTheme.radiusL,
                                 ),
                               ),
-                              child: LabelSmallLabel(
+                              // Tone.onAccent, not a dropped override: the
+                              // pill behind this text is painted with the
+                              // accent by the application itself, which is
+                              // the exact case the tone's doc names. It
+                              // leaves with the pill when the badge surface
+                              // migrates.
+                              child: BaseLabel(
                                 'LATEST',
-                                color: Theme.of(context).colorScheme.onPrimary,
+                                role: TextRole.micro,
+                                tone: Tone.onAccent,
                               ),
                             ),
                           ],
@@ -183,11 +191,10 @@ class ChangelogDialog extends HookConsumerWidget {
                             ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: AppTheme.paddingXS),
-                          BodySmallLabel(
+                          BaseLabel(
                             _formatDate(release.date),
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            role: TextRole.detail,
+                            tone: Tone.muted,
                           ),
                           const SizedBox(width: AppTheme.paddingM),
                           Icon(
@@ -198,11 +205,10 @@ class ChangelogDialog extends HookConsumerWidget {
                             ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: AppTheme.paddingXS),
-                          BodySmallLabel(
+                          BaseLabel(
                             release.commit,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
+                            role: TextRole.detail,
+                            tone: Tone.muted,
                           ),
                         ],
                       ),
@@ -269,11 +275,10 @@ class ChangelogDialog extends HookConsumerWidget {
                           ),
                           const SizedBox(width: AppTheme.paddingS),
                           Flexible(
-                            child: BodySmallLabel(
+                            child: BaseLabel(
                               "Don't show on startup",
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              role: TextRole.detail,
+                              tone: Tone.muted,
                             ),
                           ),
                         ],
@@ -315,11 +320,18 @@ class ChangelogDialog extends HookConsumerWidget {
                               AppTheme.radiusXL,
                             ),
                           ),
-                          child: BodyMediumLabel(
-                            '${index + 1} of ${releases.length}',
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onPrimaryContainer,
+                          // The pill paints its own fill and states the
+                          // foreground that pairs with it.
+                          child: DefaultTextStyle.merge(
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
+                            child: BaseLabel(
+                              '${index + 1} of ${releases.length}',
+                              role: TextRole.body,
+                            ),
                           ),
                         ),
                         const SizedBox(width: AppTheme.paddingM),
@@ -479,10 +491,10 @@ class _StatusPane extends StatelessWidget {
         children: [
           Icon(icon, size: 64, color: iconColor),
           const SizedBox(height: AppTheme.paddingM),
-          TitleLargeLabel(title),
+          BaseLabel(title, role: TextRole.pageTitle),
           if (detail != null) ...[
             const SizedBox(height: AppTheme.paddingS),
-            BodyMediumLabel(detail!, textAlign: TextAlign.center),
+            BaseLabel(detail!, role: TextRole.body, align: TextAlign.center),
           ],
         ],
       ),

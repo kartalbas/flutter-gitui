@@ -1362,6 +1362,27 @@ into adaptation, and it is cheaper to know that now than to discover it in P7.
     parameters (`divider.dart:56ff`). Fluent's `Divider` takes a `direction`
     and a style; macOS draws hairlines with no indent concept.
 
+One member that is **not** on this list, and the reading that would have put it
+there: **`TextRole.pageTitle`**. Its first doc said "the name of a screen or of
+a dialog, one per surface", and measured against the application that was
+wrong four times out of five — roughly forty of its fifty uses are the headline
+of an empty or an error state standing in place of a region's content, and a
+bisect dialog renders its own name and such a headline at the same moment. Read
+as "a page title", a macOS skin would answer it with sheet-title chrome and
+stamp that treatment into the middle of every panel, which is exactly the
+substitution failure this section exists to catch — arriving through a role's
+DOC rather than through its name.
+
+It is not a tenth role. The two uses are one job at two altitudes ("the loudest
+line in this region"), and the higher one is temporary: a dialog's title is
+chrome, it is a slot on `DialogSpec`, and it stops travelling through the label
+layer the moment `BaseDialog` renders through `overlays.dialog`. So the repair
+is in the definition — `vocabulary.dart` now names both uses, forbids the
+window-chrome reading outright, and names `base_dialog.dart` as the one site
+still spending the role on chrome. Splitting the role instead would have grown
+the vocabulary from a doc ambiguity, which §5.5 calls the abort signal rather
+than the fix.
+
 One vocabulary the Material census suspected and this census clears:
 **`ProgressExtent { inline, block }` is not Material's**. It maps 1:1 onto
 Fluent's `ProgressBar`/`ProgressRing` and macOS's `ProgressBar`/`ProgressCircle`

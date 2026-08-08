@@ -4,13 +4,12 @@ import '../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:path/path.dart' as path;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_text_field.dart';
-import '../../shared/components/base_menu_item.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_speed_dial.dart';
 import '../../shared/utils/search_parser.dart';
@@ -322,17 +321,17 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
             segments: [
               ButtonSegment(
                 value: SearchMode.simple,
-                label: LabelSmallLabel('Aa'),
+                label: const BaseLabel('Aa', role: TextRole.micro),
                 tooltip: 'Simple search (case-insensitive)',
               ),
               ButtonSegment(
                 value: SearchMode.glob,
-                label: LabelSmallLabel('*'),
+                label: const BaseLabel('*', role: TextRole.micro),
                 tooltip: 'Glob pattern (*.json, *ABN*/file)',
               ),
               ButtonSegment(
                 value: SearchMode.regex,
-                label: LabelSmallLabel('.*'),
+                label: const BaseLabel('.*', role: TextRole.micro),
                 tooltip: 'Regular expression',
               ),
             ],
@@ -355,17 +354,26 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   PhosphorIconsRegular.clockCounterClockwise,
                   size: 18,
                 ),
-                label: MenuItemLabel(AppLocalizations.of(context)!.history),
+                label: BaseLabel(
+                  AppLocalizations.of(context)!.history,
+                  role: TextRole.control,
+                ),
               ),
               ButtonSegment(
                 value: BrowseViewMode.blame,
                 icon: Icon(PhosphorIconsRegular.users, size: 18),
-                label: MenuItemLabel(AppLocalizations.of(context)!.blame),
+                label: BaseLabel(
+                  AppLocalizations.of(context)!.blame,
+                  role: TextRole.control,
+                ),
               ),
               ButtonSegment(
                 value: BrowseViewMode.preview,
                 icon: Icon(PhosphorIconsRegular.eye, size: 18),
-                label: MenuItemLabel(AppLocalizations.of(context)!.preview),
+                label: BaseLabel(
+                  AppLocalizations.of(context)!.preview,
+                  role: TextRole.control,
+                ),
               ),
             ],
             selected: {viewMode},
@@ -391,8 +399,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         .read(configProvider.notifier)
                         .setShowHiddenFiles(!showHidden);
                   },
-                  child: MenuItemLabel(
+                  child: BaseLabel(
                     AppLocalizations.of(context)!.showHiddenFiles,
+                    role: TextRole.control,
                   ),
                 ),
                 CheckedPopupMenuItem<void>(
@@ -402,8 +411,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         .read(configProvider.notifier)
                         .setShowIgnoredFiles(!showIgnored);
                   },
-                  child: MenuItemLabel(
+                  child: BaseLabel(
                     AppLocalizations.of(context)!.showIgnoredFiles,
+                    role: TextRole.control,
                   ),
                 ),
                 const PopupMenuDivider(),
@@ -415,7 +425,10 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                       treeState.expandAll();
                     }
                   },
-                  child: MenuItemLabel(AppLocalizations.of(context)!.expandAll),
+                  child: BaseLabel(
+                    AppLocalizations.of(context)!.expandAll,
+                    role: TextRole.control,
+                  ),
                 ),
                 PopupMenuItem<void>(
                   onTap: () {
@@ -425,8 +438,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                       treeState.collapseAll();
                     }
                   },
-                  child: MenuItemLabel(
+                  child: BaseLabel(
                     AppLocalizations.of(context)!.collapseAll,
+                    role: TextRole.control,
                   ),
                 ),
               ];

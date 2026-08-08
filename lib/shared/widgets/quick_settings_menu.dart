@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, TextRole, Tone;
 
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
@@ -35,9 +36,10 @@ class QuickSettingsMenu extends ConsumerWidget {
             horizontal: AppTheme.paddingL,
             vertical: AppTheme.paddingS,
           ),
-          child: LabelSmallLabel(
+          child: BaseLabel(
             'THEME MODE',
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.micro,
+            tone: Tone.muted,
           ),
         ),
         _buildThemeModeItem(
@@ -70,10 +72,7 @@ class QuickSettingsMenu extends ConsumerWidget {
             horizontal: AppTheme.paddingL,
             vertical: AppTheme.paddingS,
           ),
-          child: LabelSmallLabel(
-            'FONT SIZE',
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+          child: BaseLabel('FONT SIZE', role: TextRole.micro, tone: Tone.muted),
         ),
         _buildFontSizeItem(context, 'Tiny', AppFontSize.tiny, fontSize),
         _buildFontSizeItem(context, 'Small', AppFontSize.small, fontSize),
@@ -88,9 +87,10 @@ class QuickSettingsMenu extends ConsumerWidget {
             horizontal: AppTheme.paddingL,
             vertical: AppTheme.paddingS,
           ),
-          child: LabelSmallLabel(
+          child: BaseLabel(
             'COLOR SCHEME',
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            role: TextRole.micro,
+            tone: Tone.muted,
           ),
         ),
         _buildColorSchemeItem(
@@ -256,13 +256,11 @@ class QuickSettingsMenu extends ConsumerWidget {
           ),
           const SizedBox(width: AppTheme.paddingM),
           Expanded(
-            child: MenuItemLabel(
-              label,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurface,
-            ),
+            // The checkmark to the right is what says "this is the one in
+            // force" — the fact `MenuCheckable.checked` will carry once this
+            // menu is a contract member. The semibold and the accent tint were
+            // a third and fourth statement of it, chosen by a call site.
+            child: BaseLabel(label, role: TextRole.control),
           ),
           if (isSelected) ...[
             const SizedBox(width: AppTheme.paddingM),

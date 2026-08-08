@@ -30,7 +30,18 @@ class EmptyStateWidget extends StatelessWidget {
   // Multiple structured actions
   final List<EmptyStateAction>? actions;
 
-  final double iconSize;
+  /// How large the hero mark is drawn.
+  ///
+  /// Deliberately a private constant rather than a parameter (#430). This is
+  /// the facade that becomes `surfaces.emptyState`, and `EmptyStateSpec`
+  /// carries icon, title, message and actions and NO size — a member that
+  /// accepts no size owns the size, so a glyph size written at a call site is
+  /// a leak by construction. It was a parameter with a default that no call
+  /// site ever overrode, which is the leak sitting open rather than in use.
+  ///
+  /// The value moves into the skin in P5; until then it is Material's answer,
+  /// unchanged, and it is stated once here instead of at every empty state.
+  static const double _heroGlyph = 64.0;
 
   const EmptyStateWidget({
     super.key,
@@ -42,7 +53,6 @@ class EmptyStateWidget extends StatelessWidget {
     this.onActionPressed,
     this.actionIcon,
     this.actions,
-    this.iconSize = 64.0,
   });
 
   @override
@@ -92,9 +102,18 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Left as a raw `Icon` deliberately, and it is the LAST thing in
+            // this file that reads a Material role. `BaseIcon` cannot say it:
+            // it takes an `IconRole` (this member is still handed an
+            // `IconData` by every caller) at one of three `ControlScale`
+            // rungs, whose largest is 24 dp. Naming the nearest rung would
+            // shrink the hero mark from 64 dp to 24 — rounding a meaning onto
+            // the nearest available word, which is what cost #426. The size
+            // and the colour leave together when `surfaces.emptyState` owns
+            // both; they are one decision and cannot be half-converted.
             Icon(
               icon,
-              size: iconSize,
+              size: _heroGlyph,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             // The mark and the words it introduces are two groups of one

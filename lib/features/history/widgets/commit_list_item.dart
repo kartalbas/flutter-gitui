@@ -79,6 +79,14 @@ class CommitListItem extends ConsumerWidget {
               // container's breathing room, and `BaseInset` has no per-side
               // form to say it with. It waits for the row surface.
               padding: const EdgeInsets.only(top: 2),
+              // The graph node is a drawn SHAPE, not a glyph and not text: a
+              // 12 dp disc with a 2 dp ring. Both of its colours are therefore
+              // a fill and a border rather than a foreground, which is the one
+              // class of read this conversion deliberately leaves where it is
+              // - they disappear together when the row becomes a skin member
+              // and the lanes become `Tone.series`. There is also no legal way
+              // to say them: a tone reaches a mark only through `BaseIcon` or
+              // `BaseLabel`, and neither draws a circle.
               child: Container(
                 width: 12,
                 height: 12,

@@ -78,6 +78,15 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
   }
 
   Widget _buildNoToolsFound(BuildContext context) {
+    // The hero's colour is already the supporting foreground the empty-state
+    // facade paints, so this is the one state here whose MARK could adopt it
+    // (#430) - and the state's SHAPE is what stops it. `EmptyStateSpec` holds
+    // a headline, one sentence and the ways out; this state says three things,
+    // and the third ("install tools such as ...") is a hint rather than an
+    // action, so the facade has no slot for it. Adopting would mean dropping a
+    // line or promoting a hint into the action row, which is a change of
+    // content rather than a rename. The size and the colour stay together
+    // until the member grows a slot for the third line.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -110,6 +119,13 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
   }
 
   Widget _buildError(BuildContext context, Object error) {
+    // Shaped exactly like the empty-state facade takes - hero, headline,
+    // sentence - and still not converted, because the blocker is the mark's
+    // COLOUR rather than its size (#430). `EmptyStateWidget` paints its hero
+    // in the supporting foreground unconditionally and carries no tone slot,
+    // so adopting it here would turn a red failure mark grey, which is a
+    // change of appearance rather than a rename. The `64` is stranded with the
+    // colour: the two are one decision and cannot be half-converted.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -89,11 +89,18 @@ class WorkspaceListItem extends StatelessWidget {
           // Repository count
           Row(
             children: [
-              Icon(
-                PhosphorIconsRegular.gitCommit,
-                size: AppTheme.iconXS,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              // The colour is gone rather than translated, which is the repair
+              // repository_list_item.dart:280-285 already made for the same
+              // kind of glyph. `BaseListItem` publishes an `IconTheme` for the
+              // whole row (base_list_item.dart:340) whose colour IS
+              // `onSurfaceVariant`, dropping to a readable fallback on a
+              // selected tile where the plain role measures 2.86 : 1 - so
+              // spelling the role out again changed nothing on an unselected
+              // row and overpainted the correction on a selected one. It is
+              // not a `BaseIcon` either: `AppTheme.iconXS` is 12 dp and
+              // `ControlScale`'s smallest rung is 16, so naming `compact`
+              // would grow this inline mark by a third.
+              Icon(PhosphorIconsRegular.gitCommit, size: AppTheme.iconXS),
               const BaseGap(Proximity.hairline),
               BaseLabel(
                 AppLocalizations.of(

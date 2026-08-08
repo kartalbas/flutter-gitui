@@ -249,6 +249,16 @@ class _SearchableDropdownState<T> extends State<SearchableDropdown<T>> {
                         _filterItems('');
                       },
                     ),
+                  // The field's own open/closed mark, and it is the field's to
+                  // draw: it sits inside an `InputDecoration.suffixIcon`,
+                  // whose `IconTheme` already supplies the size and a colour.
+                  // Neither way out is a rename. `BaseIcon(IconRole.caretDown)`
+                  // swaps Material's filled triangle for a Phosphor caret at a
+                  // different size, and simply deleting the colour hands the
+                  // mark to whatever the theme's suffix-icon default resolves
+                  // to, which this application does not set and therefore
+                  // cannot predict. It converts when the field is
+                  // `controls.field` and the mark is part of its spec.
                   Icon(
                     _isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,

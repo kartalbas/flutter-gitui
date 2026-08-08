@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -252,11 +252,13 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                    // The mark of the warning this panel carries, at the
+                    // ordinary size: Material's `error` role was its answer to
+                    // a danger the panel around it has already named, and the
+                    // 20 the mark stated is exactly what the ordinary rung
+                    // renders, so the mark says the meaning now and the size
+                    // stops being a decision this dialog makes.
+                    const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                     const BaseGap(Proximity.related),
                     Expanded(
                       child: BaseLabel(
@@ -398,11 +400,11 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(
-                        PhosphorIconsRegular.warningCircle,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+                      // Same mark, same meaning and the same rung as the
+                      // warning above: the conflict this panel reports is the
+                      // danger Material's `error` role was its answer to, and
+                      // 20 is what the ordinary rung already renders.
+                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                       const BaseGap(Proximity.related),
                       BaseLabel(
                         AppLocalizations.of(context)!.conflictsDetected,
@@ -460,6 +462,13 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
   }
 
   Widget _buildError(BuildContext context, Object error) {
+    // Shaped exactly like the empty-state facade takes - hero, headline,
+    // sentence - and still not converted, because the blocker is the mark's
+    // COLOUR rather than its size (#430). `EmptyStateWidget` paints its hero
+    // in the supporting foreground unconditionally and carries no tone slot,
+    // so adopting it here would turn a red failure mark grey, which is a
+    // change of appearance rather than a rename. The `64` is stranded with the
+    // colour: the two are one decision and cannot be half-converted.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

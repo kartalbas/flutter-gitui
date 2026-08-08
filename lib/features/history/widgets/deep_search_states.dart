@@ -8,6 +8,7 @@ import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Full-area state while git walks the entire history.
 ///
@@ -129,31 +130,13 @@ class DeepSearchNoResultsState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // An empty state's hero mark keeps its measure and its colour: no
-          // rung of `ControlScale` reaches it, and a tone can only reach a
-          // mark through `BaseIcon`. See history_empty_states.dart.
-          Icon(
-            PhosphorIconsRegular.magnifyingGlass,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          // A hero glyph and the headline under it are two groups inside one
-          // region; the headline and its explanation are two parts of one
-          // statement.
-          const BaseGap(Proximity.separate),
-          BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            l10n.historyDeepSearchNoMatches,
-            role: TextRole.body,
-            tone: Tone.muted,
-          ),
-        ],
-      ),
+    // The facade, not a copy of it: mark, headline, sentence, and no size
+    // written here. See history_empty_states.dart for why `ControlScale` was
+    // never the answer to a hero mark's measure.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.magnifyingGlass,
+      title: l10n.emptyStateNoResultsFound,
+      message: l10n.historyDeepSearchNoMatches,
     );
   }
 }
@@ -172,6 +155,13 @@ class DeepSearchFailedState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Two reasons this stays hand-rolled, either one of which is enough. The
+    // hero is red and `EmptyStateWidget` has no tone slot, so adopting it
+    // would grey out the one thing that says this failed. And this state has
+    // no headline at all - a single sentence carrying the git error - while
+    // the facade always renders a `pageTitle` above its message, so the
+    // sentence would be promoted out of `body` to fill a slot it does not
+    // belong in.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

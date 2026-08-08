@@ -61,11 +61,22 @@ class ThemeSection extends ConsumerWidget {
               ),
             ],
           ),
+          // The `style:` this dropdown used to carry said `onSurface` a second
+          // time, in Material's words. Every entry below is a `BaseLabel` at
+          // `TextRole.body`, which pins its own ramp step and leaves only the
+          // COLOUR to the enclosing `DefaultTextStyle` - and that is exactly
+          // what `Tone.neutral` means ("whatever this surface's ordinary
+          // foreground is"), which every one of them already says by default.
+          // Saying nothing here is therefore the conversion rather than a
+          // deletion: the meaning is stated once, in the vocabulary, instead
+          // of twice with one of the two naming a Material role. It moves no
+          // pixel - `DropdownButton` falls back to `textTheme.titleMedium`,
+          // and `AppTheme._brightnessCorrectedTextTheme` gives every step of
+          // this scale the scheme's `onSurface` - and the size never came from
+          // here, because `isDense` is false and the labels pin their own.
+          // The four dropdowns below say the same thing the same way.
           trailing: DropdownButton<AppColorScheme>(
             value: ui.colorScheme,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
             items: AppColorScheme.values.map((scheme) {
               return DropdownMenuItem(
                 value: scheme,
@@ -96,9 +107,6 @@ class ThemeSection extends ConsumerWidget {
           ),
           trailing: DropdownButton<String>(
             value: currentFont,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
             items: AppTheme.availableFonts.map((font) {
               return DropdownMenuItem(
                 value: font,
@@ -126,9 +134,6 @@ class ThemeSection extends ConsumerWidget {
           ),
           trailing: DropdownButton<AppFontSize>(
             value: ui.fontSize,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
             items: AppFontSize.values.map((size) {
               return DropdownMenuItem(
                 value: size,
@@ -156,9 +161,6 @@ class ThemeSection extends ConsumerWidget {
           ),
           trailing: DropdownButton<String>(
             value: currentPreviewFont,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
             items: AppTheme.availableMonospaceFonts.map((font) {
               return DropdownMenuItem(
                 value: font,
@@ -189,9 +191,6 @@ class ThemeSection extends ConsumerWidget {
           ),
           trailing: DropdownButton<AppFontSize>(
             value: ui.previewFontSize,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
             items: AppFontSize.values.map((size) {
               return DropdownMenuItem(
                 value: size,

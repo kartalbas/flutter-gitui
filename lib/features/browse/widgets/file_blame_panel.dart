@@ -14,6 +14,7 @@ import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_viewer_dialog.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/blame.dart';
 import '../../history/widgets/commit_details_panel.dart';
@@ -311,12 +312,24 @@ class FileBlamePanel extends ConsumerWidget {
 
           // Code content
           Expanded(
+            // The colour word is gone and nothing else moved, which is the
+            // point. `Tone.neutral` is "whatever this surface's ordinary
+            // foreground is", and the ramp this style is built from already
+            // carries exactly that - `_brightnessCorrectedTextTheme` stamps the
+            // scheme's on-surface role on every step of it - so naming that
+            // role again here was the ambient answer restated in Material's
+            // words.
+            // The rest of the style stays hand-built and stays a finding:
+            // `TextRole.code` is the only member that can say "this is code",
+            // and it renders bodyMedium in the user's mono family with no 1.2
+            // line height, which would make every blame line taller and wider.
+            // That is #426 exactly, so the style waits for the member that can
+            // carry a gutter's density.
             child: SelectableText(
               line.lineContent,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontFamily: 'monospace',
                 height: 1.2,
-                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -326,33 +339,16 @@ class FileBlamePanel extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // An empty state's hero mark keeps its measure and its colour: no
-          // rung of `ControlScale` reaches it, and a tone can only reach a
-          // mark through `BaseIcon`. See history_empty_states.dart.
-          Icon(
-            PhosphorIconsRegular.file,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          // A hero glyph and the headline under it are two groups inside one
-          // region; the headline and its explanation are two parts of one
-          // statement.
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.emptyFile,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            AppLocalizations.of(context)!.noContent,
-            role: TextRole.body,
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    // The facade rather than a fourth hand-built copy of it (#430). The `64`
+    // and the on-surface-variant role that stood here are one decision,
+    // and it is the member's: `EmptyStateSpec` takes an icon, a headline, a
+    // sentence and the ways out, and no size, so a size at a call site is a
+    // leak by construction and the colour paired with it goes the same way.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.file,
+      title: l10n.emptyFile,
+      message: l10n.noContent,
     );
   }
 
@@ -361,6 +357,15 @@ class FileBlamePanel extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Not `EmptyStateWidget`, and the mark is why. The facade owns its
+          // hero glyph's colour and answers it with `onSurfaceVariant`
+          // (#430); handing this state to it would repaint a red failure mark
+          // neutral, which is a change to what the user sees rather than a
+          // change of vocabulary. Nor can the read move on its own: `Tone` has
+          // a word for something that destroys, one for a doubt and one for a
+          // value the user must correct, and none of the three is "the command
+          // you asked for came back with an error". The mark waits for a tone
+          // slot on the empty-state member, and both leave together.
           Icon(
             PhosphorIconsRegular.warningCircle,
             size: 64,
@@ -523,10 +528,14 @@ ${line.summary}
         BaseInset(
           x: Inset.normal,
           y: Inset.tight,
-          child: SelectableText(
-            value,
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-          ),
+          // The whole of this site's style was one colour word, so there is
+          // nothing left for a hand-built `TextStyle` to carry: the value the
+          // statistic states is ordinary prose the user reads, and staying
+          // copyable is behaviour rather than appearance, which is the one
+          // thing `BaseLabel` still takes. `Tone.neutral` is what the colour
+          // said - the dialog's own foreground - and it is now said by not
+          // naming a colour at all.
+          child: BaseLabel(value, role: TextRole.body, selectable: true),
         ),
       ],
     );

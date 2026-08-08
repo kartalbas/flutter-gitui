@@ -266,6 +266,14 @@ class _RepositorySwitcherDialogState
                               ),
                           ],
                         ),
+                        // Survives the tone conversion whole, like the two
+                        // marks in the leading slot above: the glyph is a
+                        // Phosphor BOLD constant, a weight `IconRole` cannot
+                        // carry (conflict C3), so converting the colour alone
+                        // would drop the stroke silently. The accent/muted
+                        // conditional is the row's validity restated on its
+                        // mark and converts with the weight when the row is a
+                        // member that draws its own trailing mark.
                         trailing: Icon(
                           PhosphorIconsBold.gitCommit,
                           color: repo.isValidGitRepo

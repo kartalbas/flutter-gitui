@@ -46,6 +46,13 @@ class SettingsScreen extends ConsumerWidget {
               label: l10n.resetToDefaults,
               scale: ControlScale.normal,
               tone: Tone.danger,
+              // The same sentence twice, and only one of the two can be said
+              // in the vocabulary today: `tone` colours the entry's MARK, and
+              // `MenuItemContent` colours its WORDS from a `Color?`. Dropping
+              // the colour would leave a destructive entry whose words read
+              // like any other. The repair is a label tone on
+              // `MenuItemContent` (lib/shared/components/base_menu_item.dart),
+              // which ten call sites across the application are waiting for.
               labelColor: Theme.of(context).colorScheme.error,
             ),
             onTap: () => _confirmReset(context, ref),

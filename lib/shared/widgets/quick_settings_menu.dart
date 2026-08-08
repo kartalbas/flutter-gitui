@@ -166,6 +166,12 @@ class QuickSettingsMenu extends ConsumerWidget {
             icon: IconRole.gear,
             label: 'All Settings',
             tone: Tone.accent,
+            // The same pair as the destructive entry in `branch_switcher`: the
+            // tone reaches `MenuItemContent`'s mark, `labelColor` reaches its
+            // words, and only one of the two is a meaning. Removing the
+            // Material half from here would leave the entry's words in the
+            // ordinary menu colour while its gear stayed accented, so it goes
+            // when the component spends its tone on both.
             labelColor: Theme.of(context).colorScheme.primary,
           ),
         ),

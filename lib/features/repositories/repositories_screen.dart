@@ -390,6 +390,14 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // Not an empty state and not converted: this whole
+                        // overlay - the 10 % wash behind it, the container, the
+                        // 2 px accent border and this 64 px mark - is one drop
+                        // TARGET, which is a `dropTarget` state layer and goes
+                        // to the skin whole in P5. `EmptyStateWidget` cannot
+                        // take it (it stands in place of a region's content,
+                        // where this floats over it, and it has no message to
+                        // give), and `BaseIcon` cannot be told 64.
                         Icon(
                           PhosphorIconsBold.folderOpen,
                           size: 64,

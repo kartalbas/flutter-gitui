@@ -14,6 +14,7 @@ import '../components/base_dialog.dart';
 import '../../core/git/models/reflog_entry.dart';
 import '../components/base_list_item.dart';
 import '../components/base_layout.dart';
+import '../widgets/empty_state.dart';
 
 /// Dialog for viewing Git reflog
 class ReflogDialog extends ConsumerWidget {
@@ -59,31 +60,29 @@ class ReflogDialog extends ConsumerWidget {
   }
 
   Widget _buildEmpty(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.clockCounterClockwise,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.noReflogEntries,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            AppLocalizations.of(context)!.referenceLogEmpty,
-            role: TextRole.body,
-          ),
-        ],
-      ),
+    // A reflog with nothing in it stands in place of this dialog's whole
+    // content, which is the empty-state hero rather than a column this dialog
+    // arranges itself (#430). The `64` went with it: `EmptyStateSpec` takes an
+    // icon, a headline, a sentence and the ways out and NO size, so a glyph
+    // size written here was a leak by construction - and `colorScheme
+    // .onSurfaceVariant` was Material's answer to the supporting foreground
+    // the member already paints its hero in, unchanged.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.clockCounterClockwise,
+      title: AppLocalizations.of(context)!.noReflogEntries,
+      message: AppLocalizations.of(context)!.referenceLogEmpty,
     );
   }
 
   Widget _buildError(BuildContext context, Object error) {
+    // The sibling of `_buildEmpty` above, and the one shape the facade cannot
+    // take: the blocker is the mark's COLOUR, not its size.
+    // `EmptyStateWidget` paints its hero in the supporting foreground
+    // unconditionally and carries no tone slot, so adopting it here would turn
+    // a red failure mark grey - the whole difference between "there is nothing
+    // here" and "this went wrong" - which is a change of appearance rather
+    // than a rename. Reported instead: the facade needs a tone on its hero
+    // before this converts, and the size leaves with the colour.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

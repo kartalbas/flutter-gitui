@@ -549,12 +549,17 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // The headline mark of a failure that fills this pane, and it
-                // stays a raw `Icon` for the same two reasons the changes
-                // screen's error state does: `ControlScale`'s largest rung is
-                // the ordinary size of a control's mark rather than the size
-                // of an error's artwork, and `Tone.danger` means "this
-                // destroys something you cannot get back", which a diff that
-                // failed to load is not saying.
+                // stays a raw `Icon` for three reasons now. It is not the
+                // empty-state facade's shape (#430): a 32 dp mark over one
+                // sentence with no headline, where `EmptyStateWidget` draws a
+                // 64 dp hero and always renders a `pageTitle` above its
+                // message. The facade could not carry the colour even if the
+                // shape matched, because it has no tone slot for its hero and
+                // would grey this failure out. And `Tone.danger` is not the
+                // word for it either - danger means "this destroys something
+                // you cannot get back", which a diff that failed to load is
+                // not saying. None of the three is rounded onto its nearest
+                // neighbour.
                 Icon(
                   PhosphorIconsRegular.warningCircle,
                   size: AppTheme.iconXL,

@@ -19,6 +19,7 @@ import '../../core/config/config_providers.dart';
 import '../../core/git/git_command_log_filters.dart';
 import '../../core/git/git_command_log_provider.dart';
 import '../../core/git/models/git_command_log.dart';
+import 'empty_state.dart';
 
 /// Expandable panel showing git command log history
 class CommandLogPanel extends ConsumerStatefulWidget {
@@ -179,55 +180,34 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
     );
   }
 
+  /// The panel before any git command has run.
+  ///
+  /// It used to lay out the mark, the headline and the sentence itself, and in
+  /// doing so it wrote down how big the glyph is (`iconXL * 2`) and which
+  /// colour it takes — two decisions an empty state does not get to make.
+  /// [EmptyStateWidget] is the facade that becomes `surfaces.emptyState`, and
+  /// once the member owns the size the question cannot be asked here at all
+  /// (#430).
   Widget _buildEmptyState(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.terminal,
-            size: AppTheme.iconXL * 2,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          // The mark and the words it introduces are two groups of one state.
-          const BaseGap(Proximity.separate),
-          BaseLabel(l10n.emptyStateNoCommandsYet, role: TextRole.pageTitle),
-          // The headline and the sentence explaining it are one statement.
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            l10n.emptyStateNoCommandsYetMessage,
-            role: TextRole.body,
-            tone: Tone.muted,
-          ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.terminal,
+      title: l10n.emptyStateNoCommandsYet,
+      message: l10n.emptyStateNoCommandsYetMessage,
     );
   }
 
+  /// The panel when the filter band has excluded every run there is.
+  ///
+  /// Same member as [_buildEmptyState]: "nothing matches" and "nothing yet"
+  /// are one surface with different words, which is exactly what the facade is
+  /// for.
   Widget _buildNoMatchState(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.magnifyingGlass,
-            size: AppTheme.iconXL * 2,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          // The mark and the words it introduces are two groups of one state.
-          const BaseGap(Proximity.separate),
-          BaseLabel(l10n.emptyStateNoResultsFound, role: TextRole.pageTitle),
-          // The headline and the sentence explaining it are one statement.
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            l10n.emptyStateTryAdjustingSearchCriteria,
-            role: TextRole.body,
-            tone: Tone.muted,
-          ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.magnifyingGlass,
+      title: l10n.emptyStateNoResultsFound,
+      message: l10n.emptyStateTryAdjustingSearchCriteria,
     );
   }
 
@@ -504,6 +484,15 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                             // type step all belong to the member it is waiting
                             // for, and the style stays written out until that
                             // member exists.
+                            //
+                            // Its two colours stay with it. They mean
+                            // `Tone.danger` and `Tone.neutral` - "this run
+                            // failed" against ordinary output - but a tone is
+                            // only sayable through `BaseLabel`, and `BaseLabel`
+                            // would bring `TextRole.code`'s size with it and
+                            // grow every output line. Naming the meaning here
+                            // would cost the very regression the paragraph
+                            // above avoids.
                             child: SelectableText(
                               entry.fullOutput,
                               style: GoogleFonts.getFont(

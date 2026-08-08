@@ -102,7 +102,25 @@ class ProjectSection extends ConsumerWidget {
                   ),
                   const BaseGap(Proximity.related),
 
-                  // Project icon
+                  // Project icon. NOT converted, and the review put it back
+                  // after a conversion shipped two visible changes inside a
+                  // colour rename. First, the Bold stroke: this is a section
+                  // header's mark beside a `sectionTitle` label - the weight
+                  // is the header's prominence, not a state the glyph ternary
+                  // distinguishes, and `IconRole` re-decides weight inside the
+                  // skin (conflict C3), so converting drops it silently.
+                  // Second, the unassigned branch's colour: `Tone.neutral`
+                  // does not resolve to the `onSurface` written here - for a
+                  // mark it means "take the ambient IconTheme"
+                  // (material_type.dart:168), and no theme in this application
+                  // sets one, so it lands on Flutter's own black87/white
+                  // default, which is measurably not the scheme's foreground.
+                  // Until the ambient icon colour is the skin's answer, an
+                  // explicit `onSurface` is a meaning the vocabulary cannot
+                  // say about a bare mark. The assigned branch's
+                  // `project!.color` leaves with the swatch palette when
+                  // `controls.seriesPicker` lands in P5; the mark converts as
+                  // one piece then.
                   Icon(
                     isUnassigned
                         ? PhosphorIconsBold.package

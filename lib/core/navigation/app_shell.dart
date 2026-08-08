@@ -326,6 +326,14 @@ class _AppShellState extends ConsumerState<AppShell> {
                             },
                             child: Column(
                               children: [
+                                // The application's brand mark, and a survivor
+                                // three times over: the Bold stroke is a
+                                // weight `IconRole` cannot carry (C3), 32 px
+                                // is beyond every `ControlScale` rung
+                                // (`prominent` is 24), and the accent is the
+                                // brand's own statement rather than a row's.
+                                // The rail is shell chrome; the mark converts
+                                // with `chrome.shell` as one piece.
                                 Icon(
                                   PhosphorIconsBold.gitBranch,
                                   size: AppTheme.iconXL,
@@ -628,6 +636,15 @@ class _AppShellState extends ConsumerState<AppShell> {
                                         ),
                                         child: Row(
                                           children: [
+                                            // Survives with the banner it
+                                            // sits in: the Bold stroke is a
+                                            // weight `IconRole` cannot carry
+                                            // (C3), and the banner painting
+                                            // its own `errorContainer` fill
+                                            // is a notice surface - fill,
+                                            // paired foreground and mark all
+                                            // leave together when it becomes
+                                            // the notice member in P5.
                                             Icon(
                                               PhosphorIconsBold.warning,
                                               color: Theme.of(

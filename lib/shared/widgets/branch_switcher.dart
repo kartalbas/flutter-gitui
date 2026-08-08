@@ -103,6 +103,11 @@ class BranchSwitcher extends ConsumerWidget {
                   icon: PhosphorIconsBold.gitBranch,
                   primaryLabel: branch.name,
                   secondaryLabel: branch.lastCommitMessage,
+                  // Still a Material role, and it cannot stop being one from
+                  // here: `MenuItemContentTwoLine` takes an `IconData` and a
+                  // `Color?`, with no tone to hand the meaning to. The
+                  // accent belongs on that component, not at this call site,
+                  // and the read leaves the moment it carries one.
                   iconColor: Theme.of(context).colorScheme.primary,
                   isSelected: isSelected,
                   showCheck: true,
@@ -158,6 +163,13 @@ class BranchSwitcher extends ConsumerWidget {
             icon: IconRole.trash,
             label: l10n.deleteAllUnprotectedBranches,
             tone: Tone.danger,
+            // The tone above reaches the mark only - `MenuItemContent` spends
+            // it on its `BaseIcon` and colours its words from `labelColor`.
+            // So this is the same statement said twice, once as a meaning and
+            // once as Material's answer to it, and dropping the second half
+            // today would leave a destructive entry with a red glyph and
+            // black words. It goes when the component's tone reaches its
+            // label, which is one edit in `base_menu_item.dart`.
             labelColor: Theme.of(context).colorScheme.error,
           ),
         ),
@@ -677,6 +689,11 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
             key: BulkDeleteBranchesDialog.forceCheckboxKey,
             value: _force,
             onChanged: (value) => setState(() => _force = value ?? false),
+            // A checked box painted in the destructive colour, which is the
+            // one thing on this row that is not a foreground: it is the
+            // control's own fill. `ToggleKind.check` plus `Tone.danger` says
+            // it once `controls.toggle` exists; until then a `Color` is the
+            // only thing `CheckboxListTile` will take.
             activeColor: colorScheme.error,
             title: Row(
               children: [
@@ -686,6 +703,13 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
                 // `IconRole` cannot carry, because a role names the mark and
                 // the skin re-decides its weight. Converting it here would
                 // drop the weight silently. See the P3d report.
+                //
+                // The colour is pinned to that decision: a raw `Icon` takes a
+                // `Color` and nothing else, and the application has no way to
+                // ask a skin what `Tone.danger` resolves to - by design, since
+                // handing out colours is what the seam exists to stop. So the
+                // Material read stays for exactly as long as the raw glyph
+                // does, and the two convert together or not at all.
                 Icon(
                   PhosphorIconsBold.warning,
                   size: AppTheme.iconS,

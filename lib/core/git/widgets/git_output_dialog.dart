@@ -11,6 +11,7 @@ import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/components/base_layout.dart';
 
 /// Result of a Git command execution
@@ -351,23 +352,16 @@ ${widget.result.fullOutput}
     final result = widget.result;
 
     if (!result.hasOutput) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              PhosphorIconsRegular.fileText,
-              size: AppTheme.iconXL * 2,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const BaseGap(Proximity.grouped),
-            BaseLabel(
-              AppLocalizations.of(context)!.noOutput,
-              role: TextRole.body,
-              tone: Tone.muted,
-            ),
-          ],
-        ),
+      // A command that printed nothing stands in place of this section's whole
+      // content, which is the empty-state hero rather than a column this dialog
+      // arranges itself (#430). `AppTheme.iconXL * 2` left with it: the member
+      // accepts no size, so the arithmetic that produced a 64 px glyph here was
+      // a leak by construction - and "No output" is the headline of the state,
+      // which is what TextRole.pageTitle is for.
+      return EmptyStateWidget(
+        icon: PhosphorIconsRegular.fileText,
+        title: AppLocalizations.of(context)!.noOutput,
+        message: '',
       );
     }
 

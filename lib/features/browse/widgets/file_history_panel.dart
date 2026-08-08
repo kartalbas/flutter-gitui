@@ -12,6 +12,7 @@ import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_viewer_dialog.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/commit.dart';
 import '../../history/widgets/commit_details_panel.dart';
@@ -58,27 +59,15 @@ class FileHistoryPanel extends ConsumerWidget {
   Widget _buildCommitList(BuildContext context, List<GitCommit> commits) {
     if (commits.isEmpty) {
       final l10n = AppLocalizations.of(context)!;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // An empty state's hero mark keeps its measure and its colour: no
-            // rung of `ControlScale` reaches it, and a tone can only reach a
-            // mark through `BaseIcon`. See history_empty_states.dart.
-            Icon(
-              PhosphorIconsRegular.clockCounterClockwise,
-              size: 64,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            // A hero glyph and the headline under it are two groups inside
-            // one region; the headline and its explanation are two parts of
-            // one statement.
-            const BaseGap(Proximity.separate),
-            BaseLabel(l10n.emptyStateNoHistory, role: TextRole.pageTitle),
-            const BaseGap(Proximity.related),
-            BaseLabel(l10n.emptyStateNoHistoryMessage, role: TextRole.body),
-          ],
-        ),
+      // The facade rather than another hand-built copy of it (#430). The `64`
+      // and the on-surface-variant role beside it were one decision
+      // and it belongs to the member: `EmptyStateSpec` accepts no size, so a
+      // size written at a call site is a leak by construction, and the colour
+      // paired with it cannot be half-converted away from it.
+      return EmptyStateWidget(
+        icon: PhosphorIconsRegular.clockCounterClockwise,
+        title: l10n.emptyStateNoHistory,
+        message: l10n.emptyStateNoHistoryMessage,
       );
     }
 
@@ -180,6 +169,14 @@ class FileHistoryPanel extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Not `EmptyStateWidget`, for the reason spelled out at
+          // file_blame_panel.dart's error state: the facade owns its hero
+          // glyph's colour and answers it with `onSurfaceVariant`, so adopting
+          // it here would repaint a red failure mark neutral - a change to
+          // what the user sees, not a change of vocabulary. The read cannot
+          // move on its own either: no `Tone` says "the command came back with
+          // an error", only "this destroys", "this may be a mistake" and "fix
+          // this value".
           Icon(
             PhosphorIconsRegular.warningCircle,
             size: 64,

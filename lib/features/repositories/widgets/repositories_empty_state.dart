@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show Proximity, TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Empty state for repositories screen
 class RepositoriesEmptyState extends StatelessWidget {
@@ -24,59 +24,51 @@ class RepositoriesEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    // The hand-rolled Column of {64 px glyph, headline, explanation, ways
+    // out} is gone (#430). `EmptyStateSpec` takes icon/title/message and NO
+    // size, so a glyph size written here would be a leak by construction -
+    // the member that accepts no size is the one that owns it. The gaps this
+    // Column spelled out are the same rungs the facade already uses at those
+    // two boundaries (`separate` around the mark and around the actions,
+    // `related` between headline and explanation), so nothing about the
+    // rhythm is being re-decided here; it is being stopped from being said
+    // twice. The mark's colour goes with its size: this state painted its
+    // glyph in Material's accent role, and the member draws every empty
+    // state's mark in the supporting foreground instead.
+    //
+    // The three ways out travel through the legacy `action` slot rather than
+    // `EmptyStateAction`, and that is deliberate: `EmptyStateAction` is a
+    // BUTTON - a label, a mark and a callback stacked vertically - while
+    // these are three cards that also carry a sentence of explanation each
+    // and lay out across. Folding them into buttons would throw the
+    // descriptions away, which is a redesign and not a conversion. They stay
+    // whole here until `surfaces.emptyState` grows a way to say "several
+    // described choices".
+    return EmptyStateWidget(
+      icon: PhosphorIconsBold.gitBranch,
+      title: AppLocalizations.of(context)!.noRepositoriesYet,
+      message: AppLocalizations.of(context)!.addRepositoryToGetStarted,
+      action: Wrap(
+        spacing: AppTheme.paddingM,
+        runSpacing: AppTheme.paddingM,
         children: [
-          Icon(
-            PhosphorIconsBold.gitBranch,
-            size: 64,
-            color: Theme.of(context).colorScheme.primary,
+          _ActionCard(
+            icon: PhosphorIconsRegular.folderOpen,
+            title: AppLocalizations.of(context)!.openRepository,
+            description: AppLocalizations.of(context)!.browseExistingRepository,
+            onTap: onOpenRepository,
           ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.noRepositoriesYet,
-            role: TextRole.pageTitle,
+          _ActionCard(
+            icon: PhosphorIconsRegular.downloadSimple,
+            title: AppLocalizations.of(context)!.cloneRepository,
+            description: AppLocalizations.of(context)!.cloneFromRemoteUrl,
+            onTap: onCloneRepository,
           ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            AppLocalizations.of(context)!.addRepositoryToGetStarted,
-            role: TextRole.body,
-            tone: Tone.muted,
-          ),
-          // The verbal statement and the actions offered under it are two
-          // groups inside the one empty-state region: `separate`, the word
-          // every other empty state uses at this boundary. It is not
-          // `sectioned` - a message and its own call to action are not two
-          // regions about different subjects.
-          const BaseGap(Proximity.separate),
-          Wrap(
-            spacing: AppTheme.paddingM,
-            runSpacing: AppTheme.paddingM,
-            children: [
-              _ActionCard(
-                icon: PhosphorIconsRegular.folderOpen,
-                title: AppLocalizations.of(context)!.openRepository,
-                description: AppLocalizations.of(
-                  context,
-                )!.browseExistingRepository,
-                onTap: onOpenRepository,
-              ),
-              _ActionCard(
-                icon: PhosphorIconsRegular.downloadSimple,
-                title: AppLocalizations.of(context)!.cloneRepository,
-                description: AppLocalizations.of(context)!.cloneFromRemoteUrl,
-                onTap: onCloneRepository,
-              ),
-              _ActionCard(
-                icon: PhosphorIconsRegular.plus,
-                title: AppLocalizations.of(context)!.initializeRepository,
-                description: AppLocalizations.of(
-                  context,
-                )!.createNewGitRepository,
-                onTap: onInitRepository,
-              ),
-            ],
+          _ActionCard(
+            icon: PhosphorIconsRegular.plus,
+            title: AppLocalizations.of(context)!.initializeRepository,
+            description: AppLocalizations.of(context)!.createNewGitRepository,
+            onTap: onInitRepository,
           ),
         ],
       ),
@@ -107,6 +99,17 @@ class _ActionCard extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Deliberately NOT converted, and the size is the reason. This is
+            // a 48 px hero inside a quick-action card, and `ControlScale`'s
+            // three rungs are 16 / 20 / 24: naming `prominent` here would
+            // halve the mark, which is a different card and not a different
+            // spelling of this one. It is not the empty state's own mark
+            // either - `EmptyStateWidget` above draws exactly one of those,
+            // and these are the three choices UNDER it - so the member that
+            // owns a size has no slot for this. Because the size cannot move,
+            // the accent cannot either: a `Tone` needs a `BaseIcon` to be
+            // said through, and a `BaseIcon` cannot be told 48. Both leave
+            // together when the card becomes a surface member.
             Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
             const BaseGap(Proximity.grouped),
             BaseLabel(title, role: TextRole.pageTitle, align: TextAlign.center),

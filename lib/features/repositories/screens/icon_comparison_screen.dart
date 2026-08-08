@@ -138,7 +138,18 @@ class _IconCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Regular variant
+              // Regular variant.
+              //
+              // Neither of the two marks on this row converts, and the screen
+              // is the reason. Its entire subject is the WEIGHT difference
+              // between two Phosphor fonts, so it has to name the raw
+              // constants: `BaseIcon` takes an `IconRole`, and the skin
+              // deliberately re-decides the weight behind it (#249 conflict
+              // C3), which would render both columns identically and delete
+              // the comparison. The 64 px they are drawn at is a second
+              // blocker - `ControlScale` stops at 24 - and the colours are the
+              // labelling of the comparison itself rather than a meaning about
+              // the marks.
               Column(
                 children: [
                   Icon(

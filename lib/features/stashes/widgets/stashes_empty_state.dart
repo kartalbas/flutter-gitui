@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_button.dart';
-import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Empty state for stashes screen when no stashes exist
 class StashesEmptyState extends StatelessWidget {
@@ -16,35 +13,20 @@ class StashesEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.package,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.noStashes,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            AppLocalizations.of(context)!.createStashToSaveWorkInProgress,
-            role: TextRole.body,
-            align: TextAlign.center,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseButton(
-            onPressed: onCreateStash,
-            leadingIcon: IconRole.floppyDisk,
-            label: AppLocalizations.of(context)!.createStash,
-            variant: ButtonVariant.primary,
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    // The empty-state hero with its way out. The action was already a
+    // `BaseButton` at the primary emphasis, which is exactly what the member
+    // builds from `actionLabel`/`actionIcon`, so handing it over changes no
+    // pixels and takes the mark's size and colour out of this file with it -
+    // `EmptyStateSpec` accepts neither, which is what makes a size written
+    // here a leak by construction.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.package,
+      title: l10n.noStashes,
+      message: l10n.createStashToSaveWorkInProgress,
+      actionLabel: l10n.createStash,
+      actionIcon: IconRole.floppyDisk,
+      onActionPressed: onCreateStash,
     );
   }
 }

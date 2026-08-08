@@ -282,12 +282,20 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // hero marks returned to literals rather than staying rounded onto rungs
   // that moved their pixels, which is why some numbers rose by less than the
   // conversion first measured.
-  'shell': 175,
+  // The tone conversion's review pass moved exactly two numbers, both by one,
+  // and both are the same change: an empty state that used to hand-roll its
+  // column adopted `EmptyStateWidget` (#430), whose `BaseInset.roomy` is one
+  // more fence than the column planted. The shell's is the command-log
+  // panel's "no commands yet" state; browse's is its "no file selected"
+  // state. Every other scene measured unchanged - the same run that took the
+  // four repository-card metadata marks and the project-section mark back to
+  // literals confirmed neither direction moved a count.
+  'shell': 176,
   'workspaces': 31,
   'repositories': 55,
   'changes': 39,
   'history': 80,
-  'browse': 24,
+  'browse': 25,
   'branches': 15,
   'stashes': 17,
   'tags': 34,
@@ -349,7 +357,7 @@ const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
   // exactly one less: the difference IS the single toolbar action
   // `visibleActionCount()` sheds at the stretched distance, so this number
   // moves in lockstep whenever the shell's own count moves.
-  'shell': 174,
+  'shell': 175,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

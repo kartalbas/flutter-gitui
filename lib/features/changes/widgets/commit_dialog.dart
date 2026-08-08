@@ -298,6 +298,13 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             // Commit tips
             const BaseGap(Proximity.related),
             Container(
+              // The tinted panel and its hairline are the SURFACE of this
+              // note, not a foreground: a fill and a border, both washed to
+              // 30% so they sit under the words rather than beside them. An
+              // alpha wash of `primary` is a state layer, which is not
+              // something `Tone.accent` can say - a tone names a foreground's
+              // meaning - so both stay until the note becomes a skin member
+              // and the surface answers them together.
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,

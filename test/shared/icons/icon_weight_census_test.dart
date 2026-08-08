@@ -75,7 +75,7 @@ class _Weights {
 /// `git show HEAD:` each file and over the working tree, with whole-line
 /// comments dropped so that a comment recording what a site USED to draw is
 /// not counted as a live reference. 110 Bold and 14 Fill references before;
-/// 98 and 10 now, and the two "before" totals are the ones the mapping phase's
+/// 92 and 10 now, and the two "before" totals are the ones the mapping phase's
 /// own census reported.
 const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/core/navigation/app_shell.dart': _Weights(2, 1, 2, 0),
@@ -95,7 +95,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   ),
   'lib/features/history/widgets/file_tree_panel.dart': _Weights(2, 0, 2, 0),
   'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart':
-      _Weights(4, 0, 4, 0),
+      _Weights(4, 0, 2, 0),
   'lib/features/repositories/dialogs/create_pull_request_dialog.dart': _Weights(
     2,
     0,
@@ -113,13 +113,13 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/features/repositories/widgets/batch_operations_toolbar.dart': _Weights(
     1,
     0,
-    1,
+    0,
     0,
   ),
   'lib/features/repositories/widgets/global_branch_switcher.dart': _Weights(
     4,
     0,
-    4,
+    3,
     0,
   ),
   'lib/features/repositories/widgets/project_section.dart': _Weights(
@@ -143,7 +143,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/features/repositories/widgets/repository_list_item.dart': _Weights(
     2,
     1,
-    2,
+    0,
     0,
   ),
   'lib/features/tags/tags_screen.dart': _Weights(12, 2, 12, 1),
@@ -198,8 +198,8 @@ class _GivenUp {
 
 /// Every weight the conversion removed from `lib/`, with its disposition.
 ///
-/// Sixteen entries against a ledger difference of 12 Bold plus 4 Fill, so the
-/// two measurements have to agree; the first test makes them.
+/// Twenty-two entries against a ledger difference of 18 Bold plus 4 Fill, so
+/// the two measurements have to agree; the third test makes them.
 const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
   // ---- Fill: four sites, all four still drawn solid -----------------------
   _GivenUp(
@@ -237,7 +237,7 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
     'The engaged filter. `isSelected: _hasActiveFilters()` carries the state '
         'and the skin re-decides the solid mark from it.',
   ),
-  // ---- Bold: twelve marks, all twelve now at the ordinary stroke ----------
+  // ---- Bold: eighteen marks, all eighteen now at the ordinary stroke ------
   _GivenUp(
     'lib/features/history/dialogs/advanced_search_dialog.dart',
     'magnifyingGlass',
@@ -335,6 +335,64 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
     _Fate.normalised,
     'Dialog title mark, drawn at the ordinary stroke at 21 other sites.',
   ),
+  // ---- The tone conversion's six, adjudicated by its review ---------------
+  _GivenUp(
+    'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.normalised,
+    'The per-repository outcome mark in the progress list. The same dialog '
+        'already drew the same outcome at the ordinary stroke through its '
+        'status helper, so one dialog was stating one fact at two weights; '
+        'the row now matches its converted twin.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart',
+    'xCircle',
+    'Bold',
+    _Fate.normalised,
+    'The failure branch of that same row mark, at the same weight on both '
+        'branches of the ternary, so no state distinction existed to lose.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/widgets/batch_operations_toolbar.dart',
+    'checkSquare',
+    'Bold',
+    _Fate.normalised,
+    'The selection banner\'s mark, unconditional - one mark, no second state '
+        'to tell apart, inside a pill the accent already sets off. Where this '
+        'same check-square IS a state (git_status_tree_view.dart, Bold means '
+        'staged), the weight is kept and the skin re-decides it.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/widgets/global_branch_switcher.dart',
+    'gitBranch',
+    'Bold',
+    _Fate.normalised,
+    'Unconditional on every row of the switcher menu, so it separated no row '
+        'from another, and the application draws the same mark at the '
+        'ordinary stroke for the same meaning across its branch lists. Where '
+        'the weight IS the meaning - branch_list_tile.dart, Bold for the '
+        'current branch - it is a state and stays.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/widgets/repository_list_item.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.normalised,
+    'The batch outcome mark in the list presentation - the twin of '
+        'repository_card.dart\'s, recorded above, by the same measurement: '
+        'the weight was identical on both branches of the ternary and never '
+        'told success from failure.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/widgets/repository_list_item.dart',
+    'warningCircle',
+    'Bold',
+    _Fate.normalised,
+    'The failure branch of that same list mark, drawn at the same weight as '
+        'the success branch, so nothing distinguished the two.',
+  ),
 ];
 
 void main() {
@@ -366,7 +424,7 @@ void main() {
             'A file gained or lost a Phosphor weight without the ledger being '
             'updated. Losing one is a site that will now render at the '
             'ordinary stroke — write down which site and why in '
-            '_kWeightsGivenUp and at the call site, exactly as the twelve '
+            '_kWeightsGivenUp and at the call site, exactly as those '
             'already recorded there did, or find the member that carries the '
             'weight across the seam and use it instead.',
       );
@@ -420,7 +478,7 @@ void main() {
         fillRemoved,
         _kWeightsGivenUp.where((_GivenUp g) => g.weight == 'Fill').length,
       );
-      expect(boldRemoved, 12);
+      expect(boldRemoved, 18);
       expect(fillRemoved, 4);
     });
 
@@ -487,13 +545,15 @@ void main() {
     });
   });
 
-  group('the twelve normalised marks are the ordinary stroke everywhere', () {
+  group('the eighteen normalised marks are the ordinary stroke everywhere', () {
     test('each one is a mark the application already draws unheavied', () {
       // The specific way this could still have gone wrong: ten roles in the
       // census are drawn ONLY at Bold, so routing one of them through a bare
       // `type.icon` would render a mark that appears nowhere in the shipping
-      // application. None of the twelve is such a role — each is drawn at the
-      // ordinary stroke at other sites — and this pins that.
+      // application. None of the eighteen is such a role — each is drawn at
+      // the ordinary stroke at other sites (xCircle at
+      // command_log_panel.dart:172, checkSquare at
+      // base_select_all_button.dart:127) — and this pins that.
       const List<IconRole> normalised = <IconRole>[
         IconRole.magnifyingGlass,
         IconRole.gitPullRequest,
@@ -504,6 +564,8 @@ void main() {
         IconRole.warningCircle,
         IconRole.gitBranch,
         IconRole.gitCommit,
+        IconRole.xCircle,
+        IconRole.checkSquare,
       ];
       for (final IconRole role in normalised) {
         expect(
@@ -511,7 +573,7 @@ void main() {
           'PhosphorRegular',
           reason:
               'IconRole.${role.name} no longer answers with the ordinary '
-              'stroke, so the twelve recorded normalisations no longer say '
+              'stroke, so the recorded normalisations no longer say '
               'what happened.',
         );
         expect(

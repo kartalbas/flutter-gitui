@@ -136,6 +136,12 @@ class LanguageSelector extends ConsumerWidget {
                 // Left as a Phosphor constant deliberately: the heavier stroke
                 // is a fact `IconRole` cannot carry, so converting the mark
                 // would drop it silently. See the P3d report.
+                //
+                // Which pins the colour too: a raw `Icon` takes a `Color`, and
+                // the application is given no way to resolve `Tone.accent`
+                // into one. Glyph and colour are one decision here and they
+                // convert together, when a checked menu entry is a member that
+                // draws its own mark.
                 Icon(
                   PhosphorIconsBold.check,
                   size: AppTheme.iconM,
@@ -242,6 +248,10 @@ class LanguageSelector extends ConsumerWidget {
       width: 28,
       height: 28,
       decoration: BoxDecoration(
+        // Not a tone: a ring at 30% opacity is a selection state layer drawn
+        // as a border, which is the `listRow` / selectable-surface question
+        // and is answered in P5. Calling it `Tone.accent` would turn a wash
+        // into a foreground.
         border: Border.all(
           color: isSelected
               ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)

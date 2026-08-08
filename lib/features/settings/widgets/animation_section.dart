@@ -58,11 +58,18 @@ class AnimationSection extends ConsumerWidget {
               ),
             ],
           ),
+          // No `style:` here, and the absence is the statement. Each entry is a
+          // `BaseLabel` at `TextRole.body` that pins its own ramp step and
+          // takes only its COLOUR from the enclosing `DefaultTextStyle`, which
+          // is precisely `Tone.neutral` - "whatever this surface's ordinary
+          // foreground is" - and is what every one of them already says by
+          // default. Spelling `onSurface` out again here said the same thing
+          // in Material's words. Nothing moves: the fallback ramp step carries
+          // the scheme's `onSurface` too
+          // (`AppTheme._brightnessCorrectedTextTheme`), and the labels own the
+          // size.
           trailing: DropdownButton<AppAnimationSpeed>(
             value: ui.animationSpeed,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
             items: AppAnimationSpeed.values.map((speed) {
               return DropdownMenuItem(
                 value: speed,

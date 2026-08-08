@@ -103,10 +103,14 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // An empty state's hero mark keeps its measure and its
-                  // colour: no rung of `ControlScale` reaches it, and a tone
-                  // can only reach a mark through `BaseIcon`. See
-                  // history_empty_states.dart.
+                  // Not the empty-state facade's shape (#430): a 32 dp note
+                  // with one sentence and no headline, inside a panel its own
+                  // header already names, where `EmptyStateWidget` is a 64 dp
+                  // hero that always renders a `pageTitle` above its message.
+                  // Adopting it in a pane this narrow would double the mark
+                  // and promote the sentence out of `body`. The colour is
+                  // stranded with the size: a tone reaches a mark only through
+                  // `BaseIcon`, whose scales top out at 24.
                   Icon(
                     PhosphorIconsRegular.files,
                     size: AppTheme.iconXL,
@@ -220,6 +224,12 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // The same in-panel note shape as the empty case above, plus the
+              // colour blocker the facade cannot answer at all:
+              // `EmptyStateWidget` paints its hero in the supporting
+              // foreground and carries no tone slot, so adopting it would turn
+              // a red failure mark grey - the difference between "there is
+              // nothing here" and "this went wrong".
               Icon(
                 PhosphorIconsRegular.warningCircle,
                 size: AppTheme.iconXL,

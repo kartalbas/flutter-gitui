@@ -958,6 +958,15 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     ResolvedCommitSelection selection,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    // The destructive entries below already say what they mean once, as
+    // `tone: Tone.danger`, and that word colours their MARK. It cannot reach
+    // their words: `MenuItemContent.labelColor` is typed as a `Color?` and
+    // falls back to the inherited menu foreground rather than resolving the
+    // tone it was already handed, so dropping this would silently un-redden
+    // three labels. The read is the component's gap, not this screen's - the
+    // repair is in `lib/shared/components/base_menu_item.dart`, outside this
+    // slice, and it deletes the same read at `branch_switcher.dart:161` and
+    // `quick_settings_menu.dart:169` in one move.
     final errorColor = Theme.of(context).colorScheme.error;
     final count = selection.count;
 

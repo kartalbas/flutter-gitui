@@ -188,6 +188,20 @@ class RepositoryCard extends ConsumerWidget {
           // Path
           Row(
             children: [
+              // NOT converted, and the review put it back after a conversion
+              // shipped it 2 dp larger. This mark is 14 px, a size the card
+              // states four times over (here, the branch, the remote and the
+              // clock below) and `ControlScale` cannot say: `compact` is the
+              // 16 dp rung, so `BaseIcon` here is rule 1's exact violation -
+              // a meaning rounded onto the nearest available word, silently,
+              // inside a colour rename. The colour is stranded with the size,
+              // because a tone reaches a mark only through `BaseIcon` - and
+              // the selected branch of it is itself contested: a selected
+              // card paints `customBackgroundColor` (primary at 10 %), so the
+              // `onSecondaryContainer` read answers a surface `BaseCard`
+              // never paints (base_card.dart:160-168). Both questions - the
+              // 14 px measure and the metadata row's selected foreground -
+              // belong to the card member and move to P5 as one piece.
               Icon(
                 PhosphorIconsRegular.folder,
                 size: 14,
@@ -211,6 +225,9 @@ class RepositoryCard extends ConsumerWidget {
             const BaseGap(Proximity.related),
             Row(
               children: [
+                // Left raw with the folder mark above: 14 px is on no
+                // `ControlScale` rung, and the colour cannot cross the seam
+                // without the size. See the survivor note on the path row.
                 Icon(
                   PhosphorIconsRegular.gitBranch,
                   size: 14,
@@ -237,6 +254,9 @@ class RepositoryCard extends ConsumerWidget {
             const BaseGap(Proximity.related),
             Row(
               children: [
+                // Left raw with the folder mark above: 14 px is on no
+                // `ControlScale` rung, and the colour cannot cross the seam
+                // without the size. See the survivor note on the path row.
                 Icon(
                   PhosphorIconsRegular.cloud,
                   size: 14,
@@ -290,6 +310,13 @@ class RepositoryCard extends ConsumerWidget {
                 // with a padding token, which said nothing true about it. It
                 // moves into `controls.progress` at the inline extent, where a
                 // number is legal.
+                // The colour stays with the geometry, for the same reason: a
+                // spinner is neither a label nor a glyph, so neither `BaseLabel`
+                // nor `BaseIcon` can carry a tone for it, and there is no
+                // `BaseProgress` to reach for. `controls.progress` is the member
+                // that takes all three of these numbers plus the tone at once,
+                // and splitting them now would leave the stroke and the box
+                // spelled out beside a tone that had already crossed the seam.
                 SizedBox(
                   width: AppTheme.iconS,
                   height: AppTheme.iconS,
@@ -383,10 +410,15 @@ class RepositoryCard extends ConsumerWidget {
                 all: Inset.tight,
                 child: Row(
                   children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      size: AppTheme.iconS,
-                      color: Theme.of(context).colorScheme.error,
+                    // The mark now says what the sentence beside it already
+                    // said. `AppTheme.iconS` is the 16 dp rung `compact`
+                    // resolves to, so nothing moves; the fill and the corner
+                    // of the box around it stay behind, because a container is
+                    // a surface and surfaces leave in P5.
+                    BaseIcon(
+                      IconRole.warningCircle,
+                      scale: ControlScale.compact,
+                      tone: Tone.danger,
                     ),
                     const BaseGap(Proximity.related),
                     Expanded(
@@ -406,6 +438,9 @@ class RepositoryCard extends ConsumerWidget {
           const BaseGap(Proximity.grouped),
           Row(
             children: [
+              // Left raw with the folder mark above: 14 px is on no
+              // `ControlScale` rung, and the colour cannot cross the seam
+              // without the size. See the survivor note on the path row.
               Icon(
                 PhosphorIconsRegular.clock,
                 size: 14,

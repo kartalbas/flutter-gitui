@@ -229,6 +229,13 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Not the empty-state facade (#430): the blocker is the mark's
+            // COLOUR rather than its size. `EmptyStateWidget` paints its hero
+            // in the supporting foreground unconditionally and carries no tone
+            // slot, so adopting it would turn a red failure mark grey - and it
+            // would also promote the danger-toned line below into a neutral
+            // headline. The `48` is stranded with the colour: the two are one
+            // decision and cannot be half-converted.
             Icon(
               PhosphorIconsRegular.warningCircle,
               size: 48,

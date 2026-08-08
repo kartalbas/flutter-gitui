@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_layout.dart';
@@ -63,10 +63,24 @@ class BatchOperationsToolbar extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        PhosphorIconsBold.checkSquare,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                      // Tone.onAccent for the same reason the words beside it
+                      // take it: the pill behind both is painted with the
+                      // accent by the application itself, three lines up. 16 is
+                      // exactly the `compact` rung, so the mark does not change
+                      // size.
+                      //
+                      // The Bold stroke does NOT survive, and that is measured
+                      // rather than overlooked. It was unconditional here - one
+                      // mark, no second state to tell apart - so it drew no
+                      // distinction; the same check-square IS a state elsewhere
+                      // (git_status_tree_view.dart:374, 481, where Bold means
+                      // "staged"), and that is the case a weight has to be kept
+                      // for. Recorded in test/shared/icons/
+                      // icon_weight_census_test.dart.
+                      BaseIcon(
+                        IconRole.checkSquare,
+                        scale: ControlScale.compact,
+                        tone: Tone.onAccent,
                       ),
                       const BaseGap(Proximity.related),
                       // Tone.onAccent, not a dropped override: the count pill

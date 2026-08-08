@@ -610,8 +610,22 @@ class _ConflictResolutionScreenState
             // what a line is FOR and `Tone` says what it MEANS; neither says
             // "set this apart as provisional", which is the whole of what the
             // italic is doing on a line that exists only while a git command
-            // is in flight. Moving the colour alone would take the italic with
-            // it, so the read stays until there is a word for the slant.
+            // is in flight, so the style stays until there is a word for the
+            // slant.
+            //
+            // The colour word stays with it, and NOT because it says
+            // anything: the ramp this style is built from already carries the
+            // scheme's on-surface role on every step, so this restates the
+            // ambient foreground and paints nothing new. It stays because
+            // `avoid_text_with_style` waves a `Text` through as soon as its
+            // `copyWith` mentions a `color:` at all, whatever else that
+            // `copyWith` changes. Deleting the inert colour therefore does not
+            // simplify this line, it exposes the italic to a lint the colour
+            // was hiding it from - and the fix is the rule's exemption ("the
+            // copyWith changes ONLY the colour", not "the copyWith names a
+            // colour"), not an ignore comment here. Until then a Material role
+            // read is load-bearing for the gate rather than for the pixels,
+            // which is worth knowing.
             Center(
               child: Text(
                 AppLocalizations.of(context)!.resolvingConflict,
@@ -857,6 +871,10 @@ class _ConflictResolutionScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.snackbarMergeAborted),
+            // A surface FILL, not a foreground: the notice is painted in this
+            // colour and its text is paired against it. Fills leave when the
+            // surface becomes a member, so converting it now would be churn
+            // that member has to undo.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

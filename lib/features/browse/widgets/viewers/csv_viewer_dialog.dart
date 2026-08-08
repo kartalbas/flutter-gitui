@@ -99,10 +99,16 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // An error state's hero mark keeps its measure and its
-                  // colour: no rung of `ControlScale` reaches it, and a tone
-                  // can only reach a mark through `BaseIcon`. See
-                  // history_empty_states.dart.
+                  // Not `EmptyStateWidget`, and this state is blocked twice
+                  // over. It says a mark and ONE line - there is no headline
+                  // to hand the facade, and the facade renders its headline
+                  // and its sentence unconditionally, so inventing a headline
+                  // adds a line of text and passing '' paints a blank one and
+                  // its gap (base_diff_viewer.dart refuses it from that same
+                  // side). And the facade owns the mark's colour, answering it
+                  // with `onSurfaceVariant`, which would repaint this red
+                  // failure mark neutral. The read cannot move alone either:
+                  // no `Tone` says "the file could not be read".
                   Icon(
                     PhosphorIconsRegular.warningCircle,
                     size: 48,

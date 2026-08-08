@@ -273,9 +273,14 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // An empty state's hero mark keeps its measure and its colour: no
-            // rung of `ControlScale` reaches it, and a tone can only reach a
-            // mark through `BaseIcon`. See history_empty_states.dart.
+            // Not `EmptyStateWidget`, for the reason spelled out at
+            // file_blame_panel.dart's error state: the facade owns its hero
+            // glyph's colour and answers it with `onSurfaceVariant`, so
+            // adopting it here would repaint a red failure mark neutral - a
+            // change to what the user sees rather than a change of vocabulary.
+            // The read cannot move on its own either: no `Tone` says "this
+            // file could not be read", only "this destroys", "this may be a
+            // mistake" and "fix this value".
             Icon(
               PhosphorIconsRegular.warningCircle,
               size: 64,
@@ -305,6 +310,15 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Not `EmptyStateWidget` either, and here the blocker is the third
+            // line rather than the colour. This state says three things - what
+            // it is, why it cannot be shown, and how big it is - and the last
+            // is `TextRole.detail` a hairline under the sentence above it. The
+            // facade carries a headline and one sentence and nothing else, so
+            // adopting it would either drop the byte count or fold it into the
+            // sentence at the wrong role and the wrong distance. The hero
+            // mark's `64` and its colour therefore stay together, exactly as
+            // they stay together inside the facade itself.
             Icon(
               PhosphorIconsRegular.fileCode,
               size: 64,
@@ -382,6 +396,18 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                         minWidth: constraints.maxWidth,
                       ),
                       child: BaseInset(
+                        // The colour word is gone and nothing else moved.
+                        // `Tone.neutral` is "whatever this surface's ordinary
+                        // foreground is", and the ramp this style is built
+                        // from already carries exactly that - the theme stamps
+                        // the scheme's on-surface role on every step of it -
+                        // so naming that role again was the ambient answer
+                        // restated in Material's words. The rest stays a
+                        // hand-built style and stays a finding: this is the
+                        // one text in the application whose FAMILY and whose
+                        // SIZE are both the user's own settings, and no member
+                        // can carry a per-user scale factor - `TextRole.code`
+                        // fixes the step and `ControlScale` is about controls.
                         child: SelectableText(
                           _content,
                           style: GoogleFonts.getFont(
@@ -389,9 +415,6 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
                             textStyle: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   height: 1.2,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
                                   fontSize:
                                       (Theme.of(
                                             context,

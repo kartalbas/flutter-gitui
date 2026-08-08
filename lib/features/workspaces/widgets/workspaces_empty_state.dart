@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Empty state for workspaces screen when no workspaces exist
 class WorkspacesEmptyState extends StatelessWidget {
@@ -13,28 +10,23 @@ class WorkspacesEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsBold.folder,
-            size: 64,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.noWorkspacesYet,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            AppLocalizations.of(context)!.createWorkspaceToOrganize,
-            role: TextRole.body,
-            tone: Tone.muted,
-          ),
-        ],
-      ),
+    // The hand-rolled Column of {64 px glyph, headline, explanation} is gone,
+    // and the glyph SIZE went with it (#430). `EmptyStateSpec` takes
+    // icon/title/message and no size at all, so a member that accepts no size
+    // owns it - which makes a size written here a leak by construction rather
+    // than a value to translate into a scale word. This widget therefore
+    // states only what the empty state SAYS and lets the facade that becomes
+    // `surfaces.emptyState` decide how large its mark is and how far the
+    // words sit from the region's edges.
+    //
+    // The mark's colour moves with the size: this state painted its glyph in
+    // Material's accent role, and the member draws every empty state's mark in
+    // the supporting foreground instead, so this one stops being the single
+    // empty state in the application that shouted.
+    return EmptyStateWidget(
+      icon: PhosphorIconsBold.folder,
+      title: AppLocalizations.of(context)!.noWorkspacesYet,
+      message: AppLocalizations.of(context)!.createWorkspaceToOrganize,
     );
   }
 }

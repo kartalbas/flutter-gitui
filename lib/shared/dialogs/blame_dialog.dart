@@ -191,7 +191,19 @@ class BlameDialog extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Line content
+                        // Line content. Still a hand-set style, and the
+                        // blocker is `height: 1.2`: `BaseLabel(TextRole.code)`
+                        // says "monospaced, because alignment is meaning here"
+                        // and says nothing about leading, so converting would
+                        // hand every blame line Material's own 1.43 and make
+                        // the view taller - #426 verbatim, which is the one
+                        // mistake this conversion is not allowed to repeat.
+                        // The scheme's `onSurface` beside it is stranded with
+                        // the style rather than independently convertible: a
+                        // `Tone` reaches text only through `BaseLabel`, which
+                        // is the widget the leading rules out. Both leave
+                        // together when the contract can say how tightly a run
+                        // of code is set.
                         Expanded(
                           child: SelectableText(
                             line.lineContent.isEmpty ? ' ' : line.lineContent,
@@ -232,6 +244,13 @@ class BlameDialog extends ConsumerWidget {
   }
 
   Widget _buildError(BuildContext context, String error) {
+    // Not the empty-state facade (#430), for two reasons that compound. The
+    // mark's COLOUR is the first: `EmptyStateWidget` paints its hero in the
+    // supporting foreground unconditionally and carries no tone slot, so
+    // adopting it would turn a red failure mark grey. The state's SHAPE is the
+    // second: it says one thing, and the facade wants a headline and a
+    // sentence, so the one line would have to be promoted into the headline.
+    // The `48` is stranded with the colour - they are one decision.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

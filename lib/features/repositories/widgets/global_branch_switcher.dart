@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_switcher.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/notification_service.dart';
@@ -110,10 +110,23 @@ class GlobalBranchSwitcher extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            PhosphorIconsBold.gitBranch,
-            size: AppTheme.iconS,
-            color: Theme.of(context).colorScheme.primary,
+          // "This row is about a branch" is `Tone.accent`, which is the answer
+          // branch_list_tile.dart:66 and repository_list_item.dart:263 already
+          // give for the identical fact. `AppTheme.iconS` is the 16 dp
+          // `compact` rung, so the mark keeps its size.
+          //
+          // The Bold stroke does not survive, and it was not carrying anything:
+          // it is unconditional on EVERY row of this menu, so it separates no
+          // row from another, and the application already draws this same mark
+          // at the ordinary stroke for the same meaning
+          // (repository_card.dart, commit_list_item.dart:158). Where the weight
+          // IS the meaning - branch_list_tile.dart:53-54, Bold for the current
+          // branch - it is a state and the skin re-decides it. Recorded in
+          // test/shared/icons/icon_weight_census_test.dart.
+          BaseIcon(
+            IconRole.gitBranch,
+            scale: ControlScale.compact,
+            tone: Tone.accent,
           ),
           const BaseGap(Proximity.grouped),
           Expanded(

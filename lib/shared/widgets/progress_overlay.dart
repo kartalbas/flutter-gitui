@@ -60,6 +60,14 @@ class _BackgroundProgressLabel extends StatelessWidget {
               // The caption and the mark that says it can be opened are two
               // halves of one affordance.
               const BaseGap(Proximity.hairline),
+              // Twelve, which `AppTheme.iconXS` documents as the size reserved
+              // for a non-interactive inline indicator - and no `ControlScale`
+              // rung reaches it, the smallest being 16. `BaseIcon` here would
+              // grow this caret by a third inside a 3 px-tall strip floating
+              // over the user's content, which is the blame view's inset
+              // mistake (#426) one axis over: a meaning rounded onto the
+              // nearest available word. The read stays until the strip is a
+              // member that owns its own mark.
               Icon(
                 PhosphorIconsRegular.caretRight,
                 size: 12,

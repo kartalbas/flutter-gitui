@@ -348,15 +348,31 @@ class _BatchOperationProgressDialogState
                       ),
                     ],
                   ),
+                  // Now the SAME expression as `_buildStatusIcon` below, which
+                  // draws this dialog's other copy of the very same outcome
+                  // mark and converted a phase earlier. One dialog was stating
+                  // one fact two ways: `Tone.success` is exactly what
+                  // `context.gitColors.added` resolved to
+                  // (material_ink.dart:169), and `Tone.invalid` is the reading
+                  // both that helper and this row's own status line already
+                  // give the failure - it needs attention, but nothing was
+                  // destroyed, so it is not `danger`. `AppTheme.iconS` is the
+                  // 16 dp `compact` rung, so neither mark changes size.
+                  //
+                  // The Bold stroke does not survive. It was the same on both
+                  // branches, so it distinguished nothing, and the twin below
+                  // has been drawing this outcome at the ordinary stroke since
+                  // it converted. Recorded in test/shared/icons/
+                  // icon_weight_census_test.dart.
                   trailing: progress.success != null
-                      ? Icon(
+                      ? BaseIcon(
                           progress.success == true
-                              ? PhosphorIconsBold.checkCircle
-                              : PhosphorIconsBold.xCircle,
-                          size: AppTheme.iconS,
-                          color: progress.success == true
-                              ? context.gitColors.added
-                              : Theme.of(context).colorScheme.error,
+                              ? IconRole.checkCircle
+                              : IconRole.xCircle,
+                          scale: ControlScale.compact,
+                          tone: progress.success == true
+                              ? Tone.success
+                              : Tone.invalid,
                         )
                       : null,
                 );
@@ -385,6 +401,10 @@ class _BatchOperationProgressDialogState
       // Only the repository the service is on gets a spinner; spinning every
       // row made a stalled run indistinguishable from a busy one.
       if (progress.repository.path == _activeRepositoryPath) {
+        // The colour stays with the box and the stroke: a spinner is neither a
+        // label nor a glyph, so neither facade can carry a tone for it, and
+        // `controls.progress` at the inline extent is the member that takes
+        // all three at once.
         return SizedBox(
           width: AppTheme.iconS,
           height: AppTheme.iconS,

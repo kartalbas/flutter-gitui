@@ -77,10 +77,16 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // An error state's hero mark keeps its measure and its
-                  // colour: no rung of `ControlScale` reaches it, and a tone
-                  // can only reach a mark through `BaseIcon`. See
-                  // history_empty_states.dart.
+                  // Not `EmptyStateWidget`, and this state is blocked twice
+                  // over. It says a mark and ONE line - there is no headline
+                  // to hand the facade, and the facade renders its headline
+                  // and its sentence unconditionally, so inventing a headline
+                  // adds a line of text and passing '' paints a blank one and
+                  // its gap (base_diff_viewer.dart refuses it from that same
+                  // side). And the facade owns the mark's colour, answering it
+                  // with `onSurfaceVariant`, which would repaint this red
+                  // failure mark neutral. The read cannot move alone either:
+                  // no `Tone` says "the file could not be read".
                   Icon(
                     PhosphorIconsRegular.warningCircle,
                     size: 48,
@@ -97,38 +103,39 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
           : Markdown(
               data: _content,
               selectable: true,
+              // Nine colour words left this sheet and not one pixel moved.
+              // `Tone.neutral` is "whatever this surface's ordinary foreground
+              // is", and the ramp these styles are built from already carries
+              // exactly that: the theme stamps the scheme's on-surface role on
+              // every step of the type scale, so each of the nine restated the
+              // ambient answer in Material's words and nothing else. Saying
+              // nothing is how a bag of styles says neutral.
+              //
+              // A `MarkdownStyleSheet` is a third-party bag of `TextStyle`s,
+              // not a widget, so `BaseLabel` cannot reach any of these lines -
+              // which is why the one line below that is NOT neutral has to
+              // stay a colour.
               styleSheet: MarkdownStyleSheet(
-                p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                h1: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                h2: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                h3: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                h4: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                h5: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                h6: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                listBullet: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                p: Theme.of(context).textTheme.bodyMedium,
+                h1: Theme.of(context).textTheme.displaySmall,
+                h2: Theme.of(context).textTheme.headlineMedium,
+                h3: Theme.of(context).textTheme.titleLarge,
+                h4: Theme.of(context).textTheme.titleMedium,
+                h5: Theme.of(context).textTheme.titleSmall,
+                h6: Theme.of(context).textTheme.labelLarge,
+                listBullet: Theme.of(context).textTheme.bodyMedium,
+                // The one line in the sheet that says something: a quotation
+                // is secondary to the prose around it, which is `Tone.muted`.
+                // It stays a `colorScheme` read because a tone can only reach
+                // text through `BaseLabel` and this is a `TextStyle` handed to
+                // a renderer the application does not own. It leaves when the
+                // markdown surface is a member.
                 blockquote: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
                 ),
                 code: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontFamily: 'monospace',
-                  color: Theme.of(context).colorScheme.onSurface,
                   backgroundColor: Theme.of(
                     context,
                   ).colorScheme.surfaceContainerHighest,

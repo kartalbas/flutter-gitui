@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// No file selected state for browse screen
 class BrowseNoFileSelectedState extends StatelessWidget {
@@ -12,35 +10,20 @@ class BrowseNoFileSelectedState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // An empty state's hero mark keeps its measure and its colour: no
-          // rung of `ControlScale` reaches it, and a tone can only reach a
-          // mark through `BaseIcon`. See history_empty_states.dart.
-          Icon(
-            PhosphorIconsRegular.file,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          // The hero glyph and the headline are two groups inside one region:
-          // `separate`.
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.noFileSelected,
-            role: TextRole.pageTitle,
-          ),
-          // The headline and the sentence explaining it are two parts of one
-          // statement: `related`.
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            AppLocalizations.of(context)!.selectFileToViewHistoryOrPreview,
-            role: TextRole.body,
-            align: TextAlign.center,
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context)!;
+    // The hero mark's size and its colour are no longer written here, and that
+    // is the whole point of adopting the facade (#430): `EmptyStateSpec` takes
+    // an icon, a headline, a sentence and the ways out, and NO size - a member
+    // that accepts no size owns the size, so the `64` and the
+    // on-surface-variant role beside it were one leak by construction rather
+    // than two numbers waiting for a rung. `ControlScale` never was the
+    // answer: it asks how much room a CONTROL's mark is entitled to and tops
+    // out at 24, so naming its loudest rung would have shrunk this glyph to a
+    // third and turned an empty state into a blank one.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.file,
+      title: l10n.noFileSelected,
+      message: l10n.selectFileToViewHistoryOrPreview,
     );
   }
 }

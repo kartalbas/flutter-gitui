@@ -205,7 +205,21 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                 // halves of one row, touching.
                 const BaseGap(Proximity.hairline),
 
-                // File/folder icon
+                // File/folder icon.
+                //
+                // The accent on a directory is a foreground and it still names
+                // Material's primary role, deliberately, because nothing in
+                // the vocabulary can carry this mark yet. Three things block it
+                // once and each is a rule this programme learned the hard way:
+                // the size is 18, which is between `ControlScale.compact` (16)
+                // and `normal` (20), so naming a rung would resize every row
+                // of every tree in the app; the glyph is a Phosphor BOLD
+                // constant and `IconRole` re-decides weight inside the skin,
+                // so converting drops the stroke silently; and the colour is a
+                // three-way choice that ends in a caller-supplied
+                // `fileIconColor`, which one `Tone` cannot express. The whole
+                // mark - glyph, size and colour together - belongs to the tree
+                // row member and moves in P5 as one piece.
                 Icon(
                   node.isDirectory
                       ? (node.isExpanded

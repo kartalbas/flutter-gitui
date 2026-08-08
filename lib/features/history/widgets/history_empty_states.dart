@@ -7,6 +7,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Empty state when repository has no commits
 class NoCommitsState extends StatelessWidget {
@@ -15,33 +16,18 @@ class NoCommitsState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // The hero mark of an empty state, and the one thing on this screen
-          // the vocabulary cannot say. `ControlScale` asks how much room a
-          // CONTROL is entitled to and tops out at the size of a button's
-          // glyph; this mark is not inside a control, it IS the region's
-          // content. Naming the loudest rung available would shrink it to a
-          // third and turn an empty state into a blank one, so the glyph keeps
-          // its measure - and its colour with it, because a tone can only
-          // reach a mark through `BaseIcon` - until the empty-state surface
-          // becomes a member and takes both.
-          Icon(
-            PhosphorIconsRegular.gitCommit,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          // A hero glyph and the headline under it are two groups inside one
-          // region; the headline and its explanation are two parts of one
-          // statement.
-          const BaseGap(Proximity.separate),
-          BaseLabel(l10n.emptyStateNoCommits, role: TextRole.pageTitle),
-          const BaseGap(Proximity.related),
-          BaseLabel(l10n.emptyStateNoCommitsMessage, role: TextRole.body),
-        ],
-      ),
+    // The hero mark's size is no longer written here, and that is the whole
+    // point of adopting the facade (#430): `EmptyStateSpec` takes an icon, a
+    // headline, a sentence and the ways out, and NO size - a member that
+    // accepts no size owns the size, so a `64` at this call site was a leak by
+    // construction rather than a number waiting for a rung. `ControlScale`
+    // never was the answer: it asks how much room a CONTROL's mark is entitled
+    // to and tops out at 24, so naming its loudest rung would have shrunk this
+    // glyph to a third and turned an empty state into a blank one.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.gitCommit,
+      title: l10n.emptyStateNoCommits,
+      message: l10n.emptyStateNoCommitsMessage,
     );
   }
 }
@@ -54,6 +40,13 @@ class HistoryErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The one shape in this file the facade cannot take, and the blocker is
+    // the mark's COLOUR rather than its size. `EmptyStateWidget` paints its
+    // hero in the supporting foreground unconditionally and carries no tone
+    // slot, so adopting it here would silently turn a red failure mark grey -
+    // the whole difference between "there is nothing here" and "this went
+    // wrong" - which is a change of appearance rather than a rename. Reported
+    // instead: the facade needs a tone on its hero before this converts.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -84,25 +77,13 @@ class NoCommitSelectedState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.cursorClick,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(l10n.emptyStateNoCommitSelected, role: TextRole.pageTitle),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            l10n.emptyStateNoCommitSelectedMessage,
-            role: TextRole.body,
-            tone: Tone.muted,
-          ),
-        ],
-      ),
+    // Hand-rolled, this was the facade's own layout copied out by hand, down
+    // to the muted sentence under the headline. It says the same thing with
+    // the size question deleted.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.cursorClick,
+      title: l10n.emptyStateNoCommitSelected,
+      message: l10n.emptyStateNoCommitSelectedMessage,
     );
   }
 }
@@ -124,6 +105,15 @@ class NoSearchResultsState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Stays hand-rolled, and the reason is the third line rather than the
+    // mark. `EmptyStateSpec` has one sentence slot; this state has two - the
+    // advice, and the caveat that the search only covered the loaded window -
+    // and the caveat is `related` to the sentence above it while the facade
+    // puts everything after the message a `separate` gap away. Its two ways
+    // out disagree with the facade too: `EmptyStateAction` offers primary or
+    // secondary, and "Clear filters" is deliberately quieter than both.
+    // Folding either onto the nearest thing the facade can say would move
+    // pixels, so it does not happen here.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -379,6 +379,16 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                 backgroundColor: Theme.of(context).colorScheme.error,
                 action: SnackBarAction(
                   label: AppLocalizations.of(context)!.resolve,
+                  // A foreground, and the one read in this file the mapping
+                  // would convert - except that `Tone` reaches text only
+                  // through `BaseLabel`, and a `SnackBarAction` takes a
+                  // `Color` and builds its own label. The whole notice is a
+                  // P5 member (`NoticeLifetime` already exists for it), and
+                  // the word goes with it. Recorded while it waits: this says
+                  // `onPrimary` over an `error` fill, which is the wrong
+                  // pairing and a real contrast defect - correcting it to the
+                  // danger tone's own on-colour is a change of appearance, so
+                  // it is reported here rather than smuggled into a rename.
                   textColor: Theme.of(context).colorScheme.onPrimary,
                   onPressed: () {
                     // Navigate to conflict resolution (will be handled by main screen)

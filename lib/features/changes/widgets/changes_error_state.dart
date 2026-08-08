@@ -18,13 +18,17 @@ class ChangesErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // The error state's hero glyph stays a raw `Icon`, and for two
-          // reasons rather than one. Its size has no rung: `ControlScale`'s
-          // largest step is the ordinary size of a control's mark, and the
-          // artwork filling an empty region is a different order of thing.
-          // Its colour has no word either - `Tone.danger` is "this destroys
-          // something you cannot get back", which is not what a failed status
-          // read is saying. Neither is rounded to its nearest neighbour.
+          // This is the facade's shape - hero, headline, sentence - and it
+          // still cannot adopt `EmptyStateWidget` (#430), for one reason: the
+          // facade paints its hero in the supporting foreground and carries no
+          // tone slot, so adopting it would turn this red mark grey and erase
+          // the only thing distinguishing a failure from an ordinary empty
+          // pane. That is a change of appearance, not a rename, so it is
+          // reported rather than made. The size stays with it - `ControlScale`
+          // tops out at the ordinary size of a CONTROL's mark, and this is a
+          // region's artwork - and so does the error role below, which is not
+          // rounded onto `Tone.danger`: danger means "this destroys something
+          // you cannot get back", which a failed status read is not saying.
           Icon(
             PhosphorIconsRegular.warningCircle,
             size: 64,

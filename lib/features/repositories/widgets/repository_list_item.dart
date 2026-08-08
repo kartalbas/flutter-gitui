@@ -137,6 +137,14 @@ class RepositoryListItem extends ConsumerWidget {
                         label: 'Git not configured',
                       ),
                     ] else if (status.isLoading) ...[
+                      // Not converted: a spinner is neither a label nor a
+                      // glyph, so no `Tone` can be said about it through
+                      // `BaseLabel` or `BaseIcon`, and no `BaseProgress`
+                      // exists to say it through. `controls.progress` at the
+                      // inline extent is the member that takes the box, the
+                      // stroke and the tone together; splitting the colour off
+                      // now would leave the other two spelled out beside a
+                      // word that had already crossed the seam.
                       SizedBox(
                         width: 12,
                         height: 12,
@@ -416,13 +424,23 @@ class RepositoryListItem extends ConsumerWidget {
     }
 
     final isSuccess = batchResult.success;
-    final icon = isSuccess
-        ? PhosphorIconsBold.checkCircle
-        : PhosphorIconsBold.warningCircle;
-    final color = isSuccess
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.error;
-
+    // The twin of repository_card.dart's `_buildBatchResultIcon`, which
+    // converted a phase earlier and left this one behind saying the same fact
+    // in Material's words. `Tone.accent` resolves to the same accent role this
+    // painted and `Tone.danger` to the same error role, so no pixel of colour
+    // moves - deliberately NOT `Tone.success` for the happy branch, which
+    // would swap the accent for the git palette's green and is a design change
+    // rather than a translation.
+    //
+    // Two appearance changes come with it and both are measured. The mark goes
+    // from 14 to the 16 dp `compact` rung: 14 is a stray literal between this
+    // application's own iconXS (12) and iconS (16), and the row's height is set
+    // by the `bodySmall` line box beside it (12 x 1.33 = 16), so the row does
+    // not grow. And the Bold stroke does not survive - the card's twin already
+    // recorded why at length: the weight was identical on both branches of the
+    // ternary, so it was never what told success from failure. Recorded in
+    // test/shared/icons/icon_weight_census_test.dart.
+    //
     // The mark's trailing space was a one-sided padding, which is a gap
     // wearing a padding idiom. The enclosing row cannot own it, because it
     // does not know whether this builder returned a mark or nothing, so the
@@ -432,7 +450,11 @@ class RepositoryListItem extends ConsumerWidget {
       children: <Widget>[
         GestureDetector(
           onTap: () => _showBatchResultDialog(context, ref, batchResult),
-          child: Icon(icon, size: 14, color: color),
+          child: BaseIcon(
+            isSuccess ? IconRole.checkCircle : IconRole.warningCircle,
+            scale: ControlScale.compact,
+            tone: isSuccess ? Tone.accent : Tone.danger,
+          ),
         ),
         const BaseGap(Proximity.hairline),
       ],

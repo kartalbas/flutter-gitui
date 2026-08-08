@@ -16,6 +16,7 @@ import '../../core/services/changelog_service.dart';
 import '../../core/services/version_service.dart';
 import '../../core/services/logger_service.dart';
 import '../../shared/components/base_layout.dart';
+import '../../shared/widgets/empty_state.dart';
 
 class ChangelogDialog extends HookConsumerWidget {
   final int initialIndex;
@@ -108,18 +109,23 @@ class ChangelogDialog extends HookConsumerWidget {
         onSubmit: () => Navigator.of(context).pop(),
         content: changelogAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => _StatusPane(
-            icon: Icons.error_outline,
-            iconColor: Theme.of(context).colorScheme.error,
+          error: (error, stack) => _LoadFailurePane(
             title: 'Failed to load changelog',
             detail: error.toString(),
           ),
           data: (changelogData) {
             if (changelogData.releases.isEmpty) {
-              return _StatusPane(
+              // The facade, not a copy of it (#430): a mark, a headline and
+              // no size written here. Its hero already drew the muted mark
+              // this pane drew, so adopting `surfaces.emptyState`'s stand-in
+              // costs nothing and takes the 64 px with it - a member that
+              // accepts no size owns the size. There is no sentence under the
+              // headline, which `ErrorState` in the same file already spells
+              // as an empty message.
+              return const EmptyStateWidget(
                 icon: Icons.history,
-                iconColor: Theme.of(context).colorScheme.onSurfaceVariant,
                 title: 'No release history available',
+                message: '',
               );
             }
 
@@ -143,6 +149,19 @@ class ChangelogDialog extends HookConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // Stays a raw `Icon`, and the colour stays with
+                            // it. The mark MEANS `Tone.accent` and 20 px is
+                            // exactly `ControlScale.normal`, but a tone only
+                            // reaches a mark through `BaseIcon`, and `BaseIcon`
+                            // takes an `IconRole` - which would swap Material's
+                            // `new_releases` badge for this skin's Phosphor
+                            // glyph. No role means "this is release N" either:
+                            // `IconRole.updateAvailable` means "a new version
+                            // is waiting to be installed", which is a different
+                            // sentence and a solid download arrow. Changing the
+                            // mark is the one thing this phase promises cannot
+                            // happen, so the meaning is reported rather than
+                            // rounded onto the nearest available word.
                             Icon(
                               Icons.new_releases,
                               color: Theme.of(context).colorScheme.primary,
@@ -160,6 +179,10 @@ class ChangelogDialog extends HookConsumerWidget {
                                   horizontal: AppTheme.paddingS,
                                   vertical: 3,
                                 ),
+                                // A surface FILL, not a foreground: the accent
+                                // is what this pill is painted IN, which is a
+                                // decision that leaves with the badge surface
+                                // in P5 rather than becoming a tone here.
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
                                   borderRadius: BorderRadius.circular(
@@ -185,6 +208,15 @@ class ChangelogDialog extends HookConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // Both marks in this row stay raw, and their
+                            // colour stays with them. They mean `Tone.muted`,
+                            // but 14 px is not a rung: `ControlScale`'s
+                            // densest is 16, and taking it would grow every
+                            // mark in this header by two pixels - the exact
+                            // shape of the rounding that cost #426. The glyphs
+                            // are Material's rather than this skin's too, so
+                            // `BaseIcon` would change the mark as well as its
+                            // measure.
                             Icon(
                               Icons.calendar_today,
                               size: 14,
@@ -232,26 +264,30 @@ class ChangelogDialog extends HookConsumerWidget {
                         child: MarkdownBody(
                           data: release.changelog,
                           selectable: true,
+                          // `MarkdownStyleSheet` takes `TextStyle`s, so a role
+                          // and a tone cannot be handed to it; the ramp steps
+                          // stay written out until a member owns rendered
+                          // markdown. What is gone is the colour: each of these
+                          // three steps used to re-state `onSurface` on top of
+                          // the step it was copying, and every step of this
+                          // scale already carries the scheme's `onSurface`
+                          // (`AppTheme._brightnessCorrectedTextTheme`). Saying
+                          // nothing is what `Tone.neutral` means and is how the
+                          // skin itself says it - `MaterialType.text` leaves
+                          // the colour OUT of a neutral style rather than
+                          // stamping it back in.
                           styleSheet: MarkdownStyleSheet(
                             h3: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   height: 2,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
                                 ),
-                            p: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              height: 1.6,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            listBullet: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  height: 1.8,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
-                                ),
+                            p: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(height: 1.6),
+                            listBullet: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(height: 1.8),
                           ),
                         ),
                       ),
@@ -481,21 +517,19 @@ class ChangelogDialog extends HookConsumerWidget {
   }
 }
 
-/// Loading-adjacent panes (error, empty history). Closing goes through the
-/// header X, Esc or Enter - a pane-level Close button would be a second
-/// affordance for the same job.
-class _StatusPane extends StatelessWidget {
-  const _StatusPane({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    this.detail,
-  });
+/// The pane shown when the changelog could not be read at all. Closing goes
+/// through the header X, Esc or Enter - a pane-level Close button would be a
+/// second affordance for the same job.
+///
+/// Its twin, the "no release history" pane, is [EmptyStateWidget]. This one
+/// stays hand-rolled for the reason `DeepSearchFailedState` records: the hero
+/// is RED, and the facade has no tone slot, so adopting it would grey out the
+/// one thing on the pane that says this failed.
+class _LoadFailurePane extends StatelessWidget {
+  const _LoadFailurePane({required this.title, required this.detail});
 
-  final IconData icon;
-  final Color iconColor;
   final String title;
-  final String? detail;
+  final String detail;
 
   @override
   Widget build(BuildContext context) {
@@ -504,13 +538,21 @@ class _StatusPane extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: iconColor),
+          // The mark keeps its measure AND its colour, and the two are one
+          // decision. No rung of `ControlScale` reaches 64, and a tone can
+          // only reach a mark through `BaseIcon` - which would also swap
+          // Material's glyph for this skin's. The meaning is `Tone.danger`;
+          // it is recorded here rather than rounded onto a word that would
+          // shrink the hero to 24 px and change what it draws.
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Theme.of(context).colorScheme.error,
+          ),
           const BaseGap(Proximity.grouped),
           BaseLabel(title, role: TextRole.pageTitle),
-          if (detail != null) ...[
-            const BaseGap(Proximity.related),
-            BaseLabel(detail!, role: TextRole.body, align: TextAlign.center),
-          ],
+          const BaseGap(Proximity.related),
+          BaseLabel(detail, role: TextRole.body, align: TextAlign.center),
         ],
       ),
     );

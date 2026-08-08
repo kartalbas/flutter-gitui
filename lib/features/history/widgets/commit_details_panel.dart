@@ -82,6 +82,16 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                         ],
                       ),
                       const BaseGap(Proximity.grouped),
+                      // The commit message is set one step ABOVE ordinary
+                      // prose on purpose - it is what this panel is for - and
+                      // no `TextRole` reaches that step: `body` lands on
+                      // `bodyMedium` and there is no rung between it and
+                      // `pageTitle`. Saying `body` here would shrink the
+                      // panel's own subject by two points to buy a colour word
+                      // whose meaning (`Tone.neutral`) this line already has,
+                      // which is the trade #426 was a fix commit for. So the
+                      // ramp step and the colour it carries stay together
+                      // until the role exists.
                       SelectableText(
                         widget.commit.message,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -159,18 +169,12 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                           IconRole.user,
                           child: Column(
                             children: [
+                              _buildInfoRow(l10n.name, widget.commit.author),
                               _buildInfoRow(
-                                context,
-                                l10n.name,
-                                widget.commit.author,
-                              ),
-                              _buildInfoRow(
-                                context,
                                 l10n.email,
                                 widget.commit.authorEmail,
                               ),
                               _buildInfoRow(
-                                context,
                                 l10n.date,
                                 widget.commit.authorDateDisplay(
                                   Localizations.localeOf(context).languageCode,
@@ -193,17 +197,14 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                             child: Column(
                               children: [
                                 _buildInfoRow(
-                                  context,
                                   l10n.name,
                                   widget.commit.committer,
                                 ),
                                 _buildInfoRow(
-                                  context,
                                   l10n.email,
                                   widget.commit.committerEmail,
                                 ),
                                 _buildInfoRow(
-                                  context,
                                   l10n.date,
                                   widget.commit.committerDateDisplay(
                                     Localizations.localeOf(
@@ -415,7 +416,7 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value) {
+  Widget _buildInfoRow(String label, String value) {
     return Padding(
       // The same trailing margin as the parent list above, and left for the
       // same reason: the row owns the space under itself, which no rung of
@@ -430,12 +431,12 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
           ),
           const BaseGap(Proximity.grouped),
           Expanded(
-            child: SelectableText(
-              value,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
+            // The value beside its label: supporting detail the user copies
+            // out, which is `detail` said selectably rather than a ramp step
+            // plus a colour. The colour it spelled out was this surface's own
+            // ordinary foreground, which is what `Tone.neutral` means and what
+            // the label inherits by saying nothing.
+            child: BaseLabel(value, role: TextRole.detail, selectable: true),
           ),
         ],
       ),

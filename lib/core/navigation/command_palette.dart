@@ -12,6 +12,7 @@ import '../../shared/components/base_list_item.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/utils/fuzzy_match.dart';
+import '../../shared/widgets/empty_state.dart';
 import 'git_commands.dart';
 import '../../shared/components/base_layout.dart';
 
@@ -214,29 +215,17 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                 // Command list
                 Expanded(
                   child: _filteredCommands.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                PhosphorIconsRegular.magnifyingGlass,
-                                size: 48,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                              const BaseGap(Proximity.grouped),
-                              BaseLabel(
-                                l10n.commandPaletteNoCommandsFound,
-                                role: TextRole.pageTitle,
-                              ),
-                              const BaseGap(Proximity.related),
-                              BaseLabel(
-                                l10n.commandPaletteTryDifferentSearchTerm,
-                                role: TextRole.detail,
-                              ),
-                            ],
-                          ),
+                      // A search that matched nothing stands in place of the
+                      // palette's whole list, which is the empty-state hero and
+                      // not a column this screen gets to arrange itself (#430).
+                      // The 48 px glyph left with it: a member that accepts no
+                      // size owns the size, so a hero glyph measured at a call
+                      // site was a leak by construction rather than a rung this
+                      // screen was entitled to pick.
+                      ? EmptyStateWidget(
+                          icon: PhosphorIconsRegular.magnifyingGlass,
+                          title: l10n.commandPaletteNoCommandsFound,
+                          message: l10n.commandPaletteTryDifferentSearchTerm,
                         )
                       : ListView.builder(
                           controller: scrollController,

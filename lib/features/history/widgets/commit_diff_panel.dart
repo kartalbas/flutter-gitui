@@ -148,9 +148,16 @@ class _CommitFileDiff extends ConsumerWidget {
 ///
 /// The mark arrives already built rather than as a [Tone] of its own, because
 /// the only application-legal way to draw one from a tone is `BaseIcon`, whose
-/// three scales top out at 24 while an empty state's mark is 32. Rather than
-/// shrink a glyph inside a phase about typography, the mark stays where the
-/// application already decided it and moves when the empty-state surface does.
+/// three scales top out at 24 while this mark is 32.
+///
+/// **Nor is this the empty-state facade's shape** (#430). `EmptyStateWidget`
+/// is the hero that stands in place of a whole REGION: it draws its mark at
+/// 64 and always renders a headline above its sentence. This note has neither
+/// - it is half that size and carries one sentence with no headline, because
+/// it sits inside a panel that is already named by its own header. Adopting
+/// the facade here would double the glyph and promote the sentence into a
+/// `pageTitle` slot it does not belong in, so the note keeps its own shape
+/// and its `Color` until the in-panel note becomes a member of its own.
 class _CenteredNote extends StatelessWidget {
   final Widget mark;
   final String message;

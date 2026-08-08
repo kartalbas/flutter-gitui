@@ -35,6 +35,12 @@ class BatchResultDialog extends StatelessWidget {
     // of three rather than the one carrying a distinction. Recorded and
     // pinned by `test/shared/icons/icon_weight_census_test.dart`.
     final icon = isSuccess ? IconRole.checkCircle : IconRole.warningCircle;
+    // Not a foreground and therefore not a tone: this `Color` is read twice
+    // below and both reads paint the message box's surface - a 10% wash for
+    // the fill and a 30% one for the border. That is a state layer and an
+    // outline, which leave when the box becomes a skin surface in P5, not a
+    // meaning a `Tone` could carry today. Converting it now would create churn
+    // that phase has to undo.
     final color = isSuccess
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.error;

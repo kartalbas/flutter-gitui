@@ -406,6 +406,16 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
               color: context.gitColors.deleted.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppTheme.radiusM),
             ),
+            // Still a hand-set style, and the blocker is `FontWeight.bold`:
+            // the hash this bisect found is the result the whole dialog exists
+            // to report, and `BaseLabel(TextRole.code)` carries no weight, so
+            // converting would silently drop the stroke that makes it the
+            // answer rather than another line of output. Dropping a weight
+            // inside a rename is the mistake the staged-state checkboxes
+            // already made once. The scheme's `onSurface` beside it is
+            // stranded with the style rather than independently convertible: a
+            // `Tone` reaches text only through `BaseLabel`, which is the widget
+            // the weight rules out.
             child: BaseInset(
               child: SelectableText(
                 state.foundCommit ?? 'Unknown',
@@ -423,6 +433,13 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
   }
 
   Widget _buildError(BuildContext context, Object error) {
+    // Shaped exactly like the empty-state facade takes - hero, headline,
+    // sentence - and still not converted, because the blocker is the mark's
+    // COLOUR rather than its size (#430). `EmptyStateWidget` paints its hero
+    // in the supporting foreground unconditionally and carries no tone slot,
+    // so adopting it here would turn a red failure mark grey, which is a
+    // change of appearance rather than a rename. The `64` is stranded with the
+    // colour: the two are one decision and cannot be half-converted.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

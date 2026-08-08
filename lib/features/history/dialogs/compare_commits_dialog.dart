@@ -83,10 +83,15 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // An empty state's hero mark keeps its measure and its
-                  // colour: no rung of `ControlScale` reaches it, and a tone
-                  // can only reach a mark through `BaseIcon`. See
-                  // history_empty_states.dart.
+                  // Not the empty-state facade's shape (#430), and so not
+                  // `EmptyStateWidget`: this is a 32 dp note with one sentence
+                  // and no headline, inside a dialog that already names
+                  // itself, while the facade draws a 64 dp hero and always
+                  // renders a `pageTitle` above its message. Adopting it here
+                  // would double the mark and promote the sentence out of
+                  // `body`. Its colour is stranded with its size, because a
+                  // tone can only reach a mark through `BaseIcon` and no rung
+                  // of `ControlScale` reaches 32.
                   Icon(
                     PhosphorIconsRegular.gitCommit,
                     size: AppTheme.iconXL,

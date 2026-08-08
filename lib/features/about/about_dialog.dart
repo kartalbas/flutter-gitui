@@ -49,6 +49,16 @@ class AppAboutDialog extends HookConsumerWidget {
                       color: Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(AppTheme.radiusXL),
                     ),
+                    // The application's own mark, and it stays a raw `Icon`
+                    // with its colour on it. The meaning is `Tone.accent`, but
+                    // a tone only reaches a mark through `BaseIcon`, and
+                    // `BaseIcon` draws at one of three `ControlScale` rungs
+                    // whose largest is 24 - naming the nearest one would halve
+                    // this 48 px hero, which is rounding a meaning onto the
+                    // nearest available word. `BaseIcon` would also swap
+                    // Material's glyph for this skin's Phosphor one. The size
+                    // and the colour are one decision and leave together, with
+                    // the branded hero, when a member owns it.
                     child: Icon(
                       Icons.commit,
                       size: 48,

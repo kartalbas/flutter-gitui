@@ -79,6 +79,10 @@ class RepositorySwitcher extends ConsumerWidget {
             icon: PhosphorIconsBold.gitCommit,
             primaryLabel: repo.displayName,
             secondaryLabel: repo.path,
+            // As in `branch_switcher`: `MenuItemContentTwoLine` takes a glyph
+            // and a `Color`, with no tone to say "accent" to, so the Material
+            // read is the only thing this call site can hand it. It leaves
+            // when the component carries a tone.
             iconColor: Theme.of(context).colorScheme.primary,
             isSelected: isSelected,
             showCheck: true,

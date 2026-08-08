@@ -136,6 +136,11 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           // The sentence is produced here, in the active locale, from the
           // reason the check returned (#393).
           content: Text(failureReason.message(l10n)),
+          // A transient notice's FILL, not a foreground: this is what the bar
+          // is painted in, so it is not a tone. `SnackBar` is the member
+          // `overlays.notice` replaces - it is also where the eight-second
+          // duration below becomes `NoticeLifetime` - and the fill leaves with
+          // it rather than being converted here.
           backgroundColor: Theme.of(context).colorScheme.error,
           // The message says what to do next and carries a URL, which four
           // seconds is not enough to read.
@@ -180,6 +185,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           // user has to reach first, so the placeholder is a formality; an
           // empty version still reads better here than the word "Loading".
           content: Text(l10n.upToDateMessage(_currentVersion ?? '')),
+          // As above: the bar's FILL, which leaves with `overlays.notice`.
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
@@ -274,11 +280,18 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
                 ),
               ],
             ),
+            // No `style:` here, and the absence is the statement. Each entry is
+            // a `BaseLabel` at `TextRole.body` that pins its own ramp step and
+            // takes only its COLOUR from the enclosing `DefaultTextStyle`,
+            // which is precisely `Tone.neutral` - "whatever this surface's
+            // ordinary foreground is" - and is what every one of them already
+            // says by default. Spelling `onSurface` out again here said the
+            // same thing in Material's words. Nothing moves: the fallback ramp
+            // step carries the scheme's `onSurface` too
+            // (`AppTheme._brightnessCorrectedTextTheme`), and the labels own
+            // the size.
             trailing: DropdownButton<UpdateCheckFrequency>(
               value: updates.checkFrequency,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
               items: UpdateCheckFrequency.values.map((frequency) {
                 return DropdownMenuItem(
                   value: frequency,

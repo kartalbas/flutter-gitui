@@ -127,6 +127,46 @@ void main() {
       expect(result.stale, isEmpty);
     });
 
+    test('the default register parameter is the real register', () {
+      // Every direction test above passes `register:` explicitly, and the
+      // worktree tests read the tokenReadRegister constant directly, so none
+      // of them would notice the default parameter being gutted (say, to
+      // `const []`) — only the custom_lint run would. This test closes that
+      // redundancy gap by reconciling a real registered file WITHOUT passing
+      // `register:`, in both directions.
+      final file = tokenReadRegister.first.file;
+      final entries = [
+        for (final entry in tokenReadRegister)
+          if (entry.file == file) entry,
+      ];
+
+      final consumed = reconcileTokenReads(
+        file: file,
+        readLineTexts: [
+          for (final entry in entries)
+            for (var i = 0; i < entry.reads; i++) entry.site,
+        ],
+      );
+      expect(
+        consumed.unregistered,
+        isEmpty,
+        reason:
+            'reconcileTokenReads must default to the real tokenReadRegister. '
+            'If this fails, the default has been swapped or emptied and every '
+            'explicit-register test above stays green while the armed rule '
+            'judges against a different register than this suite pins.',
+      );
+      expect(consumed.stale, isEmpty);
+
+      final unconsumed = reconcileTokenReads(file: file, readLineTexts: []);
+      expect(
+        unconsumed.stale,
+        hasLength(entries.length),
+        reason:
+            'The stale direction must flow through the default register too.',
+      );
+    });
+
     test('an entry never leaks across files', () {
       final result = reconcileTokenReads(
         file: 'lib/other.dart',

@@ -4,17 +4,33 @@ import 'package:custom_lint_builder/custom_lint_builder.dart';
 
 /// Lint rule to avoid using null color values in copyWith calls.
 ///
-/// Using `color: null` in `.copyWith()` causes text to inherit unpredictable
-/// default colors that may not be readable in all theme modes.
+/// `color: null` in `TextStyle.copyWith()` is a no-op wearing a decision's
+/// syntax: `copyWith` keeps the existing colour when handed null, so the
+/// argument changes nothing while reading as if it reset something — and the
+/// ternary form (`color: cond ? x : null`) silently keeps the old colour on
+/// one branch, which is rarely what the author meant.
 ///
-/// Instead, always use explicit theme colors or base label components.
+/// The guidance changed with #432. This rule used to answer "so name a
+/// colour: `colorScheme.onSurface`" — which instructs the author to write
+/// the exact read the tone contract deletes, and which
+/// `avoid_text_with_style` now reports as a restated ambient colour. The
+/// colour of a styled word is the ramp's
+/// (`AppTheme._brightnessCorrectedTextTheme` applies the scheme's
+/// `onSurface` to every step), so the fix is to delete the dead argument; a
+/// colour that should *differ* from ambient is a `Tone`, stated through
+/// `BaseLabel(role:, tone:)`.
 class AvoidNullColorInCopyWith extends DartLintRule {
   const AvoidNullColorInCopyWith() : super(code: _code);
 
   static const _code = LintCode(
     name: 'avoid_null_color_in_copy_with',
     problemMessage:
-        'Avoid using null for color in copyWith. Use explicit theme colors (colorScheme.onSurface) or base label components instead.',
+        'color: null in TextStyle.copyWith is a no-op: copyWith keeps the '
+        'existing colour when given null. Delete the argument — the '
+        'text-theme ramp already carries the ambient foreground '
+        '(AppTheme._brightnessCorrectedTextTheme). A colour that should '
+        'differ from ambient is a Tone, stated through '
+        'BaseLabel(role:, tone:).',
   );
 
   @override

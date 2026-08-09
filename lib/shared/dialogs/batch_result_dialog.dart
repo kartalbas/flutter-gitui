@@ -48,9 +48,19 @@ class BatchResultDialog extends StatelessWidget {
     // twice - a 10% wash for the fill and a 30% one for the border; in the
     // failure branch it feeds only the 30% border wash, and the fill is a
     // separate `errorContainer` wash (bucket B, like the rest of the box).
-    // That is a state layer and an outline, which leave when the box becomes
-    // a skin surface in P5, not a meaning a `Tone` could carry today.
-    // Converting it now would create churn that phase has to undo.
+    //
+    // **The two branches of one box disagree, and the box cannot yet be the
+    // thing that settles them.** The success fill washes a FOREGROUND role
+    // (`primary`) at 10 %; the failure fill washes a CONTAINER role
+    // (`errorContainer`) at 30 %; and the failure border then washes the
+    // foreground role again. One box, two role families, two alphas. Picking
+    // between them here would be this dialog choosing a length and a colour,
+    // which is the decision the seam exists to take away - and the member
+    // that should take it does not reach far enough: the box holds machine
+    // output, so its ink is `surfaces.codeBlock`, and that member draws the
+    // ink with no ground at all (see the same finding written out at
+    // `command_log_panel.dart`). The disagreement is reported rather than
+    // rounded, and it goes when the ground has a member.
     final color = isSuccess
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.error;

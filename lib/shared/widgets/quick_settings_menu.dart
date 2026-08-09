@@ -258,6 +258,19 @@ class QuickSettingsMenu extends ConsumerWidget {
       },
       child: Row(
         children: [
+          // The swatch, and its corner stays here by construction rather than
+          // by a wait. Every other decorated box in this pass leaves because
+          // some member already draws it; this one shows a RAW COLOUR to the
+          // user as the thing being chosen, and a member that painted it
+          // would have to be handed the colour - which is the one move the
+          // seam exists to stop.
+          //
+          // `controls.seriesPicker` is the near miss and it is the wrong
+          // question: it asks "which of the SKIN's own generated colours does
+          // this object get", indexed so the application can never enumerate
+          // the palette. This menu is one turn further out - it chooses which
+          // palette the skin generates from at all - so an index into a
+          // palette that does not exist yet cannot say it.
           Container(
             width: 20,
             height: 20,

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        AvatarSpec,
+        ControlScale,
+        IconRole,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
-import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_label.dart';
@@ -109,26 +115,44 @@ class FileListItem extends StatelessWidget {
       _ => IconRole.file,
     };
 
-    return Container(
-      // The wash behind the mark and its corner stay spelled out: they are one
-      // micro-surface that becomes `surfaces.badge`, and a half-migrated
-      // surface whose mark is a meaning while its fill is still a `Color`
-      // would be two names for one thing. The inset stays for its own reason -
-      // 6 is a between-the-rungs distance, closer in than a chip's breathing
-      // room and further out than a dense row's, which `Inset` has no word
-      // for.
-      padding: const EdgeInsets.all(6),
-      decoration: BoxDecoration(
-        color: status.colorOf(context).withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+    // A fill, a corner, an inset and a glyph size around one mark is the
+    // application drawing an avatar by hand — the same construction the
+    // workspace card and the workspace row both gave up last pass, and the
+    // member's own words for it: "which person or thing is this, as a single
+    // compact mark". At the head of this row the mark stands for WHAT KIND OF
+    // THING the row is about — a modified file, an added one — which is the
+    // question the leading slot asks.
+    //
+    // The mark and the ground it sits on disagreed here, and that is what the
+    // corner was hiding. The glyph read `toneOf` while the wash under it read
+    // `colorOf`, and the two differ for exactly one status: an unmerged file
+    // wore the conflict colour on the deletion colour, because `colorOf` had
+    // to borrow the strongest signal the old palette carried. The member
+    // resolves the ground and the mark from ONE tone, so a conflicted file is
+    // conflict-coloured through and through and the pair cannot drift again.
+    return SkinScope.render(
+      context,
+      (Skin skin, BuildContext inner) => skin.surfaces.avatar(
+        inner,
+        AvatarSpec(
+          glyph: role,
+          tone: status.toneOf,
+          // A row-level mark is `compact`, and the plate moves to say it:
+          // the hand-painted ~28 dp rounded square (a 6 dp inset around a
+          // 16 dp glyph, an 8 dp corner, a 20 % wash) becomes the member's
+          // 24 dp circle drawing its glyph at 12 — the same measure every
+          // workspace row's avatar already wears, which is why the member's
+          // answer is right and the copy was the drift. Nothing on a shipped
+          // screen moves TODAY: this widget has no call site left in lib/
+          // (the changes screen renders its tree view instead) and survives
+          // for the material conformance scene `screen_changes_file_rows`,
+          // whose Linux-rendered golden this conversion moves. Its deletion
+          // — widget, scene section and glyph-census entry together —
+          // belongs to the changes-screen slice, not to a token sweep.
+          scale: ControlScale.compact,
+          semanticsLabel: status.displayName,
+        ),
       ),
-      // A row-level mark, which is `compact`, carrying the working-tree
-      // meaning rather than the git palette's colour. `toneOf` differs from
-      // `colorOf` for exactly one status: an
-      // unmerged file reaches the conflict tone instead of borrowing the
-      // deletion colour, which is the substitution `file_status.dart` already
-      // records as the thing the vocabulary removes.
-      child: BaseIcon(role, scale: ControlScale.compact, tone: status.toneOf),
     );
   }
 

@@ -1,8 +1,18 @@
-// BaseDropdownButton and BaseSwitch honor every parameter they accept:
-// a tooltip passed to the dropdown is actually shown, and the switch applies
-// the caller's colors per state — the active colors only while selected, the
-// inactive colors only while unselected, and neither while disabled, so the
-// theme keeps its disabled treatment.
+// BaseSwitch honors every parameter it accepts: the caller's colors are
+// applied per state — the active colors only while selected, the inactive
+// colors only while unselected, and neither while disabled, so the theme
+// keeps its disabled treatment.
+//
+// A `BaseDropdownButton` group stood beside this one and asked whether that
+// widget honored the tooltip it was passed. Its subject is gone — no call
+// site anywhere in `lib/`, deleted rather than converted (see the note where
+// it stood in base_animated_widgets.dart) — but the premise did not leave
+// with it: "a façade in this file must never cost its trigger the accessible
+// name" is exactly as true of `BasePopupMenuButton`, the file's surviving
+// façade with the same `tooltip` parameter and two live callers. The group
+// below is that premise re-aimed at the surviving subject, per the rule that
+// a test whose subject dies is rewritten onto what still matters, never
+// deleted.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,22 +21,19 @@ import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
 import '../../skin/pump_under_skin.dart';
 
 void main() {
-  group('BaseDropdownButton', () {
-    Future<void> pumpDropdown(WidgetTester tester, {String? tooltip}) {
-      return tester.pumpWidget(
+  group('BasePopupMenuButton', () {
+    Future<void> pumpButton(WidgetTester tester, {String? tooltip}) async {
+      await tester.pumpWidget(
         MaterialApp(
           builder: (BuildContext context, Widget? child) =>
               installSkinUnderTest(child ?? const SizedBox.shrink()),
-
           home: Scaffold(
-            body: BaseDropdownButton<int>(
-              value: 1,
-              items: const [
-                DropdownMenuItem(value: 1, child: Text('One')),
-                DropdownMenuItem(value: 2, child: Text('Two')),
-              ],
-              onChanged: (_) {},
+            body: BasePopupMenuButton<int>(
               tooltip: tooltip,
+              itemBuilder: (BuildContext context) =>
+                  const <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(value: 1, child: Text('One')),
+                  ],
             ),
           ),
         ),
@@ -34,15 +41,23 @@ void main() {
     }
 
     testWidgets('shows the tooltip that is passed', (tester) async {
-      await pumpDropdown(tester, tooltip: 'Pick a number');
+      await pumpButton(tester, tooltip: 'Open quick settings');
 
-      expect(find.byTooltip('Pick a number'), findsOneWidget);
+      expect(find.byTooltip('Open quick settings'), findsOneWidget);
     });
 
-    testWidgets('adds no tooltip wrapper when none is passed', (tester) async {
-      await pumpDropdown(tester);
+    testWidgets('keeps an accessible name when no tooltip is passed: the '
+        'trigger falls back to Material\'s own menu name', (tester) async {
+      await pumpButton(tester);
 
-      expect(find.byType(Tooltip), findsNothing);
+      // The façade forwards null rather than inventing a name of its own...
+      final button = tester.widget<PopupMenuButton<int>>(
+        find.byType(PopupMenuButton<int>),
+      );
+      expect(button.tooltip, isNull);
+      // ...and the icon-only trigger still carries Material's stock name, so
+      // no caller can produce a nameless control through this façade.
+      expect(find.byTooltip('Show menu'), findsOneWidget);
     });
   });
 

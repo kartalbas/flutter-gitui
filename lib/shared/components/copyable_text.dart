@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 import '../../shared/theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
+import 'base_badge.dart';
 import 'base_button.dart';
 import 'base_icon.dart';
 import 'base_label.dart';
@@ -90,8 +90,7 @@ class _CopyableTextState extends State<CopyableText> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return MouseRegion(
       onEnter: widget.showCopyButton
@@ -139,37 +138,30 @@ class _CopyableTextState extends State<CopyableText> {
               if (widget.showCopyButton) ...[
                 const BaseGap(Proximity.related),
                 if (_showCopiedFeedback)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                    ),
-                    // The wash and the corner stay on the container; the
-                    // breathing room it owes the confirmation crosses the
-                    // seam. `hairline` down the page is this pill's 2 exactly,
-                    // so nothing moves.
-                    child: BaseInset(
-                      x: Inset.tight,
-                      y: Inset.hairline,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            PhosphorIconsRegular.check,
-                            size: 12,
-                            color: colorScheme.primary,
-                          ),
-                          const BaseGap(Proximity.hairline),
-                          Text(
-                            widget.copiedMessage,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  // **A mark riding on something else** - which is what this
+                  // confirmation always was, hand-drawn: a wash of one colour
+                  // at 15 %, that same colour as the foreground of a checked
+                  // mark and a 600-weight label, and a corner. Every one of
+                  // those numbers is `surfaces.badge`'s, reached here through
+                  // the application's own badge façade, so the pill is drawn
+                  // by the same member as every other pill in the application
+                  // instead of beside it.
+                  BaseBadge(
+                    label: widget.copiedMessage,
+                    // The confirmation is the application's accent speaking,
+                    // not a git state: `primary` is the variant that resolves
+                    // to exactly the `colorScheme.primary` this site named.
+                    variant: BadgeVariant.primary,
+                    // `small` is the rung this pill's own footprint already
+                    // stated - 8 across and 2 down are the compact pill's
+                    // numbers exactly. The hand-drawn copy took its padding
+                    // from that rung and its type and mark from the next one
+                    // up, which is the drift a member cannot repeat: the
+                    // badge moves padding, type size, mark size and corner
+                    // together, because a pill this small reads as a
+                    // rendering fault when only one of them changes.
+                    size: BadgeSize.small,
+                    icon: IconRole.check,
                   )
                 else if (_isHovered)
                   SizedBox(

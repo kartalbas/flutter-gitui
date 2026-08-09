@@ -42,6 +42,27 @@ class AppAboutDialog extends HookConsumerWidget {
             Center(
               child: Column(
                 children: [
+                  // The plate is NOT converted, and the corner stays with it —
+                  // reported rather than rounded. `surfaces.avatar` is the
+                  // member this shape would otherwise be ("which person or
+                  // thing is this, as a single compact mark", a fill, a shape
+                  // and one glyph), and it cannot take this one: its only size
+                  // vocabulary is `ControlScale`, whose three rungs are
+                  // CONTROL sizes — Material draws them at 24, 40 and 40 dp —
+                  // and this is an 80 dp hero holding a 48 dp mark. Naming
+                  // `prominent` would halve the whole plate, which is the
+                  // rounding rule this repository refuses. The skin already
+                  // meets the same problem inside `surfaces.emptyState` and
+                  // answers it privately, by deriving that member's 64 dp hero
+                  // from twice its largest icon rung rather than exposing a
+                  // fourth rung nobody could promise.
+                  //
+                  // Worth measuring when it does move: the mark is `primary`
+                  // painted on `primaryContainer`, which is not the pairing
+                  // the scheme names for that fill (`onPrimaryContainer` is).
+                  // The member resolves both halves from one tone, so the
+                  // pairing is settled by the conversion rather than by a
+                  // colour changed here by hand.
                   Container(
                     width: 80,
                     height: 80,

@@ -55,7 +55,17 @@ class BaseSwitcher extends StatelessWidget {
           : null,
       child: Tooltip(
         message: tooltip,
-        child: Container(
+        // `Ink`, not `Container`, and that is a repair rather than a
+        // refactor. An `InkWell`'s hover, focus and press layers are painted
+        // by the nearest `Material` ANCESTOR, underneath everything the well
+        // wraps - so an opaque fill drawn by a `Container` inside the well
+        // covers them completely. Every switcher in the toolbar therefore had
+        // no visible state layer at all: the corner above rounded a ripple
+        // nobody could see. `Ink` paints the same fill, border and corner on
+        // that same Material canvas, which puts the well's layers back on
+        // top; at rest it is pixel-identical, which is why nothing but the
+        // hover, focus and press states changes.
+        child: Ink(
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHigh,
             border: Border.all(

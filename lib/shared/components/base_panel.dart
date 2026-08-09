@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset, Proximity;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, Inset, Proximity, Tone;
 import '../../shared/theme/app_theme.dart';
+import 'base_icon.dart';
 import 'base_layout.dart';
 
 /// Base component for all panel patterns in the app.
@@ -204,17 +205,35 @@ class _BasePanelState extends State<BasePanel> {
                           // `primary` while the tile is expanded and leaves it
                           // `onSurfaceVariant` while collapsed, so the caret
                           // carries the state on its own
-                          // (expansion_tile.dart:918 and :924).
+                          // (expansion_tile.dart:918 and :924) - and both of
+                          // those are meanings the vocabulary has words for:
+                          // the open state is the panel's own accent, the shut
+                          // one is secondary to the title it sits beside.
+                          //
+                          // It converts now rather than waiting for
+                          // `surfaces.panel`, and that is a decision rather
+                          // than impatience: `PanelSpec` is {title, content,
+                          // actions, footer, elevation, inset} and has no word
+                          // for a panel that OPENS AND SHUTS at all, so there
+                          // is no slot this caret is queuing for. Reported as a
+                          // contract finding; until the spec can say it, the
+                          // mark stands on its own and `BaseIcon` is exactly
+                          // the facade for a mark that does.
+                          //
+                          // Nothing moves: `ControlScale.normal` is the same
+                          // 20 dp the token here stood for, `Tone.accent`
+                          // resolves to `colorScheme.primary`, and
+                          // `Tone.muted` resolves against the `onSurface` this
+                          // panel publishes at its own root - which is the
+                          // case `MaterialInk._muted` answers with
+                          // `onSurfaceVariant`, the colour written here.
                           if (widget.isCollapsible) ...[
                             const BaseGap(Proximity.grouped),
-                            Icon(
+                            BaseIcon(
                               _isExpanded
-                                  ? PhosphorIconsRegular.caretUp
-                                  : PhosphorIconsRegular.caretDown,
-                              size: AppTheme.iconM,
-                              color: _isExpanded
-                                  ? colorScheme.primary
-                                  : colorScheme.onSurfaceVariant,
+                                  ? IconRole.caretUp
+                                  : IconRole.caretDown,
+                              tone: _isExpanded ? Tone.accent : Tone.muted,
                             ),
                           ],
                         ],

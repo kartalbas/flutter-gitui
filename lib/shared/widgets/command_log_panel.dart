@@ -500,10 +500,25 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                   // (labelMedium), and the vocabulary has one word for code,
                   // so naming the role here would grow every output line ~16%
                   // - the same class of regression the blame view's inset took
-                  // (#426), one axis over. The block is a code-block surface:
-                  // its fill, corner, inset and type step all belong to the
-                  // member it is waiting for, and the style stays written out
-                  // until that member exists.
+                  // (#426), one axis over.
+                  //
+                  // **The wait recorded here has become a contract finding.**
+                  // `surfaces.codeBlock` ships, and it draws the OUTPUT and
+                  // nothing under it: the Material member returns a bare
+                  // selectable run of text inside a horizontal scroller, with
+                  // no fill, no border and no corner. So the GROUND machine
+                  // output is read on has no member, and the application
+                  // draws it four times in four ways - this block
+                  // (`surfaceContainerHighest`, 4 dp corner, no border),
+                  // `git_output_dialog`'s command line and its output section
+                  // (the same fill at an 8 dp corner, one with an `outline`
+                  // border and one whose border changes with the outcome),
+                  // and `batch_result_dialog`'s message box (an outcome wash
+                  // at a 4 dp corner with a washed border). Same job, four
+                  // grounds. The corner leaves when the member owns the
+                  // ground as well as the ink; the type step needs the second
+                  // half of the same finding, because `CodeBlockSpec` carries
+                  // a tone and no step and there is one word for code.
                   //
                   // Its two colours stay with it. They mean `Tone.danger` and
                   // `Tone.neutral` - "this run failed" against ordinary output

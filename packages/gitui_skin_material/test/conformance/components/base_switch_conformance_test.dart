@@ -42,16 +42,17 @@
 ///
 /// ## BaseDropdownButton
 ///
-/// The other control in this file, `BaseDropdownButton`, is deliberately not
-/// measured. It wraps `DropdownButton`, which is Material *2*'s dropdown: in
-/// Flutter 3.44.4 `dropdown.dart` carries no `// BEGIN GENERATED TOKEN
-/// PROPERTIES` block at all, so the SDK holds no M3 token set to measure it
-/// against. Material 3's counterpart is `DropdownMenu`
-/// (`dropdown_menu.dart`), and the app's own M3 selection field is
-/// `BaseDropdown`, already measured against `DropdownButtonFormField` in
-/// base_dropdown_conformance_test.dart. Inventing tokens for a component with
-/// no specification would put values in the manifest that no oracle can
-/// falsify, so this suite states the reason instead.
+/// `BaseDropdownButton` shared this file with `BaseSwitch` and was
+/// deliberately never measured: it wrapped `DropdownButton`, which is
+/// Material *2*'s dropdown, and in Flutter 3.44.4 `dropdown.dart` carries no
+/// `// BEGIN GENERATED TOKEN PROPERTIES` block at all, so the SDK held no M3
+/// token set to measure it against. It has since been deleted outright,
+/// having no call site anywhere in `lib/`. The reason it went unmeasured is
+/// kept here rather than dropped, because it is the same reason it could go:
+/// the application's M3 selection field is `BaseDropdown`, measured against
+/// `DropdownButtonFormField` in base_dropdown_conformance_test.dart, and a
+/// second unspecified dropdown beside it was a component this suite could
+/// never falsify.
 library;
 
 import 'package:flutter/gestures.dart';

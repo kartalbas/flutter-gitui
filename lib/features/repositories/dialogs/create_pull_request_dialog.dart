@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
         ChoiceGroupSpec,
         ChoiceOption,
         IconRole,
-        Inset,
         Proximity,
         Skin,
         SkinScope,
         SuggestItem,
-        TextRole;
+        TextRole,
+        Tone;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../shared/theme/app_theme.dart';
@@ -360,51 +360,45 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
 
             const BaseGap(Proximity.related),
 
-            // Info message. NOT converted, and reported as a contract
-            // finding rather than rounded onto `surfaces.banner`. The meaning
-            // is banner's, but `BannerSpec` has no quiet rung and no body-only
-            // form: `title` is required and `body` is the optional second
-            // line, so this one sentence of supporting prose - deliberately
-            // `TextRole.detail`, deliberately washed to 30 % - would come back
-            // as a `titleMedium` headline on a full-strength
-            // `primaryContainer` strip, louder than the form it is a footnote
-            // to. The two banners this pass DID wire (the branch dialog's
-            // rejection, the batch dialog's outcome) each have a statement to
-            // put in `title`; this one has only the explanation.
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              // The callout paints its own fill and states the paired
-              // foreground once, here.
-              child: BaseInset(
-                all: Inset.normal,
-                child: DefaultTextStyle.merge(
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        PhosphorIconsRegular.info,
-                        size: AppTheme.iconS,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                      const BaseGap(Proximity.grouped),
-                      Expanded(
-                        child: BaseLabel(
-                          l10n.prInfoMessage,
-                          role: TextRole.detail,
-                        ),
-                      ),
-                    ],
-                  ),
+            // "This is worth knowing about the whole dialog", which is
+            // `surfaces.banner` - and this is the FIFTH copy of one
+            // construction, not a one-off: a tinted box, an `info` mark and a
+            // sentence of supporting prose. The other four (the two in
+            // `merge_branch_dialog.dart`, and the ones in `bisect_dialog.dart`
+            // and `rebase_dialog.dart`) became this member already. The note
+            // that stood here kept this one back because its sentence is set a
+            // type step quieter than theirs - but the two type steps ARE the
+            // drift the earlier pass named when it found the family, so
+            // keeping the quieter one out preserved exactly the disagreement
+            // the member exists to end.
+            //
+            // The whole construction goes with it: the wash, the corner, the
+            // inset, the mark, the gap and the `DefaultTextStyle.merge` that
+            // was pairing a foreground to a container this dialog painted
+            // itself - each of them is something `BannerSpec` says once.
+            //
+            // What moves: the fill goes from `secondaryContainer` at 30 % to
+            // the member's full-strength `primaryContainer` (Material answers
+            // `info` and `accent` with the same role, a collapse the contract
+            // records at material_ink.dart:173), the mark goes from
+            // `secondary` at the 16 dp rung to `onPrimaryContainer` at the
+            // banner's own size, and the sentence rises from `TextRole.detail`
+            // to the member's `titleMedium`. Louder than it was, and the
+            // member's answer is the right one: this is the dialog telling the
+            // user that creating a PR here opens their forge in a browser -
+            // the same class of statement as "this will merge the selected
+            // branch" two dialogs over, which has been drawn at exactly this
+            // volume since it converted.
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: Tone.info,
+                  icon: IconRole.info,
+                  title: l10n.prInfoMessage,
                 ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
       ),

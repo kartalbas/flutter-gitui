@@ -3,10 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, NoticeSpec, Overlays, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        IconRole,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
-import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
@@ -16,6 +24,17 @@ import '../../core/config/config_providers.dart';
 import '../components/base_dialog.dart';
 import 'select_hosted_repository_dialog.dart';
 import '../components/base_layout.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// The same move the bisect and merge dialogs already made: a tinted fill, a
+/// corner, a 16 dp inset, a mark and a line of words are `surfaces.banner` —
+/// *something about this whole surface needs saying* — so the hand-painted
+/// container leaves whole and its corner leaves with it.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// Dialog for cloning a Git repository
 class CloneRepositoryDialog extends ConsumerStatefulWidget {
@@ -167,37 +186,35 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
               ),
             ],
 
-            // Error message
+            // Why the clone could not start: `surfaces.banner`, the member
+            // for *something about this whole surface needs saying*.
+            //
+            // What the hand-painted copy got wrong is the pairing, and it got
+            // it wrong twice at one site. The box was filled with the
+            // scheme's `errorContainer` while BOTH the mark and the words on
+            // it were painted `Tone.danger`, which the Material skin resolves
+            // to `colorScheme.error` — the error FOREGROUND on the error
+            // CONTAINER. That is not an M3 pair and nothing had ever measured
+            // it; M3 pairs `errorContainer` with `onErrorContainer`. Stating
+            // the tone once on the banner hands the member both halves, and
+            // it is the member's business to keep a container and the ink on
+            // it together.
+            //
+            // The repair does not stop at the pairing - the banner is also
+            // louder than the copy was: the 8 dp corner goes to the member's
+            // square 0, the words rise from `body` to the banner's
+            // `titleMedium`, and the 20 dp mark grows to the ambient 24. The
+            // `errorContainer` fill stays, now under `onErrorContainer` ink -
+            // an error that stops the clone is exactly the statement the
+            // banner's full strength exists for.
             if (_errorMessage != null) ...[
               const BaseGap(Proximity.grouped),
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  child: Row(
-                    children: [
-                      // The mark says what the message beside it already says,
-                      // so it says it the same way: the danger this label had
-                      // already named, stated once as a meaning instead of a
-                      // second time as a scheme role. The mark stated no size
-                      // at all and took whatever the dialog's ambient theme
-                      // handed it; the other banner mark in this same dialog
-                      // asks for the ordinary size, so the difference was
-                      // drift rather than a distinction and both now say the
-                      // same rung.
-                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                      const BaseGap(Proximity.related),
-                      Expanded(
-                        child: BaseLabel(
-                          _errorMessage!,
-                          role: TextRole.body,
-                          tone: Tone.danger,
-                        ),
-                      ),
-                    ],
-                  ),
+              _banner(
+                context,
+                BannerSpec(
+                  tone: Tone.danger,
+                  icon: IconRole.warningCircle,
+                  title: _errorMessage!,
                 ),
               ),
             ],

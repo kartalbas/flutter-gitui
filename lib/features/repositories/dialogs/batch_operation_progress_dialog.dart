@@ -4,6 +4,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         BannerSpec,
         ControlScale,
         IconRole,
+        Inset,
         ProgressExtent,
         Proximity,
         Skin,
@@ -13,6 +14,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -325,89 +327,100 @@ class _BatchOperationProgressDialogState
           BaseLabel(l10n.repositories, role: TextRole.sectionTitle),
           const BaseGap(Proximity.related),
 
-          // NOT converted, and reported as a contract finding. The box is a
-          // FRAME around a bounded scroll region - an outline and a corner and
-          // nothing else, holding a height-capped list of rows that are
-          // already the skin's through `BaseListItem`. No member draws that:
-          // `surfaces.panel` is the nearest and it is not near, because a
-          // panel is a named region with a header, a 56 dp header row and its
-          // own elevation, and this frame has no name and must not gain one.
-          // The same frame stands in `create_branch_dialog.dart`, so it is a
-          // pattern rather than a one-off.
-          Container(
+          // The frame round the bounded scroll region is a CARD, and
+          // `Inset.none` is the rung `BaseCard`'s own doc names for it: "a
+          // list that must reach the card's border". The previous note here
+          // reached for `surfaces.panel`, rejected it (rightly - a panel is a
+          // NAMED region with a header row) and concluded no member draws the
+          // frame; the member it was looking for is the card, and the same
+          // construction had already become one in
+          // `squash_commits_dialog.dart` in the very change that wrote the
+          // note. Its other twin, `create_branch_dialog.dart`'s repository
+          // list, converts with this one, so the pattern the note identified
+          // now has one treatment.
+          //
+          // What moves: the box gains the card's `surfaceContainerHigh` fill
+          // where it drew none, the 1 px stroke goes from `outline` to
+          // `outlineVariant`, and the corner rounds at the skin's 12 instead
+          // of the 8 named here. The member's answer is the right one because
+          // the row list is clipped by it: at 8 the top and bottom rows'
+          // hover and press layers overhung a corner narrower than every
+          // other surface in this dialog.
+          ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 300),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.repositories.length,
-              itemBuilder: (context, index) {
-                final repo = widget.repositories[index];
-                final progress = _progress[repo.path]!;
+            child: BaseCard(
+              isSelectable: false,
+              inset: Inset.none,
+              content: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.repositories.length,
+                itemBuilder: (context, index) {
+                  final repo = widget.repositories[index];
+                  final progress = _progress[repo.path]!;
 
-                // A repository can be finished before its outcome is known
-                // (the service only delivers results at the end), and a row
-                // the service has not reached yet is waiting, not working.
-                final String statusText;
-                if (progress.completed) {
-                  statusText = progress.success == null
-                      ? l10n.completed
-                      : progress.status;
-                } else {
-                  statusText = repo.path == _activeRepositoryPath
-                      ? progress.status
-                      : l10n.operationInProgress;
-                }
+                  // A repository can be finished before its outcome is known
+                  // (the service only delivers results at the end), and a row
+                  // the service has not reached yet is waiting, not working.
+                  final String statusText;
+                  if (progress.completed) {
+                    statusText = progress.success == null
+                        ? l10n.completed
+                        : progress.status;
+                  } else {
+                    statusText = repo.path == _activeRepositoryPath
+                        ? progress.status
+                        : l10n.operationInProgress;
+                  }
 
-                return BaseListItem(
-                  leading: _buildStatusIcon(progress),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BaseLabel(repo.displayName, role: TextRole.body),
-                      // Tone.invalid, not Tone.danger: this repository did
-                      // not complete and needs attention, but nothing was
-                      // destroyed.
-                      BaseLabel(
-                        statusText,
-                        role: TextRole.detail,
-                        tone: progress.error != null
-                            ? Tone.invalid
-                            : Tone.neutral,
-                      ),
-                    ],
-                  ),
-                  // Now the SAME expression as `_buildStatusIcon` below, which
-                  // draws this dialog's other copy of the very same outcome
-                  // mark and converted a phase earlier. One dialog was stating
-                  // one fact two ways: `Tone.success` is exactly what
-                  // `context.gitColors.added` resolved to
-                  // (material_ink.dart:169), and `Tone.invalid` is the reading
-                  // both that helper and this row's own status line already
-                  // give the failure - it needs attention, but nothing was
-                  // destroyed, so it is not `danger`. `AppTheme.iconS` is the
-                  // 16 dp `compact` rung, so neither mark changes size.
-                  //
-                  // The Bold stroke does not survive. It was the same on both
-                  // branches, so it distinguished nothing, and the twin below
-                  // has been drawing this outcome at the ordinary stroke since
-                  // it converted. Recorded in test/shared/icons/
-                  // icon_weight_census_test.dart.
-                  trailing: progress.success != null
-                      ? BaseIcon(
-                          progress.success == true
-                              ? IconRole.checkCircle
-                              : IconRole.xCircle,
-                          scale: ControlScale.compact,
-                          tone: progress.success == true
-                              ? Tone.success
-                              : Tone.invalid,
-                        )
-                      : null,
-                );
-              },
+                  return BaseListItem(
+                    leading: _buildStatusIcon(progress),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(repo.displayName, role: TextRole.body),
+                        // Tone.invalid, not Tone.danger: this repository did
+                        // not complete and needs attention, but nothing was
+                        // destroyed.
+                        BaseLabel(
+                          statusText,
+                          role: TextRole.detail,
+                          tone: progress.error != null
+                              ? Tone.invalid
+                              : Tone.neutral,
+                        ),
+                      ],
+                    ),
+                    // Now the SAME expression as `_buildStatusIcon` below,
+                    // which draws this dialog's other copy of the very same
+                    // outcome mark and converted a phase earlier. One dialog
+                    // was stating one fact two ways: `Tone.success` is exactly
+                    // what `context.gitColors.added` resolved to
+                    // (material_ink.dart:169), and `Tone.invalid` is the
+                    // reading both that helper and this row's own status line
+                    // already give the failure - it needs attention, but
+                    // nothing was destroyed, so it is not `danger`.
+                    // `AppTheme.iconS` is the 16 dp `compact` rung, so neither
+                    // mark changes size.
+                    //
+                    // The Bold stroke does not survive. It was the same on
+                    // both branches, so it distinguished nothing, and the twin
+                    // below has been drawing this outcome at the ordinary
+                    // stroke since it converted. Recorded in
+                    // test/shared/icons/icon_weight_census_test.dart.
+                    trailing: progress.success != null
+                        ? BaseIcon(
+                            progress.success == true
+                                ? IconRole.checkCircle
+                                : IconRole.xCircle,
+                            scale: ControlScale.compact,
+                            tone: progress.success == true
+                                ? Tone.success
+                                : Tone.invalid,
+                          )
+                        : null,
+                  );
+                },
+              ),
             ),
           ),
         ],

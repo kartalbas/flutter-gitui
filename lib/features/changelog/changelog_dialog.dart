@@ -10,7 +10,6 @@ import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_viewer_dialog.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/utils/keyboard_guards.dart';
 import '../../core/models/changelog_release.dart';
 import '../../core/services/changelog_service.dart';
@@ -360,32 +359,37 @@ class ChangelogDialog extends HookConsumerWidget {
                             variant: ButtonVariant.primary,
                           ),
                           const BaseGap(Proximity.grouped),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingM,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusXL,
-                              ),
-                            ),
-                            // The pill paints its own fill and states the
-                            // foreground that pairs with it.
-                            child: DefaultTextStyle.merge(
-                              style: TextStyle(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                              child: BaseLabel(
-                                '${index + 1} of ${releases.length}',
-                                role: TextRole.body,
-                              ),
-                            ),
+                          // **How many, riding on something else** — which is
+                          // exactly `surfaces.badge`, and the same façade the
+                          // "LATEST" mark in this dialog's own header has been
+                          // going through all along. Two pills in one dialog,
+                          // one drawn by the member and one hand-painted at a
+                          // different measure, is the disagreement the last
+                          // pass found three times over; this is the fourth.
+                          //
+                          // The fill and the foreground leave together, and
+                          // that pairing is the reason: a solid
+                          // `primaryContainer` forced the site to name
+                          // `onPrimaryContainer` beside it, so the pill was
+                          // stating both halves of a Material pairing the
+                          // application has no business knowing. `accent` is
+                          // the whole of what it means.
+                          //
+                          // The pill moves, and by more than the fill: solid
+                          // `primaryContainer` becomes the badge's 15 % wash
+                          // of `primary`, the `body` words in
+                          // `onPrimaryContainer` become the badge's 12 sp
+                          // `w600` in `primary`, the vertical inset falls
+                          // 6 -> 4 so the pill sits ~4 dp shorter, and the
+                          // 16 dp corner becomes the pill's own half-height.
+                          // Every one of those numbers is the measure the
+                          // "LATEST" badge above has worn all along - two
+                          // pills of one kind in one dialog at two measures
+                          // was the drift, and the member's measure is the
+                          // one the human-verified baseline already shows.
+                          BaseBadge(
+                            label: '${index + 1} of ${releases.length}',
+                            variant: BadgeVariant.primary,
                           ),
                           const BaseGap(Proximity.grouped),
                           BaseIconButton(

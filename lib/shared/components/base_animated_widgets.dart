@@ -2,59 +2,17 @@ import 'package:flutter/material.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../core/config/app_config.dart';
 
-/// Base dropdown button that respects animation speed settings
-class BaseDropdownButton<T> extends StatelessWidget {
-  final T? value;
-  final List<DropdownMenuItem<T>> items;
-  final ValueChanged<T?>? onChanged;
-  final Widget? hint;
-  final Widget? icon;
-  final double? iconSize;
-  final bool isDense;
-  final bool isExpanded;
-  final Widget? underline;
-  final String? tooltip;
-
-  const BaseDropdownButton({
-    super.key,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-    this.hint,
-    this.icon,
-    this.iconSize,
-    this.isDense = false,
-    this.isExpanded = false,
-    this.underline,
-    this.tooltip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Note: DropdownButton doesn't support custom animation duration in current Flutter version
-    // Animation is controlled through MaterialApp theme settings
-    final dropdown = DropdownButton<T>(
-      value: value,
-      items: items,
-      onChanged: onChanged,
-      hint: hint,
-      icon: icon,
-      iconSize: iconSize ?? 24.0,
-      isDense: isDense,
-      isExpanded: isExpanded,
-      underline: underline,
-      menuMaxHeight: null,
-      dropdownColor: null, // Use theme default
-      style: null, // Use theme default
-      borderRadius: BorderRadius.circular(AppTheme.radiusM),
-    );
-
-    // DropdownButton has no tooltip slot of its own, so honor the parameter
-    // by wrapping the control, matching BasePopupMenuButton's contract.
-    if (tooltip == null) return dropdown;
-    return Tooltip(message: tooltip!, child: dropdown);
-  }
-}
+// `BaseDropdownButton` stood here and is gone, on the precedent this
+// migration already set for `searchable_dropdown.dart`: it had no call site
+// anywhere in `lib/`, and a second façade over one member would be two ways
+// to ask for one thing. Three ways, in fact - `controls.dropdown` is the
+// member, `BaseDropdown` (base_dropdown.dart) is the application's own front
+// door onto the field form of it, and this was a third door onto neither,
+// taking ready-made `DropdownMenuItem`s (Material widgets crossing an
+// application API) and rounding the menu itself. The corner it rounded died
+// with the construction rather than moving, which is the only way a corner
+// is allowed to leave: no application code is left that says how round a
+// menu is.
 
 /// Base popup menu button that respects animation speed settings.
 ///

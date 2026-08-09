@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
         ControlScale,
         IconRole,
         Inset,
@@ -9,6 +10,8 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         NoticeSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
@@ -19,7 +22,6 @@ import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/services/exit_guard.dart';
 import '../../../shared/components/base_button.dart';
@@ -301,47 +303,33 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
               controlAffinity: ListTileControlAffinity.leading,
             ),
 
-            // Commit tips
+            // How to write a good commit message: "this is worth knowing and
+            // nothing is wrong", which is `surfaces.banner` at `Tone.info` —
+            // the sixth site of the construction the last pass collapsed in
+            // the rebase, bisect and merge dialogs.
+            //
+            // The three statements it was making disagreed. The FILL was
+            // `primaryContainer` washed to 30 % and the border `primary` at
+            // 30 %, which is the accent; the MARK was `Tone.accent`; the WORDS
+            // were `Tone.muted` at the detail step. So the surface said "this
+            // is emphasised", the words said "this is secondary", and neither
+            // said what the note actually is. One tone answers the fill, the
+            // border, the mark and the words together now, and the wash goes
+            // with them: an alpha over a container was the site approximating
+            // a tonal surface it had no way to name.
+            //
+            // The lightbulb stays rather than becoming `IconRole.info`: a tip
+            // and a fact are different statements, and the mark is where the
+            // difference is visible.
             const BaseGap(Proximity.related),
-            Container(
-              // The tinted panel and its hairline are the SURFACE of this
-              // note, not a foreground: a fill and a border, both washed to
-              // 30% so they sit under the words rather than beside them. An
-              // alpha wash of `primary` is a state layer, which is not
-              // something `Tone.accent` can say - a tone names a foreground's
-              // meaning - so both stay until the note becomes a skin member
-              // and the surface answers them together.
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                border: Border.all(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              // The tip is a dense note rather than a card: `tight`.
-              child: BaseInset(
-                all: Inset.tight,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const BaseIcon(
-                      IconRole.lightbulb,
-                      scale: ControlScale.compact,
-                      tone: Tone.accent,
-                    ),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.tipCommitMessage,
-                        role: TextRole.detail,
-                        tone: Tone.muted,
-                      ),
-                    ),
-                  ],
+            SkinScope.render(
+              context,
+              (Skin skin, BuildContext inner) => skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: Tone.info,
+                  icon: IconRole.lightbulb,
+                  title: AppLocalizations.of(context)!.tipCommitMessage,
                 ),
               ),
             ),

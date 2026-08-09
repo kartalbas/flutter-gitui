@@ -11,7 +11,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         TextRole,
         Tone;
 
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -276,45 +276,52 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
 
           const BaseGap(Proximity.grouped),
 
-          // Full branch name preview. NOT converted, and reported as a
-          // contract finding: a read-only box showing what the form will
-          // produce is neither a card (nothing here is picked), nor a banner
-          // (nothing is being said ABOUT the dialog), nor a code block (the
-          // name is set in the prose ramp, not in the code one). The nearest
-          // member is `surfaces.panel`, and its Material answer is an elevated
-          // region with a 56 dp header row - which would turn a two-line
-          // preview into the loudest thing in the dialog. The fill, the edge
-          // and the corner stay until a member can say "here is what this
-          // form will produce".
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-            ),
-            child: BaseInset(
-              all: Inset.normal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  BaseLabel(
-                    l10n.fullBranchNameLabel,
-                    role: TextRole.micro,
-                    tone: Tone.muted,
-                  ),
-                  const BaseGap(Proximity.hairline),
-                  // Muted while nothing has been typed - a placeholder, whose
-                  // half-alpha was the same statement said twice - and the
-                  // accent once the preview names the branch that will exist.
-                  BaseLabel(
-                    fullBranchName.isEmpty
-                        ? l10n.enterBranchNameLabel
-                        : fullBranchName,
-                    role: TextRole.itemTitle,
-                    tone: fullBranchName.isEmpty ? Tone.muted : Tone.accent,
-                  ),
-                ],
-              ),
+          // The branch this form will produce, shown as its own surface:
+          // **here is one self-contained object**, which is `surfaces.card`
+          // through the façade. The previous note here refused the member on
+          // the grounds that "nothing is picked", but `CardSpec.onTap` says in
+          // as many words that a null callback makes a card "only a
+          // container", and its own siblings prove it: the identical
+          // construction - a fill, an edge, a corner, a `normal` inset, a
+          // `micro` caption and the object's name under it - is already
+          // `BaseCard(isSelectable: false)` in
+          // `create_branch_from_commit_dialog.dart` (the source commit) and in
+          // `rebase_dialog.dart` (the current branch). One kind of read-out,
+          // three screens, and this was the only one still hand-painting it.
+          //
+          // What moves: the fill goes one step quieter, from
+          // `surfaceContainerHighest` to the card's `surfaceContainerHigh`;
+          // the 1 px edge goes from `outline` to the card's `outlineVariant`;
+          // and the corner rounds at the skin's 12 rather than the 8 this
+          // dialog named. The member's answer is the right one because those
+          // three numbers are what "a resting surface holding one object"
+          // looks like in this language, decided once, where the two screens
+          // above already read it - the 8 here was drift, and it made the same
+          // read-out round differently depending on which dialog opened it.
+          // The inset is unchanged: `Inset.normal` is 16 either way.
+          BaseCard(
+            isSelectable: false,
+            inset: Inset.normal,
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BaseLabel(
+                  l10n.fullBranchNameLabel,
+                  role: TextRole.micro,
+                  tone: Tone.muted,
+                ),
+                const BaseGap(Proximity.hairline),
+                // Muted while nothing has been typed - a placeholder, whose
+                // half-alpha was the same statement said twice - and the
+                // accent once the preview names the branch that will exist.
+                BaseLabel(
+                  fullBranchName.isEmpty
+                      ? l10n.enterBranchNameLabel
+                      : fullBranchName,
+                  role: TextRole.itemTitle,
+                  tone: fullBranchName.isEmpty ? Tone.muted : Tone.accent,
+                ),
+              ],
             ),
           ),
 
@@ -327,32 +334,45 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
           ),
           const BaseGap(Proximity.related),
 
-          // The twin of `batch_operation_progress_dialog.dart`'s framed list,
-          // reported with it: an outline and a corner around a height-capped
-          // scroll region whose rows are already the skin's, and no member
-          // draws a frame that has no name.
-          Container(
+          // The bordered box round the list is a CARD, and `Inset.none` is the
+          // rung `BaseCard`'s own doc names for it: "a list that must reach
+          // the card's border". Its exact twin - a `maxHeight` cap, an
+          // `outline` stroke, an 8 dp corner and a `ListView.builder` of
+          // `BaseListItem`s - became exactly this in
+          // `squash_commits_dialog.dart`, so the frame does have a name and
+          // the previous note here (that no member draws one) was answered in
+          // the same change that wrote it.
+          //
+          // What moves: the box gains the card's `surfaceContainerHigh` fill
+          // where it had none, the stroke goes from `outline` to
+          // `outlineVariant`, and the corner rounds at 12 instead of 8. The
+          // member's answer is the right one because the rows now clip to the
+          // corner the language rounds its surfaces at - the hand-drawn 8 was
+          // narrower than any card in this dialog and the top row overhung it.
+          // The height cap stays application structure: it is what keeps a
+          // long repository list from taking the dialog over.
+          ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 150),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.repositories.length,
-              itemBuilder: (context, index) {
-                final repo = widget.repositories[index];
-                return BaseListItem(
-                  // The accent marks the repositories the branch will be
-                  // created in, at the dense scale a preview list reads at.
-                  leading: const BaseIcon(
-                    IconRole.folderSimple,
-                    scale: ControlScale.compact,
-                    tone: Tone.accent,
-                  ),
-                  content: BaseLabel(repo.displayName, role: TextRole.body),
-                );
-              },
+            child: BaseCard(
+              isSelectable: false,
+              inset: Inset.none,
+              content: ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.repositories.length,
+                itemBuilder: (context, index) {
+                  final repo = widget.repositories[index];
+                  return BaseListItem(
+                    // The accent marks the repositories the branch will be
+                    // created in, at the dense scale a preview list reads at.
+                    leading: const BaseIcon(
+                      IconRole.folderSimple,
+                      scale: ControlScale.compact,
+                      tone: Tone.accent,
+                    ),
+                    content: BaseLabel(repo.displayName, role: TextRole.body),
+                  );
+                },
+              ),
             ),
           ),
 

@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, NoticeSpec, Overlays, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        IconRole,
+        Inset,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
-import '../components/base_icon.dart';
+import '../components/base_badge.dart';
 import '../components/base_label.dart';
 import '../components/base_card.dart';
 import '../theme/app_theme.dart';
@@ -15,6 +25,17 @@ import '../../core/diff/models/diff_tool.dart';
 import '../../core/config/config_providers.dart';
 import '../components/base_layout.dart';
 import '../widgets/empty_state.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// The same move the bisect and merge dialogs already made: a tinted fill, a
+/// corner, a 16 dp inset, a mark and a line of words are `surfaces.banner` —
+/// *something about this whole surface needs saying* — so the hand-painted
+/// container leaves whole and its corner leaves with it.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// Dialog for configuring external diff/merge tools
 class DiffToolsConfigDialog extends ConsumerStatefulWidget {
@@ -141,29 +162,33 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Info banner
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              child: Row(
-                children: [
-                  // The mark of an ordinary notice, at the ordinary size: it
-                  // belongs to the line beside it rather than standing over it.
-                  const BaseIcon(IconRole.info),
-                  const BaseGap(Proximity.related),
-                  Expanded(
-                    child: BaseLabel(
-                      AppLocalizations.of(
-                        context,
-                      )!.configureYourPreferredTools(tools.length),
-                      role: TextRole.detail,
-                    ),
-                  ),
-                ],
-              ),
+          // How many tools were found and what to do about them, said once
+          // and standing while the dialog is open: `surfaces.banner`.
+          //
+          // The fill and the mark used to disagree. The mark said `info` and
+          // the box under it was painted `surfaceContainerHighest` — the
+          // scheme's role for "no particular meaning" — so the surface
+          // contradicted the very thing the glyph on it claimed. A tone says
+          // it once and the member paints the container AND the foreground
+          // that goes on it as one measured pairing, which is the half no
+          // hand-painted copy of this ever stated.
+          //
+          // Louder than it was, in every part, and deliberately: the 8 dp
+          // corner goes to the member's square 0, the quiet box becomes a
+          // full-strength `primaryContainer` strip, the words rise from
+          // `detail` to the banner's `titleMedium`, and the 20 dp mark grows
+          // to the ambient 24. The volume is the repair rather than a side
+          // effect - a notice worth a standing mark was being whispered on a
+          // meaningless fill, and the member states it at the one strength
+          // every previously converted notice already uses.
+          _banner(
+            context,
+            BannerSpec(
+              tone: Tone.info,
+              icon: IconRole.info,
+              title: AppLocalizations.of(
+                context,
+              )!.configureYourPreferredTools(tools.length),
             ),
           ),
           const BaseGap(Proximity.separate),
@@ -253,45 +278,25 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
               ),
             ),
             const BaseGap(Proximity.related),
-            // Available badge
+            // That this tool is on the machine is a mark riding on the tool's
+            // row: `surfaces.badge`, through the facade the application
+            // already names its badges in.
+            //
+            // The wait recorded here was stale rather than open. It said the
+            // badge's measure and its check mark were held until a member
+            // owned "a badge's measure and the mark inside it" — that member
+            // ships, and `BaseBadge` has been its facade since P5: a wash of
+            // the tone, the tone as foreground, and a padding, a glyph size, a
+            // type step and a corner that move together per `ControlScale`,
+            // which is exactly why this pill could not convert one half at a
+            // time. `small` is the rung the hand-painted copy was aiming at —
+            // its 8 dp across is the compact rung's own inset to the pixel.
             if (tool.isAvailable)
-              Container(
-                // The badge's inset stays a literal: across it is `tight`
-                // exactly, but its vertical 4 is on no `Inset` rung, and
-                // rounding it up would grow the badge 8px taller. Its check
-                // mark stays a literal beside it - 14 sits between two glyph
-                // rungs the same way. Both wait for `surfaces.badge`, whose
-                // skin owns a badge's measure and the mark inside it.
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.paddingS,
-                  vertical: AppTheme.paddingXS,
-                ),
-                decoration: BoxDecoration(
-                  // A 10% wash of the accent is the badge's FILL, not a
-                  // foreground, so it is not a tone: no member can tint a
-                  // surface from a `Tone` today. It waits for
-                  // `surfaces.badge` with the badge's measure above.
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusL),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.check,
-                      size: 14,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    const BaseGap(Proximity.hairline),
-                    BaseLabel(
-                      AppLocalizations.of(context)!.available,
-                      role: TextRole.micro,
-                      tone: Tone.accent,
-                    ),
-                  ],
-                ),
+              BaseBadge(
+                label: AppLocalizations.of(context)!.available,
+                variant: BadgeVariant.primary,
+                size: BadgeSize.small,
+                icon: IconRole.check,
               ),
           ],
         ),

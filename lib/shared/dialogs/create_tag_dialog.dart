@@ -3,11 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
         ControlScale,
         IconRole,
         NoticeSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
@@ -22,6 +25,17 @@ import '../../core/git/models/tag.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../components/base_layout.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// The same move the bisect and merge dialogs already made: a tinted fill, a
+/// corner, a 16 dp inset, a mark and a line of words are `surfaces.banner` —
+/// *something about this whole surface needs saying* — so the hand-painted
+/// container leaves whole and its corner leaves with it.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// The app's single create-tag dialog.
 ///
@@ -112,28 +126,30 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Info banner
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  child: Row(
-                    children: [
-                      // The mark of an ordinary notice, at the ordinary size:
-                      // it belongs to the line beside it rather than standing
-                      // over it.
-                      const BaseIcon(IconRole.info),
-                      const BaseGap(Proximity.related),
-                      Expanded(
-                        child: BaseLabel(
-                          l10n.createTagDialogDescription,
-                          role: TextRole.detail,
-                        ),
-                      ),
-                    ],
-                  ),
+              // What a tag is for, said once and standing while the dialog is
+              // open: `surfaces.banner`. The identical construction to the
+              // diff-tools dialog's, down to the fill and the corner, and it
+              // carried the identical disagreement: an `info` mark on a
+              // `surfaceContainerHighest` box, which is the scheme's role for
+              // "no particular meaning". The tone states it once and the
+              // member paints the container and the foreground on it as one
+              // measured pairing.
+              //
+              // Louder than it was, in every part, and deliberately: the 8 dp
+              // corner goes to the member's square 0, the quiet box becomes a
+              // full-strength `primaryContainer` strip, the words rise from
+              // `detail` to the banner's `titleMedium`, and the 20 dp mark
+              // grows to the ambient 24. The volume is the repair rather than
+              // a side effect - a notice worth a standing mark was being
+              // whispered on a meaningless fill, and the member states it at
+              // the one strength every previously converted notice already
+              // uses.
+              _banner(
+                context,
+                BannerSpec(
+                  tone: Tone.info,
+                  icon: IconRole.info,
+                  title: l10n.createTagDialogDescription,
                 ),
               ),
               const BaseGap(Proximity.separate),

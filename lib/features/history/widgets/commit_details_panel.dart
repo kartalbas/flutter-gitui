@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_panel.dart';
@@ -312,107 +312,45 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                             context,
                             l10n.references,
                             IconRole.gitBranch,
+                            // Which branches and tags point at this commit.
+                            // Each is a named mark riding on the card - the
+                            // badge member's own question - and the commit LIST
+                            // one screen over already asks it exactly this way
+                            // (`commit_list_item.dart`, the same
+                            // `ref.contains('tag:')` split into the same two
+                            // roles at the same small scale). One fact was
+                            // being drawn in two treatments: the list's
+                            // member-drawn neutral chip, and this
+                            // hand-painted `secondaryContainer` /
+                            // `tertiaryContainer` box with a 30 % hairline, a
+                            // 12 dp corner, an 8/4 inset, an explicit 12 px
+                            // glyph and the on-container foreground spelled out
+                            // twice. Nothing here could ever see the mismatch,
+                            // because a drawn copy has no way to ask what the
+                            // member rounds at.
+                            //
+                            // **Tag-versus-branch survives as the GLYPH, and
+                            // loses the tint.** The pill said that one fact
+                            // twice - a tag mark AND a tertiary wash - and only
+                            // the wash is unsayable: no `Tone` means "this ref
+                            // is a tag", because a container role is Material's
+                            // containment model rather than a meaning three
+                            // languages carry. The mark says it in all three,
+                            // which is how the commit list has always said it.
                             child: Wrap(
                               spacing: 6,
                               runSpacing: 6,
-                              children: widget.commit.refs.map((ref) {
-                                final isTag = ref.contains('tag:');
-                                // Hoisted so the glyph each branch names stays
-                                // one readable reference; the census that
-                                // guards mark identity reads these by name.
-                                final IconData refGlyph = isTag
-                                    ? PhosphorIconsRegular.tag
-                                    : PhosphorIconsRegular.gitBranch;
-                                return Container(
-                                  // The pill's fill, border and corner stay:
-                                  // they are the surface. How far it holds its
-                                  // content off its own edge is the language's
-                                  // question, and a pill inside a details card
-                                  // is barely set in on both axes: `tight`.
-                                  // Its dense twin in the commit list answers
-                                  // the vertical axis differently on purpose -
-                                  // there the pill's height is a list row's
-                                  // height, and here it is a card's content.
-                                  decoration: BoxDecoration(
-                                    color: isTag
-                                        ? Theme.of(
-                                            context,
-                                          ).colorScheme.tertiaryContainer
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.secondaryContainer,
-                                    borderRadius: BorderRadius.circular(
-                                      AppTheme.radiusL,
+                              children: widget.commit.refs
+                                  .map(
+                                    (ref) => BaseBadge(
+                                      label: ref,
+                                      icon: ref.contains('tag:')
+                                          ? IconRole.tag
+                                          : IconRole.gitBranch,
+                                      size: BadgeSize.small,
                                     ),
-                                    border: Border.all(
-                                      color: isTag
-                                          ? Theme.of(context)
-                                                .colorScheme
-                                                .tertiary
-                                                .withValues(alpha: 0.3)
-                                          : Theme.of(context)
-                                                .colorScheme
-                                                .secondary
-                                                .withValues(alpha: 0.3),
-                                    ),
-                                  ),
-                                  // "This ref is a tag rather than a branch" is a
-                                  // fact about the CHIP, not about its text
-                                  // colour — so the chip chooses the fill and
-                                  // states the foreground that pairs with it,
-                                  // once, and its label says nothing about
-                                  // colour at all.
-                                  child: DefaultTextStyle.merge(
-                                    style: TextStyle(
-                                      color: isTag
-                                          ? Theme.of(
-                                              context,
-                                            ).colorScheme.onTertiaryContainer
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.onSecondaryContainer,
-                                    ),
-                                    // The pill's inset stays a literal:
-                                    // across it is `tight` exactly, but its
-                                    // vertical 4 is on no `Inset` rung, and
-                                    // rounding it up would grow every ref
-                                    // pill 8px taller. Both halves wait for
-                                    // `surfaces.badge`.
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: AppTheme.paddingS,
-                                        vertical: AppTheme.paddingXS,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          // The glyph keeps its explicit size
-                                          // and colour: the colour is the
-                                          // pairing the chip's own fill
-                                          // demands, and it leaves with that
-                                          // fill rather than with this sweep.
-                                          Icon(
-                                            refGlyph,
-                                            size: 12,
-                                            color: isTag
-                                                ? Theme.of(context)
-                                                      .colorScheme
-                                                      .onTertiaryContainer
-                                                : Theme.of(context)
-                                                      .colorScheme
-                                                      .onSecondaryContainer,
-                                          ),
-                                          // A glyph and the name beside it are
-                                          // two halves of one thing:
-                                          // `hairline`.
-                                          const BaseGap(Proximity.hairline),
-                                          BaseLabel(ref, role: TextRole.micro),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                                  )
+                                  .toList(),
                             ),
                           ),
                         ],

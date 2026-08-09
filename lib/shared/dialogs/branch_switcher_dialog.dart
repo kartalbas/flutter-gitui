@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ChoiceGroupSpec,
+        ChoiceOption,
+        ControlScale,
+        IconRole,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -137,35 +146,10 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
           ),
           const BaseGap(Proximity.grouped),
 
-          // iOS-style toggle for remote branches
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildToggleButton(
-                  context,
-                  label: AppLocalizations.of(context)!.localTab,
-                  isSelected: !_showRemoteBranches,
-                  onTap: () {
-                    setState(() => _showRemoteBranches = false);
-                    _resetHighlight();
-                  },
-                ),
-                _buildToggleButton(
-                  context,
-                  label: AppLocalizations.of(context)!.remoteTab,
-                  isSelected: _showRemoteBranches,
-                  onTap: () {
-                    setState(() => _showRemoteBranches = true);
-                    _resetHighlight();
-                  },
-                ),
-              ],
-            ),
+          // Local branches or remote ones?
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _buildBranchScopeChoice(context),
           ),
           const BaseGap(Proximity.grouped),
 
@@ -342,45 +326,52 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
     }
   }
 
-  Widget _buildToggleButton(
-    BuildContext context, {
-    required String label,
-    required bool isSelected,
-    required VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          // The chosen segment's FILL, not a foreground: this is what the
-          // segment is painted in, and the word below is paired against it.
-          // It leaves with `controls.choiceGroup`, the member that owns a
-          // segmented control's selected surface.
-          color: isSelected ? Theme.of(context).colorScheme.primary : null,
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-        ),
-        // The chosen segment is painted in the accent, so its word is the
-        // foreground that goes ON the accent; the segment beside it is present
-        // but secondary to the one that is chosen. Those are the two meanings
-        // `onPrimary` and `onSurfaceVariant` were Material's answers to, and
-        // the word carries them itself now instead of being handed a
-        // `TextStyle` from outside. The semibold that used to sit here was a
-        // second statement of the same selection the fill already makes.
-        //
-        // The segment is dense, which is all Inset.tight says; it used to say
-        // `AppTheme.paddingS + AppTheme.paddingXS` across, which is the
-        // application doing arithmetic on a token and therefore deciding a
-        // length itself. This whole control is `controls.choiceGroup` once
-        // that member lands, and the rung goes with it.
-        child: BaseInset(
-          all: Inset.tight,
-          child: BaseLabel(
-            label,
-            role: TextRole.control,
-            tone: isSelected ? Tone.onAccent : Tone.muted,
+  /// **Local branches or remote ones?**
+  ///
+  /// The twin of the merge dialog's picker scope, and the last copy of the
+  /// same hand-built iOS pill: a tinted `Container` holding two
+  /// `GestureDetector` segments, the chosen one filled with the accent behind
+  /// its own tighter corner. "Which one of these few is it?" is
+  /// `controls.choiceGroup`, so the group's corner, the segment's corner, the
+  /// selected fill and the two foregrounds paired against it all leave
+  /// together — the member owns a segmented control's selected surface, and
+  /// with two corners at two different rungs stating one control this dialog
+  /// was drawing its own.
+  ///
+  /// The same three repairs the merge dialog got come with it, and they are
+  /// why this is not merely a swap: each segment becomes a Tab stop with the
+  /// language's own focus treatment, both wear its hover and press state
+  /// layers, and `GestureDetector` — which has no disabled state and simply
+  /// stops responding — is gone.
+  Widget _buildBranchScopeChoice(BuildContext context) => SkinScope.render(
+    context,
+    (Skin skin, BuildContext inner) => skin.controls.choiceGroup<bool>(
+      inner,
+      ChoiceGroupSpec<bool>(
+        // What the group is choosing, for a screen reader. Each chip names
+        // only its own half ("Local", "Remote"), so without this the group
+        // has no accessible name at all — the same slot the merge dialog's
+        // twin fills.
+        label: AppLocalizations.of(context)!.branches,
+        options: <ChoiceOption<bool>>[
+          ChoiceOption<bool>(
+            value: false,
+            label: AppLocalizations.of(context)!.localTab,
           ),
-        ),
+          ChoiceOption<bool>(
+            value: true,
+            label: AppLocalizations.of(context)!.remoteTab,
+          ),
+        ],
+        selected: _showRemoteBranches,
+        // The group promises "exactly one", so re-choosing the chosen half
+        // never arrives here and the highlight is only reset on a real change
+        // of scope.
+        onSelected: (bool showRemote) {
+          setState(() => _showRemoteBranches = showRemote);
+          _resetHighlight();
+        },
       ),
-    );
-  }
+    ),
+  );
 }

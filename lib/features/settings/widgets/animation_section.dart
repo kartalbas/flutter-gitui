@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        ControlScale,
+        IconRole,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 
 import '../../../core/config/app_config.dart';
 import '../../../core/config/config_providers.dart';
@@ -86,35 +93,39 @@ class AnimationSection extends ConsumerWidget {
             },
           ),
         ),
-        // Info card. Its margin is the distance between the card and the
-        // section around it, which is an inset owed by the container rather
-        // than a second padding inside the card.
-        BaseInset(
-          x: Inset.normal,
-          y: Inset.tight,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              all: Inset.tight,
-              child: Row(
-                children: [
-                  // The callout's mark says the same thing as the sentence
-                  // beside it and is secondary to it, which is what the muted
-                  // tone at the ordinary scale states.
-                  const BaseIcon(IconRole.info, tone: Tone.muted),
-                  const BaseGap(Proximity.related),
-                  Expanded(
-                    child: BaseLabel(
-                      l10n.animationSpeedInfo,
-                      role: TextRole.detail,
-                      tone: Tone.muted,
-                    ),
-                  ),
-                ],
-              ),
+        // The distance between the setting and the note that qualifies it.
+        const BaseGap(Proximity.related),
+
+        // "This is worth knowing and nothing is wrong" — `surfaces.banner`,
+        // and the fifth site to say it. The four notices in the rebase, bisect
+        // and merge dialogs were the same construction and moved last pass;
+        // this one survived only because it lives in a settings section rather
+        // than a dialog.
+        //
+        // It was carrying the same defect they were: an `info` MARK on a
+        // NEUTRAL fill (`surfaceContainerHighest`) with `muted` words — three
+        // parts of one statement, each answering "what does this mean" its own
+        // way. The member resolves the fill, the mark and the words from the
+        // single `Tone.info`, so they cannot disagree again.
+        //
+        // Louder than it was, in every part, and deliberately: the card sat
+        // inside its own `BaseInset` with an 8 dp corner; the banner spans
+        // the section edge to edge with the member's square corners, the
+        // quiet box becomes a full-strength `primaryContainer` strip, the
+        // `muted` `detail` words rise to `titleMedium`, and the 20 dp mark
+        // grows to the ambient 24. This is the one banner the pinned scene
+        // register actually renders — the five fences this construction was
+        // (two BaseInsets, the mark, its gap and its label) are two now (the
+        // gap above and the banner), which is the -3 the settings and shell
+        // scene counts moved by.
+        SkinScope.render(
+          context,
+          (Skin skin, BuildContext inner) => skin.surfaces.banner(
+            inner,
+            BannerSpec(
+              tone: Tone.info,
+              icon: IconRole.info,
+              title: l10n.animationSpeedInfo,
             ),
           ),
         ),

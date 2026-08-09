@@ -674,6 +674,22 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
         // with the tone vocabulary - the application has no way to resolve
         // `Tone.danger` into a `Color` for a `BoxDecoration`, and the seam is
         // right to withhold one.
+        //
+        // **Which surface, though, is a contract finding.** The two members
+        // that come closest each miss by one thing. `surfaces.banner` says
+        // exactly what this block says - *something about this whole surface
+        // needs saying* - and cannot hold it: a banner's ways out are
+        // `NoticeAction`s, i.e. buttons, and the whole point here is a
+        // CHECKBOX the user arms before pressing anything. `surfaces.card`
+        // holds the control but drops the warning: the Material member paints
+        // `CardSpec.tone` into an unselected card's BORDER only, and takes
+        // its fill from `surfaceContainerHigh` regardless - so a
+        // `Tone.danger` card at rest is a neutral block with a red outline,
+        // and the error wash that makes this thing look nothing like the
+        // branch rows above it would simply be gone. Weakening the one
+        // affordance standing between the user and a `-D` over a whole
+        // selection is not a rendering difference, so the corner stays until
+        // a tinted surface can hold a control.
         color: colorScheme.error.withValues(alpha: 0.08),
         border: Border.all(color: colorScheme.error.withValues(alpha: 0.4)),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),

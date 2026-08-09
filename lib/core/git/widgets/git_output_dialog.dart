@@ -20,10 +20,10 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_badge.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/components/base_layout.dart';
 
@@ -334,38 +334,48 @@ class _GitOutputContentState extends State<_GitOutputContent> {
     );
   }
 
+  /// **Here is one self-contained object** - the command git was given, which
+  /// is the first thing this dialog exists to report and the line the user
+  /// copies out of it.
+  ///
+  /// The fill, the corner and the edge were that card drawn by hand, and they
+  /// were drawn TWICE in this file: this section and [_buildOutputSection]
+  /// below were the same `surfaceContainerHighest` box at the same corner
+  /// behind the same 1 px `outline`, restated line for line. One member draws
+  /// both now, so the two can no longer drift apart - and neither can round
+  /// differently from the commit-message and details cards in
+  /// `commit_details_panel.dart`, which are the same construction one screen
+  /// over and already went through the member.
+  ///
+  /// `Inset.normal` is stated rather than left to the card's default, because
+  /// the hand-painted copy held its content at the ordinary reading distance
+  /// and a card's default is deliberately more generous.
   Widget _buildCommandSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
-      ),
-      child: BaseInset(
-        all: Inset.normal,
-        child: Row(
-          children: [
-            // The mark that says the line beside it is a command, drawn in
-            // the application's own accent. It sits inside one line of text,
-            // which is what decides how much room it is owed.
-            const BaseIcon(
-              IconRole.terminal,
-              scale: ControlScale.compact,
-              tone: Tone.accent,
+    return BaseCard(
+      isSelectable: false,
+      inset: Inset.normal,
+      content: Row(
+        children: [
+          // The mark that says the line beside it is a command, drawn in
+          // the application's own accent. It sits inside one line of text,
+          // which is what decides how much room it is owed.
+          const BaseIcon(
+            IconRole.terminal,
+            scale: ControlScale.compact,
+            tone: Tone.accent,
+          ),
+          const BaseGap(Proximity.related),
+          Expanded(
+            // The command git was actually given. Alignment is meaning here
+            // rather than style, and the user copies this line, so it is
+            // said as code and stays selectable.
+            child: BaseLabel(
+              'git ${widget.result.command}',
+              role: TextRole.code,
+              selectable: true,
             ),
-            const BaseGap(Proximity.related),
-            Expanded(
-              // The command git was actually given. Alignment is meaning here
-              // rather than style, and the user copies this line, so it is
-              // said as code and stays selectable.
-              child: BaseLabel(
-                'git ${widget.result.command}',
-                role: TextRole.code,
-                selectable: true,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -373,10 +383,20 @@ class _GitOutputContentState extends State<_GitOutputContent> {
   Widget _buildExecutionDetails() {
     return Row(
       children: [
+        // What the exit code MEANS, in the words for it. It used to say
+        // `Tone.gitAdded`/`Tone.gitDeleted` - the file-status palette - about a
+        // process's return value, which names neither a new file nor a deleted
+        // one. Exit code 0 is "this finished, and it finished well", which is
+        // `Tone.success` verbatim, and anything else is the failure the card
+        // below and the dialog's own frame already call `Tone.danger`. Under
+        // this skin the success half does not move a pixel (`Tone.success` and
+        // `Tone.gitAdded` both resolve to the git palette's added colour); the
+        // failure half moves from that palette's deleted red to the scheme's
+        // error role, which is the one red the rest of the dialog uses.
         _buildDetailChip(
           AppLocalizations.of(context)!.exitCode,
           widget.result.exitCode.toString(),
-          widget.result.isSuccess ? Tone.gitAdded : Tone.gitDeleted,
+          widget.result.isSuccess ? Tone.success : Tone.danger,
         ),
         const BaseGap(Proximity.related),
         _buildDetailChip(
@@ -434,46 +454,57 @@ class _GitOutputContentState extends State<_GitOutputContent> {
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        border: Border.all(
-          color: result.isSuccess
-              ? Theme.of(context).colorScheme.outline
-              : context.gitColors.deleted.withValues(alpha: 0.3),
-        ),
-      ),
-      child: BaseInset(
-        all: Inset.normal,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // STDOUT
-              if (result.stdout.isNotEmpty) ...[
-                BaseLabel('STDOUT', role: TextRole.micro, tone: Tone.gitAdded),
-                const BaseGap(Proximity.related),
-                BaseLabel(result.stdout, role: TextRole.detail),
-              ],
-
-              // STDERR
-              if (result.stderr.isNotEmpty) ...[
-                if (result.stdout.isNotEmpty) const BaseGap(Proximity.grouped),
-                BaseLabel(
-                  'STDERR',
-                  role: TextRole.micro,
-                  tone: Tone.gitDeleted,
-                ),
-                const BaseGap(Proximity.related),
-                BaseLabel(
-                  result.stderr,
-                  role: TextRole.detail,
-                  tone: Tone.gitDeleted,
-                ),
-              ],
+    // **Here is one self-contained object** again: everything git printed.
+    // The same hand-painted box as the command section above it, down to the
+    // fill, the corner and the edge, so it becomes the same member.
+    //
+    // The edge carried one extra statement and it is kept, said as a meaning
+    // instead of as a colour: the box used to swap its border for the git
+    // palette's DELETED colour at 30 % whenever the run failed. `Tone.
+    // gitDeleted` means "a tracked file that is gone", which is not what a
+    // failed push is, and the application was reaching past the seam for the
+    // colour itself. `Tone.danger` is the word this application already uses
+    // for a failure - `EmptyStateSpec.tone`'s own doc prescribes it, and both
+    // browse panels' error states say it - and the card member paints a tone
+    // exactly where the hand-painted copy did: on the edge, leaving the fill
+    // and the foreground alone.
+    return BaseCard(
+      isSelectable: false,
+      inset: Inset.normal,
+      tone: result.isSuccess ? Tone.neutral : Tone.danger,
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // STDOUT. Its heading said `Tone.gitAdded` - "a file git has never
+            // seen before, now staged for its first commit" - about the
+            // standard output STREAM, which is a meaning rounded onto the
+            // nearest green. Ordinary output has no colour, and saying nothing
+            // is how `Tone.neutral` is said.
+            //
+            // The output itself is `TextRole.code`, which is the role's own
+            // definition ("diffs, hashes, paths, command output") and what the
+            // command line six lines above already says. This file used to say
+            // "here is machine output" at two type steps - monospaced up there,
+            // proportional down here - which is the one thing alignment-bearing
+            // text cannot afford.
+            if (result.stdout.isNotEmpty) ...[
+              BaseLabel('STDOUT', role: TextRole.micro),
+              const BaseGap(Proximity.related),
+              BaseLabel(result.stdout, role: TextRole.code),
             ],
-          ),
+
+            // STDERR: what went wrong, which is `Tone.danger` and not the git
+            // palette's deleted-file colour. Said once for the heading and its
+            // content, in the same word the card's own edge now carries, so one
+            // failure is one red rather than two.
+            if (result.stderr.isNotEmpty) ...[
+              if (result.stdout.isNotEmpty) const BaseGap(Proximity.grouped),
+              BaseLabel('STDERR', role: TextRole.micro, tone: Tone.danger),
+              const BaseGap(Proximity.related),
+              BaseLabel(result.stderr, role: TextRole.code, tone: Tone.danger),
+            ],
+          ],
         ),
       ),
     );

@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+// Shown rather than imported whole: this file declares its own
+// [ChoiceOption], and the contract declares one too (`ChoiceGroupSpec`'s),
+// so an unqualified import would make the name ambiguous for anyone importing
+// both. The collision is real and it is the first thing the eventual
+// `controls.choiceGroup` facade has to reconcile - reported, not papered over.
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ContentPort, Proximity, Skin, SkinScope;
 
 import '../theme/app_theme.dart';
 
@@ -206,19 +213,36 @@ class BaseChoiceGroup<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: AppTheme.paddingS,
-      runSpacing: AppTheme.paddingS,
-      children: <Widget>[
-        for (final ChoiceOption<T> option in options)
-          _ChoiceChip(
-            label: option.label,
-            icon: option.icon,
-            selected: option.value == selected,
-            onSelected: () => onSelected(option.value),
-          ),
-      ],
-    );
+    // The options are one run of equals that may break into more lines, which
+    // is exactly what `layout.row(wrap: true)` says. The two 8s written here
+    // were Material's answer to "these belong together" stated twice - once
+    // between two chips and once between two LINES of chips - and one rung is
+    // now the whole statement for both, which is also why the member spends a
+    // single resolved distance on `spacing` and `runSpacing`.
+    //
+    // `start` across, restated rather than defaulted: a bare `Wrap` aligns its
+    // run's children at the start of the cross axis, while `layout.row`
+    // centres them, and a run of chips of equal height cannot show the
+    // difference today. Saying it keeps that accident out of the conversion.
+    return SkinScope.render(context, (Skin skin, BuildContext inner) {
+      return skin.layout.row(
+        inner,
+        <ContentPort>[
+          for (final ChoiceOption<T> option in options)
+            ContentPort(
+              _ChoiceChip(
+                label: option.label,
+                icon: option.icon,
+                selected: option.value == selected,
+                onSelected: () => onSelected(option.value),
+              ),
+            ),
+        ],
+        gap: Proximity.related,
+        cross: CrossAxisAlignment.start,
+        wrap: true,
+      );
+    });
   }
 }
 

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        ControlScale,
         IconRole,
         Inset,
         Proximity,
         SeriesPickerSpec,
         Skin,
         SkinScope,
-        TextRole;
+        TextRole,
+        Tone;
 
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../core/workspace/default_workspace_text.dart';
@@ -196,66 +199,88 @@ class _ProjectDialogState extends State<ProjectDialog> {
 
             const BaseGap(Proximity.grouped),
 
-            // Preview. NOT converted, and reported with the branch dialog's
-            // preview box: "here is what this form will produce" has no
-            // member. It is not a banner (nothing is being said about the
-            // dialog), not a card (nothing is picked) and not a panel (a panel
-            // is a named region with a header row).
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                all: Inset.normal,
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.info,
-                      size: AppTheme.iconS,
-                      color: Theme.of(context).colorScheme.secondary,
-                    ),
-                    const BaseGap(Proximity.grouped),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BaseLabel(l10n.previewLabel, role: TextRole.micro),
-                          const BaseGap(Proximity.hairline),
-                          Row(
-                            children: [
-                              // The preview's colour stripe is a SHAPE, not
-                              // a spacing: it was spelled with a padding and
-                              // an icon token, which said nothing true about
-                              // it. Four by sixteen is the swatch's geometry
-                              // and it moves into `surfaces.badge` with the
-                              // hand-painted preview around it.
-                              Container(
-                                width: 4,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: _selectedColor,
-                                  borderRadius: BorderRadius.circular(
-                                    AppTheme.radiusXS,
-                                  ),
+            // The workspace this form will produce, shown as its own surface:
+            // **here is one self-contained object**, which is `surfaces.card`
+            // through the façade. The note that stood here refused the member
+            // because "nothing is picked", but `CardSpec.onTap` states that a
+            // null callback makes a card "only a container", and the identical
+            // construction - a fill, a corner, a `normal` inset, a leading
+            // mark, a `micro` caption and the object's name under it - is
+            // already `BaseCard(isSelectable: false)` in
+            // `create_branch_from_commit_dialog.dart` and, from this change,
+            // in `create_branch_dialog.dart`. Three previews of "what this
+            // form will produce" in three dialogs, one treatment.
+            //
+            // What moves: the fill goes from `surfaceContainerHighest` at
+            // 50 % to the card's opaque `surfaceContainerHigh`, the card adds
+            // the 1 px `outlineVariant` edge this box drew none of, and the
+            // corner rounds at the skin's 12 rather than the 8 named here.
+            // The member's answer is the right one because a half-transparent
+            // grey with no edge is not a rung of anything - it was this one
+            // dialog inventing a surface, and every other read-out in the
+            // application already stands on the card's.
+            //
+            // The mark converts with it and stops disagreeing with the box it
+            // sits in. It was Phosphor's `info` in `colorScheme.secondary`
+            // over a neutral grey - a "worth knowing" notice mark on a surface
+            // that is not a notice - while its converted twins name the KIND
+            // of object they preview (a commit mark for a commit). This box
+            // previews a workspace, so it takes the workspace's own mark, the
+            // same `IconRole.folder` this dialog's own header already wears,
+            // muted because the caption beside it is what is being read.
+            BaseCard(
+              isSelectable: false,
+              inset: Inset.normal,
+              content: Row(
+                children: [
+                  const BaseIcon(
+                    IconRole.folder,
+                    scale: ControlScale.compact,
+                    tone: Tone.muted,
+                  ),
+                  const BaseGap(Proximity.grouped),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(l10n.previewLabel, role: TextRole.micro),
+                        const BaseGap(Proximity.hairline),
+                        Row(
+                          children: [
+                            // The preview's colour stripe is a SHAPE, not a
+                            // spacing: it was spelled with a padding and an
+                            // icon token, which said nothing true about it.
+                            // Still NOT converted, and reported with the 4 by
+                            // 32 twin in `project_section.dart`: no member
+                            // draws "a rule in this object's identity colour".
+                            // It is also the last place in this dialog where
+                            // the application paints a palette colour itself -
+                            // the swatch grid beside it is
+                            // `controls.seriesPicker` now, and the header this
+                            // previews wears `Tone.series(colorIndex)`.
+                            Container(
+                              width: 4,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                color: _selectedColor,
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusXS,
                                 ),
                               ),
-                              const BaseGap(Proximity.related),
-                              BaseLabel(
-                                _nameController.text.isEmpty
-                                    ? l10n.projectNamePreviewPlaceholder
-                                    : _nameController.text,
-                                role: TextRole.itemTitle,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                            const BaseGap(Proximity.related),
+                            BaseLabel(
+                              _nameController.text.isEmpty
+                                  ? l10n.projectNamePreviewPlaceholder
+                                  : _nameController.text,
+                              role: TextRole.itemTitle,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],

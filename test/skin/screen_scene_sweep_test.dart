@@ -347,7 +347,17 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // fences (a BaseInset, a BaseIcon, two BaseLabels and their two BaseGaps)
   // and is one `surfaces.banner` fence now; the error callout converted the
   // same way (-3) in a branch the scene never renders.
-  'shell': 173,
+  // The #414 closing wave moved two scenes, both by -3 and for the same
+  // construction: the settings animation section's "worth knowing" card -
+  // five fences (two BaseInsets, its BaseIcon mark, the BaseGap and the
+  // BaseLabel) - is one `surfaces.banner` fence behind the section's own
+  // BaseGap now, so settings fell 3, and the shell fell the same 3 because
+  // its scene parks the shell on the settings destination. Every other
+  // conversion in that wave measured net zero here: the dialogs' banners,
+  // badges and the progress strip render behind states no scene reaches.
+  // Measured at closing under BOTH skins - Material and the blueprint land
+  // on the same two numbers - so the register stays skin-independent.
+  'shell': 170,
   'workspaces': 34,
   'repositories': 61,
   'changes': 50,
@@ -364,7 +374,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // application reaching the contract, not a skin drawing more of itself.
   'stashes': 19,
   'tags': 39,
-  'settings': 139,
+  'settings': 136,
   'merge_conflicts': 31,
 };
 
@@ -422,14 +432,15 @@ const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
   // exactly one less: the difference IS the single toolbar action
   // `visibleActionCount()` sheds at the stretched distance, so this number
   // moves in lockstep whenever the shell's own count moves. Re-measured at
-  // DISTANCE=64 at the surfaces wave's closing: the stretched run lands on
-  // 173 against the resting 174, and the gap is still exactly the one shed
-  // action. The lockstep had in fact been missed once already - P6 raised
-  // the shell to 192 and left this entry at 190, so the stretched half was
-  // failing at 191-measured before this wave touched anything - which is
-  // worth recording precisely because nothing in the resting gates can see
-  // this number go stale.
-  'shell': 173,
+  // DISTANCE=64 at the #414 closing: the stretched run lands on 169 against
+  // the resting 170, and the gap is still exactly the one shed action. The
+  // lockstep has now been missed twice - P6 raised the shell to 192 and
+  // left this entry at 190, and the banner/badge/avatar wave took the
+  // resting shell to 173 and left this entry EQUAL to it at 173, its own
+  // invariant broken in the register's text - which is worth recording
+  // precisely because nothing in the resting gates can see this number go
+  // stale.
+  'shell': 169,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

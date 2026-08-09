@@ -26,6 +26,25 @@ import '../../core/services/progress_service.dart';
 /// Deliberately small and low-contrast: it has to be readable when looked at
 /// without competing with the content for attention, since it appears for work
 /// the user did not start.
+///
+/// **Stays hand-painted, and the reason is a contract finding rather than a
+/// wait.** Every other part of this strip has a member: a count riding on the
+/// line above it is `surfaces.badge` — whose `Tone.neutral` fill is the exact
+/// `surfaceContainerHighest` painted here — and the tap, its state layers and
+/// its tooltip are `surfaces.pressable` composed around it, which is the
+/// shape `repository_card.dart` already uses for a badge that is also a
+/// control. What no member can carry is the CARET. It is the strip's only
+/// static statement that there is more behind it, and it is trailing;
+/// `BadgeSpec.icon` is a single LEADING mark standing for what the badge is
+/// about, so composing the two would delete the affordance rather than
+/// restate it — a change of content, not of treatment. The corner and the
+/// inset go the moment a badge can say "and there is more this way", and not
+/// before.
+///
+/// The 12 dp caret's own recorded blocker is gone, and it is recorded here so
+/// it is not re-derived: it read "no `ControlScale` rung reaches it, the
+/// smallest being 16", which is true of the ICON scale but not of a badge's
+/// mark — the compact pill draws its glyph at 10.
 class _BackgroundProgressLabel extends StatelessWidget {
   const _BackgroundProgressLabel({required this.progress});
 
@@ -72,11 +91,12 @@ class _BackgroundProgressLabel extends StatelessWidget {
               // Twelve, which `AppTheme.iconXS` documents as the size reserved
               // for a non-interactive inline indicator - and no `ControlScale`
               // rung reaches it, the smallest being 16. `BaseIcon` here would
-              // grow this caret by a third inside a 3 px-tall strip floating
-              // over the user's content, which is the blame view's inset
-              // mistake (#426) one axis over: a meaning rounded onto the
-              // nearest available word. The read stays until the strip is a
-              // member that owns its own mark.
+              // grow this caret by a third inside a thin strip floating over
+              // the user's content, which is the blame view's inset mistake
+              // (#426) one axis over: a meaning rounded onto the nearest
+              // available word. The mark this caret is waiting for is a
+              // TRAILING one, which is the slot the class doc records as
+              // missing from `BadgeSpec`.
               Icon(
                 PhosphorIconsRegular.caretRight,
                 size: 12,
@@ -117,13 +137,31 @@ class ProgressOverlay extends ConsumerWidget {
           children: [
             // The line itself must not swallow clicks meant for the content
             // it floats over; only the caption is a target.
+            //
+            // The same `controls.progress` the blocking branch below already
+            // calls, and the two were the odd pair of one file: that branch
+            // argues in its own comment that "how thick a bar is and what its
+            // ends look like is the language's arithmetic", and then this
+            // branch went on hand-building a raw indicator at a 3 dp
+            // thickness the application had picked. `ProgressExtent.inline`
+            // is the rung whose own doc names this arrangement in as many
+            // words — "inside a line of content: beside a label, inside a
+            // button, ALONG AN EDGE" — and it is the same rung the blocking
+            // card asks for, so one file now states one meaning once.
+            // Material's answer for the rung is its stock indicator at the
+            // M3 default 4 dp, so the strip floats one pixel thicker than
+            // the hand-picked 3 it replaces — the same thickness the batch
+            // dialog's bar already draws through this member.
             IgnorePointer(
-              child: LinearProgressIndicator(
-                minHeight: 3,
-                value: progress.isIndeterminate || progress.totalSteps <= 0
-                    ? null
-                    : progress.progress,
-              ),
+              child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+                return skin.controls.progress(
+                  inner,
+                  fraction: progress.isIndeterminate || progress.totalSteps <= 0
+                      ? null
+                      : progress.progress,
+                  extent: ProgressExtent.inline,
+                );
+              }),
             ),
             if (progress.operationName.isNotEmpty)
               _BackgroundProgressLabel(progress: progress),

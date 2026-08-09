@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        GraphEdgeSpec,
+        GraphRowSpec,
+        IconRole,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -12,7 +21,6 @@ import '../../../shared/components/base_layout.dart';
 import '../../../core/config/config_providers.dart';
 import '../../../core/git/models/commit.dart';
 import '../models/commit_graph.dart';
-import 'commit_graph_painter.dart';
 
 /// Individual commit item in the history list
 class CommitListItem extends ConsumerWidget {
@@ -68,9 +76,7 @@ class CommitListItem extends ConsumerWidget {
       leading: !showCommitGraph
           ? null
           : row != null
-          ? SizedBox(
-              width: CommitGraphRowPainter.leadingWidthFor(graphLaneCount),
-            )
+          ? SizedBox(width: _graphGutterWidthFor(graphLaneCount))
           : Padding(
               // Not a rung, and deliberately not rounded onto one: this nudges
               // the dot down so its centre meets the cap height of the subject
@@ -253,24 +259,65 @@ class CommitListItem extends ConsumerWidget {
       return listItem;
     }
 
-    // The overlay, not the leading widget, carries the painter: only here
-    // does it cover the full item height, divider strip included, so this
-    // row's lane lines meet the neighboring rows' without gaps. It ignores
-    // pointers so the item underneath keeps receiving taps.
+    // The overlay, not the leading widget, carries the graph: only here does
+    // it cover the full item height, divider strip included, so this row's
+    // lane lines meet the neighboring rows' without gaps. The `Stack` and the
+    // fill are structure and stay here; everything drawn inside them is
+    // `surfaces.commitGraphRow` (#249, P5), which is why this file no longer
+    // names a lane width, a dot radius, a stroke, a divider strip or a colour.
+    // The member ignores pointers itself, so the item underneath keeps
+    // receiving taps.
     return Stack(
       children: [
         listItem,
         Positioned.fill(
-          child: IgnorePointer(
-            child: CustomPaint(
-              painter: CommitGraphRowPainter(
-                row: row,
-                laneColors: context.gitColors.laneColors,
+          child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+            return skin.surfaces.commitGraphRow(
+              inner,
+              GraphRowSpec(
+                lane: row.lane,
+                // An INDEX into the skin's own series, never a colour: the
+                // lane cycle and its length are the skin's, exactly as they
+                // are for `Tone.series`.
+                toneIndex: row.colorIndex,
+                isMerge: row.isMerge,
+                // A COUNT, not a width. How wide the gutter has to be for
+                // this many columns is the skin's arithmetic.
+                laneCount: graphLaneCount,
+                incoming: _edges(row.incoming),
+                outgoing: _edges(row.outgoing),
+                passing: _edges(row.passing),
               ),
-            ),
-          ),
+            );
+          }),
         ),
       ],
     );
   }
+
+  /// One row's edges, as data the skin paints.
+  static List<GraphEdgeSpec> _edges(List<GraphEdge> edges) => <GraphEdgeSpec>[
+    for (final edge in edges)
+      GraphEdgeSpec(lane: edge.lane, toneIndex: edge.colorIndex),
+  ];
 }
+
+/// How much room the row's leading slot reserves so the lanes and the subject
+/// text never overlap.
+///
+/// **This is the one number `surfaces.commitGraphRow` could not take with it.**
+/// The member fills the box it is given rather than sizing itself - it has to,
+/// because the graph spans the whole row including its rule strip, and a
+/// painter confined to the leading slot would leave a gap at every row
+/// boundary. So the row must reserve the gutter's width, and the width is the
+/// skin's lane width times the columns in play - which the contract states
+/// nowhere the application can read. `GraphRowSpec.laneCount` deliberately
+/// carries a COUNT so the skin owns the width, and there is no member, no
+/// vocabulary word and no metric query that hands the count back as a width.
+///
+/// Until the contract can answer "how wide is your graph gutter for n lanes",
+/// this reproduces the Material skin's own arithmetic and is therefore a
+/// reported drift rather than a hidden one: a skin with a different lane width
+/// - or, like the blueprint, with no drawn graph at all - gets a gutter sized
+/// for Material's. See the P5 report for #249.
+double _graphGutterWidthFor(int laneCount) => 12.0 * laneCount.clamp(1, 8);

@@ -1,6 +1,6 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+
 import '../../shared/theme/app_theme.dart';
 
 /// Badge visual variants
@@ -38,7 +38,14 @@ enum BadgeSize {
 
 /// Base badge component for all badge patterns in the app.
 ///
-/// Provides unified badge behavior with variants and sizes.
+/// **This is a façade** (#249, §2.11), on the same terms as `BaseButton`: the
+/// application keeps naming a badge in its own words - a [BadgeVariant] and a
+/// [BadgeSize] - and this component translates those words into the contract's
+/// ([Tone] and [ControlScale]) and hands them to `surfaces.badge`, or to
+/// `surfaces.tag` when the badge can be removed. Nothing here decides a
+/// padding, a corner or a colour any more; the pill's whole measure is the
+/// skin's, which is what makes the same badge look like the host platform's
+/// badge under a different skin instead of like Material's everywhere.
 ///
 /// Example usage:
 /// ```dart
@@ -46,7 +53,7 @@ enum BadgeSize {
 ///   label: 'New',
 ///   variant: BadgeVariant.success,
 ///   size: BadgeSize.medium,
-///   icon: PhosphorIconsRegular.check,
+///   icon: IconRole.check,
 ///   onDeleted: () => print('Badge deleted'),
 /// )
 /// ```
@@ -57,7 +64,6 @@ class BaseBadge extends StatelessWidget {
     this.variant = BadgeVariant.neutral,
     this.size = BadgeSize.medium,
     this.icon,
-    this.isPill = true,
     this.onDeleted,
   });
 
@@ -70,256 +76,70 @@ class BaseBadge extends StatelessWidget {
   /// Size variant (small, medium, large)
   final BadgeSize size;
 
-  /// Leading icon (optional)
-  final IconData? icon;
-
-  /// Whether to use pill shape (true) or rounded corners (false)
-  final bool isPill;
-
-  /// Optional callback for making the badge deletable (shows close icon).
+  /// The meaning of the mark before the words, or null for none.
   ///
-  /// A deletable badge is taller and wider than the same badge without a
-  /// delete callback, because the delete glyph is a real button with the full
-  /// 48 dp interactive minimum around it (see [_BadgeDeleteButton]): its
-  /// *layout* box is [kMinInteractiveDimension] tall with the pill centred in
-  /// it, and the pill itself sets the glyph off from the label by enough that
-  /// the 48 dp box lands on the badge's trailing space instead of on the
-  /// label. Nothing else about the pill changes.
+  /// An `IconRole` and no longer an `IconData`, because the mark now crosses
+  /// the seam with the rest of the badge: `IconData` is type-neutral but not
+  /// identity-neutral, so accepting it here would hand every skin Phosphor's
+  /// glyphs forever (#249 conflict C3).
+  final IconRole? icon;
+
+  /// Optional callback for making the badge removable (shows close icon).
+  ///
+  /// A removable badge is drawn by `surfaces.tag` rather than by
+  /// `surfaces.badge`: the two do not overlap even inside Material, because a
+  /// removal is a second, separately named control inside the pill and a badge
+  /// has no slot for its tooltip. It is taller and wider than the same badge
+  /// without a removal, and that is the member's own deliberate arithmetic -
+  /// the removal carries the full 48 dp interactive minimum, laid out over the
+  /// pill so that only the target grows.
+  ///
+  /// Because the tag is the removable form, it draws at the tag's own measure
+  /// rather than at [size]; every site that removes uses [BadgeSize.medium],
+  /// which is the measure the tag draws at.
   final VoidCallback? onDeleted;
 
+  /// What the variant MEANS, in the contract's word for it.
+  ///
+  /// Each pairing is the one the Material skin already resolves to the colour
+  /// this component used to name directly: `success` and `warning` are the git
+  /// palette's added and modified (`material_ink.dart:171-172`), `info` and
+  /// `primary` land on the same `colorScheme.primary` this component gave both
+  /// (`material_ink.dart:177`), and `neutral` keeps its own
+  /// `surfaceContainerHighest` chip rather than a wash.
+  static Tone _toneOf(BadgeVariant variant) => switch (variant) {
+    BadgeVariant.neutral => Tone.neutral,
+    BadgeVariant.primary => Tone.accent,
+    BadgeVariant.success => Tone.success,
+    BadgeVariant.warning => Tone.warning,
+    BadgeVariant.danger => Tone.danger,
+    BadgeVariant.info => Tone.info,
+  };
+
+  /// How much room the size asks for.
+  static ControlScale _scaleOf(BadgeSize size) => switch (size) {
+    BadgeSize.small => ControlScale.compact,
+    BadgeSize.medium => ControlScale.normal,
+    BadgeSize.large => ControlScale.prominent,
+  };
+
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    // Get size-specific values
-    final double horizontalPadding;
-    final double verticalPadding;
-    final double fontSize;
-    final double iconSize;
-    final double borderRadius;
-
-    switch (size) {
-      case BadgeSize.small:
-        horizontalPadding = AppTheme.paddingS;
-        verticalPadding = 2;
-        fontSize = 10;
-        iconSize = 10;
-        borderRadius = isPill ? 12 : AppTheme.radiusS;
-        break;
-      case BadgeSize.medium:
-        horizontalPadding = AppTheme.paddingM;
-        verticalPadding = 4;
-        fontSize = 12;
-        iconSize = 12;
-        borderRadius = isPill ? 16 : AppTheme.radiusS;
-        break;
-      case BadgeSize.large:
-        horizontalPadding = AppTheme.paddingL;
-        verticalPadding = AppTheme.paddingS;
-        fontSize = 14;
-        iconSize = 14;
-        borderRadius = isPill ? 20 : AppTheme.radiusM;
-        break;
+  Widget build(BuildContext context) => SkinScope.render(context, (
+    Skin skin,
+    BuildContext inner,
+  ) {
+    final Tone tone = _toneOf(variant);
+    if (onDeleted != null) {
+      return skin.surfaces.tag(
+        inner,
+        TagSpec(label: label, icon: icon, tone: tone, onRemoved: onDeleted),
+      );
     }
-
-    // Get variant-specific colors
-    Color backgroundColor;
-    Color foregroundColor;
-
-    switch (variant) {
-      case BadgeVariant.neutral:
-        backgroundColor = colorScheme.surfaceContainerHighest;
-        foregroundColor = colorScheme.onSurface;
-        break;
-      case BadgeVariant.primary:
-        backgroundColor = colorScheme.primary.withValues(alpha: 0.15);
-        foregroundColor = colorScheme.primary;
-        break;
-      case BadgeVariant.success:
-        backgroundColor = context.gitColors.added.withValues(alpha: 0.15);
-        foregroundColor = context.gitColors.added;
-        break;
-      case BadgeVariant.warning:
-        backgroundColor = context.gitColors.modified.withValues(alpha: 0.15);
-        foregroundColor = context.gitColors.modified;
-        break;
-      case BadgeVariant.danger:
-        backgroundColor = colorScheme.error.withValues(alpha: 0.15);
-        foregroundColor = colorScheme.error;
-        break;
-      case BadgeVariant.info:
-        backgroundColor = colorScheme.primary.withValues(alpha: 0.15);
-        foregroundColor = colorScheme.primary;
-        break;
-    }
-
-    // The delete glyph is two steps up from the badge's own icon size, the
-    // size it has always painted at; only its interactive box grows below.
-    final double deleteGlyphSize = iconSize + 2;
-
-    // The gap between the label and the delete glyph. It is not a spacing
-    // choice: it is what keeps the glyph's 48 dp interactive box off the
-    // label. The box is centred on the glyph, so it reaches
-    // kMinInteractiveDimension / 2 back towards the label, and anything the
-    // label occupies inside that reach is a place where clicking the badge's
-    // own text deletes the badge. Material draws the same line for its chip -
-    // the delete affordance's hit region is capped at the label padding plus
-    // the icon so that it claims the gap and never the label (Flutter 3.44.4
-    // packages/flutter/lib/src/material/chip.dart:2425-2431,
-    // `accessibleDeleteButtonWidth`) - and this is that rule with the app's
-    // larger target: the gap grows to whatever the 48 dp box needs, and the
-    // badge grows with it, rather than the box being allowed to overlap the
-    // text. A non-deletable badge keeps the ordinary half-step.
-    final double deleteGap = math.max(
-      AppTheme.paddingS / 2,
-      kMinInteractiveDimension / 2 - deleteGlyphSize / 2,
+    return skin.surfaces.badge(
+      inner,
+      BadgeSpec(label: label, icon: icon, tone: tone, scale: _scaleOf(size)),
     );
-
-    final Widget pill = Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: iconSize, color: foregroundColor),
-            SizedBox(width: AppTheme.paddingS / 2),
-          ],
-          // ignore: avoid_text_with_style
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontSize: fontSize,
-              color: foregroundColor,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          if (onDeleted != null) ...[
-            SizedBox(width: deleteGap),
-            // The slot the delete glyph occupies inside the pill. The glyph
-            // itself is painted by the control stacked over this slot, which
-            // is the whole point: the pill reserves the glyph's space without
-            // having to contain the glyph's 48 dp interactive box.
-            SizedBox.square(dimension: deleteGlyphSize),
-          ],
-        ],
-      ),
-    );
-
-    if (onDeleted == null) {
-      return pill;
-    }
-
-    // A deletable badge lays out inside a 48 dp interactive row while the pill
-    // keeps painting at its own height - the move BaseIconButton already makes,
-    // where only the painted container shrinks and the hit area stays at
-    // kMinInteractiveDimension. Growing the pill instead would turn a 25 dp
-    // status pill into a 56 dp one wherever it happens to be deletable.
-    //
-    // The two children are aligned on their trailing edge, so the arithmetic
-    // is one number: how far the centre of the reserved glyph slot sits from
-    // the pill's trailing edge. Whichever of the two boxes reaches less far
-    // takes the difference as padding, which puts the 48 dp box exactly over
-    // the slot and makes the badge as wide as it needs to be for the target to
-    // be hit-testable in full. It reaches beyond the pill by at most 10 dp
-    // (the small size); at the large size it fits inside it.
-    //
-    // Everything the box covers is the badge's own trailing space, because
-    // [deleteGap] has already pushed the label out of its reach: the target
-    // spans the glyph, the gap before it, the pill's trailing padding and the
-    // strip of the badge's box beyond the pill, plus the band above and below
-    // the pill - and nothing else. The label is never inside it, so a click on
-    // the badge's text cannot delete the badge.
-    final double slotCentre = horizontalPadding + deleteGlyphSize / 2;
-    final double targetRadius = kMinInteractiveDimension / 2;
-    final double pillOverhang = math.max(0, targetRadius - slotCentre);
-    final double targetInset = math.max(0, slotCentre - targetRadius);
-
-    return Stack(
-      alignment: AlignmentDirectional.centerEnd,
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsetsDirectional.only(end: pillOverhang),
-          child: pill,
-        ),
-        Padding(
-          padding: EdgeInsetsDirectional.only(end: targetInset),
-          child: _BadgeDeleteButton(
-            glyphSize: deleteGlyphSize,
-            color: foregroundColor,
-            onDeleted: onDeleted!,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The delete affordance of a deletable [BaseBadge]: a 48 dp interactive box
-/// around a glyph that keeps the size the badge draws it at.
-///
-/// It exists because the glyph used to be a bare `GestureDetector` - a 14 dp
-/// tap target with no state layer, no focus and no keyboard activation. This
-/// is the same shape Material gives its own chip's delete affordance
-/// (Flutter 3.44.4 packages/flutter/lib/src/material/chip.dart:1305-1321): a
-/// circular [InkResponse] whose highlight is sized to the glyph rather than to
-/// the box, so the state layer stays inside the pill while the target does not
-/// have to.
-class _BadgeDeleteButton extends StatelessWidget {
-  const _BadgeDeleteButton({
-    required this.glyphSize,
-    required this.color,
-    required this.onDeleted,
   });
-
-  /// The painted glyph's size; the interactive box is always
-  /// [kMinInteractiveDimension].
-  final double glyphSize;
-
-  /// The badge variant's foreground, so the glyph keeps carrying the variant's
-  /// accent the way the label does.
-  final Color color;
-
-  final VoidCallback onDeleted;
-
-  @override
-  Widget build(BuildContext context) {
-    // The glyph is the whole control, so without a tooltip it reaches
-    // assistive technology as a tappable node with no name at all - which is
-    // what the a11y matrix sweep measures. The message is Material's own, the
-    // one `Chip` gives its delete affordance (chip.dart:1307-1308), so it is
-    // already translated into every locale the app ships and reads the same
-    // here as it does on a chip.
-    return Tooltip(
-      message: MaterialLocalizations.of(context).deleteButtonTooltip,
-      // An InkResponse paints its state layers into the nearest Material, and
-      // a badge is placed in toolbars and rows that may not offer one. A
-      // transparent Material guarantees the ink surface without painting
-      // anything itself - the same guarantee BaseCard makes for its content.
-      child: Material(
-        type: MaterialType.transparency,
-        child: SizedBox.square(
-          dimension: kMinInteractiveDimension,
-          child: InkResponse(
-            onTap: onDeleted,
-            customBorder: const CircleBorder(),
-            // The hover, focus and pressed circle is sized to the glyph plus
-            // one spacing step, not to the 48 dp box, so it stays within the
-            // pill it is drawn on.
-            radius: glyphSize / 2 + AppTheme.paddingXS,
-            child: Icon(Icons.close, size: glyphSize, color: color),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Numeric badge variant for displaying counts

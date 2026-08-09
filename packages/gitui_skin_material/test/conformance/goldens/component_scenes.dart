@@ -747,19 +747,27 @@ List<GoldenScene> _displayScenes() {
               size: badgeSizes[column],
             ),
           ),
+          // The middle specimen used to be a 'squared' badge - `isPill: false`,
+          // a 4 dp corner instead of the pill's own. The flag went with the
+          // hand-painted geometry when the badge became `surfaces.badge`: the
+          // corner is the skin's and the member draws one shape, so there is
+          // no second shape left to photograph. What replaces it is the axis
+          // the sheet still needs and the matrix above cannot show - a badge
+          // whose mark and words are both drawn at the prominent scale.
           _captioned(
             context,
-            'icon, square and deletable',
+            'icon, icon at the prominent scale and deletable',
             _row(<Widget>[
               const BaseBadge(
                 label: 'ahead 3',
                 variant: BadgeVariant.success,
-                icon: PhosphorIconsRegular.arrowRight,
+                icon: IconRole.arrowRight,
               ),
               const BaseBadge(
-                label: 'squared',
+                label: 'ahead 3',
                 variant: BadgeVariant.info,
-                isPill: false,
+                size: BadgeSize.large,
+                icon: IconRole.arrowRight,
               ),
               BaseBadge(
                 label: 'deletable',

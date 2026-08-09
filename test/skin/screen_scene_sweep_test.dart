@@ -290,17 +290,24 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // state. Every other scene measured unchanged - the same run that took the
   // four repository-card metadata marks and the project-section mark back to
   // literals confirmed neither direction moved a count.
-  'shell': 176,
-  'workspaces': 31,
-  'repositories': 55,
+  // P5's member wirings raised seven scenes by +50 in total: the badges and
+  // tags, the list rows, the command log's disclosure, the repositories grid,
+  // the colour picker, the data grid, the commit-graph rows and the suggest
+  // fields now reach the skin instead of being hand-painted copies of it.
+  // Changes, browse, stashes and tags measured unchanged. Every number below
+  // is the sweep's own measurement at closing time, not a sum of the slices'
+  // claims.
+  'shell': 191,
+  'workspaces': 34,
+  'repositories': 59,
   'changes': 39,
-  'history': 80,
+  'history': 84,
   'browse': 25,
-  'branches': 15,
+  'branches': 19,
   'stashes': 17,
   'tags': 34,
-  'settings': 141,
-  'merge_conflicts': 31,
+  'settings': 156,
+  'merge_conflicts': 36,
 };
 
 /// The scenes whose count the SKIN changes, and by how much.
@@ -356,8 +363,10 @@ const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
   // Exactly one less than the register's shell entry, and it must stay
   // exactly one less: the difference IS the single toolbar action
   // `visibleActionCount()` sheds at the stretched distance, so this number
-  // moves in lockstep whenever the shell's own count moves.
-  'shell': 175,
+  // moves in lockstep whenever the shell's own count moves. Measured at
+  // DISTANCE=64 when P5's wirings raised the shell to 191: the stretched run
+  // lands on 190, and the gap is still exactly the one shed action.
+  'shell': 190,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

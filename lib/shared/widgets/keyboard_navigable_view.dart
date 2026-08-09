@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ContentPort, GridDensity, GridSpec, Skin, SkinScope;
 
 import '../controllers/item_navigation_controller.dart';
 import '../controllers/tree_view_controller.dart';
@@ -212,27 +214,70 @@ class _KeyboardNavigableListViewState extends State<KeyboardNavigableListView> {
 
 /// A scrollable grid that is one Tab stop with a roving highlight.
 ///
-/// Same contract as [KeyboardNavigableListView]; the controller's
+/// Same keyboard contract as [KeyboardNavigableListView]; the controller's
 /// [ItemNavigationController.crossAxisCount] makes vertical arrows move by
 /// whole rows while ArrowLeft/Right step through the flattened order.
-class KeyboardNavigableGridView extends StatefulWidget {
+///
+/// **The geometry is `layout.grid`'s wherever the member can state it**
+/// (#249 P5). The tile extent, the aspect ratio and both gutters used to be a
+/// `SliverGridDelegateWithMaxCrossAxisExtent` each hosting screen built by
+/// hand — and each screen then re-implemented that delegate's own column-count
+/// formula on the side, because [ItemNavigationController.crossAxisCount]
+/// needs the answer. Both halves are the member's on the [density] path: the
+/// screen states how tightly packed the tiles should be, and the member
+/// reports the resolved column count back through `GridSpec.onColumnsChanged`
+/// — the one place in the whole contract where a member reports STRUCTURE to
+/// the application, and it exists precisely for this controller.
+///
+/// What this view keeps either way is the half that was never a design
+/// decision: the single focus node, the key handling, the roving highlight and
+/// the per-item `isSelected`/`containerHasFocus` flags.
+///
+/// **[gridDelegate] is the named exception, and it is a measurement, not a
+/// preference.** `GridSpec` says only how tightly packed the tiles are; it has
+/// no word for how TALL a tile has to be, and the Material skin answers every
+/// density rung with one fixed `childAspectRatio: 1.2`. A card whose content
+/// decides its own height therefore has no rung that fits, and the workspace
+/// card is such a card: at the shell's 870-pixel measurement the member's
+/// tile is 232.8 logical pixels tall against the 239.9 the card needs, and it
+/// overflows by 7.1 — the same shortfall recurs across whole bands of window
+/// width (roughly 733–895, 1099–1199, 1465–1503). No density rung avoids it,
+/// because at any one width all three rungs resolve to the same column count
+/// and therefore the same tile height. So that grid keeps its measured
+/// delegate and its register entries until `GridSpec` can state a tile
+/// proportion. Exactly one of [density] and [gridDelegate] is given.
+///
+/// Two capabilities left with the migration, because on the [density] path the
+/// member owns the scroll view and `GridSpec` has no slot for either: a
+/// `padding` around the viewport and the `rowExtent` that used to keep the
+/// highlight scrolled into view. Neither had a caller — both grids passed
+/// neither — so nothing on screen changes; the loss is recorded here rather
+/// than kept as a parameter that silently does nothing.
+class KeyboardNavigableGridView extends StatelessWidget {
   KeyboardNavigableGridView({
     super.key,
     required this.controller,
     required this.itemCount,
     required this.itemBuilder,
-    required this.gridDelegate,
-    this.rowExtent,
+    this.density,
+    this.gridDelegate,
     this.autofocus = false,
     this.additionalBindings,
-    this.padding,
   }) : assert(
          _bindingsAvoidReservedKeys(additionalBindings),
          _bindingsAssertMessage,
+       ),
+       assert(
+         (density == null) != (gridDelegate == null),
+         'A grid states its geometry once: through the contract as a '
+         'GridDensity, or - only for the one grid GridSpec cannot yet '
+         'describe - as a measured delegate. Never both, never neither.',
        );
 
-  /// The shared navigation semantics; its crossAxisCount must describe the
-  /// same columns [gridDelegate] lays out.
+  /// The shared navigation semantics. On the [density] path its
+  /// `crossAxisCount` is written by the member through
+  /// `GridSpec.onColumnsChanged`, so it always describes the columns actually
+  /// laid out; on the [gridDelegate] path the hosting screen still sets it.
   final ItemNavigationController controller;
 
   /// Number of items. The view keeps the controller's count in sync.
@@ -241,12 +286,13 @@ class KeyboardNavigableGridView extends StatefulWidget {
   /// Builds each item; see [NavigableItemBuilder].
   final NavigableItemBuilder itemBuilder;
 
-  /// Grid layout, typically [SliverGridDelegateWithFixedCrossAxisCount].
-  final SliverGridDelegate gridDelegate;
+  /// How tightly packed the tiles should be. The skin turns this into a tile
+  /// extent, an aspect ratio and its gutters. The contract path.
+  final GridDensity? density;
 
-  /// Main-axis extent of one grid row including spacing. Enables keeping the
-  /// highlight scrolled into view; without it the view does not auto-scroll.
-  final double? rowExtent;
+  /// Measured grid geometry, for the one grid `GridSpec` cannot describe yet.
+  /// See the class doc for the measurement that keeps it alive.
+  final SliverGridDelegate? gridDelegate;
 
   /// Whether this collection claims initial focus.
   final bool autofocus;
@@ -255,51 +301,7 @@ class KeyboardNavigableGridView extends StatefulWidget {
   /// function keys plus bare Delete/Backspace.
   final Map<SingleActivator, VoidCallback>? additionalBindings;
 
-  /// Padding for the scroll view.
-  final EdgeInsetsGeometry? padding;
-
-  @override
-  State<KeyboardNavigableGridView> createState() =>
-      _KeyboardNavigableGridViewState();
-}
-
-class _KeyboardNavigableGridViewState extends State<KeyboardNavigableGridView> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_keepSelectionVisible);
-  }
-
-  @override
-  void didUpdateWidget(KeyboardNavigableGridView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_keepSelectionVisible);
-      widget.controller.addListener(_keepSelectionVisible);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_keepSelectionVisible);
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _keepSelectionVisible() {
-    final index = widget.controller.selectedIndex;
-    if (index < 0) return;
-    _scrollRowIntoView(
-      scrollController: _scrollController,
-      row: index ~/ widget.controller.crossAxisCount,
-      rowExtent: widget.rowExtent,
-    );
-  }
-
   KeyEventResult _handleNavigationKey(KeyEvent event) {
-    final controller = widget.controller;
     final key = event.logicalKey;
     if (key == LogicalKeyboardKey.arrowLeft) {
       controller.moveLeft();
@@ -314,28 +316,55 @@ class _KeyboardNavigableGridViewState extends State<KeyboardNavigableGridView> {
 
   @override
   Widget build(BuildContext context) {
-    widget.controller.itemCount = widget.itemCount;
+    controller.itemCount = itemCount;
     return _CollectionFocus(
-      controller: widget.controller,
-      autofocus: widget.autofocus,
-      additionalBindings: widget.additionalBindings,
+      controller: controller,
+      autofocus: autofocus,
+      additionalBindings: additionalBindings,
       handleNavigationKey: _handleNavigationKey,
       builder: (context, hasFocus) => ListenableBuilder(
-        listenable: widget.controller,
-        builder: (context, _) => GridView.builder(
-          controller: _scrollController,
-          padding: widget.padding,
-          gridDelegate: widget.gridDelegate,
-          itemCount: widget.itemCount,
-          itemBuilder: (context, index) => widget.itemBuilder(
-            context,
-            index,
-            widget.controller.isSelected(index),
-            hasFocus,
-          ),
-        ),
+        listenable: controller,
+        builder: (context, _) => _body(context, hasFocus),
       ),
     );
+  }
+
+  Widget _body(BuildContext context, bool hasFocus) {
+    final SliverGridDelegate? measured = gridDelegate;
+    if (measured != null) {
+      return GridView.builder(
+        gridDelegate: measured,
+        itemCount: itemCount,
+        itemBuilder: (context, index) =>
+            itemBuilder(context, index, controller.isSelected(index), hasFocus),
+      );
+    }
+    return SkinScope.render(context, (Skin skin, BuildContext inner) {
+      return skin.layout.grid(
+        inner,
+        GridSpec(
+          density: density!,
+          // The member measures the width and answers with the column count;
+          // the controller needs it for ArrowUp/ArrowDown to move by a whole
+          // row. The answer arrives after the frame that measured it, which
+          // is early enough: no key can be pressed before the grid has been
+          // laid out once.
+          onColumnsChanged: (int columns) =>
+              controller.crossAxisCount = columns,
+          children: <ContentPort>[
+            for (int index = 0; index < itemCount; index++)
+              ContentPort(
+                itemBuilder(
+                  inner,
+                  index,
+                  controller.isSelected(index),
+                  hasFocus,
+                ),
+              ),
+          ],
+        ),
+      );
+    });
   }
 }
 

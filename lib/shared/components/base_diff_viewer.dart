@@ -20,6 +20,33 @@ enum DiffViewMode {
 }
 
 /// Base diff viewer component for rendering diff content with syntax highlighting
+///
+/// **`surfaces.codeLine` is NOT called here, and that is a finding rather than
+/// an omission** (#249, P5). The member exists, is implemented in every skin,
+/// and its gutter geometry is byte-for-byte what this file measures — but two
+/// facts this viewer renders have no slot on `CodeLineSpec` or on
+/// `SkinRequest`, so calling it would silently delete both:
+///
+///  * **The user's code font SIZE.** The application offers two independent
+///    size settings — "Font Size" for the interface and "Code Font Size" for
+///    diffs and previews (`theme_section.dart:185`, `AppConfig.previewFontSize`).
+///    `SkinRequest` carries `monoFamily`, the code font's FAMILY, but only one
+///    `textScale`, and it is the interface one. `CodeLineSpec` has no scale
+///    either, so a diff routed through the member renders at the interface
+///    size and the "Code Font Size" control goes dead for the one surface it
+///    is named after. That is a user-visible setting stopping working, not a
+///    pixel moving.
+///  * **A one-sided gutter.** [_buildFullFileLine] shows a whole file, which
+///    has a single line number, not an old one and a new one. `CodeLineSpec`
+///    draws both gutter columns whenever either number is set, so the full-file
+///    view would gain a permanently blank 52 dp column and push its content
+///    60 dp to the right.
+///
+/// Both are recorded in `docs/SKIN-CONTRACT-MEMBERS.md`'s terms: a member that
+/// cannot say what the site says is a gap in the contract, and the construction
+/// stays by hand — pixel for pixel — until the contract can say it. The eleven
+/// `AppTheme` reads below therefore stay registered against
+/// `surfaces.codeLine` rather than being half-converted around it.
 class BaseDiffViewer extends StatefulWidget {
   final List<DiffLine> diffLines;
   final bool compactMode;

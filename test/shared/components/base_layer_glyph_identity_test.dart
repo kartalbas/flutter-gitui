@@ -14,24 +14,28 @@
 /// independent ways because it can go wrong in three independent ways.
 ///
 /// **One - the site still names the same mark.** [_kMarkCensus] is the
-/// measured inventory of every glyph these twenty-five files named before the
-/// conversion started, counted per file and per mark, with comments dropped.
+/// measured inventory of every glyph these files named before the conversion
+/// started, counted per file and per mark, with comments dropped.
 /// The first test re-counts the same files, folding `PhosphorIcons*.x` and
 /// `IconRole.x` into one tally because a converted site and an unconverted one
 /// name the same *mark* under two vocabularies. A site that quietly moves from
 /// `pencil` to `pencilSimple`, loses a mark or grows one fails here.
 ///
 /// It is generated from `git show HEAD:<file>` rather than typed, and it
-/// carries exactly **two** deliberate differences from the pre-conversion
-/// count, each recorded so that it cannot pass as an accident. Both are the
-/// same judgement made twice: a site drew a mark with Material's `Icons.*`,
-/// which is not in the settled 151-name table at all and therefore counted as
-/// no mark here, and something forced it to become a role.
+/// carries deliberate differences from the pre-conversion count, each recorded
+/// so that it cannot pass as an accident.
+///
+/// The first kind is the same judgement made twice: a site drew a mark with
+/// Material's `Icons.*`, which is not in the settled 151-name table at all and
+/// therefore counted as no mark here, and something forced it to become a role.
 ///
 ///  * `searchable_dropdown.dart` drew its clear affordance with `Icons.clear`;
 ///    it had to become a role for `BaseIconButton.icon` to accept it, and it
-///    became `IconRole.x` because this application already answers "clear this
-///    field" with `x` in `base_text_field.dart`.
+///    became `IconRole.x`. **That file no longer exists** (#249 P5): it was the
+///    second hand-built searchable dropdown, unreachable from anywhere in
+///    `lib/`, and `controls.suggestField` is the member that answers its
+///    question - so the copy was deleted rather than converted, and its one
+///    reference left the census with it.
 ///  * `quick_settings_menu.dart` marked the colour scheme in force with
 ///    `Icons.check`, tinted `colorScheme.primary`. That tint is `Tone.accent`
 ///    said as a value, and the only door a tone goes through is `BaseIcon`,
@@ -40,8 +44,31 @@
 ///    `language_selector.dart` already answers "this is the one in force" with
 ///    `check`, three rows away in the same menu bar.
 ///
-/// Those two are the reason the tally reads 81 references where the
-/// pre-conversion tree read 79.
+/// The second kind is what P5 does by design: a construction that named marks
+/// stops existing because the skin's own member draws them now, and the marks
+/// it named leave the census with it. That is not a mark CHANGING - the census
+/// question - it is a hand-painted construction ceasing to ask for one.
+///
+///  * `base_dropdown.dart` named `caretDown`, `caretUp` and `magnifyingGlass`
+///    inside `SearchableBaseDropdown`: the closed field's open/closed mark and
+///    the search box's mark in its overlay. The class is a façade over
+///    `controls.suggestField` now, and all three marks are drawn by the skin,
+///    from the same roles, inside `_MaterialSuggestField`. `base_panel.dart`
+///    still names the caret pair and `inline_search_field.dart` still names
+///    the glass, so the census's distinct-mark set is unchanged.
+///  * `base_list_item.dart` named `dotsThreeVertical` for the row's own
+///    overflow anchor. The class is a façade over `surfaces.listRow` now, the
+///    entries travel as `MenuEntry` data, and the SKIN builds the anchor from
+///    them — so the row no longer names a mark at all and leaves the census
+///    entirely. `overflow_action_bar.dart` and `standard_app_bar.dart` still
+///    name that mark.
+///  * `command_log_panel.dart` named `caretUp` and `caretDown` for the log
+///    entry's own expand affordance. The entry is `surfaces.disclosure` now
+///    and the caret is the member's, drawn as one mark it turns rather than as
+///    two the application swaps. `base_panel.dart` still names the pair.
+///
+/// The tally therefore reads 74 references: the 81 the conversion measured,
+/// less those seven.
 ///
 /// **Two - the skin maps the mark back to the identical glyph.** The second
 /// test resolves every one of the 39 marks through `MaterialGlyphs` and
@@ -120,14 +147,14 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 81 references', () {
+  test('the census still accounts for all 74 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of an 81-entry diff.
+    // agreeing and this says so in one line instead of a 74-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 81);
+    expect(total, 74);
     // Still 39 distinct marks: the reference `quick_settings_menu.dart` gained
     // is `check`, which `language_selector.dart` already drew.
     expect(_marksInCensus().length, 39);
@@ -521,11 +548,14 @@ const Map<String, String> _kDrawnHeavier = <String, String>{
 const List<String> _kDrawnSolidWhenSelected = <String>['star', 'funnel'];
 
 /// Every mark named in `lib/shared/components/` and `lib/shared/widgets/`, per
-/// file: 81 references over 39 distinct marks in 25 files.
+/// file: 74 references over 39 distinct marks in 22 files.
 ///
 /// Generated from `git show HEAD:<file>` at the commit the conversion started
-/// from, with the two documented exceptions recorded at the top of this file. The counts are per MARK and not per weight, because that is the axis
-/// the conversion must not move.
+/// from, with the documented exceptions recorded at the top of this file - the
+/// two `Icons.*` sites the conversion forced into roles, and the two
+/// constructions P5 replaced with the skin's own member. The counts are per
+/// MARK and not per weight, because that is the axis the conversion must not
+/// move.
 const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
   'lib/shared/components/base_dialog.dart': <String, int>{
     'question': 1,
@@ -535,14 +565,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
   'lib/shared/components/base_diff_viewer.dart': <String, int>{
     'file': 1,
     'gitDiff': 1,
-  },
-  'lib/shared/components/base_dropdown.dart': <String, int>{
-    'caretDown': 1,
-    'caretUp': 1,
-    'magnifyingGlass': 1,
-  },
-  'lib/shared/components/base_list_item.dart': <String, int>{
-    'dotsThreeVertical': 1,
   },
   'lib/shared/components/base_panel.dart': <String, int>{
     'caretDown': 1,
@@ -586,8 +608,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'warning': 1,
   },
   'lib/shared/widgets/command_log_panel.dart': <String, int>{
-    'caretDown': 1,
-    'caretUp': 1,
     'checkCircle': 1,
     'copy': 1,
     'magnifyingGlass': 2,
@@ -636,7 +656,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'textAa': 1,
   },
   'lib/shared/widgets/repository_switcher.dart': <String, int>{'gitCommit': 2},
-  'lib/shared/widgets/searchable_dropdown.dart': <String, int>{'x': 1},
   'lib/shared/widgets/standard_app_bar.dart': <String, int>{
     'arrowsClockwise': 1,
     'dotsThreeVertical': 1,

@@ -3,7 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ContentPort,
+        ControlScale,
+        DisclosureSpec,
+        IconRole,
+        Inset,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 import 'package:google_fonts/google_fonts.dart';
 import '../../generated/app_localizations.dart';
 
@@ -252,11 +262,7 @@ class _LogEntryCardState extends State<_LogEntryCard> {
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
-    final log = group.representative;
-    final isFailure = log.isFailure;
     final hasOutput = group.entries.any((entry) => entry.fullOutput.isNotEmpty);
-    final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
     // The card's trailing bottom padding was the space between one run of the
     // log and the next wearing a padding idiom, so the run states it: the card
     // owns nothing, and the gap sits between it and whatever follows.
@@ -266,259 +272,275 @@ class _LogEntryCardState extends State<_LogEntryCard> {
       children: [
         BaseCard(
           inset: Inset.none,
-          content: InkWell(
-            onTap: hasOutput
-                ? () => setState(() => _isExpanded = !_isExpanded)
-                : null,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            // One entry is a small region of its own inside the card, at the
-            // ordinary reading distance from its edges.
-            child: BaseInset(
-              all: Inset.normal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Success stays quiet, failure takes the danger tone so
-                      // a failed push is visible without expanding anything.
-                      // The nudge above the mark is optical alignment against
-                      // the first line of the command, not an inset, and the
-                      // vocabulary has no word for it - see the report.
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: BaseIcon(
-                          isFailure ? IconRole.xCircle : IconRole.checkCircle,
-                          scale: ControlScale.compact,
-                          tone: isFailure ? Tone.danger : Tone.success,
-                        ),
-                      ),
-                      // The outcome mark and the command it judges are two
-                      // halves of one statement.
-                      const BaseGap(Proximity.related),
-                      // The command is the headline; everything else is meta.
-                      Expanded(
-                        child: BaseLabel(
-                          log.command,
-                          // A git command line is code by the role's own
-                          // definition, and the monospace family it takes is
-                          // now the one the user chose rather than a family
-                          // name written into this file.
-                          role: TextRole.code,
-                          tone: isFailure ? Tone.danger : Tone.neutral,
-                          maxLines: _isExpanded ? null : 2,
-                        ),
-                      ),
-                      // The command and the actions on it are members of one
-                      // row.
-                      const BaseGap(Proximity.related),
-                      BaseIconButton(
-                        icon: IconRole.copy,
-                        size: ButtonSize.small,
-                        tooltip: l10n.tooltipCopyCommand,
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: log.command));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.commandCopiedToClipboard),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                        },
-                      ),
-                      if (hasOutput) ...[
-                        // Two marks of one control cluster, touching.
-                        const BaseGap(Proximity.hairline),
-                        // Optical alignment again: the caret is dropped onto
-                        // the command's first line rather than set in from an
-                        // edge.
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: AppTheme.paddingS,
-                          ),
-                          child: BaseIcon(
-                            _isExpanded ? IconRole.caretUp : IconRole.caretDown,
-                            scale: ControlScale.compact,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  // The command and the facts about that run are two halves of
-                  // one entry.
-                  const BaseGap(Proximity.hairline),
-                  // Meta row, aligned under the command headline. The leading
-                  // padding is that alignment - the extent of the outcome mark
-                  // and the gap after it - rather than the row's own inset, so
-                  // it stays a measurement until the entry becomes a member.
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: AppTheme.paddingM + AppTheme.paddingS,
-                    ),
-                    child: Row(
-                      children: [
-                        if (group.count > 1) ...[
-                          Container(
-                            // A count pill keeps its own tight horizontal
-                            // measure, which no rung names - see the report.
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingXS,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.secondaryContainer,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusS,
-                              ),
-                            ),
-                            child: DefaultTextStyle.merge(
-                              style: TextStyle(
-                                color: colorScheme.onSecondaryContainer,
-                              ),
-                              child: BaseLabel(
-                                'x${group.count}',
-                                role: TextRole.micro,
-                              ),
-                            ),
-                          ),
-                          // Two facts about the same run, side by side.
-                          const BaseGap(Proximity.related),
-                        ],
-                        if (isFailure) ...[
-                          Container(
-                            // Same pill measure as the count beside it.
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingXS,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.errorContainer,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusS,
-                              ),
-                            ),
-                            child: DefaultTextStyle.merge(
-                              style: TextStyle(
-                                color: colorScheme.onErrorContainer,
-                              ),
-                              child: BaseLabel(
-                                '${l10n.failed} (${log.exitCode})',
-                                role: TextRole.micro,
-                              ),
-                            ),
-                          ),
-                          // Two facts about the same run, side by side.
-                          const BaseGap(Proximity.related),
-                        ],
-                        Flexible(
-                          child: BaseLabel(
-                            log.timestampDisplay(
-                              Localizations.localeOf(context).languageCode,
-                            ),
-                            role: TextRole.micro,
-                            tone: Tone.muted,
-                            // A timestamp is one line; the `Flexible` around
-                            // it exists to let it shrink, not to let it wrap.
-                            maxLines: 1,
-                          ),
-                        ),
-                        if (log.duration != null) ...[
-                          // When it ran and how long it took are two facts of
-                          // one line.
-                          const BaseGap(Proximity.related),
-                          BaseLabel(
-                            '${log.duration!.inMilliseconds}ms',
-                            role: TextRole.micro,
-                            tone: Tone.muted,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  // Output (expandable); a collapsed burst lists every run so
-                  // grouping never hides an individual run's output.
-                  if (_isExpanded && hasOutput) ...[
-                    // The entry's own facts and the output it reveals are two
-                    // parts of one card.
-                    const BaseGap(Proximity.related),
-                    const BaseSeparator(),
-                    for (final entry in group.entries)
-                      if (entry.fullOutput.isNotEmpty) ...[
-                        if (group.count > 1) ...[
-                          // One run of the burst and the next.
-                          const BaseGap(Proximity.related),
-                          BaseLabel(
-                            entry.timestampDisplay(
-                              Localizations.localeOf(context).languageCode,
-                            ),
-                            role: TextRole.micro,
-                            tone: Tone.muted,
-                          ),
-                        ],
-                        // The run and the output it produced are two parts of
-                        // one statement.
-                        const BaseGap(Proximity.related),
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusS,
-                            ),
-                          ),
-                          // The output block is a region of its own inside the
-                          // entry and reads at the ordinary distance from its
-                          // own edges.
-                          child: BaseInset(
-                            all: Inset.normal,
-                            // A dense repeating code surface, one step SMALLER
-                            // than `TextRole.code`: the site distinguishes the
-                            // command headline (code, bodyMedium) from the
-                            // output under it (labelMedium), and the
-                            // vocabulary has one word for code, so naming the
-                            // role here would grow every output line ~16% -
-                            // the same class of regression the blame view's
-                            // inset took (#426), one axis over. The block is a
-                            // code-block surface: its fill, corner, inset and
-                            // type step all belong to the member it is waiting
-                            // for, and the style stays written out until that
-                            // member exists.
-                            //
-                            // Its two colours stay with it. They mean
-                            // `Tone.danger` and `Tone.neutral` - "this run
-                            // failed" against ordinary output - but a tone is
-                            // only sayable through `BaseLabel`, and `BaseLabel`
-                            // would bring `TextRole.code`'s size with it and
-                            // grow every output line. Naming the meaning here
-                            // would cost the very regression the paragraph
-                            // above avoids.
-                            child: SelectableText(
-                              entry.fullOutput,
-                              style: GoogleFonts.getFont(
-                                'JetBrains Mono',
-                                textStyle: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(
-                                      color: entry.isFailure
-                                          ? colorScheme.error
-                                          : colorScheme.onSurface,
-                                    ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                  ],
-                ],
+          // One command, and the output it produced when the user asks to see
+          // it: `surfaces.disclosure` said once. The press target, the reveal
+          // animation, the caret and the entry's own inset are all the
+          // member's now - and with them went the hand-built `InkWell`, the
+          // caret glyph swap and the two ways this file used to say "open".
+          content: SkinScope.render(context, (Skin skin, BuildContext inner) {
+            return skin.surfaces.disclosure(
+              inner,
+              DisclosureSpec(
+                header: ContentPort(_buildHeader(inner)),
+                body: ContentPort(_buildOutput(inner)),
+                // An entry that produced no output cannot be opened, and a
+                // stale `true` from a previous group must not survive into
+                // one that has nothing to show.
+                expanded: _isExpanded && hasOutput,
+                onExpandedChanged: (bool open) =>
+                    setState(() => _isExpanded = open),
+                enabled: hasOutput,
               ),
-            ),
-          ),
+            );
+          }),
         ),
         // One run of the log and the next.
         const BaseGap(Proximity.related),
       ],
+    );
+  }
+
+  /// What the entry says whether or not it is open: the outcome, the command,
+  /// the copy action and the facts about the run.
+  ///
+  /// The outcome mark leads the row and the command and its meta line share the
+  /// column beside it, so the meta line is aligned under the headline BY THE
+  /// LAYOUT rather than by a hanging indent measured against the mark. That
+  /// measurement (`AppTheme.paddingM + AppTheme.paddingS` — the mark's own 16
+  /// plus the 8 after it) is what the register held for this file, and it dies
+  /// here rather than being converted.
+  ///
+  /// The mark stays in the header port rather than moving to
+  /// [DisclosureSpec.leading], and that is a contract finding rather than a
+  /// preference: `leading` is an [IconRole] with no [Tone], so the member can
+  /// draw a mark but cannot say that THIS one means "the command failed".
+  /// Handing it over would repaint a red cross in `primary` and lose the one
+  /// thing the mark is there to state.
+  Widget _buildHeader(BuildContext context) {
+    final group = widget.group;
+    final log = group.representative;
+    final isFailure = log.isFailure;
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Success stays quiet, failure takes the danger tone so a failed push
+        // is visible without expanding anything. The nudge above the mark is
+        // optical alignment against the first line of the command, not an
+        // inset, and the vocabulary has no word for it - see the report.
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: BaseIcon(
+            isFailure ? IconRole.xCircle : IconRole.checkCircle,
+            scale: ControlScale.compact,
+            tone: isFailure ? Tone.danger : Tone.success,
+          ),
+        ),
+        // The outcome mark and the command it judges are two halves of one
+        // statement.
+        const BaseGap(Proximity.related),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // The command is the headline; everything else is meta.
+                  Expanded(
+                    child: BaseLabel(
+                      log.command,
+                      // A git command line is code by the role's own
+                      // definition, and the monospace family it takes is now
+                      // the one the user chose rather than a family name
+                      // written into this file.
+                      role: TextRole.code,
+                      tone: isFailure ? Tone.danger : Tone.neutral,
+                      maxLines: _isExpanded ? null : 2,
+                    ),
+                  ),
+                  // The command and the actions on it are members of one row.
+                  const BaseGap(Proximity.related),
+                  BaseIconButton(
+                    icon: IconRole.copy,
+                    size: ButtonSize.small,
+                    tooltip: l10n.tooltipCopyCommand,
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: log.command));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.commandCopiedToClipboard),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              // The command and the facts about that run are two halves of one
+              // entry.
+              const BaseGap(Proximity.hairline),
+              _buildMeta(context),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// The facts about the run: how many times it repeated, whether it failed,
+  /// when it ran and how long it took.
+  Widget _buildMeta(BuildContext context) {
+    final group = widget.group;
+    final log = group.representative;
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        if (group.count > 1) ...[
+          Container(
+            // A count pill keeps its own tight horizontal measure, which no
+            // rung names - see the report.
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.paddingXS,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(AppTheme.radiusS),
+            ),
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: colorScheme.onSecondaryContainer),
+              child: BaseLabel('x${group.count}', role: TextRole.micro),
+            ),
+          ),
+          // Two facts about the same run, side by side.
+          const BaseGap(Proximity.related),
+        ],
+        if (log.isFailure) ...[
+          Container(
+            // Same pill measure as the count beside it.
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.paddingXS,
+              vertical: 2,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.errorContainer,
+              borderRadius: BorderRadius.circular(AppTheme.radiusS),
+            ),
+            child: DefaultTextStyle.merge(
+              style: TextStyle(color: colorScheme.onErrorContainer),
+              child: BaseLabel(
+                '${l10n.failed} (${log.exitCode})',
+                role: TextRole.micro,
+              ),
+            ),
+          ),
+          // Two facts about the same run, side by side.
+          const BaseGap(Proximity.related),
+        ],
+        Flexible(
+          child: BaseLabel(
+            log.timestampDisplay(Localizations.localeOf(context).languageCode),
+            role: TextRole.micro,
+            tone: Tone.muted,
+            // A timestamp is one line; the `Flexible` around it exists to let
+            // it shrink, not to let it wrap.
+            maxLines: 1,
+          ),
+        ),
+        if (log.duration != null) ...[
+          // When it ran and how long it took are two facts of one line.
+          const BaseGap(Proximity.related),
+          BaseLabel(
+            '${log.duration!.inMilliseconds}ms',
+            role: TextRole.micro,
+            tone: Tone.muted,
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// What the entry reveals: every run of the burst that produced output, so
+  /// grouping never hides an individual run's.
+  ///
+  /// It carries its own horizontal inset because the member insets the HEADER
+  /// and reveals the body underneath it unpadded; the trailing gap is the last
+  /// run's distance from the card's own bottom edge.
+  Widget _buildOutput(BuildContext context) {
+    final group = widget.group;
+    final colorScheme = Theme.of(context).colorScheme;
+    return BaseInset(
+      y: Inset.none,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const BaseSeparator(),
+          for (final entry in group.entries)
+            if (entry.fullOutput.isNotEmpty) ...[
+              if (group.count > 1) ...[
+                // One run of the burst and the next.
+                const BaseGap(Proximity.related),
+                BaseLabel(
+                  entry.timestampDisplay(
+                    Localizations.localeOf(context).languageCode,
+                  ),
+                  role: TextRole.micro,
+                  tone: Tone.muted,
+                ),
+              ],
+              // The run and the output it produced are two parts of one
+              // statement.
+              const BaseGap(Proximity.related),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                ),
+                // The output block is a region of its own inside the entry and
+                // reads at the ordinary distance from its own edges.
+                child: BaseInset(
+                  all: Inset.normal,
+                  // A dense repeating code surface, one step SMALLER than
+                  // `TextRole.code`: the site distinguishes the command
+                  // headline (code, bodyMedium) from the output under it
+                  // (labelMedium), and the vocabulary has one word for code,
+                  // so naming the role here would grow every output line ~16%
+                  // - the same class of regression the blame view's inset took
+                  // (#426), one axis over. The block is a code-block surface:
+                  // its fill, corner, inset and type step all belong to the
+                  // member it is waiting for, and the style stays written out
+                  // until that member exists.
+                  //
+                  // Its two colours stay with it. They mean `Tone.danger` and
+                  // `Tone.neutral` - "this run failed" against ordinary output
+                  // - but a tone is only sayable through `BaseLabel`, and
+                  // `BaseLabel` would bring `TextRole.code`'s size with it and
+                  // grow every output line. Naming the meaning here would cost
+                  // the very regression the paragraph above avoids.
+                  child: SelectableText(
+                    entry.fullOutput,
+                    style: GoogleFonts.getFont(
+                      'JetBrains Mono',
+                      textStyle: Theme.of(context).textTheme.labelMedium
+                          ?.copyWith(
+                            color: entry.isFailure
+                                ? colorScheme.error
+                                : colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          // The last run's output and the card's own bottom edge.
+          const BaseGap(Proximity.grouped),
+        ],
+      ),
     );
   }
 }

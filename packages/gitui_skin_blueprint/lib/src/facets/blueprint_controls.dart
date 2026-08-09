@@ -850,6 +850,8 @@ class _BlueprintSuggestFieldState<T> extends State<_BlueprintSuggestField<T>> {
             fillWidth: true,
             child: Row(
               children: <Widget>[
+                if (spec.leading != null)
+                  _mark(BlueprintMarks.icon(spec.leading!)),
                 Expanded(
                   child: ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,

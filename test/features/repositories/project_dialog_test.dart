@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show SkinPainted;
 
 import 'package:flutter_gitui/features/repositories/dialogs/project_dialog.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
@@ -79,5 +80,30 @@ void main() {
     expect(find.byType(ProjectDialog), findsNothing);
     expect(result, isNotNull);
     expect(result!.name, 'Alpha');
+  });
+
+  testWidgets('the colour swatches are the skin\'s, not the dialog\'s', (
+    tester,
+  ) async {
+    await _openDialog(tester, (_) {});
+
+    // `controls.seriesPicker` announces itself as one container carrying the
+    // field's own label, which is how the member is recognisable without
+    // naming any skin's widgets. The dialog used to draw the swatches itself
+    // from a palette it enumerated; once the skin owns the palette AND its
+    // length there is no legal way for it to.
+    final picker = find.byWidgetPredicate(
+      (widget) =>
+          widget is Semantics && widget.properties.label == 'Project Color',
+    );
+    expect(picker, findsOneWidget);
+
+    // And it is genuinely below a skin's fence rather than hand-painted with
+    // the same words: the attribution walk prunes at [SkinPainted], which
+    // only `SkinScope.render` can plant.
+    expect(
+      find.ancestor(of: picker, matching: find.byType(SkinPainted)),
+      findsWidgets,
+    );
   });
 }

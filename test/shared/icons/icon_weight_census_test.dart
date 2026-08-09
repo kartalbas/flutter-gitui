@@ -75,7 +75,7 @@ class _Weights {
 /// `git show HEAD:` each file and over the working tree, with whole-line
 /// comments dropped so that a comment recording what a site USED to draw is
 /// not counted as a live reference. 110 Bold and 14 Fill references before;
-/// 92 and 10 now, and the two "before" totals are the ones the mapping phase's
+/// 91 and 10 now, and the two "before" totals are the ones the mapping phase's
 /// own census reported.
 const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/core/navigation/app_shell.dart': _Weights(2, 1, 2, 0),
@@ -102,7 +102,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
     0,
     0,
   ),
-  'lib/features/repositories/dialogs/project_dialog.dart': _Weights(4, 0, 1, 0),
+  'lib/features/repositories/dialogs/project_dialog.dart': _Weights(4, 0, 0, 0),
   'lib/features/repositories/repositories_screen.dart': _Weights(1, 0, 1, 0),
   'lib/features/repositories/screens/icon_comparison_screen.dart': _Weights(
     10,
@@ -198,8 +198,8 @@ class _GivenUp {
 
 /// Every weight the conversion removed from `lib/`, with its disposition.
 ///
-/// Twenty-two entries against a ledger difference of 18 Bold plus 4 Fill, so
-/// the two measurements have to agree; the third test makes them.
+/// Twenty-three entries against a ledger difference of 19 Bold plus 4 Fill,
+/// so the two measurements have to agree; the third test makes them.
 const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
   // ---- Fill: four sites, all four still drawn solid -----------------------
   _GivenUp(
@@ -393,6 +393,19 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
     'The failure branch of that same list mark, drawn at the same weight as '
         'the success branch, so nothing distinguished the two.',
   ),
+  // ---- P5's one: the weight crossed the seam with its member --------------
+  _GivenUp(
+    'lib/features/repositories/dialogs/project_dialog.dart',
+    'check',
+    'Bold',
+    _Fate.restored,
+    'The selected-swatch tick in the colour picker. The whole picker moved '
+        'across the seam as controls.seriesPicker, and the member keeps the '
+        'weight: MaterialControls.seriesPicker draws the tick with '
+        'MaterialGlyphs.boldOf(IconRole.check), because a mark sitting on a '
+        'saturated swatch has to survive the contrast - the skin deciding a '
+        'WEIGHT, which is exactly the decision IconRole refuses to carry.',
+  ),
 ];
 
 void main() {
@@ -478,7 +491,7 @@ void main() {
         fillRemoved,
         _kWeightsGivenUp.where((_GivenUp g) => g.weight == 'Fill').length,
       );
-      expect(boldRemoved, 18);
+      expect(boldRemoved, 19);
       expect(fillRemoved, 4);
     });
 

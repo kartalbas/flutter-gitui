@@ -5,7 +5,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, GridDensity, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -50,9 +50,6 @@ class RepositoriesScreen extends ConsumerStatefulWidget {
 }
 
 class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
-  /// Width one grid card may take, matching the grid delegate below.
-  static const double _cardMaxCrossAxisExtent = 400;
-
   bool _isDragging = false;
   int _lastRepositoryCount = 0;
   bool _hasAssignedRepos = false;
@@ -523,57 +520,44 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     final currentRepoPath = ref.watch(currentRepositoryPathProvider);
     final selectedPaths = ref.watch(repositoryMultiSelectProvider);
 
-    // The grid resolves its column count from the width, so the controller
-    // must learn it here for vertical arrows to move by whole rows. Same
-    // formula SliverGridDelegateWithMaxCrossAxisExtent uses.
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns =
-            (constraints.maxWidth /
-                    (_cardMaxCrossAxisExtent + AppTheme.paddingM))
-                .ceil();
-        _navigationController.crossAxisCount = columns < 1 ? 1 : columns;
+    // The grid's geometry is `layout.grid`'s: the screen states how tightly
+    // packed the cards should sit and the member answers with the tile
+    // extent, the aspect ratio, the gutters AND the resolved column count the
+    // keyboard controller needs. `roomy` is the rung that carries the 400
+    // pixels these cards were laid out at.
+    return KeyboardNavigableGridView(
+      controller: _navigationController,
+      itemCount: repositories.length,
+      autofocus: true,
+      density: GridDensity.roomy,
+      itemBuilder: (context, index, isHighlighted, containerHasFocus) {
+        final repo = repositories[index];
+        final isSelected =
+            currentRepoPath != null && repo.path == currentRepoPath;
+        final isMultiSelected = selectedPaths.contains(repo.path);
 
-        return KeyboardNavigableGridView(
-          controller: _navigationController,
-          itemCount: repositories.length,
-          autofocus: true,
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: _cardMaxCrossAxisExtent,
-            childAspectRatio: 1.2,
-            crossAxisSpacing: AppTheme.paddingM,
-            mainAxisSpacing: AppTheme.paddingM,
-          ),
-          itemBuilder: (context, index, isHighlighted, containerHasFocus) {
-            final repo = repositories[index];
-            final isSelected =
-                currentRepoPath != null && repo.path == currentRepoPath;
-            final isMultiSelected = selectedPaths.contains(repo.path);
-
-            return RepositoryCard(
-              repository: repo,
-              isSelected: isSelected,
-              isMultiSelected: isMultiSelected,
-              isHighlighted: isHighlighted,
-              containerHasFocus: containerHasFocus,
-              showCheckbox: true, // Always show checkbox for easy multi-select
-              onToggleSelection: () {
-                ref
-                    .read(repositoryMultiSelectProvider.notifier)
-                    .toggleSelection(repo);
-              },
-              onTap: () {
-                // A click moves the highlight to the card it acted on, so
-                // keyboard and mouse stay in one story.
-                _navigationController.select(index);
-                _activateRepositoryAt(index);
-              },
-              onRemove: () => _confirmRemoveRepository(context, ref, repo),
-              onToggleFavorite: () => _toggleFavorite(ref, repo),
-              onOpenInEditor: () => _openInEditor(context, ref, repo),
-              onEditRemoteUrl: () => _editRemoteUrl(context, ref, repo),
-            );
+        return RepositoryCard(
+          repository: repo,
+          isSelected: isSelected,
+          isMultiSelected: isMultiSelected,
+          isHighlighted: isHighlighted,
+          containerHasFocus: containerHasFocus,
+          showCheckbox: true, // Always show checkbox for easy multi-select
+          onToggleSelection: () {
+            ref
+                .read(repositoryMultiSelectProvider.notifier)
+                .toggleSelection(repo);
           },
+          onTap: () {
+            // A click moves the highlight to the card it acted on, so
+            // keyboard and mouse stay in one story.
+            _navigationController.select(index);
+            _activateRepositoryAt(index);
+          },
+          onRemove: () => _confirmRemoveRepository(context, ref, repo),
+          onToggleFavorite: () => _toggleFavorite(ref, repo),
+          onOpenInEditor: () => _openInEditor(context, ref, repo),
+          onEditRemoteUrl: () => _editRemoteUrl(context, ref, repo),
         );
       },
     );

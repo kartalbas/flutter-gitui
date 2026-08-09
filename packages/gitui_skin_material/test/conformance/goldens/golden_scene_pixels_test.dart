@@ -39,6 +39,7 @@ import 'package:flutter_gitui/shared/components/base_list_item.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/conformance_harness.dart';
 import 'component_scenes.dart';
 import 'golden_scene.dart';
 
@@ -256,6 +257,14 @@ void main() {
             theme: brightness == Brightness.light
                 ? AppTheme.lightTheme()
                 : AppTheme.darkTheme(),
+            // The scope `main.dart` installs, beneath the single `MaterialApp`
+            // and above whatever it builds. It is part of "the way every
+            // screen does it", not a wrapper of this test's own invention:
+            // `BaseListItem` is a façade over `surfaces.listRow` since P5, and
+            // a façade without a scope fails on the missing scope instead of
+            // being measured — the case `underSkin` was written for at P2.
+            builder: (BuildContext context, Widget? built) =>
+                underSkin(built ?? const SizedBox.shrink(), brightness),
             home: Scaffold(
               body: Builder(
                 builder: (BuildContext context) {

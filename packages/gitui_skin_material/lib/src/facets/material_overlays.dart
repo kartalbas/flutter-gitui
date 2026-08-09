@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart' hide MaterialType;
+// `SemanticsRole` is not re-exported by material.dart; the menu surface below
+// states the enclosing menu role its `PopupMenuItem` rows require.
+import 'package:flutter/semantics.dart' show SemanticsRole;
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 
 import '../material_glyphs.dart';
@@ -461,25 +464,38 @@ class _MaterialMenuSurface extends StatelessWidget {
           );
       }
     }
-    return Material(
-      elevation: menuTheme.elevation ?? MaterialMetrics.elevationRaised,
-      color: menuTheme.color,
-      shape: menuTheme.shape,
-      clipBehavior: Clip.antiAlias,
-      child: ConstrainedBox(
-        // The SDK's own menu measurements: two width steps minimum, five
-        // maximum, at 56 logical pixels a step.
-        constraints: const BoxConstraints(minWidth: 112, maxWidth: 280),
-        child: IntrinsicWidth(
-          stepWidth: 56,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: MaterialMetrics.spaceS,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: rows,
+    // The rows are `PopupMenuItem`s, and a `PopupMenuItem` publishes
+    // `SemanticsRole.menuItem` (popup_menu.dart:479). Flutter validates that
+    // role: a menu item with no `SemanticsRole.menu` ancestor raises "A menu
+    // item must be a child of a menu or a menu bar"
+    // (semantics.dart:_semanticsMenuItem). Material's own `_PopupMenu` states
+    // the enclosing role at popup_menu.dart:766; this surface replaces that
+    // widget, so it has to state it too. Without it every menu opened through
+    // this member throws the moment semantics are on - which is every widget
+    // test, and every user running a screen reader.
+    return Semantics(
+      role: SemanticsRole.menu,
+      explicitChildNodes: true,
+      child: Material(
+        elevation: menuTheme.elevation ?? MaterialMetrics.elevationRaised,
+        color: menuTheme.color,
+        shape: menuTheme.shape,
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          // The SDK's own menu measurements: two width steps minimum, five
+          // maximum, at 56 logical pixels a step.
+          constraints: const BoxConstraints(minWidth: 112, maxWidth: 280),
+          child: IntrinsicWidth(
+            stepWidth: 56,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: MaterialMetrics.spaceS,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: rows,
+              ),
             ),
           ),
         ),

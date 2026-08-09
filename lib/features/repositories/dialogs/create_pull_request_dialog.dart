@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show IconRole, Inset, Proximity, SuggestItem, TextRole, Tone;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../shared/theme/app_theme.dart';
@@ -160,13 +160,23 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
+                  // `controls.suggestField`, reached through the one façade
+                  // the application keeps for it. The branch list is stated as
+                  // DATA - a value, the words it is called, what distinguishes
+                  // it and what KIND of branch it is - and the skin draws the
+                  // row, the overlay and the search box from it.
+                  //
+                  // The validator this used to carry is gone with the hand-built
+                  // `FormField`: the member is unhosted by decision
+                  // (`Fields.suggest`), and the rule it enforced - "a source
+                  // branch must be named" - cannot fail here, because
+                  // `_selectedSourceBranch` is non-nullable and is set in
+                  // `initState`.
                   child: SearchableBaseDropdown<GitBranch>(
                     value: _selectedSourceBranch,
-                    labelText: l10n.sourceBranchLabel,
-                    hintText: l10n.selectSourceBranch,
-                    searchHintText: l10n.searchBranches,
+                    label: l10n.sourceBranchLabel,
                     prefixIcon: IconRole.gitBranch,
-                    displayStringForItem: (branch) => branch.name,
+                    searchHint: l10n.searchBranches,
                     items: sourceBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
                           ? timeago.format(
@@ -174,34 +184,28 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                               locale: 'en_short',
                             )
                           : null;
-                      return SearchableDropdownItem<GitBranch>.simple(
+                      return SuggestItem<GitBranch>(
                         value: branch,
                         label: branch.name,
-                        subtitle: lastCommitText,
+                        detail: lastCommitText,
+                        // A meaning rather than a glyph: which mark stands for
+                        // "this branch lives on a remote" is the skin's answer.
                         icon: branch.isRemote
-                            ? PhosphorIconsRegular.cloud
-                            : PhosphorIconsRegular.gitBranch,
+                            ? IconRole.cloud
+                            : IconRole.gitBranch,
                       );
                     }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedSourceBranch = value;
-                          // The target dropdown hides the source branch, so a base that
-                          // just became the source is no longer selectable and would
-                          // otherwise survive as a same-branch pull request.
-                          if (_selectedBaseBranch.name ==
-                              _selectedSourceBranch.name) {
-                            _resetBranchSelection();
-                          }
-                        });
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return l10n.selectSourceBranch;
-                      }
-                      return null;
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedSourceBranch = value;
+                        // The target dropdown hides the source branch, so a base
+                        // that just became the source is no longer selectable and
+                        // would otherwise survive as a same-branch pull request.
+                        if (_selectedBaseBranch.name ==
+                            _selectedSourceBranch.name) {
+                          _resetBranchSelection();
+                        }
+                      });
                     },
                   ),
                 ),
@@ -260,13 +264,14 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
+                  // The same member as the source field above, for the same
+                  // reason; `_selectedBaseBranch` is non-nullable too, so the
+                  // dropped validator was equally unreachable here.
                   child: SearchableBaseDropdown<GitBranch>(
                     value: _selectedBaseBranch,
-                    labelText: l10n.targetBranchLabel,
-                    hintText: l10n.selectTargetBranch,
-                    searchHintText: l10n.searchBranches,
+                    label: l10n.targetBranchLabel,
                     prefixIcon: IconRole.gitBranch,
-                    displayStringForItem: (branch) => branch.name,
+                    searchHint: l10n.searchBranches,
                     items: targetBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
                           ? timeago.format(
@@ -274,27 +279,19 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                               locale: 'en_short',
                             )
                           : null;
-                      return SearchableDropdownItem<GitBranch>.simple(
+                      return SuggestItem<GitBranch>(
                         value: branch,
                         label: branch.name,
-                        subtitle: lastCommitText,
+                        detail: lastCommitText,
                         icon: branch.isRemote
-                            ? PhosphorIconsRegular.cloud
-                            : PhosphorIconsRegular.gitBranch,
+                            ? IconRole.cloud
+                            : IconRole.gitBranch,
                       );
                     }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedBaseBranch = value;
-                        });
-                      }
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return l10n.selectTargetBranch;
-                      }
-                      return null;
+                    onSelected: (value) {
+                      setState(() {
+                        _selectedBaseBranch = value;
+                      });
                     },
                   ),
                 ),

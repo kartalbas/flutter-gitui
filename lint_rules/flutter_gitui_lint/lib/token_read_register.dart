@@ -272,138 +272,53 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
     reason: 'The gutter-to-content gap of the same hand-painted line.',
   ),
 
-  // ── surfaces.badge (8 reads) ────────────────────────────────────────────
-  // The hand-painted pill. BadgeSpec maps size to ControlScale and variant to
-  // Tone; the per-size geometry below is what the member replaces. A Material
-  // floor already exists (material_surfaces.dart:670).
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'horizontalPadding = AppTheme.paddingS;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (small) horizontal padding of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'horizontalPadding = AppTheme.paddingM;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (medium) horizontal padding of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'horizontalPadding = AppTheme.paddingL;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (large) horizontal padding of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'verticalPadding = AppTheme.paddingS;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (large) vertical padding of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'borderRadius = isPill ? 12 : AppTheme.radiusS;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (small) corner of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'borderRadius = isPill ? 16 : AppTheme.radiusS;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (medium) corner of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'borderRadius = isPill ? 20 : AppTheme.radiusM;',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Per-size (large) corner of the hand-painted pill.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'SizedBox(width: AppTheme.paddingS / 2),',
-    reads: 1,
-    waitsFor: 'surfaces.badge',
-    reason: 'Icon-to-label gap inside the pill.',
-  ),
-
-  // ── surfaces.tag (2 reads) ──────────────────────────────────────────────
-  // The deletable form of the pill; TagSpec (onRemoved, removeTooltip) owns
-  // the delete affordance geometry.
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'AppTheme.paddingS / 2,',
-    reads: 1,
-    waitsFor: 'surfaces.tag',
-    reason:
-        'The delete-gap half-step inside the math.max that spaces the '
-        'label from the delete affordance.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_badge.dart',
-    site: 'radius: glyphSize / 2 + AppTheme.paddingXS,',
-    reads: 1,
-    waitsFor: 'surfaces.tag',
-    reason:
-        'The delete affordance\'s state-layer radius; the skin owns the '
-        'delete geometry.',
-  ),
-
-  // ── layout.grid — GridSpec with onColumnsChanged (6 reads) ──────────────
-  // GridSpec's own doc (layout_specs.dart:8-14) names this exact
-  // construction: the screen re-implements the delegate's own formula.
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/repositories_screen.dart',
-    site: '(_cardMaxCrossAxisExtent + AppTheme.paddingM))',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec.onColumnsChanged)',
-    reason:
-        'The column-count formula the delegate already owns; GridSpec '
-        'reports the count back instead of the screen re-deriving it.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/repositories_screen.dart',
-    site: 'crossAxisSpacing: AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec)',
-    reason: 'Grid gutter; the grid member owns its gutters.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/repositories_screen.dart',
-    site: 'mainAxisSpacing: AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec)',
-    reason: 'Grid gutter; the grid member owns its gutters.',
-  ),
+  // ── layout.grid — GridSpec with onColumnsChanged (3 reads) ──────────────
+  // The repositories card grid CONVERTED and took its 3 reads with it: it
+  // states GridDensity.roomy through KeyboardNavigableGridView and the member
+  // answers with the tile extent, the aspect ratio, both gutters and - through
+  // onColumnsChanged - the column count the screen used to re-derive from the
+  // delegate's own formula. Its numbers were the member's exactly (400, 1.2,
+  // 16, 16), so not a pixel moved.
+  //
+  // The workspaces card grid did NOT convert, and the blocker is measured
+  // rather than asserted: GridSpec says only how tightly PACKED the tiles are
+  // and has no word for how TALL a tile has to be, so the Material skin
+  // answers every density rung with one fixed childAspectRatio of 1.2. The
+  // workspace card decides its own height and needs 239.9 logical pixels at
+  // the shell's 870-pixel measurement, where the member's tile is 232.8 - a
+  // RenderFlex overflow of 7.1, recurring across whole bands of window width
+  // (roughly 733-895, 1099-1199, 1465-1503). No rung avoids it: at any one
+  // width all three resolve to the same column count and therefore the same
+  // tile height. These three reads stay until GridSpec can state a tile
+  // proportion; see keyboard_navigable_view.dart's gridDelegate for the same
+  // measurement at the call site.
   TokenReadRegisterEntry(
     file: 'lib/features/workspaces/workspaces_screen.dart',
     site: '(_cardMaxCrossAxisExtent + AppTheme.paddingL))',
     reads: 1,
     waitsFor: 'layout.grid (GridSpec.onColumnsChanged)',
     reason:
-        'Same column-count formula as the repositories screen, with the '
-        'wider gutter.',
+        'The column-count formula the delegate already owns. It cannot go '
+        'until the grid itself does, and the grid is held by GridSpec having '
+        'no word for a tile proportion (measured above).',
   ),
   TokenReadRegisterEntry(
     file: 'lib/features/workspaces/workspaces_screen.dart',
     site: 'crossAxisSpacing: AppTheme.paddingL,',
     reads: 1,
     waitsFor: 'layout.grid (GridSpec)',
-    reason: 'Grid gutter; the grid member owns its gutters.',
+    reason:
+        'Grid gutter; the grid member owns its gutters, and takes this one '
+        'as soon as it can host these cards without shortening them.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/features/workspaces/workspaces_screen.dart',
     site: 'mainAxisSpacing: AppTheme.paddingL,',
     reads: 1,
     waitsFor: 'layout.grid (GridSpec)',
-    reason: 'Grid gutter; the grid member owns its gutters.',
+    reason: 'The other gutter of the same grid; see the entry above.',
   ),
+
   // ── surfaces.tree (5 reads) ─────────────────────────────────────────────
   // The tree owns per-depth indent, row height and (via TreeNodeSpec.menu)
   // its own row-action anchor.
@@ -449,34 +364,13 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'the component\'s indent parameter becomes one.',
   ),
 
-  // ── controls.suggestField (3 reads) ─────────────────────────────────────
-  // Both hand-built searchable dropdowns; "a different canonical widget
-  // class in every language" (skin_controls.dart:40-48).
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_dropdown.dart',
-    site: 'elevation: AppTheme.elevationLevel2,',
-    reads: 1,
-    waitsFor: 'controls.suggestField',
-    reason:
-        'Overlay elevation of the hand-built searchable dropdown '
-        '(SearchableBaseDropdown).',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_dropdown.dart',
-    site: 'vertical: AppTheme.paddingS + 4,',
-    reads: 1,
-    waitsFor: 'controls.suggestField',
-    reason:
-        'Field box vertical padding of the hand-built searchable '
-        'dropdown.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/widgets/searchable_dropdown.dart',
-    site: 'elevation: AppTheme.elevationLevel2,',
-    reads: 1,
-    waitsFor: 'controls.suggestField',
-    reason: 'Overlay elevation of the second hand-built searchable dropdown.',
-  ),
+  // ── controls.suggestField — CONVERTED, no entries left ──────────────────
+  // Both hand-built searchable dropdowns are gone. `SearchableBaseDropdown`
+  // is a façade over `controls.suggestField` (through `Fields.suggest`), so
+  // the overlay elevation and the closed box's vertical padding are the
+  // skin's numbers now; `searchable_dropdown.dart` had no call site anywhere
+  // in lib/ and a second façade over one member would be two ways to ask for
+  // one thing, so it was deleted rather than converted.
 
   // ── chrome.shell — ShellSpec.toolbar (2 reads) ──────────────────────────
   // The skin owns what fits and what overflows (SKIN-CONTRACT.md §4.1);
@@ -502,92 +396,38 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'the bar.',
   ),
 
-  // ── surfaces.commitGraphRow (2 reads) ───────────────────────────────────
-  // The contract names these constants as moving into the skin verbatim
-  // (SKIN-CONTRACT.md §5.4).
-  TokenReadRegisterEntry(
-    file: 'lib/features/history/widgets/commit_graph_painter.dart',
-    site: 'static const double _dividerStrip = AppTheme.paddingS + 1.0;',
-    reads: 1,
-    waitsFor: 'surfaces.commitGraphRow',
-    reason:
-        'The divider strip constant the contract moves into the skin '
-        'verbatim.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/history/widgets/commit_graph_painter.dart',
-    site: 'AppTheme.paddingL +',
-    reads: 1,
-    waitsFor: 'surfaces.commitGraphRow',
-    reason:
-        'The lane x-origin (paddingL + laneWidth * lane) the contract '
-        'moves into the skin verbatim.',
-  ),
+  // ── surfaces.commitGraphRow — CONVERTED (was 2 reads) ───────────────────
+  // commit_list_item.dart calls surfaces.commitGraphRow and
+  // commit_graph_painter.dart is deleted, so the divider strip and the lane
+  // x-origin moved into the skin verbatim, exactly as SKIN-CONTRACT.md §5.4
+  // said they would. lib/ now contains no `extends CustomPainter`.
 
-  // ── controls.seriesPicker (2 reads) ─────────────────────────────────────
-  // The workspace-colour swatch grid; after Tone.series the application
-  // cannot even enumerate the palette (control_specs.dart:534-541).
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/dialogs/project_dialog.dart',
-    site: 'width: AppTheme.iconXL * 2,',
-    reads: 1,
-    waitsFor: 'controls.seriesPicker',
-    reason: 'Swatch square width; the picker owns swatch geometry.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/dialogs/project_dialog.dart',
-    site: 'height: AppTheme.iconXL * 2,',
-    reads: 1,
-    waitsFor: 'controls.seriesPicker',
-    reason: 'Swatch square height; the picker owns swatch geometry.',
-  ),
+  // controls.seriesPicker: CONVERTED, 2 reads gone. The swatch grid in
+  // project_dialog.dart is the member now, so the swatch geometry - and the
+  // length of the palette the application could still enumerate - is the
+  // skin's. What the dialog still owns is which member of the series is on.
 
-  // ── surfaces.disclosure (2 reads) ───────────────────────────────────────
-  // The command-log entry is a named floor of this member
-  // (SKIN-CONTRACT-MEMBERS.md:396,418); the outcome mark becomes
-  // DisclosureSpec.leading, so the hanging-indent measurement dies.
-  TokenReadRegisterEntry(
-    file: 'lib/shared/widgets/command_log_panel.dart',
-    site: 'left: AppTheme.paddingM + AppTheme.paddingS,',
-    reads: 2,
-    waitsFor: 'surfaces.disclosure',
-    reason:
-        'Meta-row hanging indent aligning under the headline past the '
-        'outcome mark; DisclosureSpec.leading absorbs the mark and the '
-        'measurement with it.',
-  ),
+  // ── surfaces.disclosure — CONVERTED (was 2 reads) ───────────────────────
+  // command_log_panel.dart's log entry calls surfaces.disclosure. The
+  // hanging indent died with the construction rather than moving: the
+  // outcome mark leads the header row and the command and its meta line
+  // share the column beside it, so the meta line is aligned by the layout.
+  // The mark stayed in the header port and did NOT become
+  // DisclosureSpec.leading, because that slot is an IconRole with no Tone
+  // and cannot say "this run failed" - reported as a contract finding.
 
-  // ── surfaces.dataGrid (2 reads) ─────────────────────────────────────────
-  TokenReadRegisterEntry(
-    file: 'lib/features/browse/widgets/viewers/csv_viewer_dialog.dart',
-    site: 'columnSpacing: AppTheme.paddingL,',
-    reads: 1,
-    waitsFor: 'surfaces.dataGrid',
-    reason:
-        'The CSV viewer\'s DataTable column spacing; the grid member '
-        'owns table metrics.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/browse/widgets/viewers/csv_viewer_dialog.dart',
-    site: 'horizontalMargin: AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'surfaces.dataGrid',
-    reason:
-        'The CSV viewer\'s DataTable horizontal margin; the grid member '
-        'owns table metrics.',
-  ),
+  // ── surfaces.dataGrid — CONVERTED (was 2 reads) ─────────────────────────
+  // csv_viewer_dialog.dart calls surfaces.dataGrid; the column spacing and
+  // the horizontal margin are the member's arithmetic now.
 
-  // ── controls.progress — ProgressExtent.block (1 read) ───────────────────
-  TokenReadRegisterEntry(
-    file:
-        'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart',
-    site: 'minHeight: AppTheme.paddingS,',
-    reads: 1,
-    waitsFor: 'controls.progress (ProgressExtent.block)',
-    reason:
-        'Bar thickness; the member takes fraction + extent and the '
-        'thickness is the skin\'s.',
-  ),
+  // ── controls.progress — CONVERTED, no entries left ──────────────────────
+  // The batch dialog's bar calls `controls.progress` and the thickness is the
+  // skin's. The entry that stood here named the wrong rung: it said
+  // `ProgressExtent.block`, but `block` is the rung for "its own region, with
+  // nothing else competing for the space" - Material draws it as a centred
+  // ring and the blueprint skin as a bare "(45%)". The batch bar shares its
+  // row with the "3 / 10" count, which is `ProgressExtent.inline` by the
+  // vocabulary's own words, and that is the rung it converted under.
 
   // ── overlays.presentMenu (1 read) ───────────────────────────────────────
   TokenReadRegisterEntry(
@@ -602,14 +442,9 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'fallback would change 20 to Material\'s 24.',
   ),
 
-  // ── surfaces.listRow (1 read) ───────────────────────────────────────────
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_list_item.dart',
-    site: 'start: AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'surfaces.listRow',
-    reason: 'Inset divider start; the tile is the P2 extraction floor.',
-  ),
+  // ── surfaces.listRow — CONVERTED (was 1 read) ───────────────────────────
+  // base_list_item.dart is a façade over surfaces.listRow, so the inset rule
+  // between two rows - and the leading edge it starts at - is the skin's.
 
   // ── surfaces.panel (1 read) ─────────────────────────────────────────────
   TokenReadRegisterEntry(

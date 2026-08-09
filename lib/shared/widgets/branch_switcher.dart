@@ -570,6 +570,14 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
                         // follow the badge when the component changes - which
                         // the golden baselines pin and this dialog does not
                         // appear in.
+                        //
+                        // It used to ask for `isPill: false` - a 4 dp corner
+                        // instead of the badge's own - which is precisely the
+                        // "a little differently on the same kind of row" this
+                        // comment was written against: the branches panel's
+                        // row badge is a pill and this one was not. The corner
+                        // is the skin's, and `surfaces.badge` has one shape,
+                        // so the flag went with the hand-painted geometry.
                         BaseBadge(
                           label: losesNothing
                               ? l10n.branchStatusMerged
@@ -578,7 +586,6 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
                               ? BadgeVariant.success
                               : BadgeVariant.danger,
                           size: BadgeSize.small,
-                          isPill: false,
                         ),
                       ],
                     ),

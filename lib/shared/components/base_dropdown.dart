@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show
+        ControlScale,
+        Fields,
+        IconRole,
+        SuggestFieldSpec,
+        SuggestItem,
+        TextRole;
 
+import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'base_icon.dart';
 import 'base_label.dart';
-import 'base_text_field.dart';
 
 /// Base dropdown component for consistent dropdown styling across the app.
 ///
@@ -176,370 +182,72 @@ class BaseDropdownItem<T> {
   }
 }
 
-/// Searchable dropdown with popup menu and search field
-/// Shows a search icon that opens a popup with search field and filtered items
-class SearchableBaseDropdown<T> extends StatefulWidget {
-  final T? value;
-  final String? labelText;
-  final String? hintText;
-  final String? searchHintText;
-
-  /// The meaning of an optional leading mark; the skin chooses the glyph.
-  final IconRole? prefixIcon;
-  final List<SearchableDropdownItem<T>> items;
-  final void Function(T?)? onChanged;
-  final String? Function(T?)? validator;
-  final String Function(T) displayStringForItem;
-  final int minSearchLength;
-
+/// The application's way of asking the user to narrow a closed list down to
+/// one of its items.
+///
+/// **This is a façade** (#249, §2.11): the body is one delegation to
+/// `controls.suggestField`, through the package's own field seam. Everything
+/// this class used to draw itself moved into the skin verbatim — the
+/// `LayerLink`, the `OverlayEntry` and the `CompositedTransformFollower` that
+/// anchored the list, the search box above it, the filtering beneath it, the
+/// `TapRegion` that dismissed it and the caret that turned over — and the
+/// Material skin's `_MaterialSuggestField` carries the same lengths it did
+/// (`elevationRaised` == `elevationLevel2`, `radiusM`, `spaceS + 4` inside the
+/// closed box, a 300 px list, the 4 px drop below the anchor).
+///
+/// What stays here is the two things that are the application's and not a
+/// design language's: WHAT is being narrowed ([label], [items], [value]) and
+/// WHAT the field says while the list has nothing to show — this
+/// application's own translated sentence, so it crosses the contract as a
+/// string instead of being invented by the skin.
+class SearchableBaseDropdown<T> extends StatelessWidget {
   const SearchableBaseDropdown({
     super.key,
-    this.value,
-    this.labelText,
-    this.hintText,
-    this.searchHintText,
-    this.prefixIcon,
+    required this.label,
+    required this.value,
     required this.items,
-    this.onChanged,
-    this.validator,
-    required this.displayStringForItem,
+    required this.onSelected,
+    this.prefixIcon,
+    this.searchHint,
     this.minSearchLength = 3,
   });
 
-  @override
-  State<SearchableBaseDropdown<T>> createState() =>
-      _SearchableBaseDropdownState<T>();
-}
+  /// What kind of thing is being named.
+  final String label;
 
-class _SearchableBaseDropdownState<T> extends State<SearchableBaseDropdown<T>> {
-  final _focusNode = FocusNode();
-  bool _isOpen = false;
-  final LayerLink _layerLink = LayerLink();
-  OverlayEntry? _overlayEntry;
+  /// The meaning of an optional leading mark; the skin chooses the glyph.
+  final IconRole? prefixIcon;
 
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    _removeOverlay();
-    super.dispose();
-  }
+  /// Which one is named so far, or null.
+  final T? value;
 
-  void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    _isOpen = false;
-  }
+  /// Everything it could settle on, as data.
+  final List<SuggestItem<T>> items;
 
-  void _showOverlay() {
-    if (_isOpen) return;
+  /// How to tell the application the user settled on one.
+  final ValueChanged<T> onSelected;
 
-    _overlayEntry = _createOverlayEntry();
-    Overlay.of(context).insert(_overlayEntry!);
-    _isOpen = true;
-  }
+  /// What the search box says while nothing is typed.
+  final String? searchHint;
 
-  OverlayEntry _createOverlayEntry() {
-    final renderBox = context.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-
-    return OverlayEntry(
-      builder: (context) => Positioned(
-        width: size.width,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: Offset(0, size.height + 4),
-          child: Material(
-            elevation: AppTheme.elevationLevel2,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            child: _SearchableDropdownOverlay<T>(
-              items: widget.items,
-              searchHintText: widget.searchHintText ?? 'Search...',
-              minSearchLength: widget.minSearchLength,
-              onSelected: (item) {
-                widget.onChanged?.call(item);
-                _removeOverlay();
-              },
-              onDismiss: _removeOverlay,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final selectedItem = widget.items
-        .where((item) => item.value == widget.value)
-        .firstOrNull;
-    final displayText = selectedItem != null
-        ? widget.displayStringForItem(selectedItem.value)
-        : widget.hintText ?? '';
-
-    return CompositedTransformTarget(
-      link: _layerLink,
-      child: FormField<T>(
-        initialValue: widget.value,
-        validator: widget.validator,
-        builder: (formState) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (widget.labelText != null) ...[
-                // A field's own label is text the user operates, which is what
-                // `TextRole.control` names explicitly. It was drawn a rung
-                // below every other field label in the application; this is the
-                // disagreement being removed rather than a size being chosen.
-                BaseLabel(widget.labelText!, role: TextRole.control),
-                const SizedBox(height: AppTheme.paddingXS),
-              ],
-              InkWell(
-                onTap: () {
-                  if (_isOpen) {
-                    _removeOverlay();
-                  } else {
-                    _showOverlay();
-                  }
-                },
-                borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.paddingM,
-                    vertical: AppTheme.paddingS + 4,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: formState.hasError
-                          ? Theme.of(context).colorScheme.error
-                          : Theme.of(context).colorScheme.outline,
-                    ),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                  ),
-                  child: Row(
-                    children: [
-                      if (widget.prefixIcon != null) ...[
-                        BaseIcon(
-                          widget.prefixIcon!,
-                          scale: ControlScale.compact,
-                          tone: Tone.muted,
-                        ),
-                        const SizedBox(width: AppTheme.paddingS),
-                      ],
-                      Expanded(
-                        child: BaseLabel(
-                          displayText,
-                          role: TextRole.body,
-                          // Nothing has been chosen yet, so this line is a
-                          // placeholder rather than a value.
-                          tone: selectedItem != null
-                              ? Tone.neutral
-                              : Tone.muted,
-                          // A closed field is one line tall whatever it holds;
-                          // wrapping here would grow the field as the user
-                          // picks a longer value.
-                          maxLines: 1,
-                        ),
-                      ),
-                      BaseIcon(
-                        _isOpen ? IconRole.caretUp : IconRole.caretDown,
-                        scale: ControlScale.compact,
-                        tone: Tone.muted,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              if (formState.hasError) ...[
-                const SizedBox(height: AppTheme.paddingXS),
-                BaseLabel(
-                  formState.errorText ?? '',
-                  role: TextRole.detail,
-                  tone: Tone.danger,
-                ),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Overlay content for searchable dropdown
-class _SearchableDropdownOverlay<T> extends StatefulWidget {
-  final List<SearchableDropdownItem<T>> items;
-  final String searchHintText;
+  /// How much the user must type before narrowing is useful.
   final int minSearchLength;
-  final void Function(T) onSelected;
-  final VoidCallback onDismiss;
-
-  const _SearchableDropdownOverlay({
-    required this.items,
-    required this.searchHintText,
-    required this.minSearchLength,
-    required this.onSelected,
-    required this.onDismiss,
-  });
 
   @override
-  State<_SearchableDropdownOverlay<T>> createState() =>
-      _SearchableDropdownOverlayState<T>();
-}
-
-class _SearchableDropdownOverlayState<T>
-    extends State<_SearchableDropdownOverlay<T>> {
-  final _searchController = TextEditingController();
-  final _searchFocusNode = FocusNode();
-  String _searchQuery = '';
-
-  @override
-  void initState() {
-    super.initState();
-    // Auto-focus search field when overlay opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchFocusNode.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Filter items based on search query (only if >= minSearchLength chars)
-    final filteredItems = _searchQuery.length >= widget.minSearchLength
-        ? widget.items
-              .where(
-                (item) => item.searchText.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ),
-              )
-              .toList()
-        : widget.items;
-
-    return TapRegion(
-      onTapOutside: (_) => widget.onDismiss(),
-      child: Container(
-        constraints: const BoxConstraints(maxHeight: 300),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Search field
-            Padding(
-              padding: const EdgeInsets.all(AppTheme.paddingS),
-              child: BaseTextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                hintText: widget.searchHintText,
-                prefixIcon: IconRole.magnifyingGlass,
-                onChanged: (value) {
-                  setState(() {
-                    _searchQuery = value;
-                  });
-                },
-              ),
-            ),
-
-            // Divider
-            Divider(
-              height: 1,
-              color: Theme.of(
-                context,
-              ).colorScheme.outline.withValues(alpha: 0.3),
-            ),
-
-            // Items list
-            Flexible(
-              child: filteredItems.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(AppTheme.paddingL),
-                      child: Center(
-                        child: BaseLabel(
-                          'No items found',
-                          role: TextRole.detail,
-                          tone: Tone.muted,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems[index];
-                        return InkWell(
-                          onTap: () => widget.onSelected(item.value),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.paddingM,
-                              vertical: AppTheme.paddingS,
-                            ),
-                            child: item.builder(context),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Item for searchable dropdown
-class SearchableDropdownItem<T> {
-  final T value;
-  final String searchText;
-  final Widget Function(BuildContext) builder;
-
-  const SearchableDropdownItem({
-    required this.value,
-    required this.searchText,
-    required this.builder,
-  });
-
-  /// Create a simple searchable dropdown item with icon, label, and optional subtitle
-  factory SearchableDropdownItem.simple({
-    required T value,
-    required String label,
-    String? subtitle,
-    IconData? icon,
-  }) {
-    return SearchableDropdownItem(
+  Widget build(BuildContext context) => Fields.suggest<T>(
+    context,
+    SuggestFieldSpec<T>(
+      label: label,
       value: value,
-      searchText: label,
-      builder: (context) => Row(
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16),
-            const SizedBox(width: AppTheme.paddingS),
-          ],
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BaseLabel(label, role: TextRole.control, maxLines: 1),
-                if (subtitle != null)
-                  BaseLabel(subtitle, role: TextRole.micro, tone: Tone.muted),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      items: items,
+      onSelected: onSelected,
+      hint: searchHint,
+      leading: prefixIcon,
+      minQueryLength: minSearchLength,
+      // The hand-built overlay hard-coded an English "No items found"; the
+      // member takes the words from the application instead, so the empty
+      // answer is translated like every other sentence on screen.
+      emptyLabel: AppLocalizations.of(context)!.emptyStateNoResultsFound,
+    ),
+  );
 }

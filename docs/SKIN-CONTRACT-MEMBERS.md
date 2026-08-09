@@ -268,7 +268,7 @@ final class SuggestItem<T> {
 final class SuggestFieldSpec<T> {
   const SuggestFieldSpec({
     required this.label, required this.value, required this.items,
-    required this.onSelected, this.onQueryChanged, this.hint,
+    required this.onSelected, this.onQueryChanged, this.hint, this.leading,
     this.minQueryLength = 0, this.emptyLabel, this.enabled = true,
   });
   final String label;
@@ -277,6 +277,7 @@ final class SuggestFieldSpec<T> {
   final ValueChanged<T> onSelected;
   final ValueChanged<String>? onQueryChanged;
   final String? hint, emptyLabel;
+  final IconRole? leading; // the head mark DropdownSpec/FieldSpec already carry
   final int minQueryLength;
   final bool enabled;
 }

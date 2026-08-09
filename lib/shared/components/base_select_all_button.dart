@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
@@ -124,7 +123,7 @@ class BaseSelectionCountBadge extends StatelessWidget {
 
     return BaseBadge(
       label: l10n.selectedCount(count),
-      icon: PhosphorIconsRegular.checkSquare,
+      icon: IconRole.checkSquare,
       variant: BadgeVariant.primary,
       size: BadgeSize.medium,
     );

@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show GridDensity;
 
 import 'package:flutter_gitui/shared/controllers/item_navigation_controller.dart';
 import 'package:flutter_gitui/shared/controllers/tree_view_controller.dart';
@@ -282,12 +283,17 @@ void main() {
   });
 
   group('KeyboardNavigableGridView', () {
-    testWidgets('arrows move by rows vertically and by items horizontally', (
+    testWidgets('the skin reports the columns and arrows move by whole rows', (
       tester,
     ) async {
       var boundaryCalls = 0;
+      // Deliberately started at one column. The grid's geometry belongs to
+      // `layout.grid` now, so the member measures the width and reports the
+      // real column count back through `GridSpec.onColumnsChanged`; if that
+      // report were lost the highlight would move by the wrong stride, and
+      // every row assertion below would fail.
       final controller = ItemNavigationController(
-        crossAxisCount: 3,
+        crossAxisCount: 1,
         onTrailingBoundary: () => boundaryCalls++,
       );
       addTearDown(controller.dispose);
@@ -302,9 +308,7 @@ void main() {
               controller: controller,
               itemCount: 8,
               autofocus: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-              ),
+              density: GridDensity.normal,
               itemBuilder: (context, index, isSelected, hasFocus) =>
                   _marker(index, isSelected, hasFocus),
             ),
@@ -312,6 +316,10 @@ void main() {
         ),
       );
       await tester.pump();
+
+      // 800 logical pixels of test surface at the Material skin's normal
+      // density: the member worked the three out, the test did not.
+      expect(controller.crossAxisCount, 3);
 
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();

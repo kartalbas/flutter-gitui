@@ -51,6 +51,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_gitui/shared/components/base_badge.dart';
 import 'package:flutter_gitui/shared/components/base_switcher.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../goldens/component_scenes.dart';
 import '../goldens/golden_scene.dart';
@@ -449,6 +451,13 @@ void main() {
       // badge at all, so the target is measured by name here: the scene must
       // still contain one, and the box around its glyph must still be the
       // interactive minimum rather than the 14 dp glyph it used to be.
+      //
+      // The removal's mark is `IconRole.x` resolved by this skin, not
+      // `Icons.close`: a removable badge is drawn by `surfaces.tag` now, and
+      // the mark inside a member is the skin's to choose - the same way every
+      // other close affordance in this application already draws whatever
+      // `MaterialGlyphs` answers for `IconRole.x`. Only the finder moved; the
+      // 48 dp measurement below is unchanged.
       await pumpGoldenScene(
         tester,
         _sceneNamed('base_badges'),
@@ -456,7 +465,7 @@ void main() {
       );
       final Finder deleteGlyph = find.descendant(
         of: find.byType(BaseBadge),
-        matching: find.byIcon(Icons.close),
+        matching: find.byIcon(MaterialGlyphs.of(IconRole.x)),
       );
       expect(
         deleteGlyph,
@@ -510,7 +519,7 @@ void main() {
         );
         final Rect target = tester.getRect(
           find.ancestor(
-            of: find.byIcon(Icons.close),
+            of: find.byIcon(MaterialGlyphs.of(IconRole.x)),
             matching: find.byType(InkResponse),
           ),
         );
@@ -554,7 +563,7 @@ void main() {
         BaseBadge(label: 'deletable', onDeleted: () => deleted++),
       );
       final Finder target = find.ancestor(
-        of: find.byIcon(Icons.close),
+        of: find.byIcon(MaterialGlyphs.of(IconRole.x)),
         matching: find.byType(InkResponse),
       );
       final Rect box = tester.getRect(target);

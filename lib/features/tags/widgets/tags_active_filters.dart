@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
 
 import '../../../generated/app_localizations.dart';
@@ -46,7 +45,7 @@ class TagsActiveFilters extends StatelessWidget {
           if (dateFilter != DateRangeFilter.all) ...<Widget>[
             BaseBadge(
               label: tagsService.getDateFilterLabel(dateFilter),
-              icon: PhosphorIconsRegular.calendar,
+              icon: IconRole.calendar,
               variant: BadgeVariant.neutral,
               size: BadgeSize.medium,
               onDeleted: onClearDateFilter,
@@ -56,7 +55,7 @@ class TagsActiveFilters extends StatelessWidget {
           if (authorFilter != null && authorFilter!.isNotEmpty) ...<Widget>[
             BaseBadge(
               label: AppLocalizations.of(context)!.authorFilter(authorFilter!),
-              icon: PhosphorIconsRegular.user,
+              icon: IconRole.user,
               variant: BadgeVariant.neutral,
               size: BadgeSize.medium,
               onDeleted: onClearAuthorFilter,
@@ -66,7 +65,7 @@ class TagsActiveFilters extends StatelessWidget {
           if (useRegex) ...<Widget>[
             BaseBadge(
               label: AppLocalizations.of(context)!.regex,
-              icon: PhosphorIconsRegular.code,
+              icon: IconRole.code,
               variant: BadgeVariant.neutral,
               size: BadgeSize.medium,
               onDeleted: onClearRegexFilter,

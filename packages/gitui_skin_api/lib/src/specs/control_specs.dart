@@ -304,6 +304,7 @@ final class SuggestFieldSpec<T> {
     required this.onSelected,
     this.onQueryChanged,
     this.hint,
+    this.leading,
     this.minQueryLength = 0,
     this.emptyLabel,
     this.enabled = true,
@@ -327,6 +328,12 @@ final class SuggestFieldSpec<T> {
 
   /// What to say while nothing is typed.
   final String? hint;
+
+  /// A mark at the head of the field, saying what kind of thing is being
+  /// narrowed. The same slot [DropdownSpec.leading] and `FieldSpec.leading`
+  /// already carry; a suggest field that could not say "this names a branch"
+  /// while its siblings could would be a vocabulary hole, not a look.
+  final IconRole? leading;
 
   /// How much the user must type before suggesting is useful. A fact about the
   /// data - a list of ten needs none, a list of ten thousand needs three.

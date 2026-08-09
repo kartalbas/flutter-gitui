@@ -554,7 +554,12 @@ final class MaterialSurfaces implements SkinSurfaces {
   /// [GridDensity] moves the column spacing and the row height together,
   /// because "how much of this does the user want to see at once" is one
   /// question and answering it on one axis only would leave a compact grid as
-  /// tall as a roomy one. `normal` is the CSV viewer's own rhythm, unchanged.
+  /// tall as a roomy one. `normal` keeps the CSV viewer's column spacing and
+  /// margin but NOT its row height: the hand-painted table sat on
+  /// `DataTable`'s stock 48 fixed, and this member's `normal` rung is the
+  /// touch minimum plus a breath (56) with no ceiling, so a long cell wraps
+  /// and grows its row instead of clipping at a height chosen for buttons.
+  /// A deliberate, reported change of the conversion, not a drifting copy.
   ///
   /// There is no sorting, and that is settled rather than missing: the floor
   /// does not sort, and a member is derived from a need rather than from a

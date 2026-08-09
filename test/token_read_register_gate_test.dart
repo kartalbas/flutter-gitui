@@ -305,15 +305,31 @@ void main() {
         (sum, entry) => sum + entry.reads,
       );
 
-      // 77 is the 2026-08-09 census: 64 reads waiting for a named P5 member,
-      // 6 blocked on a missing vocabulary word, 7 kept by a named permanent
-      // carve-out (#433). Converting a read lowers this number in the same
-      // change that deletes its entry. Raising it is the forbidden
-      // direction: new code states its lengths through the contract, it
-      // does not register exceptions.
+      // 51 is the 2026-08-09 census (77) less the 10 reads P5 converted when
+      // `BaseBadge` stopped hand-painting its pill and started calling
+      // `surfaces.badge` / `surfaces.tag`, less the 5 it converted when the
+      // repositories card grid started calling `layout.grid` (3) and the
+      // workspace swatch grid started calling `controls.seriesPicker` (2) -
+      // the workspaces card grid kept its 3, because `GridSpec` has no word
+      // for a tile proportion and the member's fixed one overflows those
+      // cards, measured in the register entry - less the 4
+      // it converted when the CSV viewer's table became `surfaces.dataGrid`
+      // (2) and the commit graph became `surfaces.commitGraphRow` (2, and the
+      // application's only `CustomPainter` was deleted with them), less the 3
+      // it converted when `BaseListItem` became a façade over
+      // `surfaces.listRow` (1) and the command-log entry became
+      // `surfaces.disclosure` (2), less the 4 it converted when both
+      // hand-built searchable dropdowns gave way to `controls.suggestField`
+      // (3, one of them an unreachable second copy that was deleted rather
+      // than converted) and the batch dialog's bar became `controls.progress`
+      // (1): 38 reads waiting for a named P5 member, 6 blocked on a missing
+      // vocabulary word, 7 kept by a named permanent carve-out (#433).
+      // Converting a read lowers this number in the same change that deletes
+      // its entry. Raising it is the forbidden direction: new code states its
+      // lengths through the contract, it does not register exceptions.
       expect(
         total,
-        77,
+        51,
         reason:
             'The register must shrink deliberately: update this pin in the '
             'same change that shrinks (never grows) the register.',
@@ -329,7 +345,7 @@ void main() {
           );
 
       // The total pin cannot see a reclassification: moving reads between
-      // causes keeps 77 true while changing WHY they claim to remain,
+      // causes keeps 51 true while changing WHY they claim to remain,
       // which is exactly the hiding place the causes exist to close (#433
       // found two sites sitting in the gap list that no vocabulary
       // decision would ever free). Unlike the total, a cause count may
@@ -338,7 +354,7 @@ void main() {
       // the same change that re-argues the entries' reasons.
       expect(
         readsWhere((entry) => entry.waitsFor != null),
-        64,
+        38,
         reason:
             'Reads waiting for a named P5 contract member. A conversion '
             'lowers this; a reclassification moves it and must say why.',

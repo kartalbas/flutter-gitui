@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole;
+    show
+        IconRole,
+        Inset,
+        Proximity,
+        SeriesPickerSpec,
+        Skin,
+        SkinScope,
+        TextRole;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -156,61 +163,26 @@ class _ProjectDialogState extends State<ProjectDialog> {
               ),
               child: BaseInset(
                 all: Inset.normal,
-                child: Wrap(
-                  spacing: AppTheme.paddingS,
-                  runSpacing: AppTheme.paddingS,
-                  children: WorkspaceColors.defaults.map((color) {
-                    final isSelected =
-                        _selectedColor.toARGB32() == color.toARGB32();
-                    return InkWell(
-                      onTap: () {
-                        setState(() {
-                          _selectedColor = color;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                      child: Container(
-                        width: AppTheme.iconXL * 2,
-                        height: AppTheme.iconXL * 2,
-                        decoration: BoxDecoration(
-                          color: color,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                          // The chosen swatch's 3 px ring is a BORDER, and a
-                          // border leaves with the surface it encloses. This
-                          // one leaves rather sooner than most: the whole
-                          // swatch grid is registered against
-                          // `controls.seriesPicker`, the member that owns
-                          // which colours exist and how the chosen one is
-                          // marked, so drawing the ring from a tone here
-                          // would half-migrate a construction that member
-                          // deletes.
-                          border: isSelected
-                              ? Border.all(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  width: 3,
-                                )
-                              : null,
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: color.withValues(alpha: 0.5),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: isSelected
-                            ? Icon(
-                                PhosphorIconsBold.check,
-                                color: _getContrastingColor(color),
-                                size: AppTheme.iconM,
-                              )
-                            : null,
-                      ),
-                    );
-                  }).toList(),
-                ),
+                // The swatch grid is `controls.seriesPicker` now. WHICH
+                // colours exist, HOW MANY there are, how big a swatch is and
+                // how the chosen one is marked are all the skin's answers;
+                // the application says only which member of the series is on
+                // and what the choice stands for. The frame and the inset
+                // around it stay here — they are the field's box, not the
+                // picker.
+                child: SkinScope.render(context, (
+                  Skin skin,
+                  BuildContext inner,
+                ) {
+                  return skin.controls.seriesPicker(
+                    inner,
+                    SeriesPickerSpec(
+                      selectedIndex: _selectedSeriesIndex,
+                      onSelected: _selectSeriesMember,
+                      label: l10n.projectColorLabel,
+                    ),
+                  );
+                }),
               ),
             ),
 
@@ -301,14 +273,36 @@ class _ProjectDialogState extends State<ProjectDialog> {
     );
   }
 
-  Color _getContrastingColor(Color color) {
-    // Calculate luminance to determine if we should use black or white text
-    final luminance =
-        (0.299 * ((color.r * 255.0).round() & 0xff) +
-            0.587 * ((color.g * 255.0).round() & 0xff) +
-            0.114 * ((color.b * 255.0).round() & 0xff)) /
-        255;
-    return luminance > 0.5 ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+  /// Which member of the skin's series the stored colour is, or null when it
+  /// is none of them.
+  ///
+  /// The workspace model still persists an ARGB value, so the dialog has to
+  /// translate in both directions. The match is on the packed value rather
+  /// than on `Color` equality, which is the rule the hand-painted grid used
+  /// and the one that keeps a colour read back from disk comparable. A legacy
+  /// value that is in no palette answers null — the picker then shows nothing
+  /// chosen, exactly as the old grid highlighted nothing, and the stored
+  /// colour survives an untouched save.
+  int? get _selectedSeriesIndex {
+    final index = WorkspaceColors.defaults.indexWhere(
+      (color) => color.toARGB32() == _selectedColor.toARGB32(),
+    );
+    return index < 0 ? null : index;
+  }
+
+  /// Records the series member the user picked, as the colour the model still
+  /// stores.
+  ///
+  /// The modulo is the same wraparound `Tone.series` itself is defined by, and
+  /// it is here because the application genuinely cannot know how long the
+  /// skin's series is: the Material and blueprint skins publish twelve members
+  /// and Fluent publishes seven. It is a bridge, not a translation — see the
+  /// contract finding filed with this change.
+  void _selectSeriesMember(int index) {
+    setState(() {
+      _selectedColor =
+          WorkspaceColors.defaults[index % WorkspaceColors.defaults.length];
+    });
   }
 
   void _handleSave() {

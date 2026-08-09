@@ -110,10 +110,23 @@ class AppAboutDialog extends HookConsumerWidget {
                 spacing: AppTheme.paddingS,
                 runSpacing: AppTheme.paddingS,
                 children: [
-                  _TechChip(label: 'Flutter', icon: Icons.flutter_dash),
-                  _TechChip(label: 'Dart', icon: Icons.code),
-                  _TechChip(label: 'Riverpod', icon: Icons.architecture),
-                  _TechChip(label: 'Material 3', icon: Icons.palette),
+                  // The four chips carried a leading glyph each - a Flutter
+                  // dash, `Icons.code`, `Icons.architecture`, `Icons.palette`
+                  // - and they are gone rather than converted. What each mark
+                  // stood for is a PRODUCT, not a meaning: "the Flutter
+                  // framework", "the Dart language", "Riverpod", "Material 3".
+                  // `IconRole` is a vocabulary of meanings and has no product
+                  // identities in it, so every candidate here (code for Dart,
+                  // palette for Material 3) would be the site's original
+                  // adjacency guess re-stated as a contract claim. The badge's
+                  // mark crosses the seam now, so a guess made here would be
+                  // handed to every skin. Reported as a contract finding in
+                  // the P5 surfaces.badge report; the chips say the product's
+                  // name in words, which is what they were always read by.
+                  _TechChip(label: 'Flutter'),
+                  _TechChip(label: 'Dart'),
+                  _TechChip(label: 'Riverpod'),
+                  _TechChip(label: 'Material 3'),
                 ],
               ),
             ),
@@ -130,15 +143,13 @@ class AppAboutDialog extends HookConsumerWidget {
 
 class _TechChip extends StatelessWidget {
   final String label;
-  final IconData icon;
 
-  const _TechChip({required this.label, required this.icon});
+  const _TechChip({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return BaseBadge(
       label: label,
-      icon: icon,
       variant: BadgeVariant.primary,
       size: BadgeSize.medium,
     );

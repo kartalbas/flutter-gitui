@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        ProgressExtent,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
@@ -208,14 +217,31 @@ class _BatchOperationProgressDialogState
           Row(
             children: [
               Expanded(
-                child: LinearProgressIndicator(
-                  // A determinate fraction, even at zero, tells the user how
-                  // far along the batch is; the indeterminate animation hid
-                  // that for the whole run.
-                  value: progress,
-                  minHeight: AppTheme.paddingS,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                ),
+                // `controls.progress`, which is what a bar in this application
+                // is now. The application states the two facts it owns - how
+                // far along the batch is, and that saying so may take a line
+                // of content rather than a region of its own - and the skin
+                // answers with its language's indicator. `ProgressExtent
+                // .inline` is the rung the vocabulary defines as "beside a
+                // label", which is literally the arrangement here: the bar
+                // shares its row with the "3 / 10" count. The `block` rung
+                // would have been the wrong word twice over - Material draws
+                // it as a centred ring and the blueprint skin as a bare
+                // percentage.
+                //
+                // A determinate fraction, even at zero, tells the user how far
+                // along the batch is; the indeterminate animation hid that for
+                // the whole run, so the fraction is passed rather than null.
+                child: SkinScope.render(context, (
+                  Skin skin,
+                  BuildContext inner,
+                ) {
+                  return skin.controls.progress(
+                    inner,
+                    fraction: progress,
+                    extent: ProgressExtent.inline,
+                  );
+                }),
               ),
               const BaseGap(Proximity.grouped),
               BaseLabel(

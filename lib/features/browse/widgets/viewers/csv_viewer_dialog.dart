@@ -3,7 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole;
+    show
+        ContentPort,
+        DataGridSpec,
+        IconRole,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole;
 import 'package:path/path.dart' as path;
 import 'package:csv/csv.dart';
 
@@ -11,7 +18,6 @@ import '../../../../generated/app_localizations.dart';
 import '../../../../shared/components/base_label.dart';
 import '../../../../shared/components/base_layout.dart';
 import '../../../../shared/components/base_viewer_dialog.dart';
-import '../../../../shared/theme/app_theme.dart';
 
 /// Enhanced CSV/spreadsheet viewer dialog
 class CsvViewerDialog extends StatefulWidget {
@@ -127,65 +133,58 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
             )
           : _rows.isEmpty
           ? Center(child: Text(AppLocalizations.of(context)!.emptyCsvFile))
-          : SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                child: DataTable(
-                  headingRowColor: WidgetStateProperty.all(
-                    Theme.of(context).colorScheme.surfaceContainerHigh,
-                  ),
-                  columns: _buildColumns(),
-                  rows: _buildRows(),
-                  columnSpacing: AppTheme.paddingL,
-                  horizontalMargin: AppTheme.paddingM,
-                  border: TableBorder.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
-                  ),
-                ),
-              ),
-            ),
+          // The table is `surfaces.dataGrid` (#249, P5). Every metric this
+          // dialog used to state - the column spacing, the horizontal margin,
+          // the heading fill, the rule between cells and the row height - is
+          // the grid member's, because "how tightly packed a table of values
+          // is" is one question and answering half of it here is what let the
+          // hand-built copy drift from the skin's own answer.
+          : SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.dataGrid(
+                inner,
+                DataGridSpec(columns: _headings(), rows: _cells()),
+              );
+            }),
     );
   }
 
-  List<DataColumn> _buildColumns() {
-    if (_rows.isEmpty) return [];
+  /// The first CSV row, padded to the widest row so a ragged file still names
+  /// every column the rows below can fill.
+  List<String> _headings() {
+    if (_rows.isEmpty) return const <String>[];
 
     final firstRow = _rows[0];
     return List.generate(
       _columnCount,
-      (index) => DataColumn(
-        // A column heading is a dense cell rather than a card: `tight`, the
-        // rung that swallows the two different numbers this site used to spell
-        // out per axis for one statement.
-        label: BaseInset(
-          all: Inset.tight,
-          // A column heading names one thing the rows below are instances
-          // of, which is itemTitle rather than the name of a region.
-          child: BaseLabel(
-            index < firstRow.length ? firstRow[index]?.toString() ?? '' : '',
-            role: TextRole.itemTitle,
-          ),
-        ),
-      ),
+      (index) =>
+          index < firstRow.length ? firstRow[index]?.toString() ?? '' : '',
     );
   }
 
-  List<DataRow> _buildRows() {
-    if (_rows.length <= 1) return [];
+  /// Every row but the heading, as content the grid mounts in its own cells.
+  ///
+  /// Short rows are handed over short rather than padded here: the member
+  /// fills the missing cells itself, which is what keeps "a ragged CSV still
+  /// renders" one answer instead of two.
+  List<List<ContentPort>> _cells() {
+    if (_rows.length <= 1) return const <List<ContentPort>>[];
 
-    return _rows.skip(1).map((row) {
-      return DataRow(
-        cells: List.generate(_columnCount, (index) {
-          final cell = index < row.length ? row[index] : null;
-          return DataCell(
-            SelectableText(
-              cell?.toString() ?? '',
-              style: const TextStyle(fontFamily: 'monospace'),
+    return <List<ContentPort>>[
+      for (final row in _rows.skip(1))
+        <ContentPort>[
+          for (final cell in row)
+            // A spreadsheet cell is machine-written text the user reads in a
+            // column and copies out of it, which is `TextRole.code` -
+            // monospaced because a column of numbers only lines up that way.
+            ContentPort(
+              BaseLabel(
+                cell?.toString() ?? '',
+                role: TextRole.code,
+                selectable: true,
+              ),
             ),
-          );
-        }),
-      );
-    }).toList();
+        ],
+    ];
   }
 }
 

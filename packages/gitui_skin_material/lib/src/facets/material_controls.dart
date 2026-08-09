@@ -1641,6 +1641,17 @@ class _MaterialSuggestFieldState<T> extends State<_MaterialSuggestField<T>> {
               ),
               child: Row(
                 children: <Widget>[
+                  // The field's head mark, the same answer `dropdown` and
+                  // `textField` give their `leading`: the language's prefix
+                  // treatment, muted like the caret at the other end.
+                  if (spec.leading != null) ...<Widget>[
+                    Icon(
+                      MaterialGlyphs.of(spec.leading!),
+                      size: MaterialMetrics.iconM,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: MaterialMetrics.spaceS),
+                  ],
                   Expanded(
                     child: Text(
                       _shown,

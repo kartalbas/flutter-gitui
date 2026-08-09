@@ -138,6 +138,26 @@ class BaseViewerDialog extends StatelessWidget {
         // packages/gitui_skin_material/docs/deviation_register.yaml. A viewer
         // fills 90% of the window, where Material 3's 28 dp would cut a visible arc
         // out of every corner of what is effectively a second window.
+        //
+        // **This corner is the one in this file, and it is not waiting for a
+        // member to be built.** `chrome.dialogSurface` ships, `DialogExtent
+        // .browser` is the rung for "something to look through", and the
+        // Material skin already contains this exact frame - the same 12 dp
+        // corner, the same 90% box, the same header row and close button - as
+        // `_MaterialViewerDialogSurface`. It has ZERO callers in `lib/` and
+        // zero tests in its own package, because `DialogSpec` cannot say four
+        // things every viewer here says: a SUBTITLE (6 of the 9 call sites -
+        // the file name or the commit subject under the name), header
+        // METADATA (csv_viewer_dialog's "100 rows x 5 columns"), header
+        // ACTIONS beside the close button (unified_diff_dialog), and a FOOTER
+        // (image_viewer_dialog's zoom controls, changelog_dialog's release
+        // navigation). The two size factors are a fifth difference and the
+        // only one the member is right to refuse: 0.85/0.85 and 0.75/0.85 are
+        // two screens deciding a length, and adopting the member deletes them
+        // rather than carrying them. So the finding is a HEADER the spec
+        // cannot state, exactly as `PanelSpec`'s is - one member short of the
+        // same shape - and a skin member that shipped ahead of its caller has
+        // been drifting untested ever since.
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusL),
         ),

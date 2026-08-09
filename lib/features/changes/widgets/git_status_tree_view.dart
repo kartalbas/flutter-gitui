@@ -3,7 +3,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        ProgressExtent,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_button.dart';
@@ -712,13 +721,24 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
 
     if (diffOutput.isEmpty &&
         snapshot.connectionState == ConnectionState.waiting) {
-      // Still loading, show minimal placeholder
-      return const Center(
-        child: SizedBox(
-          width: AppTheme.iconM,
-          height: AppTheme.iconM,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+      // The whole pane is waiting for its diff, which is `ProgressExtent.block`
+      // in the vocabulary's own words: "occupying its own region, with nothing
+      // else competing for the space". Nothing else is on screen while this
+      // draws.
+      //
+      // The hand-sized box was condemned by its siblings rather than by a bug
+      // report. Thirty-odd panes in this application say "this region is
+      // loading" - including this pane's own twin, `commit_diff_panel.dart`,
+      // which shows the diff of a commit the same way this one shows the diff
+      // of a working-tree file - and every one of them draws the language's
+      // stock indicator. This was the only site that decided a length and a
+      // stroke for it, and a spinner's diameter is not something the
+      // application knows: Material draws a 36 dp ring at stroke 4, Fluent a
+      // ring of its own, macOS a spinner that is not a ring at all.
+      return SkinScope.render(
+        context,
+        (Skin skin, BuildContext inner) =>
+            skin.controls.progress(inner, extent: ProgressExtent.block),
       );
     }
 

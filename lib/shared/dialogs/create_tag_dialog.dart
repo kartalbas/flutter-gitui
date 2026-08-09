@@ -285,8 +285,19 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
   // names a Material container role, which no contract tone should carry -
   // neither Fluent nor macOS has a paired-container concept - and its label
   // rides the type ramp where a badge's deliberately sits below it. See the
-  // fuller argument at the blame panel's hash chip
-  // (file_blame_panel.dart, the same construction with a tap).
+  // fuller argument at the blame panel's hash chip (file_blame_panel.dart),
+  // which also names what would free both: an inline-code span, a member to
+  // derive from need rather than a growth of the badge.
+  //
+  // "The same construction" is how that note refers to this one, and measured
+  // side by side it is not, which is the sharpest argument for the member.
+  // One short commit hash is drawn three ways in this application: here on
+  // `surfaceContainerHigh` at [TextRole.detail] with no foreground stated, at
+  // the blame gutter on `secondaryContainer` at [TextRole.micro] with
+  // `onSecondaryContainer` spelled out, and in reflog_dialog.dart with no
+  // chip at all - a `CopyableText` at [TextRole.code]. Two fills, three type
+  // steps, one object. Nothing here can reconcile them, because each site is
+  // choosing its own surface; a member is the only thing that can.
   Widget _hashChip(BuildContext context, String shortHash) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

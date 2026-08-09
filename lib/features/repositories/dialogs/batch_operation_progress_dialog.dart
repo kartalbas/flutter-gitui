@@ -11,7 +11,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         SkinScope,
         TextRole,
         Tone;
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
@@ -462,21 +461,33 @@ class _BatchOperationProgressDialogState
           child: CircularProgressIndicator(strokeWidth: 2),
         );
       }
-      return Icon(
-        PhosphorIconsRegular.circle,
-        size: AppTheme.iconS,
-        color: Theme.of(context).colorScheme.outline,
-      );
+      // A repository the run has not reached yet. Same glyph, same rung -
+      // `IconRole.circle` is Phosphor's Regular circle (0xe18a) and
+      // `ControlScale.compact` is the 16 dp this named - so the mark does not
+      // move or change shape.
+      //
+      // Its COLOUR does, and that is the repair the sibling comparison found
+      // rather than a side effect of converting a size. Every one of these
+      // marks is the `leading` of a `BaseListItem`, and that row already
+      // publishes an `IconTheme` for its whole width
+      // (material_surfaces.dart:1878) whose colour is `onSurfaceVariant` -
+      // M3's own list-item icon role - dropping to a readable fallback on a
+      // selected tile, where the plain role measures 2.86 : 1. Naming
+      // `colorScheme.outline` here overpainted that: `outline` is Material's
+      // role for BORDERS and dividers, and it was the one thing in this column
+      // still coloured for something other than a row glyph, sitting directly
+      // above two twins (`_buildStatusIcon`'s outcome branch and the row's own
+      // `trailing`) that had already stopped restating it. `Tone.neutral` is
+      // `BaseIcon`'s way of saying "take what the control around me has already
+      // published", which is exactly what these two want to say.
+      return const BaseIcon(IconRole.circle, scale: ControlScale.compact);
     }
 
     if (progress.success == null) {
       // Finished mid-run: the outcome only arrives with the final results,
       // so a neutral check avoids claiming success or failure prematurely.
-      return Icon(
-        PhosphorIconsRegular.checkCircle,
-        size: AppTheme.iconS,
-        color: Theme.of(context).colorScheme.outline,
-      );
+      // Same conversion, same reasoning as the pending mark above.
+      return const BaseIcon(IconRole.checkCircle, scale: ControlScale.compact);
     }
 
     // The outcome the run reached for this repository, at the dense scale the

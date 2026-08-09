@@ -357,12 +357,25 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // badges and the progress strip render behind states no scene reaches.
   // Measured at closing under BOTH skins - Material and the blueprint land
   // on the same two numbers - so the register stays skin-independent.
+  // The tree caret's stale-reservation fix moved two scenes, both UP. A file
+  // row used to reserve the caret column with a number copied from the caret
+  // and gone stale; it now keeps the caret itself mounted invisible
+  // (base_tree_item.dart, Visibility with maintainSize), so the caret's
+  // BaseInset fence is alive on every FILE row. Changes +2 is its fixture's
+  // two file rows (docs/alpha.md, docs/beta.md); browse +1 is its one
+  // (README.md). The same diff's other conversions measure net zero here:
+  // the batch dialog's outcome marks and spinner render behind a dialog no
+  // scene opens, the status tree's block spinner behind a loading state no
+  // fixture holds, and the deleted batch_operations_toolbar had no callers
+  // left to render. Measured at closing under BOTH skins - Material and the
+  // blueprint land on the same two numbers - so the register stays
+  // skin-independent.
   'shell': 170,
   'workspaces': 34,
   'repositories': 61,
-  'changes': 50,
+  'changes': 52,
   'history': 90,
-  'browse': 26,
+  'browse': 27,
   'branches': 19,
   // #249 P4's overlay migration raised exactly two scenes, both for the same
   // reason: their row overflow menus now open through the contract's anchored

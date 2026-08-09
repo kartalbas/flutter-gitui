@@ -129,6 +129,32 @@ class _BasePanelState extends State<BasePanel> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // The three corners below are this panel's surface, and the surface is
+    // `surfaces.panel` - which ships, and which `update_available_dialog.dart`
+    // already calls. They stay because the member cannot say what these five
+    // panel headers say, and that is a CONTRACT FINDING rather than a wait on
+    // an unbuilt member:
+    //
+    //  * `PanelSpec.title` is a bare `String`, drawn by the Material member as
+    //    `bodyLarge` with no mark. Every one of the five panels in `lib/`
+    //    (commit details, commit diff, file tree, and both panes of the
+    //    changes screen) states its title as a `Row` of an accent [BaseIcon]
+    //    and a `sectionTitle` [BaseLabel]. Calling the member today would
+    //    delete five region marks and drop the name a type weight - a change
+    //    of content, not of treatment.
+    //  * Two of the five QUALIFY the name: commit_diff_panel.dart carries the
+    //    displayed file path beside it as a muted `detail`, and the changes
+    //    screen's diff pane carries the path plus a per-file staging mark. A
+    //    header content port would hold them, and would put this application's
+    //    panel-header typography back into application code - the leak the
+    //    member exists to close - so the shape that is missing is a named
+    //    `leading` mark plus a qualifier, not an opaque slot.
+    //  * `PanelSpec` also has no outlined variant, which is what the border
+    //    below is. No screen passes `hasBorder`; it is alive only in the
+    //    Material conformance suite and one golden scene, so deleting the
+    //    variant would take one of these three corners with it and move a
+    //    golden - a decision for whoever owns that manifest, not a side
+    //    effect of this pass.
     return Material(
       elevation: widget.elevation,
       borderRadius: BorderRadius.circular(AppTheme.radiusL),

@@ -172,9 +172,28 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                   const BaseGap(Proximity.hairline),
                 ],
 
-                // Expand/collapse icon for directories
-                if (node.isDirectory)
-                  GestureDetector(
+                // Expand/collapse control for directories, kept in the layout
+                // and hidden on a file row.
+                //
+                // A file used to reserve the caret's place with a number
+                // copied FROM the caret, and the copy had gone stale: the
+                // reservation was 16 - the caret's GLYPH - while the caret
+                // itself measures its glyph plus the `Inset.hairline` it sits
+                // in. Files therefore sat 4 px to the left of the folders they
+                // hang under and their rows stood 1 px shorter, which is the
+                // opposite of what the number was there to do. Reserving the
+                // control ITSELF cannot go stale and needs no number at all:
+                // the place a file keeps is whatever that skin's caret plus
+                // that skin's hairline inset comes to, so the columns line up
+                // in every language rather than in Material by coincidence.
+                // Hidden this way the caret is also out of the hit test, so a
+                // click in a file's caret column still reaches the row.
+                Visibility(
+                  visible: node.isDirectory,
+                  maintainSize: true,
+                  maintainAnimation: true,
+                  maintainState: true,
+                  child: GestureDetector(
                     onTap: onExpandToggle ?? onTap,
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
@@ -193,13 +212,8 @@ class _BaseTreeItemState extends State<BaseTreeItem> {
                         ),
                       ),
                     ),
-                  )
-                else
-                  // Not a gap: this reserves the extent of the caret a file
-                  // row does not have, so that files line up under folders.
-                  // The vocabulary has no way to say "as wide as the control
-                  // that is missing" - see the P3d report.
-                  const SizedBox(width: AppTheme.paddingM),
+                  ),
+                ),
 
                 // The expand control and the mark naming the node are two
                 // halves of one row, touching.

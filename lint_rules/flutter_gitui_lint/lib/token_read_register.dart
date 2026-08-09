@@ -186,70 +186,107 @@ TokenReadReconciliation reconcileTokenReads({
 /// The register itself: 77 reads at the 2026-08-09 census, 33 standing after
 /// the #438 conversions and the menu family's move behind the contract — 20
 /// waiting for a named P5 member, 6 blocked on a missing word, 7 kept by a
-/// named permanent carve-out (#433). The gate test
+/// named permanent carve-out (#433). Of the 20, the speed dial's 15 were
+/// REFILED off `chrome.screen (ScreenSpec.primaryActions)` and onto
+/// `surfaces.tree (TreeNodeSpec.menu)`: the cause is unchanged — they still
+/// wait for a member — but the member they named was one no conversion here
+/// would ever reach, and the group comment argues the measurement. The
+/// gate test
 /// pins the total (shrink-only — lower it when converting, never raise it)
 /// and the per-cause counts, so a read cannot change its story without
 /// passing through that pin.
 const List<TokenReadRegisterEntry> tokenReadRegister = [
-  // ── chrome.screen — ScreenSpec.primaryActions (15 reads) ────────────────
-  // The entire hand-built draggable speed dial. SKIN-CONTRACT-MEMBERS.md:1357
-  // states the member's shape exists precisely for Material's FAB; the skin
-  // draws the FAB, mini-FABs, label pills, elevations and gaps, and decides
-  // placement, so the drag machinery and its edge margins die with the
-  // construction.
+  // ── surfaces.tree — TreeNodeSpec.menu (15 reads) ─────────────────────────
+  // The entire hand-built draggable speed dial: its resting offset, both drag
+  // clamps, the row pitch of its action column, and the label pills'
+  // elevation, padding and gap.
+  //
+  // REFILED. These 15 reads stood under `chrome.screen (ScreenSpec
+  // .primaryActions)`, and that filing named a member no conversion here will
+  // ever reach - the same defect #433 fixed for the icon-comparison grid.
+  // The codebase had already recorded why, for the third dial: #438 moved the
+  // Changes screen's diff-column dial into `PanelSpec.actions` because "up to
+  // seven entries are not 'the one or two things a user came here to do'"
+  // (git_status_tree_view.dart, `_headerActions`). The two dials that remain
+  // measure the same way, and neither lands on `primaryActions`:
+  //
+  //  * BROWSE (browse_screen.dart, built by `FileTreeViewState.fabActions`) -
+  //    up to seven entries, every one gated on a selected FILE node: open in
+  //    editor, rename, copy, paste, delete, copy path, reveal. That is a file
+  //    tree row's own menu, and the contract already has the slot:
+  //    `TreeNodeSpec.menu`, the one the commit-details tree converted under.
+  //    It is also the browse tree's ONLY affordance for those seven actions -
+  //    that tree has no context menu - so this half CONVERTS.
+  //  * HISTORY (history_screen.dart) - five entries whose gating and
+  //    callbacks are a strict SUBSET of the commit context menu built in the
+  //    same file: squash (>= 2), cherry-pick (> 0), revert, reset and create
+  //    tag (== 1) dispatch to the same five methods the menu's entries do.
+  //    The menu carries four more entries, is reachable by right-click AND
+  //    from the keyboard (Shift+F10 and the ContextMenu key), and marks
+  //    squash, revert and reset `MenuActionRole.destructive` while the dial
+  //    marks nothing. Two affordances for one job, the weaker one without the
+  //    destructive treatment: that half is DELETED, not converted, and no
+  //    member and no word frees it.
+  //
+  // So the file dies when the browse tree becomes `surfaces.tree` and states
+  // its row actions as `TreeNodeSpec.menu` - the one member a conversion here
+  // actually reaches - with the history dial going in the same change for its
+  // own reason.
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'AppTheme.paddingM,',
     reads: 6,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
     reason:
         'Default resting offset from the bottom-right corner and the '
         'bare halves of the drag-clamp arithmetic that keep the dial inside '
-        'its edge margin. Placement is the skin\'s once primaryActions '
-        'exists, so the whole drag machinery goes with the construction.',
+        'its edge margin. A row menu has no resting place to drag, so the '
+        'whole drag machinery dies with the construction.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'viewport.width - dialSize.width - AppTheme.paddingM,',
     reads: 1,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
     reason: 'Horizontal drag clamp keeping the dial\'s edge margin.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'viewport.height - dialSize.height - AppTheme.paddingM,',
     reads: 1,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
     reason: 'Vertical drag clamp keeping the dial\'s edge margin.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'bottom: AppTheme.paddingS + AppTheme.paddingXS,',
     reads: 2,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
     reason:
-        'Row pitch between the dial\'s action rows; the skin owns the '
-        'column once it draws the mini-FABs.',
+        'Row pitch between the dial\'s action rows; a menu\'s rows are '
+        'the skin\'s once the entries travel as `MenuEntry` data.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'elevation: AppTheme.elevationLevel2,',
     reads: 1,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
-    reason: 'Label pill elevation; the skin draws the label pills.',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
+    reason:
+        'Label pill elevation. A menu entry carries its label inline, so '
+        'the pill it is painted on has no successor to inherit the number.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'AppTheme.paddingS + AppTheme.paddingXS,',
     reads: 2,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
     reason: 'Label pill horizontal padding.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_speed_dial.dart',
     site: 'width: AppTheme.paddingS + AppTheme.paddingXS,',
     reads: 2,
-    waitsFor: 'chrome.screen (ScreenSpec.primaryActions)',
+    waitsFor: 'surfaces.tree (TreeNodeSpec.menu)',
     reason: 'Gap between a label pill and its mini-FAB.',
   ),
 
@@ -276,7 +313,7 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
   // content ownership through the contract, and its 3 reads (the column
   // formula and both paddingL gutters) died with the hand-built delegate.
 
-  // ── surfaces.tree (2 reads) ─────────────────────────────────────────────
+  // ── surfaces.tree (2 reads here; 15 more in the dial group above) ───────
   // The tree owns per-depth indent, row height and (via TreeNodeSpec.menu)
   // its own row-action anchor. The commit-details tree
   // (file_tree_panel.dart) CONVERTED and took its 3 reads with it - the

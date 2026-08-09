@@ -106,6 +106,20 @@ class _CopyableTextState extends State<CopyableText> {
             horizontal: AppTheme.paddingS,
             vertical: AppTheme.paddingXS,
           ),
+          // The wash and its corner stay hand-painted, and `surfaces
+          // .pressable` is the near miss rather than the answer. That member
+          // is "an arbitrary region the user can act on, wearing the
+          // language's own hover, focus and press feedback", and this region
+          // is not acted on: no call site passes `selectOnClick`, so the
+          // gesture detector above carries a null tap everywhere in `lib/`.
+          // What the hover means here is not "you may press this" but "there
+          // is a control hidden in this row" - it exists to REVEAL the copy
+          // button, which is why the application has to know about it, and
+          // `PressableSpec` reports nothing back. Handing the region to the
+          // member would therefore paint a press affordance that does nothing
+          // and still leave this `MouseRegion` in place to swap the trailing
+          // slot: two hover models over one box. The word that would free it
+          // is a reveal-on-hover slot on a row-shaped member, not a corner.
           decoration: BoxDecoration(
             color: _isHovered
                 ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)

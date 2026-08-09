@@ -74,14 +74,21 @@ class BaseSwitcher extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
           ),
-          // The switcher's internal distances stay LITERALS, deliberately,
-          // and this is a CONTRACT FINDING rather than an unconverted site:
-          // this control is one hand-painted unit - its fill, border and
-          // corner are stated right above as Material's own numbers - and its
-          // inset and gaps are that unit's anatomy, so they leave together
-          // when the switcher becomes a member (`controls` owes it one; the
-          // toolbar's width arithmetic in overflow_action_bar.dart is the
-          // same §1 residue with the same P5 home). Resolving the distances
+          // The switcher's internal distances stay LITERALS, deliberately, and
+          // so do the two corners above: this control is one hand-painted unit
+          // - its fill, border and corner are stated right above as Material's
+          // own numbers - and its inset and gaps are that unit's anatomy, so
+          // they leave together when the switcher becomes a member. WHICH
+          // member is settled rather than owed, and the earlier note here
+          // ("`controls` owes it one") named the wrong facet: the contract
+          // already carries this control as `ToolbarPickerEntry` on
+          // `ShellSpec.toolbar`, whose own doc names these four by name - "the
+          // four switchers - workspace, repository, branch, global branch -
+          // are not actions" - and carries them as DATA precisely because a
+          // pre-built control cannot become `MacosPulldownButton` or a
+          // `CommandBarBuilderItem`. `chrome.shell` draws it, which is also
+          // where the toolbar's width arithmetic in overflow_action_bar.dart
+          // goes, so the two are one wait and not two. Resolving the distances
           // through the skin while the box stayed hand-painted was tried and
           // taken back at closing, on the review pass's own precedent
           // ("returned to literals rather than staying rounded onto rungs

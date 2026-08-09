@@ -110,12 +110,6 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
     10,
     0,
   ),
-  'lib/features/repositories/widgets/batch_operations_toolbar.dart': _Weights(
-    1,
-    0,
-    0,
-    0,
-  ),
   'lib/features/repositories/widgets/global_branch_switcher.dart': _Weights(
     4,
     0,
@@ -358,16 +352,6 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
     _Fate.normalised,
     'The failure branch of that same row mark, at the same weight on both '
         'branches of the ternary, so no state distinction existed to lose.',
-  ),
-  _GivenUp(
-    'lib/features/repositories/widgets/batch_operations_toolbar.dart',
-    'checkSquare',
-    'Bold',
-    _Fate.normalised,
-    'The selection banner\'s mark, unconditional - one mark, no second state '
-        'to tell apart, inside a pill the accent already sets off. Where this '
-        'same check-square IS a state (git_status_tree_view.dart, Bold means '
-        'staged), the weight is kept and the skin re-decides it.',
   ),
   _GivenUp(
     'lib/features/repositories/widgets/global_branch_switcher.dart',
@@ -688,7 +672,12 @@ void main() {
         fillRemoved,
         _kWeightsGivenUp.where((_GivenUp g) => g.weight == 'Fill').length,
       );
-      expect(boldRemoved, 39);
+      // 39 held one normalisation in batch_operations_toolbar.dart. That file
+      // is deleted outright now - it had lost its callers, so there is no
+      // destination to move its entry to - and its ledger entry and its
+      // disposition note left with it, one bold on each side, so the pin
+      // follows without the two lists drifting apart.
+      expect(boldRemoved, 38);
       expect(fillRemoved, 5);
     });
 

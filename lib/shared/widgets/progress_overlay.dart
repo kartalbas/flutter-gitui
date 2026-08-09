@@ -27,24 +27,39 @@ import '../../core/services/progress_service.dart';
 /// without competing with the content for attention, since it appears for work
 /// the user did not start.
 ///
-/// **Stays hand-painted, and the reason is a contract finding rather than a
-/// wait.** Every other part of this strip has a member: a count riding on the
-/// line above it is `surfaces.badge` — whose `Tone.neutral` fill is the exact
-/// `surfaceContainerHighest` painted here — and the tap, its state layers and
-/// its tooltip are `surfaces.pressable` composed around it, which is the
-/// shape `repository_card.dart` already uses for a badge that is also a
-/// control. What no member can carry is the CARET. It is the strip's only
-/// static statement that there is more behind it, and it is trailing;
-/// `BadgeSpec.icon` is a single LEADING mark standing for what the badge is
-/// about, so composing the two would delete the affordance rather than
-/// restate it — a change of content, not of treatment. The corner and the
-/// inset go the moment a badge can say "and there is more this way", and not
-/// before.
+/// **Stays hand-painted, and the blocker is `chrome.shell` — not a missing
+/// word.** What stood here argued that the strip could be re-composed in
+/// application code out of `surfaces.badge` plus `surfaces.pressable`, and
+/// that it could not be, because `BadgeSpec.icon` is a single LEADING mark
+/// while this caret is trailing. That asked the wrong member. This strip is
+/// not the application's to compose at all: [ProgressOverlay] is mounted by
+/// the shell (`app_shell.dart`), and the contract already carries the whole
+/// thing as `ShellSpec.activity` — `ActivitySpec` states operation,
+/// currentStep, totalSteps, indeterminate and onShowDetail, which is exactly
+/// the fact set this class renders and nothing more. The shipped Material
+/// skin already contains the extraction, caret included, as
+/// `_MaterialActivityLine` in
+/// packages/gitui_skin_material/lib/src/facets/material_chrome.dart. So
+/// nothing here waits for a vocabulary decision: the two corners, the strip's
+/// inset and the caret's own 12 all die in one move, the moment `chrome
+/// .shell` is wired and this widget states an `ActivitySpec` instead of
+/// drawing one.
+///
+/// **The extraction has drifted from this copy, and that is worth knowing
+/// before the swap rather than after it**, because nothing reaches it: the
+/// member has no caller in `lib/` and no test in its own package, so no gate
+/// compares the two. Measured today, `_MaterialActivityLine` writes the
+/// caption at `labelMedium` where this one says [TextRole.detail]
+/// (`bodySmall`), and hand-builds its bar at `minHeight: 3` — the thickness
+/// the branch above deliberately gave up when it moved to `controls
+/// .progress`, whose `inline` rung is Material's stock 4. Wiring the shell
+/// without reconciling those two would silently take both back.
 ///
 /// The 12 dp caret's own recorded blocker is gone, and it is recorded here so
 /// it is not re-derived: it read "no `ControlScale` rung reaches it, the
 /// smallest being 16", which is true of the ICON scale but not of a badge's
-/// mark — the compact pill draws its glyph at 10.
+/// mark — the compact pill draws its glyph at 10. The member settles it
+/// either way: the skin draws its own caret at `iconXS`, which is this 12.
 class _BackgroundProgressLabel extends StatelessWidget {
   const _BackgroundProgressLabel({required this.progress});
 
@@ -94,9 +109,10 @@ class _BackgroundProgressLabel extends StatelessWidget {
               // grow this caret by a third inside a thin strip floating over
               // the user's content, which is the blame view's inset mistake
               // (#426) one axis over: a meaning rounded onto the nearest
-              // available word. The mark this caret is waiting for is a
-              // TRAILING one, which is the slot the class doc records as
-              // missing from `BadgeSpec`.
+              // available word. It is not waiting for a rung either: the
+              // caret belongs to `ShellSpec.activity`, whose skin draws it
+              // itself at its own `iconXS` - the same 12 - and decides on
+              // `onShowDetail` alone whether there is anything to open.
               Icon(
                 PhosphorIconsRegular.caretRight,
                 size: 12,

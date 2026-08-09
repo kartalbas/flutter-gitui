@@ -14,6 +14,27 @@ import '../theme/app_theme.dart';
 /// packages/flutter/lib/src/material/chip.dart:2495), which is also the app's
 /// control corner for buttons (BTN-001) and the `chipRadius` the theme
 /// configures in lib/shared/theme/app_theme.dart:41.
+///
+/// **It survives for ONE of the three chips below, and that is the finding.**
+/// The Material skin already owns this file's other two: `controls
+/// .filterToggle` and `controls.choiceGroup` ship in all three skins, and
+/// Material's implementations are these very parts moved - its own private
+/// `_chipShape`, `_chipAvatar` and `_chipLabel` are byte-for-byte this file's,
+/// carrying the same CHIP-001/002/003 deviations. [BaseFilterChip] and
+/// [BaseChoiceGroup] are therefore façade work, blocked on nothing but the
+/// per-call-site `IconData` to `IconRole` flip.
+///
+/// [BaseActionChip] has no member at all, and no near miss survives reading:
+/// `surfaces.tag` is "a named thing the user can take away again" and Material
+/// draws it as the BADGE pill, not an M3 chip, so its two call sites (the
+/// history screen's "Last 7 days" / "Last 30 days" quick filters and its
+/// "Clear filters") would change shape, height and type step; `controls
+/// .filterToggle` is the wrong statement, because these set a filter rather
+/// than report a condition that is on; and §6.7 of docs/SKIN-CONTRACT-MEMBERS.md
+/// deleted `controls.actionBar` on the grounds that a bar belongs to a frame,
+/// which says nothing about an action wearing a chip inline in a filter row.
+/// So the corner leaves when a chip-shaped ACTION has a word - or when those
+/// two sites stop being chips - and not before.
 final RoundedRectangleBorder _chipShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.circular(AppTheme.radiusM),
 );

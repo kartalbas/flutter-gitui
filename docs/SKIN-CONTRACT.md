@@ -23,7 +23,7 @@ Every number below was measured on this repository at `master`, Flutter 3.44.4
 claim cites a file and a line in `flutter/packages/flutter/lib`,
 `fluent_ui-4.16.1` or `macos_ui-2.2.2`, all three of which are resolvable from
 this machine's pub cache. Where a claim comes from the completed viability
-spike it cites `spike/skin_lab/FINDINGS.md`. Where a claim is *not* measured, it
+spike it cites `docs/SKIN-SPIKE-FINDINGS.md`. Where a claim is *not* measured, it
 says so.
 
 ---
@@ -1502,7 +1502,7 @@ where the other half of the design actually lives.
 
 ### 5.0 A gate that runs before P0
 
-**A one-week `macos_ui` probe**, mirroring `spike/skin_lab`. The spike's 195
+**A one-week `macos_ui` probe**, mirroring the viability spike (`docs/SKIN-SPIKE-FINDINGS.md`). The spike's 195
 classifications were against *Cupertino* and none of that evidence transfers.
 Much of the probe is already done — every macOS claim in this document was read
 out of `macos_ui-2.2.2` source and is cited — but three questions remain
@@ -1522,7 +1522,7 @@ and the cost of the programme grows. That is why this runs first.
 
 #### The gate has run. Two answers passed, one did not.
 
-Measured in `spike/skin_lab/test/macos_gate_test.dart` (19 tests) against
+Measured in `the spike's macOS gate (19 tests, recorded in `docs/SKIN-SPIKE-FINDINGS.md`)` (19 tests) against
 `macos_ui 2.2.2`. Every claim below is executed, not read.
 
 **(3) Co-resolution — passed, purely additively.** Four new transitive packages

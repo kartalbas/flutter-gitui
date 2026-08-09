@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Error state for branches screen when loading fails
 class BranchesErrorState extends StatelessWidget {
@@ -14,44 +13,33 @@ class BranchesErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Not the empty-state facade (#430). The hero carries a tone now
-          // (#431) and `EmptyStateSpec.tone` settles what to say with it, so
-          // the mark's COLOUR no longer blocks this - its SIZE and its SHAPE
-          // still do, and this is the only one of the four screen-level error
-          // states where they do. Its three siblings (tags, stashes, changes)
-          // draw a 64 dp hero over a headline and a sentence, which is the
-          // facade's own shape and is what let them adopt it. This one drifted
-          // to a 48 dp mark over a single headline that folds the error into
-          // its own words, with no sentence under it: adopting would hand the
-          // `48` to a member that draws its hero at 64 and add the member's
-          // empty second line beneath, both changes of appearance rather than
-          // renames - the same pair blame_dialog.dart and
-          // unified_diff_dialog.dart are reported for. Reported instead: this
-          // converts when the facade can say a one-statement shape, and the
-          // colour leaves with the size it is stranded to, because `BaseIcon`
-          // tops out at 24 dp and rounding a 48 dp hero onto it is #426.
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          // The glyph and the headline are members of one statement: `grouped`,
-          // which Material answers with the 16 pixels this line used to name.
-          const BaseGap(Proximity.grouped),
-          // The error state's headline, at the same rung as every other one.
-          BaseLabel(
-            AppLocalizations.of(
-              context,
-            )!.errorLoadingBranches(error.toString()),
-            role: TextRole.pageTitle,
-            align: TextAlign.center,
-          ),
-        ],
-      ),
+    // The facade rather than a hand-built copy of it (#430), and the last of
+    // the four screen error states to adopt. Its three siblings (changes,
+    // stashes, tags) went at #431, when the hero learned to say `Tone.danger`
+    // and a failure stopped being dressed as an ordinary empty pane. This one
+    // stayed behind on its SIZE alone: it drifted to a 48 dp mark where they
+    // drew 64.
+    //
+    // That is not a difference worth forking a shared member over, and it is
+    // not this file's decision to hold: `EmptyStateWidget._heroGlyph` records
+    // that a member accepting no size owns the size, so the `48` here was the
+    // leak rather than the intent. The read leaves with it - a `Tone` reaches
+    // a mark only through `BaseIcon`, whose largest rung is 24 dp, so
+    // converting the colour alone would have shrunk the hero, which is #426.
+    //
+    // Deltas, stated rather than discovered later: the hero grows 48 -> 64 dp
+    // (matching its three siblings), the column takes the member's roomy
+    // inset, and the mark-to-headline gap becomes the member's `separate`. The
+    // words do not move - `errorLoadingBranches` folds the error into one
+    // headline, so it stays the headline and the explaining sentence is empty,
+    // the construction `ErrorState` already ships.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: AppLocalizations.of(
+        context,
+      )!.errorLoadingBranches(error.toString()),
+      message: '',
+      tone: Tone.danger,
     );
   }
 }

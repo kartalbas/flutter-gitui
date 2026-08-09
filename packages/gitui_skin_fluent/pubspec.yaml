@@ -1,0 +1,81 @@
+name: gitui_skin_fluent
+description: >-
+  The Fluent 2 skin for Flutter GitUI (#249): every contract member drawn
+  here, against the published Fluent 2 and WinUI specifications, with no
+  widget library underneath. It is the contract's falsifier as much as a
+  look - the Material skin was written alongside the contract and cannot
+  disconfirm it, while Fluent disagrees with Material at exactly the places a
+  badly-drawn contract breaks: the affirmative dialog action sits on the LEFT,
+  the AppBar dissolves into NavigationView, one control height answers three
+  ControlScales. Where the contract bends to fit Fluent, that is a finding to
+  report, never something to hide.
+
+  Drawing it rather than delegating puts the burden on this package to earn
+  what a widget library would have supplied: not the metrics, which are
+  published, but the FEEL - how a control answers the pointer, how focus
+  reads on both grounds, how a selection changes when its window goes
+  inactive. Those are asserted from the paint stream under each state, the
+  way the Material conformance suite already measures state layers, so that
+  "it feels right" is a claim with a test behind it.
+publish_to: 'none'
+version: 0.0.0
+
+environment:
+  sdk: ^3.9.2
+
+# Member of the app's pub workspace so this package resolves against the same
+# Flutter/Dart SDK and the same shared transitive versions the app uses. It is
+# deliberately NOT in the app's `dependencies`: nothing in lib/ registers this
+# skin yet, and the workspace-isolation gate (analysis_options.yaml,
+# depend_on_referenced_packages at error severity, #383) makes that absence
+# enforced rather than merely true today.
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The contract this package implements. A skin depends on the contract and
+  # never the other way round, and never on the application.
+  gitui_skin_api:
+    path: ../gitui_skin_api
+
+  # No widget library. This skin draws Fluent 2 itself, and that is a decision
+  # rather than an omission: delegating would put a second complete widget
+  # library - and a third for macOS - into the shipped application, and make
+  # the way this application feels the property of two projects nobody here
+  # controls.
+  #
+  # The cost is real and is accepted knowingly: `fluent_ui` encodes years of
+  # hand-tuning that a reimplementation does not inherit for free. So the
+  # values are not invented. They are read from the published Fluent 2 and
+  # WinUI specifications and from reference checkouts kept OUTSIDE this
+  # repository (D:/repos/github/fluent_ui, D:/repos/github/macos_ui), and each
+  # number that lands here carries where it came from - the same provenance
+  # discipline the conformance deviation register uses. Reading is not
+  # depending: nothing from those checkouts is compiled, vendored or shipped.
+
+  # The one role whose FAMILY is the user's own choice rather than this
+  # skin's: `TextRole.code` carries the user's monospace family across the
+  # contract as a name (`SkinRequest.monoFamily`), and this is how a name
+  # becomes a bundled font. The same door the Material skin uses, because the
+  # user's choice is application configuration, not a design language.
+  google_fonts: ^8.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The design-system lint gate. A package is only its own `custom_lint`
+  # context root if it depends on the plugin; without these two lines the
+  # rules simply do not run here, which would be a gate lowered by omission.
+  # The same arrangement as the Material and blueprint skin packages.
+  custom_lint: ^0.8.1
+  flutter_gitui_lint:
+    path: ../../lint_rules/flutter_gitui_lint
+
+flutter:
+  # fluent_ui declares `uses-material-design: true`; a consumer that does not
+  # prints a mismatch warning on every run. Recorded as a Fluent packaging
+  # constraint in docs/SKIN-SPIKE-FINDINGS.md §1.1.
+  uses-material-design: true

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_parser.dart';
@@ -14,7 +14,7 @@ import '../components/base_badge.dart';
 import '../components/base_diff_viewer.dart';
 import '../components/base_button.dart';
 import '../components/base_viewer_dialog.dart';
-import '../components/base_layout.dart';
+import '../widgets/empty_state.dart';
 
 /// Unified diff dialog that handles all diff viewing use cases
 class UnifiedDiffDialog extends ConsumerStatefulWidget {
@@ -174,26 +174,25 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
 
   Widget _buildErrorState(BuildContext context, Object? error) {
     final l10n = AppLocalizations.of(context)!;
-    // Not the empty-state facade (#430). The hero carries a tone now (#431),
-    // so the mark's COLOUR no longer blocks this - its SHAPE still does. The
-    // state says one thing, in one body-sized line, and the facade wants a
-    // headline and a sentence: adopting would promote the line into a
-    // page-title headline and hand the `48` to a member that draws its hero
-    // at 64, both changes of appearance rather than renames. Reported
-    // instead: this converts when the facade can say a one-statement shape.
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 48,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.grouped),
-          Text(l10n.messageErrorLoadingDiff(error.toString())),
-        ],
-      ),
+    // The facade (#430), now that its hero can say a failure (#431). The
+    // reason recorded here for staying hand-built was that the facade "wants a
+    // headline and a sentence" and this state says one thing - which the
+    // facade file itself disproves: `ErrorState` is a one-statement state,
+    // built out of this same member with `message: ''`. So the shape was never
+    // the blocker; the hero's colour was, and it is a `Tone` now.
+    //
+    // The statement is passed through unchanged rather than routed via
+    // `ErrorState`, which would prefix it with its own localized "Error:" and
+    // change what the user reads. One delta rides along and is deliberate: the
+    // hero goes from this copy's 48 dp to the member's 64, because the size is
+    // the member's answer and a copy that will not follow the member is not a
+    // copy. Its COLOUR is unchanged: the facade answers `Tone.danger` with the
+    // very scheme role this mark was naming by hand.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: l10n.messageErrorLoadingDiff(error.toString()),
+      message: '',
+      tone: Tone.danger,
     );
   }
 

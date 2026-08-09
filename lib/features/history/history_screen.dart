@@ -958,16 +958,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     ResolvedCommitSelection selection,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    // The destructive entries below already say what they mean once, as
-    // `tone: Tone.danger`, and that word colours their MARK. It cannot reach
-    // their words: `MenuItemContent.labelColor` is typed as a `Color?` and
-    // falls back to the inherited menu foreground rather than resolving the
-    // tone it was already handed, so dropping this would silently un-redden
-    // three labels. The read is the component's gap, not this screen's - the
-    // repair is in `lib/shared/components/base_menu_item.dart`, outside this
-    // slice, and it deletes the same read at `branch_switcher.dart:161` and
-    // `quick_settings_menu.dart:169` in one move.
-    final errorColor = Theme.of(context).colorScheme.error;
+    // The destructive entries below say what they mean exactly once, as
+    // `tone: Tone.danger`. Each of them used to say it twice - the tone for
+    // the mark, and a `labelColor:` naming Material's error role for the
+    // words - because the tone reached only the glyph. That was the
+    // component's gap rather than this screen's, and it is now closed in
+    // `lib/shared/components/base_menu_item.dart`: `MenuItemContent` resolves
+    // the label from the tone it was already handed, so the three colours
+    // here are gone and no pixel with them.
     final count = selection.count;
 
     return [
@@ -1021,7 +1019,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             icon: IconRole.arrowsInLineVertical,
             label: l10n.squashCommits,
             tone: Tone.danger,
-            labelColor: errorColor,
           ),
         ),
       if (count == 1) ...[
@@ -1031,7 +1028,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             icon: IconRole.arrowCounterClockwise,
             label: l10n.revert,
             tone: Tone.danger,
-            labelColor: errorColor,
           ),
         ),
         BaseMenuItem(
@@ -1040,7 +1036,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             icon: IconRole.arrowCounterClockwise,
             label: l10n.resetToHere,
             tone: Tone.danger,
-            labelColor: errorColor,
           ),
         ),
       ],

@@ -109,16 +109,14 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
           const PopupMenuDivider(),
           // Clear All action
           PopupMenuItem(
-            // The same statement twice, for the reason tag_list_tile.dart
-            // records: the meaning is `Tone.danger`, and `MenuItemContent`
-            // wears its tone on the MARK only, painting its label from a raw
-            // `Color?`. Deleting the read greys the destructive label, which
-            // is a change of appearance rather than a rename.
+            // Said once, for the reason tag_list_tile.dart records:
+            // `MenuItemContent.tone` reaches the WORDS as well as the mark
+            // now, so the `Color` that used to re-say `Tone.danger` beside it
+            // is gone. Pixel-identical by construction.
             child: MenuItemContent(
               icon: IconRole.trash,
               label: AppLocalizations.of(context)!.clearAll,
               tone: Tone.danger,
-              labelColor: Theme.of(context).colorScheme.error,
             ),
             onTap: () => _confirmClearAllStashes(context),
           ),

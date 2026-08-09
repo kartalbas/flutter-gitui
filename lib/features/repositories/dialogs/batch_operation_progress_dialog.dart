@@ -401,17 +401,21 @@ class _BatchOperationProgressDialogState
       // Only the repository the service is on gets a spinner; spinning every
       // row made a stalled run indistinguishable from a busy one.
       if (progress.repository.path == _activeRepositoryPath) {
-        // The colour stays with the box and the stroke: a spinner is neither a
-        // label nor a glyph, so neither facade can carry a tone for it, and
-        // `controls.progress` at the inline extent is the member that takes
-        // all three at once.
-        return SizedBox(
+        // The colour is GONE rather than translated: it restated the ambient
+        // default instead of stating a meaning. `CircularProgressIndicator`
+        // resolves `valueColor ?? color ?? ProgressIndicatorTheme.color ??
+        // defaults.color`; this application installs no
+        // `ProgressIndicatorTheme` and every M3 default class answers
+        // `defaults.color` with `colorScheme.primary`, so the deleted line and
+        // the ambient default hand the painter the same Color - measured in
+        // both themes. See `repository_card.dart` for the full note.
+        //
+        // The box and the stroke stay: neither facade can carry them, and they
+        // leave with `controls.progress` at the inline extent.
+        return const SizedBox(
           width: AppTheme.iconS,
           height: AppTheme.iconS,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          child: CircularProgressIndicator(strokeWidth: 2),
         );
       }
       return Icon(

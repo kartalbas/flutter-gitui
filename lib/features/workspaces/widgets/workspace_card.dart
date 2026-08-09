@@ -47,6 +47,20 @@ class WorkspaceCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final description = project.displayDescription(l10n);
 
+    // What the overflow menu offers, as language-neutral data. Built once and
+    // closed over by both halves of the button, so the index `onSelected`
+    // reports always addresses this same list.
+    final List<MenuEntry> menuEntries = <MenuEntry>[
+      MenuAction(label: l10n.edit, icon: IconRole.pencil, onPressed: onEdit),
+      if (onDelete != null)
+        MenuAction(
+          label: l10n.delete,
+          icon: IconRole.trash,
+          onPressed: onDelete,
+          role: MenuActionRole.destructive,
+        ),
+    ];
+
     return BaseCard(
       isSelected: isSelected || isHighlighted,
       // The focus ring belongs to the roving highlight alone; the selected
@@ -82,7 +96,27 @@ class WorkspaceCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              BasePopupMenuButton<String>(
+              // The menu is stated as DATA rather than hand-rolled, which is
+              // what retires the last Material colour word on this card. The
+              // destructive entry used to say its meaning twice - `Tone.danger`
+              // for the mark and a spelled-out `colorScheme.error` for the
+              // words - because `MenuItemContent` wears its tone on the mark
+              // only and paints its label from a raw `Color?`. Deleting the
+              // second half at the call site would have left a red glyph beside
+              // black words, so the route out is the other one
+              // `tag_list_tile.dart` names: `MenuActionRole.destructive`, from
+              // which `materialMenuEntries` derives BOTH halves itself
+              // (base_menu_item.dart:132-143). The application says what the
+              // entry means; the one place that turns menu data into Material
+              // widgets keeps answering how that looks.
+              //
+              // Nothing moves. Both entries already drew at `MenuItemContent`'s
+              // default `compact` rung, which is what `materialMenuEntries`
+              // builds, and the destructive tint is unchanged because this
+              // entry only exists when `onDelete` is non-null - so it is always
+              // enabled, and the disabled case where that function drops the
+              // tint is unreachable here.
+              BasePopupMenuButton<int>(
                 // The overflow mark acts on this workspace, so it takes the
                 // workspace's own place in the skin's series - the same word
                 // the list row states for the workspace's name. The prominent
@@ -93,43 +127,10 @@ class WorkspaceCard extends StatelessWidget {
                   tone: Tone.series(project.colorIndex),
                   scale: ControlScale.prominent,
                 ),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'edit',
-                    child: MenuItemContent(
-                      icon: IconRole.pencil,
-                      label: AppLocalizations.of(context)!.edit,
-                    ),
-                  ),
-                  if (onDelete != null)
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: MenuItemContent(
-                        icon: IconRole.trash,
-                        label: AppLocalizations.of(context)!.delete,
-                        tone: Tone.danger,
-                        // The tone above reaches the MARK only:
-                        // `MenuItemContent` spends it on its `BaseIcon` and
-                        // colours its words from a `Color? labelColor`.
-                        // Dropping this half today would leave a destructive
-                        // entry with a red glyph and black words - an
-                        // appearance change inside a colour rename. It goes
-                        // when the component's tone reaches its label, one
-                        // edit in `lib/shared/components/base_menu_item.dart`.
-                        labelColor: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                ],
-                onSelected: (value) {
-                  switch (value) {
-                    case 'edit':
-                      onEdit();
-                      break;
-                    case 'delete':
-                      onDelete?.call();
-                      break;
-                  }
-                },
+                itemBuilder: (context) =>
+                    materialMenuEntries(context, menuEntries),
+                onSelected: (int index) =>
+                    dispatchMenuEntry(menuEntries, index),
               ),
             ],
           ),

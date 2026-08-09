@@ -13,6 +13,7 @@ import '../../core/utils/executable_path.dart';
 import '../components/base_label.dart';
 import '../components/base_dialog.dart';
 import '../components/base_layout.dart';
+import '../widgets/empty_state.dart';
 
 /// Dialog to detect and select available tools on Linux
 class DetectToolsDialog extends StatefulWidget {
@@ -224,38 +225,25 @@ class _DetectToolsDialogState extends State<DetectToolsDialog> {
 
   Widget _buildContent(BuildContext context, AppLocalizations l10n) {
     if (_gitPath == null && _diffTools.isEmpty && _textEditors.isEmpty) {
-      return BaseInset(
-        all: Inset.roomy,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Not the empty-state facade (#430). The hero carries a tone now
-            // (#431), so the mark's COLOUR no longer blocks this - the
-            // state's SHAPE still does: its headline is a body-sized line
-            // wearing Tone.danger where the facade draws a neutral page
-            // title, so adopting would promote the danger-toned line into a
-            // neutral headline and hand the `48` to a member that draws its
-            // hero at 64, both changes of appearance rather than renames.
-            Icon(
-              PhosphorIconsRegular.warningCircle,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const BaseGap(Proximity.separate),
-            BaseLabel(
-              l10n.noToolsDetected,
-              role: TextRole.body,
-              tone: Tone.danger,
-            ),
-            const BaseGap(Proximity.grouped),
-            BaseLabel(
-              l10n.noToolsDetectedHint,
-              role: TextRole.detail,
-              tone: Tone.muted,
-              align: TextAlign.center,
-            ),
-          ],
-        ),
+      // The facade (#430), now that its hero can say a failure (#431). This
+      // column was already the member's shape - hero, headline, the sentence
+      // explaining it - laid out by hand, down to the roomy inset the member
+      // applies itself; what kept it hand-built was that the facade painted
+      // every hero in the supporting foreground, and that is a `Tone` now.
+      //
+      // The state SAYS failure and keeps saying it: `Tone.danger` resolves to
+      // the very scheme role this mark was handed by hand, so the hero's
+      // colour is unchanged. Two deltas ride along with the member and are
+      // deliberate rather than discovered later: the hero takes the member's
+      // 64 dp instead of this copy's 48, and the headline takes the member's
+      // treatment - a neutral page title, with the failure now stated by the
+      // mark above it rather than twice. Both are the member owning what a
+      // copy of it had drifted on.
+      return EmptyStateWidget(
+        icon: PhosphorIconsRegular.warningCircle,
+        title: l10n.noToolsDetected,
+        message: l10n.noToolsDetectedHint,
+        tone: Tone.danger,
       );
     }
 

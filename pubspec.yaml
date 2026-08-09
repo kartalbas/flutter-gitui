@@ -11,12 +11,6 @@ environment:
 # independently, so the plugin resolves as a member of this workspace.
 workspace:
   - lint_rules/flutter_gitui_lint
-  # Throwaway viability spike for #249 (see spike/skin_lab/FINDINGS.md). It is
-  # a workspace member so `fluent_ui` resolves against this Flutter/Dart SDK
-  # and these shared transitive versions without ever entering this package's
-  # `dependencies`. The workspace-isolation gate below
-  # (depend_on_referenced_packages: error) keeps lib/ unable to import it.
-  - spike/skin_lab
   # The skin contract (#249, P1): the vocabularies, the specs and the 55
   # members every skin implements. A workspace member so it resolves against
   # this Flutter/Dart SDK and these shared transitive versions, and
@@ -39,6 +33,14 @@ workspace:
   # and these shared transitive versions; it depends on this package (the
   # application it measures), and this package depends on nothing in it.
   - packages/gitui_skin_material
+  # The Fluent 2 skin (#249): the second design language, and the contract's
+  # falsifier - Material was written alongside the contract and cannot
+  # disconfirm it. A workspace member so `fluent_ui` resolves against this
+  # Flutter/Dart SDK and these shared transitive versions, and deliberately
+  # NOT in this package's `dependencies`: nothing in lib/ registers it yet,
+  # and the workspace-isolation gate below (depend_on_referenced_packages:
+  # error) keeps lib/ unable to import it until that day comes.
+  - packages/gitui_skin_fluent
 
 dependencies:
   flutter:

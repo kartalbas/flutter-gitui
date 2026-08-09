@@ -17,6 +17,7 @@ import '../../../shared/controllers/tree_view_controller.dart';
 import '../../../shared/widgets/base_focus_region.dart';
 import '../../../shared/widgets/base_tree_item.dart';
 import '../../../shared/widgets/keyboard_navigable_view.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/file_status_badge.dart';
 import '../../../core/git/models/file_status.dart';
 import '../../../core/diff/diff_parser.dart';
@@ -544,38 +545,25 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
       future: _diffFuture,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // The headline mark of a failure that fills this pane, and two
-                // of the three reasons it stayed a raw `Icon` are gone. The
-                // facade can carry a failure's colour now (#431), and
-                // `EmptyStateSpec.tone` decides that a state standing in for a
-                // FAILURE says `Tone.danger` - which is why the label directly
-                // below already says it. What survives is the SHAPE and the
-                // SIZE: this is a 32 dp mark over one sentence with no
-                // headline, where `EmptyStateWidget` draws a 64 dp hero and
-                // always renders a `pageTitle` above its message, so adopting
-                // would promote the sentence into a headline and grow the
-                // mark. The colour is stranded with the size rather than
-                // independently convertible: a `Tone` reaches a mark only
-                // through `BaseIcon`, whose largest rung is 24 dp, and naming
-                // it here would shrink a 32 dp mark - rounding a meaning onto
-                // the nearest available word, which is what cost #426.
-                Icon(
-                  PhosphorIconsRegular.warningCircle,
-                  size: AppTheme.iconXL,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const BaseGap(Proximity.grouped),
-                BaseLabel(
-                  'Error loading diff: ${snapshot.error}',
-                  role: TextRole.body,
-                  tone: Tone.danger,
-                ),
-              ],
-            ),
+          // The in-panel member, not the region-filling hero. This column is
+          // a 32 dp mark over one sentence with no headline, and that shape is
+          // the whole reason it stayed hand-rolled through two passes:
+          // `EmptyStateWidget` draws 64 dp above a `pageTitle`, so adopting IT
+          // would have doubled the mark and promoted the sentence out of
+          // `body` - rounding a meaning onto the nearest available word, which
+          // is what cost #426. `PanelNote` is that shape said once, so the
+          // `32` and the colour leave together into the member that owns them
+          // rather than being stranded here.
+          //
+          // Pixel-identical by construction: same glyph at the same rung, the
+          // same `grouped` distance under it, and the same sentence in `body`
+          // wearing the same `Tone.danger` this file already stated - the
+          // member simply quotes Material's answer to that tone for the mark,
+          // where a call site cannot.
+          return PanelNote(
+            icon: PhosphorIconsRegular.warningCircle,
+            message: 'Error loading diff: ${snapshot.error}',
+            tone: Tone.danger,
           );
         }
 

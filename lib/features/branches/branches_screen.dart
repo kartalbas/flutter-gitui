@@ -309,6 +309,21 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
+              // The notice's own FILL, not a foreground, so the tone mapping
+              // has nothing to say about it. It waits for `overlays.notify`
+              // for the reason that member's Material implementation states:
+              // a tone may only be resolved inside the notice host's `build`,
+              // so its `SnackBar` shell is transparent and the tone-coloured
+              // pill is drawn from inside. A call site has no host, and the
+              // application is deliberately given no way to turn a `Tone` into
+              // a `Color` for its own decoration.
+              //
+              // The hand-rolled notice is itself the defect underneath: this
+              // is `NotificationService.showError` written out by hand, and
+              // adopting the service is what deletes the read here. That is a
+              // behaviour change (the service never auto-dismisses and adds a
+              // copy affordance), not a rename, so it is reported rather than
+              // folded into a colour conversion.
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

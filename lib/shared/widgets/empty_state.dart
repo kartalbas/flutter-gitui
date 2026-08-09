@@ -7,6 +7,7 @@ import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../components/base_layout.dart';
+import '../theme/app_theme.dart';
 
 /// Reusable empty state widget for displaying empty states throughout the app
 ///
@@ -167,6 +168,85 @@ class EmptyStateWidget extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A mark over one sentence, standing in for a single PANE's content.
+///
+/// The in-panel sibling of [EmptyStateWidget], and what separates them is
+/// scale rather than decoration. The hero above stands in place of a whole
+/// REGION: a 64 dp mark with a `pageTitle` above its sentence. This note
+/// stands inside a panel that its own header already names, so it is half that
+/// mark and carries no headline at all — and that difference is not a nuance,
+/// it is precisely why four of these stayed hand-rolled through two conversion
+/// passes (#430). Adopting the hero would have doubled each mark and promoted
+/// each sentence out of `body` into a slot it does not belong in, which is
+/// rounding a meaning onto the nearest available word — the mistake that cost
+/// #426.
+///
+/// [tone] is the one thing a call site says, and it says it once: "there is
+/// nothing here" ([Tone.muted]) or "this could not be loaded" ([Tone.danger]).
+/// It reaches the sentence as a tone through [BaseLabel]; it reaches the mark
+/// as this member's own quotation of Material's answer to it, for the reason
+/// the hero above records in the same words — a tone reaches a glyph only
+/// through `BaseIcon`, whose three `ControlScale` rungs top out at 24 dp while
+/// this mark is 32. Stating that quotation ONCE here is the whole point: the
+/// four call sites that adopted this had each stated it themselves, and each
+/// had written a paragraph explaining why it had to.
+///
+/// The size and the two colour words leave together when P5 gives the in-panel
+/// note a member of its own, exactly as [EmptyStateWidget]'s do.
+class PanelNote extends StatelessWidget {
+  const PanelNote({
+    super.key,
+    required this.icon,
+    required this.message,
+    this.tone = Tone.muted,
+  }) : // `identical` rather than `==`, for the reason BaseLabel records: Tone
+       // carries a custom `==`, a const constructor may only use primitive
+       // equality, and every named tone is a const singleton.
+       assert(
+         identical(tone, Tone.muted) || identical(tone, Tone.danger),
+         'The in-panel note can say exactly two things: Tone.muted ("there is '
+         'nothing here") and Tone.danger ("this failed"). Like the hero above '
+         'it, this member quotes one Material colour word per meaning, so a '
+         'third meaning must be added here and in both skins\' members '
+         'deliberately — never silently painted as the nearer of these two.',
+       );
+
+  /// The glyph. An `IconData` rather than an `IconRole` for the same reason
+  /// [EmptyStateWidget] takes one: the role would have to arrive at `BaseIcon`
+  /// to mean anything, and `BaseIcon` cannot draw this size.
+  final IconData icon;
+
+  /// The one sentence. There is no headline slot, by design — see above.
+  final String message;
+
+  /// What the note MEANS. Worn by the mark and by the sentence together.
+  final Tone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: AppTheme.iconXL,
+            color: identical(tone, Tone.danger)
+                ? Theme.of(context).colorScheme.error
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          // The mark and the sentence under it are members of one statement:
+          // `grouped`. The hero above says `separate` at the same boundary
+          // because its two parts are a mark and a HEADLINE; here there is one
+          // statement in two pieces, and the smaller distance is the meaning.
+          const BaseGap(Proximity.grouped),
+          BaseLabel(message, role: TextRole.body, tone: tone),
+        ],
       ),
     );
   }

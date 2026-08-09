@@ -5,11 +5,11 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_diff_viewer.dart';
 import '../../../core/diff/diff_parser.dart';
@@ -75,22 +75,14 @@ class CommitDiffPanel extends ConsumerWidget {
       inset: Inset.none,
       content: fileAsync.when(
         data: (path) => path == null
-            ? _CenteredNote(
-                mark: Icon(
-                  PhosphorIconsRegular.files,
-                  size: AppTheme.iconXL,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+            ? PanelNote(
+                icon: PhosphorIconsRegular.files,
                 message: l10n.messageNoFilesChanged,
               )
             : _CommitFileDiff(commitHash: commitHash, filePath: path),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _CenteredNote(
-          mark: Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: AppTheme.iconXL,
-            color: Theme.of(context).colorScheme.error,
-          ),
+        error: (error, stack) => PanelNote(
+          icon: PhosphorIconsRegular.warningCircle,
           message: l10n.errorLoadingData('diff'),
           tone: Tone.danger,
         ),
@@ -127,12 +119,8 @@ class _CommitFileDiff extends ConsumerWidget {
         fontSize: ref.watch(previewFontSizeProvider),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => _CenteredNote(
-        mark: Icon(
-          PhosphorIconsRegular.warningCircle,
-          size: AppTheme.iconXL,
-          color: Theme.of(context).colorScheme.error,
-        ),
+      error: (error, stack) => PanelNote(
+        icon: PhosphorIconsRegular.warningCircle,
         message: l10n.errorLoadingData('diff'),
         tone: Tone.danger,
       ),
@@ -140,48 +128,10 @@ class _CommitFileDiff extends ConsumerWidget {
   }
 }
 
-/// A mark over a sentence, in the middle of the panel.
-///
-/// The colour parameter this used to carry was the caller's MEANING wearing a
-/// `Color`: "nothing went wrong, this is just empty" or "this failed". Said as
-/// a meaning it is a [Tone], and the skin decides what that looks like.
-///
-/// The mark arrives already built rather than as a [Tone] of its own, because
-/// the only application-legal way to draw one from a tone is `BaseIcon`, whose
-/// three scales top out at 24 while this mark is 32.
-///
-/// **Nor is this the empty-state facade's shape** (#430). `EmptyStateWidget`
-/// is the hero that stands in place of a whole REGION: it draws its mark at
-/// 64 and always renders a headline above its sentence. This note has neither
-/// - it is half that size and carries one sentence with no headline, because
-/// it sits inside a panel that is already named by its own header. Adopting
-/// the facade here would double the glyph and promote the sentence into a
-/// `pageTitle` slot it does not belong in, so the note keeps its own shape
-/// and its `Color` until the in-panel note becomes a member of its own.
-class _CenteredNote extends StatelessWidget {
-  final Widget mark;
-  final String message;
-  final Tone tone;
-
-  const _CenteredNote({
-    required this.mark,
-    required this.message,
-    this.tone = Tone.muted,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          mark,
-          // The mark and the sentence under it are members of one statement:
-          // `grouped`.
-          const BaseGap(Proximity.grouped),
-          BaseLabel(message, role: TextRole.body, tone: tone),
-        ],
-      ),
-    );
-  }
-}
+// `_CenteredNote` used to live here, and its own doc comment named the
+// condition on which it would leave: "until the in-panel note becomes a member
+// of its own". It has — `PanelNote`, beside the hero it is the small sibling
+// of, in lib/shared/widgets/empty_state.dart — so the private copy is gone and
+// the three notes above are the member. Two of the four sites that had
+// hand-rolled this same shape were in other files entirely, each with its own
+// paragraph explaining the same constraint; they are the member now too.

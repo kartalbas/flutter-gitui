@@ -13,6 +13,7 @@ import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/utils/file_icon_utils.dart';
@@ -99,33 +100,13 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
       content: changedFilesAsync.when(
         data: (files) {
           if (files.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Not the empty-state facade's shape (#430): a 32 dp note
-                  // with one sentence and no headline, inside a panel its own
-                  // header already names, where `EmptyStateWidget` is a 64 dp
-                  // hero that always renders a `pageTitle` above its message.
-                  // Adopting it in a pane this narrow would double the mark
-                  // and promote the sentence out of `body`. The colour is
-                  // stranded with the size: a tone reaches a mark only through
-                  // `BaseIcon`, whose scales top out at 24.
-                  Icon(
-                    PhosphorIconsRegular.files,
-                    size: AppTheme.iconXL,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  // The mark and the sentence under it are members of one
-                  // statement: `grouped`.
-                  const BaseGap(Proximity.grouped),
-                  BaseLabel(
-                    AppLocalizations.of(context)!.messageNoFilesChanged,
-                    role: TextRole.body,
-                    tone: Tone.muted,
-                  ),
-                ],
-              ),
+            // Still not the region-scale hero (#430) — this is a pane inside
+            // a panel its own header already names — but no longer
+            // hand-rolled either: `PanelNote` IS that shape, and adopting it
+            // deletes the mark's size and its colour together.
+            return PanelNote(
+              icon: PhosphorIconsRegular.files,
+              message: AppLocalizations.of(context)!.messageNoFilesChanged,
             );
           }
 
@@ -220,32 +201,12 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // The same in-panel note shape as the empty case above, and that
-              // shape is now the only thing holding it back: the facade's hero
-              // carries a tone (#431), so a red failure mark is something it
-              // can say. It is still a 32 dp note with one sentence and no
-              // headline inside a panel its own header already names, while
-              // `EmptyStateWidget` is a 64 dp hero that always renders a
-              // `pageTitle`. The colour is stranded with the size, exactly as
-              // above: a tone reaches a mark only through a member or
-              // `BaseIcon`, whose scales top out at 24.
-              Icon(
-                PhosphorIconsRegular.warningCircle,
-                size: AppTheme.iconXL,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const BaseGap(Proximity.grouped),
-              BaseLabel(
-                AppLocalizations.of(context)!.errorLoadingData('files'),
-                role: TextRole.body,
-                tone: Tone.danger,
-              ),
-            ],
-          ),
+        // The same note as the empty case above, saying the other of the two
+        // things the shape can say.
+        error: (error, stack) => PanelNote(
+          icon: PhosphorIconsRegular.warningCircle,
+          message: AppLocalizations.of(context)!.errorLoadingData('files'),
+          tone: Tone.danger,
         ),
       ),
     );

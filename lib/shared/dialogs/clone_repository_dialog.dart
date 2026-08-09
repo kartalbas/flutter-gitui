@@ -179,13 +179,14 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
                   child: Row(
                     children: [
                       // The mark says what the message beside it already says,
-                      // so it says it the same way: `colorScheme.error` was
-                      // Material's answer to the danger this label had already
-                      // named. It stated no size at all and took whatever the
-                      // dialog's ambient theme handed it; the other banner mark
-                      // in this same dialog asks for the ordinary size, so the
-                      // difference was drift rather than a distinction and both
-                      // now say the same rung.
+                      // so it says it the same way: the danger this label had
+                      // already named, stated once as a meaning instead of a
+                      // second time as a scheme role. The mark stated no size
+                      // at all and took whatever the dialog's ambient theme
+                      // handed it; the other banner mark in this same dialog
+                      // asks for the ordinary size, so the difference was
+                      // drift rather than a distinction and both now say the
+                      // same rung.
                       const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
                       const BaseGap(Proximity.related),
                       Expanded(

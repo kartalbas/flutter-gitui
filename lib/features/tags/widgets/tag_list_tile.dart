@@ -207,22 +207,17 @@ class TagListTile extends ConsumerWidget {
                     if (!isLocalOnly || !hasRemotes) const PopupMenuDivider(),
                     PopupMenuItem(
                       value: 'delete',
-                      // The meaning is already stated: `Tone.danger`. The
-                      // colour beside it is the same statement said twice,
-                      // because `MenuItemContent` wears its tone on the MARK
-                      // only and paints its label from a raw `Color?`.
-                      // Deleting the read would drop the destructive label
-                      // back to the menu's ambient foreground, which is a
-                      // change of appearance rather than a rename, so it
-                      // stays until the component's label wears the tone too
-                      // - or until this menu is expressed as `MenuAction(role:
-                      // MenuActionRole.destructive)` and `materialMenuEntries`
-                      // derives both halves the way it already does.
+                      // The meaning is stated once now. `MenuItemContent.tone`
+                      // wore its meaning on the MARK only, so the label had to
+                      // be re-said as a raw `Color` to keep the two halves of
+                      // one entry agreeing; the tone reaches the words too,
+                      // and the second statement goes. Pixel-identical by
+                      // construction: the component answers `Tone.danger` with
+                      // the same scheme role this line spelled out.
                       child: MenuItemContent(
                         icon: IconRole.trash,
                         label: AppLocalizations.of(context)!.delete,
                         tone: Tone.danger,
-                        labelColor: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ],
@@ -441,6 +436,19 @@ class TagListTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.snackbarFailedToCheckoutTag(e.toString())),
+            // The notice's own FILL, not a foreground: the tone mapping is
+            // about what a mark or a word MEANS, and this paints the pill the
+            // words sit on. It waits for `overlays.notify`, because a tone may
+            // only be resolved inside the notice host's `build` - a call site
+            // has no host, and the application is deliberately given no way to
+            // turn a `Tone` into a `Color` for its own decoration.
+            //
+            // Underneath the read sits the real defect: all five notices in
+            // this file are `NotificationService.showError` and `.showSuccess`
+            // written out by hand. Adopting the service is what deletes them,
+            // and it is a behaviour change (the error service never
+            // auto-dismisses and adds a copy affordance) rather than a rename,
+            // so it is reported instead of folded in here.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -468,6 +476,9 @@ class TagListTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.snackbarBranchCreatedSuccess(branchName)),
+            // The same fill as the checkout failure above, one meaning over:
+            // a notice that succeeded rather than one that failed, waiting for
+            // the same member.
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -476,6 +487,8 @@ class TagListTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
+            // The same fill as the checkout failure above, waiting for the
+            // same member.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -522,6 +535,8 @@ class TagListTile extends ConsumerWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(l10n.snackbarFailedToPushTag(e.toString())),
+                // The same fill as the checkout failure above, waiting for the
+                // same member.
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
             );
@@ -644,6 +659,8 @@ class TagListTile extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.snackbarFailedToDeleteTag(e.toString())),
+              // The same fill as the checkout failure above, waiting for the
+              // same member.
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

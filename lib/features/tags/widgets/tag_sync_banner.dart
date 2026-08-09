@@ -40,6 +40,12 @@ class TagSyncBanner extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          // The banner's own STROKE, washed to 30% so it sits under the words
+          // rather than beside them. A wash of an accent is a state layer, and
+          // a state layer is not something `Tone.accent` can say - a tone
+          // names a foreground's MEANING, not paint applied at a fraction of
+          // itself. Fill and stroke are the surface, and they leave together
+          // when the banner becomes a member.
           border: Border.all(
             color: Theme.of(context).colorScheme.primary.withAlpha(77),
           ),

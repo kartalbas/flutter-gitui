@@ -114,16 +114,14 @@ class StashListTile extends ConsumerWidget {
               const PopupMenuDivider(),
               PopupMenuItem(
                 value: 'drop',
-                // The same statement twice, for the reason tag_list_tile.dart
-                // records: the meaning is `Tone.danger`, and `MenuItemContent`
-                // wears its tone on the MARK only, painting its label from a
-                // raw `Color?`. Deleting the read greys the destructive label,
-                // which is a change of appearance rather than a rename.
+                // Said once, for the reason tag_list_tile.dart records:
+                // `MenuItemContent.tone` reaches the WORDS as well as the mark
+                // now, so the `Color` that used to re-say `Tone.danger` beside
+                // it is gone. Pixel-identical by construction.
                 child: MenuItemContent(
                   icon: IconRole.trash,
                   label: AppLocalizations.of(context)!.drop,
                   tone: Tone.danger,
-                  labelColor: Theme.of(context).colorScheme.error,
                 ),
               ),
             ],
@@ -263,6 +261,19 @@ class StashListTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.snackbarFailedToApplyStash(e.toString())),
+            // The notice's own FILL, not a foreground: the tone mapping is
+            // about what a mark or a word MEANS, and this paints the pill the
+            // words sit on. It waits for `overlays.notify`, because a tone may
+            // only be resolved inside the notice host's `build` - a call site
+            // has no host, and the application is deliberately given no way to
+            // turn a `Tone` into a `Color` for its own decoration.
+            //
+            // Underneath the read sits the real defect: all five notices in
+            // this file are `NotificationService.showError` written out by
+            // hand. Adopting the service is what deletes them, and it is a
+            // behaviour change (the service never auto-dismisses and adds a
+            // copy affordance) rather than a rename, so it is reported instead
+            // of folded in here.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -281,6 +292,8 @@ class StashListTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.snackbarFailedToPopStash(e.toString())),
+            // The same fill as the apply failure above, waiting for the same
+            // member.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -299,6 +312,8 @@ class StashListTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.snackbarFailedToLoadDiff(e.toString())),
+            // The same fill as the apply failure above, waiting for the same
+            // member.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -321,6 +336,8 @@ class StashListTile extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
+              // The same fill as the apply failure above, waiting for the same
+              // member.
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -351,6 +368,8 @@ class StashListTile extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.snackbarFailedToDropStash(e.toString())),
+              // The same fill as the apply failure above, waiting for the same
+              // member.
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );

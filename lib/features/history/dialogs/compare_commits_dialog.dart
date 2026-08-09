@@ -5,10 +5,10 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_viewer_dialog.dart';
 import '../../../core/git/git_providers.dart';
@@ -79,34 +79,13 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
 
           final commits = snapshot.data ?? const [];
           if (commits.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Not the empty-state facade's shape (#430), and so not
-                  // `EmptyStateWidget`: this is a 32 dp note with one sentence
-                  // and no headline, inside a dialog that already names
-                  // itself, while the facade draws a 64 dp hero and always
-                  // renders a `pageTitle` above its message. Adopting it here
-                  // would double the mark and promote the sentence out of
-                  // `body`. Its colour is stranded with its size, because a
-                  // tone can only reach a mark through `BaseIcon` and no rung
-                  // of `ControlScale` reaches 32.
-                  Icon(
-                    PhosphorIconsRegular.gitCommit,
-                    size: AppTheme.iconXL,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  // The mark and the sentence under it are members of one
-                  // statement: `grouped`.
-                  const BaseGap(Proximity.grouped),
-                  BaseLabel(
-                    l10n.noCommitsInRange,
-                    role: TextRole.body,
-                    tone: Tone.muted,
-                  ),
-                ],
-              ),
+            // Still not the region-scale hero (#430) — this dialog already
+            // names itself, so the note carries no headline — but the shape
+            // is a member now, and adopting it takes the mark's size and its
+            // colour with it.
+            return PanelNote(
+              icon: PhosphorIconsRegular.gitCommit,
+              message: l10n.noCommitsInRange,
             );
           }
 

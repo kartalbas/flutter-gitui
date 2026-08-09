@@ -137,21 +137,27 @@ class RepositoryListItem extends ConsumerWidget {
                         label: 'Git not configured',
                       ),
                     ] else if (status.isLoading) ...[
-                      // Not converted: a spinner is neither a label nor a
-                      // glyph, so no `Tone` can be said about it through
-                      // `BaseLabel` or `BaseIcon`, and no `BaseProgress`
-                      // exists to say it through. `controls.progress` at the
-                      // inline extent is the member that takes the box, the
-                      // stroke and the tone together; splitting the colour off
-                      // now would leave the other two spelled out beside a
-                      // word that had already crossed the seam.
-                      SizedBox(
+                      // The colour is GONE rather than translated: it was
+                      // Material's own answer copied back onto the widget that
+                      // had already given it, not a meaning this row was
+                      // stating. `CircularProgressIndicator` resolves
+                      // `valueColor ?? color ?? ProgressIndicatorTheme.color ??
+                      // defaults.color`; this application installs no
+                      // `ProgressIndicatorTheme` and every M3 default class
+                      // answers `defaults.color` with `colorScheme.primary`, so
+                      // the deleted line and the ambient default hand the
+                      // painter the same Color - measured in both themes. See
+                      // the twin in `repository_card.dart` for the full note.
+                      //
+                      // The box and the stroke stay, because those are this
+                      // row's own statements and no facade can carry them; they
+                      // leave with `controls.progress` at the inline extent,
+                      // which is also where a spinner first gets a way to say a
+                      // tone.
+                      const SizedBox(
                         width: 12,
                         height: 12,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                     ] else ...[
                       // Broken

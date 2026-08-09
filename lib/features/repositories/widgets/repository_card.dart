@@ -315,20 +315,32 @@ class RepositoryCard extends ConsumerWidget {
                 // with a padding token, which said nothing true about it. It
                 // moves into `controls.progress` at the inline extent, where a
                 // number is legal.
-                // The colour stays with the geometry, for the same reason: a
-                // spinner is neither a label nor a glyph, so neither `BaseLabel`
-                // nor `BaseIcon` can carry a tone for it, and there is no
-                // `BaseProgress` to reach for. `controls.progress` is the member
-                // that takes all three of these numbers plus the tone at once,
-                // and splitting them now would leave the stroke and the box
-                // spelled out beside a tone that had already crossed the seam.
-                SizedBox(
+                //
+                // The colour is GONE rather than translated, and the
+                // difference matters: it was not a meaning this screen was
+                // stating, it was Material's own answer copied back onto the
+                // widget that had already given it. `CircularProgressIndicator`
+                // resolves `valueColor ?? color ?? ProgressIndicatorTheme.color
+                // ?? defaults.color`, this application installs no
+                // `ProgressIndicatorTheme` (measured: the resolved theme colour
+                // is null under both `AppTheme.lightTheme()` and
+                // `darkTheme()`), and every M3 default class answers
+                // `defaults.color` with `colorScheme.primary` - so the line
+                // deleted here and the ambient default handed the painter the
+                // same Color in both themes. This is the spinner's form of the
+                // redundant `copyWith(color: colorScheme.onSurface)` that
+                // `avoid_text_with_style` now flags: restating the ambient
+                // answer is the defect, and removing it moves no pixel.
+                //
+                // What stays is the geometry alone - the box and the stroke -
+                // because those really are this card's statements and neither
+                // `BaseLabel` nor `BaseIcon` can carry them. They leave when
+                // `controls.progress` lands at the inline extent, which is also
+                // where a spinner first gets a way to say a tone at all.
+                const SizedBox(
                   width: AppTheme.iconS,
                   height: AppTheme.iconS,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
                 const BaseGap(Proximity.related),
                 BaseLabel('Analyzing...', role: TextRole.detail),

@@ -115,7 +115,6 @@ List<PopupMenuEntry<int>> materialMenuEntries(
   BuildContext context,
   List<MenuEntry> entries,
 ) {
-  final ColorScheme colorScheme = Theme.of(context).colorScheme;
   final List<PopupMenuEntry<int>> rendered = <PopupMenuEntry<int>>[];
 
   for (int index = 0; index < entries.length; index++) {
@@ -127,8 +126,12 @@ List<PopupMenuEntry<int>> materialMenuEntries(
         // The destructive tint is dropped while the entry is unavailable, so
         // the disabled treatment `PopupMenuItem` resolves for its label
         // (onSurface at 38%, popup_menu.dart:1847-1852) is the one that shows.
-        // A spelled-out `error` would paint straight over it and a disabled
-        // destructive entry would look exactly like an invokable one.
+        // Naming the tint anyway would paint straight over it and a disabled
+        // destructive entry would look exactly like an invokable one. The
+        // second half of that sentence used to be a `labelColor:` spelling out
+        // `colorScheme.error` under the same condition; it says nothing the
+        // tone beside it did not already say, now that the tone reaches the
+        // words too.
         final bool emphasiseAsDestructive =
             entry.role == MenuActionRole.destructive && entry.isEnabled;
         rendered.add(
@@ -139,7 +142,6 @@ List<PopupMenuEntry<int>> materialMenuEntries(
               icon: entry.icon,
               label: entry.label,
               tone: emphasiseAsDestructive ? Tone.danger : Tone.neutral,
-              labelColor: emphasiseAsDestructive ? colorScheme.error : null,
             ),
           ),
         );
@@ -215,10 +217,26 @@ class MenuItemContent extends StatelessWidget {
   final IconRole icon;
   final String label;
 
-  /// What the mark means. [Tone.neutral] leaves the colour to whatever the
+  /// What the entry means. [Tone.neutral] leaves the colour to whatever the
   /// enclosing menu item has already published, which is what a null
   /// `iconColor` did and what keeps a disabled entry looking disabled.
+  ///
+  /// It reaches the WORDS as well as the mark. It did not until now, and that
+  /// gap is why four screens spelled out `colorScheme.error` beside a
+  /// `Tone.danger` they had already stated: the tone said "destructive", the
+  /// component reddened only the glyph, and the label had to be re-said as a
+  /// `Color` to keep the two halves of one entry agreeing. Material's answer
+  /// to `Tone.danger` is quoted once here instead — the same arrangement the
+  /// empty-state hero uses, and for the same reason: a tone reaches text only
+  /// through `BaseLabel`, and this label is a `TextStyle` on Material's own
+  /// `bodyLarge` ramp that `PopupMenuItem` expects to inherit.
   final Tone tone;
+
+  /// An explicit override for the label's colour.
+  ///
+  /// Deprecated by [tone] in everything but name: every remaining caller is
+  /// restating what its tone already says, and each one deletes this argument
+  /// as it converts. The parameter goes when the last of them has.
   final Color? labelColor;
 
   /// How much room the mark is entitled to. `compact` is the 16 dp rung this
@@ -230,7 +248,14 @@ class MenuItemContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveLabelColor = labelColor ?? _inheritedLabelColor(context);
+    // `identical` rather than `==` for the reason BaseLabel records: Tone
+    // carries a custom `==` and every named tone is a const singleton, so
+    // identity is exactly as strong as equality here.
+    final effectiveLabelColor =
+        labelColor ??
+        (identical(tone, Tone.danger)
+            ? theme.colorScheme.error
+            : _inheritedLabelColor(context));
 
     return Row(
       children: [

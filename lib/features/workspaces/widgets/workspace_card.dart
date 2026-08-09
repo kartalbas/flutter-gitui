@@ -74,10 +74,22 @@ class WorkspaceCard extends StatelessWidget {
       // workspace keeps the muted tinted treatment.
       containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
-      customBorderColor: project.color,
-      customBackgroundColor: isSelected
-          ? project.color.withValues(alpha: 0.1)
-          : null,
+      // The workspace's own place in the skin's series, which is what the two
+      // `Color`s that stood here were both spelling out: the card's border was
+      // `project.color` and its selected fill the same colour at 10 %. The
+      // card member draws both from this one word, from the SAME twelve
+      // values, because `WorkspaceColors.defaults` and the skin's series
+      // palette are the same list in the same order.
+      //
+      // One state DOES move under Material, deliberately: the RESTING card's
+      // 1 px outline. The old `BaseCard` consulted `customBorderColor` only
+      // in its focused-selection branch, so an unselected card wore the grey
+      // `outlineVariant`; the member draws an identity-bearing card's outline
+      // in its identity in every state, so every resting workspace card now
+      // carries its own colour at 1 px. That is the member's considered
+      // answer to "this card is ABOUT something", not a side effect - the
+      // selected fill, the focused ring and the selection wash are unchanged.
+      tone: Tone.series(project.colorIndex),
       inset: Inset.normal,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

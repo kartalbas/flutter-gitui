@@ -56,10 +56,6 @@ class BaseSwitcher extends StatelessWidget {
       child: Tooltip(
         message: tooltip,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.paddingM,
-            vertical: AppTheme.paddingS,
-          ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerHigh,
             border: Border.all(
@@ -67,6 +63,26 @@ class BaseSwitcher extends StatelessWidget {
               width: 1,
             ),
             borderRadius: BorderRadius.circular(AppTheme.radiusS),
+          ),
+          // The switcher's internal distances stay LITERALS, deliberately,
+          // and this is a CONTRACT FINDING rather than an unconverted site:
+          // this control is one hand-painted unit - its fill, border and
+          // corner are stated right above as Material's own numbers - and its
+          // inset and gaps are that unit's anatomy, so they leave together
+          // when the switcher becomes a member (`controls` owes it one; the
+          // toolbar's width arithmetic in overflow_action_bar.dart is the
+          // same §1 residue with the same P5 home). Resolving the distances
+          // through the skin while the box stayed hand-painted was tried and
+          // taken back at closing, on the review pass's own precedent
+          // ("returned to literals rather than staying rounded onto rungs
+          // that moved their pixels"): under the blueprint the collapsed
+          // insets widened the toolbar's overflow bar by three actions and
+          // made the scene sweep's skin-independent register skin-DEPENDENT,
+          // and at DISTANCE=64 the stretched gaps overflowed this very Row -
+          // a T2 failure the resting gates never see.
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.paddingM,
+            vertical: AppTheme.paddingS,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

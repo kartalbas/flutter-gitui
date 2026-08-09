@@ -57,10 +57,13 @@ double wcagContrast(Color a, Color b) {
 ///
 /// This is the same helper `git_colors_contrast_test.dart` has always applied
 /// before measuring the 12 % diff-row tint and the 15 % badge tint (`flattened`
-/// there). It belongs on the application side too, because the application
-/// paints translucent containers as well: `BaseCard.customBackgroundColor`
-/// receives `primary` at 10 % from repository_card.dart and the workspace
-/// colour at 10 % from workspace_card.dart.
+/// there). The two translucent card fills it used to name here — `primary` at
+/// 10 % on a selected repository card, the workspace colour at 10 % on a
+/// selected workspace card — are no longer the application's to hand over:
+/// `BaseCard` is a façade over `surfaces.card` and both arrive as a `Tone`,
+/// with the wash itself mixed inside the skin. What keeps the helper on this
+/// side of the seam is [readableForeground] below, which cannot judge a
+/// translucent container without flattening it first.
 Color flattenedOver(Color color, Color base) => Color.alphaBlend(color, base);
 
 /// The foreground to paint on [background] over [backgroundBase], which is

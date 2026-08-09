@@ -87,7 +87,13 @@ final class BlueprintSurfaces implements SkinSurfaces {
               _containerMark(spec.containerFocused),
             ]),
             if (spec.header != null) spec.header!.mount(),
-            spec.content.mount(),
+            // Loose, exactly as the Material member holds the same port: a
+            // card's content may be the screen's own scroller (the diff
+            // viewer mounts a `ListView` here), and a shrink-wrapping column
+            // would hand it unbounded height - an exception, not a layout.
+            // Boundedness is not a colour or a distance, so passing the
+            // card's own bound through is not this skin styling anything.
+            Flexible(child: spec.content.mount()),
             if (spec.footer != null) spec.footer!.mount(),
           ]),
         ),
@@ -117,7 +123,10 @@ final class BlueprintSurfaces implements SkinSurfaces {
           for (final ToolbarActionEntry action in spec.actions)
             _action(context, action),
         ]),
-        spec.content.mount(),
+        // Loose for the same reason the card holds its content loose: a
+        // panel's content is routinely the region's scroller, and it must
+        // inherit the panel's bound rather than an unbounded shrink-wrap.
+        Flexible(child: spec.content.mount()),
         if (spec.footer != null) spec.footer!.mount(),
       ]),
     ),

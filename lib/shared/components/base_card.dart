@@ -1,28 +1,29 @@
-import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset;
-import '../../shared/theme/app_theme.dart';
-import 'base_layout.dart';
+import 'package:flutter/widgets.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show CardSpec, ContentPort, Inset, RowSelection, Skin, SkinScope, Tone;
 
 /// Base component for all card patterns in the app.
 ///
-/// This is the app's Material 3 **outlined card**: it renders flat (no shadow
-/// elevation) behind a 1 px `outlineVariant` border, exactly like
-/// `Card.outlined` (flutter/lib/src/material/card.dart:371-396), and reserves
-/// the tonal containers for selection rather than for elevation:
-/// - Normal state (surfaceContainerHigh, 1px outlineVariant border)
-/// - Multi-selected state (tertiaryContainer, 2px onTertiaryContainer border)
-/// - Selected state (secondaryContainer, 2px onSecondaryContainer border)
+/// **This is a façade** (#249, §2.11), on the same terms as `BaseDialog` and
+/// `BaseListItem`: the constructor is the one thirteen call sites already
+/// write, and the body is one delegation to `surfaces.card`. Everything the
+/// card used to draw itself — the 12 dp corner and the `ClipRRect` that
+/// repeated it, the three container tones, the 1 px resting outline and the
+/// 2 px focus ring, the `readableForeground` pairing, the transparency
+/// `Material` that lets ink children paint their state layers, and the rules
+/// above the header and below the footer — moved into the skin verbatim
+/// (`material_surfaces.dart`, `MaterialSurfaces.card`). Nothing was
+/// re-decided on the way: the member is the extraction of this build method,
+/// comment for comment.
 ///
-/// Hover and press are **not** container-color swaps but Material state
-/// layers painted by the card's own [InkWell], so they read the same on a
-/// resting card and on a selected one. See
-/// packages/gitui_skin_material/test/conformance/components/base_card_conformance_test.dart.
-///
-/// The content's text color follows whichever of those containers is painted,
-/// through [readableForeground], so a selection never leaves the label on a
-/// role that was chosen against the unselected background. The pairs are
-/// asserted per state and per brightness by
-/// packages/gitui_skin_material/test/conformance/a11y/component_colors_contrast_test.dart.
+/// **What the move deletes is the pair of `Color` parameters.**
+/// `customBackgroundColor` and `customBorderColor` let a call site hand this
+/// component half of a decision — a fill without the foreground that pairs
+/// with it — and only a skin may resolve the other half. They are replaced by
+/// [tone], which is what the two call sites that used them were actually
+/// saying: a workspace card is painted in *its own* place in the skin's
+/// series (`Tone.series`), and a selected repository card is painted in the
+/// *accent* (`Tone.accent`). The colour itself never crosses the seam again.
 ///
 /// Example usage:
 /// ```dart
@@ -59,8 +60,7 @@ class BaseCard extends StatelessWidget {
     this.isMultiSelected = false,
     this.isSelectable = true,
     this.containerHasFocus = true,
-    this.customBorderColor,
-    this.customBackgroundColor,
+    this.tone = Tone.neutral,
     this.onTap,
     this.inset = Inset.roomy,
   });
@@ -86,19 +86,24 @@ class BaseCard extends StatelessWidget {
   /// Whether the collection rendering this card holds keyboard focus.
   ///
   /// A card grid is a single Tab stop with a roving highlight: while it is
-  /// focused the selected card wears its focus ring (tinted background plus
-  /// emphasized border), and while focus lives elsewhere the selection keeps
-  /// the tinted background with the resting outline — still clearly the
-  /// selection, no longer claiming the keyboard. Defaults to true so a card
-  /// outside a focus-aware collection keeps the full treatment.
+  /// focused the selected card wears its focus ring, and while focus lives
+  /// elsewhere the selection keeps the tinted background with the resting
+  /// outline — still clearly the selection, no longer claiming the keyboard.
+  /// Defaults to true so a card outside a focus-aware collection keeps the
+  /// full treatment.
   final bool containerHasFocus;
 
-  /// Custom border color to override theme colors (optional)
-  /// Useful for workspace-specific colors
-  final Color? customBorderColor;
-
-  /// Custom background color when selected (optional)
-  final Color? customBackgroundColor;
+  /// What this card is ABOUT, where the object it stands for carries its own
+  /// identity.
+  ///
+  /// The successor to `customBackgroundColor` and `customBorderColor`: those
+  /// two took a `Color` a screen had picked, which is a design decision taken
+  /// in a screen and half of a pairing the screen cannot complete.
+  /// [Tone.series] lets a workspace's own colour reach the card without the
+  /// application ever learning which colour that is, and [Tone.neutral] is
+  /// the card that carries no identity and keeps the scheme's tonal
+  /// containers.
+  final Tone tone;
 
   /// Callback when card is tapped
   final VoidCallback? onTap;
@@ -113,151 +118,32 @@ class BaseCard extends StatelessWidget {
   /// preview that bleeds.
   final Inset inset;
 
+  /// The card's selection state, as the contract names it.
+  RowSelection get _selection => isSelected
+      ? RowSelection.primary
+      : isMultiSelected
+      ? RowSelection.multi
+      : RowSelection.none;
+
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    // Determine background color using Material Design 3 surface tones. Hover
-    // is deliberately absent here: it is a state layer the InkWell below
-    // paints on top of whichever container color the card is resting on, so
-    // hovering a selected card is as visible as hovering a resting one.
-    Color? backgroundColor;
-    if (isSelected) {
-      // Selected state: use secondaryContainer for emphasis
-      backgroundColor = customBackgroundColor ?? colorScheme.secondaryContainer;
-    } else if (isMultiSelected) {
-      // Multi-selected state: use tertiaryContainer
-      backgroundColor = customBackgroundColor ?? colorScheme.tertiaryContainer;
-    } else {
-      // Normal state: use surfaceContainerHigh
-      backgroundColor = colorScheme.surfaceContainerHigh;
-    }
-
-    // The content's foreground follows the container the card actually
-    // paints. Selection swaps that container for a tonal one, and a label left
-    // on `onSurface` would keep the role chosen against the *unselected*
-    // background: 4.13 : 1 on `secondaryContainer` in the dark theme, under
-    // the 4.5 : 1 SC 1.4.3 asks of body text. `readableForeground` takes the
-    // M3 pairing for the state and only departs from it where the scheme's own
-    // on-role misses the threshold — which it does here, at 4.45 : 1.
-    //
-    // A [customBackgroundColor] is *not* one of those pairings, so it keeps
-    // `onSurface` as the role to try: the colour comes from outside the
-    // scheme — repository_card.dart passes `primary` at 10 %, workspace_card
-    // .dart the workspace colour at 10 % — and `onSecondaryContainer` is the
-    // on-role of a container this card is then not painting. Trying
-    // `onSurface` and falling back only when it fails is what keeps a tinted
-    // card reading like the surface it is a tint of.
-    //
-    // Both go through the rule against the colour the card *composites* to,
-    // not against the colour it was handed: a 10 % tint is transparent, and
-    // judging it by its own channels reads a pale lilac `primary` as a light
-    // container in the dark theme and answers black. What a card is composited
-    // over is `surface` — M3's role for what the application paints behind
-    // everything, and the darkest of the surface tones the card can land on,
-    // so the flattened colour is never assumed lighter than it really is.
-    final Color foregroundColor = readableForeground(
-      preferred: customBackgroundColor != null
-          ? colorScheme.onSurface
-          : isSelected
-          ? colorScheme.onSecondaryContainer
-          : isMultiSelected
-          ? colorScheme.onTertiaryContainer
-          : colorScheme.onSurface,
-      background: backgroundColor,
-      backgroundBase: colorScheme.surface,
-    );
-
-    // Determine border using Material Design 3 outline colors. The
-    // emphasized border is the focus ring: it shows its on-container color
-    // only while the card's collection holds keyboard focus. An unfocused
-    // selection keeps the tinted background behind the resting outline color
-    // (at the same width, so the content does not shift when focus moves) —
-    // still clearly the selection, no longer claiming the keyboard.
-    BoxBorder? border;
-    if (isSelected) {
-      // Selected: use onSecondaryContainer for border
-      border = Border.all(
-        color: containerHasFocus
-            ? (customBorderColor ?? colorScheme.onSecondaryContainer)
-            : colorScheme.outlineVariant,
-        width: 2,
-      );
-    } else if (isMultiSelected) {
-      // Multi-selected: use onTertiaryContainer for border
-      border = Border.all(
-        color: containerHasFocus
-            ? colorScheme.onTertiaryContainer
-            : colorScheme.outlineVariant,
-        width: 2,
-      );
-    } else {
-      // Normal state: use outline variant
-      border = Border.all(color: colorScheme.outlineVariant, width: 1);
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: border,
-        borderRadius: BorderRadius.circular(AppTheme.radiusL),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppTheme.radiusL),
-        // Ink children (list tiles, ink wells) paint their hover, focus
-        // and pressed state layers on the nearest Material. Without one
-        // inside the decorated box those layers land on a Material behind
-        // the card's background and stay invisible — which keyboard
-        // traversal exposes the moment a tile in a card receives focus.
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
+  Widget build(BuildContext context) =>
+      SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.surfaces.card(
+          inner,
+          CardSpec(
+            content: ContentPort(content),
+            header: header == null ? null : ContentPort(header!),
+            footer: footer == null ? null : ContentPort(footer!),
+            selection: _selection,
+            containerFocused: containerHasFocus,
+            tone: tone,
+            inset: inset,
+            // [isSelectable] is this façade's second way of saying "nothing
+            // happens when you press me", so it is resolved into the callback
+            // rather than carried into the spec, exactly as `BaseListItem`
+            // resolves its own.
             onTap: isSelectable ? onTap : null,
-            // A card collection is a single Tab stop with a roving highlight
-            // (lib/shared/widgets/keyboard_navigable_view.dart:520-524), so
-            // an individual card must never become a Tab stop of its own;
-            // the focus indication is the emphasized border driven by
-            // [containerHasFocus]. Registered as CARD-004.
-            canRequestFocus: false,
-            child: DefaultTextStyle(
-              style: theme.textTheme.bodyMedium!.copyWith(
-                color: foregroundColor,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header section
-                  if (header != null) ...[
-                    header!,
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: colorScheme.outlineVariant,
-                    ),
-                  ],
-
-                  // Content section (main area)
-                  Flexible(
-                    child: BaseInset(all: inset, child: content),
-                  ),
-
-                  // Footer section
-                  if (footer != null) ...[
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: colorScheme.outlineVariant,
-                    ),
-                    footer!,
-                  ],
-                ],
-              ),
-            ),
           ),
-        ),
-      ),
-    );
-  }
+        );
+      });
 }

@@ -83,9 +83,21 @@ class FileHistoryPanel extends ConsumerWidget {
   Widget _buildCommitCard(BuildContext context, GitCommit commit) {
     return BaseCard(
       inset: Inset.none,
+      // The card's corner is the skin's now that `BaseCard` is a facade over
+      // `surfaces.card`, so this well no longer restates it. The copy was
+      // wrong as well as redundant - it rounded the ripple at 8 inside a card
+      // the member clips at 12 - and a corner the application does not know
+      // cannot be copied at all.
+      //
+      // The well itself stays, and that is a reported contract finding rather
+      // than an unfinished conversion: `CardSpec.onTap` would move the press
+      // onto the card, but the member draws every card with
+      // `canRequestFocus: false` because a card grid is one Tab stop with a
+      // roving highlight - and this is a plain `ListView`, where each commit
+      // card is its own Tab stop today. Handing the tap to the member would
+      // take these cards off the keyboard.
       content: InkWell(
         onTap: () => _viewCommitDiff(context, commit),
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
         child: BaseInset(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

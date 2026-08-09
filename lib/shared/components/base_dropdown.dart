@@ -4,14 +4,16 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         Fields,
         IconRole,
+        Proximity,
         SuggestFieldSpec,
         SuggestItem,
         TextRole;
 
 import '../../generated/app_localizations.dart';
-import '../theme/app_theme.dart';
+import 'base_badge.dart';
 import 'base_icon.dart';
 import 'base_label.dart';
+import 'base_layout.dart';
 
 /// Base dropdown component for consistent dropdown styling across the app.
 ///
@@ -107,7 +109,7 @@ class BaseDropdownItem<T> {
         children: [
           if (icon != null) ...[
             Icon(icon, size: 14),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
           ],
           // One line, because a menu entry is a row: the line cap is the fact
           // the application states, and how the skin truncates the last line
@@ -115,10 +117,7 @@ class BaseDropdownItem<T> {
           Expanded(
             child: BaseLabel(label, role: TextRole.control, maxLines: 1),
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: AppTheme.paddingS),
-            trailing,
-          ],
+          if (trailing != null) ...[const BaseGap(Proximity.related), trailing],
         ],
       ),
     );
@@ -146,34 +145,24 @@ class BaseDropdownItem<T> {
         children: [
           if (icon != null) ...[
             Icon(icon, size: 14),
-            const SizedBox(width: AppTheme.paddingS),
+            const BaseGap(Proximity.related),
           ],
           Expanded(
             child: BaseLabel(label, role: TextRole.control, maxLines: 1),
           ),
           if (badgeText != null) ...[
-            const SizedBox(width: AppTheme.paddingS),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.paddingXS,
-                vertical: 1,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusS),
-              ),
-              // The surface publishes the foreground it pairs with, and the
-              // label reads it. That is the whole of Material's on-colour model
-              // (`docs/SKIN-CONTRACT-MEMBERS.md` §10.2) and the reason the
-              // label itself now says nothing about colour: a container that
-              // states its own pairing cannot be given text that disagrees
-              // with it.
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                child: BaseLabel(badgeText, role: TextRole.control),
-              ),
+            const BaseGap(Proximity.related),
+            // The badge this factory is named after, now asked for as one.
+            // The paragraph above predicted exactly this: it carries a single
+            // meaning and the skin pairs the foreground with the fill, which
+            // is the one arrangement that cannot be got wrong. The 4/1 inset
+            // and the 4 dp corner left with the hand-painted box - a badge's
+            // measure is the member's, and its corner is derived from its own
+            // height rather than named as a rung here.
+            BaseBadge(
+              label: badgeText,
+              variant: BadgeVariant.primary,
+              size: BadgeSize.small,
             ),
           ],
         ],

@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import '../../shared/theme/app_theme.dart';
 import '../../generated/app_localizations.dart';
 import 'base_button.dart';
 import 'base_icon.dart';
 import 'base_label.dart';
+import 'base_layout.dart';
 
 /// Component for displaying text that can be copied to clipboard.
 ///
@@ -122,7 +123,7 @@ class _CopyableTextState extends State<CopyableText> {
                   scale: ControlScale.compact,
                   tone: Tone.muted,
                 ),
-                SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
               ],
 
               // Text content
@@ -136,34 +137,38 @@ class _CopyableTextState extends State<CopyableText> {
 
               // Copy button or copied feedback
               if (widget.showCopyButton) ...[
-                SizedBox(width: AppTheme.paddingS),
+                const BaseGap(Proximity.related),
                 if (_showCopiedFeedback)
                   Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppTheme.paddingS,
-                      vertical: 2,
-                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(AppTheme.radiusS),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          PhosphorIconsRegular.check,
-                          size: 12,
-                          color: colorScheme.primary,
-                        ),
-                        SizedBox(width: AppTheme.paddingXS),
-                        Text(
-                          widget.copiedMessage,
-                          style: theme.textTheme.labelMedium?.copyWith(
+                    // The wash and the corner stay on the container; the
+                    // breathing room it owes the confirmation crosses the
+                    // seam. `hairline` down the page is this pill's 2 exactly,
+                    // so nothing moves.
+                    child: BaseInset(
+                      x: Inset.tight,
+                      y: Inset.hairline,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            PhosphorIconsRegular.check,
+                            size: 12,
                             color: colorScheme.primary,
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                      ],
+                          const BaseGap(Proximity.hairline),
+                          Text(
+                            widget.copiedMessage,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   )
                 else if (_isHovered)

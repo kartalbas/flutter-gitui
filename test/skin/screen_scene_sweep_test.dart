@@ -312,11 +312,31 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // screen's config-and-logs section. Measured at closing under BOTH skins -
   // Material and the blueprint report the same four rises - so the register
   // stays skin-independent.
-  'shell': 192,
+  // The surfaces wave (BaseCard becoming a facade over `surfaces.card`, and
+  // the settings sections adopting `surfaces.disclosure`) moved four scenes,
+  // in both directions, and every number below is the closing agent's own
+  // measurement under BOTH skins - Material and the blueprint agree on each.
+  // The falls are consolidation into members, not components leaving their
+  // skin, and the attribution walk proves it fence by fence: a BaseCard now
+  // plants its OWN card fence while its old internal `BaseInset(all: inset)`
+  // fence left with the hand-painting (per card the two cancel), and each
+  // settings section's hand-built header - its BaseInset, its BaseIcon mark,
+  // its BaseGap and its caret's BaseIcon, four fences - became ONE disclosure
+  // fence, -3 per section. Settings fell 18 that way, and the shell fell the
+  // same 18 because its scene parks the shell on the settings destination
+  // while the chrome measures byte-identical. Changes rose 8 and history 3:
+  // the diff viewer's card plants the member's fence now, and the panel
+  // headers' insets and action gaps are `BaseInset`/`BaseGap` fences since
+  // base_panel.dart's conversion. The shell's skin-independence was RESTORED
+  // at closing rather than absorbed into a per-skin entry: the switcher
+  // conversion had handed `OverflowActionBar` a skin-dependent width - three
+  // extra actions under the blueprint's collapsed insets - and was taken
+  // back to literals (see base_switcher.dart for the finding it reports).
+  'shell': 174,
   'workspaces': 34,
   'repositories': 60,
-  'changes': 42,
-  'history': 87,
+  'changes': 50,
+  'history': 90,
   'browse': 26,
   'branches': 19,
   // #249 P4's overlay migration raised exactly two scenes, both for the same
@@ -329,7 +349,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // application reaching the contract, not a skin drawing more of itself.
   'stashes': 19,
   'tags': 39,
-  'settings': 157,
+  'settings': 139,
   'merge_conflicts': 36,
 };
 
@@ -386,10 +406,15 @@ const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
   // Exactly one less than the register's shell entry, and it must stay
   // exactly one less: the difference IS the single toolbar action
   // `visibleActionCount()` sheds at the stretched distance, so this number
-  // moves in lockstep whenever the shell's own count moves. Measured at
-  // DISTANCE=64 when P5's wirings raised the shell to 191: the stretched run
-  // lands on 190, and the gap is still exactly the one shed action.
-  'shell': 190,
+  // moves in lockstep whenever the shell's own count moves. Re-measured at
+  // DISTANCE=64 at the surfaces wave's closing: the stretched run lands on
+  // 173 against the resting 174, and the gap is still exactly the one shed
+  // action. The lockstep had in fact been missed once already - P6 raised
+  // the shell to 192 and left this entry at 190, so the stretched half was
+  // failing at 191-measured before this wave touched anything - which is
+  // worth recording precisely because nothing in the resting gates can see
+  // this number go stale.
+  'shell': 173,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

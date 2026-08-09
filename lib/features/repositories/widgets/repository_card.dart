@@ -88,16 +88,18 @@ class RepositoryCard extends ConsumerWidget {
       // repository keeps the muted tinted treatment.
       containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
-      // Both washes stay. A 10 % tint is a FILL - the card's own background -
-      // and a fill is what a surface is made of, so it leaves with the card
-      // when the card becomes a member rather than ahead of it. It is also
-      // unsayable today by construction: `BaseCard.customBackgroundColor` is
-      // typed as a `Color`, and only a skin may resolve a `Tone` into one.
-      customBackgroundColor: isSelected
-          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-          : isMultiSelected
-          ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1)
-          : null,
+      // Both washes left with the card, exactly as this comment used to
+      // predict: they were the card's own background, a fill is what a surface
+      // is made of, and only a skin may resolve a meaning into one. What the
+      // two of them were saying is `Tone.accent` - "this card is the one being
+      // acted on" - and the member draws the primary wash for the single
+      // selection and the secondary wash for a card gathered into a batch, so
+      // the two selections stay tellable apart without this screen naming
+      // either colour. A card carrying no selection states no identity, which
+      // is what keeps its resting outline the neutral one.
+      tone: (isSelected || isHighlighted || isMultiSelected)
+          ? Tone.accent
+          : Tone.neutral,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

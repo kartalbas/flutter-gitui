@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 import '../../generated/app_localizations.dart';
 import 'base_dialog.dart' show DialogKeyboardHost;
 import '../../shared/theme/app_theme.dart';
 import 'base_button.dart';
 import 'base_icon.dart';
 import 'base_label.dart';
+import 'base_layout.dart';
 
 /// Base component for full-screen viewer dialogs.
 ///
@@ -151,8 +152,7 @@ class BaseViewerDialog extends StatelessWidget {
               // labels inherit — which is the arrangement that cannot be got
               // wrong, and the reason neither label below says anything about
               // colour.
-              Padding(
-                padding: const EdgeInsets.all(AppTheme.paddingM),
+              BaseInset(
                 child: Row(
                   children: [
                     if (icon != null) ...[
@@ -164,7 +164,7 @@ class BaseViewerDialog extends StatelessWidget {
                         scale: ControlScale.prominent,
                         tone: Tone.accent,
                       ),
-                      const SizedBox(width: AppTheme.paddingS),
+                      const BaseGap(Proximity.related),
                     ],
                     Expanded(
                       child: Column(
@@ -178,11 +178,11 @@ class BaseViewerDialog extends StatelessWidget {
                     ),
                     if (headerMetadata != null) ...[
                       headerMetadata!,
-                      const SizedBox(width: AppTheme.paddingM),
+                      const BaseGap(Proximity.grouped),
                     ],
                     if (headerActions != null) ...[
                       ...headerActions!,
-                      const SizedBox(width: AppTheme.paddingS),
+                      const BaseGap(Proximity.related),
                     ],
                     BaseIconButton(
                       icon: IconRole.x,
@@ -201,13 +201,12 @@ class BaseViewerDialog extends StatelessWidget {
 
               // Actions (row of buttons)
               if (actions != null && actions!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(AppTheme.paddingM),
+                BaseInset(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       for (int i = 0; i < actions!.length; i++) ...[
-                        if (i > 0) const SizedBox(width: AppTheme.paddingS),
+                        if (i > 0) const BaseGap(Proximity.related),
                         actions![i],
                       ],
                     ],

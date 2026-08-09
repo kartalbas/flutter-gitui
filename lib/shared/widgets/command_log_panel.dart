@@ -20,6 +20,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../generated/app_localizations.dart';
 
 import '../theme/app_theme.dart';
+import '../components/base_badge.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_layout.dart';
@@ -406,47 +407,26 @@ class _LogEntryCardState extends State<_LogEntryCard> {
     final group = widget.group;
     final log = group.representative;
     final l10n = AppLocalizations.of(context)!;
-    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         if (group.count > 1) ...[
-          Container(
-            // A count pill keeps its own tight horizontal measure, which no
-            // rung names - see the report.
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.paddingXS,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            child: DefaultTextStyle.merge(
-              style: TextStyle(color: colorScheme.onSecondaryContainer),
-              child: BaseLabel('x${group.count}', role: TextRole.micro),
-            ),
-          ),
+          // How many times this run repeated - a count riding on the entry it
+          // belongs to, which is the badge member's own question. It was a
+          // hand-painted `secondaryContainer` box at a 4 dp corner with a 4/2
+          // inset and its pairing spelled out above the word; the whole
+          // measure and the pairing are the skin's now, and the corner left
+          // with the fill rather than being restated as a rung.
+          BaseBadge(label: 'x${group.count}', size: BadgeSize.small),
           // Two facts about the same run, side by side.
           const BaseGap(Proximity.related),
         ],
         if (log.isFailure) ...[
-          Container(
-            // Same pill measure as the count beside it.
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.paddingXS,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            child: DefaultTextStyle.merge(
-              style: TextStyle(color: colorScheme.onErrorContainer),
-              child: BaseLabel(
-                '${l10n.failed} (${log.exitCode})',
-                role: TextRole.micro,
-              ),
-            ),
+          // The same pill saying a different thing: this run failed, which is
+          // `Tone.danger` rather than an `errorContainer` fill named here.
+          BaseBadge(
+            label: '${l10n.failed} (${log.exitCode})',
+            variant: BadgeVariant.danger,
+            size: BadgeSize.small,
           ),
           // Two facts about the same run, side by side.
           const BaseGap(Proximity.related),

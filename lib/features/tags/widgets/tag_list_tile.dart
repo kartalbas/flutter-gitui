@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
@@ -219,37 +220,23 @@ class TagListTile extends ConsumerWidget {
     );
   }
 
+  /// "This tag exists only here", said beside the name it qualifies.
+  ///
+  /// It is the same statement `branch_list_tile.dart` already makes through
+  /// `surfaces.badge` for the branch you are on - a dense, row-level pill in
+  /// the accent - and it used to be hand-painted here at its own measure: a
+  /// `primaryContainer` fill, a 4 dp corner, a 12 dp glyph and a bold
+  /// `labelSmall`. One meaning drawn two ways is the drift a member exists to
+  /// end, so the pill's whole measure is the skin's now and the two agree by
+  /// construction. The corner went with the fill it belonged to rather than
+  /// being restated: a badge's corner is derived from its own height in the
+  /// skin, which is why no rung is named here.
   Widget _buildLocalBadge(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      ),
-      // A badge sits barely in from its edge across, and down the page it is
-      // as close to the edge as its word stays legible: the badge's height is
-      // the point, because it rides beside a tag name in a list row.
-      child: BaseInset(
-        x: Inset.tight,
-        y: Inset.hairline,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              PhosphorIconsRegular.upload,
-              size: 12,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-            const BaseGap(Proximity.hairline),
-            Text(
-              AppLocalizations.of(context)!.local,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return BaseBadge(
+      label: AppLocalizations.of(context)!.local,
+      icon: IconRole.upload,
+      variant: BadgeVariant.primary,
+      size: BadgeSize.small,
     );
   }
 

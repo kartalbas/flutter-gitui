@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Inset, Proximity;
 import '../../shared/theme/app_theme.dart';
 import 'base_layout.dart';
 
@@ -156,16 +156,15 @@ class _BasePanelState extends State<BasePanel> {
                     constraints: const BoxConstraints(
                       minHeight: BasePanel.headerMinHeight,
                     ),
-                    child: Padding(
-                      // Horizontal 24 keeps the title on the same optical
-                      // left edge as the panel content below the divider
-                      // (registered as PANEL-001); vertical 8 is the M3
-                      // minVerticalPadding, with the height carried by the
-                      // 56 dp minimum above.
-                      padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: AppTheme.paddingL,
-                        vertical: AppTheme.paddingS,
-                      ),
+                    child: BaseInset(
+                      // Across, the header is `roomy`: the title stands on the
+                      // same optical left edge as the panel content below the
+                      // divider (registered as PANEL-001). Down the page it is
+                      // `tight` - the M3 minVerticalPadding - with the height
+                      // carried by the 56 dp minimum above rather than by this
+                      // rung.
+                      x: Inset.roomy,
+                      y: Inset.tight,
                       child: Row(
                         children: [
                           // Title. The header's own text role is bodyLarge on
@@ -182,27 +181,32 @@ class _BasePanelState extends State<BasePanel> {
                             ),
                           ),
 
-                          // Action buttons
+                          // Action buttons. The distance in front of each one
+                          // is stated as a gap between neighbours rather than
+                          // as a one-sided padding around it: `BaseInset` has
+                          // deliberately no per-side form, because a leading
+                          // `EdgeInsets.only` is a gap wearing a padding
+                          // idiom - the space belongs BETWEEN the title and
+                          // the actions, and between one action and the next,
+                          // not inside any of them. Restating it as
+                          // composition is what `base_layout.dart` prescribes,
+                          // and it lays out identically.
                           if (widget.actions != null &&
-                              widget.actions!.isNotEmpty) ...{
-                            const SizedBox(width: AppTheme.paddingM),
-                            ...widget.actions!.map(
-                              (action) => Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                  start: AppTheme.paddingS,
-                                ),
-                                child: action,
-                              ),
-                            ),
-                          },
+                              widget.actions!.isNotEmpty) ...[
+                            const BaseGap(Proximity.grouped),
+                            for (final Widget action in widget.actions!) ...[
+                              const BaseGap(Proximity.related),
+                              action,
+                            ],
+                          ],
 
                           // Collapse/expand icon. M3 tints the caret with
                           // `primary` while the tile is expanded and leaves it
                           // `onSurfaceVariant` while collapsed, so the caret
                           // carries the state on its own
                           // (expansion_tile.dart:918 and :924).
-                          if (widget.isCollapsible) ...{
-                            const SizedBox(width: AppTheme.paddingM),
+                          if (widget.isCollapsible) ...[
+                            const BaseGap(Proximity.grouped),
                             Icon(
                               _isExpanded
                                   ? PhosphorIconsRegular.caretUp
@@ -212,7 +216,7 @@ class _BasePanelState extends State<BasePanel> {
                                   ? colorScheme.primary
                                   : colorScheme.onSurfaceVariant,
                             ),
-                          },
+                          ],
                         ],
                       ),
                     ),
@@ -240,10 +244,7 @@ class _BasePanelState extends State<BasePanel> {
                     thickness: 1,
                     color: colorScheme.outlineVariant,
                   ),
-                  Padding(
-                    padding: EdgeInsets.all(AppTheme.paddingL),
-                    child: widget.footer,
-                  ),
+                  BaseInset(all: Inset.roomy, child: widget.footer!),
                 },
               ],
             ),

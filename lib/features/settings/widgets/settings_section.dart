@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
-import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_layout.dart';
 
 /// Base widget for settings sections with collapsible functionality
 class SettingsSection extends StatefulWidget {
@@ -31,11 +28,8 @@ class SettingsSection extends StatefulWidget {
   State<SettingsSection> createState() => _SettingsSectionState();
 }
 
-class _SettingsSectionState extends State<SettingsSection>
-    with SingleTickerProviderStateMixin {
+class _SettingsSectionState extends State<SettingsSection> {
   late bool _isExpanded;
-  late AnimationController _animationController;
-  late Animation<double> _iconRotation;
   static const String _prefsKeyPrefix = 'settings_section_expanded_';
 
   @override
@@ -43,25 +37,6 @@ class _SettingsSectionState extends State<SettingsSection>
     super.initState();
     _isExpanded = widget.initiallyExpanded;
     _loadExpandedState();
-
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-
-    _iconRotation = Tween<double>(begin: 0, end: 0.5).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-
-    if (_isExpanded) {
-      _animationController.value = 1.0;
-    }
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadExpandedState() async {
@@ -69,15 +44,8 @@ class _SettingsSectionState extends State<SettingsSection>
     final key = _prefsKeyPrefix + _getSectionKey();
     final savedState = prefs.getBool(key);
 
-    if (savedState != null && savedState != _isExpanded) {
-      setState(() {
-        _isExpanded = savedState;
-        if (_isExpanded) {
-          _animationController.value = 1.0;
-        } else {
-          _animationController.value = 0.0;
-        }
-      });
+    if (savedState != null && savedState != _isExpanded && mounted) {
+      setState(() => _isExpanded = savedState);
     }
   }
 
@@ -92,68 +60,64 @@ class _SettingsSectionState extends State<SettingsSection>
     return widget.title.replaceAll(' ', '_').toLowerCase();
   }
 
-  void _toggleExpanded() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-      if (_isExpanded) {
-        _animationController.forward();
-      } else {
-        _animationController.reverse();
-      }
-      _saveExpandedState(_isExpanded);
-    });
+  void _setExpanded(bool expanded) {
+    setState(() => _isExpanded = expanded);
+    _saveExpandedState(expanded);
   }
 
+  /// A settings section is the first example `surfaces.disclosure` names in
+  /// its own doc, and it now says itself that way: the press target, the
+  /// header's inset, the naming mark, the caret and its half-turn, and the
+  /// reveal of the body are all the member's. What left with them is
+  /// everything this widget used to hand-build around them — the [InkWell]
+  /// and the top-corner radius that shaped its ripple, the
+  /// [AnimationController] and its [RotationTransition], and the
+  /// [AnimatedCrossFade] whose curve and duration the member already carries.
+  /// Which section is open stays APPLICATION state, because it is persisted
+  /// per section and a rebuild must not lose it.
+  ///
+  /// Three things about the picture moved with the conversion, and each is
+  /// named rather than implied. The 1 px `outlineVariant` rule the card drew
+  /// under its header slot is GONE: the disclosure rides in the card's
+  /// *content* slot now, and the member draws no line between header and
+  /// body - M3's `ExpansionTile` separates the two by state, not by a rule.
+  /// The caret is tinted `primary` while the section is open and muted while
+  /// shut - `ExpansionTile`'s own open-state tint, pinned with its state by
+  /// test/features/icon_conversion_pixel_identity_test.dart. And the member
+  /// keeps an 8 dp gap between the title and its caret that the hand-built
+  /// row never had, so a truncating title gives up those pixels.
+  ///
+  /// The card around it keeps its `Inset.none`: the sections' rows own their
+  /// own edges, and the disclosure fills the card the way the command log's
+  /// entries already do.
   @override
   Widget build(BuildContext context) {
     return BaseCard(
       inset: Inset.none,
-      header: InkWell(
-        onTap: _toggleExpanded,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppTheme.radiusL),
-        ),
-        child: BaseInset(
-          all: Inset.normal,
-          child: Row(
-            children: [
-              // The section's own mark, resolved by the skin. Accent at the
-              // prominent scale is exactly what this header drew before the
-              // conversion - `AppTheme.iconL` (24) in `colorScheme.primary` -
-              // so the swap changes the vocabulary, not a pixel; the identity
-              // is asserted by
-              // test/features/icon_conversion_pixel_identity_test.dart.
-              BaseIcon(
-                widget.icon,
-                tone: Tone.accent,
-                scale: ControlScale.prominent,
+      content: SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.surfaces.disclosure(
+          inner,
+          DisclosureSpec(
+            // The mark that names the section is the disclosure's own
+            // `leading` rather than something composed into the header port:
+            // it names the whole revealed region, which is exactly the slot's
+            // meaning, and the member draws it at the same 24 dp accent this
+            // header always drew.
+            leading: widget.icon,
+            header: ContentPort(
+              BaseLabel(widget.title, role: TextRole.sectionTitle),
+            ),
+            body: ContentPort(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.children,
               ),
-              const BaseGap(Proximity.grouped),
-              Expanded(
-                child: BaseLabel(widget.title, role: TextRole.sectionTitle),
-              ),
-              RotationTransition(
-                turns: _iconRotation,
-                // The expand caret, muted at the ordinary scale - the same
-                // `AppTheme.iconM` (20) in `onSurfaceVariant` it has always
-                // been, now said in the contract's words.
-                child: const BaseIcon(IconRole.caretDown, tone: Tone.muted),
-              ),
-            ],
+            ),
+            expanded: _isExpanded,
+            onExpandedChanged: _setExpanded,
           ),
-        ),
-      ),
-      content: AnimatedCrossFade(
-        firstChild: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: widget.children,
-        ),
-        secondChild: const SizedBox.shrink(),
-        crossFadeState: _isExpanded
-            ? CrossFadeState.showFirst
-            : CrossFadeState.showSecond,
-        duration: const Duration(milliseconds: 200),
-      ),
+        );
+      }),
     );
   }
 }

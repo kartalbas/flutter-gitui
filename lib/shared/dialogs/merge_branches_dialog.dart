@@ -12,6 +12,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Tone;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_badge.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
@@ -188,36 +189,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                     ),
                                     if (branch.name == currentBranch) ...[
                                       const BaseGap(Proximity.related),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: AppTheme.paddingXS,
-                                          vertical: 1,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primaryContainer,
-                                          borderRadius: BorderRadius.circular(
-                                            AppTheme.radiusS,
-                                          ),
-                                        ),
-                                        // The pill states the foreground its
-                                        // own fill pairs with; the word inside
-                                        // reads it.
-                                        child: DefaultTextStyle.merge(
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimaryContainer,
-                                          ),
-                                          child: BaseLabel(
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.current,
-                                            role: TextRole.micro,
-                                          ),
-                                        ),
-                                      ),
+                                      _currentBadge(context),
                                     ],
                                   ],
                                 ),
@@ -342,36 +314,7 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                                     ),
                                     if (branch.name == currentBranch) ...[
                                       const BaseGap(Proximity.related),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: AppTheme.paddingXS,
-                                          vertical: 1,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primaryContainer,
-                                          borderRadius: BorderRadius.circular(
-                                            AppTheme.radiusS,
-                                          ),
-                                        ),
-                                        // The pill states the foreground its
-                                        // own fill pairs with; the word inside
-                                        // reads it.
-                                        child: DefaultTextStyle.merge(
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimaryContainer,
-                                          ),
-                                          child: BaseLabel(
-                                            AppLocalizations.of(
-                                              context,
-                                            )!.current,
-                                            role: TextRole.micro,
-                                          ),
-                                        ),
-                                      ),
+                                      _currentBadge(context),
                                     ],
                                   ],
                                 ),
@@ -1032,6 +975,22 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
       }
     }
   }
+
+  /// "This is the branch you are on", said beside the name it qualifies.
+  ///
+  /// Both branch lists in this dialog - the source list and the target list -
+  /// stated it by hand, twice, as a `primaryContainer` box at a 4 dp corner
+  /// with a 4/1 inset and a `micro` word paired against the fill. It is the
+  /// same sentence `branch_list_tile.dart` has been saying through
+  /// `surfaces.badge` all along, down to the word, so the two copies became
+  /// one call to the member: the fill, the pairing, the inset and the corner
+  /// are the skin's, and a badge's corner is derived from its own height
+  /// there rather than named as a rung here.
+  Widget _currentBadge(BuildContext context) => BaseBadge(
+    label: AppLocalizations.of(context)!.current,
+    variant: BadgeVariant.primary,
+    size: BadgeSize.small,
+  );
 
   /// Build iOS-style toggle button
   Widget _buildToggleButton(

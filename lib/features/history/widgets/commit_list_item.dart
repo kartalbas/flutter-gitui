@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ControlScale,
@@ -14,7 +13,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         TextRole,
         Tone;
 
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -139,61 +138,27 @@ class CommitListItem extends ConsumerWidget {
             Wrap(
               spacing: 4,
               runSpacing: 4,
-              children: commit.refs.map((ref) {
-                return Container(
-                  // The badge's fill, border and corner stay: they are the
-                  // surface. Its inset and its internal gap stay literals
-                  // too: 6 sits between `hairline` and `tight` on a ladder
-                  // that skips it - the same between-the-rungs distance
-                  // file_list_item.dart's status badge records - and this
-                  // badge rides inside the densest list in the application,
-                  // so rounding either number would widen every ref chip.
-                  // Both wait for `surfaces.badge`, whose skin owns a
-                  // badge's measure.
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.secondary.withValues(alpha: 0.3),
+              // Which branches and tags point at this commit. Each is a named
+              // mark riding on the row - the badge member's own question - and
+              // it says nothing beyond the name, which is what `neutral`
+              // means. It used to be a hand-painted `secondaryContainer` box
+              // with a `secondary`-at-30 % hairline, a 4 dp corner, a 6/2
+              // inset and a glyph whose size and colour were spelled out
+              // beside the word; every one of those is the skin's now. The
+              // whole point of the mark travelling as an `IconRole` is that
+              // the pairing can no longer disagree with the label beside it,
+              // because one member paints both.
+              children: commit.refs
+                  .map(
+                    (ref) => BaseBadge(
+                      label: ref,
+                      icon: ref.contains('tag:')
+                          ? IconRole.tag
+                          : IconRole.gitBranch,
+                      size: BadgeSize.small,
                     ),
-                  ),
-                  // The chip is painted here, so the pairing is stated
-                  // here: its label reads the foreground rather than naming
-                  // one, and cannot disagree with the glyph beside it.
-                  child: DefaultTextStyle.merge(
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // The glyph keeps its explicit size and colour
-                        // because it is painted ON the badge's own fill: the
-                        // pairing that colour states is the surface's, and
-                        // it leaves with the surface rather than with this
-                        // sweep.
-                        Icon(
-                          ref.contains('tag:')
-                              ? PhosphorIconsRegular.tag
-                              : PhosphorIconsRegular.gitBranch,
-                          size: 10,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSecondaryContainer,
-                        ),
-                        const SizedBox(width: 2),
-                        BaseLabel(ref, role: TextRole.micro),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
+                  )
+                  .toList(),
             ),
             const BaseGap(Proximity.hairline),
           ],

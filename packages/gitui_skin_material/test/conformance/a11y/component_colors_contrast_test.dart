@@ -47,9 +47,9 @@
 ///     row was still at 4.13 : 1, the very number the suite reported as gone.
 ///     Glyphs are measured too, at SC 1.4.11's 3 : 1.
 ///   * **The container as it is composited, not as it was handed over.**
-///     `Color.computeLuminance()` ignores alpha, and both shipping callers of
-///     `BaseCard.customBackgroundColor` pass a 10 % tint, so a case that reads
-///     the decoration colour raw is measuring a colour nobody painted.
+///     `Color.computeLuminance()` ignores alpha, and an identity card's
+///     container is that identity washed to 10 %, so a case that reads the
+///     decoration colour raw is measuring a colour nobody painted.
 ///   * **A census** at the bottom of this file, which reads the component
 ///     sources and fails when one of them paints a selection container that
 ///     nothing here measures.
@@ -86,7 +86,7 @@ import 'package:flutter_gitui/shared/components/base_list_item.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole, Tone;
 
 import '../support/conformance_harness.dart';
 
@@ -307,51 +307,61 @@ void main() {
         );
       });
 
-      // A caller-supplied container is a colour the design system never saw,
-      // and the card takes it verbatim, so the rule has to hold for it too.
-      // The shapes here are the ones the application really passes, not a
-      // convenient opaque one: both shipping call sites hand over a *tint* —
-      // `primary` and `secondary` at 10 % (repository_card.dart:76-80) and the
-      // workspace colour at 10 % (workspace_card.dart:49-51). A translucent
-      // container is the case the rule got wrong, because luminance ignores
-      // alpha: measured against its own channels, `primary` at 10 % reads as a
-      // pale lilac in the dark theme and the card answered black — on the
-      // near-black that tint actually composites to, 1.21 : 1. The opaque case
-      // stays in the list because it is the other polarity: there the fallback
-      // really does have to fire.
-      for (final (String name, Color? Function(ColorScheme) resolve)
-          in <(String, Color? Function(ColorScheme))>[
-            (
-              'repository card, selected: primary at 10%',
-              (ColorScheme c) => c.primary.withValues(alpha: 0.1),
-            ),
-            (
-              'repository card, multi-selected: secondary at 10%',
-              (ColorScheme c) => c.secondary.withValues(alpha: 0.1),
-            ),
-            (
-              'workspace card: a workspace colour at 10%',
-              (ColorScheme _) => const Color(0xFF2196F3).withValues(alpha: 0.1),
-            ),
-            ('an opaque colour', (ColorScheme _) => const Color(0xFFFFC107)),
-          ]) {
-        testWidgets('a caller-supplied container colour is honoured too '
-            '($name)', (WidgetTester tester) async {
-          // Pumped twice: the colour is resolved from the scheme, and the
-          // scheme is only reachable once something has been pumped under the
-          // theme.
-          await pumpConformance(
-            tester,
-            const SizedBox.shrink(),
-            brightness: brightness,
-          );
-          final Color container = resolve(_theme(tester).colorScheme)!;
+      // A card that stands for an object with its own IDENTITY paints a
+      // container the scheme never chose, and the rule has to hold for that
+      // one too. The three cases below are the shipping ones, unchanged in
+      // what they paint and changed only in how they are asked for: the card
+      // no longer takes a `Color` at all — `customBackgroundColor` and
+      // `customBorderColor` are gone with `BaseCard`'s hand-painting — so the
+      // identity arrives as a `Tone` and the SKIN washes it, which is what
+      // put the pairing and the fill on the same side of the seam at last.
+      // `Tone.accent` is what repository_card.dart says for both of its
+      // selections (the member draws `primary` for the single one and
+      // `secondary` for a multi-selection); `Tone.series` is what
+      // workspace_card.dart says, and index 0 is the same 0xFF2196F3 the
+      // hand-painted case named.
+      //
+      // A translucent container is the case the rule got wrong, because
+      // luminance ignores alpha: measured against its own channels, `primary`
+      // at 10 % reads as a pale lilac in the dark theme and the card answered
+      // black — on the near-black that tint actually composites to, 1.21 : 1.
+      // The fourth case is the brightest ink the door still admits: series
+      // index 6 is the palette's yellow, whose 10 % wash is the lightest
+      // identity container a card can paint. What it is NOT is the old
+      // opaque case's polarity: a 10 % wash over `surface` never gets light
+      // enough to defeat `onSurface`, so no identity case can drive the
+      // fallback's flip any more — that input became unreachable BY
+      // CONSTRUCTION when the `Color` parameters left, because no member
+      // washes an identity at full opacity. The flip itself does not go
+      // unproven: the dark theme's tonal-selection cases above are the ones
+      // that fire it (`onSecondaryContainer` misses 4.5 : 1 there, at
+      // 4.45 : 1, and the rule departs from the M3 pairing). This case is
+      // kept as the ceiling of what an identity may paint, not as the
+      // polarity the contract no longer permits.
+      for (final (String name, Tone tone, bool multi) in <(String, Tone, bool)>[
+        ('repository card, selected: accent at 10%', Tone.accent, false),
+        (
+          'repository card, multi-selected: the second accent at 10%',
+          Tone.accent,
+          true,
+        ),
+        ('workspace card: a workspace colour at 10%', Tone.series(0), false),
+        (
+          'the lightest identity the series carries at 10%',
+          Tone.series(6),
+          false,
+        ),
+      ]) {
+        testWidgets('an identity container is honoured too ($name)', (
+          WidgetTester tester,
+        ) async {
           await pumpConformance(
             tester,
             BaseCard(
               content: const BaseLabel(_label, role: TextRole.body),
-              isSelected: true,
-              customBackgroundColor: container,
+              isSelected: !multi,
+              isMultiSelected: multi,
+              tone: tone,
             ),
             brightness: brightness,
           );
@@ -359,7 +369,7 @@ void main() {
             _foreground(tester),
             _cardContainer(tester),
             component: 'BaseCard',
-            state: 'selected with a custom container colour ($name)',
+            state: 'selected with an identity container ($name)',
             brightness: brightness,
           );
         });
@@ -683,8 +693,16 @@ void main() {
 /// Kept as paths rather than as types because the census below is a source
 /// scan: the question it answers is "does this file paint a selection
 /// container", and the answer has to be comparable with what is measured here.
+/// `base_card.dart` left this list when it became a façade over
+/// `surfaces.card`: it names neither selection role any more, because it paints
+/// nothing at all — the containers, the pairing and the focus ring are the
+/// skin's. The BaseCard cases above did NOT leave with it, and that is the
+/// point of measuring the composed result rather than the source: they still
+/// pump the real component in the real theme and still read the colour the
+/// text actually carries on the container actually painted. What shrank is the
+/// source-scan bookkeeping, which is what the second census test below exists
+/// to force in the same change.
 const Set<String> kMeasuredComponentSources = <String>{
-  'lib/shared/components/base_card.dart',
   'lib/shared/components/base_list_item.dart',
 };
 

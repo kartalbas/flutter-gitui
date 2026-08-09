@@ -50,42 +50,70 @@ Icon _iconDrawing(WidgetTester tester, IconData glyph) {
 }
 
 void main() {
-  testWidgets(
-    'a settings section header still draws its mark at 24 in the accent '
-    'colour, and its caret at 20 in the muted colour',
-    (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
-      await pumpUnderSkin(
-        tester,
-        home: Scaffold(
-          body: SettingsSection(
-            title: 'Section under test',
-            icon: IconRole.gear,
-            children: const <Widget>[SizedBox.shrink()],
+  // Both states, because the header stopped being hand-built: the section is
+  // `surfaces.disclosure` now, and the member CARRIES the caret's state on the
+  // caret itself, which the hand-built header did not. Collapsed is still the
+  // muted 20 px this file pinned; expanded is the accent, and that is the one
+  // deliberate difference the conversion made - Material 3's own
+  // `ExpansionTile` tints its caret with `primary` while the tile is open and
+  // leaves it `onSurfaceVariant` while it is shut (expansion_tile.dart:918
+  // and :924), which is what the member draws and what the command-log entries
+  // have already been drawing since they moved to the same member. Asserting
+  // both states rather than dropping the case is what keeps this file's
+  // promise honest: the glyph and its size are unchanged, and the colour that
+  // did change is named here with the state it belongs to.
+  for (final (String state, bool expanded) in <(String, bool)>[
+    ('collapsed', false),
+    ('expanded', true),
+  ]) {
+    testWidgets(
+      'a $state settings section header still draws its mark at 24 in the '
+      'accent colour, and its caret at 20',
+      (WidgetTester tester) async {
+        SharedPreferences.setMockInitialValues(<String, Object>{});
+        await pumpUnderSkin(
+          tester,
+          home: Scaffold(
+            body: SettingsSection(
+              title: 'Section under test',
+              icon: IconRole.gear,
+              initiallyExpanded: expanded,
+              children: const <Widget>[SizedBox.shrink()],
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final ColorScheme scheme = Theme.of(
-        tester.element(find.byType(SettingsSection)),
-      ).colorScheme;
+        final ColorScheme scheme = Theme.of(
+          tester.element(find.byType(SettingsSection)),
+        ).colorScheme;
 
-      // Before the conversion the header built
-      // `Icon(widget.icon, size: AppTheme.iconL, color: colorScheme.primary)`,
-      // which is 24 logical pixels in the accent colour.
-      final Icon header = _iconDrawing(tester, PhosphorIconsRegular.gear);
-      expect(header.size, 24);
-      expect(header.color, scheme.primary);
+        // Before the conversion the header built
+        // `Icon(widget.icon, size: AppTheme.iconL, color:
+        // colorScheme.primary)`, which is 24 logical pixels in the accent
+        // colour. The member draws exactly that for `DisclosureSpec.leading`.
+        final Icon header = _iconDrawing(tester, PhosphorIconsRegular.gear);
+        expect(header.size, 24);
+        expect(header.color, scheme.primary);
 
-      // And the expand caret built
-      // `Icon(PhosphorIconsRegular.caretDown, size: AppTheme.iconM,
-      // color: colorScheme.onSurfaceVariant)`: 20 logical pixels, muted.
-      final Icon caret = _iconDrawing(tester, PhosphorIconsRegular.caretDown);
-      expect(caret.size, 20);
-      expect(caret.color, scheme.onSurfaceVariant);
-    },
-  );
+        // And the expand caret built
+        // `Icon(PhosphorIconsRegular.caretDown, size: AppTheme.iconM,
+        // color: colorScheme.onSurfaceVariant)`: 20 logical pixels, muted in
+        // BOTH states. The size survives; the open state's colour does not,
+        // for the reason above.
+        final Icon caret = _iconDrawing(tester, PhosphorIconsRegular.caretDown);
+        expect(caret.size, 20);
+        expect(
+          caret.color,
+          expanded ? scheme.primary : scheme.onSurfaceVariant,
+          reason:
+              'The caret carries the disclosure\'s state under the member: '
+              'accent while open, muted while shut. Before the conversion it '
+              'was muted in both states and the rotation alone said which.',
+        );
+      },
+    );
+  }
 
   testWidgets(
     'a command palette row still draws its command mark at 24 with no colour '

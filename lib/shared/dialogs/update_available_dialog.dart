@@ -48,7 +48,14 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
       title: l10n.updateAvailableTitle,
       icon: IconRole.downloadSimple,
       variant: DialogVariant.normal,
-      maxWidth: 600,
+      // `form` rather than `alert`: this dialog carries release notes and
+      // three ways forward, which is past the alert rung's "a sentence and up
+      // to two answers". It holds no fields either - see the reported gap in
+      // DialogExtent for the rung this and the other statement-with-detail
+      // dialogs actually want - so it takes the middle rung. This WIDENS the
+      // dialog: it was shown at 600 before the migration (`maxWidth: 600`),
+      // and the middle rung is 650 under Material - a named change, not a
+      // preserved width.
       onSubmit: _isDownloading ? null : _downloadAndInstall,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -332,9 +339,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
     final l10n = AppLocalizations.of(context)!;
 
     if (ref.read(progressProvider.notifier).hasActiveOperation) {
-      await showDialog<void>(
+      await BaseDialog.show<void>(
         context: context,
-        builder: (context) => BaseDialog(
+        dialog: BaseDialog(
           title: l10n.updateOperationRunningTitle,
           icon: IconRole.warningCircle,
           onSubmit: () => Navigator.of(context).pop(),
@@ -355,9 +362,9 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
     }
 
     if (ref.read(unsavedInputProvider).isNotEmpty) {
-      final proceed = await showDialog<bool>(
+      final proceed = await BaseDialog.show<bool>(
         context: context,
-        builder: (context) => BaseDialog(
+        dialog: BaseDialog(
           title: l10n.updateUnsavedInputTitle,
           icon: IconRole.warningCircle,
           variant: DialogVariant.destructive,

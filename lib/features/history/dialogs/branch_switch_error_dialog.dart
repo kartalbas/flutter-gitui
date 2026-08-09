@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show DialogExtent, IconRole, TextRole;
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -24,7 +25,9 @@ class BranchSwitchErrorDialog extends StatelessWidget {
       title: l10n.branchSwitchFailed,
       icon: IconRole.xCircle,
       variant: DialogVariant.destructive,
-      maxWidth: 400,
+      // A sentence and one answer: the `alert` extent by the vocabulary's own
+      // words, and 400 under Material - the width this dialog already had.
+      extent: DialogExtent.alert,
       // Red styling for attention only; the single action is OK, so Enter
       // dismisses like any informational dialog.
       onSubmit: () => Navigator.pop(context),

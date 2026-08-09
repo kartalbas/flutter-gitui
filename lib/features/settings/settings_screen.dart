@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show IconRole, Inset, MenuAction, MenuActionRole, Proximity, TextRole;
 import '../../generated/app_localizations.dart';
 
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_label.dart';
-import '../../shared/components/base_menu_item.dart';
 import '../../core/config/app_config.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/diff/models/diff_tool.dart';
@@ -39,24 +38,15 @@ class SettingsScreen extends ConsumerWidget {
       appBar: StandardAppBar(
         title: l10n.settings,
         moreMenuItems: [
-          // Reset to defaults (destructive action)
-          PopupMenuItem(
-            child: MenuItemContent(
-              icon: IconRole.arrowCounterClockwise,
-              label: l10n.resetToDefaults,
-              scale: ControlScale.normal,
-              // One sentence, said once. This entry used to say it twice -
-              // `Tone.danger` for the mark and a `labelColor` restating the
-              // scheme's `error` for the words - because the tone reached only
-              // the glyph, and the two halves of a destructive entry would
-              // otherwise have disagreed. `MenuItemContent` carries the tone
-              // through to its label now
-              // (lib/shared/components/base_menu_item.dart), answering
-              // `Tone.danger` with exactly the colour this line named, so
-              // nothing moves.
-              tone: Tone.danger,
-            ),
-            onTap: () => _confirmReset(context, ref),
+          // Reset to defaults (destructive action). What the entry MEANS -
+          // that it destroys something - is `MenuActionRole.destructive`, and
+          // the skin decides how a destructive row reads; `Tone.danger` was
+          // the application answering that question for it.
+          MenuAction(
+            icon: IconRole.arrowCounterClockwise,
+            label: l10n.resetToDefaults,
+            role: MenuActionRole.destructive,
+            onPressed: () => _confirmReset(context, ref),
           ),
         ],
       ),
@@ -166,11 +156,11 @@ class SettingsScreen extends ConsumerWidget {
           } else {
             // Not git - show error
             if (!context.mounted) return;
-            showDialog(
+            BaseDialog.show<void>(
               context: context,
-              builder: (dialogContext) => BaseDialog(
+              dialog: BaseDialog(
                 title: l10n.invalidGitExecutable,
-                onSubmit: () => Navigator.of(dialogContext).pop(),
+                onSubmit: () => Navigator.of(context).pop(),
                 content: BaseLabel(
                   l10n.invalidGitExecutableMessage(
                     selectedPath,
@@ -183,7 +173,7 @@ class SettingsScreen extends ConsumerWidget {
                   // A result sheet with nothing to answer: acknowledging it
                   // completes it, which is what onSubmit fires too.
                   DialogAction(
-                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    onPressed: () => Navigator.of(context).pop(),
                     label: l10n.ok,
                     role: DialogActionRole.affirmative,
                   ),
@@ -194,11 +184,11 @@ class SettingsScreen extends ConsumerWidget {
         } else {
           // Failed to execute
           if (!context.mounted) return;
-          showDialog(
+          BaseDialog.show<void>(
             context: context,
-            builder: (dialogContext) => BaseDialog(
+            dialog: BaseDialog(
               title: l10n.executionFailed,
-              onSubmit: () => Navigator.of(dialogContext).pop(),
+              onSubmit: () => Navigator.of(context).pop(),
               content: BaseLabel(
                 l10n.executionFailedMessage(
                   selectedPath,
@@ -209,7 +199,7 @@ class SettingsScreen extends ConsumerWidget {
               actions: [
                 // Likewise a result sheet: acknowledging it is all there is.
                 DialogAction(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  onPressed: () => Navigator.of(context).pop(),
                   label: l10n.ok,
                   role: DialogActionRole.affirmative,
                 ),
@@ -220,11 +210,11 @@ class SettingsScreen extends ConsumerWidget {
       } catch (e) {
         // Exception during validation
         if (context.mounted) {
-          showDialog(
+          BaseDialog.show<void>(
             context: context,
-            builder: (dialogContext) => BaseDialog(
+            dialog: BaseDialog(
               title: l10n.validationError,
-              onSubmit: () => Navigator.of(dialogContext).pop(),
+              onSubmit: () => Navigator.of(context).pop(),
               content: BaseLabel(
                 l10n.validationErrorMessage(selectedPath, e.toString()),
                 role: TextRole.body,
@@ -232,7 +222,7 @@ class SettingsScreen extends ConsumerWidget {
               actions: [
                 // Likewise a result sheet: acknowledging it is all there is.
                 DialogAction(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  onPressed: () => Navigator.of(context).pop(),
                   label: l10n.ok,
                   role: DialogActionRole.affirmative,
                 ),
@@ -301,12 +291,12 @@ class SettingsScreen extends ConsumerWidget {
 
       if (!isKnownEditor) {
         if (context.mounted) {
-          showDialog(
+          BaseDialog.show<void>(
             context: context,
-            builder: (dialogContext) => BaseDialog(
+            dialog: BaseDialog(
               title: l10n.unknownTextEditor,
               onSubmit: () async {
-                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pop();
                 await ref
                     .read(configProvider.notifier)
                     .setTextEditor(selectedPath, version: version);
@@ -317,13 +307,13 @@ class SettingsScreen extends ConsumerWidget {
               ),
               actions: [
                 DialogAction(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  onPressed: () => Navigator.of(context).pop(),
                   label: l10n.cancel,
                   role: DialogActionRole.dismissive,
                 ),
                 DialogAction(
                   onPressed: () async {
-                    Navigator.of(dialogContext).pop();
+                    Navigator.of(context).pop();
                     await ref
                         .read(configProvider.notifier)
                         .setTextEditor(selectedPath, version: version);
@@ -590,12 +580,12 @@ class SettingsScreen extends ConsumerWidget {
     // onChanged instead.
     var name = git.defaultUserName ?? '';
 
-    final result = await showDialog<String>(
+    final result = await BaseDialog.show<String>(
       context: context,
-      builder: (dialogContext) => BaseDialog(
+      dialog: BaseDialog(
         title: l10n.defaultUserName,
         icon: IconRole.user,
-        onSubmit: () => Navigator.of(dialogContext).pop(name.trim()),
+        onSubmit: () => Navigator.of(context).pop(name.trim()),
         content: BaseTextField(
           initialValue: name,
           onChanged: (value) => name = value,
@@ -606,7 +596,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(context).pop(),
             label: l10n.cancel,
             role: DialogActionRole.dismissive,
           ),
@@ -616,13 +606,13 @@ class SettingsScreen extends ConsumerWidget {
           DialogAction(
             onPressed: () {
               ref.read(configProvider.notifier).setDefaultUserName(null);
-              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pop();
             },
             label: l10n.clear,
             role: DialogActionRole.neutral,
           ),
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(name.trim()),
+            onPressed: () => Navigator.of(context).pop(name.trim()),
             label: l10n.save,
             role: DialogActionRole.affirmative,
           ),
@@ -641,12 +631,12 @@ class SettingsScreen extends ConsumerWidget {
     // See _editUserName: the field owns its controller so nothing outlives it.
     var email = git.defaultUserEmail ?? '';
 
-    final result = await showDialog<String>(
+    final result = await BaseDialog.show<String>(
       context: context,
-      builder: (dialogContext) => BaseDialog(
+      dialog: BaseDialog(
         title: l10n.defaultUserEmail,
         icon: IconRole.at,
-        onSubmit: () => Navigator.of(dialogContext).pop(email.trim()),
+        onSubmit: () => Navigator.of(context).pop(email.trim()),
         content: BaseTextField(
           initialValue: email,
           onChanged: (value) => email = value,
@@ -657,7 +647,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(context).pop(),
             label: l10n.cancel,
             role: DialogActionRole.dismissive,
           ),
@@ -666,13 +656,13 @@ class SettingsScreen extends ConsumerWidget {
           DialogAction(
             onPressed: () {
               ref.read(configProvider.notifier).setDefaultUserEmail(null);
-              Navigator.of(dialogContext).pop();
+              Navigator.of(context).pop();
             },
             label: l10n.clear,
             role: DialogActionRole.neutral,
           ),
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(email.trim()),
+            onPressed: () => Navigator.of(context).pop(email.trim()),
             label: l10n.save,
             role: DialogActionRole.affirmative,
           ),
@@ -694,15 +684,15 @@ class SettingsScreen extends ConsumerWidget {
     // See _editUserName: the field owns its controller so nothing outlives it.
     var limit = history.defaultCommitLimit.toString();
 
-    final result = await showDialog<int>(
+    final result = await BaseDialog.show<int>(
       context: context,
-      builder: (dialogContext) => BaseDialog(
+      dialog: BaseDialog(
         title: l10n.defaultCommitLimit,
         icon: IconRole.listNumbers,
         onSubmit: () {
           final value = int.tryParse(limit);
           if (value != null && value > 0) {
-            Navigator.of(dialogContext).pop(value);
+            Navigator.of(context).pop(value);
           }
         },
         content: BaseTextField(
@@ -715,7 +705,7 @@ class SettingsScreen extends ConsumerWidget {
         ),
         actions: [
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(context).pop(),
             label: l10n.cancel,
             role: DialogActionRole.dismissive,
           ),
@@ -723,7 +713,7 @@ class SettingsScreen extends ConsumerWidget {
             onPressed: () {
               final value = int.tryParse(limit);
               if (value != null && value > 0) {
-                Navigator.of(dialogContext).pop(value);
+                Navigator.of(context).pop(value);
               }
             },
             label: l10n.save,
@@ -741,21 +731,21 @@ class SettingsScreen extends ConsumerWidget {
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await BaseDialog.show<bool>(
       context: context,
-      builder: (dialogContext) => BaseDialog(
+      dialog: BaseDialog(
         title: l10n.resetSettings,
         icon: IconRole.warning,
         variant: DialogVariant.destructive,
         content: BaseLabel(l10n.resetSettingsMessage, role: TextRole.body),
         actions: [
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
+            onPressed: () => Navigator.of(context).pop(false),
             label: l10n.cancel,
             role: DialogActionRole.dismissive,
           ),
           DialogAction(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
+            onPressed: () => Navigator.of(context).pop(true),
             label: l10n.reset,
             role: DialogActionRole.destructive,
           ),

@@ -17,15 +17,33 @@ class ResetModeDialog extends StatelessWidget {
 
   const ResetModeDialog({super.key, required this.commit});
 
+  /// Asks for the reset mode, on the skin's own dialog route.
+  ///
+  /// The frame is the same on every build and every action only pops, so the
+  /// whole dialog can be stated before it exists - which is what lets it
+  /// reach `Overlays.dialog` rather than Material's `showDialog`.
+  static Future<ResetMode?> show(
+    BuildContext context, {
+    required GitCommit commit,
+  }) => BaseDialog.show<ResetMode>(
+    context: context,
+    dialog: _dialog(context, commit),
+  );
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => _dialog(context, commit);
+
+  static BaseDialog _dialog(BuildContext context, GitCommit commit) {
     final l10n = AppLocalizations.of(context)!;
 
     return BaseDialog(
       title: l10n.resetToCommit,
       icon: IconRole.arrowCounterClockwise,
       variant: DialogVariant.normal,
-      maxWidth: 500,
+      // `form` is the middle rung, taken here for want of a better one: the
+      // dialog states what will happen and offers FOUR answers (soft, mixed,
+      // hard, cancel), which is past `alert`'s "a sentence and up to two
+      // answers", and it holds no fields. See the reported DialogExtent gap.
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

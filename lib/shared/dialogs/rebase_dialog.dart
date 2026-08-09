@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -524,12 +531,16 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.rebaseStartedSuccessfully,
-            ),
-            backgroundColor: context.gitColors.added,
+        // Nine notices in this file borrowed three GIT tones as generic
+        // greens, ambers and reds. A git tone says what a FILE's state in the
+        // index is; none of them says "this worked", "check this" or "this
+        // was thrown away". Each notice states its own meaning now, and the
+        // skin picks the colours.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.success,
+            title: AppLocalizations.of(context)!.rebaseStartedSuccessfully,
           ),
         );
       }
@@ -539,26 +550,25 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         // rebase state before rethrowing, so no invalidation is needed here.
         final errorMsg = e.toString().toLowerCase();
         if (errorMsg.contains('conflict') || errorMsg.contains('merge')) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(
-                  context,
-                )!.rebaseStartedConflictNeedsResolution,
-              ),
-              backgroundColor: context.gitColors.modified,
+          // The rebase is running but did not go through: not a failure the
+          // user can do nothing about, a state that needs their attention.
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.warning,
+              title: AppLocalizations.of(
+                context,
+              )!.rebaseStartedConflictNeedsResolution,
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(context)!.failedToStartRebase(e.toString()),
-              ),
-              // A surface FILL, not a foreground: this is what the notice is
-              // painted in, and its words are paired against it. The whole
-              // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-              backgroundColor: Theme.of(context).colorScheme.error,
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.danger,
+              title: AppLocalizations.of(
+                context,
+              )!.failedToStartRebase(e.toString()),
             ),
           );
         }
@@ -577,26 +587,23 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       await ref.read(gitActionsProvider).continueRebase();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.rebaseContinued),
-            backgroundColor: context.gitColors.added,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.success,
+            title: AppLocalizations.of(context)!.rebaseContinued,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              )!.failedToContinueRebase(e.toString()),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(
+              context,
+            )!.failedToContinueRebase(e.toString()),
           ),
         );
       }
@@ -610,24 +617,23 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       await ref.read(gitActionsProvider).skipRebase();
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.commitSkipped),
-            backgroundColor: context.gitColors.modified,
+        // A commit was passed over rather than applied: worth flagging, and
+        // possibly not what the user meant to do.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.warning,
+            title: AppLocalizations.of(context)!.commitSkipped,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.failedToSkip(e.toString()),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(context)!.failedToSkip(e.toString()),
           ),
         );
       }
@@ -642,24 +648,26 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.rebaseAborted),
-            backgroundColor: context.gitColors.deleted,
+        // The rewrite was thrown away and the branch tip moved back, which
+        // the site said with the git-DELETED red. `danger` is that meaning
+        // without borrowing a word about a file.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(context)!.rebaseAborted,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.failedToAbortRebase(e.toString()),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(
+              context,
+            )!.failedToAbortRebase(e.toString()),
           ),
         );
       }

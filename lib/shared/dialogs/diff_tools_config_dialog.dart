@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show IconRole, Inset, NoticeSpec, Overlays, Proximity, TextRole, Tone;
 import '../components/base_dialog.dart';
 
 import '../../generated/app_localizations.dart';
@@ -337,11 +337,12 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
 
     if (mounted) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.diffMergeToolSettingsSaved,
-          ),
+      // The settings are written: something that finished, and finished well.
+      Overlays.notify(
+        context,
+        NoticeSpec(
+          tone: Tone.success,
+          title: AppLocalizations.of(context)!.diffMergeToolSettingsSaved,
         ),
       );
     }

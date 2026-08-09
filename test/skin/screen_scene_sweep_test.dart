@@ -312,8 +312,16 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   'history': 86,
   'browse': 26,
   'branches': 19,
-  'stashes': 17,
-  'tags': 36,
+  // #249 P4's overlay migration raised exactly two scenes, both for the same
+  // reason: their row overflow menus now open through the contract's anchored
+  // menu (`Overlays.anchor`). Stashes +2 is its fixture's two stash rows'
+  // anchors; tags +3 is its fixture's three tag rows' - each row's trigger is
+  // the skin's control now, named 'More actions' where Material's default
+  // said 'Show menu'. Measured at closing under BOTH skins - Material and
+  // the blueprint land on the same two numbers - so the rise is the
+  // application reaching the contract, not a skin drawing more of itself.
+  'stashes': 19,
+  'tags': 39,
   'settings': 156,
   'merge_conflicts': 36,
 };

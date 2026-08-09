@@ -33,8 +33,13 @@ extension BuildContextExtensions on BuildContext {
   /// Check if screen is large (>= 1200)
   bool get isLargeScreen => screenWidth >= 1200;
 
-  /// Show an error notification with optional text editor for opening log files
-  void showErrorSnackBar(String message) {
+  /// Report an error as a notice, with an optional text editor for opening
+  /// log files.
+  ///
+  /// Named for what it does rather than for the Material widget it used to
+  /// build: nothing under `lib/` constructs a `SnackBar` any more — the notice
+  /// goes through `Overlays.notify`, and how it appears is the skin's answer.
+  void showErrorNotice(String message) {
     // Try to get text editor from ProviderScope
     String? textEditor;
     try {
@@ -46,8 +51,10 @@ extension BuildContextExtensions on BuildContext {
     NotificationService.showError(this, message, textEditor: textEditor);
   }
 
-  /// Show a warning notification with optional text editor for opening log files
-  void showWarningSnackBar(String message) {
+  /// Report a warning as a notice, with an optional text editor for opening
+  /// log files. See [showErrorNotice] for why the name no longer says
+  /// `SnackBar`.
+  void showWarningNotice(String message) {
     // Try to get text editor from ProviderScope
     String? textEditor;
     try {

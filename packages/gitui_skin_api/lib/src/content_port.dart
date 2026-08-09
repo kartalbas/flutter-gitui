@@ -31,6 +31,17 @@ part 'skin_scope.dart';
 /// no `IconTheme`, no decoration beyond the surface that was asked for. The
 /// content inside already asked the skin for everything it needed.
 ///
+/// The same partition answers the migration-window question the dialog seam
+/// left open: **content crosses the port with its ambient needs already
+/// satisfied.** A skin re-establishes its own scope inside a route and
+/// nothing else - it does not know, and must not know, which widget library
+/// the application built its content from. While application content is still
+/// made of Material widgets (a `TextField` asserts a `Material` ancestor),
+/// the APPLICATION supplies that ancestor inside the port; a skin that
+/// happened to build one (Material's own dialog surface does) was satisfying
+/// the need by coincidence, and the blueprint measured the coincidence the
+/// moment the surface moved behind the contract.
+///
 /// The child is PRIVATE, and that is the load-bearing detail. [mount] is the
 /// only way to reach it, and [mount] plants the boundary the attribution walk
 /// resumes at - so a skin that read the child directly instead of mounting it

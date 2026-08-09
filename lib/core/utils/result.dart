@@ -120,8 +120,12 @@ class Failure<T> extends Result<T> {
 
 /// Extension methods for Result type
 extension ResultExtensions<T> on Result<T> {
-  /// Shows the result in a SnackBar (errors only)
-  void showInSnackBar(BuildContext context) {
+  /// Reports the result as a notice (errors only).
+  ///
+  /// The name says notice rather than `SnackBar` because that is what the
+  /// body already does: the report goes through `NotificationService`, which
+  /// states a `NoticeSpec` and lets the skin decide what a notice looks like.
+  void reportAsNotice(BuildContext context) {
     when(
       success: (value) {
         // Success notifications removed - silent on success
@@ -155,11 +159,11 @@ extension ResultExtensions<T> on Result<T> {
 
 /// Extension for Future of Result of T
 extension FutureResultExtensions<T> on Future<Result<T>> {
-  /// Shows the result in a SnackBar when the future completes
-  Future<void> showInSnackBar(BuildContext context) async {
+  /// Reports the result as a notice when the future completes.
+  Future<void> reportAsNotice(BuildContext context) async {
     final result = await this;
     if (context.mounted) {
-      result.showInSnackBar(context);
+      result.reportAsNotice(context);
     }
   }
 

@@ -5,7 +5,15 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, GridDensity, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        GridDensity,
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuActionRole,
+        MenuSeparator,
+        Proximity,
+        TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -13,7 +21,6 @@ import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_label.dart';
-import '../../shared/components/base_menu_item.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/git_service.dart';
@@ -249,73 +256,49 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                     ]
                   : null,
               moreMenuItems: [
-                // Add repository action (first)
-                PopupMenuItem<String>(
-                  value: 'add',
-                  child: MenuItemContent(
-                    icon: IconRole.plus,
-                    label: AppLocalizations.of(context)!.tooltipAddRepository,
-                    scale: ControlScale.normal,
-                  ),
-                  onTap: () => _openRepository(context, ref),
+                // Add repository action (first). The mark's scale is gone
+                // with the widget rows: a menu entry's mark is drawn at the
+                // size the SKIN's menu rows use, and `ControlScale.normal`
+                // here was this screen setting a menu's own metric. Named
+                // rather than silent: this SHRINKS the marks in this menu
+                // (and the settings overflow's, the repository card's and the
+                // repository list row's - the four surfaces that passed
+                // `normal`) from 20 to the 16 every other menu already used;
+                // the skin's one answer replaces the two the screens gave.
+                MenuAction(
+                  icon: IconRole.plus,
+                  label: AppLocalizations.of(context)!.tooltipAddRepository,
+                  onPressed: () => _openRepository(context, ref),
                 ),
-                const PopupMenuDivider(),
+                const MenuSeparator(),
                 // Clone action
-                PopupMenuItem<String>(
-                  value: 'clone',
-                  child: MenuItemContent(
-                    icon: IconRole.downloadSimple,
-                    label: AppLocalizations.of(context)!.cloneRepository,
-                    scale: ControlScale.normal,
-                  ),
-                  onTap: () => _showCloneDialog(context),
+                MenuAction(
+                  icon: IconRole.downloadSimple,
+                  label: AppLocalizations.of(context)!.cloneRepository,
+                  onPressed: () => _showCloneDialog(context),
                 ),
                 // Initialize action
-                PopupMenuItem<String>(
-                  value: 'init',
-                  child: MenuItemContent(
-                    icon: IconRole.folderPlus,
-                    label: AppLocalizations.of(context)!.initializeRepository,
-                    scale: ControlScale.normal,
-                  ),
-                  onTap: () => _showInitDialog(context),
+                MenuAction(
+                  icon: IconRole.folderPlus,
+                  label: AppLocalizations.of(context)!.initializeRepository,
+                  onPressed: () => _showInitDialog(context),
                 ),
-                const PopupMenuDivider(),
+                const MenuSeparator(),
                 // Validate action
-                PopupMenuItem<String>(
-                  value: 'validate',
-                  child: MenuItemContent(
-                    icon: IconRole.checkCircle,
-                    label: AppLocalizations.of(context)!.validateAll,
-                    scale: ControlScale.normal,
-                  ),
-                  onTap: () => _validateRepositories(ref),
+                MenuAction(
+                  icon: IconRole.checkCircle,
+                  label: AppLocalizations.of(context)!.validateAll,
+                  onPressed: () => _validateRepositories(ref),
                 ),
-                // Remove all from workspace (conditional)
+                // Remove all from workspace (conditional). It says what it
+                // MEANS - this entry destroys something - and the skin
+                // decides how a destructive row reads.
                 if (hasRepositories)
-                  PopupMenuItem<String>(
-                    value: 'clear',
-                    child: MenuItemContent(
-                      icon: IconRole.trash,
-                      label: AppLocalizations.of(context)!.clearAllRepositories,
-                      scale: ControlScale.normal,
-                      // The tone now says the whole entry. It used to reach the
-                      // MARK only, so this line carried a `labelColor:` that
-                      // spelled out Material's error role beside it - one
-                      // statement said twice, once as a meaning and once as
-                      // Material's answer to it - and dropping that half back
-                      // then would have left a destructive entry with a red
-                      // glyph and black words. The component closed the gap:
-                      // `MenuItemContent` resolves its own label to that same
-                      // error role for `Tone.danger`
-                      // (lib/shared/components/base_menu_item.dart), which is
-                      // the identical Color the deleted line passed, in every
-                      // state - the component does not vary it by enablement,
-                      // and this entry is only built when it is invokable
-                      // anyway. No pixel moves.
-                      tone: Tone.danger,
-                    ),
-                    onTap: () => _confirmClearAll(context, ref),
+                  MenuAction(
+                    icon: IconRole.trash,
+                    label: AppLocalizations.of(context)!.clearAllRepositories,
+                    role: MenuActionRole.destructive,
+                    onPressed: () => _confirmClearAll(context, ref),
                   ),
               ],
             ),

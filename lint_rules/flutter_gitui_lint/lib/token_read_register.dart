@@ -183,9 +183,10 @@ TokenReadReconciliation reconcileTokenReads({
   return TokenReadReconciliation(unregistered: unregistered, stale: stale);
 }
 
-/// The register itself: 77 reads at the 2026-08-09 census, 34 standing after
-/// the #438 conversions — 21 waiting for a named P5 member, 6 blocked on a
-/// missing word, 7 kept by a named permanent carve-out (#433). The gate test
+/// The register itself: 77 reads at the 2026-08-09 census, 33 standing after
+/// the #438 conversions and the menu family's move behind the contract — 20
+/// waiting for a named P5 member, 6 blocked on a missing word, 7 kept by a
+/// named permanent carve-out (#433). The gate test
 /// pins the total (shrink-only — lower it when converting, never raise it)
 /// and the per-cause counts, so a read cannot change its story without
 /// passing through that pin.
@@ -366,18 +367,15 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
   // row with the "3 / 10" count, which is `ProgressExtent.inline` by the
   // vocabulary's own words, and that is the rung it converted under.
 
-  // ── overlays.presentMenu (1 read) ───────────────────────────────────────
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_animated_widgets.dart',
-    site: 'iconSize: iconSize ?? AppTheme.iconM,',
-    reads: 1,
-    waitsFor: 'overlays.presentMenu',
-    reason:
-        'The anchor glyph\'s fallback size in BasePopupMenuButton; the '
-        'skin builds its own menu anchor from MenuEntry data, so the '
-        'fallback goes with the construction. Not mechanical: deleting the '
-        'fallback would change 20 to Material\'s 24.',
-  ),
+  // ── overlays.menuAnchor — CONVERTED (was 1 read) ────────────────────────
+  // The fallback sized the anchor glyph of `BasePopupMenuButton`, and every
+  // caller that let it decide now states its trigger as a `MenuAnchorSpec`
+  // instead: the app bar's overflow, the repository card and list row, the
+  // workspace-section header, the stash and tag tiles. The skin builds the
+  // trigger and opens the menu against it, so the fallback died with the
+  // construction exactly as this entry predicted. The two menus that keep
+  // the widget form (#438: per-row swatch and flag artwork) hand in their
+  // own already-sized `BaseIcon`, so nothing was left for it to size.
 
   // ── surfaces.listRow — CONVERTED (was 1 read) ───────────────────────────
   // base_list_item.dart is a façade over surfaces.listRow, so the inset rule

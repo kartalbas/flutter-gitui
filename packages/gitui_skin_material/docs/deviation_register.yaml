@@ -935,20 +935,14 @@ deviations:
       glyph-to-label proportion of the stock arrangement.
     registered: 2026-08-07
 
-  - id: MENU-004
-    component: BasePopupMenuButton
-    property: iconSize
-    spec_value: 24.0
-    app_value: 20.0
-    spec_source: "Flutter 3.44.4 packages/flutter/lib/src/material/popup_menu.dart:1782 (PopupMenuButton takes its glyph size from the ambient IconTheme, which is 24 dp under Material 3)"
-    rationale: >
-      The overflow button is an icon button standing in a toolbar next to other
-      icon buttons, and it has to be the size they are or the row of controls
-      looks unaligned. 20 dp is the size already registered for the default
-      BaseIconButton glyph in ICO-004 (AppTheme.iconM), so this entry is that
-      one decision reaching the one icon button in the app that is not built
-      through BaseIconButton.
-    registered: 2026-08-07
+  # MENU-004 (BasePopupMenuButton.iconSize, app 20 dp against the M3 24) was
+  # deleted when the overlay migration (#249 P4) removed the component's
+  # iconSize parameter: the two callers that remain (the quick-settings menu
+  # and the language selector) hand their own already-sized BaseIcon in, so
+  # the 20 dp toolbar decision is carried by ICO-004 at those call sites and
+  # a bare BasePopupMenuButton now renders the ambient M3 glyph. Nothing the
+  # application ships draws that bare default, so no shipped pixel moved;
+  # the stale-deviation check is what forced the entry out.
 
   # The badge family (lib/shared/components/base_badge.dart), measured against
   # a real `Badge`. Material 3 has exactly one badge - a 16 dp notification

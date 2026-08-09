@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -415,9 +423,13 @@ ${line.summary}
 
       if (commits.isEmpty) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Commit not found in repository history'),
+          // The blamed line names a commit the log cannot produce, so the
+          // action the user asked for did not happen.
+          Overlays.notify(
+            context,
+            const NoticeSpec(
+              tone: Tone.danger,
+              title: 'Commit not found in repository history',
             ),
           );
         }
@@ -465,9 +477,11 @@ ${line.summary}
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarErrorLoadingCommit(e.toString())),
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: l10n.snackbarErrorLoadingCommit(e.toString()),
           ),
         );
       }
@@ -536,9 +550,9 @@ ${line.summary}
   }
 
   void _showBlameInfo(BuildContext context, FileBlame blame) {
-    showDialog(
+    BaseDialog.show<void>(
       context: context,
-      builder: (context) => BaseDialog(
+      dialog: BaseDialog(
         title: AppLocalizations.of(context)!.blameStatistics,
         onSubmit: () => Navigator.pop(context),
         content: SingleChildScrollView(

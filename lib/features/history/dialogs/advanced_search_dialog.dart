@@ -88,7 +88,9 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
       // go rather than smuggled back across the seam as a flag.
       icon: IconRole.magnifyingGlass,
       title: AppLocalizations.of(context)!.advancedSearch,
-      maxWidth: 800,
+      // Fields the user fills in - a query, an author, a date range - so the
+      // dialog's extent is `form` and the 800 it used to name is the skin's
+      // answer now (650 under Material).
       onSubmit: _applySearch,
       content: SingleChildScrollView(
         child: Column(

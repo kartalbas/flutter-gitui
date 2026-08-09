@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_menu_item.dart';
-import '../../../shared/components/base_animated_widgets.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../core/git/git_providers.dart';
@@ -78,51 +75,48 @@ class StashListTile extends ConsumerWidget {
             role: TextRole.detail,
             tone: Tone.muted,
           ),
-          trailing: BasePopupMenuButton<String>(
-            icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
-            onSelected: (value) => _handleMenuAction(context, ref, value),
-            itemBuilder: (context) => <PopupMenuEntry<String>>[
-              PopupMenuItem(
-                value: 'apply',
-                child: MenuItemContent(
-                  icon: IconRole.arrowBendDownLeft,
-                  label: AppLocalizations.of(context)!.apply,
-                ),
+          // The trigger and the menu it opens are the skin's, through
+          // `overlays.menuAnchor`. What this tile used to do instead was a
+          // three-part hand-build: a Material `PopupMenuButton` for the
+          // trigger, `PopupMenuItem` widgets for the rows, and a string switch
+          // to turn the chosen value back into the callback it came from. All
+          // three go: each entry now carries its own action, and the anchor
+          // carries the name every mark-only control owes - it had none.
+          trailing: Overlays.anchor(
+            spec: MenuAnchorSpec(
+              icon: IconRole.dotsThreeVertical,
+              tooltip: AppLocalizations.of(context)!.moreActions,
+            ),
+            entries: <MenuEntry>[
+              MenuAction(
+                icon: IconRole.arrowBendDownLeft,
+                label: AppLocalizations.of(context)!.apply,
+                onPressed: () => _applyStash(context, ref),
               ),
-              PopupMenuItem(
-                value: 'pop',
-                child: MenuItemContent(
-                  icon: IconRole.arrowBendUpLeft,
-                  label: AppLocalizations.of(context)!.pop,
-                ),
+              MenuAction(
+                icon: IconRole.arrowBendUpLeft,
+                label: AppLocalizations.of(context)!.pop,
+                onPressed: () => _popStash(context, ref),
               ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'branch',
-                child: MenuItemContent(
-                  icon: IconRole.gitBranch,
-                  label: AppLocalizations.of(context)!.menuItemCreateBranch,
-                ),
+              const MenuSeparator(),
+              MenuAction(
+                icon: IconRole.gitBranch,
+                label: AppLocalizations.of(context)!.menuItemCreateBranch,
+                onPressed: () => _createBranch(context, ref),
               ),
-              PopupMenuItem(
-                value: 'diff',
-                child: MenuItemContent(
-                  icon: IconRole.gitDiff,
-                  label: AppLocalizations.of(context)!.menuItemViewDiff,
-                ),
+              MenuAction(
+                icon: IconRole.gitDiff,
+                label: AppLocalizations.of(context)!.menuItemViewDiff,
+                onPressed: () => _showDiff(context, ref),
               ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'drop',
-                // Said once, for the reason tag_list_tile.dart records:
-                // `MenuItemContent.tone` reaches the WORDS as well as the mark
-                // now, so the `Color` that used to re-say `Tone.danger` beside
-                // it is gone. Pixel-identical by construction.
-                child: MenuItemContent(
-                  icon: IconRole.trash,
-                  label: AppLocalizations.of(context)!.drop,
-                  tone: Tone.danger,
-                ),
+              const MenuSeparator(),
+              // It says what it MEANS - dropping a stash destroys it - and
+              // the skin decides how a destructive row reads.
+              MenuAction(
+                icon: IconRole.trash,
+                label: AppLocalizations.of(context)!.drop,
+                role: MenuActionRole.destructive,
+                onPressed: () => _confirmDropStash(context, ref),
               ),
             ],
           ),
@@ -232,49 +226,26 @@ class StashListTile extends ConsumerWidget {
     );
   }
 
-  void _handleMenuAction(BuildContext context, WidgetRef ref, String action) {
-    switch (action) {
-      case 'apply':
-        _applyStash(context, ref);
-        break;
-      case 'pop':
-        _popStash(context, ref);
-        break;
-      case 'branch':
-        _createBranch(context, ref);
-        break;
-      case 'diff':
-        _showDiff(context, ref);
-        break;
-      case 'drop':
-        _confirmDropStash(context, ref);
-        break;
-    }
-  }
-
   Future<void> _applyStash(BuildContext context, WidgetRef ref) async {
     try {
       await ref.read(gitActionsProvider).applyStash(stash.ref);
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarFailedToApplyStash(e.toString())),
-            // The notice's own FILL, not a foreground: the tone mapping is
-            // about what a mark or a word MEANS, and this paints the pill the
-            // words sit on. It waits for `overlays.notify`, because a tone may
-            // only be resolved inside the notice host's `build` - a call site
-            // has no host, and the application is deliberately given no way to
-            // turn a `Tone` into a `Color` for its own decoration.
-            //
-            // Underneath the read sits the real defect: all five notices in
-            // this file are `NotificationService.showError` written out by
-            // hand. Adopting the service is what deletes them, and it is a
-            // behaviour change (the service never auto-dismisses and adds a
-            // copy affordance) rather than a rename, so it is reported instead
-            // of folded in here.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        // The fill left with the surface: the site states what happened and
+        // the skin resolves the tone inside its own notice host.
+        //
+        // What did NOT change is the mechanism these five notices use. They
+        // are still `NotificationService.showError` written out by hand, so
+        // they auto-dismiss, carry no mark and offer no copy affordance where
+        // the service's errors do all three. That disagreement is #418, and
+        // adopting the service here would be that redesign rather than this
+        // conversion.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: l10n.snackbarFailedToApplyStash(e.toString()),
           ),
         );
       }
@@ -289,12 +260,11 @@ class StashListTile extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarFailedToPopStash(e.toString())),
-            // The same fill as the apply failure above, waiting for the same
-            // member.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: l10n.snackbarFailedToPopStash(e.toString()),
           ),
         );
       }
@@ -309,12 +279,11 @@ class StashListTile extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarFailedToLoadDiff(e.toString())),
-            // The same fill as the apply failure above, waiting for the same
-            // member.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: l10n.snackbarFailedToLoadDiff(e.toString()),
           ),
         );
       }
@@ -333,12 +302,11 @@ class StashListTile extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
-              // The same fill as the apply failure above, waiting for the same
-              // member.
-              backgroundColor: Theme.of(context).colorScheme.error,
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.danger,
+              title: l10n.snackbarFailedToCreateBranch(e.toString()),
             ),
           );
         }
@@ -365,12 +333,11 @@ class StashListTile extends ConsumerWidget {
             .dropStash(stash.ref, expectedHash: stash.hash);
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.snackbarFailedToDropStash(e.toString())),
-              // The same fill as the apply failure above, waiting for the same
-              // member.
-              backgroundColor: Theme.of(context).colorScheme.error,
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.danger,
+              title: l10n.snackbarFailedToDropStash(e.toString()),
             ),
           );
         }

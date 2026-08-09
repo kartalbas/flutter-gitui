@@ -36,7 +36,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
-import 'package:flutter_gitui/shared/components/base_viewer_dialog.dart';
 
 import 'dialog_population.dart';
 
@@ -93,11 +92,19 @@ Future<_Session> _open(WidgetTester tester, DialogCase dialogCase) async {
   return session;
 }
 
-/// The dialog's root widget, whichever of the two components it is built on.
-Finder _dialogRoot() {
-  final base = find.byType(BaseDialog);
-  return base.evaluate().isEmpty ? find.byType(BaseViewerDialog) : base;
-}
+/// The dialog's root widget: the keyboard host every dialog is wrapped in.
+///
+/// This used to be whichever of the two components the dialog was built on
+/// (`BaseDialog` / `BaseViewerDialog`), but that named the WIDGET path only:
+/// `BaseDialog.show` now hands its spec straight to `Overlays.dialog`, which
+/// composes the application's [DialogKeyboardHost] with the skin's surface
+/// and never builds the `BaseDialog` widget at all — so a dialog opened
+/// through `show` (the destructive confirmations of `confirmDestructive`)
+/// had no root this sweep could see. Both presentation paths install exactly
+/// one host, and the host is the precise boundary of the keyboard contract
+/// this sweep holds: a key claimed inside it is the dialog's, a key past it
+/// escaped to the screen behind the barrier.
+Finder _dialogRoot() => find.byType(DialogKeyboardHost);
 
 bool _dialogIsOpen() => _dialogRoot().evaluate().isNotEmpty;
 

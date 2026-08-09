@@ -253,7 +253,12 @@ const Set<String> conformanceTokenManifest = <String>{
   'BasePopupMenuButton.menu.containerColor', // M3: surfaceContainer — conforms
   'BasePopupMenuButton.menu.elevation', // M3: 3.0 — conforms
   'BasePopupMenuButton.menu.padding.vertical', // M3: 8.0 — conforms
-  'BasePopupMenuButton.iconSize', // M3: 24.0 — registered MENU-004
+  // Conforms since #249 P4 removed the component's own iconSize: the two
+  // surviving callers size their mark themselves through BaseIcon (ICO-004),
+  // so the 20 dp toolbar decision lives at the call sites and the bare
+  // component renders the ambient M3 glyph. MENU-004 left the register with
+  // the parameter.
+  'BasePopupMenuButton.iconSize', // M3: 24.0 — conforms
   'BaseMenuItem.minHeight', // M3: 48.0 — conforms
   'BaseMenuItem.contentPadding.start', // M3: 12.0 — conforms
   'BaseMenuItem.labelTextStyle', // M3: labelLarge — conforms

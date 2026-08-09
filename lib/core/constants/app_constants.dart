@@ -18,10 +18,13 @@ class AppConstants {
   static const double defaultWindowWidth = 1728;
   static const double defaultWindowHeight = 972;
 
-  // Dialog sizing
-  static const double maxDialogWidth = 800;
-  static const double defaultDialogWidth = 650;
-  static const double minDialogWidth = 300;
+  // Dialog sizing is no longer stated here. How wide a dialog is depends on
+  // WHAT IT CONTAINS, which the application says with `DialogExtent` on
+  // `BaseDialog`, and on the design language, which answers it - `chrome
+  // .dialogSurface` resolves the extent to a width (400 for an alert, 650 for
+  // a form, 90% of the window for a browser under Material) and clamps it to
+  // the window. Three constants named here could only ever be Material's
+  // answer written down in application code.
 
   // Debouncing & timing
   static const Duration debounceMilliseconds = Duration(milliseconds: 300);

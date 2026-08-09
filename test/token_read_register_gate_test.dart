@@ -330,13 +330,16 @@ void main() {
       // it always belonged with, and the full-file view's one-sided gutter
       // is `CodeLineSpec.paired = false` - so every diff and full-file line
       // is the member's and the gutter arithmetic died with the
-      // construction - and less the 3 the commit-details tree surrendered
+      // construction - less the 3 the commit-details tree surrendered
       // when #438 gave `surfaces.tree` the two words its blockers were
       // waiting for (`TreeSpec.revealed` says "keep this node in view"
       // without a controller crossing the seam, and
       // `TreeNodeSpec.leadingTone` lets a file's mark carry what happened to
       // it), so file_tree_panel.dart's per-depth indent and its two shrunk
-      // PopupMenuButton constraints died with the construction: 21 reads
+      // PopupMenuButton constraints died with the construction - and less the
+      // 1 the menu family surrendered when every anchored menu in the
+      // application became `overlays.menuAnchor`, so `BasePopupMenuButton`'s
+      // anchor-glyph fallback had no caller left to size: 20 reads
       // waiting for a named P5 member, 6 blocked on a
       // missing vocabulary word, 7 kept by a named permanent carve-out
       // (#433). Converting a read lowers this number in the same change that
@@ -345,7 +348,7 @@ void main() {
       // exceptions.
       expect(
         total,
-        34,
+        33,
         reason:
             'The register must shrink deliberately: update this pin in the '
             'same change that shrinks (never grows) the register.',
@@ -370,7 +373,7 @@ void main() {
       // the same change that re-argues the entries' reasons.
       expect(
         readsWhere((entry) => entry.waitsFor != null),
-        21,
+        20,
         reason:
             'Reads waiting for a named P5 contract member. A conversion '
             'lowers this; a reclassification moves it and must say why.',

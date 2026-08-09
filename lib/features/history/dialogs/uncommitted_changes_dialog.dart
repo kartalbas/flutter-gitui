@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show DialogExtent, IconRole, TextRole;
 
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -20,7 +21,9 @@ class UncommittedChangesDialog extends StatelessWidget {
       title: l10n.uncommittedChanges,
       icon: IconRole.warning,
       variant: DialogVariant.confirmation,
-      maxWidth: 400,
+      // A sentence and two answers: the `alert` extent by the vocabulary's own
+      // words, and 400 under Material - the width this dialog already had.
+      extent: DialogExtent.alert,
       onSubmit: () => Navigator.pop(context, true),
       content: BaseLabel(
         l10n.youHaveUncommittedChanges(changeCount, pluralForm),

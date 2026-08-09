@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuAnchorSpec,
+        MenuEntry,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_animated_widgets.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../core/workspace/models/repository_status.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
@@ -127,45 +135,34 @@ class RepositoryCard extends ConsumerWidget {
               // Repository menu
               if (onOpenInEditor != null ||
                   (status.hasRemote && onEditRemoteUrl != null))
-                BasePopupMenuButton<String>(
-                  // The overflow mark takes the ordinary scale and leaves its
-                  // colour to the header row it sits in, as it always did.
-                  icon: const BaseIcon(IconRole.dotsThreeVertical),
-                  tooltip: AppLocalizations.of(context)!.moreActions,
-                  itemBuilder: (context) => [
+                // The trigger and the menu it opens are one thing, and both
+                // halves are the skin's through `overlays.menuAnchor`. This
+                // card used to build Material's own `PopupMenuButton`, render
+                // the rows itself and dispatch the chosen value back through a
+                // string switch - application code performing skin geometry and
+                // then re-deriving its own callback table from it. The card now
+                // states only what each entry means and what it does.
+                Overlays.anchor(
+                  spec: MenuAnchorSpec(
+                    icon: IconRole.dotsThreeVertical,
+                    tooltip: AppLocalizations.of(context)!.moreActions,
+                  ),
+                  entries: <MenuEntry>[
                     if (onOpenInEditor != null)
-                      PopupMenuItem<String>(
-                        value: 'open_in_editor',
-                        child: MenuItemContent(
-                          icon: IconRole.code,
-                          label: AppLocalizations.of(
-                            context,
-                          )!.openFolderInEditor,
-                          scale: ControlScale.normal,
-                        ),
+                      MenuAction(
+                        icon: IconRole.code,
+                        label: AppLocalizations.of(context)!.openFolderInEditor,
+                        onPressed: onOpenInEditor,
                       ),
                     if (status.hasRemote && onEditRemoteUrl != null)
-                      PopupMenuItem<String>(
-                        value: 'edit_remote_url',
-                        child: MenuItemContent(
-                          icon: IconRole.link,
-                          label: AppLocalizations.of(
-                            context,
-                          )!.editRemoteUrl('origin'),
-                          scale: ControlScale.normal,
-                        ),
+                      MenuAction(
+                        icon: IconRole.link,
+                        label: AppLocalizations.of(
+                          context,
+                        )!.editRemoteUrl('origin'),
+                        onPressed: onEditRemoteUrl,
                       ),
                   ],
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'open_in_editor':
-                        onOpenInEditor?.call();
-                        break;
-                      case 'edit_remote_url':
-                        onEditRemoteUrl?.call();
-                        break;
-                    }
-                  },
                 ),
               BaseIconButton(
                 icon: IconRole.trash,

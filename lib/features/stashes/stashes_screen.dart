@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, TextRole, Tone;
+    show IconRole, Inset, MenuAction, MenuActionRole, MenuSeparator, TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/components/base_label.dart';
-import '../../shared/components/base_menu_item.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
@@ -99,26 +98,20 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
         onRefresh: () => ref.read(gitActionsProvider).refreshStashes(),
         moreMenuItems: [
           // Create action always first
-          PopupMenuItem(
-            child: MenuItemContent(
-              icon: IconRole.plus,
-              label: AppLocalizations.of(context)!.createStash,
-            ),
-            onTap: () => _showCreateStashDialog(context),
+          MenuAction(
+            icon: IconRole.plus,
+            label: AppLocalizations.of(context)!.createStash,
+            onPressed: () => _showCreateStashDialog(context),
           ),
-          const PopupMenuDivider(),
-          // Clear All action
-          PopupMenuItem(
-            // Said once, for the reason tag_list_tile.dart records:
-            // `MenuItemContent.tone` reaches the WORDS as well as the mark
-            // now, so the `Color` that used to re-say `Tone.danger` beside it
-            // is gone. Pixel-identical by construction.
-            child: MenuItemContent(
-              icon: IconRole.trash,
-              label: AppLocalizations.of(context)!.clearAll,
-              tone: Tone.danger,
-            ),
-            onTap: () => _confirmClearAllStashes(context),
+          const MenuSeparator(),
+          // Clear All action. It states its ROLE - this entry destroys
+          // something - and the skin decides what a destructive row looks
+          // like; `Tone.danger` was the application deciding that itself.
+          MenuAction(
+            icon: IconRole.trash,
+            label: AppLocalizations.of(context)!.clearAll,
+            role: MenuActionRole.destructive,
+            onPressed: () => _confirmClearAllStashes(context),
           ),
         ],
       ),

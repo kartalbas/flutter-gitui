@@ -934,34 +934,32 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       // Show rename dialog
       if (!context.mounted) return;
       final controller = TextEditingController(text: currentName);
-      final newName = await showDialog<String>(
+      final newName = await BaseDialog.show<String>(
         context: context,
-        builder: (context) {
-          return BaseDialog(
-            title: AppLocalizations.of(context)!.dialogTitleRenameFile,
-            icon: IconRole.pencilSimple,
-            onSubmit: () => Navigator.pop(context, controller.text),
-            // Enter submits via the dialog's onSubmit; a second field-level
-            // submit path would pop twice.
-            content: BaseTextField(
-              controller: controller,
-              autofocus: true,
-              label: AppLocalizations.of(context)!.dialogLabelNewName,
+        dialog: BaseDialog(
+          title: AppLocalizations.of(context)!.dialogTitleRenameFile,
+          icon: IconRole.pencilSimple,
+          onSubmit: () => Navigator.pop(context, controller.text),
+          // Enter submits via the dialog's onSubmit; a second field-level
+          // submit path would pop twice.
+          content: BaseTextField(
+            controller: controller,
+            autofocus: true,
+            label: AppLocalizations.of(context)!.dialogLabelNewName,
+          ),
+          actions: [
+            DialogAction(
+              label: AppLocalizations.of(context)!.cancel,
+              role: DialogActionRole.dismissive,
+              onPressed: () => Navigator.pop(context),
             ),
-            actions: [
-              DialogAction(
-                label: AppLocalizations.of(context)!.cancel,
-                role: DialogActionRole.dismissive,
-                onPressed: () => Navigator.pop(context),
-              ),
-              DialogAction(
-                label: AppLocalizations.of(context)!.dialogActionRename,
-                role: DialogActionRole.affirmative,
-                onPressed: () => Navigator.pop(context, controller.text),
-              ),
-            ],
-          );
-        },
+            DialogAction(
+              label: AppLocalizations.of(context)!.dialogActionRename,
+              role: DialogActionRole.affirmative,
+              onPressed: () => Navigator.pop(context, controller.text),
+            ),
+          ],
+        ),
       );
 
       controller.dispose();
@@ -1047,9 +1045,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
       // Check if file exists (or if pasting in same directory)
       if (isSameDirectory || await File(destinationPath).exists()) {
         if (context.mounted) {
-          final action = await showDialog<String>(
+          final action = await BaseDialog.show<String>(
             context: context,
-            builder: (context) => BaseDialog(
+            dialog: BaseDialog(
               title: isSameDirectory
                   ? AppLocalizations.of(context)!.dialogTitleCopyFile
                   : AppLocalizations.of(context)!.dialogTitleFileExists,
@@ -1178,9 +1176,9 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
 
       // Confirm deletion
       if (context.mounted) {
-        final confirm = await showDialog<bool>(
+        final confirm = await BaseDialog.show<bool>(
           context: context,
-          builder: (context) => BaseDialog(
+          dialog: BaseDialog(
             icon: IconRole.warning,
             title: AppLocalizations.of(context)!.dialogTitleDeleteFile,
             variant: DialogVariant.destructive,

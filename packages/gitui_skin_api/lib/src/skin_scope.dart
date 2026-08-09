@@ -272,6 +272,45 @@ extension SkinContext on BuildContext {
   Skin get skin => SkinScope.of(this).skin;
 }
 
+/// The application-visible identity of a menu anchor a skin built.
+///
+/// The control below this widget is the SKIN's on purpose - a pre-built
+/// control could never become the canonical one in another language - which
+/// is why the anchor's NAME travels as data on [MenuAnchorSpec.tooltip] and
+/// is applied by each skin: Material hands it to its icon button's tooltip,
+/// the blueprint stamps it as the pressable's semantics label. What the seam
+/// took away was the application's own view of that fact. With the trigger
+/// built behind [Overlays.anchor], no element application code could name
+/// carried the anchor's name any more, so the focus stop the trigger
+/// occupies read as unnamed to every instrument that walks the element tree
+/// - the settings screen's keyboard test measured exactly that, reporting
+/// `unnamed:Focus` where it used to read the anchor's name off the
+/// application's old menu-button widget.
+///
+/// This widget puts the identity back on the application's side of the seam.
+/// It draws nothing and decides nothing - the skin keeps the ink, the
+/// geometry and the route - it only states WHAT stands here and what it is
+/// called, as the spec the application wrote.
+///
+/// Only [Overlays.anchor] can plant one, for the same reason the fences'
+/// constructors are private: an identity anyone could wrap around anything
+/// would stop meaning "the contract mounted a menu anchor here", and the
+/// walk from a focused element to its anchor's name is only trustworthy while
+/// that meaning holds.
+final class SkinMenuAnchor extends StatelessWidget {
+  const SkinMenuAnchor._({required this.spec, required this.child});
+
+  /// What the anchor means, in the application's words - most importantly
+  /// [MenuAnchorSpec.tooltip], the name the control answers to.
+  final MenuAnchorSpec spec;
+
+  /// The skin-built control, already fenced as skin-painted.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
 /// The application's ONLY overlay API.
 ///
 /// It captures the envelope, builds the host and hands both to the skin. A
@@ -340,19 +379,28 @@ abstract final class Overlays {
   /// fence - the same arrangement as [SkinScope.render] - so a change of skin
   /// rebuilds the anchor, and the host it constructs carries the envelope in
   /// force at that moment into whatever route the skin opens from it.
+  ///
+  /// The whole arrangement is wrapped in a [SkinMenuAnchor] carrying [spec],
+  /// planted ABOVE the fence: the control stays the skin's, but what it IS
+  /// and what it is CALLED stay readable from the application's side of the
+  /// seam - see [SkinMenuAnchor] for the regression that made this
+  /// load-bearing.
   static Widget anchor({
     required MenuAnchorSpec spec,
     required List<MenuEntry> entries,
-  }) => SkinPainted._(
-    child: Builder(
-      builder: (BuildContext inner) {
-        final SkinEnvelope envelope = SkinScope.of(inner).envelope;
-        return envelope.skin.overlays.menuAnchor(
-          inner,
-          spec,
-          SkinMenuHost._(envelope, entries),
-        );
-      },
+  }) => SkinMenuAnchor._(
+    spec: spec,
+    child: SkinPainted._(
+      child: Builder(
+        builder: (BuildContext inner) {
+          final SkinEnvelope envelope = SkinScope.of(inner).envelope;
+          return envelope.skin.overlays.menuAnchor(
+            inner,
+            spec,
+            SkinMenuHost._(envelope, entries),
+          );
+        },
+      ),
     ),
   );
 

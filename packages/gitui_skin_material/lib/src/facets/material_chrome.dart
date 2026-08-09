@@ -1221,10 +1221,22 @@ class _MaterialDialogSurface extends StatelessWidget {
                         const SizedBox(width: MaterialMetrics.spaceM),
                       ],
                       Expanded(
+                        // titleLarge, not Material 3's headlineSmall (DLG-005
+                        // in this package's docs/deviation_register.yaml).
+                        // The typography collapse (#249 P3b) decided that one
+                        // role answers "the name of a surface" everywhere it
+                        // is asked, and this skin maps that role to
+                        // titleLarge - so the modal title lands on the same
+                        // 20 px as every screen title and the viewer dialog's
+                        // header (VIEW-002, below). The extraction briefly
+                        // reached for the M3 default here and made the modal
+                        // title the single 22 px line left in the
+                        // application; the register's stale-deviation check
+                        // is what caught it.
                         // ignore: avoid_text_with_style
                         child: Text(
                           spec.title,
-                          style: theme.textTheme.headlineSmall?.copyWith(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             color: titleColor,
                           ),
                         ),

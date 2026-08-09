@@ -15,8 +15,22 @@ import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/tag.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
+import 'package:flutter_gitui/shared/widgets/standard_app_bar.dart';
 
 import '../../skin/pump_under_skin.dart';
+
+/// The app bar's own overflow anchor, addressed by its place rather than by
+/// its name. The name used to be unique on this screen only by accident: the
+/// tag rows' menus were Material `PopupMenuButton`s wearing the framework's
+/// default "Show menu" tooltip, so 'More actions' matched exactly the app
+/// bar. Now that the rows' menus are `Overlays.anchor`s too, each row trigger
+/// carries the app's own overflow name ('More actions' — the vocabulary the
+/// repository cards already used), and only the scope to [StandardAppBar]
+/// says which overflow the test means.
+final Finder _appBarMoreActions = find.descendant(
+  of: find.byType(StandardAppBar),
+  matching: find.byTooltip('More actions'),
+);
 
 GitTag _tag(String name, String hash, DateTime date) => GitTag(
   name: name,
@@ -264,10 +278,13 @@ void main() {
     await pumpScreen(tester);
 
     // The mode lives behind the app bar's overflow menu, so the keyboard has
-    // to reach that menu, open it and pick from it.
+    // to reach that menu, open it and pick from it. The finder is scoped to
+    // the app bar: the walk passes the tag rows' own 'More actions' anchors
+    // on the way, and stopping at one of those would open a row menu with no
+    // Select Tags in it.
     await _tabUntil(
       tester,
-      () => _focusIsInside(find.byTooltip('More actions')),
+      () => _focusIsInside(_appBarMoreActions),
       target: "the app bar's overflow menu",
     );
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
@@ -303,7 +320,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.byTooltip('Exit Selection'), findsNothing);
-    expect(find.byTooltip('More actions'), findsOneWidget);
+    expect(_appBarMoreActions, findsOneWidget);
 
     // And the keyboard is still on the list afterwards: Enter opens the
     // details of the tag the highlight ended on.

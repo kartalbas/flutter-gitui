@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole, Tone;
+    show
+        ContentPort,
+        DialogAction,
+        DialogActionRole,
+        DialogExtent,
+        DialogSpec,
+        IconRole,
+        Overlays,
+        Skin,
+        SkinScope,
+        Tone;
 import '../../generated/app_localizations.dart';
-import '../../core/constants/constants.dart';
-import '../../shared/theme/app_theme.dart';
 import '../utils/keyboard_guards.dart';
-import 'base_button.dart';
-import 'base_icon.dart';
-import 'base_label.dart';
+
+/// The dialog's action data, which is the CONTRACT's type rather than a copy
+/// of it.
+///
+/// `DialogAction` and `DialogActionRole` used to be declared here, word for
+/// word identical to the pair in `packages/gitui_skin_api` — same six fields,
+/// same four roles, same reasoning in the doc comments. Two identical
+/// declarations of one idea is one too many: the skin renders the contract's
+/// type, so an application copy could only ever be converted to it at the
+/// seam, and the first field that was added to one and not the other would be
+/// a silent loss. Re-exporting means the ~50 files that write
+/// `DialogAction(...)` against this component keep their single import and now
+/// name the type the skin actually receives.
+export 'package:gitui_skin_api/gitui_skin_api.dart'
+    show DialogAction, DialogActionRole;
 
 /// Dialog visual variants
 enum DialogVariant {
@@ -21,124 +41,6 @@ enum DialogVariant {
   /// Destructive action dialog (red accent)
   destructive,
 }
-
-/// What an action at the bottom of a dialog *means*, independent of how any
-/// one design language chooses to draw it.
-///
-/// The role, not a button variant, is what a dialog declares, because the
-/// three design languages disagree about how emphasis is expressed and even
-/// about where the actions go: Material 3 and Apple's HIG put the affirmative
-/// action last (on the right), Fluent 2 puts it **first** (on the left) and
-/// stretches every action to equal width, and Cupertino expresses "this one is
-/// destructive" and "this one is the default" on the action itself
-/// (`CupertinoDialogAction.isDestructiveAction` / `isDefaultAction`) rather
-/// than on the dialog. A caller that hands over a ready-made button has
-/// already made all three of those decisions for every language at once, and
-/// none of them can be undone by the code that renders the dialog — which is
-/// why [BaseDialog.actions] carries data with a role instead of widgets.
-enum DialogActionRole {
-  /// Completes the dialog by doing the thing it asked about: Save, Create,
-  /// Merge, Continue, and the OK of a dialog whose only job is to be
-  /// acknowledged.
-  ///
-  /// A dialog has **at most one** affirmative action — it is the one a
-  /// language may single out as its default, and "the default" is not a set.
-  /// A dialog offering several equally weighted ways forward gives them all
-  /// [neutral] instead ([BaseDialog] asserts this).
-  affirmative,
-
-  /// Completes the dialog by destroying something: Delete, Discard, Force
-  /// delete, Reset --hard, Abort.
-  ///
-  /// Separate from [affirmative] rather than a flag on it, because a dialog
-  /// may legitimately offer two of them (delete and force-delete) while it may
-  /// only ever have one default, and because two languages draw a destructive
-  /// action with their own treatment rather than with a red tint we choose.
-  destructive,
-
-  /// Leaves the dialog without doing what it asked: Cancel, Close, Not now.
-  /// The lowest-emphasis action, and the one Escape is the keyboard
-  /// equivalent of.
-  dismissive,
-
-  /// Any other action the dialog offers, weighted between [dismissive] and
-  /// [affirmative]: a second way forward that is not *the* way forward (Keep
-  /// both, Download only, a soft reset next to a hard one), or an auxiliary
-  /// action that does not close the dialog at all (Copy, Refresh, Clear
-  /// filters).
-  neutral,
-}
-
-/// One action at the bottom of a [BaseDialog], as data rather than as a
-/// widget.
-///
-/// Everything here is language-neutral: a string, a callback, a role, two
-/// flags and an [IconRole] — a MEANING rather than a glyph, so the mark and
-/// its weight stay the skin's to choose (#249 conflict C3). Nothing in it
-/// names a Material class, a colour or a size, so each design language can
-/// render the same action its own way — put it on the other side of the row,
-/// stretch it to equal width, or turn it into a `CupertinoDialogAction` with
-/// the alert's dividers.
-class DialogAction {
-  const DialogAction({
-    required this.label,
-    required this.onPressed,
-    required this.role,
-    this.icon,
-    this.enabled = true,
-    this.isLoading = false,
-  });
-
-  /// The action's text. Also its accessible name, and in the languages that
-  /// stack their actions full-width the only thing distinguishing them.
-  final String label;
-
-  /// What the action does. Null disables it, exactly as on a button, so a
-  /// call site that already computes `condition ? callback : null` needs no
-  /// rewriting; [enabled] is the readable alternative for the cases that do
-  /// have a callback and simply may not run it yet.
-  final VoidCallback? onPressed;
-
-  /// What the action means. See [DialogActionRole]: this is the single piece
-  /// of information the widget form threw away, and the reason this type
-  /// exists.
-  final DialogActionRole role;
-
-  /// The meaning of an optional leading mark. Which glyph stands for it, at
-  /// which weight and in which colour, is the skin's answer.
-  final IconRole? icon;
-
-  /// Whether the action may run right now. Distinct from a null [onPressed]
-  /// only in how it reads at the call site: a dialog whose confirm button
-  /// waits for a typed token or a validated form says
-  /// `enabled: _tokenMatches` and keeps its callback visible, instead of
-  /// hiding it inside a ternary.
-  final bool enabled;
-
-  /// Whether the action is currently running, so the dialog can show progress
-  /// in its place. A loading action is never invokable.
-  final bool isLoading;
-
-  /// The resolved answer to "can the user invoke this now", folding together
-  /// the three ways an action can be unavailable.
-  bool get isEnabled => enabled && !isLoading && onPressed != null;
-}
-
-/// How Material 3 — this app's current and default design language — expresses
-/// each [DialogActionRole].
-///
-/// This mapping is deliberately the *only* place a role becomes a button
-/// variant. Another language expresses the same four roles differently (Fluent
-/// gives the affirmative its accent fill and leaves the rest as standard
-/// buttons; Cupertino has no fills at all and marks the default action with
-/// weight), so a call site that picked a variant itself would have been
-/// picking Material's answer for every language.
-ButtonVariant _variantForRole(DialogActionRole role) => switch (role) {
-  DialogActionRole.affirmative => ButtonVariant.primary,
-  DialogActionRole.destructive => ButtonVariant.danger,
-  DialogActionRole.dismissive => ButtonVariant.tertiary,
-  DialogActionRole.neutral => ButtonVariant.secondary,
-};
 
 /// Whether the widget holding primary focus is a multiline editable text.
 ///
@@ -157,6 +59,22 @@ bool focusedEditableKeepsEnter() => focusedEditableOwnsKey(
 );
 
 /// Base component for all dialog patterns in the app.
+///
+/// **This is a façade** (#249, §2.11), on the same terms as `BaseButton`: the
+/// constructor is the one ~82 call sites already write, and the body is one
+/// delegation to `chrome.dialogSurface`. Everything the dialog used to draw
+/// itself — the `Dialog` and its DLG-001 corner, the 24/16/24 insets, the
+/// title row with its mark and its close button, the scrolling content and its
+/// traversal group, and the wrapping action row with the role→variant table —
+/// moved into the skin verbatim (`material_chrome.dart`,
+/// `_MaterialDialogSurface`).
+///
+/// Two things stayed on this side of the seam, and both are deliberate. The
+/// **keyboard contract** ([DialogKeyboardHost]) is what the user can do, not
+/// what the dialog looks like, so no skin may weaken it — the same host the
+/// application installs on `SkinScope` for the route path is applied here for
+/// the widget path. And the **content assertions** below are statements about
+/// the application's own widget tree, which the skin never sees.
 ///
 /// Provides 3 variants:
 /// - Normal: Standard dialog
@@ -198,7 +116,7 @@ class BaseDialog extends StatelessWidget {
     this.actions,
     this.variant = DialogVariant.normal,
     this.icon,
-    this.maxWidth = AppConstants.defaultDialogWidth,
+    this.extent = DialogExtent.form,
     this.barrierDismissible = true,
     this.onSubmit,
   });
@@ -235,8 +153,16 @@ class BaseDialog extends StatelessWidget {
   /// The meaning of an optional mark in the title area.
   final IconRole? icon;
 
-  /// Maximum dialog width
-  final double maxWidth;
+  /// What KIND of thing this dialog contains — a sentence and its answers, a
+  /// set of fields, or something to look through.
+  ///
+  /// This replaces a raw `maxWidth` in logical pixels, and the replacement is
+  /// the point rather than a side effect: how wide a dialog holding a form
+  /// should be is a design language's answer, and eleven call sites were each
+  /// making it themselves with a number (400, 500, 600, 800). The extent is
+  /// the question the application can actually answer; the skin turns it into
+  /// a width.
+  final DialogExtent extent;
 
   /// Allow closing by clicking outside dialog
   final bool barrierDismissible;
@@ -252,8 +178,22 @@ class BaseDialog extends StatelessWidget {
   /// (see [showDestructiveDialog]).
   final VoidCallback? onSubmit;
 
-  @override
-  Widget build(BuildContext context) {
+  /// What this dialog asks, in the contract's words.
+  ///
+  /// The one place the façade's own vocabulary becomes the contract's, and it
+  /// is exact rather than approximate:
+  ///
+  /// * [DialogVariant.destructive] is `Tone.danger` — "this dialog destroys
+  ///   something" is a meaning, and the red glyph and red title were Material's
+  ///   answer to it spelled out in application code. The skin re-derives both,
+  ///   and supplies the warning mark when the caller named none, exactly as the
+  ///   variant switch here used to.
+  /// * [DialogVariant.confirmation] is not a tone at all: its whole content
+  ///   was "show a question mark", so it resolves to [IconRole.question] and
+  ///   leaves the tone neutral, which is what the old switch's `Tone.accent`
+  ///   mark plus `Tone.neutral` title already meant.
+  /// * [DialogVariant.normal] states nothing beyond the caller's own mark.
+  DialogSpec _spec() {
     // Turn the runtime RenderFlex error into an immediate, named one: the
     // content sits in a scroll view, so a flex child of a content Column can
     // never get the remaining space it asks for. This mirrors RenderFlex's
@@ -261,6 +201,10 @@ class BaseDialog extends StatelessWidget {
     // height; a loose Flexible only when the Column wants MainAxisSize.max),
     // so a legal loose Flexible in a min Column stays allowed. Only direct
     // children are checkable here; the doc on [content] covers the rest.
+    //
+    // It lives on the spec rather than in [build] because both ways of
+    // presenting a dialog pass through here: `BaseDialog.show` hands the spec
+    // straight to `Overlays.dialog` and never builds this widget at all.
     assert(() {
       final inner = content;
       if (inner is Flex && inner.direction == Axis.vertical) {
@@ -312,226 +256,95 @@ class BaseDialog extends StatelessWidget {
       return true;
     }());
 
-    final l10n = AppLocalizations.of(context)!;
+    return DialogSpec(
+      title: title,
+      // The port carries its own ambient environment (see
+      // [_MigrationMaterialHost]): the content is still built from Material
+      // widgets, and satisfying their needs is the application's job, not the
+      // surface's.
+      content: ContentPort(_MigrationMaterialHost(child: content)),
+      actions: actions ?? const <DialogAction>[],
+      icon: switch (variant) {
+        // A confirmation's mark WAS the variant: the old switch produced the
+        // question glyph and an otherwise ordinary dialog. Stating the mark
+        // says the same thing without a second word for it.
+        DialogVariant.confirmation => icon ?? IconRole.question,
+        // A destructive dialog's warning fallback is the skin's, so it is not
+        // repeated here: `Tone.danger` with no mark already means "warn".
+        DialogVariant.normal || DialogVariant.destructive => icon,
+      },
+      tone: variant == DialogVariant.destructive ? Tone.danger : Tone.neutral,
+      extent: extent,
+      barrierDismissible: barrierDismissible,
+      onSubmit: onSubmit,
+    );
+  }
 
-    // Determine the mark and what it means, from the variant.
-    //
-    // The colour is no longer a `Color` but a [Tone]: "this dialog is
-    // destructive" is a meaning, and `colorScheme.error` was Material's answer
-    // to it written down in application code. `Tone.danger` asks the question
-    // and the skin answers it — with `colorScheme.error` under Material, which
-    // is why nothing on screen moves.
-    IconRole? variantIcon = icon;
-    Tone iconTone = Tone.accent;
-    // The title says the same thing the mark beside it says, so it is now the
-    // same kind of statement: a [Tone] rather than a `Color`. `Tone.neutral` is
-    // literally "whatever this surface's ordinary foreground is", which is what
-    // `colorScheme.onSurface` was spelling out longhand at four of these six
-    // arms — saying nothing twice.
-    Tone titleTone;
-
-    if (icon == null) {
-      switch (variant) {
-        case DialogVariant.normal:
-          variantIcon = null;
-          titleTone = Tone.neutral;
-          break;
-        case DialogVariant.confirmation:
-          variantIcon = IconRole.question;
-          iconTone = Tone.accent;
-          titleTone = Tone.neutral;
-          break;
-        case DialogVariant.destructive:
-          variantIcon = IconRole.warning;
-          iconTone = Tone.danger;
-          titleTone = Tone.danger;
-          break;
-      }
-    } else {
-      // Custom icon provided
-      switch (variant) {
-        case DialogVariant.normal:
-          iconTone = Tone.accent;
-          titleTone = Tone.neutral;
-          break;
-        case DialogVariant.confirmation:
-          iconTone = Tone.accent;
-          titleTone = Tone.neutral;
-          break;
-        case DialogVariant.destructive:
-          iconTone = Tone.danger;
-          titleTone = Tone.danger;
-          break;
-      }
-    }
-
+  @override
+  Widget build(BuildContext context) {
+    final DialogSpec spec = _spec();
+    // The keyboard host is the application's and stays outside the fence; the
+    // surface below it is the skin's. That is the same two-layer arrangement
+    // `Overlays.dialog` composes for the route path, written once here for the
+    // widget path so a dialog opened either way behaves and looks identical.
     return DialogKeyboardHost(
       barrierDismissible: barrierDismissible,
       onSubmit: onSubmit,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final availableWidth = MediaQuery.of(context).size.width;
-          final availableHeight = MediaQuery.of(context).size.height;
-          // Honour the caller's maxWidth, which was accepted and then ignored:
-          // every dialog rendered at 90% of the window regardless. The 90% only
-          // survives as a ceiling so a wide dialog cannot outgrow a small
-          // screen; the height still shrinks to its content below.
-          final widthCeiling = availableWidth * 0.9;
-          final dialogWidth = maxWidth < widthCeiling ? maxWidth : widthCeiling;
-          final dialogHeight = availableHeight * 0.9;
-
-          // ignore: avoid_dialog
-          return Dialog(
-            // 12 dp, not Material 3's 28 (DLG-001 in
-            // packages/gitui_skin_material/docs/deviation_register.yaml). This
-            // is a Windows/Linux desktop
-            // app, and 28 dp is a phone-scale corner: it is the one radius in
-            // the whole app that would read as a mobile sheet. 12 dp is the
-            // surface corner this app already uses for the cards and panels
-            // the dialog hosts, and it sits between the 8 dp of Windows 11's
-            // own ContentDialog and the 12 dp of libadwaita's.
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusL),
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: dialogWidth.clamp(
-                  AppConstants.minDialogWidth,
-                  double.infinity,
-                ),
-                maxHeight: dialogHeight,
-              ),
-              child: Padding(
-                // Material 3's dialog insets, which happen to be exactly this
-                // app's own spacing steps: 24 dp around the whole dialog, 16
-                // between the title and the content, 24 between the content
-                // and the action row. These are AlertDialog's defaults
-                // (flutter/lib/src/material/dialog.dart:825 for the title
-                // padding, :857 for the content padding, :1994 for the
-                // actions padding). The uniform 32 dp this used to spend was
-                // never measured against them.
-                padding: EdgeInsets.all(AppTheme.paddingL),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Title section with optional icon and X close button
-                    Row(
-                      children: [
-                        if (variantIcon != null) ...{
-                          // The M3 dialog icon is the ambient 24 dp glyph:
-                          // AlertDialog wraps it in an IconTheme that sets a
-                          // colour and nothing else
-                          // (flutter/lib/src/material/dialog.dart:818), so the
-                          // size comes from the theme. The 28 that stood here
-                          // was on no icon scale at all.
-                          // `prominent` is the 24 dp rung, which is the size
-                          // that stood here; the tone is the meaning the
-                          // colour used to spell out.
-                          BaseIcon(
-                            variantIcon,
-                            scale: ControlScale.prominent,
-                            tone: iconTone,
-                          ),
-                          SizedBox(width: AppTheme.paddingM),
-                        },
-                        Expanded(
-                          child: BaseLabel(
-                            title,
-                            role: TextRole.pageTitle,
-                            tone: titleTone,
-                          ),
-                        ),
-                        if (barrierDismissible) ...{
-                          SizedBox(width: AppTheme.paddingM),
-                          BaseIconButton(
-                            icon: IconRole.x,
-                            tooltip: l10n.close,
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        },
-                      ],
-                    ),
-
-                    SizedBox(height: AppTheme.paddingM),
-
-                    // Content section (scrollable if long).
-                    //
-                    // The content is its own traversal group, and that is a
-                    // correctness fix rather than a tidiness one. Tab's
-                    // default policy sorts the ring by where the controls
-                    // currently *are*, and it scrolls the control it moves to
-                    // into view - so as soon as a dialog's content scrolls,
-                    // the rows that scrolled off the top acquire smaller
-                    // global y coordinates than the title row's close button
-                    // and get sorted in front of it. The ring then wraps from
-                    // the last action into the middle of the list instead of
-                    // back to the close button, and the rows near the top are
-                    // visited twice per cycle. Measured on the bulk branch
-                    // delete at 10 branches: Close, b0..b9, force, Cancel,
-                    // Delete, b0, b1, b2, Close - 17 stops for 14 controls.
-                    // A group is sorted among its siblings by the group's own
-                    // rect, which is this Flexible's box and does not move
-                    // when the content inside scrolls, so the title row and
-                    // the action row keep their places and the content keeps
-                    // its internal reading order.
-                    Flexible(
-                      child: FocusTraversalGroup(
-                        child: SingleChildScrollView(child: content),
-                      ),
-                    ),
-
-                    // Actions section. A Wrap, not a Row: a Row overflows
-                    // when the buttons outgrow the dialog width (the update
-                    // dialog's three actions did); wrapping onto a second
-                    // end-aligned run is the M3 fallback for that case and
-                    // renders identically while one line fits.
-                    if (actions != null && actions!.isNotEmpty) ...{
-                      SizedBox(height: AppTheme.paddingL),
-                      Wrap(
-                        alignment: WrapAlignment.end,
-                        // 8 dp between actions, the spacing M3's OverflowBar
-                        // gets from AlertDialog's default buttonPadding
-                        // (dialog.dart:882). The run spacing is ours: an
-                        // OverflowBar stacks its overflow with no gap at all,
-                        // which would leave two wrapped buttons touching.
-                        spacing: AppTheme.paddingS,
-                        runSpacing: AppTheme.paddingS,
-                        children: [
-                          for (final action in actions!)
-                            BaseButton(
-                              label: action.label,
-                              variant: _variantForRole(action.role),
-                              leadingIcon: action.icon,
-                              isLoading: action.isLoading,
-                              onPressed: action.isEnabled
-                                  ? action.onPressed
-                                  : null,
-                            ),
-                        ],
-                      ),
-                    },
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+      child: SkinScope.render(
+        context,
+        (Skin skin, BuildContext inner) =>
+            skin.chrome.dialogSurface(inner, spec),
       ),
     );
   }
 
-  /// Show dialog helper
+  /// Takes the application away until the user answers this dialog.
+  ///
+  /// The route is the skin's now: this used to call `showDialog` — Material's
+  /// own route helper — from application code, which decided for every design
+  /// language how a dialog arrives. `Overlays.dialog` states the dialog and
+  /// lets the skin push its own route, and it composes the application's
+  /// keyboard host and the skin's surface itself, so this widget is never
+  /// built on that path.
   static Future<T?> show<T>({
     required BuildContext context,
     required BaseDialog dialog,
-  }) {
-    return showDialog<T>(
-      context: context,
-      barrierDismissible: dialog.barrierDismissible,
-      builder: (context) => dialog,
-    );
-  }
+  }) => Overlays.dialog<T>(context, dialog._spec());
+}
+
+/// The ambient environment the application's un-migrated dialog content still
+/// requires, supplied by the application because the need is the
+/// application's.
+///
+/// Dialog content is still built from Material widgets - a [TextField]
+/// asserts a [Material] ancestor - and under the shipped Material skin that
+/// ancestor used to arrive by coincidence: the skin's own dialog surface is a
+/// `Dialog`, which builds one. The blueprint builds no Material anywhere,
+/// deliberately, so the moment the surface moved behind the contract every
+/// dialog holding a Material control crashed under it with "No Material
+/// widget found" - a measured regression of the blueprint dialog keyboard
+/// sweep from 24 failures to 160. The contract's answer (see `ContentPort` in
+/// `gitui_skin_api`) is that content crosses the port with its library's
+/// ambient needs already satisfied; this widget is that answer for the
+/// migration window.
+///
+/// [MaterialType.transparency] paints nothing, casts nothing and takes no
+/// gesture, and the text style re-states the one already in force at the
+/// port, so under the Material skin this wrapper is pixel-neutral. It dies
+/// with the migration window: when dialog content no longer contains Material
+/// widgets, delete it.
+class _MigrationMaterialHost extends StatelessWidget {
+  const _MigrationMaterialHost({required this.child});
+
+  /// The application's dialog content, exactly as the caller wrote it.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    type: MaterialType.transparency,
+    textStyle: DefaultTextStyle.of(context).style,
+    child: child,
+  );
 }
 
 /// The keyboard host every dialog is wrapped in, so the dialog keyboard

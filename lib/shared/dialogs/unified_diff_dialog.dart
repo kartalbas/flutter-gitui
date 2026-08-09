@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, NoticeSpec, Overlays, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_parser.dart';
@@ -158,11 +159,12 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
           showLineNumbers: true,
           onLineCopied: () {
             final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.lineCopiedToClipboard),
-                duration: const Duration(seconds: 1),
-              ),
+            // The clipboard holds the line: something that finished, and
+            // finished well. How long "brief" lasts is the skin's answer, so
+            // the one second this asked for goes with the construction.
+            Overlays.notify(
+              context,
+              NoticeSpec(tone: Tone.success, title: l10n.lineCopiedToClipboard),
             );
           },
         );
@@ -213,18 +215,21 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             final diffOutput = await _diffFuture;
             await Clipboard.setData(ClipboardData(text: diffOutput));
             if (context.mounted) {
-              ScaffoldMessenger.of(
+              Overlays.notify(
                 context,
-              ).showSnackBar(SnackBar(content: Text(l10n.snackbarDiffCopied)));
+                NoticeSpec(tone: Tone.success, title: l10n.snackbarDiffCopied),
+              );
             }
           } catch (e) {
             // The button stays enabled while the content area shows the load
             // error, and awaiting the failed future rethrows here, so the
             // failure has to be reported instead of escaping unhandled.
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.messageErrorLoadingDiff(e.toString())),
+              Overlays.notify(
+                context,
+                NoticeSpec(
+                  tone: Tone.danger,
+                  title: l10n.messageErrorLoadingDiff(e.toString()),
                 ),
               );
             }
@@ -238,11 +243,20 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
           leadingIcon: IconRole.arrowSquareOut,
           onPressed: () async {
             // Launching the external tool outlives the route's exit
-            // transition, so the messenger is captured while the dialog
-            // context is still mounted; afterwards the guard would be false
-            // and the failure would go unreported.
-            final messenger = ScaffoldMessenger.of(context);
-            Navigator.of(context).pop();
+            // transition, so the failure has to be reported from a context
+            // that survives the pop; this dialog's own is defunct by then and
+            // the notice would never appear.
+            //
+            // The raw messenger could simply be CAPTURED before the pop.
+            // `Overlays.notify` cannot: it resolves the skin and the host
+            // from the context it is handed, at the moment it is called, so
+            // there is nothing to capture. What outlives the route is the
+            // navigator's own context, which sits below the skin scope the
+            // application installs above it - reported as a contract finding
+            // rather than worked around silently.
+            final navigator = Navigator.of(context);
+            final BuildContext host = navigator.context;
+            navigator.pop();
             // Open in external tool
             try {
               if (widget.staged) {
@@ -255,11 +269,15 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
                     .diffUnstagedFile(widget.filePath!);
               }
             } catch (e) {
-              messenger.showSnackBar(
-                SnackBar(
-                  content: Text(
-                    l10n.snackbarFailedToOpenExternalTool(e.toString()),
-                  ),
+              // A real guard, not a suppression: the navigator survives the
+              // popped route but not the application shutting down under a
+              // launch that is still in flight.
+              if (!host.mounted) return;
+              Overlays.notify(
+                host,
+                NoticeSpec(
+                  tone: Tone.danger,
+                  title: l10n.snackbarFailedToOpenExternalTool(e.toString()),
                 ),
               );
             }

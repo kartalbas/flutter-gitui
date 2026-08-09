@@ -11,8 +11,23 @@ class CheckoutTagDialog extends StatelessWidget {
 
   const CheckoutTagDialog({super.key, required this.tagName});
 
+  /// Asks the user, on the skin's own dialog route.
+  ///
+  /// The frame this dialog states — its title, its mark and its two ways out —
+  /// is the same on every build and every callback only pops, so the whole
+  /// dialog can be stated before it exists. That is what lets it reach
+  /// `Overlays.dialog` instead of Material's `showDialog`: the route becomes
+  /// the skin's, and nothing about the dialog changes.
+  static Future<bool?> show(BuildContext context, {required String tagName}) =>
+      BaseDialog.show<bool>(
+        context: context,
+        dialog: _dialog(context, tagName),
+      );
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => _dialog(context, tagName);
+
+  static BaseDialog _dialog(BuildContext context, String tagName) {
     final loc = AppLocalizations.of(context)!;
     final confirmMessage = loc.checkoutTagConfirm(tagName);
 

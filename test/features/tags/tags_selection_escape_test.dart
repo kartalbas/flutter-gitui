@@ -12,7 +12,19 @@ import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/tag.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import 'package:flutter_gitui/shared/widgets/standard_app_bar.dart';
 import '../../skin/pump_under_skin.dart';
+
+/// The app bar's own overflow anchor, addressed by its place rather than by
+/// its name. 'More actions' used to be unique on this screen only because the
+/// tag rows' menus wore Material's default "Show menu" tooltip; the rows'
+/// `Overlays.anchor`s now carry the app's own overflow name (as the
+/// repository cards already did), so only the scope to [StandardAppBar] says
+/// which overflow the test means.
+final Finder _appBarMoreActions = find.descendant(
+  of: find.byType(StandardAppBar),
+  matching: find.byTooltip('More actions'),
+);
 
 GitTag _tag(String name) => GitTag(
   name: name,
@@ -55,7 +67,7 @@ void main() {
 
     // Enter the selection mode through the overflow menu, the way a user
     // reaches it.
-    await tester.tap(find.byTooltip('More actions'));
+    await tester.tap(_appBarMoreActions);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Select Tags'));
     await tester.pumpAndSettle();
@@ -66,13 +78,13 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.byTooltip('Exit Selection'), findsNothing);
-    expect(find.byTooltip('More actions'), findsOneWidget);
+    expect(_appBarMoreActions, findsOneWidget);
 
     // A second Escape has nothing to dismiss and changes nothing.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
     expect(find.byTooltip('Exit Selection'), findsNothing);
-    expect(find.byTooltip('More actions'), findsOneWidget);
+    expect(_appBarMoreActions, findsOneWidget);
     expect(find.text('v1.0.0'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -81,7 +93,7 @@ void main() {
       'selecting', (tester) async {
     await pumpScreen(tester);
 
-    await tester.tap(find.byTooltip('More actions'));
+    await tester.tap(_appBarMoreActions);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Select Tags'));
     await tester.pumpAndSettle();

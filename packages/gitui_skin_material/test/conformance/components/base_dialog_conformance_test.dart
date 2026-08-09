@@ -58,11 +58,10 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show DialogExtent, IconRole;
 import 'package:gitui_skin_material/gitui_skin_material.dart';
 
 import '../support/conformance_harness.dart';
@@ -179,6 +178,19 @@ double _cornerRadius(ShapeBorder? shape) {
 Finder _oracleActions() => find.byType(OverflowBar);
 
 Finder _baseActions() => find.byType(Wrap);
+
+/// The skin-drawn action carrying [label].
+///
+/// A dialog's actions are `DialogAction` data and the SKIN builds the
+/// buttons - the dismissive one as a `TextButton`, the affirmative one as a
+/// `FilledButton` - so `BaseButton` no longer appears inside an action row
+/// and a finder naming it measures nothing. The box under measurement is
+/// Material's own button, which in this package's own conformance suite is
+/// exactly the right class to name.
+Finder _baseAction(String label) => find.ancestor(
+  of: find.text(label),
+  matching: find.bySubtype<ButtonStyleButton>(),
+);
 
 /// Where the actions sit across the dialog: measured against the dialog
 /// surface, so the answer is the one a user sees rather than the one the
@@ -483,8 +495,8 @@ void main() {
         token: 'BaseDialog.actionsSpacing',
         component: 'BaseDialog',
         measured:
-            tester.getRect(find.widgetWithText(BaseButton, _second)).left -
-            tester.getRect(find.widgetWithText(BaseButton, _first)).right,
+            tester.getRect(_baseAction(_second)).left -
+            tester.getRect(_baseAction(_first)).right,
         expected: expected,
       );
     });
@@ -511,8 +523,8 @@ void main() {
         component: 'BaseDialog',
         measured: _actionsAlignment(
           tester,
-          find.widgetWithText(BaseButton, _first),
-          find.widgetWithText(BaseButton, _second),
+          _baseAction(_first),
+          _baseAction(_second),
         ),
         expected: expected,
         unit: '',
@@ -648,22 +660,63 @@ void main() {
       );
     });
 
-    testWidgets('the caller-declared maxWidth is what the dialog renders at', (
+    testWidgets('the declared extent is what selects the width', (
       WidgetTester tester,
     ) async {
-      // Ties the measured width to the parameter it comes from, so the fixed
-      // width DLG-003/DLG-004 register cannot drift into a different number
-      // while both entries still pass.
+      // This used to tie the width to a `maxWidth` the caller passed in
+      // pixels. The caller no longer names pixels - it names what KIND of
+      // thing the dialog holds, and the skin answers with a width - so the
+      // property worth pinning changed with it: a different extent must reach
+      // a different number. That is what stops DLG-003/DLG-004 drifting into
+      // one value while both entries still pass, and it does it without the
+      // application knowing either number.
       await pumpConformanceDialog(
         tester,
         const BaseDialog(
           title: _title,
-          maxWidth: 420,
+          extent: DialogExtent.alert,
           barrierDismissible: false,
           content: Text(_content),
         ),
       );
-      expect(_surface(tester).width, 420);
+      final double alertWidth = _surface(tester).width;
+
+      await pumpConformanceDialog(
+        tester,
+        const BaseDialog(
+          title: _title,
+          extent: DialogExtent.form,
+          barrierDismissible: false,
+          content: Text(_content),
+        ),
+      );
+
+      expect(alertWidth, isNot(_surface(tester).width));
+
+      // The two numbers themselves are pinned HERE and nowhere else, because
+      // they are this skin's own answer to the extents
+      // (material_chrome.dart, `_MaterialDialogSurface._maxWidthFor`): the
+      // form width is the application's historical default dialog width, the
+      // alert is narrower so a sentence and two answers do not read as an
+      // empty room. The application must not know either number - that is
+      // the inequality above - but the skin's own suite has to, or both
+      // rungs could drift silently as long as they still differ. The 1280 dp
+      // conformance surface leaves the 90% ceiling (1152) above both, so the
+      // extent, not the window, is what is measured.
+      expect(
+        _surface(tester).width,
+        650,
+        reason:
+            "DialogExtent.form must render at the skin's declared 650 dp on "
+            'a window wide enough not to clamp it.',
+      );
+      expect(
+        alertWidth,
+        400,
+        reason:
+            "DialogExtent.alert must render at the skin's declared 400 dp on "
+            'a window wide enough not to clamp it.',
+      );
     });
   });
 

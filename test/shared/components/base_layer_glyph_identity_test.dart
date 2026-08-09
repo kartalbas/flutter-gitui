@@ -66,6 +66,16 @@
 ///    entry's own expand affordance. The entry is `surfaces.disclosure` now
 ///    and the caret is the member's, drawn as one mark it turns rather than as
 ///    two the application swaps. `base_panel.dart` still names the pair.
+///  * `base_dialog.dart` named `x` for the title row's close button and
+///    `warning` as the destructive variant's fallback mark. The dialog
+///    surface is `chrome.dialogSurface` now (#249 P4), and both marks are the
+///    member's: the skin draws the close button from `IconRole.x` with the
+///    SDK's own close tooltip, and answers `Tone.danger`-with-no-mark with the
+///    warning glyph, exactly as the variant switch here used to. `question`
+///    stays: a confirmation's mark IS the variant, so the façade still states
+///    it on the spec. `base_text_field.dart` still names `x` and
+///    `branch_switcher.dart` still names `warning`, so the distinct-mark set
+///    is unchanged.
 ///
 /// The third kind is a construction MOVING OUT of the censused area rather
 /// than converting or dying, recorded for the same reason:
@@ -81,8 +91,9 @@
 ///    all any more; `async_value_builder.dart` still names `file`, and
 ///    `gitDiff` leaves the distinct set with the move.
 ///
-/// The tally therefore reads 72 references: the 81 the conversion measured,
-/// less the seven above, less the diff viewer's two that moved out of scope.
+/// The tally therefore reads 70 references: the 81 the conversion measured,
+/// less the seven recorded up to P3d, less the diff viewer's two that moved
+/// out of scope, less the dialog surface's two that the skin draws now.
 ///
 /// **Two - the skin maps the mark back to the identical glyph.** The second
 /// test resolves every one of the 38 marks through `MaterialGlyphs` and
@@ -161,14 +172,14 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 72 references', () {
+  test('the census still accounts for all 70 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 72-entry diff.
+    // agreeing and this says so in one line instead of a 70-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 72);
+    expect(total, 70);
     // 38 distinct marks: `quick_settings_menu.dart`'s gained `check` was
     // already drawn by `language_selector.dart`, and `gitDiff` left with the
     // diff viewer's toggle when it moved into the changes screen's panel
@@ -564,7 +575,7 @@ const Map<String, String> _kDrawnHeavier = <String, String>{
 const List<String> _kDrawnSolidWhenSelected = <String>['star', 'funnel'];
 
 /// Every mark named in `lib/shared/components/` and `lib/shared/widgets/`, per
-/// file: 74 references over 39 distinct marks in 22 files.
+/// file: 70 references over 38 distinct marks in 22 files.
 ///
 /// Generated from `git show HEAD:<file>` at the commit the conversion started
 /// from, with the documented exceptions recorded at the top of this file - the
@@ -573,11 +584,11 @@ const List<String> _kDrawnSolidWhenSelected = <String>['star', 'funnel'];
 /// MARK and not per weight, because that is the axis the conversion must not
 /// move.
 const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
-  'lib/shared/components/base_dialog.dart': <String, int>{
-    'question': 1,
-    'warning': 1,
-    'x': 1,
-  },
+  // `warning` and `x` are deliberately absent: they left with the dialog
+  // surface when it became `chrome.dialogSurface` - see the fourth recorded
+  // difference of the second kind in the doc above. The confirmation
+  // variant's `question` stays, stated on the spec.
+  'lib/shared/components/base_dialog.dart': <String, int>{'question': 1},
   // base_diff_viewer.dart is deliberately absent: its two marks (`file`,
   // `gitDiff`) moved with the view-mode toggle into the changes screen's
   // diff panel header - see the third recorded difference in the doc above.

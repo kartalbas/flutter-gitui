@@ -9,6 +9,8 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         DisclosureSpec,
         IconRole,
         Inset,
+        NoticeSpec,
+        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -372,10 +374,15 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                     tooltip: l10n.tooltipCopyCommand,
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: log.command));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.commandCopiedToClipboard),
-                          duration: Duration(seconds: 1),
+                      // The clipboard holds the command: something that
+                      // finished, and finished well. How long "brief" lasts
+                      // is the skin's answer, so the one second goes with the
+                      // construction.
+                      Overlays.notify(
+                        context,
+                        NoticeSpec(
+                          tone: Tone.success,
+                          title: l10n.commandCopiedToClipboard,
                         ),
                       );
                     },

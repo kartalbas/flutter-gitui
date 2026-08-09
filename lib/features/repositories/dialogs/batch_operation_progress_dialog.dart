@@ -208,7 +208,12 @@ class _BatchOperationProgressDialogState
       variant: DialogVariant.normal,
       barrierDismissible: !_isRunning,
       onSubmit: _isRunning ? null : () => Navigator.of(context).pop(_results),
-      maxWidth: 600,
+      // `form` is the middle rung, taken here for want of a better one: this
+      // dialog holds no fields and is not something to look through either -
+      // it is a running progress with a per-repository result list. See the
+      // reported DialogExtent gap. This WIDENS the dialog: it was shown at
+      // 600 before the migration (`maxWidth: 600`), and the middle rung is
+      // 650 under Material - a named change, not a preserved width.
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

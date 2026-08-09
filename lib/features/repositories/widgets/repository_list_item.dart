@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
-import '../../../shared/components/base_animated_widgets.dart';
+    show
+        ControlScale,
+        IconRole,
+        MenuAction,
+        MenuEntry,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
 import '../../../core/workspace/repository_status_provider.dart';
@@ -350,6 +355,29 @@ class RepositoryListItem extends ConsumerWidget {
           ],
         ],
       ),
+      // The row's own overflow anchor, through the member that OWNS the
+      // row. It used to be a Material `PopupMenuButton` welded into the
+      // trailing slot beside the icon buttons, tinting its own glyph from
+      // `isSelected` with a hand-picked `onPrimaryContainer` at 60% - the
+      // application answering "what colour is an accessory on a selected
+      // row", which is the question `surfaces.listRow` answers for every
+      // accessory it publishes a foreground for. Handing the entries to the
+      // component instead is the bypass repaired: the skin builds the anchor,
+      // colours it for the tile it sits on, and opens the menu against it.
+      contextMenuItems: <MenuEntry>[
+        if (onOpenInEditor != null)
+          MenuAction(
+            icon: IconRole.code,
+            label: AppLocalizations.of(context)!.openFolderInEditor,
+            onPressed: onOpenInEditor,
+          ),
+        if (status.hasRemote && onEditRemoteUrl != null)
+          MenuAction(
+            icon: IconRole.link,
+            label: AppLocalizations.of(context)!.editRemoteUrl('origin'),
+            onPressed: onEditRemoteUrl,
+          ),
+      ],
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -368,53 +396,6 @@ class RepositoryListItem extends ConsumerWidget {
             onPressed: onRemove,
             tooltip: AppLocalizations.of(context)!.tooltipRemoveFromWorkspace,
           ),
-          // Repository menu - only shown if there are menu items available (on far right)
-          if (onOpenInEditor != null ||
-              (status.hasRemote && onEditRemoteUrl != null))
-            BasePopupMenuButton<String>(
-              icon: Icon(
-                PhosphorIconsRegular.dotsThreeVertical,
-                size: AppTheme.iconM,
-                color: isSelected
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.onPrimaryContainer.withValues(alpha: 0.6)
-                    : null,
-              ),
-              tooltip: AppLocalizations.of(context)!.moreActions,
-              itemBuilder: (context) => [
-                if (onOpenInEditor != null)
-                  PopupMenuItem<String>(
-                    value: 'open_in_editor',
-                    child: MenuItemContent(
-                      icon: IconRole.code,
-                      label: AppLocalizations.of(context)!.openFolderInEditor,
-                      scale: ControlScale.normal,
-                    ),
-                  ),
-                if (status.hasRemote && onEditRemoteUrl != null)
-                  PopupMenuItem<String>(
-                    value: 'edit_remote_url',
-                    child: MenuItemContent(
-                      icon: IconRole.link,
-                      label: AppLocalizations.of(
-                        context,
-                      )!.editRemoteUrl('origin'),
-                      scale: ControlScale.normal,
-                    ),
-                  ),
-              ],
-              onSelected: (value) {
-                switch (value) {
-                  case 'open_in_editor':
-                    onOpenInEditor?.call();
-                    break;
-                  case 'edit_remote_url':
-                    onEditRemoteUrl?.call();
-                    break;
-                }
-              },
-            ),
         ],
       ),
     );

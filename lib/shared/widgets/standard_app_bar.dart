@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
-import '../theme/app_theme.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, MenuAnchorSpec, MenuEntry, Overlays, Proximity;
 import '../../generated/app_localizations.dart';
-import '../components/base_animated_widgets.dart';
 import '../components/base_button.dart';
-import '../components/base_icon.dart';
 import '../components/base_layout.dart';
 
 /// Standardized app bar for all screens
 ///
 /// Enforces consistent action placement and spacing across the application.
 /// All create actions should be in the More menu, not as separate app bar buttons.
+///
+/// **The overflow anchor is the SKIN's** (#249, P4). This bar used to grow a
+/// Material `PopupMenuButton` and take its entries as `PopupMenuEntry` widgets,
+/// which welded one design language's menu *classes* into the signature every
+/// screen in the application fills in — the exact typed hole
+/// [MenuEntry] exists to close. The entries now travel as data and the skin
+/// builds the trigger, measures it and opens the menu against it.
 ///
 /// Example usage:
 /// ```dart
@@ -23,27 +28,17 @@ import '../components/base_layout.dart';
 ///       onRefresh: () => _refreshTags(),
 ///       moreMenuItems: [
 ///         // Create action always first
-///         PopupMenuItem(
-///           child: Row(
-///             children: [
-///               BaseIcon(IconRole.plus),
-///               BaseGap(Proximity.grouped),
-///               Text(l10n.createTag),
-///             ],
-///           ),
-///           onTap: () => _showCreateTagDialog(),
+///         MenuAction(
+///           icon: IconRole.plus,
+///           label: l10n.createTag,
+///           onPressed: () => _showCreateTagDialog(),
 ///         ),
-///         PopupMenuDivider(),
+///         MenuSeparator(),
 ///         // Other actions
-///         PopupMenuItem(
-///           child: Row(
-///             children: [
-///               BaseIcon(IconRole.downloadSimple),
-///               BaseGap(Proximity.grouped),
-///               Text(l10n.fetchFromRemote),
-///             ],
-///           ),
-///           onTap: () => _fetchTags(),
+///         MenuAction(
+///           icon: IconRole.downloadSimple,
+///           label: l10n.fetchFromRemote,
+///           onPressed: () => _fetchTags(),
 ///         ),
 ///       ],
 ///     ),
@@ -55,7 +50,9 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onRefresh;
   final VoidCallback? onSearch;
-  final List<PopupMenuEntry<dynamic>> moreMenuItems;
+
+  /// What the overflow menu offers, as data rather than as widgets.
+  final List<MenuEntry> moreMenuItems;
   final List<Widget>? additionalActions;
 
   const StandardAppBar({
@@ -103,15 +100,17 @@ class StandardAppBar extends ConsumerWidget implements PreferredSizeWidget {
         // Example: View mode toggle, advanced filters button
         ...?additionalActions,
 
-        // More menu (always present) - uses BasePopupMenuButton for centralized animation control
-        BasePopupMenuButton(
-          // The anchor names its meaning like every action beside it; the
-          // `iconSize` below is the button's own box, which the skin does not
-          // own yet, so it stays a number until the popup button migrates.
-          icon: const BaseIcon(IconRole.dotsThreeVertical),
-          iconSize: AppTheme.iconM,
-          tooltip: l10n.moreActions,
-          itemBuilder: (context) => moreMenuItems,
+        // More menu (always present). The trigger, its measured position and
+        // the menu opened against it are one thing with two halves, and both
+        // halves are the skin's through `overlays.menuAnchor` - which is why
+        // the `iconSize` this bar used to state is gone: the button's own box
+        // is the skin's arithmetic now.
+        Overlays.anchor(
+          spec: MenuAnchorSpec(
+            icon: IconRole.dotsThreeVertical,
+            tooltip: l10n.moreActions,
+          ),
+          entries: moreMenuItems,
         ),
 
         // The last command and the bar's trailing edge.

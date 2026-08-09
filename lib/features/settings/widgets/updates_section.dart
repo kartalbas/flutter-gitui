@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        NoticeLifetime,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../generated/app_localizations.dart';
@@ -129,22 +138,28 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
 
     final failureReason = report.failureReason;
     if (failureReason != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          // The check classifies each failure mode as something the user can
-          // act on; the raw exception named an internal host and an OS errno.
-          // The sentence is produced here, in the active locale, from the
-          // reason the check returned (#393).
-          content: Text(failureReason.message(l10n)),
-          // A transient notice's FILL, not a foreground: this is what the bar
-          // is painted in, so it is not a tone. `SnackBar` is the member
-          // `overlays.notice` replaces - it is also where the eight-second
-          // duration below becomes `NoticeLifetime` - and the fill leaves with
-          // it rather than being converted here.
-          backgroundColor: Theme.of(context).colorScheme.error,
-          // The message says what to do next and carries a URL, which four
-          // seconds is not enough to read.
-          duration: const Duration(seconds: 8),
+      // The check classifies each failure mode as something the user can act
+      // on; the raw exception named an internal host and an OS errno. The
+      // sentence is produced here, in the active locale, from the reason the
+      // check returned (#393).
+      //
+      // The fill left with the surface. `NoticeLifetime` has two rungs and
+      // this notice is neither: it went away on its own (so not `persistent`),
+      // but its eight seconds were chosen because four is not enough to read
+      // a URL - the auto-dismissing-but-readable rung does not exist, and
+      // that gap stays reported as a contract finding. Between the two rungs
+      // that DO exist, the vocabulary's own definitions decide: `brief` is
+      // "something the user may miss without harm", and an explanation of why
+      // the check the user just asked for failed is not that - under
+      // Material's two-second brief it vanishes unread. So it states
+      // `persistent`, which keeps the message until the user dismisses it;
+      // what it trades away is the self-dismissal, which is the smaller loss.
+      Overlays.notify(
+        context,
+        NoticeSpec(
+          tone: Tone.danger,
+          title: failureReason.message(l10n),
+          lifetime: NoticeLifetime.persistent,
         ),
       );
       return;
@@ -156,12 +171,19 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     final manualUpdate = report.manualUpdate;
     if (manualUpdate != null) {
       Logger.info('Manual update available: ${manualUpdate.info.version}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            manualUpdate.reason.message(l10n, manualUpdate.info.version),
-          ),
-          duration: const Duration(seconds: 12),
+      // Worth knowing, with nothing wrong: a release exists and this is
+      // where to get it - `info`. Same lifetime adjudication as the failure
+      // notice above: the twelve seconds existed so the user could read a
+      // version and where to get it, which is a message that must be read,
+      // not one that may be missed without harm - so it takes `persistent`
+      // rather than vanishing at the brief rung's two seconds. The missing
+      // middle rung stays a reported contract finding.
+      Overlays.notify(
+        context,
+        NoticeSpec(
+          tone: Tone.info,
+          title: manualUpdate.reason.message(l10n, manualUpdate.info.version),
+          lifetime: NoticeLifetime.persistent,
         ),
       );
       return;
@@ -179,14 +201,17 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       );
     } else {
       Logger.info('No updates found');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          // The version is read in initState and this runs on a button the
-          // user has to reach first, so the placeholder is a formality; an
-          // empty version still reads better here than the word "Loading".
-          content: Text(l10n.upToDateMessage(_currentVersion ?? '')),
-          // As above: the bar's FILL, which leaves with `overlays.notice`.
-          backgroundColor: Theme.of(context).colorScheme.primary,
+      // The version is read in initState and this runs on a button the user
+      // has to reach first, so the placeholder is a formality; an empty
+      // version still reads better here than the word "Loading".
+      //
+      // The fill left with the surface. The check ran and found nothing to
+      // do, which is `info`: worth knowing, and nothing is wrong.
+      Overlays.notify(
+        context,
+        NoticeSpec(
+          tone: Tone.info,
+          title: l10n.upToDateMessage(_currentVersion ?? ''),
         ),
       );
     }

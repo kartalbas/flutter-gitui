@@ -84,7 +84,7 @@ void main() {
 
     // A whitespace-only title is no better, and the button refuses too.
     await tester.enterText(_titleField, '   ');
-    await tester.tap(find.widgetWithText(BaseButton, 'Create PR'));
+    await tester.tap(find.text('Create PR'));
     await tester.pumpAndSettle();
     expect(find.byType(CreatePullRequestDialog), findsOneWidget);
     expect(find.text('Please enter a title'), findsOneWidget);

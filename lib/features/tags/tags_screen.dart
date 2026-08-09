@@ -244,22 +244,18 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   moreMenuItems: [
                     // Select Tags action (only show if tags exist)
                     if (tagsAsync.value?.isNotEmpty == true)
-                      PopupMenuItem(
-                        onTap: _enterSelectionMode,
-                        child: MenuItemContent(
-                          icon: IconRole.checkSquare,
-                          label: AppLocalizations.of(context)!.selectTags,
-                        ),
+                      MenuAction(
+                        icon: IconRole.checkSquare,
+                        label: AppLocalizations.of(context)!.selectTags,
+                        onPressed: _enterSelectionMode,
                       ),
                     // Fetch Tags action
                     if (tagsAsync.value?.isNotEmpty == true)
-                      const PopupMenuDivider(),
-                    PopupMenuItem(
-                      child: MenuItemContent(
-                        icon: IconRole.downloadSimple,
-                        label: AppLocalizations.of(context)!.fetchTags,
-                      ),
-                      onTap: () => _fetchTags(context),
+                      const MenuSeparator(),
+                    MenuAction(
+                      icon: IconRole.downloadSimple,
+                      label: AppLocalizations.of(context)!.fetchTags,
+                      onPressed: () => _fetchTags(context),
                     ),
                   ],
                 ),

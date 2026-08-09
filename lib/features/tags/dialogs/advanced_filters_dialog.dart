@@ -70,7 +70,8 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
       title: loc.advancedFiltersDialog,
       icon: IconRole.funnel,
       variant: DialogVariant.normal,
-      maxWidth: 500,
+      // Filter fields the user fills in, so the `form` extent; the 500 that
+      // stood here was this dialog's own guess at how wide a form is.
       onSubmit: () => Navigator.of(context).pop({
         'dateFilter': _dateFilter,
         'customDateStart': _customDateStart,

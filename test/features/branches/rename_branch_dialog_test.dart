@@ -76,7 +76,7 @@ void main() {
     expect(fieldNode.hasPrimaryFocus, isTrue);
 
     // The primary button must refuse too, not only the Enter path.
-    await tester.tap(find.widgetWithText(BaseButton, 'Rename'));
+    await tester.tap(find.text('Rename'));
     await tester.pumpAndSettle();
     expect(find.byType(RenameBranchDialog), findsOneWidget);
     expect(closed, isFalse);

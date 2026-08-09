@@ -444,19 +444,19 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           WindowsFilenameValidator.extractFilenameFromError(errorMessage) ??
           filePath;
 
-      await showDialog(
+      await BaseDialog.show<void>(
         context: context,
-        builder: (dialogContext) => BaseDialog(
+        dialog: BaseDialog(
           icon: IconRole.warningCircle,
           title: AppLocalizations.of(
             context,
           )!.dialogTitleWindowsReservedFilename,
-          onSubmit: () => Navigator.of(dialogContext).pop(),
+          onSubmit: () => Navigator.of(context).pop(),
           content: SingleChildScrollView(
             child: Text(
               WindowsFilenameValidator.getErrorMessage(
                 problematicFile,
-                dialogContext,
+                context,
               ),
             ),
           ),
@@ -466,7 +466,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
             DialogAction(
               label: AppLocalizations.of(context)!.ok,
               role: DialogActionRole.affirmative,
-              onPressed: () => Navigator.of(dialogContext).pop(),
+              onPressed: () => Navigator.of(context).pop(),
             ),
           ],
         ),
@@ -483,9 +483,9 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
   Future<void> _confirmStageAll(BuildContext context, WidgetRef ref) async {
     final unstagedFiles = ref.read(unstagedFilesProvider);
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await BaseDialog.show<bool>(
       context: context,
-      builder: (context) => BaseDialog(
+      dialog: BaseDialog(
         icon: IconRole.plus,
         title: AppLocalizations.of(context)!.stageAllChangesQuestion,
         variant: DialogVariant.confirmation,
@@ -525,9 +525,9 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
   Future<void> _confirmUnstageAll(BuildContext context, WidgetRef ref) async {
     final stagedFiles = ref.read(stagedFilesProvider);
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await BaseDialog.show<bool>(
       context: context,
-      builder: (context) => BaseDialog(
+      dialog: BaseDialog(
         icon: IconRole.minus,
         title: AppLocalizations.of(context)!.unstageAllChangesQuestion,
         variant: DialogVariant.confirmation,

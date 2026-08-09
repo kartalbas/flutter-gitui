@@ -62,7 +62,7 @@ void main() {
 
     // A whitespace-only name is no better, and the button refuses too.
     await tester.enterText(_nameField, '   ');
-    await tester.tap(find.widgetWithText(BaseButton, 'Create'));
+    await tester.tap(find.text('Create'));
     await tester.pumpAndSettle();
     expect(find.byType(ProjectDialog), findsOneWidget);
     expect(find.text('Please enter a project name'), findsOneWidget);

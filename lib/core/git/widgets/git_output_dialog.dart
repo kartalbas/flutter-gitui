@@ -4,7 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_icon.dart';
@@ -135,10 +143,14 @@ ${widget.result.fullOutput}
 
     Clipboard.setData(ClipboardData(text: text));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.outputCopiedToClipboard),
-        duration: const Duration(seconds: 2),
+    // The clipboard now holds what the dialog showed: something that finished
+    // and finished well, which is what the notice says. Its fill, its
+    // placement and how long two seconds of "brief" lasts are the skin's.
+    Overlays.notify(
+      context,
+      NoticeSpec(
+        tone: Tone.success,
+        title: AppLocalizations.of(context)!.outputCopiedToClipboard,
       ),
     );
   }

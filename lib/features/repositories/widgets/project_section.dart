@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuActionRole,
+        MenuAnchorSpec,
+        MenuEntry,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -10,7 +19,6 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../core/workspace/default_workspace_text.dart';
 import '../../../core/workspace/models/workspace.dart';
 import '../../../shared/components/base_layout.dart';
@@ -185,54 +193,35 @@ class ProjectSection extends ConsumerWidget {
                   // Actions (only for projects, not unassigned)
                   if (!isUnassigned) ...[
                     const BaseGap(Proximity.related),
-                    BasePopupMenuButton<String>(
-                      // The overflow mark acts on this workspace, so it wears
-                      // the workspace's own place in the skin's series like
-                      // everything else in the header.
-                      icon: BaseIcon(
-                        IconRole.dotsThreeVertical,
+                    // The anchored pair is the skin's: it builds the
+                    // trigger, measures it and opens the menu against it.
+                    // The overflow mark acts on this workspace, so it wears
+                    // the workspace's own place in the skin's series like
+                    // everything else in the header - which `MenuAnchorSpec`
+                    // carries as a tone, and the anchor now also carries the
+                    // name every mark-only control owes; the hand-built one
+                    // had none at all.
+                    Overlays.anchor(
+                      spec: MenuAnchorSpec(
+                        icon: IconRole.dotsThreeVertical,
+                        tooltip: AppLocalizations.of(context)!.moreActions,
                         tone: Tone.series(project!.colorIndex),
                       ),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 'edit',
-                          child: MenuItemContent(
-                            icon: IconRole.pencil,
-                            label: AppLocalizations.of(context)!.editProject,
-                            scale: ControlScale.compact,
-                          ),
+                      entries: <MenuEntry>[
+                        MenuAction(
+                          icon: IconRole.pencil,
+                          label: AppLocalizations.of(context)!.editProject,
+                          onPressed: onEdit,
                         ),
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: MenuItemContent(
-                            icon: IconRole.trash,
-                            label: AppLocalizations.of(context)!.deleteProject,
-                            scale: ControlScale.compact,
-                            // One word for the whole entry. The `labelColor:`
-                            // that used to sit here spelled out Material's
-                            // error role beside this same tone, because the
-                            // tone reached the MARK alone and dropping the
-                            // second half would have left a destructive entry
-                            // with a red glyph and black words.
-                            // `MenuItemContent` now answers `Tone.danger` with
-                            // that same error role for its words too
-                            // (lib/shared/components/base_menu_item.dart) - the
-                            // identical Color the deleted line passed, so the
-                            // entry renders exactly as before.
-                            tone: Tone.danger,
-                          ),
+                        // Its ROLE says it destroys something; how a
+                        // destructive row reads is the skin's answer.
+                        MenuAction(
+                          icon: IconRole.trash,
+                          label: AppLocalizations.of(context)!.deleteProject,
+                          role: MenuActionRole.destructive,
+                          onPressed: onDelete,
                         ),
                       ],
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'edit':
-                            onEdit?.call();
-                            break;
-                          case 'delete':
-                            onDelete?.call();
-                            break;
-                        }
-                      },
                     ),
                   ],
                 ],

@@ -66,7 +66,7 @@ void main() {
 
     // A name with a space is invalid in git, and the button refuses too.
     await tester.enterText(find.byType(TextField), 'up stream');
-    await tester.tap(find.widgetWithText(BaseButton, 'Rename'));
+    await tester.tap(find.text('Rename'));
     await tester.pumpAndSettle();
     expect(find.byType(RenameRemoteDialog), findsOneWidget);
     expect(find.text('Name cannot contain spaces'), findsOneWidget);

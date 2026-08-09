@@ -8,8 +8,6 @@ import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
-import '../../../shared/components/base_menu_item.dart';
-import '../../../shared/components/base_animated_widgets.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../core/git/destructive_action.dart';
@@ -166,59 +164,52 @@ class TagListTile extends ConsumerWidget {
                       ),
                   ],
                 ),
-                trailing: BasePopupMenuButton<String>(
-                  icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
-                  onSelected: (value) => _handleMenuAction(context, ref, value),
-                  itemBuilder: (context) => <PopupMenuEntry<String>>[
-                    PopupMenuItem(
-                      value: 'checkout',
-                      child: MenuItemContent(
-                        icon: IconRole.gitBranch,
-                        label: AppLocalizations.of(context)!.checkout,
-                      ),
+                // The trigger, its position and the menu opened against it
+                // are the skin's through `overlays.menuAnchor`. The tile used
+                // to build Material's `PopupMenuButton`, render each row as a
+                // `PopupMenuItem` and then translate the chosen string back
+                // into the callback it came from; each entry carries its own
+                // action now, and the anchor carries the name every mark-only
+                // control owes - the hand-built one had none.
+                trailing: Overlays.anchor(
+                  spec: MenuAnchorSpec(
+                    icon: IconRole.dotsThreeVertical,
+                    tooltip: AppLocalizations.of(context)!.moreActions,
+                  ),
+                  entries: <MenuEntry>[
+                    MenuAction(
+                      icon: IconRole.gitBranch,
+                      label: AppLocalizations.of(context)!.checkout,
+                      onPressed: () => _checkoutTag(context, ref),
                     ),
-                    PopupMenuItem(
-                      value: 'createBranch',
-                      child: MenuItemContent(
-                        icon: IconRole.gitBranch,
-                        label: AppLocalizations.of(context)!.createBranch,
-                      ),
+                    MenuAction(
+                      icon: IconRole.gitBranch,
+                      label: AppLocalizations.of(context)!.createBranch,
+                      onPressed: () => _createBranchFromTag(context, ref),
                     ),
-                    PopupMenuItem(
-                      value: 'viewInHistory',
-                      child: MenuItemContent(
-                        icon: IconRole.clockCounterClockwise,
-                        label: AppLocalizations.of(
-                          context,
-                        )!.viewCommitInHistory,
-                      ),
+                    MenuAction(
+                      icon: IconRole.clockCounterClockwise,
+                      label: AppLocalizations.of(context)!.viewCommitInHistory,
+                      onPressed: () => _viewCommitInHistory(context, ref),
                     ),
-                    // Only show push option if tag is unpushed and we have remotes
+                    // Only show push option if tag is unpushed and we have
+                    // remotes
                     if (isLocalOnly && hasRemotes) ...[
-                      PopupMenuItem(
-                        value: 'push',
-                        child: MenuItemContent(
-                          icon: IconRole.upload,
-                          label: AppLocalizations.of(context)!.push,
-                        ),
+                      MenuAction(
+                        icon: IconRole.upload,
+                        label: AppLocalizations.of(context)!.push,
+                        onPressed: () => _pushTag(context, ref),
                       ),
-                      const PopupMenuDivider(),
+                      const MenuSeparator(),
                     ],
-                    if (!isLocalOnly || !hasRemotes) const PopupMenuDivider(),
-                    PopupMenuItem(
-                      value: 'delete',
-                      // The meaning is stated once now. `MenuItemContent.tone`
-                      // wore its meaning on the MARK only, so the label had to
-                      // be re-said as a raw `Color` to keep the two halves of
-                      // one entry agreeing; the tone reaches the words too,
-                      // and the second statement goes. Pixel-identical by
-                      // construction: the component answers `Tone.danger` with
-                      // the same scheme role this line spelled out.
-                      child: MenuItemContent(
-                        icon: IconRole.trash,
-                        label: AppLocalizations.of(context)!.delete,
-                        tone: Tone.danger,
-                      ),
+                    if (!isLocalOnly || !hasRemotes) const MenuSeparator(),
+                    // It says what it MEANS - deleting a tag destroys it -
+                    // and the skin decides how a destructive row reads.
+                    MenuAction(
+                      icon: IconRole.trash,
+                      label: AppLocalizations.of(context)!.delete,
+                      role: MenuActionRole.destructive,
+                      onPressed: () => _confirmDeleteTag(context, ref),
                     ),
                   ],
                 ),
@@ -400,31 +391,8 @@ class TagListTile extends ConsumerWidget {
     );
   }
 
-  void _handleMenuAction(BuildContext context, WidgetRef ref, String action) {
-    switch (action) {
-      case 'checkout':
-        _checkoutTag(context, ref);
-        break;
-      case 'createBranch':
-        _createBranchFromTag(context, ref);
-        break;
-      case 'viewInHistory':
-        _viewCommitInHistory(context, ref);
-        break;
-      case 'push':
-        _pushTag(context, ref);
-        break;
-      case 'delete':
-        _confirmDeleteTag(context, ref);
-        break;
-    }
-  }
-
   Future<void> _checkoutTag(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => CheckoutTagDialog(tagName: tag.name),
-    );
+    final confirmed = await CheckoutTagDialog.show(context, tagName: tag.name);
 
     if (confirmed == true && context.mounted) {
       try {
@@ -433,23 +401,20 @@ class TagListTile extends ConsumerWidget {
       } catch (e) {
         if (!context.mounted) return;
         final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarFailedToCheckoutTag(e.toString())),
-            // The notice's own FILL, not a foreground: the tone mapping is
-            // about what a mark or a word MEANS, and this paints the pill the
-            // words sit on. It waits for `overlays.notify`, because a tone may
-            // only be resolved inside the notice host's `build` - a call site
-            // has no host, and the application is deliberately given no way to
-            // turn a `Tone` into a `Color` for its own decoration.
-            //
-            // Underneath the read sits the real defect: all five notices in
-            // this file are `NotificationService.showError` and `.showSuccess`
-            // written out by hand. Adopting the service is what deletes them,
-            // and it is a behaviour change (the error service never
-            // auto-dismisses and adds a copy affordance) rather than a rename,
-            // so it is reported instead of folded in here.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        // The fill left with the surface: the site states what happened and
+        // the skin resolves the tone inside its own notice host.
+        //
+        // What did NOT change is the mechanism these five notices use. They
+        // are `NotificationService.showError` and `.showSuccess` written out
+        // by hand, so the failures auto-dismiss, carry no mark and offer no
+        // copy affordance where the service's errors do all three. That
+        // disagreement is #418, and adopting the service here would be that
+        // redesign rather than this conversion.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: l10n.snackbarFailedToCheckoutTag(e.toString()),
           ),
         );
       }
@@ -473,23 +438,22 @@ class TagListTile extends ConsumerWidget {
             .createBranch(branchName, startPoint: tag.name, checkout: checkout);
 
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarBranchCreatedSuccess(branchName)),
-            // The same fill as the checkout failure above, one meaning over:
-            // a notice that succeeded rather than one that failed, waiting for
-            // the same member.
-            backgroundColor: Theme.of(context).colorScheme.primary,
+        // One meaning over from the checkout failure above: a branch that
+        // exists now, which is what `success` says.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.success,
+            title: l10n.snackbarBranchCreatedSuccess(branchName),
           ),
         );
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
-            // The same fill as the checkout failure above, waiting for the
-            // same member.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: l10n.snackbarFailedToCreateBranch(e.toString()),
           ),
         );
       }
@@ -532,12 +496,11 @@ class TagListTile extends ConsumerWidget {
         } catch (e) {
           if (context.mounted) {
             final l10n = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.snackbarFailedToPushTag(e.toString())),
-                // The same fill as the checkout failure above, waiting for the
-                // same member.
-                backgroundColor: Theme.of(context).colorScheme.error,
+            Overlays.notify(
+              context,
+              NoticeSpec(
+                tone: Tone.danger,
+                title: l10n.snackbarFailedToPushTag(e.toString()),
               ),
             );
           }
@@ -656,12 +619,11 @@ class TagListTile extends ConsumerWidget {
         progress.completeOperation();
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.snackbarFailedToDeleteTag(e.toString())),
-              // The same fill as the checkout failure above, waiting for the
-              // same member.
-              backgroundColor: Theme.of(context).colorScheme.error,
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.danger,
+              title: l10n.snackbarFailedToDeleteTag(e.toString()),
             ),
           );
         }

@@ -104,7 +104,7 @@ void main() {
     expect(find.text('Delete remote branch'), findsOneWidget);
 
     // Untyped: the confirm button is disabled, a tap does nothing.
-    await tester.tap(find.widgetWithText(BaseButton, 'Delete'));
+    await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     expect(find.text('Delete remote branch'), findsOneWidget);
     expect(result, isNull);
@@ -113,7 +113,7 @@ void main() {
     // match is too.
     await tester.enterText(find.byType(TextField), 'Origin/main');
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(BaseButton, 'Delete'));
+    await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     expect(find.text('Delete remote branch'), findsOneWidget);
     expect(result, isNull);
@@ -121,7 +121,7 @@ void main() {
     // The exact token enables the button and the tap confirms.
     await tester.enterText(find.byType(TextField), _token);
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(BaseButton, 'Delete'));
+    await tester.tap(find.text('Delete'));
     await tester.pumpAndSettle();
     expect(find.text('Delete remote branch'), findsNothing);
     expect(result, isTrue);

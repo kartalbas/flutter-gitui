@@ -114,6 +114,12 @@ Future<void> _openDialog(
 Finder get _nameField => find.byType(BaseTextField).first;
 Finder get _messageField => find.byType(BaseTextField).last;
 
+/// The dialog's Create Tag ACTION. The dialog's title says the same two
+/// words, so the bare label is ambiguous; the action row is rendered after
+/// the title in the surface's document order, so the last match is the
+/// button the skin drew for the affirmative `DialogAction`.
+Finder get _createTagAction => find.text('Create Tag').last;
+
 void main() {
   testWidgets('the tag name field autofocuses and Esc cancels', (tester) async {
     final gitService = _RecordingGitService();
@@ -159,7 +165,7 @@ void main() {
     expect(closed, isFalse);
 
     // The Create Tag button must refuse too.
-    await tester.tap(find.widgetWithText(BaseButton, 'Create Tag'));
+    await tester.tap(_createTagAction);
     await tester.pumpAndSettle();
     expect(find.byType(CreateTagDialog), findsOneWidget);
     expect(closed, isFalse);
@@ -174,7 +180,7 @@ void main() {
 
     await tester.enterText(_nameField, 'v 1.0');
     await tester.enterText(_messageField, 'Release notes');
-    await tester.tap(find.widgetWithText(BaseButton, 'Create Tag'));
+    await tester.tap(_createTagAction);
     await tester.pumpAndSettle();
 
     expect(find.byType(CreateTagDialog), findsOneWidget);
@@ -291,7 +297,7 @@ void main() {
     expect(find.text('First release'), findsOneWidget);
 
     await tester.enterText(_nameField, 'v1.0.1');
-    await tester.tap(find.widgetWithText(BaseButton, 'Create Tag'));
+    await tester.tap(_createTagAction);
     await tester.pumpAndSettle();
 
     expect(find.byType(CreateTagDialog), findsNothing);

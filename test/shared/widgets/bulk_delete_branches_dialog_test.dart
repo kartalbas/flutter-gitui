@@ -92,6 +92,12 @@ List<DialogAction> _declaredActions(WidgetTester tester) =>
     tester.widget<BaseDialog>(find.byType(BaseDialog)).actions ??
     const <DialogAction>[];
 
+/// The one destructive action of the dialog (the group below pins that there
+/// is exactly one).
+DialogAction _destructiveAction(WidgetTester tester) => _declaredActions(
+  tester,
+).singleWhere((action) => action.role == DialogActionRole.destructive);
+
 /// Unticks the row of [branchName] through its checkbox, the way the user
 /// does.
 Future<void> _untick(WidgetTester tester, String branchName) async {
@@ -102,7 +108,11 @@ Future<void> _untick(WidgetTester tester, String branchName) async {
 }
 
 Future<void> _tapAction(WidgetTester tester, String label) async {
-  await tester.tap(find.widgetWithText(BaseButton, label));
+  // `.last`, because an action's label may also stand inside the dialog's
+  // content: the force opt-in's own row says 'Force Delete' just like the
+  // relabelled action does. The action row is rendered after the content in
+  // the surface's document order, so the last match is the button.
+  await tester.tap(find.text(label).last);
   await tester.pumpAndSettle();
 }
 
@@ -215,10 +225,7 @@ void main() {
       ).firstWhere((action) => action.role == DialogActionRole.destructive);
       expect(delete.isEnabled, isFalse);
 
-      await tester.tap(
-        find.widgetWithText(BaseButton, 'Delete'),
-        warnIfMissed: false,
-      );
+      await tester.tap(find.text('Delete'), warnIfMissed: false);
       await tester.pumpAndSettle();
       expect(find.byType(BulkDeleteBranchesDialog), findsOneWidget);
       expect(session.hasClosed, isFalse);
@@ -254,9 +261,12 @@ void main() {
       await tester.pump();
 
       // The label states which git command is about to run, so force is never
-      // a hidden mode.
-      expect(find.widgetWithText(BaseButton, 'Force Delete'), findsOneWidget);
-      expect(find.widgetWithText(BaseButton, 'Delete'), findsNothing);
+      // a hidden mode. It is read off the declared action - the skin renders
+      // a DialogAction's label verbatim - because the force opt-in's own row
+      // also says 'Force Delete', so counting bare text cannot single the
+      // action out.
+      expect(_destructiveAction(tester).label, 'Force Delete');
+      expect(find.text('Delete'), findsNothing);
 
       await _tapAction(tester, 'Force Delete');
       final result = session.result as BulkDeleteResult;
@@ -325,7 +335,9 @@ void main() {
 
       await tester.tap(find.byKey(BulkDeleteBranchesDialog.forceCheckboxKey));
       await tester.pump();
-      expect(find.widgetWithText(BaseButton, 'Force Delete'), findsOneWidget);
+      // Declared-action read for the same reason as above: the opt-in row
+      // says the same two words, so bare text cannot single the action out.
+      expect(_destructiveAction(tester).label, 'Force Delete');
 
       // Unticking the only unmerged branch takes the opt-in off screen. It
       // must not come back ticked when another unmerged branch is selected
@@ -333,7 +345,7 @@ void main() {
       await _untick(tester, 'spike');
       await _untick(tester, 'spike');
 
-      expect(find.widgetWithText(BaseButton, 'Delete'), findsOneWidget);
+      expect(find.text('Delete'), findsOneWidget);
       await _tapAction(tester, 'Delete');
       expect((session.result as BulkDeleteResult).force, isFalse);
     });

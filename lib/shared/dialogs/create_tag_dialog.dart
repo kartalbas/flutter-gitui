@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole;
+    show
+        ControlScale,
+        IconRole,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -376,15 +383,11 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     } catch (e) {
       if (mounted) {
         setState(() => _isCreating = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.tagCreatedError(e.toString()),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(context)!.tagCreatedError(e.toString()),
           ),
         );
       }

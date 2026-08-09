@@ -74,7 +74,7 @@ void main() {
 
     // The Commit button must refuse: the dialog stays open, the field shows
     // its message, and no commit was attempted.
-    await tester.tap(find.widgetWithText(BaseButton, 'Commit'));
+    await tester.tap(find.text('Commit'));
     await tester.pumpAndSettle();
     expect(find.byType(CommitDialog), findsOneWidget);
     expect(find.text('Commit message is required'), findsOneWidget);
@@ -96,7 +96,7 @@ void main() {
     await _openDialog(tester, committed);
 
     await tester.enterText(find.byType(TextField), '   ');
-    await tester.tap(find.widgetWithText(BaseButton, 'Commit'));
+    await tester.tap(find.text('Commit'));
     await tester.pumpAndSettle();
 
     expect(find.byType(CommitDialog), findsOneWidget);
@@ -109,7 +109,7 @@ void main() {
     await _openDialog(tester, committed);
 
     await tester.enterText(find.byType(TextField), 'fix: proper message');
-    await tester.tap(find.widgetWithText(BaseButton, 'Commit'));
+    await tester.tap(find.text('Commit'));
     await tester.pumpAndSettle();
 
     expect(find.byType(CommitDialog), findsNothing);

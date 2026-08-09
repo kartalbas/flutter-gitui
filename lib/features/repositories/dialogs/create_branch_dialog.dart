@@ -182,7 +182,8 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
       title: l10n.createBranchDialogTitle,
       icon: IconRole.gitBranch,
       variant: DialogVariant.normal,
-      maxWidth: 600,
+      // A name, a prefix and a start point: fields the user fills in, so the
+      // `form` extent, and the 600 is the skin's number now.
       onSubmit: _createBranch,
       content: Column(
         mainAxisSize: MainAxisSize.min,

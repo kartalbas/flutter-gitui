@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, NoticeSpec, Overlays, TextRole, Tone;
 import 'package:file_picker/file_picker.dart';
 import '../../generated/app_localizations.dart';
 
@@ -312,8 +313,14 @@ class GitCommands {
         if (l10n == null) return;
 
         if (kIsWeb) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.folderSelectionNotAvailableWeb)),
+          // The command cannot be carried out at all here, which is the same
+          // meaning every other failure notice in this file states.
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.danger,
+              title: l10n.folderSelectionNotAvailableWeb,
+            ),
           );
           return;
         }
@@ -331,8 +338,12 @@ class GitCommands {
             final l10n = AppLocalizations.of(context);
             if (l10n == null) return;
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.notValidGitRepository(result))),
+            Overlays.notify(
+              context,
+              NoticeSpec(
+                tone: Tone.danger,
+                title: l10n.notValidGitRepository(result),
+              ),
             );
           }
         }
@@ -388,18 +399,14 @@ class GitCommands {
             if (context.mounted) {
               final l10n = AppLocalizations.of(context);
               if (l10n != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.failedToAmendCommit(e.toString())),
-                    // The notice's own FILL, not a foreground. It waits for
-                    // `overlays.notify` for the reason that member's Material
-                    // implementation states itself: a tone may only be
-                    // resolved inside the notice host's `build`, so its
-                    // `SnackBar` shell is transparent and the tone-coloured
-                    // pill is drawn from inside. A call site has no host, and
-                    // the application is given no way to turn a `Tone` into a
-                    // `Color` for its own decoration.
-                    backgroundColor: Theme.of(context).colorScheme.error,
+                // The fill this used to name is the member's answer now: the
+                // site says the amend failed, and the skin resolves the tone
+                // inside its own notice host, where a tone is legal.
+                Overlays.notify(
+                  context,
+                  NoticeSpec(
+                    tone: Tone.danger,
+                    title: l10n.failedToAmendCommit(e.toString()),
                   ),
                 );
               }
@@ -881,14 +888,13 @@ class GitCommands {
           if (context.mounted) {
             final l10n = AppLocalizations.of(context);
             if (l10n != null) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    l10n.failedToCleanWorkingDirectory(e.toString()),
-                  ),
-                  // The same fill as the amend failure above, waiting for the
-                  // same member: `overlays.notify`.
-                  backgroundColor: Theme.of(context).colorScheme.error,
+              // The same meaning as the amend failure above, said the same
+              // way.
+              Overlays.notify(
+                context,
+                NoticeSpec(
+                  tone: Tone.danger,
+                  title: l10n.failedToCleanWorkingDirectory(e.toString()),
                 ),
               );
             }

@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show SkinMenuAnchor;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,7 +31,6 @@ import 'package:flutter_gitui/core/diff/models/diff_tool.dart';
 import 'package:flutter_gitui/features/settings/settings_screen.dart';
 import 'package:flutter_gitui/features/settings/widgets/settings_section.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
-import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import '../../skin/pump_under_skin.dart';
 
@@ -110,6 +110,12 @@ final AppConfig _configured = AppConfig.defaults.copyWith(
 /// read from the nearest recognisable ancestor of the focused context. A
 /// section header is the fallback: it is the only focusable part of a
 /// [SettingsSection] that is not itself a button, dropdown or switch.
+///
+/// The overflow menu's trigger is the one control here the application does
+/// not build: the SKIN draws it behind `Overlays.anchor`, so no application
+/// widget class stands above its focus node any more. Its name travels as
+/// data on the spec instead, and [SkinMenuAnchor] - the identity the contract
+/// plants around every anchor it mounts - is where that data is read back.
 String _focusedControl() {
   final context = FocusManager.instance.primaryFocus?.context;
   if (context == null) return 'nothing';
@@ -125,8 +131,8 @@ String _focusedControl() {
       name = 'button:${widget.label}';
     } else if (widget is BaseIconButton) {
       name = 'iconButton:${widget.tooltip}';
-    } else if (widget is BasePopupMenuButton) {
-      name = 'menu:${widget.tooltip}';
+    } else if (widget is SkinMenuAnchor) {
+      name = 'menu:${widget.spec.tooltip}';
     } else if (widget is SettingsSection) {
       name = 'sectionHeader:${widget.title}';
     }

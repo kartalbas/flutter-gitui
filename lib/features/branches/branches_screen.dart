@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset;
+    show ControlScale, IconRole, Inset, NoticeSpec, Overlays, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/components/base_icon.dart';
@@ -147,12 +147,10 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
         onRefresh: () => ref.read(gitActionsProvider).refreshBranches(),
         moreMenuItems: [
           // Create action always first
-          PopupMenuItem(
-            child: MenuItemContent(
-              icon: IconRole.plus,
-              label: l10n.createBranch,
-            ),
-            onTap: () => _showCreateBranchDialog(context),
+          MenuAction(
+            icon: IconRole.plus,
+            label: l10n.createBranch,
+            onPressed: () => _showCreateBranchDialog(context),
           ),
         ],
       ),
@@ -306,25 +304,15 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
       } catch (e) {
         if (context.mounted) {
           final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.snackbarFailedToCreateBranch(e.toString())),
-              // The notice's own FILL, not a foreground, so the tone mapping
-              // has nothing to say about it. It waits for `overlays.notify`
-              // for the reason that member's Material implementation states:
-              // a tone may only be resolved inside the notice host's `build`,
-              // so its `SnackBar` shell is transparent and the tone-coloured
-              // pill is drawn from inside. A call site has no host, and the
-              // application is deliberately given no way to turn a `Tone` into
-              // a `Color` for its own decoration.
-              //
-              // The hand-rolled notice is itself the defect underneath: this
-              // is `NotificationService.showError` written out by hand, and
-              // adopting the service is what deletes the read here. That is a
-              // behaviour change (the service never auto-dismisses and adds a
-              // copy affordance), not a rename, so it is reported rather than
-              // folded into a colour conversion.
-              backgroundColor: Theme.of(context).colorScheme.error,
+          // The fill this used to name is the member's answer now. The notice
+          // stays brief and without the service's copy affordance: adopting
+          // `NotificationService.showError` here is the second half of #418,
+          // and it would be a behaviour change this slice did not measure.
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.danger,
+              title: l10n.snackbarFailedToCreateBranch(e.toString()),
             ),
           );
         }

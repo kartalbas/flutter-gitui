@@ -50,7 +50,8 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
       title: l10n.createStashDialog,
       icon: IconRole.floppyDisk,
       variant: DialogVariant.normal,
-      maxWidth: 600,
+      // A message and two switches: fields the user fills in, so the `form`
+      // extent, and how wide that is belongs to the skin.
       // The message field is multiline; Enter inside it writes a newline,
       // Enter anywhere else stashes.
       onSubmit: _selectedFiles.isEmpty && !_stashAllFiles

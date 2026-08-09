@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        NoticeLifetime,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -108,31 +116,24 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
     } catch (e) {
       if (mounted) {
         setState(() => _isCommitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                // The mark and its `onError` stay together with the fill
-                // below. `onError` is the paired foreground of a surface that
-                // is still a hand-painted `Color`, and `Tone.onAccent` is the
-                // ACCENT's pairing - saying it here would paint an
-                // on-primary foreground over an error fill. Both halves leave
-                // together when the notice becomes a skin member.
-                Icon(
-                  PhosphorIconsRegular.warningCircle,
-                  color: Theme.of(context).colorScheme.onError,
-                ),
-                const BaseGap(Proximity.related),
-                Expanded(
-                  child: BaseLabel(
-                    AppLocalizations.of(context)!.commitFailed(e.toString()),
-                    role: TextRole.control,
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 5),
+        // The mark, its paired foreground and the fill left together, exactly
+        // as this site said they would: the notice states that the commit
+        // failed and carries a leading mark, and the skin pairs the two.
+        //
+        // `persistent`, where this site used to hand-roll five seconds: the
+        // application's own convention for a danger explanation
+        // (NotificationService.showError) has always been persistent-with-
+        // dismiss, because why a commit failed is a message that must be
+        // read, not one the user may miss without harm - and the brief rung
+        // Material resolves to two seconds. The five seconds were this raw
+        // site's drift from that convention, not a meaning to preserve.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(context)!.commitFailed(e.toString()),
+            icon: IconRole.warningCircle,
+            lifetime: NoticeLifetime.persistent,
           ),
         );
       }

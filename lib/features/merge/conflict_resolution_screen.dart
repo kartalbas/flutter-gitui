@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -799,9 +807,9 @@ class _ConflictResolutionScreenState
   }
 
   Future<void> _continueMerge(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await BaseDialog.show<bool>(
       context: context,
-      builder: (context) => BaseDialog(
+      dialog: BaseDialog(
         icon: IconRole.gitMerge,
         title: AppLocalizations.of(context)!.dialogTitleContinueMerge,
         onSubmit: () => Navigator.of(context).pop(true),
@@ -844,9 +852,9 @@ class _ConflictResolutionScreenState
   }
 
   Future<void> _showAbortDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await BaseDialog.show<bool>(
       context: context,
-      builder: (context) => BaseDialog(
+      dialog: BaseDialog(
         icon: IconRole.warning,
         title: AppLocalizations.of(context)!.dialogTitleAbortMerge,
         content: BaseLabel(
@@ -877,14 +885,14 @@ class _ConflictResolutionScreenState
       if (context.mounted) {
         Navigator.of(context).pop();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.snackbarMergeAborted),
-            // A surface FILL, not a foreground: the notice is painted in this
-            // colour and its text is paired against it. Fills leave when the
-            // surface becomes a member, so converting it now would be churn
-            // that member has to undo.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        // The fill left with the surface, exactly as this site said it would.
+        // The tone is `danger` because aborting throws the merge's work away
+        // and the site painted it in the error role to say so.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(context)!.snackbarMergeAborted,
           ),
         );
       }

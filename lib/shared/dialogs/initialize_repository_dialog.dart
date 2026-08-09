@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole, Tone;
+    show IconRole, NoticeSpec, Overlays, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
@@ -270,14 +270,15 @@ class _InitializeRepositoryDialogState
         if (success && mounted) {
           Navigator.of(context).pop(path);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                AppLocalizations.of(
-                  context,
-                )!.repositoryInitializedSuccess(path),
-              ),
-              backgroundColor: context.gitColors.added,
+          // As in the clone dialog: the repository exists and is open, which
+          // is `success` rather than the git-added green it used to borrow.
+          Overlays.notify(
+            context,
+            NoticeSpec(
+              tone: Tone.success,
+              title: AppLocalizations.of(
+                context,
+              )!.repositoryInitializedSuccess(path),
             ),
           );
         } else if (mounted) {

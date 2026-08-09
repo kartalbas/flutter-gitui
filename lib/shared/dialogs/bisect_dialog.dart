@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole, Tone;
+    show IconRole, NoticeSpec, Overlays, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -494,24 +494,27 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       ref.invalidate(bisectStateProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.bisectStarted),
-            backgroundColor: context.gitColors.added,
+        // The bisect is running: something that finished, and finished well.
+        // The fill it used to borrow was the git-ADDED green, which says
+        // "this file is new to git" and not "this worked" - the tone says the
+        // meaning, and the skin picks the colour.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.success,
+            title: AppLocalizations.of(context)!.bisectStarted,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.failedToStartBisect(e.toString()),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(
+              context,
+            )!.failedToStartBisect(e.toString()),
           ),
         );
       }
@@ -543,30 +546,27 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       ref.invalidate(bisectStateProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              )!.markedAs(step.displayName, step.displayName),
-            ),
-            backgroundColor: context.gitColors.added,
+        // The same git-added green as the start notice, and the same
+        // correction: the commit was marked, which is `success`.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.success,
+            title: AppLocalizations.of(
+              context,
+            )!.markedAs(step.displayName, step.displayName),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(
-                context,
-              )!.failedToMarkCommit(e.toString(), 'status'),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(
+              context,
+            )!.failedToMarkCommit(e.toString(), 'status'),
           ),
         );
       }
@@ -585,24 +585,24 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.bisectReset),
-            backgroundColor: context.gitColors.added,
+        // The third git-added green in this file, corrected the same way.
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.success,
+            title: AppLocalizations.of(context)!.bisectReset,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.failedToResetBisect(e.toString()),
-            ),
-            // A surface FILL, not a foreground: this is what the notice is
-            // painted in, and its words are paired against it. The whole
-            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
-            backgroundColor: Theme.of(context).colorScheme.error,
+        Overlays.notify(
+          context,
+          NoticeSpec(
+            tone: Tone.danger,
+            title: AppLocalizations.of(
+              context,
+            )!.failedToResetBisect(e.toString()),
           ),
         );
       }

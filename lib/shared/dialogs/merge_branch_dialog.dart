@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        NoticeAction,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -369,36 +377,31 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
               context,
             ).pop(true); // Return true to indicate conflicts
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.mergeHasConflicts(mergeState.conflictCount),
-                ),
-                // A surface FILL, not a foreground: this is what the notice
-                // is painted in, and its words are paired against it. The
-                // whole `SnackBar` is `overlays.notify`, and the fill leaves
-                // with it - which is also what finally settles the mispaired
-                // `onPrimary` recorded on the action below.
-                backgroundColor: Theme.of(context).colorScheme.error,
-                action: SnackBarAction(
-                  label: AppLocalizations.of(context)!.resolve,
-                  // A foreground, and the one read in this file the mapping
-                  // would convert - except that `Tone` reaches text only
-                  // through `BaseLabel`, and a `SnackBarAction` takes a
-                  // `Color` and builds its own label. The whole notice is a
-                  // P5 member (`NoticeLifetime` already exists for it), and
-                  // the word goes with it. Recorded while it waits: this says
-                  // `onPrimary` over an `error` fill, which is the wrong
-                  // pairing and a real contrast defect - correcting it to the
-                  // danger tone's own on-colour is a change of appearance, so
-                  // it is reported here rather than smuggled into a rename.
-                  textColor: Theme.of(context).colorScheme.onPrimary,
-                  onPressed: () {
-                    // Navigate to conflict resolution (will be handled by main screen)
-                  },
-                ),
+            // The same conversion as `merge_branches_dialog.dart`, and the
+            // same contrast defect settled: the action said `onPrimary` over
+            // an `error` fill, and the skin now pairs both halves of the
+            // notice from one tone.
+            //
+            // The action's tooltip repeats its label because the label is the
+            // only description the application has for it - and the action
+            // itself does nothing here, a pre-existing defect this conversion
+            // carries across rather than hides.
+            Overlays.notify(
+              context,
+              NoticeSpec(
+                tone: Tone.danger,
+                title: AppLocalizations.of(
+                  context,
+                )!.mergeHasConflicts(mergeState.conflictCount),
+                actions: <NoticeAction>[
+                  NoticeAction(
+                    label: AppLocalizations.of(context)!.resolve,
+                    tooltip: AppLocalizations.of(context)!.resolve,
+                    onPressed: () {
+                      // Navigate to conflict resolution (will be handled by main screen)
+                    },
+                  ),
+                ],
               ),
             );
           }
@@ -407,15 +410,15 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
           if (mounted) {
             Navigator.of(context).pop(false);
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  AppLocalizations.of(context)!.successfullyMergedBranch(
-                    _selectedBranch!.name,
-                    ref.read(currentBranchProvider).value ?? 'unknown',
-                  ),
+            // `success`, not the git-added green: see the sibling dialog.
+            Overlays.notify(
+              context,
+              NoticeSpec(
+                tone: Tone.success,
+                title: AppLocalizations.of(context)!.successfullyMergedBranch(
+                  _selectedBranch!.name,
+                  ref.read(currentBranchProvider).value ?? 'unknown',
                 ),
-                backgroundColor: context.gitColors.added,
               ),
             );
           }

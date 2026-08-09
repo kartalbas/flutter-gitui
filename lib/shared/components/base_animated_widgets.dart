@@ -56,11 +56,24 @@ class BaseDropdownButton<T> extends StatelessWidget {
   }
 }
 
-/// Base popup menu button that respects animation speed settings
+/// Base popup menu button that respects animation speed settings.
+///
+/// **Two callers left, both kept by a recorded decision (#438).** Every other
+/// menu in the application opens through `overlays.menuAnchor` now, where the
+/// SKIN builds the trigger and the menu together; what remains here is the
+/// quick-settings menu, whose colour-scheme rows lead with a seed-colour
+/// swatch, and the language selector, whose rows lead with flag artwork -
+/// per-row artwork the sealed `MenuEntry` set deliberately cannot carry.
+///
+/// The [iconSize] parameter is gone with the migration: every caller that
+/// passed one now states its trigger through `MenuAnchorSpec`, and the two
+/// that remain hand their own already-sized [BaseIcon] in, so the fallback had
+/// nothing left to size. Nothing moves - `IconButton`'s M3 container is 40 dp
+/// at both 20 and 24, and a [BaseIcon] carries its own measured size - which
+/// is why the token read this line held could finally leave the register.
 class BasePopupMenuButton<T> extends StatelessWidget {
   final Widget? icon;
   final String? tooltip;
-  final double? iconSize;
   final List<PopupMenuEntry<T>> Function(BuildContext) itemBuilder;
   final PopupMenuItemSelected<T>? onSelected;
   final PopupMenuCanceled? onCanceled;
@@ -72,7 +85,6 @@ class BasePopupMenuButton<T> extends StatelessWidget {
     super.key,
     this.icon,
     this.tooltip,
-    this.iconSize,
     required this.itemBuilder,
     this.onSelected,
     this.onCanceled,
@@ -89,7 +101,6 @@ class BasePopupMenuButton<T> extends StatelessWidget {
 
     return PopupMenuButton<T>(
       icon: icon,
-      iconSize: iconSize ?? AppTheme.iconM,
       tooltip: tooltip,
       itemBuilder: itemBuilder,
       onSelected: onSelected,

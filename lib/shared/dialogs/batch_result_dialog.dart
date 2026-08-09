@@ -23,7 +23,15 @@ class BatchResultDialog extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      _dialog(context, repositoryName, result, onDismiss);
+
+  static BaseDialog _dialog(
+    BuildContext context,
+    String repositoryName,
+    RepositoryBatchResult result,
+    VoidCallback onDismiss,
+  ) {
     final isSuccess = result.success;
     // Both marks were drawn at Phosphor BOLD before the conversion and now
     // take the ordinary stroke, because a role carries no weight (#249
@@ -129,19 +137,24 @@ class BatchResultDialog extends StatelessWidget {
   }
 }
 
-/// Helper function to show the batch result dialog
+/// Reports a batch result, on the skin's own dialog route.
+///
+/// The frame is decided once from [result] and both actions only pop, so the
+/// whole dialog can be stated before it exists - which is what lets it reach
+/// `Overlays.dialog` rather than Material's `showDialog`.
 Future<void> showBatchResultDialog({
   required BuildContext context,
   required String repositoryName,
   required RepositoryBatchResult result,
   required VoidCallback onDismiss,
 }) {
-  return showDialog(
+  return BaseDialog.show<void>(
     context: context,
-    builder: (context) => BatchResultDialog(
-      repositoryName: repositoryName,
-      result: result,
-      onDismiss: onDismiss,
+    dialog: BatchResultDialog._dialog(
+      context,
+      repositoryName,
+      result,
+      onDismiss,
     ),
   );
 }

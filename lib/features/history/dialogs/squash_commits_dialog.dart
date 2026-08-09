@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Proximity, TextRole, Tone;
 
-import '../../../core/constants/constants.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -163,7 +162,9 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
       title: l10n.squashCommitsDialog,
       icon: IconRole.arrowsInLineVertical,
       variant: DialogVariant.normal,
-      maxWidth: AppConstants.maxDialogWidth,
+      // The combined commit message is a field the user fills in, so this is
+      // the `form` extent (BaseDialog's default) and how wide a form should be
+      // is the skin's answer rather than a constant named here.
       // The message field is multiline, so Enter inside it writes a newline;
       // Enter anywhere else squashes.
       onSubmit: _areConsecutive ? _squash : null,

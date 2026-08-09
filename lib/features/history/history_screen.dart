@@ -5,7 +5,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuActionRole,
+        MenuEntry,
+        MenuSeparator,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -15,7 +26,6 @@ import '../../shared/components/base_label.dart';
 import '../../shared/components/base_layout.dart';
 import '../../shared/components/base_filter_chip.dart';
 import '../../shared/components/base_button.dart';
-import '../../shared/components/base_menu_item.dart';
 import '../../shared/components/base_speed_dial.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/git/git_providers.dart';
@@ -936,106 +946,126 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final selection = ref.read(commitSelectionProvider).resolve(commits);
     if (selection.isEmpty) return;
 
-    final overlay =
-        Overlay.of(context).context.findRenderObject()! as RenderBox;
-    // A value-returning menu instead of per-item onTap callbacks: the action
-    // runs after the menu route has closed, so its dialogs and notifications
-    // are not torn down together with the menu.
-    final action = await showMenu<_CommitContextAction>(
-      context: context,
-      position: RelativeRect.fromRect(
-        position & Size.zero,
-        Offset.zero & overlay.size,
-      ),
-      items: _buildCommitContextMenuItems(selection),
+    // The menu is the skin's, opened at the point the user asked for it -
+    // which is the one case `overlays.presentMenu` was written for, a context
+    // click. The screen no longer measures the overlay box, builds a
+    // `RelativeRect` or renders `PopupMenuItem` rows: it states the point and
+    // the entries, and the member does the rest.
+    //
+    // Each entry still runs AFTER the menu route has closed - the member
+    // dispatches the chosen entry once the route completes - so an action's
+    // dialogs and notifications are not torn down together with the menu.
+    await Overlays.menu(
+      context,
+      at: position,
+      entries: _buildCommitContextMenuItems(selection),
     );
-
-    if (action == null || !mounted) return;
-    await _runCommitContextAction(action, selection);
   }
 
-  List<PopupMenuEntry<_CommitContextAction>> _buildCommitContextMenuItems(
+  /// Runs a context-menu action once the menu has closed, if this screen is
+  /// still alive to run it.
+  void _dispatchCommitContextAction(
+    _CommitContextAction action,
+    ResolvedCommitSelection selection,
+  ) {
+    if (!mounted) return;
+    unawaited(_runCommitContextAction(action, selection));
+  }
+
+  List<MenuEntry> _buildCommitContextMenuItems(
     ResolvedCommitSelection selection,
   ) {
     final l10n = AppLocalizations.of(context)!;
-    // The destructive entries below say what they mean exactly once, as
-    // `tone: Tone.danger`. Each of them used to say it twice - the tone for
-    // the mark, and a `labelColor:` naming Material's error role for the
-    // words - because the tone reached only the glyph. That was the
-    // component's gap rather than this screen's, and it is now closed in
-    // `lib/shared/components/base_menu_item.dart`: `MenuItemContent` resolves
-    // the label from the tone it was already handed, so the three colours
-    // here are gone and no pixel with them.
+    // The destructive entries below say what they MEAN exactly once, as
+    // `MenuActionRole.destructive`. They used to say it as `tone:
+    // Tone.danger` on a hand-built row, which was this screen answering "how
+    // does a destructive menu entry read" - a question each design language
+    // answers for itself, and the skin answers now.
     final count = selection.count;
 
-    return [
-      BaseMenuItem(
-        value: _CommitContextAction.copySha,
-        child: MenuItemContent(icon: IconRole.copy, label: l10n.copySha),
-      ),
-      BaseMenuItem(
-        value: _CommitContextAction.copyMessage,
-        child: MenuItemContent(
-          icon: IconRole.chatText,
-          label: l10n.copyCommitMessage,
+    return <MenuEntry>[
+      MenuAction(
+        icon: IconRole.copy,
+        label: l10n.copySha,
+        onPressed: () => _dispatchCommitContextAction(
+          _CommitContextAction.copySha,
+          selection,
         ),
       ),
-      if (count == 1) ...[
-        BaseMenuItem(
-          value: _CommitContextAction.createBranch,
-          child: MenuItemContent(
-            icon: IconRole.gitBranch,
-            label: l10n.createBranchFromCommit,
+      MenuAction(
+        icon: IconRole.chatText,
+        label: l10n.copyCommitMessage,
+        onPressed: () => _dispatchCommitContextAction(
+          _CommitContextAction.copyMessage,
+          selection,
+        ),
+      ),
+      if (count == 1) ...<MenuEntry>[
+        MenuAction(
+          icon: IconRole.gitBranch,
+          label: l10n.createBranchFromCommit,
+          onPressed: () => _dispatchCommitContextAction(
+            _CommitContextAction.createBranch,
+            selection,
           ),
         ),
-        BaseMenuItem(
-          value: _CommitContextAction.createTag,
-          child: MenuItemContent(icon: IconRole.tag, label: l10n.createTag),
+        MenuAction(
+          icon: IconRole.tag,
+          label: l10n.createTag,
+          onPressed: () => _dispatchCommitContextAction(
+            _CommitContextAction.createTag,
+            selection,
+          ),
         ),
       ],
       if (count == 2)
-        BaseMenuItem(
-          value: _CommitContextAction.compare,
-          child: MenuItemContent(
-            icon: IconRole.gitDiff,
-            label: l10n.compareCommits,
+        MenuAction(
+          icon: IconRole.gitDiff,
+          label: l10n.compareCommits,
+          onPressed: () => _dispatchCommitContextAction(
+            _CommitContextAction.compare,
+            selection,
           ),
         ),
-      BaseMenuItem(
-        value: _CommitContextAction.cherryPick,
-        child: MenuItemContent(
-          icon: IconRole.arrowBendDownRight,
-          label: l10n.cherryPick,
+      MenuAction(
+        icon: IconRole.arrowBendDownRight,
+        label: l10n.cherryPick,
+        onPressed: () => _dispatchCommitContextAction(
+          _CommitContextAction.cherryPick,
+          selection,
         ),
       ),
-      // Everything below the divider rewrites or moves history. The visual
-      // break plus the error color keeps a hand aiming at a copy entry from
-      // landing on a reset by one pixel.
-      const PopupMenuDivider(),
+      // Everything below the separator rewrites or moves history. The visual
+      // break plus the destructive treatment keeps a hand aiming at a copy
+      // entry from landing on a reset by one pixel.
+      const MenuSeparator(),
       if (count >= 2)
-        BaseMenuItem(
-          value: _CommitContextAction.squash,
-          child: MenuItemContent(
-            icon: IconRole.arrowsInLineVertical,
-            label: l10n.squashCommits,
-            tone: Tone.danger,
+        MenuAction(
+          icon: IconRole.arrowsInLineVertical,
+          label: l10n.squashCommits,
+          role: MenuActionRole.destructive,
+          onPressed: () => _dispatchCommitContextAction(
+            _CommitContextAction.squash,
+            selection,
           ),
         ),
-      if (count == 1) ...[
-        BaseMenuItem(
-          value: _CommitContextAction.revert,
-          child: MenuItemContent(
-            icon: IconRole.arrowCounterClockwise,
-            label: l10n.revert,
-            tone: Tone.danger,
+      if (count == 1) ...<MenuEntry>[
+        MenuAction(
+          icon: IconRole.arrowCounterClockwise,
+          label: l10n.revert,
+          role: MenuActionRole.destructive,
+          onPressed: () => _dispatchCommitContextAction(
+            _CommitContextAction.revert,
+            selection,
           ),
         ),
-        BaseMenuItem(
-          value: _CommitContextAction.reset,
-          child: MenuItemContent(
-            icon: IconRole.arrowCounterClockwise,
-            label: l10n.resetToHere,
-            tone: Tone.danger,
+        MenuAction(
+          icon: IconRole.arrowCounterClockwise,
+          label: l10n.resetToHere,
+          role: MenuActionRole.destructive,
+          onPressed: () => _dispatchCommitContextAction(
+            _CommitContextAction.reset,
+            selection,
           ),
         ),
       ],
@@ -1383,10 +1413,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     BuildContext context,
     GitCommit commit,
   ) {
-    return showDialog<ResetMode>(
-      context: context,
-      builder: (context) => ResetModeDialog(commit: commit),
-    );
+    return ResetModeDialog.show(context, commit: commit);
   }
 }
 

@@ -111,12 +111,10 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
             : null,
         moreMenuItems: [
           // New workspace action (first)
-          PopupMenuItem(
-            child: MenuItemContent(
-              icon: IconRole.plus,
-              label: AppLocalizations.of(context)!.tooltipNewWorkspace,
-            ),
-            onTap: () => _createProject(context, ref),
+          MenuAction(
+            icon: IconRole.plus,
+            label: AppLocalizations.of(context)!.tooltipNewWorkspace,
+            onPressed: () => _createProject(context, ref),
           ),
         ],
       ),
@@ -281,30 +279,28 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
     WidgetRef ref,
     Workspace project,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await BaseDialog.show<bool>(
       context: context,
-      builder: (context) {
-        final l10n = AppLocalizations.of(context)!;
-        return BaseDialog(
-          title: l10n.deleteWorkspace,
-          content: Text(
-            l10n.dialogContentDeleteWorkspace(project.displayName(l10n)),
+      dialog: BaseDialog(
+        title: l10n.deleteWorkspace,
+        content: Text(
+          l10n.dialogContentDeleteWorkspace(project.displayName(l10n)),
+        ),
+        variant: DialogVariant.destructive,
+        actions: [
+          DialogAction(
+            label: l10n.cancel,
+            role: DialogActionRole.dismissive,
+            onPressed: () => Navigator.of(context).pop(false),
           ),
-          variant: DialogVariant.destructive,
-          actions: [
-            DialogAction(
-              label: l10n.cancel,
-              role: DialogActionRole.dismissive,
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            DialogAction(
-              label: l10n.delete,
-              role: DialogActionRole.destructive,
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        );
-      },
+          DialogAction(
+            label: l10n.delete,
+            role: DialogActionRole.destructive,
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true && context.mounted) {

@@ -66,7 +66,7 @@ void main() {
     expect(closed, isFalse);
 
     // The primary button must refuse too, not only the Enter path.
-    await tester.tap(find.widgetWithText(BaseButton, 'Save'));
+    await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
     expect(find.byType(EditRemoteUrlDialog), findsOneWidget);
     expect(closed, isFalse);

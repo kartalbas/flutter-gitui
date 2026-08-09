@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -79,11 +80,10 @@ class RepositorySwitcher extends ConsumerWidget {
             icon: PhosphorIconsBold.gitCommit,
             primaryLabel: repo.displayName,
             secondaryLabel: repo.path,
-            // As in `branch_switcher`: `MenuItemContentTwoLine` takes a glyph
-            // and a `Color`, with no tone to say "accent" to, so the Material
-            // read is the only thing this call site can hand it. It leaves
-            // when the component carries a tone.
-            iconColor: Theme.of(context).colorScheme.primary,
+            // As in `branch_switcher`: the mark wears the application's own
+            // colour, and that is `Tone.accent`. The Bold glyph stays the
+            // component's, for the weight reason recorded there.
+            tone: Tone.accent,
             isSelected: isSelected,
             showCheck: true,
             iconSize: AppTheme.iconS,

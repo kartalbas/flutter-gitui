@@ -208,17 +208,18 @@ class ProjectSection extends ConsumerWidget {
                             icon: IconRole.trash,
                             label: AppLocalizations.of(context)!.deleteProject,
                             scale: ControlScale.compact,
+                            // One word for the whole entry. The `labelColor:`
+                            // that used to sit here spelled out Material's
+                            // error role beside this same tone, because the
+                            // tone reached the MARK alone and dropping the
+                            // second half would have left a destructive entry
+                            // with a red glyph and black words.
+                            // `MenuItemContent` now answers `Tone.danger` with
+                            // that same error role for its words too
+                            // (lib/shared/components/base_menu_item.dart) - the
+                            // identical Color the deleted line passed, so the
+                            // entry renders exactly as before.
                             tone: Tone.danger,
-                            // The tone above reaches the MARK only:
-                            // `MenuItemContent` spends it on its `BaseIcon`
-                            // and colours its words from a `Color?
-                            // labelColor`. Dropping this half today would
-                            // leave a destructive entry with a red glyph and
-                            // black words - an appearance change inside a
-                            // colour rename. It goes when the component's
-                            // tone reaches its label, one edit in
-                            // `lib/shared/components/base_menu_item.dart`.
-                            labelColor: Theme.of(context).colorScheme.error,
                           ),
                         ),
                       ],

@@ -302,21 +302,21 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                       icon: IconRole.trash,
                       label: AppLocalizations.of(context)!.clearAllRepositories,
                       scale: ControlScale.normal,
+                      // The tone now says the whole entry. It used to reach the
+                      // MARK only, so this line carried a `labelColor:` that
+                      // spelled out Material's error role beside it - one
+                      // statement said twice, once as a meaning and once as
+                      // Material's answer to it - and dropping that half back
+                      // then would have left a destructive entry with a red
+                      // glyph and black words. The component closed the gap:
+                      // `MenuItemContent` resolves its own label to that same
+                      // error role for `Tone.danger`
+                      // (lib/shared/components/base_menu_item.dart), which is
+                      // the identical Color the deleted line passed, in every
+                      // state - the component does not vary it by enablement,
+                      // and this entry is only built when it is invokable
+                      // anyway. No pixel moves.
                       tone: Tone.danger,
-                      // The tone above reaches the MARK only:
-                      // `MenuItemContent` spends it on its `BaseIcon` and
-                      // colours its words from a `Color? labelColor` that
-                      // falls back to the inherited menu foreground. So this
-                      // is the same statement said twice, once as a meaning
-                      // and once as Material's answer to it, and dropping the
-                      // second half today would leave a destructive entry with
-                      // a red glyph and black words. The read is the
-                      // component's gap, not this screen's: it goes when
-                      // `lib/shared/components/base_menu_item.dart` spends its
-                      // tone on both halves, which deletes the same read at
-                      // `project_section.dart`, `workspace_card.dart`,
-                      // `branch_switcher.dart` and five more in one move.
-                      labelColor: Theme.of(context).colorScheme.error,
                     ),
                     onTap: () => _confirmClearAll(context, ref),
                   ),

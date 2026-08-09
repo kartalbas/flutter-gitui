@@ -103,12 +103,12 @@ class BranchSwitcher extends ConsumerWidget {
                   icon: PhosphorIconsBold.gitBranch,
                   primaryLabel: branch.name,
                   secondaryLabel: branch.lastCommitMessage,
-                  // Still a Material role, and it cannot stop being one from
-                  // here: `MenuItemContentTwoLine` takes an `IconData` and a
-                  // `Color?`, with no tone to hand the meaning to. The
-                  // accent belongs on that component, not at this call site,
-                  // and the read leaves the moment it carries one.
-                  iconColor: Theme.of(context).colorScheme.primary,
+                  // The mark carries the application's own colour, which is a
+                  // meaning: `Tone.accent`. The glyph itself stays a Phosphor
+                  // Bold constant on this component - its stroke is a fact
+                  // `IconRole` cannot carry - but the COLOUR no longer has to
+                  // be Material's word for it at this call site.
+                  tone: Tone.accent,
                   isSelected: isSelected,
                   showCheck: true,
                   iconSize: AppTheme.iconS,
@@ -163,14 +163,6 @@ class BranchSwitcher extends ConsumerWidget {
             icon: IconRole.trash,
             label: l10n.deleteAllUnprotectedBranches,
             tone: Tone.danger,
-            // The tone above reaches the mark only - `MenuItemContent` spends
-            // it on its `BaseIcon` and colours its words from `labelColor`.
-            // So this is the same statement said twice, once as a meaning and
-            // once as Material's answer to it, and dropping the second half
-            // today would leave a destructive entry with a red glyph and
-            // black words. It goes when the component's tone reaches its
-            // label, which is one edit in `base_menu_item.dart`.
-            labelColor: Theme.of(context).colorScheme.error,
           ),
         ),
       ],

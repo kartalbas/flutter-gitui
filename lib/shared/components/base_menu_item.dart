@@ -245,17 +245,35 @@ class MenuItemContent extends StatelessWidget {
   final ControlScale scale;
   final double spacing;
 
+  /// Material's answer to the tones this entry can carry, or null for the
+  /// tones it leaves to the enclosing item.
+  ///
+  /// Quoted once here rather than at every call site, which is the whole
+  /// repair: `Tone.danger` used to be restated as `colorScheme.error` and
+  /// `Tone.accent` as `colorScheme.primary` beside the tone that had already
+  /// said it, because the tone reached only the mark. Both quotations leave
+  /// together when a menu entry is a member of `overlays.menu` and the skin
+  /// draws its own words.
+  Color? _quotedToneColor(ThemeData theme) {
+    if (identical(tone, Tone.danger)) return theme.colorScheme.error;
+    if (identical(tone, Tone.accent)) return theme.colorScheme.primary;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // `identical` rather than `==` for the reason BaseLabel records: Tone
     // carries a custom `==` and every named tone is a const singleton, so
     // identity is exactly as strong as equality here.
+    //
+    // Two tones are answered, and no more. Every other tone falls to the
+    // colour the enclosing item published, which is what keeps a disabled
+    // entry looking disabled - so this is deliberately not a `switch` over
+    // the whole vocabulary. A third meaning is added here on purpose, never
+    // rounded onto the nearer of these two.
     final effectiveLabelColor =
-        labelColor ??
-        (identical(tone, Tone.danger)
-            ? theme.colorScheme.error
-            : _inheritedLabelColor(context));
+        labelColor ?? _quotedToneColor(theme) ?? _inheritedLabelColor(context);
 
     return Row(
       children: [
@@ -344,6 +362,7 @@ class MenuItemContentTwoLine extends StatelessWidget {
     required this.icon,
     required this.primaryLabel,
     this.secondaryLabel,
+    this.tone = Tone.neutral,
     this.iconColor,
     this.primaryLabelColor,
     this.secondaryLabelColor,
@@ -356,6 +375,26 @@ class MenuItemContentTwoLine extends StatelessWidget {
   final IconData icon;
   final String primaryLabel;
   final String? secondaryLabel;
+
+  /// What the entry's leading mark MEANS.
+  ///
+  /// The mark is still drawn as a raw [Icon] rather than through [BaseIcon],
+  /// and that is not an oversight: [icon] is an `IconData`, so this component
+  /// cannot name a role, and every caller hands it a Phosphor **Bold**
+  /// constant whose heavier stroke `IconRole` cannot carry — `type.icon` draws
+  /// the ordinary weight, so converting the glyph would thin it silently.
+  ///
+  /// What the tone DOES fix is the colour: the two switchers each spelled out
+  /// `colorScheme.primary` here because there was nothing to say "accent" to,
+  /// which put a Material colour role in a screen. Material's answer is quoted
+  /// once below instead. [Tone.neutral] leaves the mark to the ambient
+  /// foreground, exactly as a null [iconColor] did.
+  final Tone tone;
+
+  /// An explicit colour for the mark, for a caller whose colour is not a
+  /// meaning this vocabulary has — the workspace switcher tints each entry
+  /// with that workspace's own `Tone.series` colour, held as a `Color` on the
+  /// model. It wins over [tone] when both are given.
   final Color? iconColor;
   final Color? primaryLabelColor;
   final Color? secondaryLabelColor;
@@ -372,7 +411,13 @@ class MenuItemContentTwoLine extends StatelessWidget {
         (isSelected
             ? theme.colorScheme.primary
             : _inheritedLabelColor(context));
-    final effectiveIconColor = iconColor;
+    // One tone is answered, and only one: `accent` is the sole meaning these
+    // menus state about a leading mark. Any other tone falls through to the
+    // ambient foreground rather than being painted as the nearest of the
+    // answers this component happens to know.
+    final effectiveIconColor =
+        iconColor ??
+        (identical(tone, Tone.accent) ? theme.colorScheme.primary : null);
     final effectiveSecondaryColor =
         secondaryLabelColor ?? theme.colorScheme.onSurfaceVariant;
 

@@ -45,15 +45,16 @@ class SettingsScreen extends ConsumerWidget {
               icon: IconRole.arrowCounterClockwise,
               label: l10n.resetToDefaults,
               scale: ControlScale.normal,
+              // One sentence, said once. This entry used to say it twice -
+              // `Tone.danger` for the mark and a `labelColor` restating the
+              // scheme's `error` for the words - because the tone reached only
+              // the glyph, and the two halves of a destructive entry would
+              // otherwise have disagreed. `MenuItemContent` carries the tone
+              // through to its label now
+              // (lib/shared/components/base_menu_item.dart), answering
+              // `Tone.danger` with exactly the colour this line named, so
+              // nothing moves.
               tone: Tone.danger,
-              // The same sentence twice, and only one of the two can be said
-              // in the vocabulary today: `tone` colours the entry's MARK, and
-              // `MenuItemContent` colours its WORDS from a `Color?`. Dropping
-              // the colour would leave a destructive entry whose words read
-              // like any other. The repair is a label tone on
-              // `MenuItemContent` (lib/shared/components/base_menu_item.dart),
-              // which ten call sites across the application are waiting for.
-              labelColor: Theme.of(context).colorScheme.error,
             ),
             onTap: () => _confirmReset(context, ref),
           ),

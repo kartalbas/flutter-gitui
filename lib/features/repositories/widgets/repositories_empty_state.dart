@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ContentPort, Proximity, Skin, SkinScope, TextRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_layout.dart';
@@ -48,30 +48,51 @@ class RepositoriesEmptyState extends StatelessWidget {
       icon: PhosphorIconsBold.gitBranch,
       title: AppLocalizations.of(context)!.noRepositoriesYet,
       message: AppLocalizations.of(context)!.addRepositoryToGetStarted,
-      action: Wrap(
-        spacing: AppTheme.paddingM,
-        runSpacing: AppTheme.paddingM,
-        children: [
-          _ActionCard(
-            icon: PhosphorIconsRegular.folderOpen,
-            title: AppLocalizations.of(context)!.openRepository,
-            description: AppLocalizations.of(context)!.browseExistingRepository,
-            onTap: onOpenRepository,
-          ),
-          _ActionCard(
-            icon: PhosphorIconsRegular.downloadSimple,
-            title: AppLocalizations.of(context)!.cloneRepository,
-            description: AppLocalizations.of(context)!.cloneFromRemoteUrl,
-            onTap: onCloneRepository,
-          ),
-          _ActionCard(
-            icon: PhosphorIconsRegular.plus,
-            title: AppLocalizations.of(context)!.initializeRepository,
-            description: AppLocalizations.of(context)!.createNewGitRepository,
-            onTap: onInitRepository,
-          ),
-        ],
-      ),
+      // The three choices are one run of equals that breaks onto a second line
+      // when the state is narrower than they are, which is exactly what
+      // `layout.row(wrap: true)` says. The two 16s that stood here said it as
+      // Material's number twice - between two cards and between two lines of
+      // them - and the member answers both with the one rung. Stated `start`
+      // because that is what the bare `Wrap` did: three cards of unequal height
+      // hang from the top of their line, and centring them would move them.
+      action: SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.layout.row(
+          inner,
+          [
+            ContentPort(
+              _ActionCard(
+                icon: PhosphorIconsRegular.folderOpen,
+                title: AppLocalizations.of(context)!.openRepository,
+                description: AppLocalizations.of(
+                  context,
+                )!.browseExistingRepository,
+                onTap: onOpenRepository,
+              ),
+            ),
+            ContentPort(
+              _ActionCard(
+                icon: PhosphorIconsRegular.downloadSimple,
+                title: AppLocalizations.of(context)!.cloneRepository,
+                description: AppLocalizations.of(context)!.cloneFromRemoteUrl,
+                onTap: onCloneRepository,
+              ),
+            ),
+            ContentPort(
+              _ActionCard(
+                icon: PhosphorIconsRegular.plus,
+                title: AppLocalizations.of(context)!.initializeRepository,
+                description: AppLocalizations.of(
+                  context,
+                )!.createNewGitRepository,
+                onTap: onInitRepository,
+              ),
+            ),
+          ],
+          gap: Proximity.grouped,
+          cross: CrossAxisAlignment.start,
+          wrap: true,
+        );
+      }),
     );
   }
 }

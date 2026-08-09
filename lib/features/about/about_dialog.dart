@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show ContentPort, IconRole, Proximity, Skin, SkinScope, TextRole;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_dialog.dart';
@@ -106,29 +106,40 @@ class AppAboutDialog extends HookConsumerWidget {
             Center(child: BaseLabel('Built with', role: TextRole.sectionTitle)),
             const BaseGap(Proximity.related),
             Center(
-              child: Wrap(
-                spacing: AppTheme.paddingS,
-                runSpacing: AppTheme.paddingS,
-                children: [
-                  // The four chips carried a leading glyph each - a Flutter
-                  // dash, `Icons.code`, `Icons.architecture`, `Icons.palette`
-                  // - and they are gone rather than converted. What each mark
-                  // stood for is a PRODUCT, not a meaning: "the Flutter
-                  // framework", "the Dart language", "Riverpod", "Material 3".
-                  // `IconRole` is a vocabulary of meanings and has no product
-                  // identities in it, so every candidate here (code for Dart,
-                  // palette for Material 3) would be the site's original
-                  // adjacency guess re-stated as a contract claim. The badge's
-                  // mark crosses the seam now, so a guess made here would be
-                  // handed to every skin. Reported as a contract finding in
-                  // the P5 surfaces.badge report; the chips say the product's
-                  // name in words, which is what they were always read by.
-                  _TechChip(label: 'Flutter'),
-                  _TechChip(label: 'Dart'),
-                  _TechChip(label: 'Riverpod'),
-                  _TechChip(label: 'Material 3'),
-                ],
-              ),
+              // The four chips are one run of equals that breaks onto a second
+              // line in a narrow dialog, which is what `layout.row(wrap: true)`
+              // states; the distance between two chips and the distance between
+              // two lines of them are one rung the skin answers, not the two 8s
+              // written here. The chips are all one height, so the run's cross
+              // alignment is not visible; `start` is what the bare `Wrap` did.
+              child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+                return skin.layout.row(
+                  inner,
+                  const [
+                    // The four chips carried a leading glyph each - a Flutter
+                    // dash, `Icons.code`, `Icons.architecture`,
+                    // `Icons.palette` - and they are gone rather than
+                    // converted. What each mark stood for is a PRODUCT, not a
+                    // meaning: "the Flutter framework", "the Dart language",
+                    // "Riverpod", "Material 3". `IconRole` is a vocabulary of
+                    // meanings and has no product identities in it, so every
+                    // candidate here (code for Dart, palette for Material 3)
+                    // would be the site's original adjacency guess re-stated
+                    // as a contract claim. The badge's mark crosses the seam
+                    // now, so a guess made here would be handed to every skin.
+                    // Reported as a contract finding in the P5 surfaces.badge
+                    // report; the chips say the product's name in words, which
+                    // is what they were always read by.
+                    ContentPort(_TechChip(label: 'Flutter')),
+                    ContentPort(_TechChip(label: 'Dart')),
+                    ContentPort(_TechChip(label: 'Riverpod')),
+                    ContentPort(_TechChip(label: 'Material 3')),
+                  ],
+                  gap: Proximity.related,
+                  cross: CrossAxisAlignment.start,
+                  wrap: true,
+                );
+              }),
             ),
             const BaseGap(Proximity.grouped),
 

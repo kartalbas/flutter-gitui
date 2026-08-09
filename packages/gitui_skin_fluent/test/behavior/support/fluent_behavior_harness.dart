@@ -273,6 +273,51 @@ List<PaintedStroke> paintedStrokes(WidgetTester tester, Finder finder) {
   return strokes;
 }
 
+/// Every stroke-style paint under [finder], in paint order, with its
+/// width - how a `BoxDecoration`'s UNIFORM rounded border reaches the
+/// canvas (one stroked `drawRRect` inset by half the width), and how the
+/// drawn anatomy marks (check, chevron) paint their polylines
+/// (`drawPath`). The `drawDRRect` outlines have their own readers above.
+List<PaintedStroke> paintedStrokeStyle(WidgetTester tester, Finder finder) {
+  const Set<Symbol> strokeCalls = <Symbol>{#drawRRect, #drawRect, #drawPath};
+  final List<PaintedStroke> strokes = <PaintedStroke>[];
+  for (final RecordedInvocation recorded in _recordPaint(tester, finder)) {
+    final Invocation invocation = recorded.invocation;
+    if (!invocation.isMethod || !strokeCalls.contains(invocation.memberName)) {
+      continue;
+    }
+    double outerRadius = 0;
+    Paint? paint;
+    for (final Object? argument in invocation.positionalArguments) {
+      if (argument is RRect) outerRadius = argument.tlRadiusX;
+      if (argument is Paint && argument.style == PaintingStyle.stroke) {
+        paint = argument;
+      }
+    }
+    if (paint == null) continue;
+    strokes.add(
+      PaintedStroke(
+        color: paint.color,
+        width: paint.strokeWidth,
+        outerRadius: outerRadius,
+      ),
+    );
+  }
+  return strokes;
+}
+
+/// The single fill painted under [finder] right now - the generic
+/// counterpart of [containerFill] for controls other than the button.
+Color singleFillOf(WidgetTester tester, Finder finder) {
+  final List<Color> fills = paintedFillColors(tester, finder);
+  expect(
+    fills,
+    hasLength(1),
+    reason: 'expected exactly one fill under the finder, found $fills',
+  );
+  return fills.single;
+}
+
 /// Every rounded rectangle painted under [finder], in paint order - for
 /// measuring a painted corner radius.
 List<RRect> paintedRRects(WidgetTester tester, Finder finder) {

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../shared/components/base_select_all_button.dart';
 import '../../../core/workspace/models/workspace_repository.dart';
@@ -11,7 +10,8 @@ import '../../../core/workspace/models/repository_status.dart';
 import '../../../core/workspace/repository_status_provider.dart';
 import '../repository_multi_select_provider.dart';
 import '../../../shared/components/base_layout.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show ContentPort, Proximity, Skin, SkinScope;
 
 /// Filter chips and selection controls for repositories screen
 class RepositoriesFilterChips extends ConsumerWidget {
@@ -51,24 +51,41 @@ class RepositoriesFilterChips extends ConsumerWidget {
 
     return Row(
       children: [
-        // Filter chips
-        Wrap(
-          spacing: AppTheme.paddingS,
-          children: [
-            BaseFilterChip(
-              label: AppLocalizations.of(context)!.cleanOnly,
-              selected: filterCleanOnly,
-              onSelected: onFilterCleanOnlyChanged,
-              icon: PhosphorIconsRegular.check,
-            ),
-            BaseFilterChip(
-              label: AppLocalizations.of(context)!.withRemote,
-              selected: filterWithRemote,
-              onSelected: onFilterWithRemoteChanged,
-              icon: PhosphorIconsRegular.cloud,
-            ),
-          ],
-        ),
+        // The two filters are one run of equals, which is what
+        // `layout.row(wrap: true)` says; the 8 written here was Material's
+        // answer to "these belong together" and the rung is now the whole
+        // statement. The member also answers the distance between two LINES of
+        // the run, which the bare `Wrap` left at 0 - and that cannot move
+        // anything, because this run is a non-flexible child of a `Row` and so
+        // is laid out against an unbounded width: it has always been one line
+        // and there is no second line for a run gap to appear between. Stated
+        // `start`, which is what the bare `Wrap` did.
+        SkinScope.render(context, (Skin skin, BuildContext inner) {
+          return skin.layout.row(
+            inner,
+            [
+              ContentPort(
+                BaseFilterChip(
+                  label: AppLocalizations.of(context)!.cleanOnly,
+                  selected: filterCleanOnly,
+                  onSelected: onFilterCleanOnlyChanged,
+                  icon: PhosphorIconsRegular.check,
+                ),
+              ),
+              ContentPort(
+                BaseFilterChip(
+                  label: AppLocalizations.of(context)!.withRemote,
+                  selected: filterWithRemote,
+                  onSelected: onFilterWithRemoteChanged,
+                  icon: PhosphorIconsRegular.cloud,
+                ),
+              ),
+            ],
+            gap: Proximity.related,
+            cross: CrossAxisAlignment.start,
+            wrap: true,
+          );
+        }),
         const BaseGap(Proximity.grouped),
 
         // Select All / Deselect All

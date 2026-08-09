@@ -189,41 +189,61 @@ class StashListTile extends ConsumerWidget {
     );
   }
 
+  /// Everything the user can do to this stash, as one run of equals.
+  ///
+  /// The same statement the tag tile makes: a row of related actions that may
+  /// run onto a second line when the panel is narrow, so both the distance
+  /// between two buttons and the distance between two lines of them are the
+  /// skin's one answer rather than the two hand-written 8s that stood here.
+  /// The buttons are all one height, so the run's cross alignment is not
+  /// visible; `start` is stated because that is what the bare `Wrap` did.
   Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
-    return Wrap(
-      spacing: AppTheme.paddingS,
-      runSpacing: AppTheme.paddingS,
-      children: [
-        BaseButton(
-          onPressed: () => _applyStash(context, ref),
-          leadingIcon: IconRole.arrowBendDownLeft,
-          label: AppLocalizations.of(context)!.apply,
-          variant: ButtonVariant.primary,
-          size: ButtonSize.small,
-        ),
-        BaseButton(
-          onPressed: () => _popStash(context, ref),
-          leadingIcon: IconRole.arrowBendUpLeft,
-          label: AppLocalizations.of(context)!.pop,
-          variant: ButtonVariant.primary,
-          size: ButtonSize.small,
-        ),
-        BaseButton(
-          onPressed: () => _showDiff(context, ref),
-          leadingIcon: IconRole.gitDiff,
-          label: AppLocalizations.of(context)!.diff,
-          variant: ButtonVariant.secondary,
-          size: ButtonSize.small,
-        ),
-        BaseButton(
-          onPressed: () => _createBranch(context, ref),
-          leadingIcon: IconRole.gitBranch,
-          label: AppLocalizations.of(context)!.branch,
-          variant: ButtonVariant.secondary,
-          size: ButtonSize.small,
-        ),
-      ],
-    );
+    return SkinScope.render(context, (Skin skin, BuildContext inner) {
+      return skin.layout.row(
+        inner,
+        [
+          ContentPort(
+            BaseButton(
+              onPressed: () => _applyStash(context, ref),
+              leadingIcon: IconRole.arrowBendDownLeft,
+              label: AppLocalizations.of(context)!.apply,
+              variant: ButtonVariant.primary,
+              size: ButtonSize.small,
+            ),
+          ),
+          ContentPort(
+            BaseButton(
+              onPressed: () => _popStash(context, ref),
+              leadingIcon: IconRole.arrowBendUpLeft,
+              label: AppLocalizations.of(context)!.pop,
+              variant: ButtonVariant.primary,
+              size: ButtonSize.small,
+            ),
+          ),
+          ContentPort(
+            BaseButton(
+              onPressed: () => _showDiff(context, ref),
+              leadingIcon: IconRole.gitDiff,
+              label: AppLocalizations.of(context)!.diff,
+              variant: ButtonVariant.secondary,
+              size: ButtonSize.small,
+            ),
+          ),
+          ContentPort(
+            BaseButton(
+              onPressed: () => _createBranch(context, ref),
+              leadingIcon: IconRole.gitBranch,
+              label: AppLocalizations.of(context)!.branch,
+              variant: ButtonVariant.secondary,
+              size: ButtonSize.small,
+            ),
+          ),
+        ],
+        gap: Proximity.related,
+        cross: CrossAxisAlignment.start,
+        wrap: true,
+      );
+    });
   }
 
   Future<void> _applyStash(BuildContext context, WidgetRef ref) async {

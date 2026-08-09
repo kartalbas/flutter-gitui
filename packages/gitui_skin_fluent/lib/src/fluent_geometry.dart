@@ -19,6 +19,16 @@ abstract final class FluentGeometry {
   /// defines stays a pair.
   static const double overlayCornerRadius = 8;
 
+  /// The fully-rounded corner of a stadium-shaped part: the switch track
+  /// and knob, the InfoBadge.
+  ///
+  /// The reference writes `BorderRadius.circular(100)` at every such site
+  /// (fluent_ui@4.16.1 lib/src/controls/inputs/toggle_switch.dart:434-441,
+  /// lib/src/controls/utils/info_badge.dart:101,115): any radius at least
+  /// half the part's extent renders the same stadium, and 100 is the
+  /// reference's own spelling of "always enough".
+  static const double stadiumRadius = 100;
+
   /// A button's content padding: 11 / 5 / 11 / 6 (start / top / end /
   /// bottom). The asymmetric bottom is WinUI's own optical correction for
   /// Segoe's metrics, not a typo.

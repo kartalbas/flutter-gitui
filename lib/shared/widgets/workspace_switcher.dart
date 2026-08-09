@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
-import '../theme/app_theme.dart';
 import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
 import '../../core/workspace/workspace_list_provider.dart';
@@ -71,8 +70,6 @@ class WorkspaceSwitcher extends ConsumerWidget {
             iconColor: project.color,
             isSelected: isSelected,
             showCheck: true,
-            iconSize: AppTheme.iconS,
-            spacing: AppTheme.paddingM,
           ),
         );
       }).toList(),

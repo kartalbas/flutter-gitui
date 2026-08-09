@@ -3,10 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, TextRole;
+    show ContentPort, IconRole, Inset, Proximity, Skin, SkinScope, TextRole;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_label.dart';
@@ -33,51 +32,72 @@ class ConfigAndLogsSection extends ConsumerWidget {
       children: [
         BaseInset(
           all: Inset.normal,
-          child: Wrap(
-            spacing: AppTheme.paddingM,
-            runSpacing: AppTheme.paddingM,
-            children: [
-              // Open app.log
-              BaseButton(
-                onPressed: textEditor != null
-                    ? () => _openAppLog(context, textEditor)
-                    : null,
-                label: l10n.openAppLog,
-                leadingIcon: IconRole.fileText,
-                variant: ButtonVariant.secondary,
-              ),
-              // Open git.log
-              BaseButton(
-                onPressed: textEditor != null
-                    ? () => _openGitLog(context, textEditor)
-                    : null,
-                label: l10n.openGitLog,
-                leadingIcon: IconRole.gitBranch,
-                variant: ButtonVariant.secondary,
-              ),
-              // Open user flutter-gitui folder
-              BaseButton(
-                onPressed: () => _openConfigFolder(context, textEditor),
-                label: l10n.openConfigFolder,
-                leadingIcon: IconRole.folderOpen,
-                variant: ButtonVariant.secondary,
-              ),
-              // Delete app.log
-              BaseButton(
-                onPressed: () => _deleteAppLog(context),
-                label: l10n.deleteAppLog,
-                leadingIcon: IconRole.trash,
-                variant: ButtonVariant.danger,
-              ),
-              // Delete git.log
-              BaseButton(
-                onPressed: () => _deleteGitLog(context),
-                label: l10n.deleteGitLog,
-                leadingIcon: IconRole.trash,
-                variant: ButtonVariant.danger,
-              ),
-            ],
-          ),
+          // The section's five actions are one run of equals that runs onto a
+          // second line when the settings pane is narrow - `layout.row(wrap:
+          // true)` - so the distance between two buttons and the distance
+          // between two lines of them are the skin's one answer instead of the
+          // two 16s written here. The buttons are all one height, so the run's
+          // cross alignment is not visible; it is stated `start` because that
+          // is what the bare `Wrap` did.
+          child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+            return skin.layout.row(
+              inner,
+              [
+                // Open app.log
+                ContentPort(
+                  BaseButton(
+                    onPressed: textEditor != null
+                        ? () => _openAppLog(context, textEditor)
+                        : null,
+                    label: l10n.openAppLog,
+                    leadingIcon: IconRole.fileText,
+                    variant: ButtonVariant.secondary,
+                  ),
+                ),
+                // Open git.log
+                ContentPort(
+                  BaseButton(
+                    onPressed: textEditor != null
+                        ? () => _openGitLog(context, textEditor)
+                        : null,
+                    label: l10n.openGitLog,
+                    leadingIcon: IconRole.gitBranch,
+                    variant: ButtonVariant.secondary,
+                  ),
+                ),
+                // Open user flutter-gitui folder
+                ContentPort(
+                  BaseButton(
+                    onPressed: () => _openConfigFolder(context, textEditor),
+                    label: l10n.openConfigFolder,
+                    leadingIcon: IconRole.folderOpen,
+                    variant: ButtonVariant.secondary,
+                  ),
+                ),
+                // Delete app.log
+                ContentPort(
+                  BaseButton(
+                    onPressed: () => _deleteAppLog(context),
+                    label: l10n.deleteAppLog,
+                    leadingIcon: IconRole.trash,
+                    variant: ButtonVariant.danger,
+                  ),
+                ),
+                // Delete git.log
+                ContentPort(
+                  BaseButton(
+                    onPressed: () => _deleteGitLog(context),
+                    label: l10n.deleteGitLog,
+                    leadingIcon: IconRole.trash,
+                    variant: ButtonVariant.danger,
+                  ),
+                ),
+              ],
+              gap: Proximity.grouped,
+              cross: CrossAxisAlignment.start,
+              wrap: true,
+            );
+          }),
         ),
       ],
     );

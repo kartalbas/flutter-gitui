@@ -350,45 +350,69 @@ class TagListTile extends ConsumerWidget {
     );
   }
 
+  /// Everything the user can do to this tag, as one run of equals.
+  ///
+  /// The statement is a row of related actions that is allowed to run onto a
+  /// second line when the panel is narrow - which is what `layout.row(wrap:
+  /// true)` says - so the distance between two buttons, and the distance
+  /// between two lines of them, are the skin's single answer to "these belong
+  /// together" instead of the two hand-written 8s that stood here. The buttons
+  /// are all one height, so the run's cross alignment is not visible; it is
+  /// stated as `start` because that is what the bare `Wrap` did and this
+  /// conversion changes vocabulary, not a pixel.
   Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
-    return Wrap(
-      spacing: AppTheme.paddingS,
-      runSpacing: AppTheme.paddingS,
-      children: [
-        BaseButton(
-          label: AppLocalizations.of(context)!.checkout,
-          variant: ButtonVariant.secondary,
-          leadingIcon: IconRole.gitBranch,
-          onPressed: () => _checkoutTag(context, ref),
-        ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.createBranch,
-          variant: ButtonVariant.secondary,
-          leadingIcon: IconRole.gitBranch,
-          onPressed: () => _createBranchFromTag(context, ref),
-        ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.viewCommitInHistory,
-          variant: ButtonVariant.secondary,
-          leadingIcon: IconRole.clockCounterClockwise,
-          onPressed: () => _viewCommitInHistory(context, ref),
-        ),
-        // Only show push button if tag is unpushed and we have remotes
-        if (isLocalOnly && hasRemotes)
-          BaseButton(
-            label: AppLocalizations.of(context)!.push,
-            variant: ButtonVariant.secondary,
-            leadingIcon: IconRole.upload,
-            onPressed: () => _pushTag(context, ref),
+    return SkinScope.render(context, (Skin skin, BuildContext inner) {
+      return skin.layout.row(
+        inner,
+        [
+          ContentPort(
+            BaseButton(
+              label: AppLocalizations.of(context)!.checkout,
+              variant: ButtonVariant.secondary,
+              leadingIcon: IconRole.gitBranch,
+              onPressed: () => _checkoutTag(context, ref),
+            ),
           ),
-        BaseButton(
-          label: AppLocalizations.of(context)!.delete,
-          variant: ButtonVariant.dangerSecondary,
-          leadingIcon: IconRole.trash,
-          onPressed: () => _confirmDeleteTag(context, ref),
-        ),
-      ],
-    );
+          ContentPort(
+            BaseButton(
+              label: AppLocalizations.of(context)!.createBranch,
+              variant: ButtonVariant.secondary,
+              leadingIcon: IconRole.gitBranch,
+              onPressed: () => _createBranchFromTag(context, ref),
+            ),
+          ),
+          ContentPort(
+            BaseButton(
+              label: AppLocalizations.of(context)!.viewCommitInHistory,
+              variant: ButtonVariant.secondary,
+              leadingIcon: IconRole.clockCounterClockwise,
+              onPressed: () => _viewCommitInHistory(context, ref),
+            ),
+          ),
+          // Only show push button if tag is unpushed and we have remotes
+          if (isLocalOnly && hasRemotes)
+            ContentPort(
+              BaseButton(
+                label: AppLocalizations.of(context)!.push,
+                variant: ButtonVariant.secondary,
+                leadingIcon: IconRole.upload,
+                onPressed: () => _pushTag(context, ref),
+              ),
+            ),
+          ContentPort(
+            BaseButton(
+              label: AppLocalizations.of(context)!.delete,
+              variant: ButtonVariant.dangerSecondary,
+              leadingIcon: IconRole.trash,
+              onPressed: () => _confirmDeleteTag(context, ref),
+            ),
+          ),
+        ],
+        gap: Proximity.related,
+        cross: CrossAxisAlignment.start,
+        wrap: true,
+      );
+    });
   }
 
   Future<void> _checkoutTag(BuildContext context, WidgetRef ref) async {

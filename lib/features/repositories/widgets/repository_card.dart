@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        ContentPort,
         ControlScale,
         IconRole,
         Inset,
@@ -11,6 +12,8 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuEntry,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
@@ -350,64 +353,91 @@ class RepositoryCard extends ConsumerWidget {
             SyncOnDoubleTap(
               repository: repository,
               onSingleTap: onTap,
-              child: Wrap(
-                spacing: AppTheme.paddingXS,
-                runSpacing: AppTheme.paddingXS,
-                children: [
-                  // Broken status
-                  if (status.isBroken)
-                    _buildStatusBadge(
-                      context,
-                      PhosphorIconsRegular.warningCircle,
-                      'Broken',
-                      Theme.of(context).colorScheme.error,
-                      isSelected,
-                    ),
+              // The badges are one run of equals that breaks onto a second line
+              // inside the tile, which is what `layout.row(wrap: true)` says.
+              // The two 4s written here said the same closeness twice - between
+              // two badges and between two lines of them - and the member
+              // answers both with the one rung. Stated `start`, which is what
+              // the bare `Wrap` did; the badges are one height, so it moves
+              // nothing.
+              child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+                return skin.layout.row(
+                  inner,
+                  [
+                    // Broken status
+                    if (status.isBroken)
+                      ContentPort(
+                        _buildStatusBadge(
+                          context,
+                          PhosphorIconsRegular.warningCircle,
+                          'Broken',
+                          Theme.of(context).colorScheme.error,
+                          isSelected,
+                        ),
+                      ),
 
-                  // Commits behind (need to pull)
-                  if (status.hasIncoming)
-                    _buildStatusBadge(
-                      context,
-                      PhosphorIconsRegular.arrowDown,
-                      '↓${status.commitsBehind}',
-                      Theme.of(context).colorScheme.tertiary,
-                      isSelected,
-                    ),
+                    // Commits behind (need to pull)
+                    if (status.hasIncoming)
+                      ContentPort(
+                        _buildStatusBadge(
+                          context,
+                          PhosphorIconsRegular.arrowDown,
+                          '↓${status.commitsBehind}',
+                          Theme.of(context).colorScheme.tertiary,
+                          isSelected,
+                        ),
+                      ),
 
-                  // Commits ahead (need to push)
-                  if (status.hasOutgoing)
-                    _buildStatusBadge(
-                      context,
-                      PhosphorIconsRegular.arrowUp,
-                      '↑${status.commitsAhead}',
-                      Theme.of(context).colorScheme.primary,
-                      isSelected,
-                    ),
+                    // Commits ahead (need to push)
+                    if (status.hasOutgoing)
+                      ContentPort(
+                        _buildStatusBadge(
+                          context,
+                          PhosphorIconsRegular.arrowUp,
+                          '↑${status.commitsAhead}',
+                          Theme.of(context).colorScheme.primary,
+                          isSelected,
+                        ),
+                      ),
 
-                  // Uncommitted changes
-                  if (status.hasUncommittedChanges)
-                    _buildStatusBadge(
-                      context,
-                      PhosphorIconsRegular.pencilSimple,
-                      'Changes',
-                      Theme.of(context).colorScheme.secondary,
-                      isSelected,
-                    ),
+                    // Uncommitted changes
+                    if (status.hasUncommittedChanges)
+                      ContentPort(
+                        _buildStatusBadge(
+                          context,
+                          PhosphorIconsRegular.pencilSimple,
+                          'Changes',
+                          Theme.of(context).colorScheme.secondary,
+                          isSelected,
+                        ),
+                      ),
 
-                  // Nothing outstanding. The remote-tracking refs only move on a
-                  // fetch, so claiming to be in sync before one has happened
-                  // would report a clean state that was never verified. A
-                  // repository the check could not reach says why instead, and
-                  // the one case the user can resolve offers to do it.
-                  if (!status.isBroken &&
-                      !status.hasIncoming &&
-                      !status.hasOutgoing &&
-                      !status.hasUncommittedChanges &&
-                      status.exists &&
-                      status.isValidGit)
-                    _buildVerificationBadge(context, ref, status, isSelected),
-                ],
-              ),
+                    // Nothing outstanding. The remote-tracking refs only move
+                    // on a fetch, so claiming to be in sync before one has
+                    // happened would report a clean state that was never
+                    // verified. A repository the check could not reach says why
+                    // instead, and the one case the user can resolve offers to
+                    // do it.
+                    if (!status.isBroken &&
+                        !status.hasIncoming &&
+                        !status.hasOutgoing &&
+                        !status.hasUncommittedChanges &&
+                        status.exists &&
+                        status.isValidGit)
+                      ContentPort(
+                        _buildVerificationBadge(
+                          context,
+                          ref,
+                          status,
+                          isSelected,
+                        ),
+                      ),
+                  ],
+                  gap: Proximity.hairline,
+                  cross: CrossAxisAlignment.start,
+                  wrap: true,
+                );
+              }),
             ),
 
           const Spacer(),

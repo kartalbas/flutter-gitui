@@ -1,0 +1,59 @@
+# Analysis options for the Fluent skin package.
+#
+# It restates the application's settings rather than including
+# `../../analysis_options.yaml`, for the measured defect the blueprint
+# package's copy of this file records: `custom_lint` 0.8.1 silently DISCARDS
+# a package's whole `custom_lint:` section when the same file carries a
+# RELATIVE `include:`. A `package:` include is resolved and works. The cost
+# is that the settings the root file carries are repeated here and both
+# copies have to be kept in step, which is why each one says what it is for.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # The workspace-isolation gate (#383), restated. At error severity, an
+    # import here of anything absent from this package's `dependencies` -
+    # the application, the lint plugin, another skin - is a hard stop. It
+    # matters more in a skin package than anywhere else: a skin reaching
+    # back into `lib/` would invert the one dependency edge the whole
+    # contract is built on.
+    depend_on_referenced_packages: error
+
+linter:
+  rules:
+    # Restated from the application's options, and they earn their place
+    # here too: this package holds focus nodes, controllers and animation
+    # controllers whose lifetime is a widget's, and a desktop session that
+    # switches repository for hours is exactly where one that outlives its
+    # widget shows up.
+    - cancel_subscriptions
+    - close_sinks
+
+# One design-system rule is switched off, with the same two-part reason the
+# blueprint package documents for the same rule:
+#
+#   * the letter: `avoid_text_with_style` tells the code it finds to use a
+#     `BaseLabel` subclass, which lives in the application package - and the
+#     isolation gate above makes a skin package importing it a hard error.
+#     There is nothing to switch to.
+#   * the spirit: the rule exists to stop APPLICATION code from deciding
+#     what text looks like. A skin is the layer that decides what text
+#     looks like - that is the whole of the line this programme draws.
+#
+# The discipline the rule was standing in for is kept by the package rather
+# than the analyser: every styled `Text` in this package resolves its style
+# through `FluentTypeResolution.styleOf`, the single door the typography
+# file establishes, and recolours it only with `FluentResources` /
+# `FluentInk` values. A style written any other way is visible in review as
+# a style belonging to nothing.
+#
+# `avoid_hardcoded_spacing` and `avoid_hardcoded_radius` stay ON, unlike in
+# the blueprint package: this skin has its own named vocabulary for both
+# (`FluentMetrics`, `FluentGeometry`), so the rules keep working as a check
+# that every length and corner is a named, provenanced constant.
+#
+# Any further rule switched off here needs its own entry and its own
+# reason - one line, one reason, never a blanket.
+custom_lint:
+  rules:
+    - avoid_text_with_style: false

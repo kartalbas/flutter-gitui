@@ -414,9 +414,21 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
     final previewFontFamily = ref.watch(uiConfigProvider).previewFontFamily;
     final previewFontSize = ref.watch(uiConfigProvider).previewFontSize;
 
+    // Deliberately NO `key:` here (#425). A ValueKey over the four appearance
+    // settings used to force the whole MaterialApp to remount on every change,
+    // demolition standing in for propagation. Every consumer already follows
+    // the ordinary channels - the providers rebuild this widget, the builder
+    // re-runs with the new values, `SkinScope` notifies on a request change,
+    // and the re-published theme extensions notify their readers - so the
+    // remount had nothing left to do except cost: it discarded the
+    // ScaffoldMessenger (killing any visible notice) and replaced the theme
+    // dissolve with a hard cut. The `navigatorKey` GlobalKey even reparented
+    // the navigator subtree through each remount, so the "clean slate" the key
+    // suggested never actually happened. test/settings_propagation_test.dart
+    // proves each of the four settings still reaches the pixels, and that a
+    // settings change no longer tears the application down.
     return MaterialApp(
       navigatorKey: navigatorKey,
-      key: ValueKey('$fontSize-$fontFamily-$colorScheme-$animationSpeed'),
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
       locale: localeCode != null ? Locale(localeCode) : null,

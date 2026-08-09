@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show ContentPort, IconRole, Proximity, Skin, SkinScope, TextRole;
 
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
@@ -111,9 +110,12 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
             // group: `grouped`.
             const BaseGap(Proximity.grouped),
 
-            // Search options
-            Wrap(
-              spacing: AppTheme.paddingM,
+            // Search options: three independent qualifiers on one query, so
+            // they are a run of equals allowed onto a second line when the
+            // labels are long - `layout.row(wrap: true)`. The rung is
+            // `grouped`, which is the 16 that stood here exactly.
+            _wrappingRun(
+              gap: Proximity.grouped,
               children: [
                 BaseFilterChip(
                   label: AppLocalizations.of(context)!.caseSensitive,
@@ -190,9 +192,11 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
             ),
             const BaseGap(Proximity.grouped),
 
-            // Quick date filters
-            Wrap(
-              spacing: AppTheme.paddingS,
+            // Quick date filters: four shortcuts into the same date range,
+            // one run of equals that may take a second line. `related` is
+            // the 8 that stood here exactly.
+            _wrappingRun(
+              gap: Proximity.related,
               children: [
                 BaseButton(
                   label: AppLocalizations.of(context)!.today,
@@ -248,6 +252,31 @@ class _AdvancedSearchDialogState extends ConsumerState<AdvancedSearchDialog> {
         ),
       ],
     );
+  }
+
+  /// A run of equals that is allowed to take a second line, stated once.
+  ///
+  /// The two runs in this dialog were bare `Wrap`s naming their own item
+  /// distance and saying nothing at all about the distance BETWEEN two lines,
+  /// which left every wrapped line touching the one above it. `layout.row(wrap:
+  /// true)` answers both with one rung, so the line distance follows the item
+  /// distance instead of staying at zero - the one thing this conversion moves,
+  /// and only in the wrapped state.
+  Widget _wrappingRun({
+    required Proximity gap,
+    required List<Widget> children,
+  }) {
+    return SkinScope.render(context, (Skin skin, BuildContext inner) {
+      return skin.layout.row(
+        inner,
+        [for (final Widget child in children) ContentPort(child)],
+        gap: gap,
+        // What the bare `Wrap` did: a run whose members hang from their own
+        // top edge rather than being centred on the tallest of them.
+        cross: CrossAxisAlignment.start,
+        wrap: true,
+      );
+    });
   }
 
   Widget _buildSectionTitle(String title) {

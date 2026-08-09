@@ -111,8 +111,6 @@ class BranchSwitcher extends ConsumerWidget {
                   tone: Tone.accent,
                   isSelected: isSelected,
                   showCheck: true,
-                  iconSize: AppTheme.iconS,
-                  spacing: AppTheme.paddingM,
                 ),
               ),
               // Protected branch lock icon

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Tone;
+    show ControlScale, IconRole, Proximity, Tone;
 
 import 'base_icon.dart';
+import 'base_layout.dart';
 
 /// The menu vocabulary this file re-exports is the CONTRACT's.
 ///
@@ -230,9 +231,18 @@ class MenuItemContentTwoLine extends StatelessWidget {
     this.secondaryLabelColor,
     this.isSelected = false,
     this.showCheck = false,
-    this.iconSize = 16,
-    this.spacing = 8,
   });
+
+  /// The extent of the leading mark.
+  ///
+  /// A bare number rather than a [ControlScale] for the reason [tone] records
+  /// below: [icon] is an `IconData` and every caller hands in a Phosphor
+  /// **Bold** constant, so this mark cannot go through [BaseIcon] without
+  /// losing its stroke. It is the component's own statement rather than a
+  /// per-caller knob — all three switchers used to pass this exact number back
+  /// in — and it leaves with the raw glyph when a menu entry is a member that
+  /// draws its own mark.
+  static const double _glyphExtent = 16;
 
   final IconData icon;
   final String primaryLabel;
@@ -262,8 +272,6 @@ class MenuItemContentTwoLine extends StatelessWidget {
   final Color? secondaryLabelColor;
   final bool isSelected;
   final bool showCheck;
-  final double iconSize;
-  final double spacing;
 
   @override
   Widget build(BuildContext context) {
@@ -285,8 +293,14 @@ class MenuItemContentTwoLine extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(icon, size: iconSize, color: effectiveIconColor),
-        SizedBox(width: spacing),
+        Icon(icon, size: _glyphExtent, color: effectiveIconColor),
+        // The mark and the two lines beside it are members of one entry. It is
+        // deliberately a rung wider than [MenuItemContent]'s: there the mark
+        // and the single line it names are two halves of one statement, while
+        // here the mark stands beside a BLOCK of two lines and relates to the
+        // block rather than to either line. All three switchers stated that
+        // same distance as a length at their call sites; it is said once here.
+        const BaseGap(Proximity.grouped),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,8 +328,14 @@ class MenuItemContentTwoLine extends StatelessWidget {
           ),
         ),
         if (showCheck && isSelected) ...[
-          SizedBox(width: spacing),
-          Icon(Icons.check, size: iconSize, color: theme.colorScheme.primary),
+          // The entry and the mark that says it is the one in force are
+          // members of the same entry, at the same distance as above.
+          const BaseGap(Proximity.grouped),
+          Icon(
+            Icons.check,
+            size: _glyphExtent,
+            color: theme.colorScheme.primary,
+          ),
         ],
       ],
     );

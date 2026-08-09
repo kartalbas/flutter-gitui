@@ -21,12 +21,59 @@ enum _ActivityState { running, checked, failed, pending, local }
 /// Built from the repository statuses rather than from a separate record of the
 /// sweep, so it stays correct however the sweep was started and keeps updating
 /// while it is open.
-class BackgroundActivityDialog extends ConsumerWidget {
+class BackgroundActivityDialog extends StatelessWidget {
   const BackgroundActivityDialog({super.key});
+
+  /// Opens the monitor, on the skin's own dialog route.
+  ///
+  /// The frame this dialog states — its title, its mark and its one way out —
+  /// is the same on every build, so the whole dialog can be stated before it
+  /// exists and reach `Overlays.dialog` instead of Material's `showDialog`.
+  /// The part that DOES change while the dialog is up — which repository is
+  /// running, which failed — lives entirely in the content, and content stays
+  /// live across the seam: it crosses as a `ContentPort`, so the consumer
+  /// inside keeps watching its providers on the skin's route exactly as it
+  /// did on Material's.
+  static Future<void> show(BuildContext context) =>
+      BaseDialog.show<void>(context: context, dialog: _dialog(context));
+
+  @override
+  Widget build(BuildContext context) => _dialog(context);
+
+  static BaseDialog _dialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    // On the [show] path [context] is the OPENER's, alive only at open time,
+    // and the very thing this dialog watches - a background status sweep -
+    // is what re-sorts the repository list and can dispose the opener under
+    // the barrier. Capturing the navigator once here (it outlives the
+    // opener) keeps Enter and Close working for the dialog's whole life;
+    // a press-time `Navigator.of(context)` on the disposed opener throws.
+    final NavigatorState navigator = Navigator.of(context);
+    return BaseDialog(
+      icon: IconRole.pulse,
+      title: 'Background activity',
+      onSubmit: () => navigator.pop(),
+      content: const _ActivityContent(),
+      actions: [
+        // A monitor with nothing to confirm: closing it IS completing it,
+        // which is why Enter fires this action above.
+        DialogAction(
+          label: l10n.close,
+          role: DialogActionRole.affirmative,
+          onPressed: () => navigator.pop(),
+        ),
+      ],
+    );
+  }
+}
+
+/// The live half of the dialog: the summary line and the per-repository rows,
+/// re-sorted and re-counted on every status change while the dialog is open.
+class _ActivityContent extends ConsumerWidget {
+  const _ActivityContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final repositories = ref.watch(workspaceProvider);
     final statuses = ref.watch(workspaceRepositoryStatusProvider);
 
@@ -49,49 +96,35 @@ class BackgroundActivityDialog extends ConsumerWidget {
         .where((row) => _stateOf(row.status) == _ActivityState.running)
         .length;
 
-    return BaseDialog(
-      icon: IconRole.pulse,
-      title: 'Background activity',
-      onSubmit: () => Navigator.of(context).pop(),
-      content: SizedBox(
-        width: 520,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BaseLabel(
-              running == 0
-                  ? 'Nothing is running right now.'
-                  : '$running of ${rows.length} repositories are being checked.',
-              role: TextRole.detail,
-              tone: Tone.muted,
+    return SizedBox(
+      width: 520,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BaseLabel(
+            running == 0
+                ? 'Nothing is running right now.'
+                : '$running of ${rows.length} repositories are being checked.',
+            role: TextRole.detail,
+            tone: Tone.muted,
+          ),
+          const BaseGap(Proximity.grouped),
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: rows.length,
+              itemBuilder: (context, index) {
+                final row = rows[index];
+                return _ActivityRow(
+                  name: row.repo.displayName,
+                  status: row.status,
+                );
+              },
             ),
-            const BaseGap(Proximity.grouped),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: rows.length,
-                itemBuilder: (context, index) {
-                  final row = rows[index];
-                  return _ActivityRow(
-                    name: row.repo.displayName,
-                    status: row.status,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-      actions: [
-        // A monitor with nothing to confirm: closing it IS completing it,
-        // which is why Enter fires this action above.
-        DialogAction(
-          label: l10n.close,
-          role: DialogActionRole.affirmative,
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ],
     );
   }
 }
@@ -175,9 +208,5 @@ class _ActivityRow extends StatelessWidget {
 }
 
 /// Opens the per-repository view of what the app is doing in the background.
-Future<void> showBackgroundActivityDialog(BuildContext context) {
-  return showDialog<void>(
-    context: context,
-    builder: (context) => const BackgroundActivityDialog(),
-  );
-}
+Future<void> showBackgroundActivityDialog(BuildContext context) =>
+    BackgroundActivityDialog.show(context);

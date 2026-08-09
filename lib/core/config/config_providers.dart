@@ -1165,9 +1165,9 @@ enum RequiredSetting {
 /// Get list of missing required settings
 ///
 /// Keys are returned instead of localized strings so this provider needs no
-/// BuildContext. A context-keyed family would retain every AppShell element the
-/// theme-keyed MaterialApp rebuild creates, and would keep serving strings from
-/// the locale that was active when the entry was first computed.
+/// BuildContext. A context-keyed family would retain every element ever used
+/// as a key, and would keep serving strings from the locale that was active
+/// when the entry was first computed.
 final missingRequiredSettingsProvider = Provider<List<RequiredSetting>>((ref) {
   final config = ref.watch(configProvider);
   final missing = <RequiredSetting>[];

@@ -305,7 +305,7 @@ void main() {
         (sum, entry) => sum + entry.reads,
       );
 
-      // 34 is the 2026-08-09 census (77) less the 10 reads P5 converted when
+      // 33 is the 2026-08-09 census (77) less the 10 reads P5 converted when
       // `BaseBadge` stopped hand-painting its pill and started calling
       // `surfaces.badge` / `surfaces.tag`, less the 5 it converted when the
       // repositories card grid started calling `layout.grid` (3) and the

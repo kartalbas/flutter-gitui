@@ -305,11 +305,18 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // anchors, +2). Measured at closing under BOTH skins - Material and the
   // blueprint agree on every resting count, so the register stays
   // skin-independent and kContractRenderedUnderBlueprint stays shell-only.
-  'shell': 191,
+  // The P6 mechanical token sweep raised four scenes by +1 each: converting a
+  // hand-stated gap or inset row into the contract's `layout.row` plants one
+  // more `SkinScope.render` fence, and one landed on the shell, one on the
+  // repositories widgets, one on the history screen and one on the settings
+  // screen's config-and-logs section. Measured at closing under BOTH skins -
+  // Material and the blueprint report the same four rises - so the register
+  // stays skin-independent.
+  'shell': 192,
   'workspaces': 34,
-  'repositories': 59,
+  'repositories': 60,
   'changes': 42,
-  'history': 86,
+  'history': 87,
   'browse': 26,
   'branches': 19,
   // #249 P4's overlay migration raised exactly two scenes, both for the same
@@ -322,7 +329,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // application reaching the contract, not a skin drawing more of itself.
   'stashes': 19,
   'tags': 39,
-  'settings': 156,
+  'settings': 157,
   'merge_conflicts': 36,
 };
 

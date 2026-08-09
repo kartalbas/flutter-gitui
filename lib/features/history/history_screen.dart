@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        ContentPort,
         ControlScale,
         IconRole,
         Inset,
@@ -15,6 +16,8 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuSeparator,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
@@ -409,36 +412,62 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   tone: Tone.muted,
                 ),
                 const BaseGap(Proximity.related),
+                // The shortcuts themselves: a run of equals that is allowed
+                // onto a second line when the window is narrow, which is what
+                // `layout.row(wrap: true)` says. `related` is the 8 that stood
+                // between two chips exactly; what it also answers now is the
+                // distance between two LINES of them, which the bare `Wrap`
+                // left at zero.
                 Expanded(
-                  child: Wrap(
-                    spacing: AppTheme.paddingS,
-                    children: [
-                      _buildQuickFilter(
-                        AppLocalizations.of(context)!.today,
-                        HistorySearchFilter.today(),
-                      ),
-                      _buildQuickFilter(
-                        AppLocalizations.of(context)!.thisWeek,
-                        HistorySearchFilter.thisWeek(),
-                      ),
-                      _buildQuickFilter(
-                        AppLocalizations.of(context)!.thisMonth,
-                        HistorySearchFilter.thisMonth(),
-                      ),
-                      _buildQuickFilter(
-                        AppLocalizations.of(context)!.last30Days,
-                        HistorySearchFilter.last30Days(),
-                      ),
-                      if (searchFilter.isNotEmpty)
-                        BaseActionChip(
-                          label: AppLocalizations.of(
-                            context,
-                          )!.clearFilters(searchFilter.activeFilterCount),
-                          icon: PhosphorIconsRegular.x,
-                          onPressed: _clearSearch,
+                  child: SkinScope.render(context, (
+                    Skin skin,
+                    BuildContext inner,
+                  ) {
+                    return skin.layout.row(
+                      inner,
+                      [
+                        ContentPort(
+                          _buildQuickFilter(
+                            AppLocalizations.of(context)!.today,
+                            HistorySearchFilter.today(),
+                          ),
                         ),
-                    ],
-                  ),
+                        ContentPort(
+                          _buildQuickFilter(
+                            AppLocalizations.of(context)!.thisWeek,
+                            HistorySearchFilter.thisWeek(),
+                          ),
+                        ),
+                        ContentPort(
+                          _buildQuickFilter(
+                            AppLocalizations.of(context)!.thisMonth,
+                            HistorySearchFilter.thisMonth(),
+                          ),
+                        ),
+                        ContentPort(
+                          _buildQuickFilter(
+                            AppLocalizations.of(context)!.last30Days,
+                            HistorySearchFilter.last30Days(),
+                          ),
+                        ),
+                        if (searchFilter.isNotEmpty)
+                          ContentPort(
+                            BaseActionChip(
+                              label: AppLocalizations.of(
+                                context,
+                              )!.clearFilters(searchFilter.activeFilterCount),
+                              icon: PhosphorIconsRegular.x,
+                              onPressed: _clearSearch,
+                            ),
+                          ),
+                      ],
+                      gap: Proximity.related,
+                      // What the bare `Wrap` did: each chip hangs from its own
+                      // top edge rather than being centred on the tallest.
+                      cross: CrossAxisAlignment.start,
+                      wrap: true,
+                    );
+                  }),
                 ),
               ],
             ),

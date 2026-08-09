@@ -2,7 +2,8 @@
 /// the armed `token_read_is_mechanical` rule is allowed to find in the
 /// application's `lib/`, each entry naming the contract member the read is
 /// waiting for — or, for the handful the vocabulary genuinely cannot say yet,
-/// the missing word itself.
+/// the missing word itself — or, for the sites the contract cannot reach or
+/// does not govern by construction, the named permanent carve-out.
 ///
 /// This is the same pattern as `packages/gitui_skin_material/docs/
 /// deviation_register.yaml`: a register that is normative and executable, and
@@ -13,7 +14,7 @@
 /// read and deleting its entry is one change, reviewed together. That is what
 /// stops the register rotting into an excuse list.
 ///
-/// Two kinds of entry, told apart by which field they carry, because they
+/// Three kinds of entry, told apart by which field they carry, because they
 /// have different causes and go away for different reasons:
 ///
 /// * [TokenReadRegisterEntry.waitsFor] — the read sits inside a construction
@@ -24,6 +25,14 @@
 ///   the contract vocabulary has no word for. There is no member to wait for;
 ///   filing it under one would misstate the cause. Each gap names the missing
 ///   word so the vocabulary decision it needs can be made on its own terms.
+/// * [TokenReadRegisterEntry.carveOut] — the read sits in code the contract
+///   cannot reach (it runs where no skin scope exists) or does not govern
+///   (a file outside the shipping application). No member and no word would
+///   ever free it; the read dies with its code — deleted or redesigned — and
+///   this two-way register forces the entry out in that same change. The
+///   category exists so the gap list cannot quietly become the place where
+///   the unsayable and the merely unreachable are counted as one cause
+///   (#433).
 ///
 /// The `reason` lives here, not in a comment at the call site, so this file
 /// is the single place the remainder is counted and argued.
@@ -46,8 +55,9 @@
 library;
 
 /// One register entry: `reads` allowed classifier reports at `site` in
-/// `file`, waiting for `waitsFor` (a P5 contract member) or blocked on
-/// `vocabularyGap` (a word the contract vocabulary does not have).
+/// `file`, waiting for `waitsFor` (a P5 contract member), blocked on
+/// `vocabularyGap` (a word the contract vocabulary does not have), or kept
+/// by `carveOut` (a named permanent exception the contract cannot absorb).
 class TokenReadRegisterEntry {
   const TokenReadRegisterEntry({
     required this.file,
@@ -55,6 +65,7 @@ class TokenReadRegisterEntry {
     required this.reads,
     this.waitsFor,
     this.vocabularyGap,
+    this.carveOut,
     required this.reason,
   });
 
@@ -71,14 +82,26 @@ class TokenReadRegisterEntry {
   final int reads;
 
   /// The P5 contract member whose arrival deletes the construction this read
-  /// is part of. Exactly one of [waitsFor] and [vocabularyGap] is set.
+  /// is part of. Exactly one of [waitsFor], [vocabularyGap] and [carveOut]
+  /// is set.
   final String? waitsFor;
 
   /// The meaning the contract vocabulary cannot express yet. Exactly one of
-  /// [waitsFor] and [vocabularyGap] is set.
+  /// [waitsFor], [vocabularyGap] and [carveOut] is set.
   final String? vocabularyGap;
 
-  /// Why this read cannot convert before its member (or word) exists.
+  /// The named permanent exception that keeps this read: the site is outside
+  /// the contract's reach (code that runs where no skin scope exists, so no
+  /// word could be resolved even if it existed) or outside its scope (a file
+  /// that is not part of the shipping application). Deliberately hard to
+  /// enter: a carve-out claims a conversion is impossible by construction,
+  /// never that it is merely unpleasant, and the claim is argued in the
+  /// entry's [reason]. Exactly one of [waitsFor], [vocabularyGap] and
+  /// [carveOut] is set.
+  final String? carveOut;
+
+  /// Why this read cannot convert before its member (or word) exists — or,
+  /// for a carve-out, why no member and no word ever frees it.
   final String reason;
 }
 
@@ -160,9 +183,11 @@ TokenReadReconciliation reconcileTokenReads({
   return TokenReadReconciliation(unregistered: unregistered, stale: stale);
 }
 
-/// The register itself: 77 reads as of the 2026-08-09 census — 66 waiting for
-/// a named P5 member, 11 blocked on a missing word. The gate test pins the
-/// total, shrink-only; lower it when converting, never raise it.
+/// The register itself: 77 reads as of the 2026-08-09 census — 64 waiting
+/// for a named P5 member, 6 blocked on a missing word, 7 kept by a named
+/// permanent carve-out (#433). The gate test pins the total (shrink-only —
+/// lower it when converting, never raise it) and the per-cause counts, so a
+/// read cannot change its story without passing through that pin.
 const List<TokenReadRegisterEntry> tokenReadRegister = [
   // ── chrome.screen — ScreenSpec.primaryActions (15 reads) ────────────────
   // The entire hand-built draggable speed dial. SKIN-CONTRACT-MEMBERS.md:1357
@@ -330,7 +355,7 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'delete geometry.',
   ),
 
-  // ── layout.grid — GridSpec with onColumnsChanged (8 reads) ──────────────
+  // ── layout.grid — GridSpec with onColumnsChanged (6 reads) ──────────────
   // GridSpec's own doc (layout_specs.dart:8-14) names this exact
   // construction: the screen re-implements the delegate's own formula.
   TokenReadRegisterEntry(
@@ -379,21 +404,6 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
     waitsFor: 'layout.grid (GridSpec)',
     reason: 'Grid gutter; the grid member owns its gutters.',
   ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
-    site: 'crossAxisSpacing: AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec)',
-    reason: 'Grid gutter; the grid member owns its gutters.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
-    site: 'mainAxisSpacing: AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec)',
-    reason: 'Grid gutter; the grid member owns its gutters.',
-  ),
-
   // ── surfaces.tree (5 reads) ─────────────────────────────────────────────
   // The tree owns per-depth indent, row height and (via TreeNodeSpec.menu)
   // its own row-action anchor.
@@ -612,30 +622,14 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'PanelSpec deletes.',
   ),
 
-  // ── Vocabulary gaps (11 reads, tracked in #433) ─────────────────────────
+  // ── Vocabulary gaps (6 reads) ───────────────────────────────────────────
   // No member to wait for; each entry names the missing word instead, so the
   // vocabulary decision it needs can be made on its own terms rather than
-  // being buried under a fake member name.
-  TokenReadRegisterEntry(
-    file: 'lib/main.dart',
-    site: 'size: AppTheme.iconXL * 3 + AppTheme.paddingS,',
-    reads: 2,
-    vocabularyGap: 'a splash/boot surface and a brand mark at display scale',
-    reason:
-        'The boot splash renders before the MaterialApp - and therefore '
-        'before any skin scope - exists; the surface cannot call '
-        'context.skin at all at that moment in the app\'s life, and the '
-        'contract has no splash member and no word for a 104px brand mark.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/main.dart',
-    site: 'const SizedBox(height: AppTheme.iconXL * 2),',
-    reads: 1,
-    vocabularyGap: 'a splash/boot surface and a brand mark at display scale',
-    reason:
-        'The same pre-skin boot splash: the separation under the brand '
-        'mark, unstatable for the same reason.',
-  ),
+  // being buried under a fake member name. #433 audited this list and moved
+  // the reads that were not actually waiting for a word - the pre-scope boot
+  // splash and the unreachable specimen sheet - into the named carve-outs
+  // below, so what remains here is exactly the set a vocabulary decision
+  // would free.
   TokenReadRegisterEntry(
     file: 'lib/features/repositories/dialogs/create_pull_request_dialog.dart',
     site: 'height: AppTheme.paddingL + AppTheme.paddingS,',
@@ -648,17 +642,6 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'hand-copied so the Local/Remote toggle aligns with the field\'s '
         'input box. controls.choiceGroup replaces the toggle but does not '
         'absorb a metric of the other control.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
-    site: 'size: AppTheme.iconXL * 2,',
-    reads: 2,
-    vocabularyGap: 'a specimen/display icon scale',
-    reason:
-        'The screen\'s subject IS the raw weight difference between two '
-        'Phosphor fonts, so IconRole cannot be used (the skin would '
-        're-decide the weight and delete the comparison) and ControlScale '
-        'stops at 24.',
   ),
   TokenReadRegisterEntry(
     file: 'lib/shared/components/base_diff_viewer.dart',
@@ -683,5 +666,84 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'Where a keyboard-opened context menu anchors on the selected '
         'commit row. overlays.presentMenu requires an application-supplied '
         'at: Offset, so this length survives the overlay funnel.',
+  ),
+
+  // ── Named carve-outs (7 reads, decided in #433) ─────────────────────────
+  // Not waiting for anything. Each of these sites is outside the contract's
+  // reach or scope by construction, so no P5 member and no new vocabulary
+  // word would ever free it; the read dies with its code - deleted or
+  // redesigned - never with a vocabulary decision.
+  TokenReadRegisterEntry(
+    file: 'lib/main.dart',
+    site: 'size: AppTheme.iconXL * 3 + AppTheme.paddingS,',
+    reads: 2,
+    carveOut: 'pre-scope boot splash: renders before any skin scope exists',
+    reason:
+        'The boot splash (_NativeLoadingScreen) is returned from build() '
+        'BEFORE the MaterialApp whose builder installs SkinScope, so at '
+        'that moment in the app\'s life there is no skin to answer ANY '
+        'word - inventing "a brand mark at display scale" would free '
+        'nothing, which is what made the old vocabulary-gap filing false: '
+        'the missing thing is the scope, not a word. Same shape as the '
+        'three declared exceptions on SkinRootClaims - root plumbing in '
+        'main.dart that the contract names instead of absorbing. The brand '
+        'mark\'s 104px ends only if the boot sequence is redesigned to '
+        'install a scope of its own, a programme decision rather than a '
+        'vocabulary one.',
+  ),
+  TokenReadRegisterEntry(
+    file: 'lib/main.dart',
+    site: 'const SizedBox(height: AppTheme.iconXL * 2),',
+    reads: 1,
+    carveOut: 'pre-scope boot splash: renders before any skin scope exists',
+    reason:
+        'The same pre-scope boot splash: the separation under the brand '
+        'mark, kept for the same structural reason.',
+  ),
+  TokenReadRegisterEntry(
+    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
+    site: 'size: AppTheme.iconXL * 2,',
+    reads: 2,
+    carveOut:
+        'developer-only specimen sheet: unreachable in the shipping '
+        'application and recorded for deletion',
+    reason:
+        'The screen\'s subject IS the raw weight difference between two '
+        'Phosphor fonts, so rendering its specimens through the contract '
+        'would measure the skin instead of the fonts: IconRole lets the '
+        'skin re-decide the weight, which deletes the comparison (#249 '
+        'conflict C3). No vocabulary is grown for it - a specimen is not a '
+        'control, and ControlScale\'s own doc caps the contract at the '
+        'three rungs every language honours - because the contract\'s scope '
+        'is the shipping application and this screen is not in it: zero '
+        'references anywhere in lib/, and the screen-population census '
+        '(test/skin/screen_population.dart, kScreensNoSceneCovers) already '
+        'records that it is to be DELETED rather than covered. These reads '
+        'die with the file, and this two-way register forces their entries '
+        'out in that same change.',
+  ),
+  TokenReadRegisterEntry(
+    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
+    site: 'crossAxisSpacing: AppTheme.paddingM,',
+    reads: 1,
+    carveOut:
+        'developer-only specimen sheet: unreachable in the shipping '
+        'application and recorded for deletion',
+    reason:
+        'Formerly filed under layout.grid (GridSpec), which claimed a P5 '
+        'conversion would visit this gutter. It will not: the screen is '
+        'unreachable and recorded for deletion (see the entry above), and '
+        'a dead screen is deleted, not converted. Refiled in #433 so the '
+        'GridSpec remainder counts only reads a conversion will actually '
+        'reach.',
+  ),
+  TokenReadRegisterEntry(
+    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
+    site: 'mainAxisSpacing: AppTheme.paddingM,',
+    reads: 1,
+    carveOut:
+        'developer-only specimen sheet: unreachable in the shipping '
+        'application and recorded for deletion',
+    reason: 'The other gutter of the same dead grid; see the entries above.',
   ),
 ];

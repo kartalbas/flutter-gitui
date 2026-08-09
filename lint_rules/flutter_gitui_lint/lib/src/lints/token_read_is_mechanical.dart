@@ -80,7 +80,8 @@ import '../../token_read_register.dart';
 /// the Material skin's `docs/deviation_register.yaml` — naming every read
 /// that is allowed to remain and the P5 contract member it is waiting for
 /// (or, for the few meanings the vocabulary cannot say yet, the missing word
-/// itself).
+/// itself; or, for the sites the contract cannot reach or does not govern by
+/// construction, the named permanent carve-out that keeps them, #433).
 ///
 /// The register fails in **both directions**. A read the classifier reports
 /// that has no register entry is reported at its site, exactly as before. A

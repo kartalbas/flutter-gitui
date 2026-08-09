@@ -92,7 +92,9 @@ that means nothing (the defect that shipped an unenforced format check twice,
 still exists is the **two-way token-read register**,
 `lib/token_read_register.dart`: every remaining read has an entry naming its
 file, its site line and the contract member it waits for (or the missing
-vocabulary word), an unregistered read is an error, and a registered entry
+vocabulary word, or the named permanent carve-out that keeps it — code the
+contract cannot reach or does not govern by construction, #433), an
+unregistered read is an error, and a registered entry
 whose site is now clean is an error too — stale — so the register can only
 shrink, and only deliberately. `test/token_read_register_gate_test.dart` in
 the application package proves both directions and pins the shrink-only

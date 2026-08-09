@@ -192,17 +192,22 @@ void main() {
   });
 
   group('the register is well-formed', () {
-    test('every entry names exactly one cause: a member or a missing word', () {
+    test('every entry names exactly one cause: a member, a missing word, or a '
+        'carve-out', () {
       for (final entry in tokenReadRegister) {
-        final hasMember = entry.waitsFor != null;
-        final hasGap = entry.vocabularyGap != null;
+        final causes = [
+          entry.waitsFor,
+          entry.vocabularyGap,
+          entry.carveOut,
+        ].whereType<String>().length;
         expect(
-          hasMember ^ hasGap,
-          isTrue,
+          causes,
+          1,
           reason:
               '${entry.file} site "${entry.site}": an entry waits for a P5 '
-              'member XOR names a vocabulary gap. Both or neither files the '
-              'remainder under the wrong cause.',
+              'member, names a vocabulary gap, or names a permanent '
+              'carve-out - exactly one. Anything else files the remainder '
+              'under the wrong cause.',
         );
       }
     });
@@ -300,17 +305,61 @@ void main() {
         (sum, entry) => sum + entry.reads,
       );
 
-      // 77 is the 2026-08-09 census: 66 reads waiting for a named P5 member,
-      // 11 blocked on a missing vocabulary word. Converting a read lowers
-      // this number in the same change that deletes its entry. Raising it is
-      // the forbidden direction: new code states its lengths through the
-      // contract, it does not register exceptions.
+      // 77 is the 2026-08-09 census: 64 reads waiting for a named P5 member,
+      // 6 blocked on a missing vocabulary word, 7 kept by a named permanent
+      // carve-out (#433). Converting a read lowers this number in the same
+      // change that deletes its entry. Raising it is the forbidden
+      // direction: new code states its lengths through the contract, it
+      // does not register exceptions.
       expect(
         total,
         77,
         reason:
             'The register must shrink deliberately: update this pin in the '
             'same change that shrinks (never grows) the register.',
+      );
+    });
+
+    test('the per-cause counts are pinned, so a read cannot change its story '
+        'silently', () {
+      int readsWhere(bool Function(TokenReadRegisterEntry entry) cause) =>
+          tokenReadRegister.fold<int>(
+            0,
+            (sum, entry) => cause(entry) ? sum + entry.reads : sum,
+          );
+
+      // The total pin cannot see a reclassification: moving reads between
+      // causes keeps 77 true while changing WHY they claim to remain,
+      // which is exactly the hiding place the causes exist to close (#433
+      // found two sites sitting in the gap list that no vocabulary
+      // decision would ever free). Unlike the total, a cause count may
+      // legitimately move in either direction - a vocabulary decision can
+      // turn a gap into a waiting member - but only through this pin, in
+      // the same change that re-argues the entries' reasons.
+      expect(
+        readsWhere((entry) => entry.waitsFor != null),
+        64,
+        reason:
+            'Reads waiting for a named P5 contract member. A conversion '
+            'lowers this; a reclassification moves it and must say why.',
+      );
+      expect(
+        readsWhere((entry) => entry.vocabularyGap != null),
+        6,
+        reason:
+            'Reads blocked on a word the vocabulary does not have. Only a '
+            'vocabulary decision moves this: grow the word and convert, '
+            'or refile the entry under its true cause.',
+      );
+      expect(
+        readsWhere((entry) => entry.carveOut != null),
+        7,
+        reason:
+            'Reads kept by a named permanent carve-out: outside the '
+            'contract\'s reach (the pre-scope boot splash) or outside its '
+            'scope (the unreachable icon-comparison specimen sheet, which '
+            'is deleted rather than converted). These die with their '
+            'code, never with a member or a word.',
       );
     });
   });

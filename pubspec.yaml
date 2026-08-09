@@ -35,8 +35,8 @@ workspace:
   - packages/gitui_skin_material
   # The Fluent 2 skin (#249): the second design language, and the contract's
   # falsifier - Material was written alongside the contract and cannot
-  # disconfirm it. A workspace member so `fluent_ui` resolves against this
-  # Flutter/Dart SDK and these shared transitive versions, and deliberately
+  # disconfirm it. A workspace member so `gitui_skin_fluent` resolves against
+  # this Flutter/Dart SDK and these shared transitive versions, and deliberately
   # NOT in this package's `dependencies`: nothing in lib/ registers it yet,
   # and the workspace-isolation gate below (depend_on_referenced_packages:
   # error) keeps lib/ unable to import it until that day comes.

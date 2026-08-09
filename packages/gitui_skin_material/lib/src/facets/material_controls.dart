@@ -1601,12 +1601,19 @@ class _MaterialSuggestFieldState<T> extends State<_MaterialSuggestField<T>> {
     setState(() => _overlay = entry);
   }
 
-  /// What the current value is called, or the hint while there is none.
+  /// What the current value is called, or the closed control's own
+  /// placeholder while there is none.
+  ///
+  /// The PLACEHOLDER and never the hint: this skin draws two surfaces - a
+  /// closed field and a search box in the overlay - so the two statements the
+  /// spec separates land on one surface each. The hint stays in the search
+  /// box, where "what to say while nothing is typed" is actually about
+  /// typing.
   String get _shown {
     for (final SuggestItem<T> item in widget.spec.items) {
       if (item.value == widget.spec.value) return item.label;
     }
-    return widget.spec.hint ?? '';
+    return widget.spec.placeholder ?? '';
   }
 
   @override
@@ -1623,7 +1630,13 @@ class _MaterialSuggestFieldState<T> extends State<_MaterialSuggestField<T>> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (spec.label.isNotEmpty) ...<Widget>[
-            Text(spec.label, style: theme.textTheme.labelMedium),
+            // `labelLarge`, not `labelMedium`: the application had
+            // deliberately raised this label to the control rung so it stops
+            // sitting a step below every other field label in the same form,
+            // the owner verified that repair, and the extraction dropped it.
+            // The rung is this skin's own answer restored, not a value passed
+            // through the seam.
+            Text(spec.label, style: theme.textTheme.labelLarge),
             const SizedBox(height: MaterialMetrics.spaceXS),
           ],
           InkWell(

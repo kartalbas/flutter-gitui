@@ -247,7 +247,21 @@ class FileBlamePanel extends ConsumerWidget {
                 // `tight` on a ladder that skips it, and the chip rides the
                 // blame gutter, where a line's height is how much code fits
                 // on the screen - rounding either axis would resize every
-                // gutter chip. It waits for `surfaces.badge`.
+                // gutter chip.
+                //
+                // Decided in #438: it does NOT wait for `surfaces.badge` any
+                // more. Its fill names a Material CONTAINER role
+                // (`secondaryContainer`), and a contract tone for a container
+                // role is un-promisable - neither Fluent nor macOS has a
+                // paired-container concept (the vocabulary's own `Tone.
+                // onAccent` note records that asymmetry), so the word would
+                // be Material's containment model crossing the seam under a
+                // neutral name. Nor is a hash chip a badge at all: its
+                // content is code the user reads, its label rides the type
+                // ramp, and its geometry rides the gutter. If a word ever
+                // earns its place here it is an inline-code span - every
+                // language has that idiom - which is a new member to derive
+                // from need, not a growth of the badge.
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.secondaryContainer,

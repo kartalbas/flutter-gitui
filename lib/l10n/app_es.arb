@@ -232,6 +232,9 @@
     }
   },
   "regex": "Regex",
+  "removeDateFilterTooltip": "Quitar el filtro de fecha",
+  "removeAuthorFilterTooltip": "Quitar el filtro de autor",
+  "removeRegexFilterTooltip": "Quitar el filtro de regex",
   "pushTagsCount": "{count, plural, =1{Enviar {count} etiqueta} other{Enviar {count} etiquetas}}",
   "@pushTagsCount": {
     "description": "Push tags button with count",

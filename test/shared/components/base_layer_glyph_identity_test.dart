@@ -67,11 +67,25 @@
 ///    and the caret is the member's, drawn as one mark it turns rather than as
 ///    two the application swaps. `base_panel.dart` still names the pair.
 ///
-/// The tally therefore reads 74 references: the 81 the conversion measured,
-/// less those seven.
+/// The third kind is a construction MOVING OUT of the censused area rather
+/// than converting or dying, recorded for the same reason:
+///
+///  * `base_diff_viewer.dart` named `file` and `gitDiff` for the speed dial's
+///    view-mode toggle. #438 resolved that dial as the site asking the wrong
+///    member - a region's action set belongs to the region's panel header,
+///    not to `ScreenSpec.primaryActions` - so the toggle is a header action
+///    of the changes screen's diff panel now, naming the SAME two marks as
+///    `IconRole.file` / `IconRole.gitDiff` in
+///    `lib/features/changes/widgets/git_status_tree_view.dart`, which is
+///    outside this census's `shared/` scope. The viewer names no mark at
+///    all any more; `async_value_builder.dart` still names `file`, and
+///    `gitDiff` leaves the distinct set with the move.
+///
+/// The tally therefore reads 72 references: the 81 the conversion measured,
+/// less the seven above, less the diff viewer's two that moved out of scope.
 ///
 /// **Two - the skin maps the mark back to the identical glyph.** The second
-/// test resolves every one of the 39 marks through `MaterialGlyphs` and
+/// test resolves every one of the 38 marks through `MaterialGlyphs` and
 /// compares the resulting `IconData` field for field against this
 /// application's own generated Phosphor constants. Identity means the
 /// codepoint, the font family, the font package and `matchTextDirection` all
@@ -147,17 +161,19 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 74 references', () {
+  test('the census still accounts for all 72 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 74-entry diff.
+    // agreeing and this says so in one line instead of a 72-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 74);
-    // Still 39 distinct marks: the reference `quick_settings_menu.dart` gained
-    // is `check`, which `language_selector.dart` already drew.
-    expect(_marksInCensus().length, 39);
+    expect(total, 72);
+    // 38 distinct marks: `quick_settings_menu.dart`'s gained `check` was
+    // already drawn by `language_selector.dart`, and `gitDiff` left with the
+    // diff viewer's toggle when it moved into the changes screen's panel
+    // header (`file` stays - `async_value_builder.dart` still names it).
+    expect(_marksInCensus().length, 38);
   });
 
   test('the Material skin maps every one of those marks to the same glyph', () {
@@ -562,10 +578,9 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'warning': 1,
     'x': 1,
   },
-  'lib/shared/components/base_diff_viewer.dart': <String, int>{
-    'file': 1,
-    'gitDiff': 1,
-  },
+  // base_diff_viewer.dart is deliberately absent: its two marks (`file`,
+  // `gitDiff`) moved with the view-mode toggle into the changes screen's
+  // diff panel header - see the third recorded difference in the doc above.
   'lib/shared/components/base_panel.dart': <String, int>{
     'caretDown': 1,
     'caretUp': 1,

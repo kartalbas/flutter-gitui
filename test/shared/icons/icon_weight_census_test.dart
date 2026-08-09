@@ -75,7 +75,7 @@ class _Weights {
 /// `git show HEAD:` each file and over the working tree, with whole-line
 /// comments dropped so that a comment recording what a site USED to draw is
 /// not counted as a live reference. 110 Bold and 14 Fill references before;
-/// 91 and 10 now, and the two "before" totals are the ones the mapping phase's
+/// 78 and 9 now, and the two "before" totals are the ones the mapping phase's
 /// own census reported.
 const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/core/navigation/app_shell.dart': _Weights(2, 1, 2, 0),
@@ -93,7 +93,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
     3,
     0,
   ),
-  'lib/features/history/widgets/file_tree_panel.dart': _Weights(2, 0, 2, 0),
+  'lib/features/history/widgets/file_tree_panel.dart': _Weights(2, 0, 0, 0),
   'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart':
       _Weights(4, 0, 2, 0),
   'lib/features/repositories/dialogs/create_pull_request_dialog.dart': _Weights(
@@ -146,7 +146,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
     0,
     0,
   ),
-  'lib/features/tags/tags_screen.dart': _Weights(12, 2, 12, 1),
+  'lib/features/tags/tags_screen.dart': _Weights(12, 2, 1, 0),
   'lib/features/tags/widgets/tag_list_tile.dart': _Weights(2, 0, 2, 0),
   'lib/features/workspaces/widgets/workspace_card.dart': _Weights(2, 0, 2, 0),
   'lib/features/workspaces/widgets/workspace_list_item.dart': _Weights(
@@ -183,6 +183,11 @@ enum _Fate {
   /// The mark now renders at the ordinary stroke. A deliberate, measured
   /// decision, recorded at the call site and repeated here.
   normalised,
+
+  /// The mark left the source together with the hand-painted construction
+  /// that drew it; the member that replaced the construction states the same
+  /// fact in its own idiom, so no site renders this mark at any weight.
+  superseded,
 }
 
 /// One site that gave up a Phosphor weight, and what became of it.
@@ -198,7 +203,7 @@ class _GivenUp {
 
 /// Every weight the conversion removed from `lib/`, with its disposition.
 ///
-/// Twenty-three entries against a ledger difference of 19 Bold plus 4 Fill,
+/// Thirty-seven entries against a ledger difference of 32 Bold plus 5 Fill,
 /// so the two measurements have to agree; the third test makes them.
 const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
   // ---- Fill: four sites, all four still drawn solid -----------------------
@@ -406,6 +411,131 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
         'saturated swatch has to survive the contrast - the skin deciding a '
         'WEIGHT, which is exactly the decision IconRole refuses to carry.',
   ),
+  // ---- The #438 closing wave: two constructions crossed the seam ----------
+  _GivenUp(
+    'lib/features/history/widgets/file_tree_panel.dart',
+    'folder',
+    'Bold',
+    _Fate.normalised,
+    'The details tree crossed the seam as surfaces.tree, and the member '
+        'draws every node mark at the ordinary stroke today. The loss is '
+        'recorded on the member\'s own Icon (material_surfaces.dart, "A '
+        'KNOWN weight loss"): the boldOf swap is one line, held back only '
+        'because the tree goldens cannot be regenerated on Windows.',
+  ),
+  _GivenUp(
+    'lib/features/history/widgets/file_tree_panel.dart',
+    'folderOpen',
+    'Bold',
+    _Fate.normalised,
+    'The open twin of the entry above, by the same seam-crossing and with '
+        'the same recorded one-line restoration waiting on Linux goldens.',
+  ),
+  // The tags screen's sort and group menus stopped hand-painting their own
+  // selection radios (a Bold checkCircle against a Regular circle, 16 px,
+  // eleven rows across the two menus) when both menus became the contract's
+  // anchored menu. The selection signal is the SKIN's now - Material's
+  // MenuChoice answer is the emphasised label with a trailing check - so the
+  // eleven marks left with the construction rather than surviving anywhere
+  // at any weight. One entry per reference, as the ledger requires.
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Sort menu, name A-Z row: the hand-drawn selection radio died with the '
+        'menu construction; MenuChoice.selected carries the fact instead.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Sort menu, name Z-A row, by the same conversion to MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Sort menu, date-newest row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Sort menu, date-oldest row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Sort menu, version-ascending row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Sort menu, version-descending row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Group menu, no-grouping row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Group menu, by-prefix row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Group menu, by-version row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Group menu, by-author row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.superseded,
+    'Group menu, by-date row, by the same conversion to '
+        'MenuChoice.selected.',
+  ),
+  _GivenUp(
+    'lib/features/tags/tags_screen.dart',
+    'rows',
+    'Fill',
+    _Fate.restored,
+    'The engaged group anchor. "A grouping is applied" crosses as '
+        'MenuAnchorSpec.selected; Material\'s anchor is its own icon-button '
+        'member, whose selected mark is MaterialGlyphs.filledOf, and the '
+        'filled table holds rows - so the solid mark is re-decided on the '
+        'skin\'s side of the seam, exactly like the star and the funnel.',
+  ),
 ];
 
 void main() {
@@ -491,8 +621,8 @@ void main() {
         fillRemoved,
         _kWeightsGivenUp.where((_GivenUp g) => g.weight == 'Fill').length,
       );
-      expect(boldRemoved, 19);
-      expect(fillRemoved, 4);
+      expect(boldRemoved, 32);
+      expect(fillRemoved, 5);
     });
 
     test('every removal names the file it happened in', () {
@@ -558,12 +688,12 @@ void main() {
     });
   });
 
-  group('the eighteen normalised marks are the ordinary stroke everywhere', () {
+  group('the twenty normalised marks are the ordinary stroke everywhere', () {
     test('each one is a mark the application already draws unheavied', () {
       // The specific way this could still have gone wrong: ten roles in the
       // census are drawn ONLY at Bold, so routing one of them through a bare
       // `type.icon` would render a mark that appears nowhere in the shipping
-      // application. None of the eighteen is such a role — each is drawn at
+      // application. None of the twenty is such a role — each is drawn at
       // the ordinary stroke at other sites (xCircle at
       // command_log_panel.dart:172, checkSquare at
       // base_select_all_button.dart:127) — and this pins that.
@@ -571,6 +701,7 @@ void main() {
         IconRole.magnifyingGlass,
         IconRole.gitPullRequest,
         IconRole.folder,
+        IconRole.folderOpen,
         IconRole.floppyDisk,
         IconRole.plus,
         IconRole.checkCircle,

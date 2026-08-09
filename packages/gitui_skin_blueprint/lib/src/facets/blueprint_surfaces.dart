@@ -5,7 +5,7 @@ import '../blueprint_ink.dart';
 
 /// Things that hold other things, naked.
 ///
-/// Nineteen members, the largest facet, and the one where a parameter is most
+/// Twenty members, the largest facet, and the one where a parameter is most
 /// easily dropped without anybody noticing: a row has a leading slot, a
 /// trailing slot, a badge and a menu; a tree has expansion, selection, checking
 /// and a context menu per node; a banner has actions and a dismissal. A skin
@@ -231,6 +231,11 @@ final class BlueprintSurfaces implements SkinSurfaces {
   /// leading dots, which is a mark and survives it. Without that, a tree under
   /// the instrument would be a flat list and the hierarchy, which is
   /// information rather than appearance, would have been destroyed.
+  ///
+  /// [TreeSpec.revealed] is a fact about a viewport and the blueprint has no
+  /// viewport - the whole tree is in the layout - so the fact is stated as
+  /// the `[revealed]` mark on the node it names. A skin that dropped the
+  /// parameter would show nothing here, which is the point of an instrument.
   @override
   Widget tree(BuildContext context, TreeSpec spec) {
     final List<Widget> rows = <Widget>[];
@@ -432,6 +437,11 @@ final class BlueprintSurfaces implements SkinSurfaces {
   /// scale changes the smallest box the badge may be drawn in and nothing else,
   /// because the blueprint has no padding to vary: at zero inset a wider square
   /// is the only way three coarse steps can be told apart.
+  ///
+  /// A paired badge ([BadgeSpec.secondary]) draws its second fact the same way
+  /// the first is drawn - tone mark, then label - inside the same box: the
+  /// instrument's job is to prove both facts and both tones crossed the seam,
+  /// and one box is the honest rendering of "two facts in one mark".
   @override
   Widget badge(BuildContext context, BadgeSpec spec) => BlueprintBox(
     minExtent: BlueprintGeometry.extent(context, spec.scale),
@@ -441,6 +451,10 @@ final class BlueprintSurfaces implements SkinSurfaces {
       children: <Widget>[
         _marks(<String>[_iconMark(spec.icon), BlueprintMarks.tone(spec.tone)]),
         BlueprintText(spec.label),
+        if (spec.secondary != null) ...<Widget>[
+          _marks(<String>[BlueprintMarks.tone(spec.secondary!.tone)]),
+          BlueprintText(spec.secondary!.label),
+        ],
       ],
     ),
   );
@@ -452,9 +466,11 @@ final class BlueprintSurfaces implements SkinSurfaces {
   /// the whole difference: it is a second, separately named control inside the
   /// pill, and this repository requires every mark-only control to say what it
   /// does. So `removeTooltip` is carried into the removal's own semantics
-  /// rather than into the tag's, and a tag with `onRemoved` but no
-  /// `removeTooltip` shows up under the instrument as an unnamed `[remove]` -
-  /// which is exactly the defect it is.
+  /// rather than into the tag's. A tag with `onRemoved` but no `removeTooltip`
+  /// used to show up under the instrument as an unnamed `[remove]` - exactly
+  /// the defect it was - and is now unconstructible: `TagSpec`'s own
+  /// constructor refuses the pair, so what the instrument exposed the
+  /// contract now forbids.
   @override
   Widget tag(BuildContext context, TagSpec spec) => BlueprintBox(
     child: Row(
@@ -648,11 +664,15 @@ final class BlueprintSurfaces implements SkinSurfaces {
   /// **Here is one line of a diff or of a code view.**
   ///
   /// What the application knows is which stretches of the line mean what, which
-  /// side each number belongs to, and what git's own gutter character was. The
-  /// gutter character is content and not decoration - it is what makes a copied
-  /// diff still a diff - so it is rendered as the application gave it, while
-  /// every meaning that a real skin would carry as a fill or a weight is
-  /// rendered as a mark beside the run.
+  /// side each number belongs to, whether the gutter pairs two versions at
+  /// all, and what git's own gutter character was. The gutter character is
+  /// content and not decoration - it is what makes a copied diff still a diff
+  /// - so it is rendered as the application gave it, while every meaning that
+  /// a real skin would carry as a fill or a weight is rendered as a mark
+  /// beside the run. A paired line shows both sides of its gutter (`3/-` for
+  /// an old-only line), an unpaired one shows the single number it has - so a
+  /// skin that reserved a comparison gutter for a whole-file view differs
+  /// from this instrument in words, not just in pixels.
   ///
   /// The line is one `Text.rich` rather than a row of widgets, and that is a
   /// deliberate defence: a row of runs would overflow on a long line and paint
@@ -671,7 +691,7 @@ final class BlueprintSurfaces implements SkinSurfaces {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: distance.gap(Proximity.related),
         children: <Widget>[
-          BlueprintMark(_gutter(spec.oldNumber, spec.newNumber)),
+          BlueprintMark(_gutter(spec.oldNumber, spec.newNumber, spec.paired)),
           if (spec.marker != null) BlueprintText(spec.marker!),
           _marks(<String>[
             BlueprintMarks.tone(spec.tone),
@@ -763,6 +783,18 @@ final class BlueprintSurfaces implements SkinSurfaces {
         BlueprintMark(_edges('through', spec.passing)),
     ]),
   );
+
+  /// **Reserve the room this row's graph needs beside its content.**
+  ///
+  /// The blueprint draws no graph, so it invents no gutter width either -
+  /// "room for n lanes" is a design number and this skin does not make any.
+  /// What it renders is the fact itself: the count, in words, whose intrinsic
+  /// width IS this skin's reservation. A skin that sized the row's leading
+  /// slot from another skin's lane arithmetic differs from this instrument
+  /// visibly, which is exactly the drift the member exists to end.
+  @override
+  Widget commitGraphGutter(BuildContext context, GraphGutterSpec spec) =>
+      BlueprintMark('[lanes ${spec.laneCount}]');
 
   // ---------------------------------------------------------------------
   // The two pictorial members
@@ -888,10 +920,19 @@ final class BlueprintSurfaces implements SkinSurfaces {
                   checked: node.checked,
                   child: BlueprintMark(BlueprintMarks.check(node.checked)),
                 ),
-              _marks(<String>[_iconMark(node.leading)]),
+              _marks(<String>[
+                _iconMark(node.leading),
+                // The mark's stated meaning rides beside the glyph the way a
+                // tone rides on a badge; unstated stays unmarked.
+                if (node.leadingTone != null)
+                  BlueprintMarks.tone(node.leadingTone!),
+              ]),
               Expanded(child: node.content.mount()),
               _marks(<String>[
                 _countMark(node.badgeCount),
+                // The node the application says must be in view. No viewport
+                // exists here to scroll, so the fact survives as its word.
+                if (node.id == spec.revealed) '[revealed]',
                 if (selected) BlueprintMarks.selected(selected),
                 _containerMark(spec.containerFocused),
               ]),
@@ -1103,9 +1144,13 @@ final class BlueprintSurfaces implements SkinSurfaces {
         )
       : body;
 
-  /// Which line this is on each side of a diff.
-  static String _gutter(int? oldNumber, int? newNumber) =>
-      '${oldNumber ?? '-'}/${newNumber ?? '-'}';
+  /// Which line this is on each side of a diff - or, on an unpaired line,
+  /// the single number a whole-file view has. The distinction is rendered in
+  /// words because it is a fact about the content: a paired line's absent
+  /// side still exists (`3/-`), an unpaired line has no absent side.
+  static String _gutter(int? oldNumber, int? newNumber, bool paired) => paired
+      ? '${oldNumber ?? '-'}/${newNumber ?? '-'}'
+      : '${oldNumber ?? newNumber ?? '-'}';
 
   /// Every lane crossing a commit row, with the series member colouring it.
   static String _edges(String direction, List<GraphEdgeSpec> edges) =>

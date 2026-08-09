@@ -297,15 +297,23 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // Changes, browse, stashes and tags measured unchanged. Every number below
   // is the sweep's own measurement at closing time, not a sum of the slices'
   // claims.
+  // The #438 closing wave raised four scenes by +8: the changes diff panel
+  // (its frame, header actions and code lines are the skin's now, +3), the
+  // history screen (the commit-graph gutter reservation and the details
+  // file tree, +2), the browse screen (its options menu opens through the
+  // contract's anchored menu, +1) and the tags screen (its sort and group
+  // anchors, +2). Measured at closing under BOTH skins - Material and the
+  // blueprint agree on every resting count, so the register stays
+  // skin-independent and kContractRenderedUnderBlueprint stays shell-only.
   'shell': 191,
   'workspaces': 34,
   'repositories': 59,
-  'changes': 39,
-  'history': 84,
-  'browse': 25,
+  'changes': 42,
+  'history': 86,
+  'browse': 26,
   'branches': 19,
   'stashes': 17,
-  'tags': 34,
+  'tags': 36,
   'settings': 156,
   'merge_conflicts': 36,
 };

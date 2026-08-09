@@ -16,6 +16,14 @@ import '../components/base_animated_widgets.dart';
 import '../components/base_menu_item.dart';
 
 /// Quick access settings dropdown menu
+///
+/// **Stays hand-painted, by decision (#438).** The theme-mode and font-size
+/// sections are one-of-N sets the contract can state today (`MenuChoice`
+/// under `MenuSection`), but the colour-scheme rows lead with a seed-colour
+/// SWATCH - per-row artwork the sealed data set deliberately cannot carry
+/// (see `_getColorForScheme`: the missing word is a theme-picker member, not
+/// a menu slot), and a menu converts whole or not at all: converting two
+/// sections and leaving the third would put one menu half in each world.
 class QuickSettingsMenu extends ConsumerWidget {
   const QuickSettingsMenu({super.key});
 

@@ -6,7 +6,7 @@ import '../specs/overlay_specs.dart';
 
 /// Things that appear on top.
 ///
-/// Four members, and one rule that runs through all of them: **the application
+/// Five members, and one rule that runs through all of them: **the application
 /// owns the entry point, this package owns the wrapper, the skin owns the
 /// route.** A skin never gets to define how an overlay is opened, so it never
 /// gets to skip the wrapper - which is what turns a measured, shippable,
@@ -18,7 +18,7 @@ import '../specs/overlay_specs.dart';
 /// carried into a route the way Fluent's can. A contract that is right only
 /// half the time is a contract that will be got wrong.
 ///
-/// **All four members take a host, and none takes a bare envelope.** The two
+/// **All five members take a host, and none takes a bare envelope.** The two
 /// whose content is the skin's own - a menu's rows, a notice's strip - used to
 /// be handed the envelope and left to rebuild the wrapper themselves, which
 /// meant the guarantee held for half the facet and the other half ran on the
@@ -55,6 +55,27 @@ abstract interface class SkinOverlays {
     required Offset at,
     required SkinMenuHost host,
   });
+
+  /// **Build the control that offers these choices, anchored to itself.**
+  ///
+  /// The widget-returning member of an overlay facet, because an anchored
+  /// menu is one thing with two halves and the seam between them is exactly
+  /// what every language answers differently: Material opens below its own
+  /// ink-bearing icon button, Fluent attaches a flyout with its own placement
+  /// resolution, macOS's pull-down opens OVER the control. [presentMenu]
+  /// stating a bare point forced the application to perform that geometry
+  /// itself at every trigger; this member takes the trigger and the geometry
+  /// into the skin together, which is where both have always belonged.
+  ///
+  /// The entries stay inside [host] for the same reason they do on
+  /// [presentMenu]: they are reachable only where the menu's rows are built,
+  /// so the skin that opens the menu re-establishes the scope by
+  /// construction.
+  Widget menuAnchor(
+    BuildContext context,
+    MenuAnchorSpec spec,
+    SkinMenuHost host,
+  );
 
   /// **Attach this content to the control the user just operated.**
   Future<T?> presentPopover<T>(

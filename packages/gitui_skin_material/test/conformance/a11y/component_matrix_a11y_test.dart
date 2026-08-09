@@ -515,6 +515,7 @@ void main() {
             label: 'Date: Last 7 days',
             size: size,
             onDeleted: () => deleted++,
+            deleteTooltip: 'Remove the date filter',
           ),
         );
         final Rect target = tester.getRect(
@@ -560,7 +561,11 @@ void main() {
       int deleted = 0;
       await pumpConformance(
         tester,
-        BaseBadge(label: 'deletable', onDeleted: () => deleted++),
+        BaseBadge(
+          label: 'deletable',
+          onDeleted: () => deleted++,
+          deleteTooltip: 'Remove',
+        ),
       );
       final Finder target = find.ancestor(
         of: find.byIcon(MaterialGlyphs.of(IconRole.x)),

@@ -7,6 +7,20 @@ import 'overlay_specs.dart';
 import 'toolbar_specs.dart';
 import 'type_specs.dart';
 
+/// Element-wise list equality, written out because the contract may reach
+/// `package:flutter/widgets.dart` and nothing else: `foundation.dart`'s
+/// `listEquals` is not in the widgets export surface, and the dependency
+/// isolation gate (test/dependency_isolation_gate_test.dart) holds every
+/// import of this package to that single allowance.
+bool _listEquals<T>(List<T> a, List<T> b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+  for (int i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
+}
+
 /// A container that holds one thing and can be chosen.
 ///
 /// The question is "here is a self-contained object the user can pick" - a
@@ -141,7 +155,17 @@ final class DisclosureSpec {
   /// How to tell the application the user opened or closed it.
   final ValueChanged<bool> onExpandedChanged;
 
-  /// A mark at the head of the header.
+  /// A mark at the head of the header, naming the disclosure - drawn in the
+  /// language's own treatment.
+  ///
+  /// Deliberately no tone beside it, and the asymmetry with
+  /// [TreeNodeSpec.leadingTone] is a decision rather than an omission. A tree
+  /// node's whole row is member-drawn, so a mark whose meaning varies per node
+  /// has nowhere else to carry it; a disclosure's [header] is a content port,
+  /// and a mark that STATES something per entry - the command log's failed-run
+  /// cross - is part of what the header says, composed there by the
+  /// application at its own scale and alignment. Growing a tone here would be
+  /// a second way to say that one thing.
   final IconRole? leading;
 
   /// Something at the tail of the header, beside whatever chevron the language
@@ -226,6 +250,7 @@ final class TreeNodeSpec {
     required this.content,
     this.children = const <TreeNodeSpec>[],
     this.leading,
+    this.leadingTone,
     this.trailing,
     this.badgeCount,
     this.checked,
@@ -243,6 +268,19 @@ final class TreeNodeSpec {
 
   /// A mark at the head of the node.
   final IconRole? leading;
+
+  /// What the [leading] mark MEANS, where the node's mark carries a meaning
+  /// of its own - a file coloured by what happened to it, which in the
+  /// commit-details tree is the only per-row statement of that fact.
+  ///
+  /// Null means the meaning is unstated and the language gives the mark its
+  /// own treatment (Material paints a branch's mark in the accent, because
+  /// the hierarchy is what the eye must find first, and a leaf's in the row's
+  /// foreground). A tone here is application truth, never a colour: Material
+  /// resolves it against its own per-brightness palette, the blueprint prints
+  /// the tone's name beside the glyph, and a language that does not colour
+  /// file marks at all may carry the meaning elsewhere in the row.
+  final Tone? leadingTone;
 
   /// Something at the tail of the node.
   final ContentPort? trailing;
@@ -279,6 +317,7 @@ final class TreeSpec {
     this.onCheck,
     this.onContextMenu,
     this.containerFocused = true,
+    this.revealed,
   });
 
   /// The top of the tree.
@@ -307,6 +346,28 @@ final class TreeSpec {
 
   /// Whether the tree has the keyboard. See [CardSpec.containerFocused].
   final bool containerFocused;
+
+  /// Which node must be inside the viewport, by id - or null when the
+  /// application makes no such claim.
+  ///
+  /// The member owns its own scrollable, so "keep the keyboard highlight on
+  /// screen" cannot be said with a controller without a Flutter scroll type -
+  /// a VALUE - crossing the seam. This is the same fact said as data: the id
+  /// is application truth ("the user's highlight is on this node"), and
+  /// everything about honouring it is the skin's - the row extents only the
+  /// skin knows, whether the scroll jumps or animates, and where in the
+  /// viewport the row comes to rest. A skin honours it when the value ARRIVES
+  /// or CHANGES, never on every rebuild, so the user can still scroll away
+  /// from a revealed node without being dragged back.
+  ///
+  /// Revealing a node hidden under a collapsed ancestor is a no-op: expansion
+  /// is the application's own fact, carried in [expanded], and a skin that
+  /// opened branches to honour a reveal would be mutating application state.
+  ///
+  /// Deliberately no alignment parameter: no caller states one - both
+  /// application trees ask only that the highlight stay visible - and minimal
+  /// motion is each language's own answer, not a spec knob.
+  final Object? revealed;
 }
 
 /// One tab, and what it contains.
@@ -437,6 +498,24 @@ final class PressableSpec {
   final String? semanticsLabel;
 }
 
+/// One half of a paired statistic inside a badge: what this half says, and
+/// what this half means.
+///
+/// A class rather than a second string-and-tone pair of fields on [BadgeSpec],
+/// so that "these two travel together" is stated by the type instead of by a
+/// doc sentence two optional fields would need.
+@immutable
+final class BadgeFact {
+  /// Declares one half.
+  const BadgeFact({required this.label, this.tone = Tone.neutral});
+
+  /// What this half says.
+  final String label;
+
+  /// What this half means.
+  final Tone tone;
+}
+
 /// A count or a mark riding on something else.
 @immutable
 final class BadgeSpec {
@@ -445,6 +524,7 @@ final class BadgeSpec {
     required this.label,
     this.icon,
     this.tone = Tone.neutral,
+    this.secondary,
     this.scale = ControlScale.normal,
   });
 
@@ -456,6 +536,19 @@ final class BadgeSpec {
 
   /// What it means.
   final Tone tone;
+
+  /// The other half of a paired statistic, carried inside the same mark:
+  /// `+12` added beside `-3` deleted. Null for the ordinary one-fact badge.
+  ///
+  /// A pair rather than a list, because the need measured is a pair - a diff
+  /// stat is two facts in one mark - and a repeated slot nobody asks for
+  /// would be speculation; [CodeLineSpec] already carries its own pair
+  /// (`oldNumber`/`newNumber`) as named slots for the same reason. What stays
+  /// the skin's to answer is everything visual about the pairing: whether the
+  /// two facts share one surface at all, how they are separated, and what
+  /// each half's tone paints - a language that writes statistics bare may
+  /// draw no surface and let the two tones carry the whole distinction.
+  final BadgeFact? secondary;
 
   /// How much room it is entitled to.
   final ControlScale scale;
@@ -479,7 +572,15 @@ final class TagSpec {
     this.onRemoved,
     this.removeTooltip,
     this.onTap,
-  });
+  }) : assert(
+         onRemoved == null || removeTooltip != null,
+         'A removable tag must name its removal. The removal is a mark-only '
+         'control and this repository requires every mark-only control to say '
+         'what it does - "required in spirit" let two skins disagree about '
+         'what null means (one papered over the absence with its own generic '
+         'string, one rendered an unnamed control), so the contract refuses '
+         'the construction instead of letting each skin decide.',
+       );
 
   /// What the tag says.
   final String label;
@@ -493,8 +594,11 @@ final class TagSpec {
   /// How to take it away. Null means it cannot be removed.
   final VoidCallback? onRemoved;
 
-  /// What removing it does, for the pointer and for a screen reader. Required
-  /// in spirit whenever [onRemoved] is set.
+  /// What removing it does, for the pointer and for a screen reader.
+  /// Required whenever [onRemoved] is set, and the constructor enforces it:
+  /// "required in spirit" left the two skins disagreeing about what null
+  /// means, and a skin that papers over the absence with its own generic
+  /// string is naming an application action the application never named.
   final String? removeTooltip;
 
   /// What happens when the tag itself is chosen.
@@ -684,6 +788,7 @@ final class CodeLineSpec {
     this.marker,
     this.oldNumber,
     this.newNumber,
+    this.paired = true,
     this.selected = false,
     this.onTap,
   });
@@ -704,6 +809,19 @@ final class CodeLineSpec {
 
   /// The line's number on the right-hand side, or null where it has none.
   final int? newNumber;
+
+  /// Whether this line comes from a COMPARISON of two versions, so its gutter
+  /// pairs an old and a new column.
+  ///
+  /// A hunk line of a diff is paired even where one number is absent: an
+  /// added line has no old number, yet the old column must still be reserved,
+  /// blank, or the code loses the alignment that carries its meaning. A line
+  /// of a plain file view is NOT paired - it has one number and no absent
+  /// side to reserve, so a skin that reserved one anyway would push a whole
+  /// file's content sideways for a column that can never fill. A fact about
+  /// the content, not a layout request: how wide either gutter is stays the
+  /// skin's answer.
+  final bool paired;
 
   /// Whether the user has picked this line - to stage it, to comment on it.
   final bool selected;
@@ -750,6 +868,9 @@ final class CodeBlockSpec {
 }
 
 /// One lane crossing a commit-graph row.
+///
+/// Carries value equality, as every graph spec does: see [GraphRowSpec] for
+/// why that is the contract's obligation rather than a skin's.
 @immutable
 final class GraphEdgeSpec {
   /// Declares one lane crossing.
@@ -762,6 +883,15 @@ final class GraphEdgeSpec {
   /// colour: the palette and its length both belong to the skin, exactly as
   /// they do for `Tone.series`.
   final int toneIndex;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GraphEdgeSpec &&
+      other.lane == lane &&
+      other.toneIndex == toneIndex;
+
+  @override
+  int get hashCode => Object.hash(lane, toneIndex);
 }
 
 /// The graph gutter of one commit row, as data.
@@ -771,6 +901,13 @@ final class GraphEdgeSpec {
 /// lanes, the dot and the edges cross as numbers-free data and each skin owns
 /// the painting - along with the lane width, the dot radius and the stroke
 /// width that live beside it.
+///
+/// **Value equality is declared here, not left to a skin**, because a painter
+/// can only skip a repaint by comparing specs, the application necessarily
+/// builds a fresh spec on every row build, and a skin comparing field by field
+/// would rot silently the day this class gains a field. The contract owns the
+/// type, so the contract owns what "the same row" means - the same reasoning
+/// [SkinRequest] already carries for its own `==`.
 @immutable
 final class GraphRowSpec {
   /// Declares one row's graph.
@@ -810,6 +947,61 @@ final class GraphRowSpec {
 
   /// Whether this is the commit HEAD is on.
   final bool isCurrent;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GraphRowSpec &&
+      other.lane == lane &&
+      other.toneIndex == toneIndex &&
+      other.isMerge == isMerge &&
+      other.laneCount == laneCount &&
+      _listEquals(other.incoming, incoming) &&
+      _listEquals(other.outgoing, outgoing) &&
+      _listEquals(other.passing, passing) &&
+      other.isCurrent == isCurrent;
+
+  @override
+  int get hashCode => Object.hash(
+    lane,
+    toneIndex,
+    isMerge,
+    laneCount,
+    Object.hashAll(incoming),
+    Object.hashAll(outgoing),
+    Object.hashAll(passing),
+    isCurrent,
+  );
+}
+
+/// The room one commit row reserves beside its content for the graph.
+///
+/// `surfaces.commitGraphRow` deliberately FILLS the box it is given - the
+/// graph must span the whole row, rule strip included, so each row's lane
+/// segments meet its neighbours' edge to edge - which leaves the row itself
+/// needing to reserve the gutter's width in its leading slot. The width is the
+/// skin's lane arithmetic, and it crosses the contract as a WIDGET rather
+/// than as a number precisely so the application never holds it: the row
+/// mounts the reservation, and how wide "room for n lanes" is stays each
+/// skin's own answer.
+///
+/// Carries value equality like every graph spec; see [GraphRowSpec].
+@immutable
+final class GraphGutterSpec {
+  /// Declares one row's reservation.
+  const GraphGutterSpec({required this.laneCount});
+
+  /// How many lanes are in play across the whole window. A COUNT, not a
+  /// width, exactly as it is on [GraphRowSpec.laneCount] - and it must be THE
+  /// SAME count on every row of one window, or the lanes stop lining up
+  /// vertically.
+  final int laneCount;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GraphGutterSpec && other.laneCount == laneCount;
+
+  @override
+  int get hashCode => laneCount.hashCode;
 }
 
 /// A document written in Markdown.

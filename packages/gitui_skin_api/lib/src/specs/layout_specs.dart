@@ -12,20 +12,42 @@ import '../vocabulary.dart';
 /// the delegate's own formula to get it; once the skin owns the geometry the
 /// application cannot compute it at all, so the member must report it. It
 /// carries no design value - it is a count of columns.
+///
+/// The member owns its scroll view and deliberately says nothing about it
+/// (#438). A viewport inset is the skin's own rhythm around its own scroll
+/// view - an application word for it would be a design decision wearing a
+/// neutral name. A scroll position ("keep tile N visible") is promisable in
+/// principle, but no site states it and the shipped grids never scrolled the
+/// highlight into view, so a slot for it would be a control that silently
+/// does nothing - the exact drift the blueprint exists to falsify. Both stay
+/// out until a live floor asks for them.
 @immutable
 final class GridSpec {
   /// Declares one grid.
   const GridSpec({
     required this.children,
     this.density = GridDensity.normal,
+    this.tileHeight = TileHeight.language,
     this.onColumnsChanged,
   });
 
   /// The things, in order.
+  ///
+  /// A materialised list, deliberately (#438): a windowed or lazily-built
+  /// grid cannot be asked for here, and that is not a gap. Windowing has no
+  /// design voice - every language would answer it identically and no
+  /// instrument could tell an eager skin from a lazy one - so it is a
+  /// property of the host toolkit's scroll machinery, not a contract word.
+  /// Only the widget objects are eager either way; what a skin elements and
+  /// paints remains its own business.
   final List<ContentPort> children;
 
   /// How tightly packed the user wants them.
   final GridDensity density;
+
+  /// Who owns a tile's height: the language's own proportion, or the content
+  /// standing at exactly the room it needs.
+  final TileHeight tileHeight;
 
   /// How to tell the application how many columns it ended up with, so its
   /// keyboard navigation can move by rows.

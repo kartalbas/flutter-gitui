@@ -48,16 +48,18 @@ final class BlueprintChrome implements SkinChrome {
   /// If this installed nothing, a leaked raw `Text` would render in the
   /// engine's default white and pass a paper-and-ink pixel invariant
   /// invisibly; installing ink turns the SDK's own fallbacks into leak
-  /// detectors. Of the request's six fields, [SkinRequest.textScale] is the
+  /// detectors. Of the request's seven fields, [SkinRequest.textScale] is the
   /// one the blueprint can honour visibly - it multiplies the single type
   /// size, because the scale is the user's and only the ramp is the skin's.
   /// [SkinRequest.animationScale] is consumed by construction: every duration
-  /// here is zero and zero times any scale is zero. The remaining four -
-  /// brightness, the accent seed and the two font families - cannot be drawn
-  /// without a second colour, a palette or a family, which are exactly the
-  /// three things the blueprint must not have; they are carried onto the
-  /// debug surface by [_RootFacts] instead, so a request a skin drops still
-  /// shows up as a difference from the blueprint in the widget tree.
+  /// here is zero and zero times any scale is zero. The remaining five -
+  /// brightness, the accent seed, the two font families and the code scale -
+  /// cannot be drawn without a second colour, a palette, a family or a second
+  /// type size, which are exactly the things the blueprint must not have (one
+  /// size is what makes a leaked ramp visible, the same reason one family
+  /// makes a leaked font visible); they are carried onto the debug surface by
+  /// [_RootFacts] instead, so a request a skin drops still shows up as a
+  /// difference from the blueprint in the widget tree.
   @override
   Widget wrapRoot(
     BuildContext context, {
@@ -81,8 +83,8 @@ final class BlueprintChrome implements SkinChrome {
     ),
   );
 
-  /// The whole window: every region the spec names, in the order the
-  /// application's pane cycle walks them.
+  /// The whole window: every region the spec's data names, each routed
+  /// through the application's own pane host.
   @override
   Widget shell(BuildContext context, ShellSpec spec) =>
       _BlueprintShell(spec: spec, distance: distance);
@@ -262,6 +264,7 @@ class _RootFacts extends StatelessWidget {
   String toStringShort() =>
       'chrome.wrapRoot(${request.brightness.name} '
       'accent:${request.accentSeed} text:x${request.textScale} '
+      'code:x${request.codeScale} '
       'motion:x${request.animationScale} mono:${request.monoFamily} '
       'ui:${request.uiFamily} $vocabulary)';
 }
@@ -276,35 +279,44 @@ class _BlueprintShell extends StatelessWidget {
   /// How far apart things are under this instrument.
   final BlueprintDistance distance;
 
+  /// Routes one pane through the application's keyboard structure, or
+  /// returns it bare when the application installed none.
+  Widget _hosted(ShellPane pane, Widget contents) =>
+      spec.paneHost?.call(pane, contents) ?? contents;
+
   @override
   Widget build(BuildContext context) {
-    // The regions are BUILT in the order the application's pane cycle walks
-    // them. The order is what the user can do - F6 and Tab traverse it - so
-    // the skin arranging its regions in the same order keeps the visual order
-    // and the traversal order the same thing, which is the least surprising
-    // answer a skin can give.
-    final List<Widget> regions = <Widget>[];
-    for (final ShellPane pane in spec.paneOrder) {
-      switch (pane) {
-        case ShellPane.rail:
-          regions.add(_rail(context));
-        case ShellPane.toolbar:
-          regions.add(_toolbarStrip(context, spec.toolbar, distance));
-        case ShellPane.content:
-          regions.add(Expanded(child: _content()));
-        case ShellPane.log:
-          final ShellAside? aside = spec.aside;
-          if (aside != null && aside.visible) {
-            regions.add(Expanded(child: _aside(context, aside)));
-          }
-      }
-    }
+    // The arrangement is this skin's own choice, and the choice is the
+    // enum's declaration order: rail, toolbar, content, log, stacked. WHICH
+    // regions exist is what the spec's data says - destinations make a rail,
+    // groups make a toolbar, a visible aside makes the log - and every one
+    // passes through the application's [ShellSpec.paneHost], so the F6 / Tab
+    // order the application installs there is independent of this stack: the
+    // naked skin proves the cycle survives any arrangement precisely by not
+    // being told what the cycle is.
+    final ShellAside? aside = spec.aside;
+    final List<Widget> regions = <Widget>[
+      // A shell with nowhere to go has no navigation strip, and the identity
+      // travels with the strip it leads - the same latitude a paneOrder that
+      // omitted the rail used to grant.
+      if (spec.destinations.isNotEmpty) _hosted(ShellPane.rail, _rail(context)),
+      // An empty toolbar draws nothing distinguishable, so the strip exists
+      // exactly when a group does.
+      if (spec.toolbar.isNotEmpty)
+        _hosted(
+          ShellPane.toolbar,
+          _toolbarStrip(context, spec.toolbar, distance),
+        ),
+      Expanded(child: _hosted(ShellPane.content, _content())),
+      if (aside != null && aside.visible)
+        Expanded(child: _hosted(ShellPane.log, _aside(context, aside))),
+    ];
     final Widget shell = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: distance.gap(Proximity.sectioned),
       children: <Widget>[
         // The banner is a standing message across the top of the WINDOW, so
-        // it sits above every region regardless of pane order.
+        // it sits above every region the arrangement stacks below it.
         if (spec.banner != null)
           BlueprintSurfaces(distance).banner(context, spec.banner!),
         ...regions,

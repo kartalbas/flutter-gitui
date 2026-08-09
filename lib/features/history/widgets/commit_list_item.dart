@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ControlScale,
         GraphEdgeSpec,
+        GraphGutterSpec,
         GraphRowSpec,
         IconRole,
         Proximity,
@@ -72,11 +73,22 @@ class CommitListItem extends ConsumerWidget {
       onSecondaryTap: onSecondaryTap,
       // With lanes available the leading slot only reserves their width; the
       // drawing happens in the overlay below, which can span the full row
-      // height. Without lanes a plain dot still marks the commit.
+      // height. The reservation is `surfaces.commitGraphGutter`: the skin
+      // that paints the lanes answers how much room they need, so the one
+      // number the graph conversion could not take with it - the gutter's
+      // width - now lives on the skin's side of the line too. Without lanes a
+      // plain dot still marks the commit.
       leading: !showCommitGraph
           ? null
           : row != null
-          ? SizedBox(width: _graphGutterWidthFor(graphLaneCount))
+          ? SkinScope.render(
+              context,
+              (Skin skin, BuildContext inner) =>
+                  skin.surfaces.commitGraphGutter(
+                    inner,
+                    GraphGutterSpec(laneCount: graphLaneCount),
+                  ),
+            )
           : Padding(
               // Not a rung, and deliberately not rounded onto one: this nudges
               // the dot down so its centre meets the cap height of the subject
@@ -301,23 +313,3 @@ class CommitListItem extends ConsumerWidget {
       GraphEdgeSpec(lane: edge.lane, toneIndex: edge.colorIndex),
   ];
 }
-
-/// How much room the row's leading slot reserves so the lanes and the subject
-/// text never overlap.
-///
-/// **This is the one number `surfaces.commitGraphRow` could not take with it.**
-/// The member fills the box it is given rather than sizing itself - it has to,
-/// because the graph spans the whole row including its rule strip, and a
-/// painter confined to the leading slot would leave a gap at every row
-/// boundary. So the row must reserve the gutter's width, and the width is the
-/// skin's lane width times the columns in play - which the contract states
-/// nowhere the application can read. `GraphRowSpec.laneCount` deliberately
-/// carries a COUNT so the skin owns the width, and there is no member, no
-/// vocabulary word and no metric query that hands the count back as a width.
-///
-/// Until the contract can answer "how wide is your graph gutter for n lanes",
-/// this reproduces the Material skin's own arithmetic and is therefore a
-/// reported drift rather than a hidden one: a skin with a different lane width
-/// - or, like the blueprint, with no drawn graph at all - gets a gutter sized
-/// for Material's. See the P5 report for #249.
-double _graphGutterWidthFor(int laneCount) => 12.0 * laneCount.clamp(1, 8);

@@ -42,6 +42,11 @@ class TagsActiveFilters extends StatelessWidget {
           // chip and the next control, not inside the chip. Stated as
           // composition, the run says it once per chip and the skin decides
           // how far "related" is.
+          // Each removal is NAMED, per chip: the removal is a mark-only
+          // control, and "what removing this does" is this site's copy
+          // decision - TagSpec refuses an unnamed removal since #438, after
+          // one skin papered over the absence with its own generic "Delete"
+          // and another rendered a control with no name at all.
           if (dateFilter != DateRangeFilter.all) ...<Widget>[
             BaseBadge(
               label: tagsService.getDateFilterLabel(dateFilter),
@@ -49,6 +54,9 @@ class TagsActiveFilters extends StatelessWidget {
               variant: BadgeVariant.neutral,
               size: BadgeSize.medium,
               onDeleted: onClearDateFilter,
+              deleteTooltip: AppLocalizations.of(
+                context,
+              )!.removeDateFilterTooltip,
             ),
             const BaseGap(Proximity.related),
           ],
@@ -59,6 +67,9 @@ class TagsActiveFilters extends StatelessWidget {
               variant: BadgeVariant.neutral,
               size: BadgeSize.medium,
               onDeleted: onClearAuthorFilter,
+              deleteTooltip: AppLocalizations.of(
+                context,
+              )!.removeAuthorFilterTooltip,
             ),
             const BaseGap(Proximity.related),
           ],
@@ -69,6 +80,9 @@ class TagsActiveFilters extends StatelessWidget {
               variant: BadgeVariant.neutral,
               size: BadgeSize.medium,
               onDeleted: onClearRegexFilter,
+              deleteTooltip: AppLocalizations.of(
+                context,
+              )!.removeRegexFilterTooltip,
             ),
             const BaseGap(Proximity.related),
           ],

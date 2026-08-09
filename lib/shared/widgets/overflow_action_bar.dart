@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show ControlScale, IconRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, MenuAction, MenuAnchorSpec, MenuEntry, Overlays;
 
-import '../components/base_animated_widgets.dart';
 import '../components/base_button.dart';
-import '../components/base_icon.dart';
-import '../components/base_menu_item.dart';
 import '../theme/app_theme.dart';
 
 /// One action of a toolbar, as an icon button or as a menu entry.
@@ -84,7 +82,7 @@ class OverflowActionBar extends StatelessWidget {
   /// it must follow the box the row actually lays out.
   static const double itemExtent = 48;
 
-  /// Width of the overflow button. A [PopupMenuButton] carries its own tap
+  /// Width of the overflow button. The skin's menu anchor carries its own tap
   /// target and needs its own reservation: it happens to equal [itemExtent]
   /// today, but the two describe different widgets and have diverged
   /// before. Pinned by
@@ -150,41 +148,36 @@ class OverflowActionBar extends StatelessWidget {
               // Loose for the same reason the actions are, and the blueprint
               // proved the need rather than the argument doing it: the anchor
               // reserves [menuExtent], another number this file knows only
-              // because Material's popup button happens to lay out at 48 dp,
-              // and under a language that draws the mark as words the row
-              // overflowed by 43 px the moment the anchor stopped being a
-              // fixed Phosphor glyph. Under Material nothing moves — the
+              // because Material's mark-only control happens to lay out at
+              // 48 dp, and under a language that draws the mark as words the
+              // row overflowed by 43 px the moment the anchor stopped being
+              // a fixed Phosphor glyph. Under Material nothing moves — the
               // count `visibleActionCount` returns guarantees every share is
               // already >= 48 — and the arithmetic itself still belongs in
               // the skin (SKIN-CONTRACT.md §1).
+              //
+              // The anchored pair itself is the contract's now: the SKIN
+              // builds the trigger and opens the menu against it, and each
+              // hidden action crosses as a MenuAction whose tooltip carries
+              // the one thing this bar has always insisted on — the REASON,
+              // readable on the row, while a disabled entry stays visible.
               Flexible(
-                child: BasePopupMenuButton<int>(
-                  // The anchor names its meaning like every action beside it.
-                  // Left as a raw Phosphor glyph it would have been the one
-                  // mark in this bar a Fluent or macOS skin could not answer:
-                  // every action drawn in the host language with a Phosphor
-                  // "more" mark sitting among them. `ControlScale.normal` is
-                  // this skin's 20 dp, which is the size that stood here.
-                  icon: const BaseIcon(IconRole.dotsThreeVertical),
-                  tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
-                  itemBuilder: (context) => [
-                    for (var index = 0; index < hidden.length; index++)
-                      PopupMenuItem<int>(
-                        value: index,
-                        // A disabled entry keeps its tooltip's reason visible
-                        // rather than vanishing from the menu.
-                        enabled: hidden[index].onPressed != null,
-                        child: Tooltip(
-                          message: hidden[index].tooltip,
-                          child: MenuItemContent(
-                            icon: hidden[index].icon,
-                            label: hidden[index].label,
-                            scale: ControlScale.normal,
-                          ),
-                        ),
+                child: Overlays.anchor(
+                  spec: MenuAnchorSpec(
+                    icon: IconRole.dotsThreeVertical,
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).moreButtonTooltip,
+                  ),
+                  entries: <MenuEntry>[
+                    for (final ToolbarAction action in hidden)
+                      MenuAction(
+                        label: action.label,
+                        icon: action.icon,
+                        tooltip: action.tooltip,
+                        onPressed: action.onPressed,
                       ),
                   ],
-                  onSelected: (index) => hidden[index].onPressed?.call(),
                 ),
               ),
             ],

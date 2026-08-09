@@ -208,6 +208,7 @@ class SearchableBaseDropdown<T> extends StatelessWidget {
     required this.items,
     required this.onSelected,
     this.prefixIcon,
+    this.placeholder,
     this.searchHint,
     this.minSearchLength = 3,
   });
@@ -227,6 +228,11 @@ class SearchableBaseDropdown<T> extends StatelessWidget {
   /// How to tell the application the user settled on one.
   final ValueChanged<T> onSelected;
 
+  /// What the closed control says while nothing is chosen. A different
+  /// sentence from [searchHint], and the spec carries both so the number of
+  /// surfaces they land on stays the skin's decision.
+  final String? placeholder;
+
   /// What the search box says while nothing is typed.
   final String? searchHint;
 
@@ -242,6 +248,7 @@ class SearchableBaseDropdown<T> extends StatelessWidget {
       items: items,
       onSelected: onSelected,
       hint: searchHint,
+      placeholder: placeholder,
       leading: prefixIcon,
       minQueryLength: minSearchLength,
       // The hand-built overlay hard-coded an English "No items found"; the

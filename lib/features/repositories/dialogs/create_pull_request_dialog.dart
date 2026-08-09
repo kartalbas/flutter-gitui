@@ -176,6 +176,11 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     value: _selectedSourceBranch,
                     label: l10n.sourceBranchLabel,
                     prefixIcon: IconRole.gitBranch,
+                    // Two sentences, two jobs: the closed field's own words
+                    // while nothing is chosen, and the search box's while
+                    // nothing is typed. The first was silently dropped when
+                    // the spec had one slot doing both.
+                    placeholder: l10n.selectSourceBranch,
                     searchHint: l10n.searchBranches,
                     items: sourceBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null
@@ -271,6 +276,7 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     value: _selectedBaseBranch,
                     label: l10n.targetBranchLabel,
                     prefixIcon: IconRole.gitBranch,
+                    placeholder: l10n.selectTargetBranch,
                     searchHint: l10n.searchBranches,
                     items: targetBranches.map((branch) {
                       final lastCommitText = branch.lastCommitDate != null

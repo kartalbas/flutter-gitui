@@ -365,6 +365,7 @@ Widget _underBlueprint(Widget child) => Directionality(
         brightness: Brightness.light,
         accentSeed: 0,
         textScale: 1,
+        codeScale: 1,
         animationScale: 0,
         monoFamily: 'monospace',
         uiFamily: 'sans-serif',

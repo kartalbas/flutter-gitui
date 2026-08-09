@@ -55,6 +55,17 @@ abstract interface class SkinChrome {
   /// The successor to the 18 raw scaffolds and the shared app bar: a screen
   /// states its title, its body, its own actions and whatever it is currently
   /// warning about, and never how any of that is framed.
+  ///
+  /// **A screen is wired LAST, and that is a property of this member, not of
+  /// any one migration.** No skin promises to host another design language's
+  /// raw widgets: the naked skin's screen deliberately provides no `Material`
+  /// ancestor - providing one would be Material leaking under a neutral name,
+  /// the substitution failure §10 of `docs/SKIN-CONTRACT-MEMBERS.md` exists
+  /// to catch - so a body that still contains widgets which assume one (a raw
+  /// `TextFormField`, an `ActionChip`, an `InkWell`) pins its screen to the
+  /// hand-built scaffold until those widgets answer the contract themselves.
+  /// The blueprint half of the scene sweep is the gate that enforces this;
+  /// this sentence is the statement of it.
   Widget screen(BuildContext context, ScreenSpec spec);
 
   /// **What does the inside of a dialog look like?**

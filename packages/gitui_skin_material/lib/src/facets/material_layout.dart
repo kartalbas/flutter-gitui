@@ -269,9 +269,14 @@ class _MaterialGridState extends State<_MaterialGrid> {
     GridDensity.roomy => 400,
   };
 
-  /// The aspect ratio and gutter both grids share today
-  /// (repositories_screen.dart's delegate: `childAspectRatio: 1.2`,
-  /// cross- and main-axis spacing at the grouped rung).
+  /// The proportion this skin shapes a language-owned tile to: the landscape
+  /// card measured from the repositories grid this member replaced
+  /// (`childAspectRatio: 1.2`), kept as Material's own answer to
+  /// [TileHeight.language]. It is a statement about THIS skin's tiles, not a
+  /// fact about the application's grids - the workspaces grid never had this
+  /// shape, and under [TileHeight.content] no proportion applies at all. The
+  /// gutters are likewise the skin's: its grouped rung, on both axes and both
+  /// paths.
   static const double _aspectRatio = 1.2;
 
   @override
@@ -286,7 +291,11 @@ class _MaterialGridState extends State<_MaterialGrid> {
         final int columns = constraints.hasBoundedWidth
             ? (constraints.maxWidth / (extent + spacing)).ceil()
             : widget.spec.children.length;
-        _report(columns < 1 ? 1 : columns);
+        final int resolved = columns < 1 ? 1 : columns;
+        _report(resolved);
+        if (widget.spec.tileHeight == TileHeight.content) {
+          return _contentRows(resolved, spacing);
+        }
         return GridView(
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: extent,
@@ -299,6 +308,52 @@ class _MaterialGridState extends State<_MaterialGrid> {
           ],
         );
       },
+    );
+  }
+
+  /// Rows of content-owned tiles.
+  ///
+  /// A grid whose content owns its height cannot be a [GridView]: every
+  /// sliver grid delegate resolves ONE main-axis extent per column count,
+  /// which is exactly the promise [TileHeight.content] withdraws. So the
+  /// tiles are laid in rows, and Material keeps its grid rhythm the way its
+  /// own card grids do: the tiles of one row share the height of the tallest
+  /// among them, so row lines stay level while every tile gets the room its
+  /// content asked for. Column count and gutters are the same as the
+  /// language-owned path's.
+  Widget _contentRows(int columns, double spacing) {
+    final List<Widget> cells = <Widget>[
+      for (final ContentPort child in widget.spec.children) child.mount(),
+    ];
+    final List<Widget> rows = <Widget>[];
+    for (int start = 0; start < cells.length; start += columns) {
+      final int end = start + columns < cells.length
+          ? start + columns
+          : cells.length;
+      final List<Widget> row = cells.sublist(start, end);
+      rows.add(
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: spacing,
+            children: <Widget>[
+              for (final Widget cell in row) Expanded(child: cell),
+              // Fillers keep a short last row's tiles the same width as
+              // every other row's.
+              for (int filler = row.length; filler < columns; filler++)
+                const Expanded(child: SizedBox.shrink()),
+            ],
+          ),
+        ),
+      );
+    }
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: spacing,
+        children: rows,
+      ),
     );
   }
 

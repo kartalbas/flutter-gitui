@@ -47,6 +47,7 @@ SkinRequest _conformanceRequest(Brightness brightness) => SkinRequest(
   brightness: brightness,
   accentSeed: 0,
   textScale: 1,
+  codeScale: 1,
   animationScale: 1,
   monoFamily: 'JetBrains Mono',
   uiFamily: 'Inter',

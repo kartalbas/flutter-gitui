@@ -1,11 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../core/git/models/file_status.dart';
 
 /// Utility class for file icon selection based on extension or status.
 class FileIconUtils {
   FileIconUtils._();
+
+  /// What kind of file this extension names, as the contract's own word - the
+  /// same table as [getIconForExtension] with the glyph choice left to the
+  /// skin. The [IconData] sibling survives beside it only for the trees that
+  /// have not become `surfaces.tree` yet, and goes with them.
+  static IconRole getRoleForExtension(String extension) {
+    switch (extension.toLowerCase()) {
+      // Code files
+      case 'dart':
+      case 'js':
+      case 'ts':
+      case 'jsx':
+      case 'tsx':
+      case 'py':
+      case 'java':
+      case 'c':
+      case 'cpp':
+      case 'cs':
+      case 'go':
+      case 'rs':
+      case 'rb':
+      case 'php':
+      case 'swift':
+      case 'kt':
+      case 'scala':
+        return IconRole.fileCode;
+
+      // Web files
+      case 'html':
+      case 'htm':
+        return IconRole.fileHtml;
+      case 'css':
+      case 'scss':
+      case 'sass':
+      case 'less':
+        return IconRole.fileCss;
+
+      // Config/data files
+      case 'json':
+      case 'yaml':
+      case 'yml':
+      case 'xml':
+      case 'toml':
+      case 'ini':
+      case 'conf':
+        return IconRole.code;
+
+      // Document files
+      case 'md':
+      case 'txt':
+      case 'doc':
+      case 'docx':
+      case 'rtf':
+        return IconRole.fileText;
+
+      // Image files
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'gif':
+      case 'svg':
+      case 'bmp':
+      case 'ico':
+      case 'webp':
+        return IconRole.fileImage;
+
+      // PDF
+      case 'pdf':
+        return IconRole.filePdf;
+
+      // Archive files
+      case 'zip':
+      case 'tar':
+      case 'gz':
+      case 'rar':
+      case '7z':
+      case 'bz2':
+        return IconRole.fileZip;
+
+      // Video files
+      case 'mp4':
+      case 'mov':
+      case 'avi':
+      case 'mkv':
+      case 'webm':
+        return IconRole.fileVideo;
+
+      // Audio files
+      case 'mp3':
+      case 'wav':
+      case 'flac':
+      case 'ogg':
+      case 'aac':
+        return IconRole.fileAudio;
+
+      default:
+        return IconRole.file;
+    }
+  }
 
   /// Get icon based on file extension
   static IconData getIconForExtension(String extension) {

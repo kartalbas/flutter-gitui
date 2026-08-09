@@ -285,11 +285,16 @@ abstract final class FluentTypeScale {
 /// The one door a facet uses to turn a [TextRole] into a style.
 ///
 /// [FluentTypeScale] states the ramp mapping and nothing else; this adds
-/// what only the tree can know - the user's request. Three of its fields
+/// what only the tree can know - the user's request. Four of its fields
 /// land here:
 ///
 ///  * `monoFamily` - the family for [TextRole.code], the user's own choice
 ///    carried across the contract as a name;
+///  * `codeScale` - the size half of that same choice: it multiplies INTO
+///    the scale [TextRole.code] is resolved at (`textScale * codeScale`,
+///    rounded once to a whole pixel), because the contract states it as a
+///    refinement on top of the interface preference. Every other role
+///    ignores it;
 ///  * `uiFamily` - the interface family for every other role. Honoured, not
 ///    overridden: the contract calls it "the interface family the user
 ///    chose", and a skin that ignored a stated choice would fail the
@@ -322,7 +327,12 @@ abstract final class FluentTypeResolution {
     final TextStyle step = FluentTypeScale.stepOf(role);
     final SkinRequest? request = FluentRequestScope.maybeOf(context);
     if (request == null) return step;
-    final TextStyle scaled = _scaled(step, request.textScale);
+    final TextStyle scaled = _scaled(
+      step,
+      role == TextRole.code
+          ? request.textScale * request.codeScale
+          : request.textScale,
+    );
     final String family = role == TextRole.code
         ? request.monoFamily
         : request.uiFamily;

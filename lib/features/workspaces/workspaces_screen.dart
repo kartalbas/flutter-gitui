@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity;
+    show GridDensity, IconRole, Inset, Proximity, TileHeight;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_menu_item.dart';
@@ -34,9 +33,6 @@ class WorkspacesScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
-  /// Width one grid card may take, matching the grid delegate below.
-  static const double _cardMaxCrossAxisExtent = 350;
-
   late final ItemNavigationController _navigationController;
 
   /// The workspaces currently shown, in collection order, so the keyboard
@@ -156,48 +152,38 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
     List<Workspace> projects,
     Workspace? selectedProject,
   ) {
-    // The grid resolves its column count from the width, so the controller
-    // must learn it here for vertical arrows to move by whole rows. Same
-    // formula SliverGridDelegateWithMaxCrossAxisExtent uses.
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns =
-            (constraints.maxWidth /
-                    (_cardMaxCrossAxisExtent + AppTheme.paddingL))
-                .ceil();
-        _navigationController.crossAxisCount = columns < 1 ? 1 : columns;
+    // The grid's geometry is `layout.grid`'s: the screen states how tightly
+    // packed the cards should sit and that each card decides its own height —
+    // a workspace card grows with its content, and no fixed tile proportion
+    // holds it at every window width (#438) — and the member answers with the
+    // tile extent, its gutters and, through `GridSpec.onColumnsChanged`, the
+    // column count the keyboard controller needs. `normal` is the rung that
+    // carries the 350 pixels these cards were laid out at.
+    return KeyboardNavigableGridView(
+      controller: _navigationController,
+      itemCount: projects.length,
+      autofocus: true,
+      density: GridDensity.normal,
+      tileHeight: TileHeight.content,
+      itemBuilder: (context, index, isHighlighted, containerHasFocus) {
+        final project = projects[index];
+        final isSelected = selectedProject?.id == project.id;
 
-        return KeyboardNavigableGridView(
-          controller: _navigationController,
-          itemCount: projects.length,
-          autofocus: true,
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: _cardMaxCrossAxisExtent,
-            childAspectRatio: 0.95,
-            crossAxisSpacing: AppTheme.paddingL,
-            mainAxisSpacing: AppTheme.paddingL,
-          ),
-          itemBuilder: (context, index, isHighlighted, containerHasFocus) {
-            final project = projects[index];
-            final isSelected = selectedProject?.id == project.id;
-
-            return WorkspaceCard(
-              project: project,
-              isSelected: isSelected,
-              isHighlighted: isHighlighted,
-              containerHasFocus: containerHasFocus,
-              onTap: () {
-                // A click moves the highlight to the card it acted on, so
-                // keyboard and mouse stay in one story.
-                _navigationController.select(index);
-                _activateProjectAt(index);
-              },
-              onEdit: () => _editProject(context, ref, project),
-              onDelete: !project.isDefaultWorkspace
-                  ? () => _deleteProject(context, ref, project)
-                  : null,
-            );
+        return WorkspaceCard(
+          project: project,
+          isSelected: isSelected,
+          isHighlighted: isHighlighted,
+          containerHasFocus: containerHasFocus,
+          onTap: () {
+            // A click moves the highlight to the card it acted on, so
+            // keyboard and mouse stay in one story.
+            _navigationController.select(index);
+            _activateProjectAt(index);
           },
+          onEdit: () => _editProject(context, ref, project),
+          onDelete: !project.isDefaultWorkspace
+              ? () => _deleteProject(context, ref, project)
+              : null,
         );
       },
     );

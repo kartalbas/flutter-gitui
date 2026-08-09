@@ -841,6 +841,13 @@ class _BlueprintSuggestFieldState<T> extends State<_BlueprintSuggestField<T>> {
         _line(<Widget>[
           BlueprintText(spec.label),
           if (spec.value != null) _mark('[= $_chosenLabel]'),
+          // The closed control's own sentence, stated while nothing is
+          // chosen. This instrument has no closed form - the field and the
+          // list are one surface - so the statement lands beside the label as
+          // a fact rather than inside the box, where the HINT already answers
+          // "what to say while nothing is typed".
+          if (spec.value == null && spec.placeholder != null)
+            BlueprintText(spec.placeholder!),
           if (spec.minQueryLength > 0) _mark('[min ${spec.minQueryLength}]'),
         ]),
         GestureDetector(

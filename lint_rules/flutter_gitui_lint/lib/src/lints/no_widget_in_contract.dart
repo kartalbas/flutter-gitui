@@ -76,10 +76,19 @@ class NoWidgetInContract extends DartLintRule {
   ///    has already been fenced by the caller, which in both cases is this
   ///    package itself, and both are handed to the layer ABOVE the skin rather
   ///    than into it.
+  ///  * `ShellPaneHost`'s `contents` is `DialogKeyboardHostBuilder`'s
+  ///    pattern at the shell, and points the same way: the widget flows FROM
+  ///    the skin UP into the application's wrapper, not from the application
+  ///    into a skin. Nothing the application adds there can hide from the
+  ///    attribution walk - the wrapper's output lands inside the skin-painted
+  ///    half of the partition, so paint smuggled through this seam is
+  ///    attributed to the skin, which is the deterrent that keeps the seam
+  ///    structural (focus regions and semantics only).
   static const Map<String, String> _sanctioned = {
     'wrapRoot': 'child',
     'DialogKeyboardHostBuilder': 'surface',
     'SkinOverlayFrame': 'content',
+    'ShellPaneHost': 'contents',
   };
 
   /// Declarations that are not contract members and so are not seams.

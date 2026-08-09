@@ -116,6 +116,59 @@ final class BlueprintOverlays implements SkinOverlays {
         ),
   );
 
+  /// Builds the control that offers the host's choices, anchored to itself.
+  ///
+  /// The naked trigger: an outlined pressable carrying the anchor's facts as
+  /// marks - the icon's role, the tone, `[*]` while the subject is engaged,
+  /// `[disabled]` while it may not be opened - sized by the scale's rung. The
+  /// menu opens under the trigger's leading corner, which is the same corner
+  /// this facet's popover uses, so the instrument has ONE answer to "where
+  /// does an anchored surface go".
+  @override
+  Widget menuAnchor(
+    BuildContext context,
+    MenuAnchorSpec spec,
+    SkinMenuHost host,
+  ) => Builder(
+    builder: (BuildContext anchorContext) {
+      final String toneMark = BlueprintMarks.tone(spec.tone);
+      return BlueprintPressable(
+        onPressed: spec.enabled
+            ? () {
+                Offset at = Offset.zero;
+                final RenderObject? renderObject = anchorContext
+                    .findRenderObject();
+                if (renderObject is RenderBox && renderObject.hasSize) {
+                  at = renderObject.localToGlobal(
+                    Offset(0, renderObject.size.height),
+                  );
+                }
+                presentMenu(anchorContext, at: at, host: host);
+              }
+            : null,
+        semanticsLabel: spec.tooltip,
+        tooltip: spec.tooltip,
+        selected: spec.selected ? true : null,
+        child: BlueprintBox(
+          minExtent: BlueprintGeometry.extent(anchorContext, spec.scale),
+          filled: spec.selected,
+          // A Wrap and not a Row, for the reason every blueprint control
+          // lays its marks out this way: the instrument draws a mark as
+          // WORDS, and words handed a narrow budget (the overflow bar's
+          // 48 px anchor share) wrap instead of overflowing.
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              BlueprintMark(BlueprintMarks.icon(spec.icon)),
+              if (toneMark != BlueprintMarks.none) BlueprintMark(toneMark),
+              if (!spec.enabled) const BlueprintMark(BlueprintMarks.disabled),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+
   /// Attaches the host's content to the control the user just operated.
   ///
   /// The anchor is the given context's own render box - the control the
@@ -292,9 +345,17 @@ class _BlueprintMenuSurface extends StatelessWidget {
               enabled: enabled,
               autofocus: autofocus,
               checked: null,
+              // The longer explanation - a disabled entry's reason - is
+              // announced rather than hovered, the same recorded answer
+              // BlueprintPressable gives every tooltip: a hovering surface
+              // is a design, and this instrument has none.
+              tooltip: action.tooltip,
               dispatch: () => action.onPressed!(),
               children: <Widget>[
-                BlueprintMark(BlueprintMarks.icon(action.icon)),
+                // A markless entry renders its words alone: the instrument
+                // reserves nothing for a mark that was never stated.
+                if (action.icon != null)
+                  BlueprintMark(BlueprintMarks.icon(action.icon!)),
                 BlueprintText(action.label),
                 if (action.role == MenuActionRole.destructive)
                   BlueprintMark(BlueprintMarks.tone(Tone.danger)),
@@ -318,6 +379,30 @@ class _BlueprintMenuSurface extends StatelessWidget {
                 if (checkable.icon != null)
                   BlueprintMark(BlueprintMarks.icon(checkable.icon!)),
                 BlueprintText(checkable.label),
+              ],
+            ),
+          );
+        case final MenuChoice choice:
+          final bool enabled = choice.isEnabled;
+          final bool autofocus = enabled && !autofocusGiven;
+          autofocusGiven = autofocusGiven || autofocus;
+          rows.add(
+            _row(
+              context,
+              index: index,
+              enabled: enabled,
+              autofocus: autofocus,
+              // One-of-N, so the row reports "chosen", not "checked": the
+              // pressable announces selection state, which is the naked
+              // radio.
+              checked: null,
+              selected: choice.selected,
+              dispatch: () => choice.onSelect!(),
+              children: <Widget>[
+                BlueprintMark(BlueprintMarks.selected(choice.selected)),
+                if (choice.icon != null)
+                  BlueprintMark(BlueprintMarks.icon(choice.icon!)),
+                BlueprintText(choice.label),
               ],
             ),
           );
@@ -356,6 +441,8 @@ class _BlueprintMenuSurface extends StatelessWidget {
     required bool? checked,
     required VoidCallback dispatch,
     required List<Widget> children,
+    bool? selected,
+    String? tooltip,
   }) => BlueprintPressable(
     onPressed: enabled
         ? () {
@@ -364,8 +451,10 @@ class _BlueprintMenuSurface extends StatelessWidget {
           }
         : null,
     autofocus: autofocus,
-    isButton: checked == null,
+    isButton: checked == null && selected == null,
     checked: checked,
+    selected: selected,
+    tooltip: tooltip,
     child: BlueprintBox(
       child: Row(
         mainAxisSize: MainAxisSize.min,

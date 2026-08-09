@@ -26,9 +26,14 @@ import 'base_menu_item.dart';
 /// - the badge slot. `ListRowSpec` states a COUNT (`badgeCount`) and this
 ///   component's [badge] is a widget — a status LETTER in the only scenes that
 ///   pass one — so there is no slot on the member to hand it to. It travels
-///   inside the trailing port instead, which is a reported contract finding
-///   rather than a rounding: the member says "how many things this row stands
-///   for", and that is not what a badge here says.
+///   inside the trailing port instead, and that is the DECIDED answer to the
+///   finding #438 recorded here, not a workaround: a count is the member's to
+///   render in its own badge idiom, while a status mark is row CONTENT at the
+///   tail, and the tail's member is the trailing port. No design language's
+///   canonical row distinguishes a second status region from its one trailing
+///   slot — Material's `ListTile`, Fluent's `ListItem` and macOS's row all
+///   carry exactly one — so a second spec slot would be fed only by
+///   conformance scenes, which is not a need.
 ///
 /// Example usage:
 /// ```dart
@@ -174,7 +179,12 @@ class BaseListItem extends StatelessWidget {
         title: contract.ContentPort(content),
         leading: leading == null ? null : contract.ContentPort(leading!),
         trailing: _trailing(),
-        menu: _menuEntries(contextMenuItems),
+        // Handed through as-is: the application's menu vocabulary IS the
+        // contract's now (base_menu_item.dart re-exports it), so the
+        // restatement switch that used to stand here - two sealed sets with
+        // the same names, translated kind by kind - is gone with the
+        // duplicate hierarchy it translated from.
+        menu: contextMenuItems ?? const <contract.MenuEntry>[],
         selection: _selection,
         containerFocused: containerHasFocus,
         // [isSelectable] is this façade's second way of saying "nothing
@@ -188,33 +198,4 @@ class BaseListItem extends StatelessWidget {
       ),
     );
   });
-}
-
-/// Restates the application's menu data as the contract's.
-///
-/// Two sealed types with the same shape and the same names, in two packages:
-/// the application's [MenuEntry] predates the contract's and is what forty call
-/// sites hand this component, while `ListRowSpec.menu` speaks the contract's.
-/// The restatement is total and lossless — a label, a mark's meaning, a
-/// callback, a role and a flag — and it is a switch rather than a cast so that
-/// a third kind of entry on either side becomes a compile error here instead
-/// of an entry that silently renders as nothing.
-List<contract.MenuEntry> _menuEntries(List<MenuEntry>? entries) {
-  if (entries == null || entries.isEmpty) return const <contract.MenuEntry>[];
-  return <contract.MenuEntry>[
-    for (final MenuEntry entry in entries)
-      switch (entry) {
-        MenuSeparator() => const contract.MenuSeparator(),
-        MenuAction() => contract.MenuAction(
-          label: entry.label,
-          icon: entry.icon,
-          onPressed: entry.onPressed,
-          role: switch (entry.role) {
-            MenuActionRole.normal => contract.MenuActionRole.normal,
-            MenuActionRole.destructive => contract.MenuActionRole.destructive,
-          },
-          enabled: entry.enabled,
-        ),
-      },
-  ];
 }

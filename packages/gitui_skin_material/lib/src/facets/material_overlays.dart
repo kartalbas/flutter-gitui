@@ -7,6 +7,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart';
 import '../material_glyphs.dart';
 import '../material_ink.dart';
 import '../material_theme.dart';
+import 'material_controls.dart';
 
 /// Things that appear on top, the Material way.
 ///
@@ -124,9 +125,55 @@ final class MaterialOverlays implements SkinOverlays {
         action.onPressed?.call();
       case final MenuCheckable checkable:
         checkable.onChanged?.call(!checkable.checked);
+      case final MenuChoice choice:
+        choice.onSelect?.call();
       case MenuSeparator() || MenuSection():
         break;
     }
+  }
+
+  /// Builds the control that offers the host's choices, anchored to itself.
+  ///
+  /// Material's answer is its own icon button - the same member, so the
+  /// anchor carries the ink, the state layers, the tooltip obligation and the
+  /// selected treatment (solid glyph, primary tint) every other mark-only
+  /// control has - opening the menu at its own bottom-start corner, which is
+  /// where M3's `MenuAnchor` places an anchored menu. The measuring that
+  /// fourteen application call sites used to perform lives in [_openBelow]
+  /// now, on this side of the seam.
+  @override
+  Widget menuAnchor(
+    BuildContext context,
+    MenuAnchorSpec spec,
+    SkinMenuHost host,
+  ) => Builder(
+    builder: (BuildContext anchorContext) =>
+        const MaterialControls().iconButton(
+          anchorContext,
+          IconButtonSpec(
+            icon: spec.icon,
+            tooltip: spec.tooltip,
+            tone: spec.tone,
+            scale: spec.scale,
+            // Only an ENGAGED anchor is announced as a toggle; an ordinary
+            // one has no state to report, which is what null means there.
+            selected: spec.selected ? true : null,
+            onPressed: spec.enabled
+                ? () => _openBelow(anchorContext, host)
+                : null,
+          ),
+        ),
+  );
+
+  /// Opens the host's menu at the bottom-start corner of the control built at
+  /// [anchorContext].
+  Future<int?> _openBelow(BuildContext anchorContext, SkinMenuHost host) {
+    Offset at = Offset.zero;
+    final RenderObject? renderObject = anchorContext.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      at = renderObject.localToGlobal(Offset(0, renderObject.size.height));
+    }
+    return presentMenu(anchorContext, at: at, host: host);
   }
 
   /// Attaches the host's content to the control the user just operated.
@@ -406,9 +453,12 @@ class _MaterialMenuSurface extends StatelessWidget {
             _row(
               index: index,
               enabled: enabled,
+              tooltip: action.tooltip,
               child: _rowContent(
                 context,
-                icon: MaterialGlyphs.of(action.icon),
+                icon: action.icon == null
+                    ? null
+                    : MaterialGlyphs.of(action.icon!),
                 label: action.label,
                 iconColor: accent,
                 labelColor: accent,
@@ -451,6 +501,56 @@ class _MaterialMenuSurface extends StatelessWidget {
                     ),
                   ),
                   if (checkable.checked) ...<Widget>[
+                    const SizedBox(width: MaterialMetrics.spaceS),
+                    Icon(
+                      MaterialGlyphs.of(IconRole.check),
+                      size: MaterialMetrics.iconS,
+                      color: primary,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          );
+        case final MenuChoice choice:
+          final bool enabled = choice.isEnabled;
+          // The one-of-N row: the same shape as a checked fact - the row in
+          // force carries its words in the primary colour at semibold with a
+          // trailing check - because a single check that MOVES between rows
+          // is how Material's own menus state a one-of-N (M3 keeps the radio
+          // dot for settings surfaces, not menus). The entry's own mark, when
+          // it has one, LEADS: it qualifies the choice ("this one sorts
+          // ascending"), and a qualifier reads before the words it qualifies.
+          final Color primary = theme.colorScheme.primary;
+          rows.add(
+            _row(
+              index: index,
+              enabled: enabled,
+              child: Row(
+                children: <Widget>[
+                  if (choice.icon != null) ...<Widget>[
+                    Icon(
+                      MaterialGlyphs.of(choice.icon!),
+                      size: MaterialMetrics.iconS,
+                      color: choice.selected ? primary : null,
+                    ),
+                    const SizedBox(width: MaterialMetrics.spaceS),
+                  ],
+                  Expanded(
+                    // ignore: avoid_text_with_style
+                    child: Text(
+                      choice.label,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: choice.selected
+                            ? primary
+                            : DefaultTextStyle.of(context).style.color,
+                        fontWeight: choice.selected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                  if (choice.selected) ...<Widget>[
                     const SizedBox(width: MaterialMetrics.spaceS),
                     Icon(
                       MaterialGlyphs.of(IconRole.check),
@@ -520,7 +620,16 @@ class _MaterialMenuSurface extends StatelessWidget {
     required int index,
     required bool enabled,
     required Widget child,
-  }) => PopupMenuItem<int>(value: index, enabled: enabled, child: child);
+    String? tooltip,
+  }) {
+    // The tooltip wraps the CONTENT rather than the item, so the reason a
+    // disabled entry cannot be used is readable exactly where the overflow
+    // bar's hand-built menu put it - over the row, disabled or not.
+    final Widget content = tooltip == null
+        ? child
+        : Tooltip(message: tooltip, child: child);
+    return PopupMenuItem<int>(value: index, enabled: enabled, child: content);
+  }
 
   /// The extraction of `MenuItemContent`: glyph, gap, label, with the label
   /// taking the colour the enclosing menu item already published through its
@@ -530,16 +639,23 @@ class _MaterialMenuSurface extends StatelessWidget {
   /// that spells `onSurface` out again paints straight over it - which is why
   /// a disabled entry in an overflow menu used to look exactly like an
   /// enabled one.
+  ///
+  /// A null [icon] renders words alone with no reserved gutter: Material's
+  /// own menus mix marked and markless rows freely (`MenuItemButton` reserves
+  /// nothing for an absent `leadingIcon`), so the alignment answer here is
+  /// the SDK's.
   Widget _rowContent(
     BuildContext context, {
-    required IconData icon,
+    required IconData? icon,
     required String label,
     Color? iconColor,
     Color? labelColor,
   }) => Row(
     children: <Widget>[
-      Icon(icon, size: MaterialMetrics.iconS, color: iconColor),
-      const SizedBox(width: MaterialMetrics.spaceS),
+      if (icon != null) ...<Widget>[
+        Icon(icon, size: MaterialMetrics.iconS, color: iconColor),
+        const SizedBox(width: MaterialMetrics.spaceS),
+      ],
       Expanded(
         // ignore: avoid_text_with_style
         child: Text(

@@ -773,6 +773,7 @@ List<GoldenScene> _displayScenes() {
                 label: 'deletable',
                 variant: BadgeVariant.neutral,
                 onDeleted: _noop,
+                deleteTooltip: 'Remove',
               ),
             ]),
           ),

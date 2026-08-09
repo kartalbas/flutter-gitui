@@ -165,8 +165,6 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
               ),
             );
           },
-          fontFamily: ref.watch(previewFontFamilyProvider),
-          fontSize: ref.watch(previewFontSizeProvider),
         );
       },
     );

@@ -214,6 +214,7 @@ SkinRequest _skinRequest({
   required Brightness brightness,
   required AppColorScheme colorScheme,
   required AppFontSize fontSize,
+  required AppFontSize codeFontSize,
   required AppAnimationSpeed animationSpeed,
   required String uiFamily,
   required String monoFamily,
@@ -225,6 +226,7 @@ SkinRequest _skinRequest({
   // application's own".
   accentSeed: colorScheme.index,
   textScale: _kTextScale[fontSize]!,
+  codeScale: _kCodeScale[codeFontSize]!,
   animationScale: _kAnimationScale[animationSpeed]!,
   monoFamily: monoFamily,
   uiFamily: uiFamily,
@@ -238,6 +240,21 @@ const Map<AppFontSize, double> _kTextScale = <AppFontSize, double>{
   AppFontSize.small: 0.92,
   AppFontSize.medium: 1.0,
   AppFontSize.large: 1.10,
+};
+
+/// The multiplier each CODE font-size setting means - the size half of the
+/// decision whose family half is `SkinRequest.monoFamily`, both fed from the
+/// same Settings section ("Code Font Size", `AppConfig.previewFontSize`).
+///
+/// The factors are the diff viewer's own, moved: `_getFontSizeScale` applied
+/// exactly these to every diff and preview line the owner has verified, and
+/// they are deliberately NOT `_kTextScale`'s - the two settings have always
+/// meant different steps.
+const Map<AppFontSize, double> _kCodeScale = <AppFontSize, double>{
+  AppFontSize.tiny: 0.8,
+  AppFontSize.small: 0.9,
+  AppFontSize.medium: 1.0,
+  AppFontSize.large: 1.15,
 };
 
 /// Which brightness the user's [themeMode] resolves to right now.
@@ -395,6 +412,7 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
     final localeCode = ref.watch(localeProvider);
     final animationSpeed = ref.watch(uiConfigProvider).animationSpeed;
     final previewFontFamily = ref.watch(uiConfigProvider).previewFontFamily;
+    final previewFontSize = ref.watch(uiConfigProvider).previewFontSize;
 
     return MaterialApp(
       navigatorKey: navigatorKey,
@@ -467,6 +485,7 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
             brightness: brightness,
             colorScheme: colorScheme,
             fontSize: fontSize,
+            codeFontSize: previewFontSize,
             animationSpeed: animationSpeed,
             uiFamily: fontFamily,
             monoFamily: previewFontFamily,

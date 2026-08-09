@@ -7,7 +7,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show GridDensity;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show GridDensity, TileHeight;
 
 import 'package:flutter_gitui/shared/controllers/item_navigation_controller.dart';
 import 'package:flutter_gitui/shared/controllers/tree_view_controller.dart';
@@ -352,6 +353,45 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
       expect(find.text('3|S|F'), findsOneWidget);
+    });
+
+    testWidgets('content-owned tiles stand at the height their content needs', (
+      tester,
+    ) async {
+      // The word #438 built: `TileHeight.content` says the content owns the
+      // tile's height. At the 800-pixel test surface and normal density the
+      // member resolves 3 columns either way, and a language-owned tile would
+      // stand ~213 logical pixels tall (256-wide tile at the Material skin's
+      // 1.2 proportion) — the shape that used to cut the workspace card
+      // short. The content below asks for 300, and the member may not cut it
+      // short.
+      final controller = ItemNavigationController(crossAxisCount: 1);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (BuildContext context, Widget? child) =>
+              installSkinUnderTest(child ?? const SizedBox.shrink()),
+
+          home: Scaffold(
+            body: KeyboardNavigableGridView(
+              controller: controller,
+              itemCount: 4,
+              density: GridDensity.normal,
+              tileHeight: TileHeight.content,
+              itemBuilder: (context, index, isSelected, hasFocus) => SizedBox(
+                key: ValueKey('cell-$index'),
+                height: 300,
+                child: _marker(index, isSelected, hasFocus),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(controller.crossAxisCount, 3);
+      expect(tester.getSize(find.byKey(const ValueKey('cell-0'))).height, 300);
     });
   });
 

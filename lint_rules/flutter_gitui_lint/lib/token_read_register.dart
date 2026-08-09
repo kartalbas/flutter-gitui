@@ -183,11 +183,12 @@ TokenReadReconciliation reconcileTokenReads({
   return TokenReadReconciliation(unregistered: unregistered, stale: stale);
 }
 
-/// The register itself: 77 reads as of the 2026-08-09 census — 64 waiting
-/// for a named P5 member, 6 blocked on a missing word, 7 kept by a named
-/// permanent carve-out (#433). The gate test pins the total (shrink-only —
-/// lower it when converting, never raise it) and the per-cause counts, so a
-/// read cannot change its story without passing through that pin.
+/// The register itself: 77 reads at the 2026-08-09 census, 34 standing after
+/// the #438 conversions — 21 waiting for a named P5 member, 6 blocked on a
+/// missing word, 7 kept by a named permanent carve-out (#433). The gate test
+/// pins the total (shrink-only — lower it when converting, never raise it)
+/// and the per-cause counts, so a read cannot change its story without
+/// passing through that pin.
 const List<TokenReadRegisterEntry> tokenReadRegister = [
   // ── chrome.screen — ScreenSpec.primaryActions (15 reads) ────────────────
   // The entire hand-built draggable speed dial. SKIN-CONTRACT-MEMBERS.md:1357
@@ -251,102 +252,38 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
     reason: 'Gap between a label pill and its mini-FAB.',
   ),
 
-  // ── surfaces.codeLine (11 reads) ────────────────────────────────────────
-  // The hand-painted diff/full-file line. CodeLineSpec carries oldNumber and
-  // newNumber, so the gutter column width and its gap are the skin's numbers.
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_diff_viewer.dart',
-    site: 'width: AppTheme.iconXL + AppTheme.paddingM + AppTheme.paddingXS,',
-    reads: 9,
-    waitsFor: 'surfaces.codeLine',
-    reason:
-        'The line-number gutter column width, three reads per gutter '
-        '(old number, new number, full-file view). CodeLineSpec carries the '
-        'numbers as data, so the column is the skin\'s to size.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/shared/components/base_diff_viewer.dart',
-    site: 'const SizedBox(width: AppTheme.paddingS + AppTheme.paddingXS),',
-    reads: 2,
-    waitsFor: 'surfaces.codeLine',
-    reason: 'The gutter-to-content gap of the same hand-painted line.',
-  ),
+  // ── surfaces.codeLine — CONVERTED (was 11 reads) ────────────────────────
+  // base_diff_viewer.dart calls surfaces.codeLine for every diff and
+  // full-file line, so the gutter column width and its gaps moved into the
+  // skin. The two facts that blocked the conversion each got their door:
+  // the user's code font size crosses as SkinRequest.codeScale (beside the
+  // monoFamily it always belonged with), and the full-file view's one-sided
+  // gutter is CodeLineSpec.paired = false.
 
-  // ── layout.grid — GridSpec with onColumnsChanged (3 reads) ──────────────
-  // The repositories card grid CONVERTED and took its 3 reads with it: it
-  // states GridDensity.roomy through KeyboardNavigableGridView and the member
-  // answers with the tile extent, the aspect ratio, both gutters and - through
-  // onColumnsChanged - the column count the screen used to re-derive from the
-  // delegate's own formula. Its numbers were the member's exactly (400, 1.2,
-  // 16, 16), so not a pixel moved.
-  //
-  // The workspaces card grid did NOT convert, and the blocker is measured
-  // rather than asserted: GridSpec says only how tightly PACKED the tiles are
-  // and has no word for how TALL a tile has to be, so the Material skin
-  // answers every density rung with one fixed childAspectRatio of 1.2. The
-  // workspace card decides its own height and needs 239.9 logical pixels at
-  // the shell's 870-pixel measurement, where the member's tile is 232.8 - a
-  // RenderFlex overflow of 7.1, recurring across whole bands of window width
-  // (roughly 733-895, 1099-1199, 1465-1503). No rung avoids it: at any one
-  // width all three resolve to the same column count and therefore the same
-  // tile height. These three reads stay until GridSpec can state a tile
-  // proportion; see keyboard_navigable_view.dart's gridDelegate for the same
-  // measurement at the call site.
-  TokenReadRegisterEntry(
-    file: 'lib/features/workspaces/workspaces_screen.dart',
-    site: '(_cardMaxCrossAxisExtent + AppTheme.paddingL))',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec.onColumnsChanged)',
-    reason:
-        'The column-count formula the delegate already owns. It cannot go '
-        'until the grid itself does, and the grid is held by GridSpec having '
-        'no word for a tile proportion (measured above).',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/workspaces/workspaces_screen.dart',
-    site: 'crossAxisSpacing: AppTheme.paddingL,',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec)',
-    reason:
-        'Grid gutter; the grid member owns its gutters, and takes this one '
-        'as soon as it can host these cards without shortening them.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/workspaces/workspaces_screen.dart',
-    site: 'mainAxisSpacing: AppTheme.paddingL,',
-    reads: 1,
-    waitsFor: 'layout.grid (GridSpec)',
-    reason: 'The other gutter of the same grid; see the entry above.',
-  ),
+  // ── layout.grid — GridSpec with onColumnsChanged (0 reads) ──────────────
+  // Both card grids CONVERTED. The repositories grid went first: it states
+  // GridDensity.roomy through KeyboardNavigableGridView and the member
+  // answers with the tile extent, the aspect ratio, both gutters and -
+  // through onColumnsChanged - the column count the screen used to re-derive
+  // from the delegate's own formula; its numbers were the member's exactly
+  // (400, 1.2, 16, 16), so not a pixel moved. The workspaces grid was held
+  // by a measured blocker - GridSpec had no word for how TALL a tile has to
+  // be, and the member's fixed proportion shortened the workspace card by
+  // 7.1 pixels at the shell's 870-pixel measurement - until #438 built the
+  // word: GridSpec.tileHeight, whose TileHeight.content rung lays each tile
+  // at the height its content asks for. The grid now states density plus
+  // content ownership through the contract, and its 3 reads (the column
+  // formula and both paddingL gutters) died with the hand-built delegate.
 
-  // ── surfaces.tree (5 reads) ─────────────────────────────────────────────
+  // ── surfaces.tree (2 reads) ─────────────────────────────────────────────
   // The tree owns per-depth indent, row height and (via TreeNodeSpec.menu)
-  // its own row-action anchor.
-  TokenReadRegisterEntry(
-    file: 'lib/features/history/widgets/file_tree_panel.dart',
-    site: 'left: depth * AppTheme.paddingM,',
-    reads: 1,
-    waitsFor: 'surfaces.tree',
-    reason: 'Per-depth indent; the tree member owns the rung.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/history/widgets/file_tree_panel.dart',
-    site: 'minWidth: AppTheme.paddingL,',
-    reads: 1,
-    waitsFor: 'surfaces.tree',
-    reason:
-        'Shrunk row-action PopupMenuButton constraint; TreeNodeSpec.menu '
-        'replaces the hand-built anchor.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/history/widgets/file_tree_panel.dart',
-    site: 'minHeight: AppTheme.paddingL,',
-    reads: 1,
-    waitsFor: 'surfaces.tree',
-    reason:
-        'Shrunk row-action PopupMenuButton constraint; TreeNodeSpec.menu '
-        'replaces the hand-built anchor.',
-  ),
+  // its own row-action anchor. The commit-details tree
+  // (file_tree_panel.dart) CONVERTED and took its 3 reads with it - the
+  // per-depth indent, and the two shrunk PopupMenuButton constraints
+  // TreeNodeSpec.menu replaced. The two reads below belong to the two
+  // keyboard trees, whose conversion the contract no longer blocks
+  // (TreeSpec.revealed and TreeNodeSpec.leadingTone exist now) but whose
+  // keyboard stack still owns the ListView the member replaces.
   TokenReadRegisterEntry(
     file: 'lib/shared/widgets/base_tree_item.dart',
     site: 'left: depth * indentPerLevel + AppTheme.paddingS,',

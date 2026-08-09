@@ -304,6 +304,7 @@ final class SuggestFieldSpec<T> {
     required this.onSelected,
     this.onQueryChanged,
     this.hint,
+    this.placeholder,
     this.leading,
     this.minQueryLength = 0,
     this.emptyLabel,
@@ -328,6 +329,18 @@ final class SuggestFieldSpec<T> {
 
   /// What to say while nothing is typed.
   final String? hint;
+
+  /// What the CLOSED control says while nothing is chosen, as distinct from
+  /// [hint], which is what the SEARCH BOX says while nothing is typed.
+  ///
+  /// Two statements, not one, because whether they are two surfaces is the
+  /// language's decision: a language that opens a search box over a closed
+  /// field shows both, and a language whose canonical control IS the search
+  /// box (a combo box) collapses them and chooses - a choice it can only
+  /// make if the contract carries both. The application has two distinct
+  /// translated sentences here ("Select source branch" / "Search
+  /// branches..."), and one slot was silently doing both jobs.
+  final String? placeholder;
 
   /// A mark at the head of the field, saying what kind of thing is being
   /// narrowed. The same slot [DropdownSpec.leading] and `FieldSpec.leading`

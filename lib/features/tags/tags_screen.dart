@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        MenuAnchorSpec,
+        MenuChoice,
+        MenuEntry,
+        MenuSeparator,
+        Overlays,
+        Proximity,
+        TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
@@ -10,7 +20,6 @@ import '../../shared/widgets/base_dismiss_scope.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
-import '../../shared/components/base_animated_widgets.dart';
 import '../../shared/components/base_icon.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_button.dart';
@@ -384,318 +393,95 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                     variant: ButtonVariant.secondary,
                   ),
                   const BaseGap(Proximity.related),
-                  BasePopupMenuButton<TagSortBy>(
-                    icon: const Icon(PhosphorIconsRegular.sortAscending),
-                    tooltip: AppLocalizations.of(context)!.sortTags,
-                    onSelected: (sortBy) {
-                      setState(() {
-                        _sortBy = sortBy;
-                      });
-                    },
-                    itemBuilder: (context) => <PopupMenuEntry<TagSortBy>>[
-                      PopupMenuItem(
-                        value: TagSortBy.nameAsc,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _sortBy == TagSortBy.nameAsc
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.sortNameAZ,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            // The mark that shows which way this entry
-                            // orders the list: a row-level hint beside the
-                            // words the user operates, so it takes the dense
-                            // rung the whole menu uses. The five entries
-                            // below say the same thing with the same word.
-                            const BaseIcon(
-                              IconRole.sortAscending,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                  // The sort menu, through the contract's anchored form. Each
+                  // row is a MenuChoice - "which one is in force" - so the
+                  // selection signal (the checkCircle/circle pair this site
+                  // used to draw by hand) is the SKIN's now, and the entry's
+                  // own mark carries the one fact that is the application's:
+                  // which way that entry orders the list.
+                  Overlays.anchor(
+                    spec: MenuAnchorSpec(
+                      icon: IconRole.sortAscending,
+                      tooltip: AppLocalizations.of(context)!.sortTags,
+                    ),
+                    entries: <MenuEntry>[
+                      _sortChoice(
+                        TagSortBy.nameAsc,
+                        AppLocalizations.of(context)!.sortNameAZ,
+                        IconRole.sortAscending,
                       ),
-                      PopupMenuItem(
-                        value: TagSortBy.nameDesc,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _sortBy == TagSortBy.nameDesc
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.sortNameZA,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.sortDescending,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      _sortChoice(
+                        TagSortBy.nameDesc,
+                        AppLocalizations.of(context)!.sortNameZA,
+                        IconRole.sortDescending,
                       ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: TagSortBy.dateNewest,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _sortBy == TagSortBy.dateNewest
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.sortDateNewest,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.sortDescending,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      const MenuSeparator(),
+                      _sortChoice(
+                        TagSortBy.dateNewest,
+                        AppLocalizations.of(context)!.sortDateNewest,
+                        IconRole.sortDescending,
                       ),
-                      PopupMenuItem(
-                        value: TagSortBy.dateOldest,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _sortBy == TagSortBy.dateOldest
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.sortDateOldest,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.sortAscending,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      _sortChoice(
+                        TagSortBy.dateOldest,
+                        AppLocalizations.of(context)!.sortDateOldest,
+                        IconRole.sortAscending,
                       ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: TagSortBy.versionAsc,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _sortBy == TagSortBy.versionAsc
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(
-                                  context,
-                                )!.sortVersionLowHigh,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.sortAscending,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      const MenuSeparator(),
+                      _sortChoice(
+                        TagSortBy.versionAsc,
+                        AppLocalizations.of(context)!.sortVersionLowHigh,
+                        IconRole.sortAscending,
                       ),
-                      PopupMenuItem(
-                        value: TagSortBy.versionDesc,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _sortBy == TagSortBy.versionDesc
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(
-                                  context,
-                                )!.sortVersionHighLow,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.sortDescending,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      _sortChoice(
+                        TagSortBy.versionDesc,
+                        AppLocalizations.of(context)!.sortVersionHighLow,
+                        IconRole.sortDescending,
                       ),
                     ],
                   ),
                   const BaseGap(Proximity.related),
-                  BasePopupMenuButton<TagGroupBy>(
-                    // "A grouping is applied" is said twice here, in the FILL
-                    // and in the colour, and only the colour has a word. Fill
-                    // is a weight, which `IconRole` deliberately cannot carry
-                    // (`docs/SKIN-CONTRACT.md` conflict C3) and which the
-                    // weight census records for this file, so converting the
-                    // colour alone would leave a `BaseIcon` that cannot switch
-                    // to the filled variant and would drop half the statement
-                    // inside a rename. The accent is stranded with the fill;
-                    // both leave when the skin re-decides the weight.
-                    icon: Icon(
-                      _groupBy != TagGroupBy.none
-                          ? PhosphorIconsFill.rows
-                          : PhosphorIconsRegular.rows,
-                      color: _groupBy != TagGroupBy.none
-                          ? Theme.of(context).colorScheme.primary
-                          : null,
+                  // The group-by menu, anchored the same way. "A grouping is
+                  // applied" used to be said by hand-picking the FILLED glyph
+                  // and spelling out the accent colour at this call site -
+                  // half a statement `IconRole` could not carry (conflict
+                  // C3). It is `MenuAnchorSpec.selected` now, one fact from
+                  // which the SKIN re-decides both the weight and the tint,
+                  // which is exactly the resolution the old comment here said
+                  // this site was waiting for.
+                  Overlays.anchor(
+                    spec: MenuAnchorSpec(
+                      icon: IconRole.rows,
+                      tooltip: AppLocalizations.of(context)!.groupTags,
+                      selected: _groupBy != TagGroupBy.none,
                     ),
-                    tooltip: AppLocalizations.of(context)!.groupTags,
-                    onSelected: (groupBy) {
-                      setState(() {
-                        _groupBy = groupBy;
-                      });
-                    },
-                    itemBuilder: (context) => <PopupMenuEntry<TagGroupBy>>[
-                      PopupMenuItem(
-                        value: TagGroupBy.none,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _groupBy == TagGroupBy.none
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.noGrouping,
-                                role: TextRole.body,
-                              ),
-                            ),
-                          ],
-                        ),
+                    entries: <MenuEntry>[
+                      _groupChoice(
+                        TagGroupBy.none,
+                        AppLocalizations.of(context)!.noGrouping,
+                        null,
                       ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: TagGroupBy.prefix,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _groupBy == TagGroupBy.prefix
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.byPrefix,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            // The mark naming what this entry groups by,
-                            // beside the words the user operates: the same
-                            // dense row-level rung the sort menu takes, and
-                            // the three entries below say it too.
-                            const BaseIcon(
-                              IconRole.textAa,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      const MenuSeparator(),
+                      // Each entry's own mark names what it groups by; the
+                      // selection signal is the skin's.
+                      _groupChoice(
+                        TagGroupBy.prefix,
+                        AppLocalizations.of(context)!.byPrefix,
+                        IconRole.textAa,
                       ),
-                      PopupMenuItem(
-                        value: TagGroupBy.version,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _groupBy == TagGroupBy.version
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.byVersion,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.gitBranch,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      _groupChoice(
+                        TagGroupBy.version,
+                        AppLocalizations.of(context)!.byVersion,
+                        IconRole.gitBranch,
                       ),
-                      PopupMenuItem(
-                        value: TagGroupBy.author,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _groupBy == TagGroupBy.author
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.byAuthor,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.user,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      _groupChoice(
+                        TagGroupBy.author,
+                        AppLocalizations.of(context)!.byAuthor,
+                        IconRole.user,
                       ),
-                      PopupMenuItem(
-                        value: TagGroupBy.date,
-                        child: Row(
-                          children: [
-                            Icon(
-                              _groupBy == TagGroupBy.date
-                                  ? PhosphorIconsBold.checkCircle
-                                  : PhosphorIconsRegular.circle,
-                              size: 16,
-                            ),
-                            const BaseGap(Proximity.related),
-                            Expanded(
-                              child: BaseLabel(
-                                AppLocalizations.of(context)!.byDate,
-                                role: TextRole.body,
-                              ),
-                            ),
-                            const BaseIcon(
-                              IconRole.calendar,
-                              scale: ControlScale.compact,
-                            ),
-                          ],
-                        ),
+                      _groupChoice(
+                        TagGroupBy.date,
+                        AppLocalizations.of(context)!.byDate,
+                        IconRole.calendar,
                       ),
                     ],
                   ),
@@ -912,6 +698,28 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       _selectedTags.addAll(visible.map((tag) => tag.name));
     });
   }
+
+  /// One sort-menu entry: "which one is in force" as a [MenuChoice], with
+  /// [direction] - the way this entry orders the list - as the entry's own
+  /// mark. Where that mark sits relative to the skin's selection signal is
+  /// the skin's answer.
+  MenuChoice _sortChoice(TagSortBy sortBy, String label, IconRole direction) =>
+      MenuChoice(
+        label: label,
+        selected: _sortBy == sortBy,
+        icon: direction,
+        onSelect: () => setState(() => _sortBy = sortBy),
+      );
+
+  /// One group-menu entry: the same shape, with [kind] naming what the entry
+  /// groups by - and null for "no grouping", which has no key to name.
+  MenuChoice _groupChoice(TagGroupBy groupBy, String label, IconRole? kind) =>
+      MenuChoice(
+        label: label,
+        selected: _groupBy == groupBy,
+        icon: kind,
+        onSelect: () => setState(() => _groupBy = groupBy),
+      );
 
   bool _hasActiveFilters() {
     return _dateFilter != DateRangeFilter.all ||

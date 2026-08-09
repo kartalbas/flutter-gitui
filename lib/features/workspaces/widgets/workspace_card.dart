@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        MenuAnchorSpec,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -47,9 +54,9 @@ class WorkspaceCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final description = project.displayDescription(l10n);
 
-    // What the overflow menu offers, as language-neutral data. Built once and
-    // closed over by both halves of the button, so the index `onSelected`
-    // reports always addresses this same list.
+    // What the overflow menu offers, as language-neutral data - the
+    // contract's own entries, so the anchor below hands them to the skin
+    // without restatement.
     final List<MenuEntry> menuEntries = <MenuEntry>[
       MenuAction(label: l10n.edit, icon: IconRole.pencil, onPressed: onEdit),
       if (onDelete != null)
@@ -96,41 +103,26 @@ class WorkspaceCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              // The menu is stated as DATA rather than hand-rolled, which is
-              // what retires the last Material colour word on this card. The
-              // destructive entry used to say its meaning twice - `Tone.danger`
-              // for the mark and a spelled-out `colorScheme.error` for the
-              // words - because `MenuItemContent` wears its tone on the mark
-              // only and paints its label from a raw `Color?`. Deleting the
-              // second half at the call site would have left a red glyph beside
-              // black words, so the route out is the other one
-              // `tag_list_tile.dart` names: `MenuActionRole.destructive`, from
-              // which `materialMenuEntries` derives BOTH halves itself
-              // (base_menu_item.dart:132-143). The application says what the
-              // entry means; the one place that turns menu data into Material
-              // widgets keeps answering how that looks.
-              //
-              // Nothing moves. Both entries already drew at `MenuItemContent`'s
-              // default `compact` rung, which is what `materialMenuEntries`
-              // builds, and the destructive tint is unchanged because this
-              // entry only exists when `onDelete` is non-null - so it is always
-              // enabled, and the disabled case where that function drops the
-              // tint is unreachable here.
-              BasePopupMenuButton<int>(
-                // The overflow mark acts on this workspace, so it takes the
-                // workspace's own place in the skin's series - the same word
-                // the list row states for the workspace's name. The prominent
-                // scale is what the bare mark drew under the ambient icon
-                // theme.
-                icon: BaseIcon(
-                  IconRole.dotsThreeVertical,
+              // The whole anchored pair - the trigger, its measured position
+              // and the menu against it - is the SKIN's now, through
+              // `overlays.menuAnchor`. This card used to build a Material
+              // `PopupMenuButton`, render the entries itself through
+              // `materialMenuEntries` and dispatch the chosen index back by
+              // hand, which was the application performing skin geometry.
+              // What the card still states is everything that is its own: the
+              // trigger's meaning, the workspace's own place in the skin's
+              // series, the prominent rung the bare mark drew at - and, new,
+              // the name every mark-only control owes ("More actions"; the
+              // hand-built anchor had no tooltip at all, which was a standing
+              // violation of this repository's own rule).
+              Overlays.anchor(
+                spec: MenuAnchorSpec(
+                  icon: IconRole.dotsThreeVertical,
+                  tooltip: l10n.moreActions,
                   tone: Tone.series(project.colorIndex),
                   scale: ControlScale.prominent,
                 ),
-                itemBuilder: (context) =>
-                    materialMenuEntries(context, menuEntries),
-                onSelected: (int index) =>
-                    dispatchMenuEntry(menuEntries, index),
+                entries: menuEntries,
               ),
             ],
           ),

@@ -99,14 +99,21 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 246 references', () {
+  test('the census still accounts for all 245 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 246-entry diff.
+    // agreeing and this says so in one line instead of a 245-entry diff.
+    // 245 = the 246 the conversion measured, plus the diff viewer's `file`
+    // and `gitDiff` that moved into git_status_tree_view.dart with the
+    // view-mode toggle (recorded at that entry), minus the three marks the
+    // tree conversion moved across the seam (the disclosure caret pair and
+    // the row-menu trigger are `surfaces.tree`'s own affordances now,
+    // recorded at the file_tree_panel.dart entry); every mark involved was
+    // and stays in the distinct set, so the 77 below is unchanged.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 246);
+    expect(total, 245);
     expect(
       _kMarkCensus.values
           .expand((Map<String, int> marks) => marks.keys)
@@ -370,9 +377,20 @@ const Map<String, String> _kDrawnAtBold = <String, String>{
   'magnifyingGlass':
       'advanced_search_dialog.dart drew its own dialog mark heavier until the '
       'conversion; the weight had no slot to survive in',
-  'folder': 'file_tree_panel.dart draws every mark in the file tree heavier',
+  // These two sites have also moved, by the same precedent: the details tree
+  // crossed the seam as `surfaces.tree` in the #438 closing wave, and the
+  // member draws every node mark at the ordinary stroke today while its own
+  // source records the one-line `boldOf` restoration waiting on Linux golden
+  // regeneration. The entries stay so the heavier mark is already proven to
+  // be in the table the day that line lands.
+  'folder':
+      'file_tree_panel.dart drew every mark in the file tree heavier until '
+      'the tree crossed the seam; the member records the loss and the '
+      'waiting one-line restoration',
   'folderOpen':
-      'file_tree_panel.dart draws every mark in the file tree heavier',
+      'file_tree_panel.dart drew every mark in the file tree heavier until '
+      'the tree crossed the seam; the member records the loss and the '
+      'waiting one-line restoration',
 };
 
 /// Every mark named in the five dense feature areas, per file, measured before
@@ -511,12 +529,18 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'plus': 2,
     'trash': 1,
   },
+  // `file` and the second `gitDiff` arrived from base_diff_viewer.dart with
+  // the view-mode toggle: #438 resolved the floating speed dial as the site
+  // asking the wrong member - a region's action set belongs to the region's
+  // panel header, not to `ScreenSpec.primaryActions` - so the toggle is a
+  // header action of the diff panel now, naming the same two marks as roles.
   'lib/features/changes/widgets/git_status_tree_view.dart': <String, int>{
     'arrowCounterClockwise': 1,
     'arrowSquareOut': 1,
     'checkSquare': 2,
     'copy': 1,
-    'gitDiff': 1,
+    'file': 1,
+    'gitDiff': 2,
     'minus': 1,
     'minusSquare': 2,
     'plus': 1,
@@ -608,10 +632,14 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'warningCircle': 1,
     'x': 3,
   },
+  // The #438 closing wave took three marks OUT of this file without any site
+  // changing what it says: the details tree crossed the seam as
+  // `surfaces.tree`, and the disclosure caret pair and the per-row menu
+  // trigger are the member's own affordances now — Material's `_TreeCaret`
+  // and `_TreeMenuAnchor` draw the same three marks on the skin's side of
+  // the seam. All three survive elsewhere in the census, so the distinct-77
+  // set is unchanged.
   'lib/features/history/widgets/file_tree_panel.dart': <String, int>{
-    'caretDown': 1,
-    'caretRight': 1,
-    'dotsThreeVertical': 1,
     'download': 1,
     'files': 1,
     'folder': 1,

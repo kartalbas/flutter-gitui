@@ -305,31 +305,47 @@ void main() {
         (sum, entry) => sum + entry.reads,
       );
 
-      // 51 is the 2026-08-09 census (77) less the 10 reads P5 converted when
+      // 34 is the 2026-08-09 census (77) less the 10 reads P5 converted when
       // `BaseBadge` stopped hand-painting its pill and started calling
       // `surfaces.badge` / `surfaces.tag`, less the 5 it converted when the
       // repositories card grid started calling `layout.grid` (3) and the
-      // workspace swatch grid started calling `controls.seriesPicker` (2) -
-      // the workspaces card grid kept its 3, because `GridSpec` has no word
-      // for a tile proportion and the member's fixed one overflows those
-      // cards, measured in the register entry - less the 4
-      // it converted when the CSV viewer's table became `surfaces.dataGrid`
-      // (2) and the commit graph became `surfaces.commitGraphRow` (2, and the
-      // application's only `CustomPainter` was deleted with them), less the 3
+      // workspace swatch grid started calling `controls.seriesPicker` (2),
+      // less the 3 the workspaces card grid surrendered when #438 gave
+      // `GridSpec` the tile-height word its measured blocker was waiting for
+      // (`TileHeight.content` lays each tile at the height its content asks
+      // for, so the hand-built delegate and its column formula died) - less
+      // the 4 it converted when the CSV viewer's table became
+      // `surfaces.dataGrid` (2) and the commit graph became
+      // `surfaces.commitGraphRow` (2, and the application's only
+      // `CustomPainter` was deleted with them), less the 3
       // it converted when `BaseListItem` became a façade over
       // `surfaces.listRow` (1) and the command-log entry became
       // `surfaces.disclosure` (2), less the 4 it converted when both
       // hand-built searchable dropdowns gave way to `controls.suggestField`
       // (3, one of them an unreachable second copy that was deleted rather
       // than converted) and the batch dialog's bar became `controls.progress`
-      // (1): 38 reads waiting for a named P5 member, 6 blocked on a missing
-      // vocabulary word, 7 kept by a named permanent carve-out (#433).
-      // Converting a read lowers this number in the same change that deletes
-      // its entry. Raising it is the forbidden direction: new code states its
-      // lengths through the contract, it does not register exceptions.
+      // (1), less the 11 the diff viewer surrendered when #438 gave the two
+      // facts that blocked `surfaces.codeLine` their doors - the user's code
+      // font size crosses as `SkinRequest.codeScale` beside the `monoFamily`
+      // it always belonged with, and the full-file view's one-sided gutter
+      // is `CodeLineSpec.paired = false` - so every diff and full-file line
+      // is the member's and the gutter arithmetic died with the
+      // construction - and less the 3 the commit-details tree surrendered
+      // when #438 gave `surfaces.tree` the two words its blockers were
+      // waiting for (`TreeSpec.revealed` says "keep this node in view"
+      // without a controller crossing the seam, and
+      // `TreeNodeSpec.leadingTone` lets a file's mark carry what happened to
+      // it), so file_tree_panel.dart's per-depth indent and its two shrunk
+      // PopupMenuButton constraints died with the construction: 21 reads
+      // waiting for a named P5 member, 6 blocked on a
+      // missing vocabulary word, 7 kept by a named permanent carve-out
+      // (#433). Converting a read lowers this number in the same change that
+      // deletes its entry. Raising it is the forbidden direction: new code
+      // states its lengths through the contract, it does not register
+      // exceptions.
       expect(
         total,
-        51,
+        34,
         reason:
             'The register must shrink deliberately: update this pin in the '
             'same change that shrinks (never grows) the register.',
@@ -345,7 +361,7 @@ void main() {
           );
 
       // The total pin cannot see a reclassification: moving reads between
-      // causes keeps 51 true while changing WHY they claim to remain,
+      // causes keeps the total true while changing WHY they claim to remain,
       // which is exactly the hiding place the causes exist to close (#433
       // found two sites sitting in the gap list that no vocabulary
       // decision would ever free). Unlike the total, a cause count may
@@ -354,7 +370,7 @@ void main() {
       // the same change that re-argues the entries' reasons.
       expect(
         readsWhere((entry) => entry.waitsFor != null),
-        38,
+        21,
         reason:
             'Reads waiting for a named P5 contract member. A conversion '
             'lowers this; a reclassification moves it and must say why.',

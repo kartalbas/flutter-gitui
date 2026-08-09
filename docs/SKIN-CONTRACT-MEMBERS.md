@@ -47,7 +47,8 @@ counts seven `SkinMotion` members that were never written. That is not a
 bookkeeping quibble: it is the largest single finding of the census, because a
 facet with a name and no members is the one thing P1 cannot build.
 
-**The settled list is 55 members across 7 facets.**
+**The settled list is 56 members across 7 facets** (55 at the census;
+`overlays.menuAnchor` was added by the #438 adjudication).
 
 | | baseline | added | removed | settled |
 |---|---:|---:|---:|---:|
@@ -56,9 +57,9 @@ facet with a name and no members is the one thing P1 cannot build.
 | `SkinSurfaces` | 11 | 9 | 1 | **19** |
 | `SkinType` | 3 | 0 | 0 | **3** |
 | `SkinLayout` | 5 | 3 | 0 | **8** |
-| `SkinOverlays` | 4 | 0 | 0 | **4** |
+| `SkinOverlays` | 4 | 1 | 0 | **5** |
 | `SkinMotion` | 0 | 2 | 0 | **2** |
-| **total** | **38** | **19** | **2** | **55** |
+| **total** | **38** | **20** | **2** | **56** |
 
 **The delta is +17 net: nineteen new members and two deletions.** Against the
 document's stated 45 the difference is +10, but that comparison is against a
@@ -268,8 +269,8 @@ final class SuggestItem<T> {
 final class SuggestFieldSpec<T> {
   const SuggestFieldSpec({
     required this.label, required this.value, required this.items,
-    required this.onSelected, this.onQueryChanged, this.hint, this.leading,
-    this.minQueryLength = 0, this.emptyLabel, this.enabled = true,
+    required this.onSelected, this.onQueryChanged, this.hint, this.placeholder,
+    this.leading, this.minQueryLength = 0, this.emptyLabel, this.enabled = true,
   });
   final String label;
   final T? value;
@@ -277,6 +278,11 @@ final class SuggestFieldSpec<T> {
   final ValueChanged<T> onSelected;
   final ValueChanged<String>? onQueryChanged;
   final String? hint, emptyLabel;
+  /// #438: what the CLOSED control says while nothing is chosen, distinct from
+  /// `hint` (what the SEARCH BOX says while nothing is typed). Whether they are
+  /// two surfaces is the language's decision - a combo-box language collapses
+  /// them, a two-surface language shows both - possible only if both cross.
+  final String? placeholder;
   final IconRole? leading; // the head mark DropdownSpec/FieldSpec already carry
   final int minQueryLength;
   final bool enabled;
@@ -700,11 +706,24 @@ abstract interface class SkinLayout {
 /// must report it. It carries no design value — it is a count of columns.
 final class GridSpec {
   const GridSpec({required this.children, this.density = GridDensity.normal,
+                  this.tileHeight = TileHeight.language,
                   this.onColumnsChanged});
   final List<Widget> children;
   final GridDensity density;
+  final TileHeight tileHeight;   // #438: who owns a tile's height — the
+                                 // language's own proportion, or the content
+                                 // standing at exactly the room it needs
   final ValueChanged<int>? onColumnsChanged;
 }
+
+/// #438: `TileHeight` is the word the workspaces grid was blocked on. The
+/// workspace card decides its own height, and no fixed tile proportion holds
+/// it at every window width (measured: 239.9 needed against 232.8 given at
+/// the shell's 870px, recurring in bands). `language` keeps the skin's own
+/// tile shape (Material: the 1.2 landscape card); `content` lays each tile at
+/// its intrinsic main-axis extent, because a language may style a tile but
+/// may not shorten what the application put inside it.
+enum TileHeight { language, content }
 
 /// browse_screen.dart:195-228 hand-builds an 8px MouseRegion strip with
 /// SystemMouseCursors.resizeColumn, an inner 1px Container and a clamp between
@@ -742,13 +761,21 @@ final class PropertyListSpec {
 }
 ```
 
-### `SkinOverlays` — four members, one return type changed
+### `SkinOverlays` — five members, one return type changed
 
 ```dart
 abstract interface class SkinOverlays {
   Future<T?> presentDialog<T>(BuildContext c, DialogSpec s, SkinContentHost host);
   Future<int?> presentMenu(BuildContext c, {required Offset at,
                            required List<MenuEntry> entries, required SkinEnvelope e});
+
+  /// #438: the anchored form. `presentMenu` is point-anchored, which is right
+  /// only where a point exists (a context click); everywhere else fourteen
+  /// call sites built their own trigger and measured their own position. The
+  /// skin builds the trigger AND opens the menu against it, because where an
+  /// anchored menu opens relative to its control is each language's answer.
+  Widget menuAnchor(BuildContext c, MenuAnchorSpec s, SkinMenuHost host);
+
   Future<T?> presentPopover<T>(BuildContext c, PopoverSpec s, SkinContentHost host);
 
   /// WAS: `void notify(…)`. A void return discards the handle
@@ -803,6 +830,36 @@ unless the sealed set carries them:
 final class MenuCheckable extends MenuEntry { /* label, icon, checked, onChanged, enabled */ }
 final class MenuSection   extends MenuEntry { /* label */ }
 ```
+
+The #438 adjudication settled four more menu facts. `MenuAction.icon` is
+OPTIONAL - the browse screen's "Expand all"/"Collapse all" falsified the
+"every menu is mark-led" claim, and whether a markless row reserves the gutter
+is each language's alignment answer. `MenuAction.tooltip` carries the reason a
+disabled entry is unavailable (the overflow bar's obligation, now stated in
+data). A third choosable kind states one-of-N:
+
+```dart
+final class MenuChoice extends MenuEntry { /* label, selected, onSelect, icon, enabled */ }
+```
+
+- a different question from `MenuCheckable` ("which one is it", not "is this
+on"), drawn differently by every language: a moving check, a radio dot, an
+emphasised row. Its optional `icon` QUALIFIES the choice (the tags sort menu's
+direction marks); where it sits relative to the language's selection signal is
+the language's answer, which is why no "trailing" slot was added. And the
+anchored trigger is stated as data:
+
+```dart
+final class MenuAnchorSpec { /* icon, tooltip, tone, scale, selected, enabled */ }
+```
+
+The application's own duplicate sealed set (`base_menu_item.dart`) is deleted;
+that file now re-exports the contract's, so its forty importers speak one
+vocabulary. Per-entry ARBITRARY leading content (the language selector's flag
+artwork, the quick-settings colour swatches) was decided the other way: it is
+application CONTENT, identical under every language, and admitting a `Widget`
+slot into the sealed data set would reopen the exact typed hole this set
+exists to close - those two menus stay hand-painted.
 
 ### `SkinMotion` — two members, and the honest floor
 
@@ -1292,6 +1349,7 @@ ink `DefaultTextStyle` and `IconTheme` installed at the root.
 | `ToggleSpec.value` (`true`/`false`/`null`) | `[x]`, `[ ]`, `[-]` |
 | `ProgressExtent`, `fraction` | `[####----]` at inline, `(45%)` at block; null fraction → `[????????]` |
 | `GridSpec.onColumnsChanged` | reported honestly from the real measured width — a blueprint that always answers 1 would break the keyboard controller and hide a real dependency |
+| `GridSpec.tileHeight` | the instrument owns no proportion, so `language` is answered with the one thing a language asserts that content does not: uniformity (each tile stretched to its row's tallest); `content` tiles each stand at the height of what they hold, ragged |
 | `TabSetSpec.selectedIndex`, `TreeSpec.expanded/selected` | selected tab outlined twice; expanded node prefixed `v`, collapsed `>` |
 | `NoticeLifetime`, `BannerSpec.actions` | `brief` auto-dismisses at `Duration.zero + 1 frame`, `persistent` does not; actions render as outlined labels |
 | `MotionRole` (4) | the role name printed once in a debug overlay; every duration is `Duration.zero`, which is what makes T2 able to see a motion dependence at all |

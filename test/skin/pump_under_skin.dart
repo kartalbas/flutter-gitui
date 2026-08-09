@@ -332,6 +332,7 @@ Widget installSkinUnderTest(
       // measured against.
       accentSeed: 0,
       textScale: 1,
+      codeScale: 1,
       animationScale: 1,
       monoFamily: kSkinUnderTest == kBlueprintSkinId
           ? 'monospace'

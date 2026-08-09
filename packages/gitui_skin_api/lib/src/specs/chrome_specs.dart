@@ -21,6 +21,7 @@ final class SkinRequest {
     required this.brightness,
     required this.accentSeed,
     required this.textScale,
+    required this.codeScale,
     required this.animationScale,
     required this.monoFamily,
     required this.uiFamily,
@@ -37,6 +38,20 @@ final class SkinRequest {
 
   /// The user's text-size preference, as a multiplier of the skin's own ramp.
   final double textScale;
+
+  /// The user's code-size preference, as a multiplier of the skin's own code
+  /// step ON TOP of [textScale].
+  ///
+  /// The application ships two independent size settings - one for the
+  /// interface, one for code, diffs and previews - and this is the second
+  /// one's door. It rides beside [monoFamily] because the family and the size
+  /// of the same font are one user decision, and the contract carried only
+  /// half of it until this field existed. Composed with [textScale] rather
+  /// than replacing it, because that is what the application has always
+  /// rendered: the interface preference sizes every step including code's,
+  /// and this one refines the code step on top. Which ramp step it multiplies
+  /// stays the skin's answer, exactly as it does for [textScale].
+  final double codeScale;
 
   /// The user's motion preference, as a multiplier of the skin's own
   /// durations. Zero means "no motion", which the skin honours by resolving
@@ -57,6 +72,7 @@ final class SkinRequest {
       other.brightness == brightness &&
       other.accentSeed == accentSeed &&
       other.textScale == textScale &&
+      other.codeScale == codeScale &&
       other.animationScale == animationScale &&
       other.monoFamily == monoFamily &&
       other.uiFamily == uiFamily;
@@ -66,6 +82,7 @@ final class SkinRequest {
     brightness,
     accentSeed,
     textScale,
+    codeScale,
     animationScale,
     monoFamily,
     uiFamily,
@@ -314,6 +331,29 @@ final class BlockingProgressSpec {
   final String? detail;
 }
 
+/// Wraps one pane of the shell in the application's own keyboard structure.
+///
+/// The same pattern as [DialogKeyboardHostBuilder], one level up: the F6 /
+/// Shift+F6 pane cycle and the Tab walk over the shell's regions are WHAT THE
+/// USER CAN DO, so they belong to the application and no skin may weaken
+/// them - which is why this is a function the application supplies once, on
+/// [ShellSpec], and not anything a skin decides. The skin passes every pane
+/// it draws through it; the application installs its focus region (with the
+/// region's numeric traversal order and its label) around [contents] and
+/// returns the wrapped pane.
+///
+/// **This is what makes "the skin may not reorder the panes" a mechanism
+/// instead of a sentence.** The application's traversal order is numeric and
+/// rides inside the wrapper, so a skin that arranges the rail on the left, on
+/// top, or behind a flyout changes the geometry and cannot change the cycle -
+/// the order never crosses the seam at all.
+///
+/// Structure only: what the application installs here is focus and semantics
+/// machinery, which paints nothing. Paint added through this seam lands
+/// inside the skin-painted half of the partition and is attributed to the
+/// skin - the same self-policing arrangement as [DialogKeyboardHostBuilder].
+typedef ShellPaneHost = Widget Function(ShellPane pane, Widget contents);
+
 /// What the whole application window contains.
 @immutable
 final class ShellSpec {
@@ -324,7 +364,7 @@ final class ShellSpec {
     required this.selectedIndex,
     required this.onSelect,
     required this.toolbar,
-    required this.paneOrder,
+    this.paneHost,
     this.density,
     this.onDensityChanged,
     this.aside,
@@ -350,12 +390,26 @@ final class ShellSpec {
   /// and what overflows.
   final List<ToolbarGroup> toolbar;
 
-  /// The order the F6 / Shift+F6 cycle and the Tab key walk the regions in.
+  /// The application's keyboard structure, applied to every pane the skin
+  /// draws.
   ///
-  /// This is WHAT THE USER CAN DO, so it is structure and the skin may not
-  /// reorder it. `BaseFocusRegion` stays in application code and wraps AROUND
-  /// whatever `chrome.shell` returns.
-  final List<ShellPane> paneOrder;
+  /// The skin MUST route each pane it renders - the rail, its own action bar,
+  /// the content, the log - through this function, whatever its arrangement
+  /// puts where. The application installs its focus regions inside, each
+  /// carrying its own numeric traversal order, which is how the F6 /
+  /// Shift+F6 pane cycle and the Tab walk stay the application's under every
+  /// arrangement: see [ShellPaneHost] for why this is the enforcement of
+  /// "the skin may not reorder the panes" rather than a request for it.
+  ///
+  /// This slot replaced `paneOrder`, and deliberately: a list of panes said
+  /// WHICH regions exist (derivable - [destinations], [toolbar] and [aside]
+  /// already say it) and in which order the cycle walks them (a rule its own
+  /// doc could only ask skins to honour). The wrapper carries the one thing
+  /// the application genuinely owns and no skin can take: its own regions.
+  ///
+  /// Null means the application installs no regions - a test harness, or a
+  /// tool with a single pane - and the skin renders each pane bare.
+  final ShellPaneHost? paneHost;
 
   /// How much of the navigation the user has asked to see, or NULL meaning
   /// "this skin owns its own display mode".

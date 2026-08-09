@@ -311,11 +311,15 @@ class _LogEntryCardState extends State<_LogEntryCard> {
   /// here rather than being converted.
   ///
   /// The mark stays in the header port rather than moving to
-  /// [DisclosureSpec.leading], and that is a contract finding rather than a
-  /// preference: `leading` is an [IconRole] with no [Tone], so the member can
-  /// draw a mark but cannot say that THIS one means "the command failed".
-  /// Handing it over would repaint a red cross in `primary` and lose the one
-  /// thing the mark is there to state.
+  /// [DisclosureSpec.leading], and that is now a DECIDED answer rather than a
+  /// pending finding (#438): `leading` is the disclosure's own naming mark,
+  /// drawn in the language's treatment, while THIS mark is part of what the
+  /// header says - a per-entry outcome, at the application's compact scale,
+  /// optically aligned to the first line of a two-line headline. The header
+  /// is a content port, and the mark reaches the skin through [BaseIcon]'s
+  /// IconRole+Tone exactly as any other content does; a tone on `leading`
+  /// would be a second way to say this one thing, and it still could not
+  /// carry the scale or the first-line alignment the statement needs.
   Widget _buildHeader(BuildContext context) {
     final group = widget.group;
     final log = group.representative;

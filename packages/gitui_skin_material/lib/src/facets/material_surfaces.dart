@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:photo_view/photo_view.dart';
@@ -12,7 +13,7 @@ import '../material_theme.dart';
 
 /// Things that hold other things, in Material 3.
 ///
-/// Nineteen members, the largest facet, and every one of them is a body MOVED
+/// Twenty members, the largest facet, and every one of them is a body MOVED
 /// out of a component in `lib/shared/`: `base_card.dart`, `base_list_item.dart`,
 /// `base_panel.dart`, `base_badge.dart`, `base_menu_item.dart`,
 /// `base_tree_item.dart`, `base_diff_viewer.dart`, `empty_state.dart`,
@@ -500,25 +501,12 @@ final class MaterialSurfaces implements SkinSurfaces {
   /// inside an `Expanded`.
   ///
   /// `BaseFocusRegion` and the roving-highlight keyboard contract stay in
-  /// application code and wrap AROUND whatever this returns.
+  /// application code and wrap AROUND whatever this returns - and
+  /// [TreeSpec.revealed] is what lets that contract keep working: the member
+  /// owns the scrollable, so the application states WHICH node must be in
+  /// view and this skin does the scrolling (see [_MaterialTreeState._reveal]).
   @override
-  Widget tree(BuildContext context, TreeSpec spec) {
-    final List<_FlatNode> rows = <_FlatNode>[];
-    void walk(List<TreeNodeSpec> nodes, int depth) {
-      for (final TreeNodeSpec node in nodes) {
-        final bool open = spec.expanded.contains(node.id);
-        rows.add(_FlatNode(node, depth, open));
-        if (open) walk(node.children, depth + 1);
-      }
-    }
-
-    walk(spec.roots, 0);
-    return ListView.builder(
-      itemCount: rows.length,
-      itemBuilder: (BuildContext row, int index) =>
-          _MaterialTreeRow(spec: spec, node: rows[index]),
-    );
-  }
+  Widget tree(BuildContext context, TreeSpec spec) => _MaterialTree(spec: spec);
 
   /// **Here are several views of the same subject; the user picks one.**
   ///
@@ -671,12 +659,20 @@ final class MaterialSurfaces implements SkinSurfaces {
   /// `Tone.neutral` is the exception and it is the application's own: a neutral
   /// badge is a `surfaceContainerHighest` chip on `onSurface`, not a wash of a
   /// colour, because "no particular meaning" has no colour to wash.
+  ///
+  /// A PAIRED badge - `spec.secondary` set, `+12` added beside `-3` deleted -
+  /// takes the neutral chip's fill regardless of its tones, because one wash
+  /// cannot mean two things: washing the surface in the first fact's colour
+  /// would claim the whole mark for half the statistic. Each fact's label
+  /// carries its own tone as foreground instead, which is where the
+  /// distinction actually lives.
   @override
   Widget badge(BuildContext context, BadgeSpec spec) => _pill(
     context,
     label: spec.label,
     icon: spec.icon,
     tone: spec.tone,
+    secondary: spec.secondary,
     scale: spec.scale,
   );
 
@@ -744,9 +740,13 @@ final class MaterialSurfaces implements SkinSurfaces {
           child: _TagRemoveButton(
             glyphSize: glyphSize,
             color: foreground,
-            tooltip:
-                spec.removeTooltip ??
-                MaterialLocalizations.of(context).deleteButtonTooltip,
+            // Non-null by TagSpec's own constructor whenever onRemoved is
+            // set. The `deleteButtonTooltip` fallback that stood here was
+            // this skin papering over an unnamed removal with its own
+            // generic string - naming an application action the application
+            // never named - and it hid the very absence the blueprint
+            // renders honestly.
+            tooltip: spec.removeTooltip!,
             onRemoved: spec.onRemoved!,
           ),
         ),
@@ -1091,16 +1091,28 @@ final class MaterialSurfaces implements SkinSurfaces {
   /// The gutter is drawn when the line has a number on either side and omitted
   /// when it has neither, which is the same rule the diff viewer applies by
   /// line type: a context, added or deleted line carries at least one number
-  /// and a header carries none.
+  /// and a header carries none. WHICH columns it has is
+  /// [CodeLineSpec.paired]'s to say: a paired line reserves both sides even
+  /// where one number is absent, because a blank old column is what keeps an
+  /// added line's code aligned with its neighbours' - while an unpaired line
+  /// (a whole-file view) draws only the side it carries, because a column
+  /// that can never fill would push the entire file 60 dp sideways.
+  ///
+  /// The gutter numbers and the marker are code, not chrome: a column of
+  /// digits is readable because every digit is the same width, and git's own
+  /// `+`/`-`/space must be the same width as each other or the code column
+  /// they prefix stops lining up. Both therefore render in the resolved code
+  /// style - the user's own diff family and size - with the numbers muted,
+  /// exactly as the viewer they replaced drew them.
   @override
   Widget codeLine(BuildContext context, CodeLineSpec spec) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colors = theme.colorScheme;
+    final ColorScheme colors = Theme.of(context).colorScheme;
     final Color foreground = _codeLineForeground(context, spec.tone);
-    final TextStyle? mono = MaterialTypeResolution.styleOf(
+    final TextStyle? code = MaterialTypeResolution.styleOf(
       context,
       TextRole.code,
-    )?.copyWith(height: _codeLineHeight);
+    );
+    final TextStyle? mono = code?.copyWith(height: _codeLineHeight);
     final bool numbered = spec.oldNumber != null || spec.newNumber != null;
 
     return InkWell(
@@ -1121,17 +1133,18 @@ final class MaterialSurfaces implements SkinSurfaces {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             if (numbered) ...<Widget>[
-              _lineNumber(context, spec.oldNumber),
-              const SizedBox(width: MaterialMetrics.spaceS),
-              _lineNumber(context, spec.newNumber),
-              const SizedBox(width: MaterialMetrics.spaceS),
+              if (spec.paired || spec.oldNumber != null) ...<Widget>[
+                _lineNumber(context, spec.oldNumber, code),
+                const SizedBox(width: MaterialMetrics.spaceS),
+              ],
+              if (spec.paired || spec.newNumber != null) ...<Widget>[
+                _lineNumber(context, spec.newNumber, code),
+                const SizedBox(width: MaterialMetrics.spaceS),
+              ],
             ],
             if (spec.marker != null)
               // ignore: avoid_text_with_style
-              Text(
-                spec.marker!,
-                style: theme.textTheme.bodyMedium?.copyWith(color: foreground),
-              ),
+              Text(spec.marker!, style: code?.copyWith(color: foreground)),
             const SizedBox(width: MaterialMetrics.spaceXS),
             Expanded(
               child: SelectableText.rich(
@@ -1228,6 +1241,18 @@ final class MaterialSurfaces implements SkinSurfaces {
           ),
         ),
       );
+
+  /// **Reserve the room this row's graph needs beside its content.**
+  ///
+  /// The width is [_CommitGraphPainter]'s own arithmetic - one 12 dp lane per
+  /// column in play, capped at eight - asked of the same constants the
+  /// painter draws with, so the reservation and the drawing cannot drift
+  /// apart inside this skin. Returning it as a `SizedBox` is what keeps the
+  /// number on this side of the contract: the application mounts room, never
+  /// a width.
+  @override
+  Widget commitGraphGutter(BuildContext context, GraphGutterSpec spec) =>
+      SizedBox(width: _CommitGraphPainter.gutterWidthFor(spec.laneCount));
 
   // ---------------------------------------------------------------------
   // The two pictorial members
@@ -1442,9 +1467,18 @@ final class MaterialSurfaces implements SkinSurfaces {
   ///
   /// Both sides are the same fixed width and right-aligned, which is what keeps
   /// the code column starting at the same x on every line however many digits a
-  /// line number has. A side with no number on it is blank rather than absent,
-  /// for the same reason.
-  static Widget _lineNumber(BuildContext context, int? number) => SizedBox(
+  /// line number has. On a paired line a side with no number on it is blank
+  /// rather than absent, for the same reason.
+  ///
+  /// [code] is the resolved code style: a gutter number is code, because what
+  /// makes a column of digits readable is that every digit occupies the same
+  /// width - alignment carrying meaning, not a style choice. It is muted
+  /// because the number qualifies the line rather than being part of it.
+  static Widget _lineNumber(
+    BuildContext context,
+    int? number,
+    TextStyle? code,
+  ) => SizedBox(
     width:
         MaterialMetrics.iconXL +
         MaterialMetrics.spaceM +
@@ -1453,9 +1487,7 @@ final class MaterialSurfaces implements SkinSurfaces {
     child: Text(
       number?.toString() ?? '',
       textAlign: TextAlign.right,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
+      style: code?.copyWith(color: MaterialInk.foreground(context, Tone.muted)),
     ),
   );
 
@@ -1496,6 +1528,7 @@ final class MaterialSurfaces implements SkinSurfaces {
     required IconRole? icon,
     required Tone tone,
     required ControlScale scale,
+    BadgeFact? secondary,
     VoidCallback? onTap,
     double? reservedTrailing,
   }) {
@@ -1503,7 +1536,10 @@ final class MaterialSurfaces implements SkinSurfaces {
     final ColorScheme colors = theme.colorScheme;
     final _PillMetrics metrics = _PillMetrics.of(scale);
     final Color foreground = _pillForeground(context, tone);
-    final Color background = tone == Tone.neutral
+    // A paired pill takes the neutral chip's fill: one wash cannot mean two
+    // things, so the surface stays quiet and each fact's own foreground is
+    // what carries its meaning. See [badge].
+    final Color background = secondary != null || tone == Tone.neutral
         ? colors.surfaceContainerHighest
         : foreground.withValues(alpha: _pillWash);
 
@@ -1536,6 +1572,18 @@ final class MaterialSurfaces implements SkinSurfaces {
               fontWeight: FontWeight.w600,
             ),
           ),
+          if (secondary != null) ...<Widget>[
+            const SizedBox(width: MaterialMetrics.spaceXS),
+            // ignore: avoid_text_with_style
+            Text(
+              secondary.label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontSize: metrics.fontSize,
+                color: _pillForeground(context, secondary.tone),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
           if (reservedTrailing != null) ...<Widget>[
             SizedBox(
               width: math.max(
@@ -2007,6 +2055,150 @@ final class _FlatNode {
   final bool open;
 }
 
+/// The whole tree: the walk, the viewport, and the reveal.
+///
+/// Stateful because the member owns the scrollable, and owning a scrollable
+/// means owning [TreeSpec.revealed]: the application states which node must
+/// be in view, and only this side of the seam knows what a row measures.
+///
+/// The walk flattens `roots` against `expanded` and builds only the rows a
+/// bounded viewport asks for - a ten-thousand-file working tree must not
+/// build ten thousand rows to show twenty. That laziness is why the reveal
+/// runs in two steps: a row far outside the viewport has no render object to
+/// measure, so the scroll first jumps to `index x [_nominalRowExtent]` to get
+/// the row built, then corrects against the row's real geometry with the
+/// minimal-motion clamp (scroll only as far as puts the row fully inside the
+/// viewport, exactly the arithmetic the floor sites' controllers applied).
+/// The reveal fires when the value arrives or changes, never on an unrelated
+/// rebuild, so the user can scroll away from a revealed node and stay there.
+class _MaterialTree extends StatefulWidget {
+  const _MaterialTree({required this.spec});
+
+  final TreeSpec spec;
+
+  @override
+  State<_MaterialTree> createState() => _MaterialTreeState();
+}
+
+class _MaterialTreeState extends State<_MaterialTree> {
+  final ScrollController _scrollController = ScrollController();
+
+  /// Marks the revealed node's row so its real geometry can be measured once
+  /// it is built. At most one row wears it, which is what a GlobalKey needs.
+  final GlobalKey _revealedKey = GlobalKey();
+
+  /// The estimate that gets a far-away row built: the dense row's own pitch
+  /// (spaceXS above and below a bodyMedium line). It only has to land within
+  /// the cache extent of the truth - the correction pass reads the row's real
+  /// render geometry.
+  static const double _nominalRowExtent = 28;
+
+  /// The rows of the current build, so the reveal can find its index.
+  List<_FlatNode> _rows = const <_FlatNode>[];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.spec.revealed != null) _scheduleReveal();
+  }
+
+  @override
+  void didUpdateWidget(_MaterialTree oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.spec.revealed != null &&
+        widget.spec.revealed != oldWidget.spec.revealed) {
+      _scheduleReveal();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Post-frame, because a reveal scheduled from init or an update runs
+  /// before this frame's layout exists.
+  void _scheduleReveal() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _reveal();
+    });
+  }
+
+  void _reveal() {
+    if (!_scrollController.hasClients) return;
+    if (_revealedKey.currentContext != null) {
+      _settleRevealedRow();
+      return;
+    }
+    // The row is not built. Revealing a node hidden under a collapsed
+    // ancestor is a no-op - expansion is application state, not this skin's
+    // to mutate - so a missing index simply returns.
+    final Object? revealed = widget.spec.revealed;
+    final int index = _rows.indexWhere(
+      (_FlatNode row) => row.node.id == revealed,
+    );
+    if (index < 0) return;
+    final ScrollPosition position = _scrollController.position;
+    _scrollController.jumpTo(
+      (index * _nominalRowExtent).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      ),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _settleRevealedRow();
+    });
+  }
+
+  /// Scrolls only as far as puts the revealed row fully inside the viewport:
+  /// nothing when it already is, to its own edge when it is not.
+  void _settleRevealedRow() {
+    final BuildContext? revealedContext = _revealedKey.currentContext;
+    if (revealedContext == null || !_scrollController.hasClients) return;
+    final RenderObject? row = revealedContext.findRenderObject();
+    if (row == null) return;
+    final RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(
+      row,
+    );
+    if (viewport == null) return;
+    final double atLeading = viewport.getOffsetToReveal(row, 0).offset;
+    final double atTrailing = viewport.getOffsetToReveal(row, 1).offset;
+    final ScrollPosition position = _scrollController.position;
+    final double target = _scrollController.offset
+        .clamp(atTrailing, atLeading)
+        .clamp(position.minScrollExtent, position.maxScrollExtent);
+    if (target != _scrollController.offset) _scrollController.jumpTo(target);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TreeSpec spec = widget.spec;
+    final List<_FlatNode> rows = <_FlatNode>[];
+    void walk(List<TreeNodeSpec> nodes, int depth) {
+      for (final TreeNodeSpec node in nodes) {
+        final bool open = spec.expanded.contains(node.id);
+        rows.add(_FlatNode(node, depth, open));
+        if (open) walk(node.children, depth + 1);
+      }
+    }
+
+    walk(spec.roots, 0);
+    _rows = rows;
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: rows.length,
+      itemBuilder: (BuildContext row, int index) {
+        final Widget built = _MaterialTreeRow(spec: spec, node: rows[index]);
+        if (spec.revealed != null && rows[index].node.id == spec.revealed) {
+          return KeyedSubtree(key: _revealedKey, child: built);
+        }
+        return built;
+      },
+    );
+  }
+}
+
 /// One row of a tree.
 ///
 /// Stateful for the same reason a list row is: a tree row acts on the press, so
@@ -2117,10 +2309,18 @@ class _MaterialTreeRowState extends State<_MaterialTreeRow> {
                   // it waits.
                   MaterialGlyphs.of(node.leading!),
                   size: MaterialSurfaces._treeGlyphSize,
-                  // A branch of the tree is the accent, because the hierarchy
-                  // is what the eye has to find first; a leaf takes whatever
-                  // the row publishes.
-                  color: parent ? colors.primary : selectedForeground,
+                  // A stated meaning wins: a mark whose tone the application
+                  // declared - a file coloured by what happened to it - keeps
+                  // that meaning on every tile, exactly as the floor sites'
+                  // caller-supplied file colours did. Unstated, the language's
+                  // own treatment applies: a branch of the tree is the accent,
+                  // because the hierarchy is what the eye has to find first,
+                  // and a leaf takes whatever the row publishes.
+                  color: node.leadingTone != null
+                      ? MaterialInk.foreground(context, node.leadingTone!)
+                      : parent
+                      ? colors.primary
+                      : selectedForeground,
                 ),
                 const SizedBox(width: MaterialMetrics.spaceS),
               ],
@@ -2142,7 +2342,7 @@ class _MaterialTreeRowState extends State<_MaterialTreeRow> {
               ],
               if (node.menu.isNotEmpty) ...<Widget>[
                 const SizedBox(width: MaterialMetrics.spaceS),
-                _MenuAnchor(entries: node.menu, color: selectedForeground),
+                _TreeMenuAnchor(entries: node.menu, color: selectedForeground),
               ],
             ],
           ),
@@ -2182,6 +2382,58 @@ class _TreeCaret extends StatelessWidget {
           MaterialGlyphs.of(open ? IconRole.caretDown : IconRole.caretRight),
           size: MaterialSurfaces._treeCaretSize,
           color: color,
+        ),
+      ),
+    ),
+  );
+}
+
+/// The anchor a tree node hangs its own menu off.
+///
+/// Deliberately NOT [_MenuAnchor]: that one is an `IconButton`, whose
+/// interactive minimum would set the pitch of every row that carries a menu,
+/// and how tall a tree row is is the point of a tree. So the tree answers its
+/// row-level affordances the way it already answers the caret - a dense glyph
+/// inside an `InkResponse`, so the mark keeps a real state layer without
+/// claiming a control-sized box. The entries go back in through [Overlays],
+/// the application's one overlay front door, exactly as every other anchor's
+/// do; the mark is named for the pointer and for a screen reader, because an
+/// icon-only control without a name is a defect by this repository's rules.
+class _TreeMenuAnchor extends StatelessWidget {
+  const _TreeMenuAnchor({required this.entries, required this.color});
+
+  /// What the menu offers.
+  final List<MenuEntry> entries;
+
+  /// The foreground the row published, so the anchor is coloured for the tile
+  /// it sits on rather than for the surface behind it.
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: MaterialLocalizations.of(context).showMenuTooltip,
+    child: Material(
+      type: MaterialType.transparency,
+      child: Semantics(
+        button: true,
+        child: InkResponse(
+          onTap: () => Overlays.menu(
+            context,
+            at: _MenuAnchor._centreOf(context),
+            entries: entries,
+          ),
+          customBorder: const CircleBorder(),
+          radius:
+              MaterialSurfaces._treeCaretSize / 2 +
+              MaterialSurfaces._treeCaretPad,
+          child: Padding(
+            padding: const EdgeInsets.all(MaterialSurfaces._treeCaretPad),
+            child: Icon(
+              MaterialGlyphs.of(IconRole.dotsThreeVertical),
+              size: MaterialSurfaces._treeCaretSize,
+              color: color,
+            ),
+          ),
         ),
       ),
     ),
@@ -2538,9 +2790,13 @@ class _CommitGraphPainter extends CustomPainter {
   /// How wide the gutter is: one lane per column in play, capped.
   ///
   /// [GraphRowSpec.laneCount] is a COUNT rather than a width precisely so that
-  /// this line, and not the application, decides how wide the gutter is.
-  double get _gutterWidth =>
-      _laneWidth * spec.laneCount.clamp(1, _maxRenderedLanes);
+  /// this line, and not the application, decides how wide the gutter is - and
+  /// `surfaces.commitGraphGutter` answers the row's reservation from the same
+  /// line, so the two cannot disagree.
+  static double gutterWidthFor(int laneCount) =>
+      _laneWidth * laneCount.clamp(1, _maxRenderedLanes);
+
+  double get _gutterWidth => gutterWidthFor(spec.laneCount);
 
   /// Where a lane sits, measured from the row's own leading edge.
   ///
@@ -2622,6 +2878,11 @@ class _CommitGraphPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CommitGraphPainter oldDelegate) =>
-      !identical(oldDelegate.spec, spec) ||
-      !identical(oldDelegate.lanes, lanes);
+      // Value equality, not identity: the application necessarily builds a
+      // fresh GraphRowSpec every row build, so an identity test would repaint
+      // the longest list in the application on every selection tick. The spec
+      // declares `==` for exactly this comparison. The lane cycle stays an
+      // identity test - it is one per-brightness const list, so identity is
+      // exact and cheaper than comparing eight colours.
+      oldDelegate.spec != spec || !identical(oldDelegate.lanes, lanes);
 }

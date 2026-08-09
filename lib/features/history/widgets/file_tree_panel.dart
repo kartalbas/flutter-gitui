@@ -3,18 +3,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ContentPort,
+        ControlScale,
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuEntry,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone,
+        TreeNodeSpec,
+        TreeSpec;
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/diff_stat_badge.dart';
 import '../../../shared/widgets/empty_state.dart';
-import '../../../shared/components/base_menu_item.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/utils/file_icon_utils.dart';
 import '../../../core/git/models/file_change.dart';
@@ -24,7 +36,6 @@ import '../../../core/git/widgets/commit_file_diff_dialog.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/editor_launcher_service.dart';
 import '../../../core/services/notification_service.dart';
-import '../../../shared/widgets/double_tap_tracker.dart';
 import '../providers/commit_diff_provider.dart';
 
 /// Tree node representing a file or directory
@@ -62,10 +73,21 @@ class FileTreePanel extends ConsumerStatefulWidget {
 }
 
 class _FileTreePanelState extends ConsumerState<FileTreePanel> {
-  // Clicking a file has to show its diff on the press. Registering onDoubleTap
-  // on the row would make Flutter withhold that click for 300 ms, so the
-  // double click is recognised from the interval between taps instead.
-  final DoubleTapTracker _tapTracker = DoubleTapTracker();
+  /// Directories the user has folded shut, by path.
+  ///
+  /// Expansion is application state under `surfaces.tree` - the member walks
+  /// `roots` against it on every build - and holding it HERE is what made the
+  /// fold work at all: the hand-rolled rows kept an `isExpanded` flag on node
+  /// objects that were rebuilt from the provider on the very setState the
+  /// fold triggered, so a collapse never survived its own rebuild.
+  final Set<String> _collapsed = <String>{};
+
+  @override
+  void didUpdateWidget(FileTreePanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new commit is a new tree, and it opens fully, as it always has.
+    if (oldWidget.commitHash != widget.commitHash) _collapsed.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +134,6 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
 
           final stats = FileChangeStats(files);
           final tree = _buildFileTree(files);
-          final rows = _flattenVisible(tree);
 
           return Column(
             children: [
@@ -180,22 +201,21 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
                 ),
               ),
 
-              // File tree. Built lazily from the flattened rows so only the
-              // visible ones are created.
+              // File tree: `surfaces.tree` said once. The walk, the lazy
+              // viewport, the indent rungs, each row's mark, the fold caret
+              // and the row-action anchor are all the member's now - and with
+              // them went the hand-built flatten, the per-depth padding
+              // arithmetic and the shrunk PopupMenuButton.
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(AppTheme.paddingS),
-                  itemCount: rows.length,
-                  itemBuilder: (context, index) {
-                    final row = rows[index];
-                    return _buildTreeRow(
-                      context,
-                      row.node,
-                      row.depth,
-                      displayedPath,
-                    );
-                  },
-                ),
+                child: SkinScope.render(context, (
+                  Skin skin,
+                  BuildContext inner,
+                ) {
+                  return skin.surfaces.tree(
+                    inner,
+                    _treeSpec(tree, displayedPath),
+                  );
+                }),
               ),
             ],
           );
@@ -231,63 +251,83 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
     );
   }
 
-  /// The rows the list shows, in display order, each with its indent depth.
+  /// The whole tree as the contract's data, from this panel's three facts:
+  /// which files the commit changed, which directories the user folded shut,
+  /// and which file's diff the neighbouring panel is showing.
   ///
-  /// The tree used to render as a Column nested per directory inside a plain
-  /// ListView, which built every node - including those scrolled out of view -
-  /// on every interaction. Flattening lets ListView.builder create only the
-  /// rows actually on screen.
-  List<({FileTreeNode node, int depth})> _flattenVisible(
-    List<FileTreeNode> nodes,
-  ) {
-    final rows = <({FileTreeNode node, int depth})>[];
+  /// The displayed file is the tree's selection - marking it is what visually
+  /// ties the list to the in-place diff - and it is also [TreeSpec.revealed]:
+  /// when the displayed file changes, the member keeps its row in view, which
+  /// this panel could never say while the scrollable was the member's own.
+  /// `containerFocused` is false because this panel is not a keyboard
+  /// collection - there is no roving highlight to wear a focus ring.
+  TreeSpec _treeSpec(List<FileTreeNode> roots, String? displayedPath) {
+    final l10n = AppLocalizations.of(context)!;
+    final expanded = <Object>{};
+    final byPath = <String, FileTreeNode>{};
 
-    void visit(List<FileTreeNode> level, int depth) {
-      for (final node in level) {
-        rows.add((node: node, depth: depth));
-        if (node.isDirectory && node.isExpanded) {
-          visit(node.children, depth + 1);
-        }
-      }
+    TreeNodeSpec nodeSpec(FileTreeNode node) {
+      byPath[node.fullPath] = node;
+      final open = node.isDirectory && !_collapsed.contains(node.fullPath);
+      if (open) expanded.add(node.fullPath);
+      final change = node.fileChange;
+      final isFile = !node.isDirectory && change != null;
+      return TreeNodeSpec(
+        id: node.fullPath,
+        content: ContentPort(
+          BaseLabel(node.name, role: TextRole.detail, maxLines: 1),
+        ),
+        children: [for (final child in node.children) nodeSpec(child)],
+        leading: node.isDirectory
+            ? (open ? IconRole.folderOpen : IconRole.folder)
+            : FileIconUtils.getRoleForExtension(change?.extension ?? ''),
+        // What happened to this file, said as a meaning rather than a colour.
+        // In this panel the mark's tone is the ONLY per-row statement of that
+        // fact - the +n/-n badge beside it does not say "deleted".
+        leadingTone: isFile ? change.type.toneOf : null,
+        // File change stats: the contract's paired badge. The counts are the
+        // application's facts and everything else - the fill, the corner, the
+        // inset, the gap between the halves - is the skin's answer to "two
+        // facts in one mark" (#438, BadgeSpec.secondary).
+        trailing: isFile
+            ? ContentPort(
+                DiffStatBadge(
+                  additions: change.additions,
+                  deletions: change.deletions,
+                ),
+              )
+            : null,
+        menu: isFile ? _fileMenu(node, change, l10n) : const <MenuEntry>[],
+      );
     }
 
-    visit(nodes, 0);
-    return rows;
-  }
+    final rootSpecs = [for (final node in roots) nodeSpec(node)];
 
-  Widget _buildTreeRow(
-    BuildContext context,
-    FileTreeNode node,
-    int depth,
-    String? displayedPath,
-  ) {
-    // The file whose diff the neighboring panel currently shows. Marking it
-    // here is what visually ties the list to the in-place diff.
-    final isDisplayedFile = !node.isDirectory && displayedPath == node.fullPath;
+    void toggleFold(Object id) {
+      setState(() {
+        final folder = id as String;
+        if (!_collapsed.remove(folder)) _collapsed.add(folder);
+      });
+    }
 
-    return InkWell(
-      // No onDoubleTap: registering one makes Flutter withhold every single
-      // tap until the 300 ms double-tap window closes, which is what made
-      // clicking a file feel slow. The tracker reports the double click.
-      onTap: () {
-        final isDoubleTap = _tapTracker.registerTap(node, DateTime.now());
+    return TreeSpec(
+      roots: rootSpecs,
+      expanded: expanded,
+      selected: {?displayedPath},
+      containerFocused: false,
+      revealed: displayedPath,
+      onToggleExpanded: toggleFold,
+      // A click on a directory folds it, exactly as it always has; a click on
+      // a file highlights it so its diff renders in the panel beside this
+      // list. The dialog stays reachable via double-click and the menu for a
+      // focused read.
+      onSelect: (id) {
+        final node = byPath[id];
+        if (node == null) return;
         if (node.isDirectory) {
-          setState(() {
-            node.isExpanded = !node.isExpanded;
-          });
+          toggleFold(id);
           return;
         }
-        if (isDoubleTap) {
-          showCommitFileDiffDialog(
-            context,
-            commitHash: widget.commitHash,
-            filePath: node.fullPath,
-          );
-          return;
-        }
-        // A click highlights the file so its diff renders in the panel
-        // beside this list; the dialog stays reachable via double-click
-        // and the menu for a focused read.
         ref
             .read(highlightedCommitFileProvider.notifier)
             .state = HighlightedCommitFile(
@@ -295,213 +335,62 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
           path: node.fullPath,
         );
       },
-      child: Container(
-        // Four sides saying three different things at once, and only one of
-        // them is a rung. The leading side is the row's DEPTH in the tree,
-        // which is structure computed per row rather than a distance the skin
-        // may choose; the vertical pair is the dense-row density; the trailing
-        // side is breathing room before the row's own actions. `BaseInset` has
-        // two axes and no per-side form, and the selection fill this padding
-        // sits inside spans the indent, so the composition that would separate
-        // them moves the highlight. Left whole, and reported.
-        padding: EdgeInsets.only(
-          left: depth * AppTheme.paddingM,
-          top: 2,
-          bottom: 2,
-          right: AppTheme.paddingXS,
-        ),
-        decoration: isDisplayedFile
-            ? BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusS),
-              )
-            : null,
-        child: Row(
-          children: [
-            // Expand/collapse icon for directories
-            if (node.isDirectory) ...[
-              // The disclosure mark of a tree row: dense, and secondary to the
-              // name beside it.
-              BaseIcon(
-                node.isExpanded ? IconRole.caretDown : IconRole.caretRight,
-                scale: ControlScale.compact,
-                tone: Tone.muted,
-              ),
-              const BaseGap(Proximity.hairline),
-            ],
+      onActivate: (id) {
+        final node = byPath[id];
+        if (node == null) return;
+        if (node.isDirectory) {
+          toggleFold(id);
+          return;
+        }
+        showCommitFileDiffDialog(
+          context,
+          commitHash: widget.commitHash,
+          filePath: node.fullPath,
+        );
+      },
+    );
+  }
 
-            // Folder/file icon, and its size is NOT what strands these two
-            // colours - 16 is exactly `ControlScale.compact`. Each branch is
-            // blocked by its glyph instead, for a different reason.
-            //
-            // On the file branch the glyph is chosen at run time from the
-            // file's extension, so it is an `IconData` that no `IconRole`
-            // names; a mark that cannot be a `BaseIcon` cannot carry a tone,
-            // so the `onSurface` fallback beside it is stranded with it.
-            //
-            // On the folder branch the role exists (`IconRole.folder` /
-            // `folderOpen`) and the block is the WEIGHT: this draws Phosphor's
-            // Bold face, while `BaseIcon` goes through `type.icon`, which
-            // resolves `MaterialGlyphs.of` - the Regular family. Naming the
-            // role would buy `Tone.accent` at the price of the bold stroke,
-            // which is dropping an appearance inside a rename and is the
-            // mistake the staged-state checkboxes already made once.
-            //
-            // Both move when the glyph table becomes roles and the weight is
-            // the skin's to re-decide.
-            Icon(
-              node.isDirectory
-                  ? (node.isExpanded
-                        ? PhosphorIconsBold.folderOpen
-                        : PhosphorIconsBold.folder)
-                  : FileIconUtils.getIconForExtension(
-                      node.fileChange?.extension ?? '',
-                    ),
-              size: AppTheme.iconS,
-              color: node.isDirectory
-                  ? Theme.of(context).colorScheme.primary
-                  : (node.fileChange?.type.colorOf(context) ??
-                        Theme.of(context).colorScheme.onSurface),
-            ),
-            const BaseGap(Proximity.related),
-
-            // Name
-            Expanded(
-              child: BaseLabel(node.name, role: TextRole.detail, maxLines: 1),
-            ),
-
-            // File change stats
-            if (!node.isDirectory && node.fileChange != null) ...[
-              const BaseGap(Proximity.related),
-              Container(
-                // The badge's fill and corner stay: they are the surface.
-                // Its inset and internal gap stay literals: 6 and 2 both sit
-                // between rungs on ladders that skip them - the same
-                // between-the-rungs distance file_list_item.dart's status
-                // badge records - and its height is the tree row's height,
-                // so rounding either number would resize every stats badge.
-                // Both wait for `surfaces.badge`.
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (node.fileChange!.additions > 0) ...[
-                      BaseLabel(
-                        '+${node.fileChange!.additions}',
-                        role: TextRole.micro,
-                        tone: Tone.gitAdded,
-                      ),
-                    ],
-                    if (node.fileChange!.additions > 0 &&
-                        node.fileChange!.deletions > 0)
-                      const SizedBox(width: 2),
-                    if (node.fileChange!.deletions > 0) ...[
-                      BaseLabel(
-                        '-${node.fileChange!.deletions}',
-                        role: TextRole.micro,
-                        tone: Tone.gitDeleted,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              // File actions menu
-              const BaseGap(Proximity.hairline),
-              PopupMenuButton<String>(
-                // A row-level action's glyph, which is what `compact` names.
-                // It was drawn here at the ladder step reserved for
-                // non-interactive inline indicators, which is not what this
-                // is: it is the row's own affordance.
-                icon: const BaseIcon(
-                  IconRole.dotsThreeVertical,
-                  scale: ControlScale.compact,
-                ),
-                tooltip: AppLocalizations.of(context)!.tooltipFileActions,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: AppTheme.paddingL,
-                  minHeight: AppTheme.paddingL,
-                ),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'view_diff',
-                    child: MenuItemContent(
-                      icon: IconRole.gitDiff,
-                      label: AppLocalizations.of(context)!.viewDiff,
-                      scale: ControlScale.compact,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'download',
-                    child: MenuItemContent(
-                      icon: IconRole.download,
-                      label: AppLocalizations.of(context)!.labelDownloadFile,
-                      scale: ControlScale.compact,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'open',
-                    child: MenuItemContent(
-                      icon: IconRole.textbox,
-                      label: AppLocalizations.of(context)!.openInEditor,
-                      scale: ControlScale.compact,
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'open_folder',
-                    child: MenuItemContent(
-                      icon: IconRole.folderOpen,
-                      label: AppLocalizations.of(
-                        context,
-                      )!.labelDownloadAndOpenFolder,
-                      scale: ControlScale.compact,
-                    ),
-                  ),
-                ],
-                onSelected: (value) async {
-                  final isDeleted =
-                      node.fileChange!.type == FileChangeType.deleted;
-                  switch (value) {
-                    case 'view_diff':
-                      showCommitFileDiffDialog(
-                        context,
-                        commitHash: widget.commitHash,
-                        filePath: node.fullPath,
-                      );
-                      break;
-                    case 'download':
-                      await _downloadFile(
-                        context,
-                        node.fullPath,
-                        isDeleted: isDeleted,
-                      );
-                      break;
-                    case 'open':
-                      await _openInEditor(
-                        context,
-                        node.fullPath,
-                        isDeleted: isDeleted,
-                      );
-                      break;
-                    case 'open_folder':
-                      await _downloadAndOpenFolder(
-                        context,
-                        node.fullPath,
-                        isDeleted: isDeleted,
-                      );
-                      break;
-                  }
-                },
-              ),
-            ],
-          ],
+  /// What can be done with one changed file, as data; the skin builds the
+  /// row's anchor from it.
+  List<MenuEntry> _fileMenu(
+    FileTreeNode node,
+    FileChange change,
+    AppLocalizations l10n,
+  ) {
+    final isDeleted = change.type == FileChangeType.deleted;
+    return <MenuEntry>[
+      MenuAction(
+        label: l10n.viewDiff,
+        icon: IconRole.gitDiff,
+        onPressed: () => showCommitFileDiffDialog(
+          context,
+          commitHash: widget.commitHash,
+          filePath: node.fullPath,
         ),
       ),
-    );
+      MenuAction(
+        label: l10n.labelDownloadFile,
+        icon: IconRole.download,
+        onPressed: () =>
+            _downloadFile(context, node.fullPath, isDeleted: isDeleted),
+      ),
+      MenuAction(
+        label: l10n.openInEditor,
+        icon: IconRole.textbox,
+        onPressed: () =>
+            _openInEditor(context, node.fullPath, isDeleted: isDeleted),
+      ),
+      MenuAction(
+        label: l10n.labelDownloadAndOpenFolder,
+        icon: IconRole.folderOpen,
+        onPressed: () => _downloadAndOpenFolder(
+          context,
+          node.fullPath,
+          isDeleted: isDeleted,
+        ),
+      ),
+    ];
   }
 
   List<FileTreeNode> _buildFileTree(List<FileChange> files) {

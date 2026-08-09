@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ContentPort, GridDensity, GridSpec, Skin, SkinScope;
+    show ContentPort, GridDensity, GridSpec, Skin, SkinScope, TileHeight;
 
 import '../controllers/item_navigation_controller.dart';
 import '../controllers/tree_view_controller.dart';
@@ -218,66 +218,49 @@ class _KeyboardNavigableListViewState extends State<KeyboardNavigableListView> {
 /// [ItemNavigationController.crossAxisCount] makes vertical arrows move by
 /// whole rows while ArrowLeft/Right step through the flattened order.
 ///
-/// **The geometry is `layout.grid`'s wherever the member can state it**
-/// (#249 P5). The tile extent, the aspect ratio and both gutters used to be a
+/// **The geometry is `layout.grid`'s** (#249 P5). The tile extent, the tile's
+/// height, both gutters and the column count used to be a
 /// `SliverGridDelegateWithMaxCrossAxisExtent` each hosting screen built by
 /// hand — and each screen then re-implemented that delegate's own column-count
 /// formula on the side, because [ItemNavigationController.crossAxisCount]
-/// needs the answer. Both halves are the member's on the [density] path: the
-/// screen states how tightly packed the tiles should be, and the member
-/// reports the resolved column count back through `GridSpec.onColumnsChanged`
-/// — the one place in the whole contract where a member reports STRUCTURE to
-/// the application, and it exists precisely for this controller.
+/// needs the answer. Both halves are the member's: the screen states how
+/// tightly packed the tiles should sit ([density]) and who owns a tile's
+/// height ([tileHeight]), and the member reports the resolved column count
+/// back through `GridSpec.onColumnsChanged` — the one place in the whole
+/// contract where a member reports STRUCTURE to the application, and it
+/// exists precisely for this controller. The measured `gridDelegate` this
+/// view carried while `GridSpec` had no word for a tile's height is gone:
+/// `TileHeight.content` now states the workspace grid's requirement — the
+/// card decides its own room — through the contract (#438).
 ///
-/// What this view keeps either way is the half that was never a design
-/// decision: the single focus node, the key handling, the roving highlight and
-/// the per-item `isSelected`/`containerHasFocus` flags.
+/// What this view keeps is the half that was never a design decision: the
+/// single focus node, the key handling, the roving highlight and the per-item
+/// `isSelected`/`containerHasFocus` flags.
 ///
-/// **[gridDelegate] is the named exception, and it is a measurement, not a
-/// preference.** `GridSpec` says only how tightly packed the tiles are; it has
-/// no word for how TALL a tile has to be, and the Material skin answers every
-/// density rung with one fixed `childAspectRatio: 1.2`. A card whose content
-/// decides its own height therefore has no rung that fits, and the workspace
-/// card is such a card: at the shell's 870-pixel measurement the member's
-/// tile is 232.8 logical pixels tall against the 239.9 the card needs, and it
-/// overflows by 7.1 — the same shortfall recurs across whole bands of window
-/// width (roughly 733–895, 1099–1199, 1465–1503). No density rung avoids it,
-/// because at any one width all three rungs resolve to the same column count
-/// and therefore the same tile height. So that grid keeps its measured
-/// delegate and its register entries until `GridSpec` can state a tile
-/// proportion. Exactly one of [density] and [gridDelegate] is given.
-///
-/// Two capabilities left with the migration, because on the [density] path the
-/// member owns the scroll view and `GridSpec` has no slot for either: a
-/// `padding` around the viewport and the `rowExtent` that used to keep the
-/// highlight scrolled into view. Neither had a caller — both grids passed
-/// neither — so nothing on screen changes; the loss is recorded here rather
-/// than kept as a parameter that silently does nothing.
+/// Two capabilities left with the P5 migration, because the member owns the
+/// scroll view and `GridSpec` deliberately says nothing about it: a `padding`
+/// around the viewport and the `rowExtent` that used to keep the highlight
+/// scrolled into view. Neither had a caller — both grids passed neither — so
+/// nothing on screen changed; `GridSpec`'s class doc records why neither
+/// became a contract word (#438).
 class KeyboardNavigableGridView extends StatelessWidget {
   KeyboardNavigableGridView({
     super.key,
     required this.controller,
     required this.itemCount,
     required this.itemBuilder,
-    this.density,
-    this.gridDelegate,
+    this.density = GridDensity.normal,
+    this.tileHeight = TileHeight.language,
     this.autofocus = false,
     this.additionalBindings,
   }) : assert(
          _bindingsAvoidReservedKeys(additionalBindings),
          _bindingsAssertMessage,
-       ),
-       assert(
-         (density == null) != (gridDelegate == null),
-         'A grid states its geometry once: through the contract as a '
-         'GridDensity, or - only for the one grid GridSpec cannot yet '
-         'describe - as a measured delegate. Never both, never neither.',
        );
 
-  /// The shared navigation semantics. On the [density] path its
-  /// `crossAxisCount` is written by the member through
-  /// `GridSpec.onColumnsChanged`, so it always describes the columns actually
-  /// laid out; on the [gridDelegate] path the hosting screen still sets it.
+  /// The shared navigation semantics. Its `crossAxisCount` is written by the
+  /// member through `GridSpec.onColumnsChanged`, so it always describes the
+  /// columns actually laid out.
   final ItemNavigationController controller;
 
   /// Number of items. The view keeps the controller's count in sync.
@@ -287,12 +270,12 @@ class KeyboardNavigableGridView extends StatelessWidget {
   final NavigableItemBuilder itemBuilder;
 
   /// How tightly packed the tiles should be. The skin turns this into a tile
-  /// extent, an aspect ratio and its gutters. The contract path.
-  final GridDensity? density;
+  /// extent and its gutters.
+  final GridDensity density;
 
-  /// Measured grid geometry, for the one grid `GridSpec` cannot describe yet.
-  /// See the class doc for the measurement that keeps it alive.
-  final SliverGridDelegate? gridDelegate;
+  /// Who owns a tile's height: the design language's own proportion, or the
+  /// content standing at exactly the room it needs.
+  final TileHeight tileHeight;
 
   /// Whether this collection claims initial focus.
   final bool autofocus;
@@ -330,20 +313,12 @@ class KeyboardNavigableGridView extends StatelessWidget {
   }
 
   Widget _body(BuildContext context, bool hasFocus) {
-    final SliverGridDelegate? measured = gridDelegate;
-    if (measured != null) {
-      return GridView.builder(
-        gridDelegate: measured,
-        itemCount: itemCount,
-        itemBuilder: (context, index) =>
-            itemBuilder(context, index, controller.isSelected(index), hasFocus),
-      );
-    }
     return SkinScope.render(context, (Skin skin, BuildContext inner) {
       return skin.layout.grid(
         inner,
         GridSpec(
-          density: density!,
+          density: density,
+          tileHeight: tileHeight,
           // The member measures the width and answers with the column count;
           // the controller needs it for ArrowUp/ArrowDown to move by a whole
           // row. The answer arrives after the frame that measured it, which

@@ -50,25 +50,39 @@ final class MenuAction extends MenuEntry {
   /// Declares one entry.
   const MenuAction({
     required this.label,
-    required this.icon,
+    this.icon,
     required this.onPressed,
     this.role = MenuActionRole.normal,
+    this.tooltip,
     this.enabled = true,
   });
 
   /// The entry's words, and its accessible name.
   final String label;
 
-  /// The entry's mark. Required rather than optional because every menu in
-  /// this application is mark-led, and a single markless row inside an
-  /// otherwise aligned column reads as a rendering fault.
-  final IconRole icon;
+  /// The entry's mark, or null for an entry that is words alone.
+  ///
+  /// This used to be required on the claim that "every menu in this
+  /// application is mark-led" - and the application itself falsified it: the
+  /// browse screen's "Expand all" and "Collapse all" have always been drawn
+  /// markless. Whether a markless row still reserves the leading gutter so
+  /// its words align with marked siblings is each language's own alignment
+  /// answer, not a fact the application can state.
+  final IconRole? icon;
 
   /// What the entry does. Null disables it.
   final VoidCallback? onPressed;
 
   /// What the entry means.
   final MenuActionRole role;
+
+  /// The longer explanation - most importantly the REASON while the entry is
+  /// unavailable, which is why [enabled] keeps a disabled entry visible at
+  /// all. The same obligation `ToolbarActionEntry.tooltip` carries, optional
+  /// here because a menu entry's own words usually suffice. How it surfaces
+  /// is the language's: a hovering tooltip, a help tag, an announced
+  /// description.
+  final String? tooltip;
 
   /// Whether the entry may be invoked right now. Distinct from a null
   /// [onPressed] only in how it reads at the call site: an entry that is
@@ -78,6 +92,52 @@ final class MenuAction extends MenuEntry {
 
   /// The resolved answer to "can the user invoke this now".
   bool get isEnabled => enabled && onPressed != null;
+}
+
+/// An entry that states which one of a set is in force.
+///
+/// A separate kind from [MenuCheckable] because it answers a different
+/// question - "which one is it" rather than "is this independent fact on" -
+/// and every language draws the two differently: a radio dot against a check,
+/// a single check that MOVES between rows against checks that accumulate.
+/// Using a checkable for a one-of-N set would be rounding a meaning onto the
+/// nearest word, which is the defect this sealed set exists to make loud.
+final class MenuChoice extends MenuEntry {
+  /// Declares one choice entry.
+  const MenuChoice({
+    required this.label,
+    required this.selected,
+    required this.onSelect,
+    this.icon,
+    this.enabled = true,
+  });
+
+  /// What choosing it means, in words.
+  final String label;
+
+  /// Whether this is the one currently in force. The SKIN draws the
+  /// selection signal - a dot, a moving check, an emphasised row - so the
+  /// application states the fact and never the mark.
+  final bool selected;
+
+  /// How to tell the application the user chose this one. Null disables the
+  /// entry. A bare callback rather than a `ValueChanged<bool>`, because
+  /// choosing an already-chosen entry is not "turning it off" - a radio set
+  /// has no off.
+  final VoidCallback? onSelect;
+
+  /// An optional mark QUALIFYING the choice - the tags screen's sort entries
+  /// carry the direction each one orders in, its grouping entries the kind of
+  /// key they group by. Optional, and deliberately not a "trailing" slot:
+  /// where it sits relative to the language's own selection signal is the
+  /// language's answer.
+  final IconRole? icon;
+
+  /// Whether the entry may be chosen right now.
+  final bool enabled;
+
+  /// The resolved answer to "can the user choose this now".
+  bool get isEnabled => enabled && onSelect != null;
 }
 
 /// An entry that states a fact the user can flip.
@@ -113,6 +173,53 @@ final class MenuCheckable extends MenuEntry {
 
   /// The resolved answer to "can the user flip this now".
   bool get isEnabled => enabled && onChanged != null;
+}
+
+/// A control that offers a menu, anchored to itself.
+///
+/// `presentMenu` is point-anchored, which is right for the one case where a
+/// point genuinely exists - a context click. Everywhere else the application
+/// was re-implementing the other half: fourteen sites built their own
+/// trigger, measured their own global position and handed a point in, which
+/// is skin geometry performed in application code. This spec states only what
+/// the trigger MEANS; the control itself, where the menu opens relative to
+/// it, and how the two are joined - ink, flyout placement, a pull-down that
+/// overlays its own control - are each language's answer.
+@immutable
+final class MenuAnchorSpec {
+  /// Declares one menu anchor.
+  const MenuAnchorSpec({
+    required this.icon,
+    required this.tooltip,
+    this.tone = Tone.neutral,
+    this.scale = ControlScale.normal,
+    this.selected = false,
+    this.enabled = true,
+  });
+
+  /// The trigger's mark.
+  final IconRole icon;
+
+  /// What the menu offers. Required, not optional: a mark-only control has to
+  /// name itself, and it doubles as the accessible name - the same
+  /// obligation `IconButtonSpec.tooltip` carries.
+  final String tooltip;
+
+  /// What the anchor's subject means - a workspace anchor takes that
+  /// workspace's own place in the skin's series.
+  final Tone tone;
+
+  /// How much room the trigger is entitled to.
+  final ControlScale scale;
+
+  /// Whether the menu's subject is currently engaged - a grouping that is
+  /// applied, a filter that is on - which the application used to say by
+  /// hand-picking a solid glyph and an accent colour at the call site. The
+  /// skin re-decides both from this one fact.
+  final bool selected;
+
+  /// Whether the menu may be opened right now.
+  final bool enabled;
 }
 
 /// Something the user can do from a notice or a banner.

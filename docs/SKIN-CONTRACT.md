@@ -644,7 +644,7 @@ final class ShellSpec {
     required this.selectedIndex,
     required this.onSelect,
     required this.toolbar,
-    required this.paneOrder,
+    this.paneHost,
     this.density,
     this.onDensityChanged,
     this.aside,
@@ -666,11 +666,12 @@ final class ShellSpec {
   /// overflows — see §4.1.
   final List<ToolbarGroup> toolbar;
 
-  /// The F6 / Shift+F6 pane cycle and the Tab order rail → toolbar → content →
-  /// log. This is WHAT THE USER CAN DO, so it is structure, and the skin may
-  /// not reorder it. `BaseFocusRegion(order: 1..4)` stays in application code
-  /// and wraps AROUND whatever `chrome.shell` returns.
-  final List<ShellPane> paneOrder;
+  /// The application's keyboard structure, applied by the skin to every pane
+  /// it draws. The F6 / Shift+F6 pane cycle and the Tab order are WHAT THE
+  /// USER CAN DO: `BaseFocusRegion(order: 1..4)` stays in application code
+  /// and is installed INSIDE this wrapper, so the order rides in the regions
+  /// and never crosses the seam - a skin cannot reorder what it never holds.
+  final ShellPaneHost? paneHost;
 
   /// NULL means "this skin owns its own display mode". A skin whose canonical
   /// navigation ships a toggle — Fluent's `NavigationPane`, macOS's window via
@@ -1362,7 +1363,7 @@ two:
   None of this is design and none of it moves.
 - **`ShellSpec` construction (≈170 lines)** — destinations, `selectedIndex`,
   `onSelect`, the toolbar groups, the pickers, the banner, the aside, and
-  `paneOrder`.
+  `paneHost`.
 
 Everything from `app_shell.dart:294` (`Scaffold`) to `:682` — the `Row`, the
 `NavigationRail`, the `VerticalDivider`, the toolbar `Container` with its
@@ -1405,10 +1406,17 @@ is drawn, and the caret button is deleted from `lib/`. Honest note:
 `SidebarItem.label` is a required `Widget` (`sidebar_item.dart:15,35`) and there
 is no icon-only AppKit sidebar — registered deviation.
 
-**`paneOrder` is structure and the skin may not touch it.** The F6 / Shift+F6
-pane cycle and the Tab order rail → toolbar → content → log are *what the user
-can do*. `BaseFocusRegion(order: 1..4)` stays in application code and wraps
-**around** whatever `chrome.shell` returns.
+**The pane cycle is structure, and `ShellSpec.paneHost` is the mechanism that
+keeps it so.** The F6 / Shift+F6 pane cycle and the Tab order rail → toolbar →
+content → log are *what the user can do* — but the skin draws all four panes,
+so a rule that only *asked* skins not to reorder them had no mechanism (P5
+measured the failure: wrapping "around whatever `chrome.shell` returns" yields
+ONE region, and the shipped four-pane cycle of #290 collapses to at most two).
+`BaseFocusRegion(order: 1..4)` stays in application code and is installed
+**inside** the per-pane wrapper the application supplies on
+`ShellSpec.paneHost`; the skin routes every pane it draws through that
+wrapper, the numeric order rides in the regions, and no arrangement can touch
+it — the order never crosses the seam at all.
 
 ### 4.2 Dialogs and overlays
 

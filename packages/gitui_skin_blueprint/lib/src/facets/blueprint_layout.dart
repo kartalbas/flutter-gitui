@@ -283,6 +283,32 @@ class _BlueprintGridState extends State<_BlueprintGrid> {
     GridDensity.roomy => 384,
   };
 
+  /// Who owns a tile's height, drawn without a proportion.
+  ///
+  /// The instrument has no shape of its own to give a tile, so
+  /// [TileHeight.language] is answered with the one thing a language asserts
+  /// that content does not: uniformity. A language-owned row stands at one
+  /// height - each tile stretched to its row's tallest - while content-owned
+  /// tiles each stand at exactly the height of what they hold, ragged. The
+  /// two answers differ wherever two tiles in a row differ, and neither
+  /// involves a number the application could come to depend on.
+  Widget _row(List<Widget> cells, {MainAxisSize size = MainAxisSize.max}) {
+    if (widget.spec.tileHeight == TileHeight.content) {
+      return Row(
+        mainAxisSize: size,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: cells,
+      );
+    }
+    return IntrinsicHeight(
+      child: Row(
+        mainAxisSize: size,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: cells,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (BuildContext context, BoxConstraints constraints) {
@@ -296,11 +322,7 @@ class _BlueprintGridState extends State<_BlueprintGrid> {
         final int columns = children.isEmpty ? 1 : children.length;
         _report(columns);
         return SingleChildScrollView(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children,
-          ),
+          child: _row(children, size: MainAxisSize.min),
         );
       }
       final double extent = _tileExtent(widget.spec.density);
@@ -314,16 +336,13 @@ class _BlueprintGridState extends State<_BlueprintGrid> {
             : children.length;
         final List<Widget> cells = children.sublist(start, end);
         rows.add(
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              for (final Widget cell in cells) Expanded(child: cell),
-              // Fillers keep a short last row's cells the same width as
-              // every other row's.
-              for (int filler = cells.length; filler < columns; filler++)
-                const Expanded(child: SizedBox.shrink()),
-            ],
-          ),
+          _row(<Widget>[
+            for (final Widget cell in cells) Expanded(child: cell),
+            // Fillers keep a short last row's cells the same width as
+            // every other row's.
+            for (int filler = cells.length; filler < columns; filler++)
+              const Expanded(child: SizedBox.shrink()),
+          ]),
         );
       }
       return SingleChildScrollView(

@@ -661,21 +661,33 @@ abstract final class MaterialTypeResolution {
   /// [context].
   ///
   /// Every role but `code` is [MaterialTypeScale]'s answer unchanged. Code is
-  /// special because the family is the user's choice - the application lets the
-  /// user pick the diff font and carries it across the contract as
-  /// [SkinRequest.monoFamily] - while the ramp step stays this skin's.
+  /// special because BOTH halves of its font are the user's choice - the
+  /// application lets the user pick the diff font and its size and carries
+  /// them across the contract as [SkinRequest.monoFamily] and
+  /// [SkinRequest.codeScale] - while the ramp step stays this skin's.
+  ///
+  /// The code scale multiplies the already-resolved step and is deliberately
+  /// NOT rounded: the ramp step arrives with the interface scale rounded in
+  /// (`_buildTextTheme`), and `codeScale` refines it on top - the exact
+  /// arithmetic the diff viewer applied by hand for every release the owner
+  /// has verified, so the door reproduces those pixels rather than
+  /// re-deciding them.
   static TextStyle? styleOf(BuildContext context, TextRole role) {
     final TextStyle? base = MaterialTypeScale.styleOf(context, role);
     if (role != TextRole.code || base == null) return base;
-    final String? family = MaterialRequestScope.maybeOf(context)?.monoFamily;
-    if (family == null || family.isEmpty) return base;
+    final SkinRequest? request = MaterialRequestScope.maybeOf(context);
+    final TextStyle scaled = request == null || request.codeScale == 1.0
+        ? base
+        : base.copyWith(fontSize: (base.fontSize ?? 14) * request.codeScale);
+    final String? family = request?.monoFamily;
+    if (family == null || family.isEmpty) return scaled;
     try {
-      return GoogleFonts.getFont(family, textStyle: base);
+      return GoogleFonts.getFont(family, textStyle: scaled);
     } catch (_) {
       // An unknown family keeps the ramp's own monospace fallback rather than
       // failing the build - the same forgiveness the theme factory extends to
       // an unknown interface family.
-      return base;
+      return scaled;
     }
   }
 }

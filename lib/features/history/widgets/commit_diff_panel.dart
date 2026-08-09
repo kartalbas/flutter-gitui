@@ -115,8 +115,6 @@ class _CommitFileDiff extends ConsumerWidget {
           context,
           l10n.lineCopiedToClipboard,
         ),
-        fontFamily: ref.watch(previewFontFamilyProvider),
-        fontSize: ref.watch(previewFontSizeProvider),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => PanelNote(

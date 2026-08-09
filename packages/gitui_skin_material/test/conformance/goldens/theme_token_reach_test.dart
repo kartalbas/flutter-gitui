@@ -978,6 +978,7 @@ Widget _reachable(Widget child, ThemeData theme) => SkinScope(
     brightness: theme.brightness,
     accentSeed: 0,
     textScale: 1,
+    codeScale: 1,
     animationScale: 1,
     monoFamily: 'JetBrains Mono',
     uiFamily: 'Inter',

@@ -56,8 +56,15 @@ abstract final class Fields {
     (Skin skin, BuildContext c) => skin.controls.dateField(c, spec, handles),
   );
 
-  /// Asks the user to narrow a closed list down to one item. Unhosted, for the
-  /// same reason as [date].
+  /// Asks the user to narrow a closed list down to one item. Unhosted, for
+  /// the same reason as [date], made concrete: a suggest value is a `T`, not
+  /// a string, so hosting it would mean a second `FormField` mechanism beside
+  /// the one host - and no live suggest field can fail validation today, both
+  /// callers arriving with a non-nullable value already chosen. Validation is
+  /// this seam's question, never a design language's, so `SuggestFieldSpec`
+  /// deliberately carries no validator; when a consumer that can actually
+  /// fail exists, the honest change is [date]'s - widen the ONE host - and
+  /// that decision is recorded here so it is made then, not defaulted now.
   static Widget suggest<T>(
     BuildContext context,
     SuggestFieldSpec<T> spec, {

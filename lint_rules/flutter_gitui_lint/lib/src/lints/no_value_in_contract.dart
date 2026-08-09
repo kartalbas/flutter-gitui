@@ -127,6 +127,9 @@ class NoValueInContract extends DartLintRule {
     // The user's own accessibility choices, carried to the skin to resolve.
     // A multiplier is not a length: it has no unit until a skin gives it one.
     'textScale': "the user's text-size preference, a multiplier",
+    'codeScale':
+        "the user's code-size preference, a multiplier - the size "
+        'half of the decision whose family half is monoFamily',
     'animationScale': "the user's motion preference, a multiplier",
     // How far along something is, from 0 to 1. Unitless by definition, and the
     // application is the only thing that knows it.

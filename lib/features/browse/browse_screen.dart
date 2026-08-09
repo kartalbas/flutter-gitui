@@ -1,11 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../shared/components/base_animated_widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole;
+    show
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuAnchorSpec,
+        MenuCheckable,
+        MenuEntry,
+        MenuSeparator,
+        Overlays,
+        Proximity,
+        TextRole;
 import 'package:path/path.dart' as path;
 
 import '../../generated/app_localizations.dart';
@@ -400,65 +409,56 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
             const BaseGap(Proximity.related),
 
-            // Options menu
-            BasePopupMenuButton<void>(
-              icon: const Icon(PhosphorIconsRegular.dotsThreeVertical),
-              tooltip: AppLocalizations.of(context)!.viewOptions,
-              itemBuilder: (context) {
-                return <PopupMenuEntry<void>>[
-                  CheckedPopupMenuItem<void>(
-                    checked: showHidden,
-                    onTap: () {
-                      ref
-                          .read(configProvider.notifier)
-                          .setShowHiddenFiles(!showHidden);
-                    },
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.showHiddenFiles,
-                      role: TextRole.control,
-                    ),
-                  ),
-                  CheckedPopupMenuItem<void>(
-                    checked: showIgnored,
-                    onTap: () {
-                      ref
-                          .read(configProvider.notifier)
-                          .setShowIgnoredFiles(!showIgnored);
-                    },
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.showIgnoredFiles,
-                      role: TextRole.control,
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  PopupMenuItem<void>(
-                    onTap: () {
-                      // Access the tree view state and expand all
-                      final treeState = _treeViewKey.currentState as dynamic;
-                      if (treeState != null) {
-                        treeState.expandAll();
-                      }
-                    },
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.expandAll,
-                      role: TextRole.control,
-                    ),
-                  ),
-                  PopupMenuItem<void>(
-                    onTap: () {
-                      // Access the tree view state and collapse all
-                      final treeState = _treeViewKey.currentState as dynamic;
-                      if (treeState != null) {
-                        treeState.collapseAll();
-                      }
-                    },
-                    child: BaseLabel(
-                      AppLocalizations.of(context)!.collapseAll,
-                      role: TextRole.control,
-                    ),
-                  ),
-                ];
-              },
+            // Options menu: the contract's anchored form. The two facts are
+            // MenuCheckable entries (independent, both can hold), and
+            // "Expand all" / "Collapse all" are MARKLESS actions - they have
+            // always been drawn as words alone, and `MenuAction.icon` is
+            // optional precisely so converting them does not invent two
+            // marks nothing asked for.
+            Overlays.anchor(
+              spec: MenuAnchorSpec(
+                icon: IconRole.dotsThreeVertical,
+                tooltip: AppLocalizations.of(context)!.viewOptions,
+              ),
+              entries: <MenuEntry>[
+                MenuCheckable(
+                  label: AppLocalizations.of(context)!.showHiddenFiles,
+                  checked: showHidden,
+                  onChanged: (bool value) {
+                    ref.read(configProvider.notifier).setShowHiddenFiles(value);
+                  },
+                ),
+                MenuCheckable(
+                  label: AppLocalizations.of(context)!.showIgnoredFiles,
+                  checked: showIgnored,
+                  onChanged: (bool value) {
+                    ref
+                        .read(configProvider.notifier)
+                        .setShowIgnoredFiles(value);
+                  },
+                ),
+                const MenuSeparator(),
+                MenuAction(
+                  label: AppLocalizations.of(context)!.expandAll,
+                  onPressed: () {
+                    // Access the tree view state and expand all
+                    final treeState = _treeViewKey.currentState as dynamic;
+                    if (treeState != null) {
+                      treeState.expandAll();
+                    }
+                  },
+                ),
+                MenuAction(
+                  label: AppLocalizations.of(context)!.collapseAll,
+                  onPressed: () {
+                    // Access the tree view state and collapse all
+                    final treeState = _treeViewKey.currentState as dynamic;
+                    if (treeState != null) {
+                      treeState.collapseAll();
+                    }
+                  },
+                ),
+              ],
             ),
           ],
         ),

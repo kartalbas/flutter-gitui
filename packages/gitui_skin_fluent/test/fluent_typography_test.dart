@@ -19,6 +19,7 @@ const SkinRequest _request = SkinRequest(
   brightness: Brightness.dark,
   accentSeed: 0,
   textScale: 1.0,
+  codeScale: 1.0,
   animationScale: 1.0,
   monoFamily: 'JetBrains Mono',
   uiFamily: 'Inter',
@@ -238,6 +239,7 @@ void main() {
         brightness: Brightness.dark,
         accentSeed: 0,
         textScale: 1.0,
+        codeScale: 1.0,
         animationScale: 1.0,
         monoFamily: 'No Such Mono 2026',
         uiFamily: 'No Such Family 2026',
@@ -267,6 +269,7 @@ void main() {
           brightness: Brightness.dark,
           accentSeed: 0,
           textScale: scale,
+          codeScale: 1.0,
           animationScale: 1.0,
           monoFamily: '',
           uiFamily: '',
@@ -284,6 +287,32 @@ void main() {
       // An empty family means "nothing chosen": the scaled step passes
       // through in the language's own face.
       expect((await at(1.10, TextRole.body)).fontFamily, 'Segoe UI Variable');
+    });
+
+    testWidgets('the code scale multiplies into the code step and only the '
+        'code step', (WidgetTester tester) async {
+      Future<TextStyle> at(double text, double code, TextRole role) => _resolve(
+        tester,
+        role,
+        request: SkinRequest(
+          brightness: Brightness.dark,
+          accentSeed: 0,
+          textScale: text,
+          codeScale: code,
+          animationScale: 1.0,
+          monoFamily: '',
+          uiFamily: '',
+        ),
+      );
+      // The contract states codeScale as a refinement ON TOP of textScale,
+      // and this door multiplies once and rounds once:
+      // 14 * 1.0 * 1.15 = 16.1 -> 16; 14 * 1.10 * 1.15 = 17.71 -> 18.
+      expect((await at(1.0, 1.15, TextRole.code)).fontSize, 16);
+      expect((await at(1.10, 1.15, TextRole.code)).fontSize, 18);
+      // Every other role ignores it - the code size is the code font's, and
+      // the code font is [TextRole.code]'s alone.
+      expect((await at(1.0, 1.15, TextRole.body)).fontSize, 14);
+      expect((await at(1.0, 1.15, TextRole.detail)).fontSize, 12);
     });
   });
 

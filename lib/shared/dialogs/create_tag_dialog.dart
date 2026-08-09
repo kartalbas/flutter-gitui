@@ -258,6 +258,12 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
   String _shortHash(String hash) =>
       hash.length > 7 ? hash.substring(0, 7) : hash;
 
+  // Decided in #438: this chip does not become `surfaces.badge`. Its fill
+  // names a Material container role, which no contract tone should carry -
+  // neither Fluent nor macOS has a paired-container concept - and its label
+  // rides the type ramp where a badge's deliberately sits below it. See the
+  // fuller argument at the blame panel's hash chip
+  // (file_blame_panel.dart, the same construction with a tap).
   Widget _hashChip(BuildContext context, String shortHash) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

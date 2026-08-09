@@ -82,6 +82,17 @@ List<LanguageOption> _getLanguageOptions(BuildContext context) {
 
 /// Standalone language selector widget
 /// Shows current language as an icon button with popup menu
+///
+/// **Stays hand-painted, by decision (#438).** Each row leads with per-language
+/// flag ARTWORK, and the trigger itself is the current flag. That is
+/// application content, not design vocabulary: it renders identically under
+/// every design language, which is the inverse of the contract's own test for
+/// a member. Admitting an arbitrary-widget slot into the sealed `MenuEntry`
+/// data set would reopen the exact typed hole the set exists to close - a
+/// `Widget` that compiles cleanly into a foreign menu and ships the wrong
+/// language inside it. The menu's one-of-N shape is expressible today
+/// (`MenuChoice`); the artwork is what keeps it here, and its remaining raw
+/// reads are classifier-mechanical, so no register entry is owed.
 class LanguageSelector extends ConsumerWidget {
   const LanguageSelector({super.key});
 

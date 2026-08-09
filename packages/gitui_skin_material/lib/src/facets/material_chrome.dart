@@ -248,47 +248,58 @@ class _MaterialShellState extends State<_MaterialShell> {
       spec.density ??
       (_ownExtended ? NavigationDensity.full : NavigationDensity.condensed);
 
+  /// Routes one pane through the application's keyboard structure, or
+  /// returns it bare when the application installed none.
+  Widget _hosted(ShellPane pane, Widget contents) =>
+      spec.paneHost?.call(pane, contents) ?? contents;
+
   @override
   Widget build(BuildContext context) {
-    final Set<ShellPane> panes = spec.paneOrder.toSet();
     final ShellAside? aside = spec.aside;
     final BlockingProgressSpec? blocking = spec.blocking;
 
     // The visual arrangement is this skin's and it is exactly the measured
     // one: rail, hairline, a column of toolbar over content, and the log
-    // panel at the trailing edge. `paneOrder` states WHICH regions exist and
-    // in which order the F6 cycle walks them - that is what the user can do,
-    // it is owned by the application's own focus regions wrapped around this
-    // return, and no arrangement here may change it.
+    // panel at the trailing edge. WHICH regions exist is what the spec's own
+    // data says - destinations make a rail, groups make a toolbar, a visible
+    // aside makes the log - and every pane is routed through the
+    // application's [ShellSpec.paneHost], so the F6 / Tab order the
+    // application installs there survives this arrangement unchanged.
     return Scaffold(
       body: Stack(
         children: <Widget>[
           Row(
             children: <Widget>[
-              if (panes.contains(ShellPane.rail) &&
+              if (spec.destinations.isNotEmpty &&
                   _density != NavigationDensity.hidden) ...<Widget>[
-                _rail(context),
+                _hosted(ShellPane.rail, _rail(context)),
                 const VerticalDivider(thickness: 1, width: 1),
               ],
               Expanded(
                 child: Column(
                   children: <Widget>[
-                    if (panes.contains(ShellPane.toolbar))
-                      _MaterialShellToolbar(groups: spec.toolbar),
+                    if (spec.toolbar.isNotEmpty)
+                      _hosted(
+                        ShellPane.toolbar,
+                        _MaterialShellToolbar(groups: spec.toolbar),
+                      ),
                     // The warning banner and the active screen form the
                     // content region together: the banner is part of what the
                     // user is working on, not part of the toolbar, so Tab and
                     // F6 treat them as one pane.
                     Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          if (spec.banner != null)
-                            const MaterialSurfaces().banner(
-                              context,
-                              spec.banner!,
-                            ),
-                          Expanded(child: _content()),
-                        ],
+                      child: _hosted(
+                        ShellPane.content,
+                        Column(
+                          children: <Widget>[
+                            if (spec.banner != null)
+                              const MaterialSurfaces().banner(
+                                context,
+                                spec.banner!,
+                              ),
+                            Expanded(child: _content()),
+                          ],
+                        ),
                       ),
                     ),
                     if (spec.status != null || spec.activity != null)
@@ -296,10 +307,8 @@ class _MaterialShellState extends State<_MaterialShell> {
                   ],
                 ),
               ),
-              if (panes.contains(ShellPane.log) &&
-                  aside != null &&
-                  aside.visible)
-                aside.content.mount(),
+              if (aside != null && aside.visible)
+                _hosted(ShellPane.log, aside.content.mount()),
             ],
           ),
           // The activity strip floats over the content's top edge so a

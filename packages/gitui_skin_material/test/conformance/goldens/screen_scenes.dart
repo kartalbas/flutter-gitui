@@ -50,16 +50,15 @@ import 'package:flutter_gitui/features/changes/widgets/file_list_item.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
 import 'package:flutter_gitui/features/tags/widgets/tag_filter_chips.dart';
 import 'package:flutter_gitui/features/tags/widgets/tags_batch_operations_bar.dart';
-import 'package:flutter_gitui/shared/components/base_animated_widgets.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
-import 'package:flutter_gitui/shared/components/base_label.dart';
 import 'package:flutter_gitui/shared/components/base_shrinking_row.dart';
 import 'package:flutter_gitui/shared/components/base_switcher.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_gitui/shared/widgets/inline_search_field.dart';
 import 'package:flutter_gitui/shared/widgets/overflow_action_bar.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, MenuAnchorSpec, MenuChoice, MenuEntry, Overlays;
 
 import 'golden_scene.dart';
 
@@ -383,8 +382,11 @@ Widget _changesFileRows() {
 /// until the field can no longer show a query, which is a usability
 /// regression a component golden cannot express and this baseline can.
 ///
-/// The search field, the filter button and both sort menus are the shipping
-/// widgets. Only the data is fixed: real `GitTag` value objects, so
+/// The search field, the filter button and both menu anchors are the shipping
+/// constructions - the anchors go through `Overlays.anchor` with the same
+/// `MenuAnchorSpec`s the screen builds, because a reconstruction still holding
+/// the old `BasePopupMenuButton` would keep this golden green while the real
+/// bar changed. Only the data is fixed: real `GitTag` value objects, so
 /// `TagFilterChips` counts them exactly as it does on the screen.
 Widget _tagsFilterBand() {
   return Padding(
@@ -413,16 +415,20 @@ Widget _tagsFilterBand() {
               onPressed: _noop,
             ),
             const SizedBox(width: AppTheme.paddingS),
-            BasePopupMenuButton<int>(
-              icon: const Icon(PhosphorIconsRegular.sortAscending),
-              tooltip: 'Sort tags',
-              itemBuilder: _sortMenuItems,
+            Overlays.anchor(
+              spec: const MenuAnchorSpec(
+                icon: IconRole.sortAscending,
+                tooltip: 'Sort tags',
+              ),
+              entries: _sortEntries,
             ),
             const SizedBox(width: AppTheme.paddingS),
-            BasePopupMenuButton<int>(
-              icon: const Icon(PhosphorIconsRegular.stack),
-              tooltip: 'Group tags',
-              itemBuilder: _sortMenuItems,
+            Overlays.anchor(
+              spec: const MenuAnchorSpec(
+                icon: IconRole.rows,
+                tooltip: 'Group tags',
+              ),
+              entries: _sortEntries,
             ),
           ],
         ),
@@ -468,18 +474,23 @@ final List<GitTag> _tags = <GitTag>[
   ),
 ];
 
-List<PopupMenuEntry<int>> _sortMenuItems(BuildContext context) {
-  return <PopupMenuEntry<int>>[
-    const PopupMenuItem<int>(
-      value: 0,
-      child: BaseLabel('Name A-Z', role: TextRole.control),
-    ),
-    const PopupMenuItem<int>(
-      value: 1,
-      child: BaseLabel('Newest first', role: TextRole.control),
-    ),
-  ];
-}
+/// The choices behind the closed anchors, in the shipping shape
+/// (`MenuChoice`, the skin drawing the selection signal). A golden never
+/// opens the menu, so the anchor's resting pixels are all this feeds.
+const List<MenuEntry> _sortEntries = <MenuEntry>[
+  MenuChoice(
+    label: 'Name A-Z',
+    selected: true,
+    icon: IconRole.sortAscending,
+    onSelect: _noop,
+  ),
+  MenuChoice(
+    label: 'Newest first',
+    selected: false,
+    icon: IconRole.sortDescending,
+    onSelect: _noop,
+  ),
+];
 
 void _ignoreText(String value) {}
 

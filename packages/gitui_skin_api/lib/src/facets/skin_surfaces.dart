@@ -4,7 +4,7 @@ import '../specs/surface_specs.dart';
 
 /// Things that hold other things.
 ///
-/// Nineteen members, the largest facet, and `treeRow` is deliberately absent:
+/// Twenty members, the largest facet, and `treeRow` is deliberately absent:
 /// the arity of a tree is the TREE, because Fluent's canonical answer covers N
 /// of our rows at once, and a per-row member left standing beside it is the
 /// one a migrating screen would reach for.
@@ -79,6 +79,15 @@ abstract interface class SkinSurfaces {
   /// the attribution walk's only blind spot by construction: after it lands
   /// there is no `paint()` call in application code for a leak to hide in.
   Widget commitGraphRow(BuildContext context, GraphRowSpec spec);
+
+  /// **Reserve the room this row's graph needs beside its content.**
+  ///
+  /// The other half of [commitGraphRow], which fills the whole row as an
+  /// overlay and therefore cannot size the row's leading slot itself. The
+  /// reservation crosses as a widget rather than as a width so that "how wide
+  /// is your gutter for n lanes" is answered by the skin's arithmetic and the
+  /// number never lands in application code.
+  Widget commitGraphGutter(BuildContext context, GraphGutterSpec spec);
 
   /// **Here is a document written in Markdown.**
   Widget markdown(BuildContext context, MarkdownSpec spec);

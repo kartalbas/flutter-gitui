@@ -214,6 +214,14 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
           : 0.0;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        // The whole ProviderScope can be gone before this frame ends - a test
+        // tears the container down right after the route, and the screen-scene
+        // sweep hit exactly that: the write landed in a disposed controller
+        // and the NEXT scene inherited the StateError. A cache write into a
+        // dead container is also pointless, because the cache died with it.
+        // Guarded rather than reordered: the write must stay post-frame so it
+        // never mutates providers mid-teardown.
+        if (!_treeNodesNotifier.mounted) return;
         _treeNodesNotifier.state = nodes;
         _loadedForNotifier.state = repoPath;
         _scrollOffsetNotifier.state = scrollOffset;

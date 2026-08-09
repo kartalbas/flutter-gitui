@@ -332,6 +332,30 @@ abstract final class Overlays {
     );
   }
 
+  /// Builds the control that offers [entries], anchored to itself.
+  ///
+  /// A widget rather than a future, because the anchor lives in the tree: the
+  /// SKIN builds the trigger, measures it and opens the menu against it, so
+  /// no call site performs that geometry again. The scope is read inside the
+  /// fence - the same arrangement as [SkinScope.render] - so a change of skin
+  /// rebuilds the anchor, and the host it constructs carries the envelope in
+  /// force at that moment into whatever route the skin opens from it.
+  static Widget anchor({
+    required MenuAnchorSpec spec,
+    required List<MenuEntry> entries,
+  }) => SkinPainted._(
+    child: Builder(
+      builder: (BuildContext inner) {
+        final SkinEnvelope envelope = SkinScope.of(inner).envelope;
+        return envelope.skin.overlays.menuAnchor(
+          inner,
+          spec,
+          SkinMenuHost._(envelope, entries),
+        );
+      },
+    ),
+  );
+
   /// Attaches [content] to the control the user just operated.
   static Future<T?> popover<T>(
     BuildContext context,

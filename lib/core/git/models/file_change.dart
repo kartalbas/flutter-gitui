@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Tone;
 
 import '../../../shared/theme/app_theme.dart';
 
@@ -35,6 +36,25 @@ enum FileChangeType {
         return colors.untracked;
     }
   }
+
+  /// What this change MEANS, for anything that says it in words - the same
+  /// map as [FileStatusType.toneOf], one model over. Deliberately
+  /// meaning-identical to [colorOf], arm for arm - even where that method
+  /// approximated (an unknown change wearing the untracked colour, a type
+  /// change wearing modified), the tone says the same thing, so the
+  /// human-verified pixels hold while the vocabulary takes over the saying.
+  /// [colorOf] survives beside it only for the fills and glyphs that have
+  /// not migrated yet, and goes with them.
+  Tone get toneOf => switch (this) {
+    FileChangeType.added => Tone.gitAdded,
+    FileChangeType.modified || FileChangeType.typeChanged => Tone.gitModified,
+    FileChangeType.deleted => Tone.gitDeleted,
+    // A copy is a rename that kept its source, and git reports both with the
+    // same similarity index, so they share a meaning as well as a colour.
+    FileChangeType.renamed || FileChangeType.copied => Tone.gitRenamed,
+    FileChangeType.unmerged => Tone.gitConflicted,
+    FileChangeType.unknown => Tone.gitUntracked,
+  };
 }
 
 /// Represents a file change in a commit

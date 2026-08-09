@@ -55,6 +55,7 @@ enum BadgeSize {
 ///   size: BadgeSize.medium,
 ///   icon: IconRole.check,
 ///   onDeleted: () => print('Badge deleted'),
+///   deleteTooltip: 'Remove the filter',
 /// )
 /// ```
 class BaseBadge extends StatelessWidget {
@@ -65,7 +66,13 @@ class BaseBadge extends StatelessWidget {
     this.size = BadgeSize.medium,
     this.icon,
     this.onDeleted,
-  });
+    this.deleteTooltip,
+  }) : assert(
+         onDeleted == null || deleteTooltip != null,
+         'A removable badge must name its removal - the removal is a '
+         'mark-only control, and every mark-only control says what it does. '
+         'TagSpec enforces the same pair one seam down.',
+       );
 
   /// Badge text label
   final String label;
@@ -98,6 +105,12 @@ class BaseBadge extends StatelessWidget {
   /// rather than at [size]; every site that removes uses [BadgeSize.medium],
   /// which is the measure the tag draws at.
   final VoidCallback? onDeleted;
+
+  /// What removing the badge does, for the pointer and for a screen reader.
+  /// Required whenever [onDeleted] is set, because the removal is a mark-only
+  /// control and its name is the application's copy decision - a skin that
+  /// invented a generic one would be naming an action it does not know.
+  final String? deleteTooltip;
 
   /// What the variant MEANS, in the contract's word for it.
   ///
@@ -132,7 +145,13 @@ class BaseBadge extends StatelessWidget {
     if (onDeleted != null) {
       return skin.surfaces.tag(
         inner,
-        TagSpec(label: label, icon: icon, tone: tone, onRemoved: onDeleted),
+        TagSpec(
+          label: label,
+          icon: icon,
+          tone: tone,
+          onRemoved: onDeleted,
+          removeTooltip: deleteTooltip,
+        ),
       );
     }
     return skin.surfaces.badge(
@@ -143,6 +162,15 @@ class BaseBadge extends StatelessWidget {
 }
 
 /// Numeric badge variant for displaying counts
+///
+/// **Decided (#438): this construction asked the wrong member.** A count
+/// riding on a host is already the contract's word - the `badgeCount` slot on
+/// `ListRowSpec`, `TreeNodeSpec`, `TabEntry` and `ShellDestination`, where the
+/// SKIN draws the count in its own idiom (the Material skin's `_CountBadge` is
+/// this widget's design, moved there). No application code calls this widget
+/// any more; it survives only as the specimen the Material conformance suite
+/// measures M3's `Badge` against, and it must not gain new callers - a count
+/// belongs in its host's `badgeCount` slot, not beside it.
 ///
 /// Example usage:
 /// ```dart
@@ -251,6 +279,18 @@ class BaseNumericBadge extends StatelessWidget {
 
 /// Icon badge variant for displaying a badge overlay on an icon or widget
 ///
+/// **Decided (#438): this construction asked the wrong member.** Its one
+/// application call site is the navigation rail's destination icon
+/// (`app_shell.dart`, `_buildIconWithBadge`), and the contract already carries
+/// that fact as `ShellDestination.badgeCount`: a count on a navigation
+/// destination is the SHELL's to draw - M3 rides a `Badge` on the rail
+/// destination, Fluent puts an `InfoBadge` beside the pane item, each in its
+/// own place - so the site converts when `chrome.shell` is wired, and this
+/// widget goes with the hand-built rail. `BadgeSpec` deliberately does not
+/// grow a slot for the thing the badge rides on: every host that can carry a
+/// count already names it as data, and a host-shaped hole on the badge would
+/// be a second way to say each of them.
+///
 /// Example usage:
 /// ```dart
 /// BaseIconBadge(
@@ -339,6 +379,15 @@ class BaseIconBadge extends StatelessWidget {
 }
 
 /// Dot badge variant for small status indicators
+///
+/// **Decided (#438): not grown into the contract.** "Presence without a
+/// count" is a real meaning - every language has a dot form - but no
+/// application screen states it: this widget has zero call sites in `lib/`
+/// and survives only as the specimen the Material conformance suite measures
+/// M3's small `Badge` against. Members and fields are derived from need in at
+/// least one source, so `BadgeSpec.label` stays required until a screen
+/// actually needs a label-less badge; growing the word for a specimen would
+/// be speculation.
 ///
 /// Example usage:
 /// ```dart

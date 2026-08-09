@@ -6,12 +6,12 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_diff_viewer.dart';
-import '../../../shared/components/base_speed_dial.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/controllers/tree_view_controller.dart';
 import '../../../shared/widgets/base_focus_region.dart';
@@ -331,101 +331,48 @@ class _GitStatusTreeViewState extends ConsumerState<GitStatusTreeView> {
           ),
         ),
 
-        // Right panel: Diff viewer
+        // Right panel: Diff viewer. The panel FRAME is built by
+        // _DiffViewerPanel itself, because the panel's header carries the
+        // region's actions and those are computed from the panel's own async
+        // state (the loaded diff decides whether "Copy all" has anything to
+        // copy and whether a full-file view exists to toggle to).
         if (_selectedFile != null)
           Expanded(
             flex: 2,
             child: BaseFocusRegion(
               order: 3,
               debugLabel: 'ChangesScreen.diffRegion',
-              child: BasePanel(
-                title: Row(
-                  children: [
-                    const BaseIcon(
-                      IconRole.gitDiff,
-                      scale: ControlScale.compact,
-                      tone: Tone.accent,
-                    ),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      // The name of one object - the file whose diff is
-                      // on screen - rather than the name of the region.
-                      child: BaseLabel(
-                        _selectedFile!.path,
-                        role: TextRole.itemTitle,
-                        maxLines: 1,
-                      ),
-                    ),
-                    // How much of this file is in the index, as a mark. The
-                    // ticked and the dashed box are drawn BOLD on purpose -
-                    // the weight census (icon_weight_census_test.dart) records
-                    // this file as one of the surfaces still waiting to be
-                    // answered with `MaterialGlyphs.boldOf` when the tree
-                    // migrates - and a weight is the one thing `IconRole`
-                    // deliberately cannot carry, so the mark stays a raw
-                    // `Icon` naming Phosphor's bold constant until the status
-                    // tree becomes a member and the skin re-decides the
-                    // weight on its side of the seam. Its colour is stranded
-                    // with it: a `Tone` can only reach a mark through
-                    // `BaseIcon`, which cannot say the weight.
-                    Icon(
-                      _selectedFile!.isPartiallyStaged
-                          ? PhosphorIconsBold.minusSquare
-                          : _selectedFile!.isStaged
-                          ? PhosphorIconsBold.checkSquare
-                          : PhosphorIconsRegular.square,
-                      size: AppTheme.iconS,
-                      color: _selectedFile!.isStaged
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    // A mark and the word beside it are two halves of one
-                    // thing: `hairline`.
-                    const BaseGap(Proximity.hairline),
-                    BaseLabel(
-                      _selectedFile!.isPartiallyStaged
-                          ? 'Partially staged'
-                          : _selectedFile!.isStaged
-                          ? 'Staged'
-                          : 'Unstaged',
-                      role: TextRole.detail,
-                    ),
-                  ],
+              child: _DiffViewerPanel(
+                key: ValueKey(
+                  '${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode',
                 ),
-                inset: Inset.none,
-                content: _DiffViewerPanel(
-                  key: ValueKey(
-                    '${_selectedFile!.path}_${_selectedFile!.isFullyStaged}_$_diffViewMode',
-                  ),
-                  filePath: _selectedFile!.path,
-                  // A partially staged file shows its work tree half, because that
-                  // is the part the user can otherwise neither see nor stage here.
-                  staged: _selectedFile!.isFullyStaged,
-                  viewMode: _diffViewMode,
-                  fileStatus: _selectedFile!,
-                  onToggleViewMode: () {
-                    setState(() {
-                      _diffViewMode = _diffViewMode == DiffViewMode.diff
-                          ? DiffViewMode.fullFile
-                          : DiffViewMode.diff;
-                    });
-                  },
-                  onDiscardFile: widget.onDiscardFile != null
-                      ? () => widget.onDiscardFile!(_selectedFile!)
-                      : null,
-                  onToggleStage: widget.onToggleStage != null
-                      ? () => widget.onToggleStage!(
-                          _selectedFile!,
-                          _selectedFile!.isFullyStaged,
-                        )
-                      : null,
-                  onDeleteFile:
-                      _selectedFile!.primaryStatus ==
-                              FileStatusType.untracked &&
-                          widget.onDeleteFile != null
-                      ? () => widget.onDeleteFile!(_selectedFile!)
-                      : null,
-                ),
+                filePath: _selectedFile!.path,
+                // A partially staged file shows its work tree half, because that
+                // is the part the user can otherwise neither see nor stage here.
+                staged: _selectedFile!.isFullyStaged,
+                viewMode: _diffViewMode,
+                fileStatus: _selectedFile!,
+                onToggleViewMode: () {
+                  setState(() {
+                    _diffViewMode = _diffViewMode == DiffViewMode.diff
+                        ? DiffViewMode.fullFile
+                        : DiffViewMode.diff;
+                  });
+                },
+                onDiscardFile: widget.onDiscardFile != null
+                    ? () => widget.onDiscardFile!(_selectedFile!)
+                    : null,
+                onToggleStage: widget.onToggleStage != null
+                    ? () => widget.onToggleStage!(
+                        _selectedFile!,
+                        _selectedFile!.isFullyStaged,
+                      )
+                    : null,
+                onDeleteFile:
+                    _selectedFile!.primaryStatus == FileStatusType.untracked &&
+                        widget.onDeleteFile != null
+                    ? () => widget.onDeleteFile!(_selectedFile!)
+                    : null,
               ),
             ),
           ),
@@ -543,149 +490,245 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, String?>>(
       future: _diffFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          // The in-panel member, not the region-filling hero. This column is
-          // a 32 dp mark over one sentence with no headline, and that shape is
-          // the whole reason it stayed hand-rolled through two passes:
-          // `EmptyStateWidget` draws 64 dp above a `pageTitle`, so adopting IT
-          // would have doubled the mark and promoted the sentence out of
-          // `body` - rounding a meaning onto the nearest available word, which
-          // is what cost #426. `PanelNote` is that shape said once, so the
-          // `32` and the colour leave together into the member that owns them
-          // rather than being stranded here.
-          //
-          // Pixel-identical by construction: same glyph at the same rung, the
-          // same `grouped` distance under it, and the same sentence in `body`
-          // wearing the same `Tone.danger` this file already stated - the
-          // member simply quotes Material's answer to that tone for the mark,
-          // where a call site cannot.
-          return PanelNote(
-            icon: PhosphorIconsRegular.warningCircle,
-            message: 'Error loading diff: ${snapshot.error}',
-            tone: Tone.danger,
-          );
-        }
+      builder: (context, snapshot) => BasePanel(
+        title: _headerTitle(context),
+        // The region's actions live in the region's own header - the panel
+        // pattern every other panel in this application already follows -
+        // not on a surface floating over the content. They depend on the
+        // loaded diff (whether "Copy all" has anything to copy, whether a
+        // full-file view exists to toggle to), which is why this widget
+        // builds the panel frame itself instead of being mounted inside one.
+        actions: _headerActions(context, snapshot),
+        inset: Inset.none,
+        content: _diffContent(context, snapshot),
+      ),
+    );
+  }
 
-        // Show diff immediately if available, otherwise show empty state
-        // This prevents blocking the UI while loading
-        final data = snapshot.data ?? {};
-        final diffOutput = data['diff'] ?? '';
-        final fullFileContent = data['fullContent'];
+  /// The panel's name: the file whose diff is on screen, and how much of it
+  /// is in the index.
+  Widget _headerTitle(BuildContext context) {
+    final fileStatus = widget.fileStatus;
+    return Row(
+      children: [
+        const BaseIcon(
+          IconRole.gitDiff,
+          scale: ControlScale.compact,
+          tone: Tone.accent,
+        ),
+        const BaseGap(Proximity.related),
+        Expanded(
+          // The name of one object - the file whose diff is
+          // on screen - rather than the name of the region.
+          child: BaseLabel(
+            widget.filePath,
+            role: TextRole.itemTitle,
+            maxLines: 1,
+          ),
+        ),
+        // How much of this file is in the index, as a mark. The
+        // ticked and the dashed box are drawn BOLD on purpose -
+        // the weight census (icon_weight_census_test.dart) records
+        // this file as one of the surfaces still waiting to be
+        // answered with `MaterialGlyphs.boldOf` when the tree
+        // migrates - and a weight is the one thing `IconRole`
+        // deliberately cannot carry, so the mark stays a raw
+        // `Icon` naming Phosphor's bold constant until the status
+        // tree becomes a member and the skin re-decides the
+        // weight on its side of the seam. Its colour is stranded
+        // with it: a `Tone` can only reach a mark through
+        // `BaseIcon`, which cannot say the weight.
+        Icon(
+          fileStatus.isPartiallyStaged
+              ? PhosphorIconsBold.minusSquare
+              : fileStatus.isStaged
+              ? PhosphorIconsBold.checkSquare
+              : PhosphorIconsRegular.square,
+          size: AppTheme.iconS,
+          color: fileStatus.isStaged
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+        // A mark and the word beside it are two halves of one
+        // thing: `hairline`.
+        const BaseGap(Proximity.hairline),
+        BaseLabel(
+          fileStatus.isPartiallyStaged
+              ? 'Partially staged'
+              : fileStatus.isStaged
+              ? 'Staged'
+              : 'Unstaged',
+          role: TextRole.detail,
+        ),
+      ],
+    );
+  }
 
-        if (diffOutput.isEmpty &&
-            snapshot.connectionState == ConnectionState.waiting) {
-          // Still loading, show minimal placeholder
-          return const Center(
-            child: SizedBox(
-              width: AppTheme.iconM,
-              height: AppTheme.iconM,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-          );
-        }
-
-        final diffLines = DiffParser.parse(diffOutput);
-        final l10n = AppLocalizations.of(context)!;
-        final diffTool = ref.watch(selectedDiffToolProvider);
-
-        // Build additional actions for the FAB
-        final additionalActions = <SpeedDialAction>[
-          // Stage/Unstage action
-          if (widget.onToggleStage != null)
-            SpeedDialAction(
-              icon: widget.staged
-                  ? PhosphorIconsRegular.minus
-                  : PhosphorIconsRegular.plus,
-              label: widget.staged ? l10n.unstageAll : l10n.stageAll,
-              onPressed: widget.onToggleStage!,
-            ),
-          // Discard changes action (for modified/deleted files)
-          if (widget.onDiscardFile != null &&
-              widget.fileStatus.primaryStatus != FileStatusType.untracked)
-            SpeedDialAction(
-              icon: PhosphorIconsRegular.arrowCounterClockwise,
-              label: l10n.discardChangesQuestion,
-              onPressed: widget.onDiscardFile!,
-            ),
-          // Delete file action (for untracked files)
-          if (widget.onDeleteFile != null &&
-              widget.fileStatus.primaryStatus == FileStatusType.untracked)
-            SpeedDialAction(
-              icon: PhosphorIconsRegular.trash,
-              label: l10n.delete,
-              onPressed: widget.onDeleteFile!,
-            ),
-          // Copy all content action
-          SpeedDialAction(
-            icon: PhosphorIconsRegular.copy,
-            label: l10n.labelCopyAll,
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: diffOutput));
+  /// The diff region's actions, in its header.
+  ///
+  /// These used to be a hand-built draggable speed dial floating over the
+  /// content, registered as waiting for `ScreenSpec.primaryActions` - and
+  /// #438's answer is that the construction asked the wrong member. Up to
+  /// seven entries are not "the one or two things a user came here to do"
+  /// (that slot's own definition); they are the REGION's action set, and the
+  /// contract's home for a region's actions is its panel header
+  /// (`PanelSpec.actions`, reached today through `BasePanel.actions`, the
+  /// facade `surfaces.panel` replaces).
+  List<Widget> _headerActions(
+    BuildContext context,
+    AsyncSnapshot<Map<String, String?>> snapshot,
+  ) {
+    final data = snapshot.data;
+    if (snapshot.hasError || data == null) return const [];
+    final diffOutput = data['diff'] ?? '';
+    final fullFileContent = data['fullContent'];
+    final canShowFullFile =
+        fullFileContent != null && fullFileContent.isNotEmpty;
+    final l10n = AppLocalizations.of(context)!;
+    final diffTool = ref.watch(selectedDiffToolProvider);
+    return [
+      // Toggle between the diff and the whole file, where a whole file exists.
+      if (canShowFullFile)
+        BaseIconButton(
+          icon: widget.viewMode == DiffViewMode.diff
+              ? IconRole.file
+              : IconRole.gitDiff,
+          tooltip: widget.viewMode == DiffViewMode.diff
+              ? 'Show Full File'
+              : 'Show Changes Only',
+          onPressed: widget.onToggleViewMode,
+        ),
+      // Stage/Unstage action
+      if (widget.onToggleStage != null)
+        BaseIconButton(
+          icon: widget.staged ? IconRole.minus : IconRole.plus,
+          tooltip: widget.staged ? l10n.unstageAll : l10n.stageAll,
+          onPressed: widget.onToggleStage!,
+        ),
+      // Discard changes action (for modified/deleted files)
+      if (widget.onDiscardFile != null &&
+          widget.fileStatus.primaryStatus != FileStatusType.untracked)
+        BaseIconButton(
+          icon: IconRole.arrowCounterClockwise,
+          tooltip: l10n.discardChangesQuestion,
+          onPressed: widget.onDiscardFile!,
+        ),
+      // Delete file action (for untracked files)
+      if (widget.onDeleteFile != null &&
+          widget.fileStatus.primaryStatus == FileStatusType.untracked)
+        BaseIconButton(
+          icon: IconRole.trash,
+          tooltip: l10n.delete,
+          onPressed: widget.onDeleteFile!,
+        ),
+      // Copy all content action
+      BaseIconButton(
+        icon: IconRole.copy,
+        tooltip: l10n.labelCopyAll,
+        onPressed: () async {
+          await Clipboard.setData(ClipboardData(text: diffOutput));
+          if (context.mounted) {
+            NotificationService.showSuccess(context, l10n.snackbarDiffCopied);
+          }
+        },
+      ),
+      // Open in external tool action (if available)
+      if (diffTool != null)
+        BaseIconButton(
+          icon: IconRole.arrowSquareOut,
+          tooltip: l10n.labelOpenInExternalTool,
+          onPressed: () async {
+            try {
+              Logger.info(
+                'Opening external diff tool for file: ${widget.filePath}, staged: ${widget.staged}',
+              );
+              if (widget.staged) {
+                await ref
+                    .read(diffActionsProvider)
+                    .diffStagedFile(widget.filePath);
+              } else {
+                await ref
+                    .read(diffActionsProvider)
+                    .diffUnstagedFile(widget.filePath);
+              }
+            } catch (e) {
+              Logger.error(
+                'Failed to open external diff tool for file: ${widget.filePath}',
+                e,
+              );
               if (context.mounted) {
-                NotificationService.showSuccess(
+                NotificationService.showError(
                   context,
-                  l10n.snackbarDiffCopied,
+                  'Failed to open external diff tool\nFile: ${widget.filePath}\nError: $e',
                 );
               }
-            },
-          ),
-          // Open in external tool action (if available)
-          if (diffTool != null)
-            SpeedDialAction(
-              icon: PhosphorIconsRegular.arrowSquareOut,
-              label: l10n.labelOpenInExternalTool,
-              onPressed: () async {
-                try {
-                  Logger.info(
-                    'Opening external diff tool for file: ${widget.filePath}, staged: ${widget.staged}',
-                  );
-                  if (widget.staged) {
-                    await ref
-                        .read(diffActionsProvider)
-                        .diffStagedFile(widget.filePath);
-                  } else {
-                    await ref
-                        .read(diffActionsProvider)
-                        .diffUnstagedFile(widget.filePath);
-                  }
-                } catch (e) {
-                  Logger.error(
-                    'Failed to open external diff tool for file: ${widget.filePath}',
-                    e,
-                  );
-                  if (context.mounted) {
-                    NotificationService.showError(
-                      context,
-                      'Failed to open external diff tool\nFile: ${widget.filePath}\nError: $e',
-                    );
-                  }
-                }
-              },
-            ),
-          // Blame action (show who changed each line)
-          SpeedDialAction(
-            icon: PhosphorIconsRegular.userList,
-            label: l10n.blame,
-            onPressed: () {
-              showBlameDialog(context, filePath: widget.filePath);
-            },
-          ),
-        ];
+            }
+          },
+        ),
+      // Blame action (show who changed each line)
+      BaseIconButton(
+        icon: IconRole.userList,
+        tooltip: l10n.blame,
+        onPressed: () {
+          showBlameDialog(context, filePath: widget.filePath);
+        },
+      ),
+    ];
+  }
 
-        return BaseDiffViewer(
-          diffLines: diffLines,
-          compactMode: _compactMode,
-          showLineNumbers: true,
-          fullFileContent: fullFileContent,
-          filePath: widget.filePath,
-          viewMode: widget.viewMode,
-          onToggleViewMode: widget.onToggleViewMode,
-          additionalActions: additionalActions,
-          fontFamily: ref.watch(previewFontFamilyProvider),
-          fontSize: ref.watch(previewFontSizeProvider),
-        );
-      },
+  /// What the region shows: the diff, its loading placeholder, or the error.
+  Widget _diffContent(
+    BuildContext context,
+    AsyncSnapshot<Map<String, String?>> snapshot,
+  ) {
+    if (snapshot.hasError) {
+      // The in-panel member, not the region-filling hero. This column is
+      // a 32 dp mark over one sentence with no headline, and that shape is
+      // the whole reason it stayed hand-rolled through two passes:
+      // `EmptyStateWidget` draws 64 dp above a `pageTitle`, so adopting IT
+      // would have doubled the mark and promoted the sentence out of
+      // `body` - rounding a meaning onto the nearest available word, which
+      // is what cost #426. `PanelNote` is that shape said once, so the
+      // `32` and the colour leave together into the member that owns them
+      // rather than being stranded here.
+      //
+      // Pixel-identical by construction: same glyph at the same rung, the
+      // same `grouped` distance under it, and the same sentence in `body`
+      // wearing the same `Tone.danger` this file already stated - the
+      // member simply quotes Material's answer to that tone for the mark,
+      // where a call site cannot.
+      return PanelNote(
+        icon: PhosphorIconsRegular.warningCircle,
+        message: 'Error loading diff: ${snapshot.error}',
+        tone: Tone.danger,
+      );
+    }
+
+    // Show diff immediately if available, otherwise show empty state
+    // This prevents blocking the UI while loading
+    final data = snapshot.data ?? {};
+    final diffOutput = data['diff'] ?? '';
+    final fullFileContent = data['fullContent'];
+
+    if (diffOutput.isEmpty &&
+        snapshot.connectionState == ConnectionState.waiting) {
+      // Still loading, show minimal placeholder
+      return const Center(
+        child: SizedBox(
+          width: AppTheme.iconM,
+          height: AppTheme.iconM,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    return BaseDiffViewer(
+      diffLines: DiffParser.parse(diffOutput),
+      compactMode: _compactMode,
+      showLineNumbers: true,
+      fullFileContent: fullFileContent,
+      filePath: widget.filePath,
+      viewMode: widget.viewMode,
     );
   }
 

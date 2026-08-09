@@ -282,6 +282,18 @@
     }
   },
   "regex": "Regex",
+  "removeDateFilterTooltip": "Remove the date filter",
+  "@removeDateFilterTooltip": {
+    "description": "Tooltip and accessible name of the date filter chip's removal"
+  },
+  "removeAuthorFilterTooltip": "Remove the author filter",
+  "@removeAuthorFilterTooltip": {
+    "description": "Tooltip and accessible name of the author filter chip's removal"
+  },
+  "removeRegexFilterTooltip": "Remove the regex filter",
+  "@removeRegexFilterTooltip": {
+    "description": "Tooltip and accessible name of the regex filter chip's removal"
+  },
   "pushTagsCount": "Push {count, plural, =1{{count} Tag} other{{count} Tags}}",
   "@pushTagsCount": {
     "description": "Push tags button with count",

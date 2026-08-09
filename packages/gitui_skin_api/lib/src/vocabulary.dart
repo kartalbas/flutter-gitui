@@ -309,6 +309,26 @@ enum GridDensity {
   roomy,
 }
 
+/// Who decides how tall a grid's tiles stand.
+///
+/// [GridDensity] says how many equals share the width; this says who owns the
+/// other axis, and the two owners give genuinely different answers. A language
+/// that owns it shapes every tile to its own proportion — Material's landscape
+/// card, Fluent's wider tile and the blueprint's uniform row are three
+/// different answers to the same word. Content that owns it gets exactly the
+/// room it needs in EVERY language, because a language may style a tile but
+/// may not shorten what the application put inside it — a clipped card is a
+/// defect, not a look.
+enum TileHeight {
+  /// The design language: every tile takes the language's own proportion, and
+  /// the content adapts to the tile.
+  language,
+
+  /// The content: each tile is as tall as what it holds, and the language may
+  /// not cut it short.
+  content,
+}
+
 /// Which of a split pane's two halves the user can resize.
 ///
 /// Carried because macOS's `ResizablePane` requires it (`resizable_pane.dart`
@@ -476,11 +496,17 @@ enum NavigationDensity {
   hidden,
 }
 
-/// The regions of the shell the F6 / Shift+F6 cycle walks, in order.
+/// The regions of the shell, named so the application can tell which one the
+/// skin is handing it.
 ///
-/// This is WHAT THE USER CAN DO, so it is structure and no skin may reorder
-/// it. `BaseFocusRegion` stays in application code and wraps AROUND whatever
-/// `chrome.shell` returns.
+/// This is the argument vocabulary of `ShellSpec.paneHost`: the skin passes
+/// every pane it draws through that wrapper, naming it with one of these, and
+/// the application installs the pane's focus region inside. The F6 /
+/// Shift+F6 cycle and the Tab walk are WHAT THE USER CAN DO, so their order
+/// is the application's - it rides in the regions the wrapper installs, as a
+/// numeric order per region, and never crosses the seam. Which panes EXIST is
+/// not stated here either: the destinations, the toolbar groups and the aside
+/// on `ShellSpec` already say it.
 enum ShellPane {
   /// The navigation rail, pane or sidebar.
   rail,

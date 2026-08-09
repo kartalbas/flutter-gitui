@@ -44,8 +44,8 @@
 ///  * `overlays.notify` returns an opaque `NoticeHandle`, because the
 ///    application already dismisses and replaces its own notices today.
 ///
-/// **Fifty-five members across seven facets**: chrome 4, controls 15,
-/// surfaces 19, type 3, layout 8, overlays 4, motion 2.
+/// **Fifty-six members across seven facets**: chrome 4, controls 15,
+/// surfaces 19, type 3, layout 8, overlays 5, motion 2.
 ///
 /// The design is `docs/SKIN-CONTRACT.md`; the settled member list is
 /// `docs/SKIN-CONTRACT-MEMBERS.md`.

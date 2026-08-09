@@ -611,11 +611,23 @@ final class EmptyStateSpec {
     required this.icon,
     required this.title,
     required this.message,
+    this.tone = Tone.muted,
     this.actions = const <EmptyStateAction>[],
   });
 
   /// A mark standing for the thing that is missing.
   final IconRole icon;
+
+  /// What the state MEANS, worn by the hero mark.
+  ///
+  /// The member owns the mark's size outright - the spec carries none - but
+  /// it cannot own the mark's meaning, because "there is nothing here yet"
+  /// and "this could not be loaded" are different statements and the mark is
+  /// where the difference is loudest. [Tone.muted] is the default: ordinary
+  /// emptiness is secondary to whatever the user came for. A state standing
+  /// in for a FAILURE says [Tone.danger] instead, so a real error is never
+  /// dressed as an ordinary empty pane.
+  final Tone tone;
 
   /// What is missing, in a few words.
   final String title;

@@ -909,7 +909,7 @@ final class MaterialSurfaces implements SkinSurfaces {
   /// **There is nothing here yet, and here is what to do about it.**
   ///
   /// `empty_state.dart`, moved: a centred column inside a 32 dp inset, a 64 dp
-  /// mark on `onSurfaceVariant`, a `titleLarge` statement, a `bodyMedium`
+  /// mark wearing the spec's tone, a `titleLarge` statement, a `bodyMedium`
   /// explanation on `onSurfaceVariant`, and the ways out.
   ///
   /// The 64 dp mark is the one length here that is not on the icon ramp, and it
@@ -917,6 +917,14 @@ final class MaterialSurfaces implements SkinSurfaces {
   /// the application has always written it (`AppTheme.iconXL * 2`). An empty
   /// state's mark is not an icon in a row, it is the picture the screen is
   /// currently showing.
+  ///
+  /// The tone reaches the MARK and nothing else. For the muted default it
+  /// resolves to exactly the `onSurfaceVariant` this member always painted;
+  /// for a failure it is the scheme's error role - the whole difference
+  /// between "there is nothing here" and "this went wrong", said where it is
+  /// loudest. The headline and the sentence keep their own roles either way,
+  /// because the words already say what happened and a page of red prose
+  /// would be shouting rather than stating.
   ///
   /// A single way out is drawn on its own; several are stacked, each in its own
   /// half-step of vertical rhythm. That is the shape `empty_state.dart` already
@@ -937,7 +945,7 @@ final class MaterialSurfaces implements SkinSurfaces {
             Icon(
               MaterialGlyphs.of(spec.icon),
               size: MaterialMetrics.iconXL * 2,
-              color: colors.onSurfaceVariant,
+              color: MaterialInk.foreground(context, spec.tone),
             ),
             const SizedBox(height: MaterialMetrics.spaceL),
             // ignore: avoid_text_with_style

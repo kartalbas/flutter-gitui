@@ -557,11 +557,15 @@ final class BlueprintSurfaces implements SkinSurfaces {
 
   /// **There is nothing here yet, and here is what to do about it.**
   ///
-  /// The application states the absence, its explanation and the ways out of
-  /// it. The ways out carry an [Emphasis], and that is the one place a naked
-  /// square can show which action the empty state is really offering: the
-  /// primary way out wears a 3px outline, the rest wear less, and a link wears
-  /// a broken one.
+  /// The application states the absence, its explanation, what the state
+  /// MEANS and the ways out of it. The tone rides beside the hero mark the
+  /// way it rides on a badge or an avatar - `[muted]` for ordinary emptiness,
+  /// `!` for a failure - because the tone is the one fact telling "there is
+  /// nothing here" apart from "this went wrong", and an instrument that hid
+  /// it could not show a failure state misstating itself. The ways out carry
+  /// an [Emphasis], and that is the one place a naked square can show which
+  /// action the empty state is really offering: the primary way out wears a
+  /// 3px outline, the rest wear less, and a link wears a broken one.
   @override
   Widget emptyState(BuildContext context, EmptyStateSpec spec) => Center(
     child: Column(
@@ -569,7 +573,10 @@ final class BlueprintSurfaces implements SkinSurfaces {
       crossAxisAlignment: CrossAxisAlignment.center,
       spacing: distance.gap(Proximity.grouped),
       children: <Widget>[
-        BlueprintMark(BlueprintMarks.icon(spec.icon)),
+        _marks(<String>[
+          BlueprintMarks.icon(spec.icon),
+          BlueprintMarks.tone(spec.tone),
+        ]),
         BlueprintText(spec.title),
         BlueprintText(spec.message),
         if (spec.actions.isNotEmpty)

@@ -30,6 +30,19 @@ class EmptyStateWidget extends StatelessWidget {
   // Multiple structured actions
   final List<EmptyStateAction>? actions;
 
+  /// What the state MEANS, worn by the hero mark - `EmptyStateSpec.tone`,
+  /// mirrored on the facade.
+  ///
+  /// A meaning rather than a colour, and the one appearance question a call
+  /// site still gets to answer: the member owns the hero's size and its
+  /// colour WORDS, but "there is nothing here yet" ([Tone.muted], the
+  /// default) and "this could not be loaded" ([Tone.danger]) are different
+  /// statements, and the mark is where the difference is loudest (#431). A
+  /// real error state that adopted the always-muted hero would have misstated
+  /// itself, which is exactly what kept the hand-rolled failure columns alive
+  /// until the tone existed.
+  final Tone tone;
+
   /// How large the hero mark is drawn.
   ///
   /// Deliberately a private constant rather than a parameter (#430). This is
@@ -48,12 +61,24 @@ class EmptyStateWidget extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.tone = Tone.muted,
     this.action,
     this.actionLabel,
     this.onActionPressed,
     this.actionIcon,
     this.actions,
-  });
+  }) : // `identical` rather than `==`, for the reason BaseLabel records: Tone
+       // carries a custom `==`, a const constructor may only use primitive
+       // equality, and every named tone is a const singleton.
+       assert(
+         identical(tone, Tone.muted) || identical(tone, Tone.danger),
+         'The empty-state hero can currently say exactly two things: '
+         'Tone.muted ("there is nothing here yet") and Tone.danger ("this '
+         'failed"). This facade quotes one Material colour word per meaning '
+         'below, so a third meaning must be added there and in both skins\' '
+         'emptyState members deliberately - never silently painted as the '
+         'nearest of these two.',
+       );
 
   @override
   Widget build(BuildContext context) {
@@ -109,12 +134,18 @@ class EmptyStateWidget extends StatelessWidget {
             // rungs, whose largest is 24 dp. Naming the nearest rung would
             // shrink the hero mark from 64 dp to 24 — rounding a meaning onto
             // the nearest available word, which is what cost #426. The size
-            // and the colour leave together when `surfaces.emptyState` owns
-            // both; they are one decision and cannot be half-converted.
+            // and the colour WORDS leave together when `surfaces.emptyState`
+            // owns both; what a call site states is only [tone], and the two
+            // colour words written here are Material's answers to the two
+            // meanings the hero can carry — the supporting foreground for
+            // muted, the scheme's error role for danger (#431) — quoted once
+            // here instead of at every state, exactly as the 64 is.
             Icon(
               icon,
               size: _heroGlyph,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: identical(tone, Tone.danger)
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             // The mark and the words it introduces are two groups of one
             // state, not two halves of one statement.
@@ -200,6 +231,12 @@ class ErrorState extends StatelessWidget {
       icon: PhosphorIconsRegular.warningCircle,
       title: l10n.error(message),
       message: '',
+      // A failure is not an emptiness. Until the hero carried a tone this
+      // state drew its mark in the supporting foreground like every other
+      // adopter, which dressed "this went wrong" as "there is nothing here" -
+      // the exact misstatement that kept the hand-rolled error columns from
+      // adopting the facade at all (#431).
+      tone: Tone.danger,
       action: onRetry != null
           ? BaseButton(
               onPressed: onRetry!,

@@ -175,6 +175,15 @@ class _ProjectDialogState extends State<ProjectDialog> {
                         decoration: BoxDecoration(
                           color: color,
                           borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                          // The chosen swatch's 3 px ring is a BORDER, and a
+                          // border leaves with the surface it encloses. This
+                          // one leaves rather sooner than most: the whole
+                          // swatch grid is registered against
+                          // `controls.seriesPicker`, the member that owns
+                          // which colours exist and how the chosen one is
+                          // marked, so drawing the ring from a tone here
+                          // would half-migrate a construction that member
+                          // deletes.
                           border: isSelected
                               ? Border.all(
                                   color: Theme.of(context).colorScheme.primary,

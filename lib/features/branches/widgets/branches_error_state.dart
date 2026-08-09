@@ -18,16 +18,22 @@ class BranchesErrorState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // The facade's shape, and it still cannot adopt `EmptyStateWidget`
-          // (#430), for the reason changes_error_state.dart records: the
-          // facade paints its hero in the supporting foreground and carries
-          // no tone slot, so adopting it would turn this red mark grey and
-          // erase the only thing distinguishing a failure from an ordinary
-          // empty pane. That is a change of appearance, not a rename, so it
-          // is reported rather than made; the size is stranded with the
-          // colour, and the error role is not rounded onto `Tone.danger` -
-          // danger means "this destroys something you cannot get back",
-          // which a failed branch listing is not saying.
+          // Not the empty-state facade (#430). The hero carries a tone now
+          // (#431) and `EmptyStateSpec.tone` settles what to say with it, so
+          // the mark's COLOUR no longer blocks this - its SIZE and its SHAPE
+          // still do, and this is the only one of the four screen-level error
+          // states where they do. Its three siblings (tags, stashes, changes)
+          // draw a 64 dp hero over a headline and a sentence, which is the
+          // facade's own shape and is what let them adopt it. This one drifted
+          // to a 48 dp mark over a single headline that folds the error into
+          // its own words, with no sentence under it: adopting would hand the
+          // `48` to a member that draws its hero at 64 and add the member's
+          // empty second line beneath, both changes of appearance rather than
+          // renames - the same pair blame_dialog.dart and
+          // unified_diff_dialog.dart are reported for. Reported instead: this
+          // converts when the facade can say a one-statement shape, and the
+          // colour leaves with the size it is stranded to, because `BaseIcon`
+          // tops out at 24 dp and rounding a 48 dp hero onto it is #426.
           Icon(
             PhosphorIconsRegular.warningCircle,
             size: 48,

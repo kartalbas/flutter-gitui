@@ -303,6 +303,19 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
                       label: AppLocalizations.of(context)!.clearAllRepositories,
                       scale: ControlScale.normal,
                       tone: Tone.danger,
+                      // The tone above reaches the MARK only:
+                      // `MenuItemContent` spends it on its `BaseIcon` and
+                      // colours its words from a `Color? labelColor` that
+                      // falls back to the inherited menu foreground. So this
+                      // is the same statement said twice, once as a meaning
+                      // and once as Material's answer to it, and dropping the
+                      // second half today would leave a destructive entry with
+                      // a red glyph and black words. The read is the
+                      // component's gap, not this screen's: it goes when
+                      // `lib/shared/components/base_menu_item.dart` spends its
+                      // tone on both halves, which deletes the same read at
+                      // `project_section.dart`, `workspace_card.dart`,
+                      // `branch_switcher.dart` and five more in one move.
                       labelColor: Theme.of(context).colorScheme.error,
                     ),
                     onTap: () => _confirmClearAll(context, ref),

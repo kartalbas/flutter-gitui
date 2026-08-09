@@ -353,43 +353,23 @@ class FileBlamePanel extends ConsumerWidget {
   }
 
   Widget _buildError(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Not `EmptyStateWidget`, and the mark is why. The facade owns its
-          // hero glyph's colour and answers it with `onSurfaceVariant`
-          // (#430); handing this state to it would repaint a red failure mark
-          // neutral, which is a change to what the user sees rather than a
-          // change of vocabulary. Nor can the read move on its own: `Tone` has
-          // a word for something that destroys, one for a doubt and one for a
-          // value the user must correct, and none of the three is "the command
-          // you asked for came back with an error". The mark waits for a tone
-          // slot on the empty-state member, and both leave together.
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.errorLoadingBlame,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          // The message is held off the pane's sides so a long error wraps
-          // instead of running edge to edge: `roomy`.
-          BaseInset(
-            x: Inset.roomy,
-            y: Inset.none,
-            child: BaseLabel(
-              error,
-              role: TextRole.body,
-              align: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
+    // The facade, now that the one fact holding this column back is sayable
+    // (#431). The mark stood here hand-built because `EmptyStateWidget`
+    // painted every hero in the supporting foreground, so adopting it would
+    // have repainted a red failure mark neutral - and no read could move on
+    // its own either, because a colour reaches a mark only through a member
+    // or `BaseIcon`. `Tone.danger` is that colour said as a meaning: the mark
+    // stays red because the STATE says failure, not because this panel named
+    // the scheme's error role. The `64` goes with it, for the reason
+    // `_buildEmptyState` above already records - a member that accepts no size
+    // owns the size - and the roomy hold-off around the message becomes the
+    // member's own, which is where an empty state's breathing room belonged
+    // all along.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: AppLocalizations.of(context)!.errorLoadingBlame,
+      message: error,
+      tone: Tone.danger,
     );
   }
 

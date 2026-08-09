@@ -165,32 +165,17 @@ class FileHistoryPanel extends ConsumerWidget {
   }
 
   Widget _buildError(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Not `EmptyStateWidget`, for the reason spelled out at
-          // file_blame_panel.dart's error state: the facade owns its hero
-          // glyph's colour and answers it with `onSurfaceVariant`, so adopting
-          // it here would repaint a red failure mark neutral - a change to
-          // what the user sees, not a change of vocabulary. The read cannot
-          // move on its own either: no `Tone` says "the command came back with
-          // an error", only "this destroys", "this may be a mistake" and "fix
-          // this value".
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.messageErrorLoadingHistory,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(error, role: TextRole.body, align: TextAlign.center),
-        ],
-      ),
+    // The facade, for the reason file_blame_panel.dart's error state now
+    // records: the one fact that kept this column hand-built was that
+    // `EmptyStateWidget` painted every hero in the supporting foreground, and
+    // that fact is a `Tone` on the member now (#431). `Tone.danger` says why
+    // the mark is red - the state is a failure - instead of naming the colour
+    // Material happens to answer that with, and the `64` leaves with it.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: AppLocalizations.of(context)!.messageErrorLoadingHistory,
+      message: error,
+      tone: Tone.danger,
     );
   }
 

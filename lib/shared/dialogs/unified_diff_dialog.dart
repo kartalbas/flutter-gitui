@@ -174,13 +174,13 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
 
   Widget _buildErrorState(BuildContext context, Object? error) {
     final l10n = AppLocalizations.of(context)!;
-    // Not the empty-state facade (#430), for two reasons that compound. The
-    // mark's COLOUR is the first: `EmptyStateWidget` paints its hero in the
-    // supporting foreground unconditionally and carries no tone slot, so
-    // adopting it would turn a red failure mark grey. The state's SHAPE is the
-    // second: it says one thing, and the facade wants a headline and a
-    // sentence, so the one line would have to be promoted into the headline.
-    // The `48` is stranded with the colour - they are one decision.
+    // Not the empty-state facade (#430). The hero carries a tone now (#431),
+    // so the mark's COLOUR no longer blocks this - its SHAPE still does. The
+    // state says one thing, in one body-sized line, and the facade wants a
+    // headline and a sentence: adopting would promote the line into a
+    // page-title headline and hand the `48` to a member that draws its hero
+    // at 64, both changes of appearance rather than renames. Reported
+    // instead: this converts when the facade can say a one-statement shape.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -449,6 +449,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                             context,
                           ).colorScheme.primaryContainer.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                          // The panel's FILL and its BORDER, both washes of
+                          // colours this notice is painted in rather than
+                          // foregrounds it states. They leave with the
+                          // surface in P5; only the words inside carry tones.
                           border: Border.all(
                             color: Theme.of(
                               context,
@@ -958,6 +962,11 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                           context,
                         )!.rebaseHasConflicts(mergeState.conflictCount),
                 ),
+                // A surface FILL, not a foreground: this is what the notice
+                // is painted in, and its words are paired against it. The
+                // whole `SnackBar` is `overlays.notify`, and the fill leaves
+                // with it - which is also what finally settles the mispaired
+                // `onPrimary` recorded on the action below.
                 backgroundColor: Theme.of(context).colorScheme.error,
                 action: SnackBarAction(
                   label: AppLocalizations.of(context)!.resolve,
@@ -1029,6 +1038,10 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
+          // The chosen segment's FILL, not a foreground: this is what the
+          // segment is painted in, and the word below is paired against it.
+          // It leaves with `controls.choiceGroup`, the member that owns a
+          // segmented control's selected surface.
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),

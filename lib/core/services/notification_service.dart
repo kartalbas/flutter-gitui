@@ -10,6 +10,36 @@ import 'editor_launcher_service.dart';
 import '../../shared/components/base_layout.dart';
 
 /// Centralized notification service for showing consistent snackbars across the app
+///
+/// **Every Material colour read below waits on one member, and only that
+/// member: `overlays.notify`.** It already exists and the Material skin
+/// already implements it — `packages/gitui_skin_material/lib/src/facets/
+/// material_overlays.dart` names this file in its own doc: "the extraction of
+/// `notification_service.dart`". What has not happened is the adoption; no
+/// site in `lib/` calls `overlays.notify` yet.
+///
+/// So the seven reads here are not a colour conversion that was skipped, they
+/// are a construction the member deletes whole. None of the three shapes can
+/// say a `Tone` from here:
+///
+///  * `SnackBar.backgroundColor` is the notice's FILL, and the skin's own
+///    implementation records why a fill cannot be lifted at this level — a
+///    tone may only be resolved inside the host's `build`, so its `SnackBar`
+///    shell is painted transparent and `_MaterialNoticeSurface` draws the
+///    tone-coloured pill from inside. A call site here has no host to build
+///    in, and the application is given no way to resolve a `Tone` to a
+///    `Color` for its own decoration — by design, since handing out colours
+///    is what the seam exists to stop.
+///  * `SnackBarAction.textColor` is a Material `Color` parameter on a
+///    Material widget. There is nothing to hand a meaning to.
+///  * the two leading marks are `Icons.*` constants, not Phosphor ones, so
+///    `BaseIcon` would swap the glyph family inside what is meant to be a
+///    rename. Their colours compound it: this notice's foreground pairs with
+///    its own fill (`onError`, `onSecondary`), and `Tone.onAccent` resolves
+///    to Material's ON-PRIMARY role (`MaterialInk.foreground`), which is a
+///    different colour in the dark scheme. Naming the tone would
+///    be rounding a meaning onto the nearest available word, which is the
+///    mistake #426 cost.
 class NotificationService {
   /// Show a success notification (green)
   static void showSuccess(BuildContext context, String message) {
@@ -22,6 +52,8 @@ class NotificationService {
     messenger.showSnackBar(
       SnackBar(
         content: Text(message),
+        // The notice's own fill. Waits for `overlays.notify`; see the class
+        // doc for why a fill cannot state a tone from a call site.
         backgroundColor: Theme.of(context).colorScheme.primary,
         duration: const Duration(seconds: 2),
       ),
@@ -50,6 +82,11 @@ class NotificationService {
       SnackBar(
         content: Row(
           children: [
+            // A Material glyph paired with this notice's own on-colour.
+            // `BaseIcon(IconRole.warningCircle, tone: Tone.onAccent)` would
+            // change both — Phosphor's mark, and Material's on-primary role
+            // instead of `onError`. Waits for `overlays.notify`, which draws
+            // the mark from inside the notice surface.
             Icon(Icons.error_outline, color: colorScheme.onError),
             const BaseGap(Proximity.related),
             Expanded(
@@ -86,6 +123,10 @@ class NotificationService {
               ),
           ],
         ),
+        // Fill, then the dismiss affordance's own foreground. Both wait for
+        // `overlays.notify`: the first because a call site cannot resolve a
+        // tone into a decoration, the second because `SnackBarAction.textColor`
+        // is a Material `Color` parameter with nothing to hand a meaning to.
         backgroundColor: colorScheme.error,
         duration: const Duration(days: 365), // Never auto-dismiss
         behavior: SnackBarBehavior.floating,
@@ -111,6 +152,8 @@ class NotificationService {
     messenger.showSnackBar(
       SnackBar(
         content: Text(message),
+        // The notice's own fill, as in [showSuccess]. Waits for
+        // `overlays.notify`.
         backgroundColor: Theme.of(context).colorScheme.primary,
         duration: const Duration(seconds: 2),
       ),
@@ -139,6 +182,9 @@ class NotificationService {
       SnackBar(
         content: Row(
           children: [
+            // As in [showError]: a Material glyph plus this notice's own
+            // on-colour, and `Tone.onAccent` resolves to `onPrimary` rather
+            // than `onSecondary`. Waits for `overlays.notify`.
             Icon(Icons.warning_amber_outlined, color: colorScheme.onSecondary),
             const BaseGap(Proximity.related),
             Expanded(
@@ -180,6 +226,8 @@ class NotificationService {
         behavior: SnackBarBehavior.floating,
         action: SnackBarAction(
           label: 'DISMISS',
+          // A Material `Color` parameter, as in [showError]. Waits for
+          // `overlays.notify`.
           textColor: colorScheme.onSecondary,
           onPressed: () {
             messenger.hideCurrentSnackBar();

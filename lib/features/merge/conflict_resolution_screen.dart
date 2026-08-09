@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
@@ -437,16 +437,27 @@ class _ConflictResolutionScreenState
               child: BaseInset(
                 child: Row(
                   children: [
-                    // The banner's mark keeps its `Color`. `Tone` has a word
-                    // for something that destroys, one for a doubt and one
-                    // for a value the user must correct, and none of the
-                    // three is "the command you asked for came back with an
-                    // error" - which is what this banner says. The label
-                    // beside it already reaches for `danger`; the mark does
-                    // not follow it there, so the gap stays visible.
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      color: Theme.of(context).colorScheme.error,
+                    // The mark now says what the label beside it has always
+                    // said. It kept a `Color` while the only argument
+                    // available was the definition of `Tone.danger` read in
+                    // isolation - "this destroys something you cannot get
+                    // back" - which does not cover "the command you asked for
+                    // came back with an error". #431 settled that question on
+                    // the contract's own terms instead: `EmptyStateSpec.tone`
+                    // says a state standing in for a FAILURE says
+                    // `Tone.danger`, so a failure and a destruction share the
+                    // word deliberately rather than by rounding. With the
+                    // meaning decided, the mark can follow its label, and the
+                    // two halves of one statement stop disagreeing.
+                    //
+                    // Pixel-identical: the bare `Icon` took the ambient 24 dp,
+                    // which is `ControlScale.prominent` (MaterialMetrics.iconL),
+                    // and `Tone.danger` resolves under Material to the same
+                    // scheme error role this site spelled out.
+                    const BaseIcon(
+                      IconRole.warningCircle,
+                      scale: ControlScale.prominent,
+                      tone: Tone.danger,
                     ),
                     const BaseGap(Proximity.related),
                     Expanded(
@@ -613,26 +624,24 @@ class _ConflictResolutionScreenState
             // is in flight, so the style stays until there is a word for the
             // slant.
             //
-            // The colour word stays with it, and NOT because it says
-            // anything: the ramp this style is built from already carries the
-            // scheme's on-surface role on every step, so this restates the
-            // ambient foreground and paints nothing new. It stays because
-            // `avoid_text_with_style` waves a `Text` through as soon as its
-            // `copyWith` mentions a `color:` at all, whatever else that
-            // `copyWith` changes. Deleting the inert colour therefore does not
-            // simplify this line, it exposes the italic to a lint the colour
-            // was hiding it from - and the fix is the rule's exemption ("the
-            // copyWith changes ONLY the colour", not "the copyWith names a
-            // colour"), not an ignore comment here. Until then a Material role
-            // read is load-bearing for the gate rather than for the pixels,
-            // which is worth knowing.
+            // It names no colour, and since #432 that is the rule rather than
+            // an accident: the ramp this style is built from already carries
+            // the scheme's on-surface role on every step
+            // (AppTheme._brightnessCorrectedTextTheme), so a `color:` here
+            // could only restate the ambient foreground — which is exactly
+            // what this line used to do, because the rule's first form waved
+            // a `Text` through as soon as its `copyWith` mentioned a colour,
+            // making a dead read load-bearing for the gate. The reshaped
+            // `avoid_text_with_style` reports that restatement instead of
+            // demanding it. The colour of a styled word is the ramp's; a
+            // colour that should differ is a Tone, said through `BaseLabel`
+            // once the slant has its word.
             Center(
               child: Text(
                 AppLocalizations.of(context)!.resolvingConflict,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontStyle: FontStyle.italic,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic),
               ),
             ),
           ],

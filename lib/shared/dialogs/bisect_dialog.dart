@@ -15,6 +15,7 @@ import '../components/base_dropdown.dart';
 import '../../core/git/models/bisect_state.dart';
 import '../../core/git/models/commit.dart';
 import '../components/base_layout.dart';
+import '../widgets/empty_state.dart';
 
 /// Dialog for Git bisect operations
 class BisectDialog extends ConsumerStatefulWidget {
@@ -412,15 +413,17 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             // converting would silently drop the stroke that makes it the
             // answer rather than another line of output. Dropping a weight
             // inside a rename is the mistake the staged-state checkboxes
-            // already made once. The scheme's `onSurface` beside it is
-            // stranded with the style rather than independently convertible: a
-            // `Tone` reaches text only through `BaseLabel`, which is the widget
-            // the weight rules out.
+            // already made once. The scheme's `onSurface` that sat beside it
+            // is gone (#432): every text-theme step already carries the
+            // scheme's on-surface (AppTheme._brightnessCorrectedTextTheme),
+            // so the read restated the ambient foreground and deleting it
+            // moves no pixel - it never needed a `Tone` or a `BaseLabel`,
+            // because it never said anything the ramp does not. The weight
+            // still waits for its word.
             child: BaseInset(
               child: SelectableText(
                 state.foundCommit ?? 'Unknown',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
                   fontFamily: 'monospace',
                   fontWeight: FontWeight.bold,
                 ),
@@ -433,32 +436,14 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
   }
 
   Widget _buildError(BuildContext context, Object error) {
-    // Shaped exactly like the empty-state facade takes - hero, headline,
-    // sentence - and still not converted, because the blocker is the mark's
-    // COLOUR rather than its size (#430). `EmptyStateWidget` paints its hero
-    // in the supporting foreground unconditionally and carries no tone slot,
-    // so adopting it here would turn a red failure mark grey, which is a
-    // change of appearance rather than a rename. The `64` is stranded with the
-    // colour: the two are one decision and cannot be half-converted.
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.error(error.toString()),
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel('', role: TextRole.detail, align: TextAlign.center),
-        ],
-      ),
-    );
+    // The facade's own error shape rather than a hand-built copy of it
+    // (#430). This column was held back by exactly one fact - the facade
+    // painted every hero in the supporting foreground - and the hero's tone
+    // is that fact stated as a meaning (#431): `ErrorState` says
+    // `Tone.danger`, so the mark stays the failure colour because the state
+    // SAYS failure, not because this dialog picked a colour. The `64` and
+    // the empty second line go to the member with it.
+    return ErrorState(message: error.toString());
   }
 
   Widget _buildCommitDropdown({
@@ -523,6 +508,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             content: Text(
               AppLocalizations.of(context)!.failedToStartBisect(e.toString()),
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -575,6 +563,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
                 context,
               )!.failedToMarkCommit(e.toString(), 'status'),
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -608,6 +599,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             content: Text(
               AppLocalizations.of(context)!.failedToResetBisect(e.toString()),
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

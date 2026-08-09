@@ -108,6 +108,14 @@ class WorkspaceCard extends StatelessWidget {
                         icon: IconRole.trash,
                         label: AppLocalizations.of(context)!.delete,
                         tone: Tone.danger,
+                        // The tone above reaches the MARK only:
+                        // `MenuItemContent` spends it on its `BaseIcon` and
+                        // colours its words from a `Color? labelColor`.
+                        // Dropping this half today would leave a destructive
+                        // entry with a red glyph and black words - an
+                        // appearance change inside a colour rename. It goes
+                        // when the component's tone reaches its label, one
+                        // edit in `lib/shared/components/base_menu_item.dart`.
                         labelColor: Theme.of(context).colorScheme.error,
                       ),
                     ),

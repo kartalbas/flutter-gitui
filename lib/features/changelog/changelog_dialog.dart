@@ -109,9 +109,23 @@ class ChangelogDialog extends HookConsumerWidget {
         onSubmit: () => Navigator.of(context).pop(),
         content: changelogAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => _LoadFailurePane(
+          // The twin of the "no release history" pane below, and no longer the
+          // one shape the facade could not take. This pane was hand-rolled for
+          // a single reason - its hero is RED and `EmptyStateWidget` painted
+          // every hero in the supporting foreground - and the hero carries a
+          // tone now (#431), so `Tone.danger` says the whole difference
+          // between "there is nothing here" and "this could not be read" as a
+          // meaning rather than as a colour this dialog picked. The glyph and
+          // its 64 px survive the move unchanged: the member draws the
+          // `IconData` it is handed at the one hero size it owns (#430). The
+          // gaps and the sentence's treatment become the member's, exactly as
+          // in `ReflogDialog._buildError` - a member that owns a composition
+          // owns its rhythm too.
+          error: (error, stack) => EmptyStateWidget(
+            icon: Icons.error_outline,
             title: 'Failed to load changelog',
-            detail: error.toString(),
+            message: error.toString(),
+            tone: Tone.danger,
           ),
           data: (changelogData) {
             if (changelogData.releases.isEmpty) {
@@ -514,47 +528,5 @@ class ChangelogDialog extends HookConsumerWidget {
     }
 
     Logger.info('[ChangelogDialog] showIfNeeded completed');
-  }
-}
-
-/// The pane shown when the changelog could not be read at all. Closing goes
-/// through the header X, Esc or Enter - a pane-level Close button would be a
-/// second affordance for the same job.
-///
-/// Its twin, the "no release history" pane, is [EmptyStateWidget]. This one
-/// stays hand-rolled for the reason `DeepSearchFailedState` records: the hero
-/// is RED, and the facade has no tone slot, so adopting it would grey out the
-/// one thing on the pane that says this failed.
-class _LoadFailurePane extends StatelessWidget {
-  const _LoadFailurePane({required this.title, required this.detail});
-
-  final String title;
-  final String detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return BaseInset(
-      all: Inset.roomy,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // The mark keeps its measure AND its colour, and the two are one
-          // decision. No rung of `ControlScale` reaches 64, and a tone can
-          // only reach a mark through `BaseIcon` - which would also swap
-          // Material's glyph for this skin's. The meaning is `Tone.danger`;
-          // it is recorded here rather than rounded onto a word that would
-          // shrink the hero to 24 px and change what it draws.
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.grouped),
-          BaseLabel(title, role: TextRole.pageTitle),
-          const BaseGap(Proximity.related),
-          BaseLabel(detail, role: TextRole.body, align: TextAlign.center),
-        ],
-      ),
-    );
   }
 }

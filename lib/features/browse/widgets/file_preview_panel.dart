@@ -12,6 +12,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
+import '../../../shared/widgets/empty_state.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/config/config_providers.dart';
 import 'viewers/markdown_viewer_dialog.dart';
@@ -269,39 +270,19 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
           ? AppLocalizations.of(context)!.messageFileNotFound
           : AppLocalizations.of(context)!.messageFileTooLargeToPreview(_error!);
 
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Not `EmptyStateWidget`, for the reason spelled out at
-            // file_blame_panel.dart's error state: the facade owns its hero
-            // glyph's colour and answers it with `onSurfaceVariant`, so
-            // adopting it here would repaint a red failure mark neutral - a
-            // change to what the user sees rather than a change of vocabulary.
-            // The read cannot move on its own either: no `Tone` says "this
-            // file could not be read", only "this destroys", "this may be a
-            // mistake" and "fix this value".
-            Icon(
-              PhosphorIconsRegular.warningCircle,
-              size: 64,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            // A hero glyph and the headline under it are two groups inside
-            // one region; the headline and its explanation are two parts of
-            // one statement.
-            const BaseGap(Proximity.separate),
-            BaseLabel(
-              AppLocalizations.of(context)!.labelCannotPreviewFile,
-              role: TextRole.pageTitle,
-            ),
-            const BaseGap(Proximity.related),
-            BaseLabel(
-              errorMessage,
-              role: TextRole.body,
-              align: TextAlign.center,
-            ),
-          ],
-        ),
+      // The facade, for the reason file_blame_panel.dart's error state
+      // records: the one fact that kept this column hand-built was that
+      // `EmptyStateWidget` painted every hero in the supporting foreground,
+      // and that fact is a `Tone` on the member now (#431). What this state
+      // says is "this failed", which is `Tone.danger`; what colour that is
+      // stops being this panel's decision. The `64` and the mark-to-headline
+      // and headline-to-sentence distances go to the member with it, which is
+      // where they were already spelled identically.
+      return EmptyStateWidget(
+        icon: PhosphorIconsRegular.warningCircle,
+        title: AppLocalizations.of(context)!.labelCannotPreviewFile,
+        message: errorMessage,
+        tone: Tone.danger,
       );
     }
 

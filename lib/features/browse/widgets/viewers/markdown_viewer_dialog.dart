@@ -77,16 +77,20 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Not `EmptyStateWidget`, and this state is blocked twice
-                  // over. It says a mark and ONE line - there is no headline
-                  // to hand the facade, and the facade renders its headline
-                  // and its sentence unconditionally, so inventing a headline
-                  // adds a line of text and passing '' paints a blank one and
-                  // its gap (base_diff_viewer.dart refuses it from that same
-                  // side). And the facade owns the mark's colour, answering it
-                  // with `onSurfaceVariant`, which would repaint this red
-                  // failure mark neutral. The read cannot move alone either:
-                  // no `Tone` says "the file could not be read".
+                  // Not `EmptyStateWidget`, and the colour is no longer why:
+                  // the hero carries a tone now (#431), so a red failure mark
+                  // is something the facade can say. What it still cannot say
+                  // is this state's SHAPE - the same one csv_viewer_dialog.dart
+                  // records beside it. It is a mark and ONE line, with no
+                  // headline to hand the facade, while the facade renders its
+                  // headline and its sentence unconditionally: inventing a
+                  // headline adds a line of text and passing '' paints a blank
+                  // one and its gap (base_diff_viewer.dart refuses it from
+                  // that same side). The mark is 48 rather than the member's
+                  // 64 on top of that, and the read is stranded with the size,
+                  // exactly as it is inside the facade: a tone reaches a mark
+                  // only through a member or `BaseIcon`, whose scales top out
+                  // at 24.
                   Icon(
                     PhosphorIconsRegular.warningCircle,
                     size: 48,

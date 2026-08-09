@@ -87,16 +87,21 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
                       // no `TextRole` reaches that step: `body` lands on
                       // `bodyMedium` and there is no rung between it and
                       // `pageTitle`. Saying `body` here would shrink the
-                      // panel's own subject by two points to buy a colour word
-                      // whose meaning (`Tone.neutral`) this line already has,
-                      // which is the trade #426 was a fix commit for. So the
-                      // ramp step and the colour it carries stay together
-                      // until the role exists.
+                      // panel's own subject by two points, which is the trade
+                      // #426 was a fix commit for, so the ramp step stays until
+                      // the role exists.
+                      //
+                      // The colour that sat beside it is gone, and no pixel
+                      // moved (#432): `AppTheme._brightnessCorrectedTextTheme`
+                      // applies the scheme's `onSurface` to every step of the
+                      // scale, so naming it here restated what `bodyLarge`
+                      // already carries. It never needed a `Tone` either -
+                      // `Tone.neutral` IS "whatever this surface's ordinary
+                      // foreground is", and saying nothing is how a style says
+                      // that.
                       SelectableText(
                         widget.commit.message,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ],
                   ),

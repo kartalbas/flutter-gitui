@@ -391,6 +391,14 @@ class GitCommands {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(l10n.failedToAmendCommit(e.toString())),
+                    // The notice's own FILL, not a foreground. It waits for
+                    // `overlays.notify` for the reason that member's Material
+                    // implementation states itself: a tone may only be
+                    // resolved inside the notice host's `build`, so its
+                    // `SnackBar` shell is transparent and the tone-coloured
+                    // pill is drawn from inside. A call site has no host, and
+                    // the application is given no way to turn a `Tone` into a
+                    // `Color` for its own decoration.
                     backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 );
@@ -878,6 +886,8 @@ class GitCommands {
                   content: Text(
                     l10n.failedToCleanWorkingDirectory(e.toString()),
                   ),
+                  // The same fill as the amend failure above, waiting for the
+                  // same member: `overlays.notify`.
                   backgroundColor: Theme.of(context).colorScheme.error,
                 ),
               );

@@ -548,18 +548,21 @@ class _DiffViewerPanelState extends ConsumerState<_DiffViewerPanel> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // The headline mark of a failure that fills this pane, and it
-                // stays a raw `Icon` for three reasons now. It is not the
-                // empty-state facade's shape (#430): a 32 dp mark over one
-                // sentence with no headline, where `EmptyStateWidget` draws a
-                // 64 dp hero and always renders a `pageTitle` above its
-                // message. The facade could not carry the colour even if the
-                // shape matched, because it has no tone slot for its hero and
-                // would grey this failure out. And `Tone.danger` is not the
-                // word for it either - danger means "this destroys something
-                // you cannot get back", which a diff that failed to load is
-                // not saying. None of the three is rounded onto its nearest
-                // neighbour.
+                // The headline mark of a failure that fills this pane, and two
+                // of the three reasons it stayed a raw `Icon` are gone. The
+                // facade can carry a failure's colour now (#431), and
+                // `EmptyStateSpec.tone` decides that a state standing in for a
+                // FAILURE says `Tone.danger` - which is why the label directly
+                // below already says it. What survives is the SHAPE and the
+                // SIZE: this is a 32 dp mark over one sentence with no
+                // headline, where `EmptyStateWidget` draws a 64 dp hero and
+                // always renders a `pageTitle` above its message, so adopting
+                // would promote the sentence into a headline and grow the
+                // mark. The colour is stranded with the size rather than
+                // independently convertible: a `Tone` reaches a mark only
+                // through `BaseIcon`, whose largest rung is 24 dp, and naming
+                // it here would shrink a 32 dp mark - rounding a meaning onto
+                // the nearest available word, which is what cost #426.
                 Icon(
                   PhosphorIconsRegular.warningCircle,
                   size: AppTheme.iconXL,

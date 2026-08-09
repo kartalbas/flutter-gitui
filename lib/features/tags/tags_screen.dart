@@ -552,6 +552,15 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
                   ),
                   const BaseGap(Proximity.related),
                   BasePopupMenuButton<TagGroupBy>(
+                    // "A grouping is applied" is said twice here, in the FILL
+                    // and in the colour, and only the colour has a word. Fill
+                    // is a weight, which `IconRole` deliberately cannot carry
+                    // (`docs/SKIN-CONTRACT.md` conflict C3) and which the
+                    // weight census records for this file, so converting the
+                    // colour alone would leave a `BaseIcon` that cannot switch
+                    // to the filled variant and would drop half the statement
+                    // inside a rename. The accent is stranded with the fill;
+                    // both leave when the skin re-decides the weight.
                     icon: Icon(
                       _groupBy != TagGroupBy.none
                           ? PhosphorIconsFill.rows
@@ -839,6 +848,13 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
 
         return ExpansionTile(
           initiallyExpanded: true,
+          // The group header's mark is drawn BOLD on purpose - the weight
+          // census records this file as one of the surfaces still waiting for
+          // `MaterialGlyphs.boldOf` - and a weight is the one thing `IconRole`
+          // deliberately cannot carry, so the mark stays a raw `Icon` naming
+          // Phosphor's bold constant. Its colour is stranded with it: a `Tone`
+          // reaches a mark only through `BaseIcon`, which cannot say the
+          // weight, so naming `Tone.accent` here would cost the bold stroke.
           leading: Icon(
             PhosphorIconsBold.folder,
             color: Theme.of(context).colorScheme.primary,

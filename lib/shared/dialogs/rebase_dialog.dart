@@ -16,6 +16,7 @@ import '../../core/git/models/rebase_state.dart';
 import '../../core/git/models/branch.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../components/base_layout.dart';
+import '../widgets/empty_state.dart';
 
 /// Dialog for Git rebase operations
 class RebaseDialog extends ConsumerStatefulWidget {
@@ -462,32 +463,14 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
   }
 
   Widget _buildError(BuildContext context, Object error) {
-    // Shaped exactly like the empty-state facade takes - hero, headline,
-    // sentence - and still not converted, because the blocker is the mark's
-    // COLOUR rather than its size (#430). `EmptyStateWidget` paints its hero
-    // in the supporting foreground unconditionally and carries no tone slot,
-    // so adopting it here would turn a red failure mark grey, which is a
-    // change of appearance rather than a rename. The `64` is stranded with the
-    // colour: the two are one decision and cannot be half-converted.
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.error(error.toString()),
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel('', role: TextRole.detail, align: TextAlign.center),
-        ],
-      ),
-    );
+    // The facade's own error shape rather than a hand-built copy of it
+    // (#430). This column was held back by exactly one fact - the facade
+    // painted every hero in the supporting foreground - and the hero's tone
+    // is that fact stated as a meaning (#431): `ErrorState` says
+    // `Tone.danger`, so the mark stays the failure colour because the state
+    // SAYS failure, not because this dialog picked a colour. The `64` and
+    // the empty second line go to the member with it.
+    return ErrorState(message: error.toString());
   }
 
   Widget _buildBranchDropdown({
@@ -572,6 +555,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               content: Text(
                 AppLocalizations.of(context)!.failedToStartRebase(e.toString()),
               ),
+              // A surface FILL, not a foreground: this is what the notice is
+              // painted in, and its words are paired against it. The whole
+              // `SnackBar` is `overlays.notify`, and the fill leaves with it.
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -607,6 +593,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
                 context,
               )!.failedToContinueRebase(e.toString()),
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -635,6 +624,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             content: Text(
               AppLocalizations.of(context)!.failedToSkip(e.toString()),
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -664,6 +656,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             content: Text(
               AppLocalizations.of(context)!.failedToAbortRebase(e.toString()),
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

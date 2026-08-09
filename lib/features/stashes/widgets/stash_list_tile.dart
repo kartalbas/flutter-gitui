@@ -114,6 +114,11 @@ class StashListTile extends ConsumerWidget {
               const PopupMenuDivider(),
               PopupMenuItem(
                 value: 'drop',
+                // The same statement twice, for the reason tag_list_tile.dart
+                // records: the meaning is `Tone.danger`, and `MenuItemContent`
+                // wears its tone on the MARK only, painting its label from a
+                // raw `Color?`. Deleting the read greys the destructive label,
+                // which is a change of appearance rather than a rename.
                 child: MenuItemContent(
                   icon: IconRole.trash,
                   label: AppLocalizations.of(context)!.drop,

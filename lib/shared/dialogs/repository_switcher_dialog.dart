@@ -319,6 +319,9 @@ class _RepositorySwitcherDialogState
             content: Text(
               AppLocalizations.of(context)!.repositoryInvalidOrMissing,
             ),
+            // A surface FILL, not a foreground: this is what the notice is
+            // painted in, and its words are paired against it. The whole
+            // `SnackBar` is `overlays.notify`, and the fill leaves with it.
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );

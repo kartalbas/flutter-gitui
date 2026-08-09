@@ -352,6 +352,10 @@ class _BranchSwitcherDialogState extends ConsumerState<BranchSwitcherDialog> {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
+          // The chosen segment's FILL, not a foreground: this is what the
+          // segment is painted in, and the word below is paired against it.
+          // It leaves with `controls.choiceGroup`, the member that owns a
+          // segmented control's selected surface.
           color: isSelected ? Theme.of(context).colorScheme.primary : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusS),
         ),

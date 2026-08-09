@@ -40,32 +40,20 @@ class HistoryErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The one shape in this file the facade cannot take, and the blocker is
-    // the mark's COLOUR rather than its size. `EmptyStateWidget` paints its
-    // hero in the supporting foreground unconditionally and carries no tone
-    // slot, so adopting it here would silently turn a red failure mark grey -
-    // the whole difference between "there is nothing here" and "this went
-    // wrong" - which is a change of appearance rather than a rename. Reported
-    // instead: the facade needs a tone on its hero before this converts.
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          const BaseLabel('Error Loading History', role: TextRole.pageTitle),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            error.toString(),
-            role: TextRole.detail,
-            align: TextAlign.center,
-          ),
-        ],
-      ),
+    // No longer the one shape in this file the facade cannot take. It was held
+    // back by a single fact - `EmptyStateWidget` painted every hero in the
+    // supporting foreground and carried no tone slot - and that fact is now a
+    // meaning the member accepts (#431). `Tone.danger` is the whole difference
+    // between "there is nothing here" and "this went wrong", said as what the
+    // state MEANS rather than as the colour Material answers it with, so the
+    // mark stays red without this file naming a colour. The `64` leaves with
+    // it for the reason `NoCommitsState` above records, and the sentence under
+    // the headline takes the member's own treatment.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: 'Error Loading History',
+      message: error.toString(),
+      tone: Tone.danger,
     );
   }
 }

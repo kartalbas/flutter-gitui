@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Proximity, TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/components/base_label.dart';
-import '../../../shared/components/base_layout.dart';
+import '../../../shared/widgets/empty_state.dart';
 
 /// Error state for changes screen when status loading fails
 class ChangesErrorState extends StatelessWidget {
@@ -14,43 +13,21 @@ class ChangesErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // This is the facade's shape - hero, headline, sentence - and it
-          // still cannot adopt `EmptyStateWidget` (#430), for one reason: the
-          // facade paints its hero in the supporting foreground and carries no
-          // tone slot, so adopting it would turn this red mark grey and erase
-          // the only thing distinguishing a failure from an ordinary empty
-          // pane. That is a change of appearance, not a rename, so it is
-          // reported rather than made. The size stays with it - `ControlScale`
-          // tops out at the ordinary size of a CONTROL's mark, and this is a
-          // region's artwork - and so does the error role below, which is not
-          // rounded onto `Tone.danger`: danger means "this destroys something
-          // you cannot get back", which a failed status read is not saying.
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          // The hero glyph and the headline are two groups inside one region:
-          // `separate`.
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.errorLoadingStatus,
-            role: TextRole.pageTitle,
-          ),
-          // The headline and the message explaining it are two parts of one
-          // statement: `related`.
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            error.toString(),
-            role: TextRole.detail,
-            align: TextAlign.center,
-          ),
-        ],
-      ),
+    // The facade rather than a hand-built copy of it (#430). This was the
+    // file that first recorded why the copy existed: the facade painted its
+    // hero in the supporting foreground and carried no tone slot, so adopting
+    // it would have greyed out a failure. Both halves of that objection are
+    // answered now. The hero takes a tone (#431), and `EmptyStateSpec.tone`
+    // decides what the tone says - "a state standing in for a FAILURE says
+    // Tone.danger" - which is the contract making the call this file declined
+    // to make on its own when the only argument available was the definition
+    // of `Tone.danger` read in isolation. The size was never a separate
+    // decision from the colour, and it leaves with it.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: AppLocalizations.of(context)!.errorLoadingStatus,
+      message: error.toString(),
+      tone: Tone.danger,
     );
   }
 }

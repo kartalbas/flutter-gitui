@@ -376,6 +376,11 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                     context,
                   )!.mergeHasConflicts(mergeState.conflictCount),
                 ),
+                // A surface FILL, not a foreground: this is what the notice
+                // is painted in, and its words are paired against it. The
+                // whole `SnackBar` is `overlays.notify`, and the fill leaves
+                // with it - which is also what finally settles the mispaired
+                // `onPrimary` recorded on the action below.
                 backgroundColor: Theme.of(context).colorScheme.error,
                 action: SnackBarAction(
                   label: AppLocalizations.of(context)!.resolve,

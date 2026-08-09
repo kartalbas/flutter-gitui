@@ -224,12 +224,15 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // The same in-panel note shape as the empty case above, plus the
-              // colour blocker the facade cannot answer at all:
-              // `EmptyStateWidget` paints its hero in the supporting
-              // foreground and carries no tone slot, so adopting it would turn
-              // a red failure mark grey - the difference between "there is
-              // nothing here" and "this went wrong".
+              // The same in-panel note shape as the empty case above, and that
+              // shape is now the only thing holding it back: the facade's hero
+              // carries a tone (#431), so a red failure mark is something it
+              // can say. It is still a 32 dp note with one sentence and no
+              // headline inside a panel its own header already names, while
+              // `EmptyStateWidget` is a 64 dp hero that always renders a
+              // `pageTitle`. The colour is stranded with the size, exactly as
+              // above: a tone reaches a mark only through a member or
+              // `BaseIcon`, whose scales top out at 24.
               Icon(
                 PhosphorIconsRegular.warningCircle,
                 size: AppTheme.iconXL,
@@ -366,12 +369,25 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
               const BaseGap(Proximity.hairline),
             ],
 
-            // Folder/file icon. The glyph is chosen at run time from the
-            // file's extension, so it is an `IconData` no `IconRole` names -
-            // and a mark that cannot be a `BaseIcon` cannot carry a tone
-            // either, which is why the brand colour on the folder branch is
-            // still written as a colour here. Both move together when the
-            // glyph table becomes roles.
+            // Folder/file icon, and its size is NOT what strands these two
+            // colours - 16 is exactly `ControlScale.compact`. Each branch is
+            // blocked by its glyph instead, for a different reason.
+            //
+            // On the file branch the glyph is chosen at run time from the
+            // file's extension, so it is an `IconData` that no `IconRole`
+            // names; a mark that cannot be a `BaseIcon` cannot carry a tone,
+            // so the `onSurface` fallback beside it is stranded with it.
+            //
+            // On the folder branch the role exists (`IconRole.folder` /
+            // `folderOpen`) and the block is the WEIGHT: this draws Phosphor's
+            // Bold face, while `BaseIcon` goes through `type.icon`, which
+            // resolves `MaterialGlyphs.of` - the Regular family. Naming the
+            // role would buy `Tone.accent` at the price of the bold stroke,
+            // which is dropping an appearance inside a rename and is the
+            // mistake the staged-state checkboxes already made once.
+            //
+            // Both move when the glyph table becomes roles and the weight is
+            // the skin's to re-decide.
             Icon(
               node.isDirectory
                   ? (node.isExpanded

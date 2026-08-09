@@ -48,6 +48,16 @@ class BranchListTile extends ConsumerWidget {
     return BaseListItem(
       isSelected: isHighlighted,
       containerHasFocus: containerHasFocus,
+      // The row's leading mark stays a raw `Icon` because its WEIGHT is the
+      // statement: Bold when this is the branch you are on, Regular otherwise,
+      // which `icon_weight_census_test.dart` records as one of the places
+      // where the weight IS the meaning. `IconRole` deliberately cannot carry
+      // a weight, so `BaseIcon` would draw the current branch at the same
+      // stroke as every other row and drop the distinction inside a rename.
+      // The colour is stranded with it: a `Tone` reaches a mark only through
+      // `BaseIcon`. Both leave together when the skin re-decides the weight on
+      // its side of the seam - and the accent this spells out is the same word
+      // the branch name beside it already says as `Tone.accent`.
       leading: Icon(
         branch.isCurrent
             ? PhosphorIconsBold.gitBranch

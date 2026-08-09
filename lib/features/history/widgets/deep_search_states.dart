@@ -155,13 +155,17 @@ class DeepSearchFailedState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Two reasons this stays hand-rolled, either one of which is enough. The
-    // hero is red and `EmptyStateWidget` has no tone slot, so adopting it
-    // would grey out the one thing that says this failed. And this state has
-    // no headline at all - a single sentence carrying the git error - while
-    // the facade always renders a `pageTitle` above its message, so the
-    // sentence would be promoted out of `body` to fill a slot it does not
-    // belong in.
+    // One of the two reasons this stayed hand-rolled is gone: the hero carries
+    // a tone now (#431), so "this failed" is something `EmptyStateWidget` can
+    // say in red. The surviving reason is shape, and it is enough on its own.
+    // This state has no headline at all - a single sentence carrying the git
+    // error - while the facade always renders a `pageTitle` above its message,
+    // so the sentence would be promoted out of `body` into a slot it does not
+    // belong in. Its way back disagrees too: `EmptyStateAction` offers primary
+    // or secondary, and this button is deliberately quieter than both. The
+    // read is stranded with the size the way it is inside the facade itself -
+    // a tone reaches a mark only through a member or `BaseIcon`, whose scales
+    // top out at 24 while this hero is 64.
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

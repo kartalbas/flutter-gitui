@@ -207,6 +207,17 @@ class TagListTile extends ConsumerWidget {
                     if (!isLocalOnly || !hasRemotes) const PopupMenuDivider(),
                     PopupMenuItem(
                       value: 'delete',
+                      // The meaning is already stated: `Tone.danger`. The
+                      // colour beside it is the same statement said twice,
+                      // because `MenuItemContent` wears its tone on the MARK
+                      // only and paints its label from a raw `Color?`.
+                      // Deleting the read would drop the destructive label
+                      // back to the menu's ambient foreground, which is a
+                      // change of appearance rather than a rename, so it
+                      // stays until the component's label wears the tone too
+                      // - or until this menu is expressed as `MenuAction(role:
+                      // MenuActionRole.destructive)` and `materialMenuEntries`
+                      // derives both halves the way it already does.
                       child: MenuItemContent(
                         icon: IconRole.trash,
                         label: AppLocalizations.of(context)!.delete,

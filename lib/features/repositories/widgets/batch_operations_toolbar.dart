@@ -27,6 +27,14 @@ class BatchOperationsToolbar extends StatelessWidget {
     // The floating bar's margin is the distance between it and the screen
     // it hovers over - an inset owed by what surrounds the bar rather than a
     // fourth number inside it.
+    // Nothing in this `BoxDecoration` converts, and none of it is an
+    // oversight: a fill, a shadow and a 1 px stroke are what a SURFACE is made
+    // of, and a surface leaves whole when the floating bar becomes its own
+    // member. `Tone` says what a mark or a word MEANS and is only ever read
+    // back inside a skin, so the application cannot resolve one into the
+    // `Color` a `BoxDecoration` demands - the seam is right to forbid that.
+    // The two marks and the two labels inside the bar have already crossed;
+    // the box they sit in has not.
     return BaseInset(
       all: Inset.roomy,
       child: Container(
@@ -51,7 +59,11 @@ class BatchOperationsToolbar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Selection count
+              // Selection count. The accent FILL below is the pill this
+              // count is painted on, and it stays for the same reason the
+              // bar's own box does: it is a surface, and it leaves with the
+              // badge member. It is also what makes `Tone.onAccent` the
+              // truthful word for the mark and the label inside it.
               Container(
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,

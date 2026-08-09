@@ -14,6 +14,7 @@ import '../../core/diff/diff_providers.dart';
 import '../../core/diff/models/diff_tool.dart';
 import '../../core/config/config_providers.dart';
 import '../components/base_layout.dart';
+import '../widgets/empty_state.dart';
 
 /// Dialog for configuring external diff/merge tools
 class DiffToolsConfigDialog extends ConsumerStatefulWidget {
@@ -119,35 +120,19 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
   }
 
   Widget _buildError(BuildContext context, Object error) {
-    // Shaped exactly like the empty-state facade takes - hero, headline,
-    // sentence - and still not converted, because the blocker is the mark's
-    // COLOUR rather than its size (#430). `EmptyStateWidget` paints its hero
-    // in the supporting foreground unconditionally and carries no tone slot,
-    // so adopting it here would turn a red failure mark grey, which is a
-    // change of appearance rather than a rename. The `64` is stranded with the
-    // colour: the two are one decision and cannot be half-converted.
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.errorDetectingTools,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            error.toString(),
-            role: TextRole.detail,
-            align: TextAlign.center,
-          ),
-        ],
-      ),
+    // The facade rather than a hand-built copy of it (#430). This column was
+    // shaped exactly as the facade draws - hero, headline, sentence - and was
+    // held back by one fact: the hero had no tone slot, so adopting it would
+    // have turned a red failure mark grey. The hero carries a tone now
+    // (#431), and the mark stays the failure colour because the state SAYS
+    // failure. The `64` and the sentence's treatment go to the member with
+    // it. `_buildNoToolsFound` above stays hand-rolled for its own reason:
+    // its shape, not its colour.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: AppLocalizations.of(context)!.errorDetectingTools,
+      message: error.toString(),
+      tone: Tone.danger,
     );
   }
 
@@ -282,6 +267,10 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
                   vertical: AppTheme.paddingXS,
                 ),
                 decoration: BoxDecoration(
+                  // A 10% wash of the accent is the badge's FILL, not a
+                  // foreground, so it is not a tone: no member can tint a
+                  // surface from a `Tone` today. It waits for
+                  // `surfaces.badge` with the badge's measure above.
                   color: Theme.of(
                     context,
                   ).colorScheme.primary.withValues(alpha: 0.1),

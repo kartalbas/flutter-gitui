@@ -75,36 +75,18 @@ class ReflogDialog extends ConsumerWidget {
   }
 
   Widget _buildError(BuildContext context, Object error) {
-    // The sibling of `_buildEmpty` above, and the one shape the facade cannot
-    // take: the blocker is the mark's COLOUR, not its size.
-    // `EmptyStateWidget` paints its hero in the supporting foreground
-    // unconditionally and carries no tone slot, so adopting it here would turn
-    // a red failure mark grey - the whole difference between "there is nothing
-    // here" and "this went wrong" - which is a change of appearance rather
-    // than a rename. Reported instead: the facade needs a tone on its hero
-    // before this converts, and the size leaves with the colour.
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            PhosphorIconsRegular.warningCircle,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const BaseGap(Proximity.separate),
-          BaseLabel(
-            AppLocalizations.of(context)!.errorLoadingReflog,
-            role: TextRole.pageTitle,
-          ),
-          const BaseGap(Proximity.related),
-          BaseLabel(
-            error.toString(),
-            role: TextRole.detail,
-            align: TextAlign.center,
-          ),
-        ],
-      ),
+    // The sibling of `_buildEmpty` above, and no longer the one shape the
+    // facade cannot take: the hero carries a tone now (#431), and
+    // `Tone.danger` is the whole difference between "there is nothing here"
+    // and "this went wrong", stated as a meaning rather than as a colour
+    // this dialog picked. The `64` goes the way `_buildEmpty`'s went (#430),
+    // and the sentence under the headline takes the member's own treatment
+    // with it.
+    return EmptyStateWidget(
+      icon: PhosphorIconsRegular.warningCircle,
+      title: AppLocalizations.of(context)!.errorLoadingReflog,
+      message: error.toString(),
+      tone: Tone.danger,
     );
   }
 
@@ -177,6 +159,17 @@ class ReflogDialog extends ConsumerWidget {
         // stays a `Color` for now because the same value paints the wash, and
         // until this chip is `surfaces.badge` at P3d there is no contract
         // member that can tint a surface from a `Tone`.
+        //
+        // A second blocker sits underneath that one and outlives it, so it is
+        // named here rather than discovered again: two of the eight actions
+        // answer with `colorScheme.tertiary` (Merge, Cherry-pick) and two with
+        // `colorScheme.secondary` (Rebase, Revert), and [Tone] has no word for
+        // either. They are not `accent` - `primary` is already spoken for by
+        // Checkout and Pull right beside them, so calling all six `accent`
+        // would erase a distinction this list draws deliberately. Reported
+        // rather than rounded (#426): converting this helper needs either a
+        // second and third accent in the vocabulary or a decision that the
+        // reflog should stop colour-coding by action at all.
         //
         // The chip's inset stays a literal: across it is `tight` exactly,
         // but its vertical 4 is on no `Inset` rung - rounding it up to

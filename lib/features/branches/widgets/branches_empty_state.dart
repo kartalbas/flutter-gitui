@@ -18,6 +18,16 @@ class BranchesEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Not the empty-state facade (#430), and the reason is the SHAPE and
+          // the SIZE rather than the colour - the mirror image of its sibling
+          // branches_error_state.dart, which is blocked on the same two.
+          // `EmptyStateWidget` draws a 64 dp hero over a headline and a
+          // sentence; this state is a 48 dp mark over one headline and says
+          // nothing under it, so adopting would grow the mark and add the
+          // member's empty second line, both changes of appearance rather than
+          // renames. The supporting foreground is stranded with the size:
+          // `Tone.muted` reaches a mark only through `BaseIcon`, whose largest
+          // rung is 24 dp, and rounding a hero onto it is #426 verbatim.
           Icon(
             isLocal ? PhosphorIconsRegular.folder : PhosphorIconsRegular.cloud,
             size: 48,

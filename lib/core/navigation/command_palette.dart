@@ -170,6 +170,14 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
+                    // Not a foreground: `onSurfaceVariant` at 40% is the FILL
+                    // of a painted shape, which is the one thing a `Tone`
+                    // cannot reach - the application is deliberately given no
+                    // way to resolve a tone into a `Color` for its own
+                    // decoration. The grip is part of the sheet's own chrome
+                    // and leaves with the surface that draws it
+                    // (`chrome.dialogSurface`), fill, corner and grip
+                    // together.
                     color: Theme.of(
                       context,
                     ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),

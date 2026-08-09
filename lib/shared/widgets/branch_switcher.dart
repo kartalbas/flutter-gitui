@@ -671,6 +671,12 @@ class _BulkDeleteBranchesDialogState extends State<BulkDeleteBranchesDialog> {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
+        // The block's own FILL and BORDER, and neither is a foreground: a
+        // tint at 8% and a stroke at 40% are how this surface is painted, not
+        // what any word on it means. They leave with the surface rather than
+        // with the tone vocabulary - the application has no way to resolve
+        // `Tone.danger` into a `Color` for a `BoxDecoration`, and the seam is
+        // right to withhold one.
         color: colorScheme.error.withValues(alpha: 0.08),
         border: Border.all(color: colorScheme.error.withValues(alpha: 0.4)),
         borderRadius: BorderRadius.circular(AppTheme.radiusM),

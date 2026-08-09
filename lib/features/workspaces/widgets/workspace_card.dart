@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        AvatarSpec,
         ControlScale,
         IconRole,
         Inset,
         MenuAnchorSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -98,22 +99,41 @@ class WorkspaceCard extends StatelessWidget {
           // Header with icon and menu
           Row(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: project.color.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  all: Inset.normal,
-                  child: Icon(
-                    project.isDefaultWorkspace
-                        ? PhosphorIconsBold.house
-                        : PhosphorIconsBold.folder,
-                    color: project.color,
-                    size: AppTheme.iconL,
+              // The workspace's identity mark is `surfaces.avatar`, the member
+              // whose own doc names this case: "`Tone.series(n)` is how a
+              // per-object identity colour reaches it without the application
+              // knowing which colour that is". The tile that stood here was
+              // the application drawing an avatar by hand - a fill, a corner,
+              // an inset and a glyph size - and every one of those is the
+              // member's answer now. The FILL does not move: Material washes
+              // the series colour onto the mark at 20 %, which is the exact
+              // `alpha: 0.2` this container painted, and the mark keeps the
+              // series colour itself.
+              //
+              // Three things about the picture do move, and each is the
+              // member's decision rather than a side effect. The tile becomes
+              // a CIRCLE, because that is what an avatar is in Material and
+              // the corner was never something this card knew. It becomes 40
+              // dp across instead of 56 (24 dp mark inside a 16 dp inset), and
+              // the mark 20 dp instead of 24, because the member moves
+              // diameter and glyph together off one `ControlScale` rung. And
+              // the mark takes the ordinary stroke instead of Bold: the weight
+              // was unconditional here - both branches of the ternary drew it
+              // - so it distinguished nothing, and `IconRole` hands weight to
+              // the skin by construction (#249 conflict C3).
+              SkinScope.render(context, (Skin skin, BuildContext inner) {
+                return skin.surfaces.avatar(
+                  inner,
+                  AvatarSpec(
+                    glyph: project.isDefaultWorkspace
+                        ? IconRole.house
+                        : IconRole.folder,
+                    tone: Tone.series(project.colorIndex),
+                    scale: ControlScale.prominent,
+                    semanticsLabel: project.displayName(l10n),
                   ),
-                ),
-              ),
+                );
+              }),
               const Spacer(),
               // The whole anchored pair - the trigger, its measured position
               // and the menu against it - is the SKIN's now, through

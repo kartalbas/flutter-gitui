@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Proximity;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, MarkdownSpec, Proximity, Skin, SkinScope;
 import 'package:path/path.dart' as path;
 
 import '../../../../shared/components/base_layout.dart';
 import '../../../../shared/components/base_viewer_dialog.dart';
-import '../../../../shared/theme/app_theme.dart';
 
 /// Enhanced markdown viewer dialog with rendering
 class MarkdownViewerDialog extends StatefulWidget {
@@ -104,52 +103,29 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
                 ],
               ),
             )
-          : Markdown(
-              data: _content,
-              selectable: true,
-              // Nine colour words left this sheet and not one pixel moved.
-              // `Tone.neutral` is "whatever this surface's ordinary foreground
-              // is", and the ramp these styles are built from already carries
-              // exactly that: the theme stamps the scheme's on-surface role on
-              // every step of the type scale, so each of the nine restated the
-              // ambient answer in Material's words and nothing else. Saying
-              // nothing is how a bag of styles says neutral.
-              //
-              // A `MarkdownStyleSheet` is a third-party bag of `TextStyle`s,
-              // not a widget, so `BaseLabel` cannot reach any of these lines -
-              // which is why the one line below that is NOT neutral has to
-              // stay a colour.
-              styleSheet: MarkdownStyleSheet(
-                p: Theme.of(context).textTheme.bodyMedium,
-                h1: Theme.of(context).textTheme.displaySmall,
-                h2: Theme.of(context).textTheme.headlineMedium,
-                h3: Theme.of(context).textTheme.titleLarge,
-                h4: Theme.of(context).textTheme.titleMedium,
-                h5: Theme.of(context).textTheme.titleSmall,
-                h6: Theme.of(context).textTheme.labelLarge,
-                listBullet: Theme.of(context).textTheme.bodyMedium,
-                // The one line in the sheet that says something: a quotation
-                // is secondary to the prose around it, which is `Tone.muted`.
-                // It stays a `colorScheme` read because a tone can only reach
-                // text through `BaseLabel` and this is a `TextStyle` handed to
-                // a renderer the application does not own. It leaves when the
-                // markdown surface is a member.
-                blockquote: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
-                code: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontFamily: 'monospace',
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHighest,
-                ),
-                codeblockDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-              ),
-            ),
+          // **Here is a document written in Markdown**, and that is the whole
+          // of what this dialog now says about it. The eleven-line
+          // `MarkdownStyleSheet` that stood here - the type ramp for six
+          // heading levels and the prose, the italic quotation, the inline
+          // code span and the fenced block's tinted 8 dp box - is the exact
+          // sheet `MaterialSurfaces.markdown` was extracted FROM, line for
+          // line, so nothing about the rendering is re-decided by the move.
+          // What leaves with it is the last thing the application had no
+          // business owning: the code block's corner. A fenced block's corner
+          // is the language's answer (M3 rounds at 8, Fluent at 4), and the
+          // only reason this file could name one was that it was holding the
+          // renderer's style bag itself.
+          : SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.markdown(
+                inner,
+                // No `baseDirectory`: the viewer opens a file the user picked
+                // and never resolved a relative image against it before, so
+                // stating one here would be new behaviour rather than a
+                // migration. Links stay inert for the same reason - this
+                // dialog has never followed one.
+                MarkdownSpec(source: _content),
+              );
+            }),
     );
   }
 }

@@ -1292,6 +1292,16 @@ class _MaterialTextFieldState extends State<_MaterialTextField> {
         // English here rather than shipped as an untranslated string the
         // application would have to own, and the moment the contract grows a
         // way for a caller to name it, it comes from there.
+        //
+        // A RECORDED CONTRACT GAP, not an oversight: all three skins invent
+        // this word (blueprint and Fluent say 'reveal'/'hide'), while the
+        // application's own catalogue already holds the localized pair the
+        // old hand-painted toggle used (`l10n.showPassword`/`hidePassword`)
+        // with no way to pass it through - `FieldRevealAffordance` is a
+        // sealed marker with no fields, and the blueprint's spec-coverage
+        // test pins it as such. No `lib/` site constructs the affordance
+        // today; the first password field added must not ship before the
+        // affordance grows reveal/conceal words in all three skins.
         tooltip: _revealed ? 'Hide' : 'Show',
         onPressed: spec.enabled
             ? () => setState(() => _revealed = !_revealed)

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -50,38 +50,40 @@ class ResetModeDialog extends StatelessWidget {
         children: [
           BaseLabel(l10n.resetCurrentBranchTo, role: TextRole.body),
           const BaseGap(Proximity.related),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              child: Row(
-                children: [
-                  const BaseIcon(
-                    IconRole.gitCommit,
-                    scale: ControlScale.compact,
-                    tone: Tone.accent,
+          // **Here is one self-contained object** - the commit the branch
+          // pointer is being moved to. The twin of the strip in
+          // `create_branch_from_commit_dialog.dart`, and the pair is the
+          // corner argument in miniature: same statement, same kind of object,
+          // one rounded at 8 and the other at 4, because neither screen could
+          // see the other. One member now answers both.
+          BaseCard(
+            isSelectable: false,
+            inset: Inset.normal,
+            content: Row(
+              children: [
+                const BaseIcon(
+                  IconRole.gitCommit,
+                  scale: ControlScale.compact,
+                  tone: Tone.accent,
+                ),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BaseLabel(
+                        commit.shortSubject,
+                        role: TextRole.body,
+                        maxLines: 1,
+                      ),
+                      BaseLabel(
+                        '${commit.shortHash} by ${commit.author}',
+                        role: TextRole.detail,
+                      ),
+                    ],
                   ),
-                  const BaseGap(Proximity.related),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BaseLabel(
-                          commit.shortSubject,
-                          role: TextRole.body,
-                          maxLines: 1,
-                        ),
-                        BaseLabel(
-                          '${commit.shortHash} by ${commit.author}',
-                          role: TextRole.detail,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const BaseGap(Proximity.separate),

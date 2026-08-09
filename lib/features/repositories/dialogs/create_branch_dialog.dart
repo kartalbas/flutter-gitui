@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        ControlScale,
+        IconRole,
+        Inset,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -190,41 +199,35 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_errorMessage != null) ...[
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              // The callout paints its own fill and states the paired
-              // foreground once, here.
-              child: BaseInset(
-                all: Inset.normal,
-                child: DefaultTextStyle.merge(
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                  ),
-                  child: Row(
-                    children: [
-                      // Tone.invalid, not Tone.danger: the branch name the
-                      // user typed was rejected and has to be corrected
-                      // before the dialog can proceed, and nothing has been
-                      // destroyed.
-                      const BaseIcon(
-                        IconRole.warningCircle,
-                        tone: Tone.invalid,
-                      ),
-                      const BaseGap(Proximity.grouped),
-                      Expanded(
-                        child: BaseLabel(
-                          _errorMessage!,
-                          role: TextRole.control,
-                        ),
-                      ),
-                    ],
-                  ),
+            // The callout is `surfaces.banner`: "something about this whole
+            // surface needs saying", said until the condition changes, which
+            // is exactly what a rejected branch name is. The whole
+            // construction goes with the member - the fill, the corner, the
+            // inset, the mark, the gap beside it and the
+            // `DefaultTextStyle.merge` that was pairing a foreground to a
+            // container the dialog painted itself.
+            //
+            // `Tone.invalid` is kept rather than swapped for `danger`, for
+            // the reason the note here already gave: the name the user typed
+            // has to be corrected before the dialog can proceed, and nothing
+            // has been destroyed. Material has no separate validation role,
+            // so the member answers `invalid` with its generic wash - the
+            // error colour at 12 % under a readable foreground - where the
+            // hand-painted copy used the solid `errorContainer` pairing. The
+            // corner goes with it: a banner is a full-width strip in
+            // Material, so the 8 dp round this callout drew is gone, and the
+            // sentence is set at the member's `titleMedium` rather than at
+            // `TextRole.control`.
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: Tone.invalid,
+                  icon: IconRole.warningCircle,
+                  title: _errorMessage!,
                 ),
-              ),
-            ),
+              );
+            }),
             const BaseGap(Proximity.grouped),
           ],
 
@@ -273,7 +276,16 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
 
           const BaseGap(Proximity.grouped),
 
-          // Full branch name preview
+          // Full branch name preview. NOT converted, and reported as a
+          // contract finding: a read-only box showing what the form will
+          // produce is neither a card (nothing here is picked), nor a banner
+          // (nothing is being said ABOUT the dialog), nor a code block (the
+          // name is set in the prose ramp, not in the code one). The nearest
+          // member is `surfaces.panel`, and its Material answer is an elevated
+          // region with a 56 dp header row - which would turn a two-line
+          // preview into the loudest thing in the dialog. The fill, the edge
+          // and the corner stay until a member can say "here is what this
+          // form will produce".
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -315,6 +327,10 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
           ),
           const BaseGap(Proximity.related),
 
+          // The twin of `batch_operation_progress_dialog.dart`'s framed list,
+          // reported with it: an outline and a corner around a height-capped
+          // scroll region whose rows are already the skin's, and no member
+          // draws a frame that has no name.
           Container(
             constraints: const BoxConstraints(maxHeight: 150),
             decoration: BoxDecoration(

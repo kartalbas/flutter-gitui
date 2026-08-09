@@ -3,7 +3,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -50,40 +50,39 @@ class _CreateBranchFromTagDialogState extends State<CreateBranchFromTagDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Tag info
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            child: BaseInset(
-              all: Inset.normal,
-              child: Row(
-                children: [
-                  // The mark on the strip that names the tag this branch will
-                  // start from: a dense row-level glyph, and secondary to the
-                  // tag name it introduces rather than competing with it.
-                  const BaseIcon(
-                    IconRole.tag,
-                    scale: ControlScale.compact,
-                    tone: Tone.muted,
+          // Tag info: **here is one self-contained object** - the tag this
+          // branch will start from. The same strip as the commit variant in
+          // `create_branch_from_commit_dialog.dart`, down to the fill and the
+          // 4 dp corner, and it becomes the same member so the two cannot
+          // drift apart again.
+          BaseCard(
+            isSelectable: false,
+            inset: Inset.normal,
+            content: Row(
+              children: [
+                // The mark on the strip that names the tag this branch will
+                // start from: a dense row-level glyph, and secondary to the
+                // tag name it introduces rather than competing with it.
+                const BaseIcon(
+                  IconRole.tag,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
+                ),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BaseLabel(
+                        l10n.sourceTag,
+                        role: TextRole.micro,
+                        tone: Tone.muted,
+                      ),
+                      BaseLabel(widget.tagName, role: TextRole.body),
+                    ],
                   ),
-                  const BaseGap(Proximity.related),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BaseLabel(
-                          l10n.sourceTag,
-                          role: TextRole.micro,
-                          tone: Tone.muted,
-                        ),
-                        BaseLabel(widget.tagName, role: TextRole.body),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const BaseGap(Proximity.separate),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
         ControlScale,
         IconRole,
-        Inset,
         ProgressExtent,
         Proximity,
         Skin,
@@ -271,62 +271,53 @@ class _BatchOperationProgressDialogState
 
           // Summary (shown when completed)
           if (!_isRunning) ...[
-            Container(
-              decoration: BoxDecoration(
-                color: _failureCount == 0
-                    ? context.gitColors.added.withValues(alpha: 0.1)
-                    : Theme.of(
-                        context,
-                      ).colorScheme.secondary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                border: Border.all(
-                  color: _failureCount == 0
-                      ? context.gitColors.added
-                      : Theme.of(context).colorScheme.secondary,
+            // How the run ended is `surfaces.banner`, and it is the shape the
+            // member was specified for: a tone, a statement, the longer form
+            // under it and a mark beside them. The whole hand-painted callout
+            // goes - the wash, the 1 px edge, the corner, the inset, the two
+            // `Color`s that painted the fill and the mark, and the Column and
+            // Row that arranged them - because every one of them is what
+            // `BannerSpec` says once.
+            //
+            // The two tones are the meanings the colours were spelling out.
+            // A clean run "finished, and it finished well", which is
+            // `Tone.success` and resolves to the same git `added` colour this
+            // callout painted by hand; a run with failures is `Tone.warning`
+            // - the operations completed and some did not, which is a doubt
+            // rather than a destruction - and that lands on the git palette's
+            // modified colour where the dialog used `colorScheme.secondary`.
+            // Both are washed at the member's 12 % rather than 10 %, the edge
+            // is gone (a banner is a strip, not a box), the corner with it,
+            // and the two lines are set at `titleMedium` over `bodySmall`.
+            //
+            // The Bold marks do NOT survive. Both branches drew Bold, so the
+            // weight distinguished nothing between them; the same
+            // check-circle and warning-circle already stand at the ordinary
+            // stroke in `git_output_dialog.dart` and eight lines further down
+            // this same file. Recorded in
+            // test/shared/icons/icon_weight_census_test.dart.
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: _failureCount == 0 ? Tone.success : Tone.warning,
+                  icon: _failureCount == 0
+                      ? IconRole.checkCircle
+                      : IconRole.warningCircle,
+                  title: _failureCount == 0
+                      ? l10n.operationsCompleted(
+                          _successCount,
+                          _successCount + _failureCount,
+                        )
+                      : l10n.operationsCompletedWithErrors(
+                          _successCount,
+                          _failureCount,
+                          _successCount + _failureCount,
+                        ),
+                  body: l10n.successCount(_successCount, _failureCount),
                 ),
-              ),
-              child: BaseInset(
-                all: Inset.normal,
-                child: Row(
-                  children: [
-                    Icon(
-                      _failureCount == 0
-                          ? PhosphorIconsBold.checkCircle
-                          : PhosphorIconsBold.warningCircle,
-                      color: _failureCount == 0
-                          ? context.gitColors.added
-                          : Theme.of(context).colorScheme.secondary,
-                    ),
-                    const BaseGap(Proximity.grouped),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BaseLabel(
-                            _failureCount == 0
-                                ? l10n.operationsCompleted(
-                                    _successCount,
-                                    _successCount + _failureCount,
-                                  )
-                                : l10n.operationsCompletedWithErrors(
-                                    _successCount,
-                                    _failureCount,
-                                    _successCount + _failureCount,
-                                  ),
-                            role: TextRole.sectionTitle,
-                          ),
-                          const BaseGap(Proximity.hairline),
-                          BaseLabel(
-                            l10n.successCount(_successCount, _failureCount),
-                            role: TextRole.detail,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+              );
+            }),
             const BaseGap(Proximity.grouped),
           ],
 
@@ -334,6 +325,15 @@ class _BatchOperationProgressDialogState
           BaseLabel(l10n.repositories, role: TextRole.sectionTitle),
           const BaseGap(Proximity.related),
 
+          // NOT converted, and reported as a contract finding. The box is a
+          // FRAME around a bounded scroll region - an outline and a corner and
+          // nothing else, holding a height-capped list of rows that are
+          // already the skin's through `BaseListItem`. No member draws that:
+          // `surfaces.panel` is the nearest and it is not near, because a
+          // panel is a named region with a header, a 56 dp header row and its
+          // own elevation, and this frame has no name and must not gain one.
+          // The same frame stands in `create_branch_dialog.dart`, so it is a
+          // pattern rather than a one-off.
           Container(
             constraints: const BoxConstraints(maxHeight: 300),
             decoration: BoxDecoration(

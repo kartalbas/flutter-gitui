@@ -107,14 +107,27 @@ class FileHistoryPanel extends ConsumerWidget {
                 children: [
                   // Hash badge
                   Container(
-                    // The badge's fill and corner stay: they are the surface.
-                    // Its inset stays a literal too: across it is `tight`
-                    // exactly, but down the page a badge keeps itself to the
-                    // height of the card row it leads, and 4 sits between
-                    // `hairline` and `tight` on a ladder that skips it -
-                    // naming either rung would move the whole first row of
-                    // every commit card. Both halves wait for
-                    // `surfaces.badge`, whose skin owns a badge's measure.
+                    // The chip's fill and corner stay, and this site no longer
+                    // claims they are waiting for `surfaces.badge`. It is the
+                    // same construction as the blame gutter's hash chip
+                    // (`file_blame_panel.dart`), and #438 decided that one
+                    // twice over: its fill names a Material CONTAINER role
+                    // (`secondaryContainer`) that no contract tone can promise
+                    // because neither Fluent nor macOS has a paired-container
+                    // concept, and a hash chip is not a badge at all - its
+                    // content is code the user reads, not a count riding on
+                    // something else. Recording a member that will never take
+                    // it was the one thing worse than recording nothing, so
+                    // the blocker is restated honestly: what this wants is an
+                    // inline-code span, which is a member to derive from need
+                    // rather than a growth of the badge.
+                    //
+                    // Its inset stays a literal for its own reason: across it
+                    // is `tight` exactly, but down the page a chip keeps
+                    // itself to the height of the card row it leads, and 4
+                    // sits between `hairline` and `tight` on a ladder that
+                    // skips it - naming either rung would move the whole first
+                    // row of every commit card.
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppTheme.paddingS,
                       vertical: AppTheme.paddingXS,

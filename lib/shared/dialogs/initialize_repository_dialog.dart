@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, NoticeSpec, Overlays, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        IconRole,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
-import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
-import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
@@ -116,70 +123,53 @@ class _InitializeRepositoryDialogState
               contentPadding: EdgeInsets.zero,
             ),
 
-            // Info card
+            // **Something about this whole surface needs saying**: what the
+            // fields above are about to create, and how the bare switch
+            // changes it. It said that from inside a hand-painted copy of the
+            // member - a neutral wash, a 12 dp corner, an inset, a mark and a
+            // line of `detail` - and all five leave together, because a notice
+            // IS a surface and every one of them was the surface. `Tone.info`
+            // is the sentence's own meaning ("this is worth knowing and
+            // nothing is wrong"), which Material answers with the primary
+            // container: the strip is tinted now instead of grey, and the info
+            // mark is no longer the only thing carrying the meaning.
             const BaseGap(Proximity.grouped),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    // The mark of an ordinary notice, at the ordinary size: it
-                    // belongs to the line beside it rather than standing over
-                    // it.
-                    const BaseIcon(IconRole.info),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.initializeRepositoryInfo(
-                          _bare
-                              ? ''
-                              : AppLocalizations.of(
-                                  context,
-                                )!.initializeRepositoryInfoBare,
-                        ),
-                        role: TextRole.detail,
-                      ),
-                    ),
-                  ],
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: Tone.info,
+                  title: AppLocalizations.of(context)!.initializeRepositoryInfo(
+                    _bare
+                        ? ''
+                        : AppLocalizations.of(
+                            context,
+                          )!.initializeRepositoryInfoBare,
+                  ),
+                  icon: IconRole.info,
                 ),
-              ),
-            ),
+              );
+            }),
 
-            // Error message
+            // The same member as the notice above, one tone over: the mark and
+            // the message had already agreed that what they say is
+            // `Tone.danger`, and the surface they sat on was the third place
+            // that same meaning was spelled out - as `errorContainer`. Now the
+            // meaning is stated once, on the thing that has it, and the fill
+            // that pairs with it is Material's answer rather than this
+            // dialog's. The corner goes with the fill it belonged to.
             if (_errorMessage != null) ...[
               const BaseGap(Proximity.grouped),
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  child: Row(
-                    children: [
-                      // The mark says what the message beside it already says,
-                      // so it says it the same way: the danger this label had
-                      // already named, stated once as a meaning instead of a
-                      // second time as a scheme role. The mark stated no size
-                      // at all and took whatever the dialog's ambient theme
-                      // handed it; the info banner a few lines above asks for
-                      // the ordinary size, so the difference was drift rather
-                      // than a distinction and both now say the same rung.
-                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                      const BaseGap(Proximity.related),
-                      Expanded(
-                        child: BaseLabel(
-                          _errorMessage!,
-                          role: TextRole.body,
-                          tone: Tone.danger,
-                        ),
-                      ),
-                    ],
+              SkinScope.render(context, (Skin skin, BuildContext inner) {
+                return skin.surfaces.banner(
+                  inner,
+                  BannerSpec(
+                    tone: Tone.danger,
+                    title: _errorMessage!,
+                    icon: IconRole.warningCircle,
                   ),
-                ),
-              ),
+                );
+              }),
             ],
 
             // Progress indicator

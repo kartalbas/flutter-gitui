@@ -1,15 +1,18 @@
 /// Material 3 conformance suite for BaseTextField
 /// (lib/shared/components/base_text_field.dart).
 ///
-/// `TextFieldVariant` names the role a field plays — `minimal`, `bordered`,
+/// `TextFieldVariant` names the role a field plays — `bordered`,
 /// `emphasized` — rather than the Material class that draws it, so this suite
-/// is what pins each role to a Material rendering: `minimal` to an
-/// `UnderlineInputBorder`, `bordered` to an `OutlineInputBorder` and
-/// `emphasized` to a filled box. The ruler is therefore the SDK widget in that
-/// same configuration: a real `TextField` pumped through [pumpConformance] and
-/// read with the same probes as BaseTextField. Fonts, device pixel ratio and
-/// visual density are identical on both sides and cancel out of every
-/// comparison.
+/// is what pins each role to a Material rendering: `bordered` to an
+/// `OutlineInputBorder` and `emphasized` to a filled box. The ruler is
+/// therefore the SDK widget in that same configuration: a real `TextField`
+/// pumped through [pumpConformance] and read with the same probes as
+/// BaseTextField. Fonts, device pixel ratio and visual density are identical
+/// on both sides and cancel out of every comparison.
+///
+/// BaseTextField is a façade over `controls.textField` now, so what this suite
+/// measures is the skin's field reached through the application's own
+/// component — which is the only rendering the application can ever get.
 ///
 /// The token ids for the emphasized role are still spelled
 /// `BaseTextField.filled.*`. A token id names the *measured Material
@@ -33,7 +36,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/components/base_text_field.dart';
-import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:gitui_skin_material/gitui_skin_material.dart';
@@ -512,22 +514,23 @@ void main() {
     });
   });
 
-  group('the minimal variant delegates the same way', () {
-    testWidgets('its outline follows the M3 state resolution too', (
-      WidgetTester tester,
-    ) async {
-      // The underline variant sets nothing but the border shape either, so the
-      // same M3 side must reach it. Measured directly rather than through a
-      // token: the shape differs from the oracle's outlined box, only the side
-      // is comparable.
-      await pumpConformance(tester, _oracleField());
-      final String expected = _side(tester, _oracle());
-
-      await pumpConformance(
-        tester,
-        _baseField(variant: TextFieldVariant.minimal),
-      );
-      expect(_side(tester, _base()), expected);
+  group('the roles the contract can carry', () {
+    test('there are exactly two, and no receding third', () {
+      // This stood as a `minimal` group measuring that the underline variant
+      // got the same M3 side as the outlined one. The rung is gone with the
+      // field's move behind `controls.textField`: `FieldPurpose` carries only
+      // the values for which a language reaches for a DIFFERENT canonical
+      // widget, and "the field recedes to its writing line" is not one of
+      // them - macOS and Fluent 2 give a text field one appearance each, so
+      // the rung named a Material rendering and nothing else. No screen in
+      // `lib/` ever asked for it. Pinned here rather than dropped silently:
+      // re-adding a rung the contract cannot carry would put this component
+      // back to hand-painting one variant while the others are drawn behind
+      // the seam, which is exactly what the corner retirement ended.
+      expect(TextFieldVariant.values, <TextFieldVariant>[
+        TextFieldVariant.bordered,
+        TextFieldVariant.emphasized,
+      ]);
     });
   });
 
@@ -676,16 +679,20 @@ void main() {
     });
   });
 
-  group('the app corner token really drives the shape', () {
-    testWidgets('the field rounds to AppTheme.radiusS', (
+  group('the skin\'s corner token really drives the shape', () {
+    testWidgets('the field rounds to MaterialMetrics.radiusS', (
       WidgetTester tester,
     ) async {
       // Ties the measured corner to the token it comes from, so a change to
-      // the token cannot pass unnoticed as "still conformant".
+      // the token cannot pass unnoticed as "still conformant". The token is
+      // this SKIN's now: the application stated a field's corner five times
+      // over until the field moved behind `controls.textField`, and a corner
+      // is the one thing three design languages answer differently and all
+      // three are right (Material 4, Fluent 4, macOS 6).
       await pumpConformance(tester, _baseField());
       expect(
         inputCornerRadius(tester, _base()),
-        closeTo(AppTheme.radiusS, 0.01),
+        closeTo(MaterialMetrics.radiusS, 0.01),
       );
     });
   });

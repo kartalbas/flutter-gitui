@@ -288,24 +288,26 @@ class TagListTile extends ConsumerWidget {
               role: TextRole.detail,
             ),
             const BaseGap(Proximity.related),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                all: Inset.normal,
-                // An annotated tag's message is quoted verbatim from the
-                // repository, so its line breaks and its alignment are part
-                // of what it says - which is what TextRole.code names. The
-                // monospace family this site spelled out was one design
-                // language's answer to that, and the user's own choice of
-                // diff font now reaches it through the skin.
-                child: BaseLabel(
-                  tag.message!,
-                  role: TextRole.code,
-                  selectable: true,
-                ),
+            // The tinted box round the tag's own message was a card drawn by
+            // hand - a fill and an 8 dp corner and nothing else - and it is
+            // the same surface `commit_details_panel.dart` paints round a
+            // commit's message for the same reason: **here is the one
+            // self-contained thing this detail view is about**, set apart from
+            // the rows of metadata around it. It becomes the same member, so
+            // the two message surfaces cannot round differently again.
+            BaseCard(
+              isSelectable: false,
+              inset: Inset.normal,
+              // An annotated tag's message is quoted verbatim from the
+              // repository, so its line breaks and its alignment are part
+              // of what it says - which is what TextRole.code names. The
+              // monospace family this site spelled out was one design
+              // language's answer to that, and the user's own choice of
+              // diff font now reaches it through the skin.
+              content: BaseLabel(
+                tag.message!,
+                role: TextRole.code,
+                selectable: true,
               ),
             ),
           ],

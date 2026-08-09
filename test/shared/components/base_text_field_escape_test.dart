@@ -43,7 +43,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextFormField), 'abc');
+      await tester.enterText(find.byType(EditableText), 'abc');
       await tester.pump();
       expect(changes.last, 'abc');
 
@@ -86,7 +86,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextFormField), 'v1.');
+    await tester.enterText(find.byType(EditableText), 'v1.');
     await tester.pump();
 
     // Even with text present, Escape goes straight to the dismiss scope and

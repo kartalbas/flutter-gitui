@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
         ControlScale,
         IconRole,
+        Inset,
+        NoticeAction,
         NoticeSpec,
         Overlays,
+        ProgressExtent,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
 import '../../generated/app_localizations.dart';
+import '../components/base_card.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
-import '../components/base_button.dart';
-import '../theme/app_theme.dart';
 import '../../core/git/git_providers.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
@@ -24,6 +28,20 @@ import '../../core/git/models/branch.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../components/base_layout.dart';
 import '../widgets/empty_state.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// Every notice in this file used to be a hand-painted `Container`: a tonal
+/// fill, a 12 dp corner, a 16 dp inset, a mark and a line of words. That is
+/// `surfaces.banner` — *something about this whole surface needs saying* —
+/// so the construction leaves whole and the corner leaves with it. What the
+/// banner is painted in, how far its words sit from its edge, and whether it
+/// is rounded at all are the skin's answers now; this dialog states only what
+/// the notice MEANS and what it says.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// Dialog for Git rebase operations
 class RebaseDialog extends ConsumerStatefulWidget {
@@ -155,28 +173,17 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Info banner
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    // The mark of an ordinary notice, at the ordinary size: it
-                    // belongs to the line beside it rather than standing over
-                    // it.
-                    const BaseIcon(IconRole.info),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.rebaseWillReplayCommits,
-                        role: TextRole.detail,
-                      ),
-                    ),
-                  ],
-                ),
+            // What a rebase does to the branch, said once and standing until
+            // the dialog closes: that is `surfaces.banner`. The fill, the
+            // corner, the inset and the mark's pairing all leave with the
+            // hand-painted container; what stays is the tone, and `info` is
+            // the word for exactly this - worth knowing, nothing is wrong.
+            _banner(
+              context,
+              BannerSpec(
+                tone: Tone.info,
+                icon: IconRole.info,
+                title: AppLocalizations.of(context)!.rebaseWillReplayCommits,
               ),
             ),
             const BaseGap(Proximity.separate),
@@ -187,34 +194,22 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
               role: TextRole.sectionTitle,
             ),
             const BaseGap(Proximity.related),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.gitBranch,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                    const BaseGap(Proximity.related),
-                    // The panel behind this line is `primaryContainer`; naming
-                    // its paired foreground is the container's business, so the
-                    // name of the branch says nothing about colour.
-                    DefaultTextStyle.merge(
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      ),
-                      child: BaseLabel(
-                        currentBranch ?? 'Unknown',
-                        role: TextRole.body,
-                      ),
-                    ),
-                  ],
-                ),
+            // One branch, shown as its own surface: `surfaces.card` through
+            // the façade. The tonal fill and the corner were this dialog
+            // painting a container, and the `onPrimaryContainer` beside them
+            // was the other half of that same decision - a fill and the
+            // foreground it pairs with, both of which only a skin may choose.
+            // The card publishes its own foreground, so the branch name says
+            // nothing about colour and the mark takes the ordinary rung (20,
+            // the size the raw glyph stated by hand).
+            BaseCard(
+              inset: Inset.normal,
+              content: Row(
+                children: [
+                  const BaseIcon(IconRole.gitBranch),
+                  const BaseGap(Proximity.related),
+                  BaseLabel(currentBranch ?? 'Unknown', role: TextRole.body),
+                ],
               ),
             ),
             const BaseGap(Proximity.separate),
@@ -248,34 +243,18 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             ),
             const BaseGap(Proximity.grouped),
 
-            // Warning
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.errorContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // The mark of the warning this panel carries, at the
-                    // ordinary size: Material's `error` role was its answer to
-                    // a danger the panel around it has already named, and the
-                    // 20 the mark stated is exactly what the ordinary rung
-                    // renders, so the mark says the meaning now and the size
-                    // stops being a decision this dialog makes.
-                    const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.rebaseWarning,
-                        role: TextRole.detail,
-                      ),
-                    ),
-                  ],
-                ),
+            // The warning the whole dialog carries, which is the same member
+            // as the notice above it and differs only in what it means. The
+            // 30 % wash of the error container was this dialog deciding how
+            // loudly a danger is painted; the tone says the danger and the
+            // skin decides how loud it is. `danger` rather than `warning`
+            // because that is the word the mark already carried here.
+            _banner(
+              context,
+              BannerSpec(
+                tone: Tone.danger,
+                icon: IconRole.warningCircle,
+                title: AppLocalizations.of(context)!.rebaseWarning,
               ),
             ),
           ],
@@ -291,61 +270,43 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Status banner
-        Container(
-          decoration: BoxDecoration(
-            color: state.hasConflicts
-                ? Theme.of(context).colorScheme.errorContainer
-                : Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: BaseInset(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // The mark of the status banner's headline, at the ordinary
-                    // size: it belongs to the line beside it. It names no
-                    // colour, so it keeps taking the one the banner around it
-                    // publishes.
-                    BaseIcon(
-                      state.hasConflicts
-                          ? IconRole.warningCircle
-                          : IconRole.gitBranch,
-                    ),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        state.hasConflicts
-                            ? AppLocalizations.of(context)!.rebaseConflicts
-                            : AppLocalizations.of(context)!.rebaseInProgress,
-                        role: TextRole.sectionTitle,
-                      ),
-                    ),
-                  ],
-                ),
-                if (state.progressText != null) ...[
-                  const BaseGap(Proximity.related),
-                  BaseLabel(
-                    AppLocalizations.of(
-                      context,
-                    )!.step(state.progressText ?? ''),
-                    role: TextRole.body,
-                  ),
-                ],
-              ],
-            ),
+        // Where the rebase stands, as one statement about the whole dialog:
+        // a headline and, under it, the step it is on. `surfaces.banner` is
+        // the member that draws exactly that pair, so the two tonal
+        // containers this dialog chose between become one tone - `danger`
+        // when the rebase has stopped on a conflict, `info` while it is
+        // simply running - and the corner, the fill, the mark's pairing and
+        // the step line's own type step all belong to the skin now.
+        _banner(
+          context,
+          BannerSpec(
+            tone: state.hasConflicts ? Tone.danger : Tone.info,
+            icon: state.hasConflicts
+                ? IconRole.warningCircle
+                : IconRole.gitBranch,
+            title: state.hasConflicts
+                ? AppLocalizations.of(context)!.rebaseConflicts
+                : AppLocalizations.of(context)!.rebaseInProgress,
+            body: state.progressText == null
+                ? null
+                : AppLocalizations.of(context)!.step(state.progressText ?? ''),
           ),
         ),
         const BaseGap(Proximity.grouped),
 
-        // Progress bar
+        // How far along the rebase is. `controls.progress` owns the bar's
+        // thickness and its ends, which is what the 8 dp height and the 4 dp
+        // corner were deciding here; `inline` is the rung, because this is a
+        // bar in a line of content rather than a whole region given over to
+        // waiting (the rung that draws a centred ring).
         if (state.progress != null)
-          LinearProgressIndicator(
-            value: state.progress,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
+          SkinScope.render(
+            context,
+            (Skin skin, BuildContext inner) => skin.controls.progress(
+              inner,
+              fraction: state.progress,
+              extent: ProgressExtent.inline,
+            ),
           ),
         if (state.progress != null) const BaseGap(Proximity.separate),
 
@@ -355,21 +316,20 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           role: TextRole.sectionTitle,
         ),
         const BaseGap(Proximity.related),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: BaseInset(
-            child: Row(
-              children: [
-                // The mark that names the branch beside it, at the ordinary
-                // size: the two are one line.
-                const BaseIcon(IconRole.gitBranch),
-                const BaseGap(Proximity.related),
-                BaseLabel(state.ontoBranch ?? 'Unknown', role: TextRole.body),
-              ],
-            ),
+        // The branch the rebase is replaying onto: one git object, shown as
+        // its own surface. The 1 px divider-coloured outline and the corner
+        // it was drawn at were this dialog imitating a surface; the card IS
+        // one, and how it is edged is the skin's answer.
+        BaseCard(
+          inset: Inset.normal,
+          content: Row(
+            children: [
+              // The mark that names the branch beside it, at the ordinary
+              // size: the two are one line.
+              const BaseIcon(IconRole.gitBranch),
+              const BaseGap(Proximity.related),
+              BaseLabel(state.ontoBranch ?? 'Unknown', role: TextRole.body),
+            ],
           ),
         ),
         const BaseGap(Proximity.separate),
@@ -381,65 +341,47 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             role: TextRole.sectionTitle,
           ),
           const BaseGap(Proximity.related),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              child: BaseLabel(state.currentCommit!, role: TextRole.body),
-            ),
+          // The commit being replayed, on the same terms as the branch above:
+          // one object, one card, no outline drawn by hand.
+          BaseCard(
+            inset: Inset.normal,
+            content: BaseLabel(state.currentCommit!, role: TextRole.body),
           ),
           const BaseGap(Proximity.separate),
         ],
 
         // Conflicts message
         if (state.hasConflicts) ...[
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(
+          // The conflict, and the one thing to do about it, as one standing
+          // statement: `surfaces.banner` carries a headline, an explanation
+          // and the actions that answer it, which is precisely the three-part
+          // column this dialog was building by hand. The button becomes the
+          // banner's own action, so how prominently a notice's way out is
+          // drawn - and where it sits - stops being decided here.
+          _banner(
+            context,
+            BannerSpec(
+              tone: Tone.danger,
+              icon: IconRole.warningCircle,
+              title: AppLocalizations.of(context)!.conflictsDetected,
+              body: AppLocalizations.of(
                 context,
-              ).colorScheme.errorContainer.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      // Same mark, same meaning and the same rung as the
-                      // warning above: the conflict this panel reports is the
-                      // danger Material's `error` role was its answer to, and
-                      // 20 is what the ordinary rung already renders.
-                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                      const BaseGap(Proximity.related),
-                      BaseLabel(
-                        AppLocalizations.of(context)!.conflictsDetected,
-                        role: TextRole.body,
-                      ),
-                    ],
-                  ),
-                  const BaseGap(Proximity.related),
-                  BaseLabel(
-                    AppLocalizations.of(
-                      context,
-                    )!.resolveConflictsInChangesScreen,
-                    role: TextRole.detail,
-                  ),
-                  const BaseGap(Proximity.grouped),
-                  BaseButton(
-                    label: AppLocalizations.of(context)!.goToChanges,
-                    variant: ButtonVariant.primary,
-                    leadingIcon: IconRole.fileCode,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      ref.read(navigationDestinationProvider.notifier).state =
-                          AppDestination.changes;
-                    },
-                  ),
-                ],
-              ),
+              )!.resolveConflictsInChangesScreen,
+              actions: <NoticeAction>[
+                NoticeAction(
+                  label: AppLocalizations.of(context)!.goToChanges,
+                  // The label is the only description the application has for
+                  // this action, and a notice may be drawn mark-only where
+                  // there is no room for words.
+                  tooltip: AppLocalizations.of(context)!.goToChanges,
+                  icon: IconRole.fileCode,
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    ref.read(navigationDestinationProvider.notifier).state =
+                        AppDestination.changes;
+                  },
+                ),
+              ],
             ),
           ),
         ],

@@ -154,6 +154,14 @@ class _ProjectDialogState extends State<ProjectDialog> {
             // Color picker
             BaseLabel(l10n.projectColorLabel, role: TextRole.control),
             const BaseGap(Proximity.related),
+            // NOT converted, and reported as a contract finding. This is a
+            // labelled FIELD's box - the frame that makes the swatch grid read
+            // as one input beside the two `BaseTextField`s above it - and the
+            // contract draws a field's box only from inside a field member.
+            // `controls.seriesPicker` draws the swatches and no frame around
+            // them (`SeriesPickerSpec` carries a label for a screen reader and
+            // nothing about hosting), so a picker that has to look like a
+            // field still needs the framing this dialog paints.
             Container(
               decoration: BoxDecoration(
                 border: Border.all(
@@ -188,7 +196,11 @@ class _ProjectDialogState extends State<ProjectDialog> {
 
             const BaseGap(Proximity.grouped),
 
-            // Preview
+            // Preview. NOT converted, and reported with the branch dialog's
+            // preview box: "here is what this form will produce" has no
+            // member. It is not a banner (nothing is being said about the
+            // dialog), not a card (nothing is picked) and not a panel (a panel
+            // is a named region with a header row).
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(

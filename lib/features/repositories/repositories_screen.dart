@@ -6,6 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        ContentPort,
+        DropTargetSpec,
         GridDensity,
         IconRole,
         Inset,
@@ -13,11 +15,12 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuActionRole,
         MenuSeparator,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
-import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/components/base_label.dart';
@@ -205,210 +208,181 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
       }
     }
 
+    // The drag overlay is the SKIN's, through `surfaces.dropTarget`. What this
+    // screen states is the two facts it owns - something is over the window
+    // right now, and what this region accepts - and everything the overlay was
+    // hand-painting is the member's: the wash over the screen, the callout, its
+    // fill, its 2 px accent edge, its corner, the mark and the sentence. The
+    // Stack and the `if (_isDragging)` branch go with it, because the member
+    // already stacks its overlay over the child it is given.
     return DropTarget(
       onDragEntered: (_) => setState(() => _isDragging = true),
       onDragExited: (_) => setState(() => _isDragging = false),
       onDragDone: (details) => _handleDroppedFiles(details),
-      child: Stack(
-        children: [
-          // Main content
-          Scaffold(
-            appBar: StandardAppBar(
-              title: AppDestination.repositories.label(context),
-              additionalActions: hasRepositories
-                  ? [
-                      // View mode toggle
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final viewMode = ref.watch(
-                            repositoriesViewModeProvider,
-                          );
-                          return SegmentedButton<RepositoriesViewMode>(
-                            segments: const [
-                              ButtonSegment(
-                                value: RepositoriesViewMode.grid,
-                                icon: Icon(
-                                  PhosphorIconsRegular.gridFour,
-                                  size: 18,
-                                ),
-                              ),
-                              ButtonSegment(
-                                value: RepositoriesViewMode.list,
-                                icon: Icon(
-                                  PhosphorIconsRegular.listBullets,
-                                  size: 18,
-                                ),
-                              ),
-                            ],
-                            selected: {viewMode},
-                            onSelectionChanged:
-                                (Set<RepositoriesViewMode> newSelection) {
-                                  ref
-                                      .read(configProvider.notifier)
-                                      .setRepositoriesViewMode(
-                                        newSelection.first,
-                                      );
-                                },
-                          );
-                        },
-                      ),
-                      const BaseGap(Proximity.grouped),
-                    ]
-                  : null,
-              moreMenuItems: [
-                // Add repository action (first). The mark's scale is gone
-                // with the widget rows: a menu entry's mark is drawn at the
-                // size the SKIN's menu rows use, and `ControlScale.normal`
-                // here was this screen setting a menu's own metric. Named
-                // rather than silent: this SHRINKS the marks in this menu
-                // (and the settings overflow's, the repository card's and the
-                // repository list row's - the four surfaces that passed
-                // `normal`) from 20 to the 16 every other menu already used;
-                // the skin's one answer replaces the two the screens gave.
-                MenuAction(
-                  icon: IconRole.plus,
-                  label: AppLocalizations.of(context)!.tooltipAddRepository,
-                  onPressed: () => _openRepository(context, ref),
-                ),
-                const MenuSeparator(),
-                // Clone action
-                MenuAction(
-                  icon: IconRole.downloadSimple,
-                  label: AppLocalizations.of(context)!.cloneRepository,
-                  onPressed: () => _showCloneDialog(context),
-                ),
-                // Initialize action
-                MenuAction(
-                  icon: IconRole.folderPlus,
-                  label: AppLocalizations.of(context)!.initializeRepository,
-                  onPressed: () => _showInitDialog(context),
-                ),
-                const MenuSeparator(),
-                // Validate action
-                MenuAction(
-                  icon: IconRole.checkCircle,
-                  label: AppLocalizations.of(context)!.validateAll,
-                  onPressed: () => _validateRepositories(ref),
-                ),
-                // Remove all from workspace (conditional). It says what it
-                // MEANS - this entry destroys something - and the skin
-                // decides how a destructive row reads.
-                if (hasRepositories)
-                  MenuAction(
-                    icon: IconRole.trash,
-                    label: AppLocalizations.of(context)!.clearAllRepositories,
-                    role: MenuActionRole.destructive,
-                    onPressed: () => _confirmClearAll(context, ref),
-                  ),
-              ],
-            ),
-            body: BaseInset(
-              all: Inset.roomy,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Filter chips and selection info
-                  if (hasRepositories) ...[
-                    RepositoriesFilterChips(
-                      filterCleanOnly: _filterCleanOnly,
-                      filterWithRemote: _filterWithRemote,
-                      onFilterCleanOnlyChanged: (value) {
-                        setState(() {
-                          _filterCleanOnly = value;
-                        });
-                      },
-                      onFilterWithRemoteChanged: (value) {
-                        setState(() {
-                          _filterWithRemote = value;
-                        });
-                      },
-                      filteredRepositories: filteredRepositories,
-                      selectedRepositories: selectedRepositories,
-                    ),
-                    const BaseGap(Proximity.grouped),
-                  ],
-
-                  // Content
-                  Expanded(
-                    child: hasRepositories
-                        ? Consumer(
+      child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.surfaces.dropTarget(
+          inner,
+          DropTargetSpec(
+            active: _isDragging,
+            icon: IconRole.folderOpen,
+            label: AppLocalizations.of(context)!.dropFoldersHere,
+            child: ContentPort(
+              Scaffold(
+                appBar: StandardAppBar(
+                  title: AppDestination.repositories.label(context),
+                  additionalActions: hasRepositories
+                      ? [
+                          // View mode toggle
+                          Consumer(
                             builder: (context, ref, child) {
                               final viewMode = ref.watch(
                                 repositoriesViewModeProvider,
                               );
-                              return viewMode == RepositoriesViewMode.grid
-                                  ? _buildRepositoryGrid(
-                                      context,
-                                      ref,
-                                      filteredRepositories,
-                                    )
-                                  : _buildRepositoryList(
-                                      context,
-                                      ref,
-                                      filteredRepositories,
-                                    );
+                              return SegmentedButton<RepositoriesViewMode>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: RepositoriesViewMode.grid,
+                                    icon: Icon(
+                                      PhosphorIconsRegular.gridFour,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  ButtonSegment(
+                                    value: RepositoriesViewMode.list,
+                                    icon: Icon(
+                                      PhosphorIconsRegular.listBullets,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ],
+                                selected: {viewMode},
+                                onSelectionChanged:
+                                    (Set<RepositoriesViewMode> newSelection) {
+                                      ref
+                                          .read(configProvider.notifier)
+                                          .setRepositoriesViewMode(
+                                            newSelection.first,
+                                          );
+                                    },
+                              );
                             },
-                          )
-                        : RepositoriesEmptyState(
-                            onOpenRepository: () =>
-                                _openRepository(context, ref),
-                            onCloneRepository: () => _showCloneDialog(context),
-                            onInitRepository: () => _showInitDialog(context),
                           ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Drag overlay
-          if (_isDragging)
-            Container(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.1),
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusL),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                      strokeAlign: BorderSide.strokeAlignInside,
+                          const BaseGap(Proximity.grouped),
+                        ]
+                      : null,
+                  moreMenuItems: [
+                    // Add repository action (first). The mark's scale is gone
+                    // with the widget rows: a menu entry's mark is drawn at the
+                    // size the SKIN's menu rows use, and `ControlScale.normal`
+                    // here was this screen setting a menu's own metric. Named
+                    // rather than silent: this SHRINKS the marks in this menu
+                    // (and the settings overflow's, the repository card's and the
+                    // repository list row's - the four surfaces that passed
+                    // `normal`) from 20 to the 16 every other menu already used;
+                    // the skin's one answer replaces the two the screens gave.
+                    MenuAction(
+                      icon: IconRole.plus,
+                      label: AppLocalizations.of(context)!.tooltipAddRepository,
+                      onPressed: () => _openRepository(context, ref),
                     ),
-                  ),
-                  child: BaseInset(
-                    all: Inset.roomy,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Not an empty state and not converted: this whole
-                        // overlay - the 10 % wash behind it, the container, the
-                        // 2 px accent border and this 64 px mark - is one drop
-                        // TARGET, which is a `dropTarget` state layer and goes
-                        // to the skin whole in P5. `EmptyStateWidget` cannot
-                        // take it (it stands in place of a region's content,
-                        // where this floats over it, and it has no message to
-                        // give), and `BaseIcon` cannot be told 64.
-                        Icon(
-                          PhosphorIconsBold.folderOpen,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.primary,
+                    const MenuSeparator(),
+                    // Clone action
+                    MenuAction(
+                      icon: IconRole.downloadSimple,
+                      label: AppLocalizations.of(context)!.cloneRepository,
+                      onPressed: () => _showCloneDialog(context),
+                    ),
+                    // Initialize action
+                    MenuAction(
+                      icon: IconRole.folderPlus,
+                      label: AppLocalizations.of(context)!.initializeRepository,
+                      onPressed: () => _showInitDialog(context),
+                    ),
+                    const MenuSeparator(),
+                    // Validate action
+                    MenuAction(
+                      icon: IconRole.checkCircle,
+                      label: AppLocalizations.of(context)!.validateAll,
+                      onPressed: () => _validateRepositories(ref),
+                    ),
+                    // Remove all from workspace (conditional). It says what it
+                    // MEANS - this entry destroys something - and the skin
+                    // decides how a destructive row reads.
+                    if (hasRepositories)
+                      MenuAction(
+                        icon: IconRole.trash,
+                        label: AppLocalizations.of(
+                          context,
+                        )!.clearAllRepositories,
+                        role: MenuActionRole.destructive,
+                        onPressed: () => _confirmClearAll(context, ref),
+                      ),
+                  ],
+                ),
+                body: BaseInset(
+                  all: Inset.roomy,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Filter chips and selection info
+                      if (hasRepositories) ...[
+                        RepositoriesFilterChips(
+                          filterCleanOnly: _filterCleanOnly,
+                          filterWithRemote: _filterWithRemote,
+                          onFilterCleanOnlyChanged: (value) {
+                            setState(() {
+                              _filterCleanOnly = value;
+                            });
+                          },
+                          onFilterWithRemoteChanged: (value) {
+                            setState(() {
+                              _filterWithRemote = value;
+                            });
+                          },
+                          filteredRepositories: filteredRepositories,
+                          selectedRepositories: selectedRepositories,
                         ),
                         const BaseGap(Proximity.grouped),
-                        BaseLabel(
-                          AppLocalizations.of(context)!.dropFoldersHere,
-                          role: TextRole.pageTitle,
-                        ),
                       ],
-                    ),
+
+                      // Content
+                      Expanded(
+                        child: hasRepositories
+                            ? Consumer(
+                                builder: (context, ref, child) {
+                                  final viewMode = ref.watch(
+                                    repositoriesViewModeProvider,
+                                  );
+                                  return viewMode == RepositoriesViewMode.grid
+                                      ? _buildRepositoryGrid(
+                                          context,
+                                          ref,
+                                          filteredRepositories,
+                                        )
+                                      : _buildRepositoryList(
+                                          context,
+                                          ref,
+                                          filteredRepositories,
+                                        );
+                                },
+                              )
+                            : RepositoriesEmptyState(
+                                onOpenRepository: () =>
+                                    _openRepository(context, ref),
+                                onCloneRepository: () =>
+                                    _showCloneDialog(context),
+                                onInitRepository: () =>
+                                    _showInitDialog(context),
+                              ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-        ],
-      ),
+          ),
+        );
+      }),
     );
   }
 

@@ -73,9 +73,21 @@
 ///    SDK's own close tooltip, and answers `Tone.danger`-with-no-mark with the
 ///    warning glyph, exactly as the variant switch here used to. `question`
 ///    stays: a confirmation's mark IS the variant, so the façade still states
-///    it on the spec. `base_text_field.dart` still names `x` and
+///    it on the spec. `batch_operations_bar.dart` still names `x` and
 ///    `branch_switcher.dart` still names `warning`, so the distinct-mark set
 ///    is unchanged.
+///  * `base_text_field.dart` named `eye` and `eyeSlash` for the password
+///    toggle and `x` for the clear button. The class is a façade over
+///    `controls.textField` now, and all three are `FieldAffordance` facts
+///    rather than marks: the application says a secret MAY be unhidden
+///    (`FieldRevealAffordance`) and that a field CAN be emptied
+///    (`FieldClearAffordance`), and the skin draws whatever its language uses
+///    for each - the sealed set exists precisely so that
+///    `MacosTextField.clearButtonMode` can answer the second one with its own
+///    affordance instead of being handed a cross. `x` survives in
+///    `batch_operations_bar.dart` and `command_log_panel.dart`; `eye` and
+///    `eyeSlash` leave the distinct set, because no other site in `lib/`
+///    names either.
 ///
 /// The third kind is a construction MOVING OUT of the censused area rather
 /// than converting or dying, recorded for the same reason:
@@ -91,9 +103,10 @@
 ///    all any more; `async_value_builder.dart` still names `file`, and
 ///    `gitDiff` leaves the distinct set with the move.
 ///
-/// The tally therefore reads 70 references: the 81 the conversion measured,
+/// The tally therefore reads 67 references: the 81 the conversion measured,
 /// less the seven recorded up to P3d, less the diff viewer's two that moved
-/// out of scope, less the dialog surface's two that the skin draws now.
+/// out of scope, less the dialog surface's two that the skin draws now, less
+/// the text field's three that became affordance facts.
 ///
 /// **Two - the skin maps the mark back to the identical glyph.** The second
 /// test resolves every one of the 38 marks through `MaterialGlyphs` and
@@ -172,19 +185,22 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 70 references', () {
+  test('the census still accounts for all 67 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 70-entry diff.
+    // agreeing and this says so in one line instead of a 67-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 70);
-    // 38 distinct marks: `quick_settings_menu.dart`'s gained `check` was
-    // already drawn by `language_selector.dart`, and `gitDiff` left with the
+    expect(total, 67);
+    // 36 distinct marks: `quick_settings_menu.dart`'s gained `check` was
+    // already drawn by `language_selector.dart`, `gitDiff` left with the
     // diff viewer's toggle when it moved into the changes screen's panel
-    // header (`file` stays - `async_value_builder.dart` still names it).
-    expect(_marksInCensus().length, 38);
+    // header (`file` stays - `async_value_builder.dart` still names it), and
+    // `eye` / `eyeSlash` left with the text field's reveal affordance - the
+    // application states that a secret MAY be unhidden and the skin decides
+    // what that looks like, so nothing in `lib/` names either mark now.
+    expect(_marksInCensus().length, 36);
   });
 
   test('the Material skin maps every one of those marks to the same glyph', () {
@@ -602,11 +618,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
   },
   'lib/shared/components/base_speed_dial.dart': <String, int>{
     'list': 1,
-    'x': 1,
-  },
-  'lib/shared/components/base_text_field.dart': <String, int>{
-    'eye': 1,
-    'eyeSlash': 1,
     'x': 1,
   },
   'lib/shared/components/base_viewer_dialog.dart': <String, int>{'x': 1},

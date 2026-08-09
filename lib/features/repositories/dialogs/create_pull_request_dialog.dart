@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, SuggestItem, TextRole, Tone;
+    show
+        ChoiceGroupSpec,
+        ChoiceOption,
+        IconRole,
+        Inset,
+        Proximity,
+        Skin,
+        SkinScope,
+        SuggestItem,
+        TextRole;
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../shared/theme/app_theme.dart';
@@ -222,40 +231,17 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     const SizedBox(
                       height: AppTheme.paddingL + AppTheme.paddingS,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildToggleButton(
-                            context,
-                            label: l10n.localTab,
-                            isSelected: !_showRemoteBranchesForSource,
-                            onTap: () {
-                              setState(() {
-                                _showRemoteBranchesForSource = false;
-                                _resetSourceBranchSelection();
-                              });
-                            },
-                          ),
-                          _buildToggleButton(
-                            context,
-                            label: l10n.remoteTab,
-                            isSelected: _showRemoteBranchesForSource,
-                            onTap: () {
-                              setState(() {
-                                _showRemoteBranchesForSource = true;
-                                _resetSourceBranchSelection();
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                    _branchScopeToggle(
+                      label: l10n.sourceBranchLabel,
+                      localLabel: l10n.localTab,
+                      remoteLabel: l10n.remoteTab,
+                      showRemote: _showRemoteBranchesForSource,
+                      onChanged: (bool showRemote) {
+                        setState(() {
+                          _showRemoteBranchesForSource = showRemote;
+                          _resetSourceBranchSelection();
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -309,40 +295,17 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
                     const SizedBox(
                       height: AppTheme.paddingL + AppTheme.paddingS,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildToggleButton(
-                            context,
-                            label: l10n.localTab,
-                            isSelected: !_showRemoteBranchesForTarget,
-                            onTap: () {
-                              setState(() {
-                                _showRemoteBranchesForTarget = false;
-                                _resetBranchSelection();
-                              });
-                            },
-                          ),
-                          _buildToggleButton(
-                            context,
-                            label: l10n.remoteTab,
-                            isSelected: _showRemoteBranchesForTarget,
-                            onTap: () {
-                              setState(() {
-                                _showRemoteBranchesForTarget = true;
-                                _resetBranchSelection();
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                    _branchScopeToggle(
+                      label: l10n.targetBranchLabel,
+                      localLabel: l10n.localTab,
+                      remoteLabel: l10n.remoteTab,
+                      showRemote: _showRemoteBranchesForTarget,
+                      onChanged: (bool showRemote) {
+                        setState(() {
+                          _showRemoteBranchesForTarget = showRemote;
+                          _resetBranchSelection();
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -397,7 +360,17 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
 
             const BaseGap(Proximity.related),
 
-            // Info message
+            // Info message. NOT converted, and reported as a contract
+            // finding rather than rounded onto `surfaces.banner`. The meaning
+            // is banner's, but `BannerSpec` has no quiet rung and no body-only
+            // form: `title` is required and `body` is the optional second
+            // line, so this one sentence of supporting prose - deliberately
+            // `TextRole.detail`, deliberately washed to 30 % - would come back
+            // as a `titleMedium` headline on a full-strength
+            // `primaryContainer` strip, louder than the form it is a footnote
+            // to. The two banners this pass DID wire (the branch dialog's
+            // rejection, the batch dialog's outcome) each have a statement to
+            // put in `title`; this one has only the explanation.
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(
@@ -514,33 +487,58 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
     );
   }
 
-  Widget _buildToggleButton(
-    BuildContext context, {
+  /// Whether a branch field offers local branches or all of them, as
+  /// `controls.choiceGroup`.
+  ///
+  /// Local-versus-remote is one single-choice question, which is the member's
+  /// own sentence ("pick exactly one"), and stating it that way deletes the
+  /// whole hand-built segmented control: the surrounding box's
+  /// `surfaceContainerHighest` fill and its corner, each segment's own fill
+  /// and corner, the 12/6 inset inside each, and the `Tone.onAccent` that was
+  /// truthful only while THIS widget painted the accent behind the chosen
+  /// segment. Both notes that stood on those two pieces predicted exactly
+  /// this and named this member.
+  ///
+  /// **It also closes a keyboard hole.** Each segment was a bare
+  /// `GestureDetector`: a tap target with no state layer, no focus and no
+  /// keyboard activation, which this repository's own rules forbid outright
+  /// and which made the two switches mouse-only. The member's chips take
+  /// focus, wear hover, focus and press layers, and activate on Enter and
+  /// Space, so Tab now walks source field → source scope → target field →
+  /// target scope in reading order.
+  ///
+  /// The picture changes with the construction, deliberately: two chips in a
+  /// wrap where there was one joined segmented box, with selection said by
+  /// the chip's own container and `secondary` outline (CHIP-003) rather than
+  /// by a solid accent fill. The chips also carry the group's accessible name,
+  /// which the hand-built pair never had.
+  ///
+  /// The `SizedBox` above each call site stays: it is the neighbouring
+  /// dropdown's label-region height, hand-copied so the switch aligns with
+  /// that field's input box, and it is registered as a vocabulary gap for
+  /// exactly the reason it survives here - the member replaces the toggle and
+  /// does not absorb a metric of the control beside it.
+  Widget _branchScopeToggle({
     required String label,
-    required bool isSelected,
-    required VoidCallback? onTap,
+    required String localLabel,
+    required String remoteLabel,
+    required bool showRemote,
+    required ValueChanged<bool> onChanged,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).colorScheme.primary : null,
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
+    return SkinScope.render(context, (Skin skin, BuildContext inner) {
+      return skin.controls.choiceGroup<bool>(
+        inner,
+        ChoiceGroupSpec<bool>(
+          label: label,
+          options: <ChoiceOption<bool>>[
+            ChoiceOption<bool>(value: false, label: localLabel),
+            ChoiceOption<bool>(value: true, label: remoteLabel),
+          ],
+          selected: showRemote,
+          onSelected: onChanged,
         ),
-        // Tone.onAccent when selected, because THIS toggle paints its own
-        // accent fill three lines up - the exact case the tone's doc names.
-        // Both the hand-painted fill and the tone leave together when the
-        // toggle becomes a proper choice control. The bold-when-selected is
-        // gone: selection is already stated by the fill, and weight was the
-        // same fact said twice.
-        child: BaseLabel(
-          label,
-          role: TextRole.control,
-          tone: isSelected ? Tone.onAccent : Tone.muted,
-        ),
-      ),
-    );
+      );
+    });
   }
 }
 

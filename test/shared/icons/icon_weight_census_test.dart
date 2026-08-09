@@ -75,7 +75,7 @@ class _Weights {
 /// `git show HEAD:` each file and over the working tree, with whole-line
 /// comments dropped so that a comment recording what a site USED to draw is
 /// not counted as a live reference. 110 Bold and 14 Fill references before;
-/// 78 and 9 now, and the two "before" totals are the ones the mapping phase's
+/// 71 and 9 now, and the two "before" totals are the ones the mapping phase's
 /// own census reported.
 const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/core/navigation/app_shell.dart': _Weights(2, 1, 2, 0),
@@ -95,7 +95,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   ),
   'lib/features/history/widgets/file_tree_panel.dart': _Weights(2, 0, 0, 0),
   'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart':
-      _Weights(4, 0, 2, 0),
+      _Weights(4, 0, 0, 0),
   'lib/features/repositories/dialogs/create_pull_request_dialog.dart': _Weights(
     2,
     0,
@@ -103,7 +103,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
     0,
   ),
   'lib/features/repositories/dialogs/project_dialog.dart': _Weights(4, 0, 0, 0),
-  'lib/features/repositories/repositories_screen.dart': _Weights(1, 0, 1, 0),
+  'lib/features/repositories/repositories_screen.dart': _Weights(1, 0, 0, 0),
   'lib/features/repositories/screens/icon_comparison_screen.dart': _Weights(
     10,
     0,
@@ -148,11 +148,11 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   ),
   'lib/features/tags/tags_screen.dart': _Weights(12, 2, 1, 0),
   'lib/features/tags/widgets/tag_list_tile.dart': _Weights(2, 0, 2, 0),
-  'lib/features/workspaces/widgets/workspace_card.dart': _Weights(2, 0, 2, 0),
+  'lib/features/workspaces/widgets/workspace_card.dart': _Weights(2, 0, 0, 0),
   'lib/features/workspaces/widgets/workspace_list_item.dart': _Weights(
     2,
     0,
-    2,
+    0,
     0,
   ),
   'lib/features/workspaces/widgets/workspaces_empty_state.dart': _Weights(
@@ -203,7 +203,7 @@ class _GivenUp {
 
 /// Every weight the conversion removed from `lib/`, with its disposition.
 ///
-/// Thirty-seven entries against a ledger difference of 32 Bold plus 5 Fill,
+/// Forty-four entries against a ledger difference of 39 Bold plus 5 Fill,
 /// so the two measurements have to agree; the third test makes them.
 const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
   // ---- Fill: four sites, all four still drawn solid -----------------------
@@ -536,6 +536,73 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
         'filled table holds rows - so the solid mark is re-decided on the '
         'skin\'s side of the seam, exactly like the star and the funnel.',
   ),
+  // ---- The banner/badge/avatar wave: seven Bold marks, each leaving with
+  // the hand-painted construction that drew it ------------------------------
+  _GivenUp(
+    'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart',
+    'checkCircle',
+    'Bold',
+    _Fate.normalised,
+    'The clean-run branch of the completion callout, which is '
+        'surfaces.banner now. Both branches drew Bold, so the weight '
+        'distinguished nothing between them; BannerSpec.icon names the same '
+        'mark and the skin draws it at the ordinary stroke, where it already '
+        'stands in git_output_dialog.dart and eight lines further down this '
+        'same file.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/dialogs/batch_operation_progress_dialog.dart',
+    'warningCircle',
+    'Bold',
+    _Fate.normalised,
+    'The with-failures branch of the same callout, by the same conversion '
+        'to surfaces.banner and the same measurement.',
+  ),
+  _GivenUp(
+    'lib/features/repositories/repositories_screen.dart',
+    'folderOpen',
+    'Bold',
+    _Fate.normalised,
+    'The drag-and-drop overlay\'s 64 dp hero mark, drawn by hand together '
+        'with the wash, the border and the corner around it, until the whole '
+        'overlay became surfaces.dropTarget. DropTargetSpec.icon still names '
+        'the mark; Material answers it from its regular table at its own '
+        'hero size.',
+  ),
+  _GivenUp(
+    'lib/features/workspaces/widgets/workspace_card.dart',
+    'house',
+    'Bold',
+    _Fate.normalised,
+    'The default workspace\'s identity tile, an avatar the card painted by '
+        'hand until it became surfaces.avatar. The weight was unconditional '
+        '- both branches of the ternary drew Bold - so it distinguished '
+        'nothing, and AvatarSpec.glyph hands the stroke to the skin.',
+  ),
+  _GivenUp(
+    'lib/features/workspaces/widgets/workspace_card.dart',
+    'folder',
+    'Bold',
+    _Fate.normalised,
+    'The ordinary workspace\'s branch of the same identity tile, by the '
+        'same conversion to surfaces.avatar.',
+  ),
+  _GivenUp(
+    'lib/features/workspaces/widgets/workspace_list_item.dart',
+    'house',
+    'Bold',
+    _Fate.normalised,
+    'The list presentation\'s twin of the workspace card\'s identity tile, '
+        'converted to surfaces.avatar with it and by the same measurement.',
+  ),
+  _GivenUp(
+    'lib/features/workspaces/widgets/workspace_list_item.dart',
+    'folder',
+    'Bold',
+    _Fate.normalised,
+    'The ordinary workspace\'s branch of the same row tile, by the same '
+        'conversion to surfaces.avatar.',
+  ),
 ];
 
 void main() {
@@ -621,7 +688,7 @@ void main() {
         fillRemoved,
         _kWeightsGivenUp.where((_GivenUp g) => g.weight == 'Fill').length,
       );
-      expect(boldRemoved, 32);
+      expect(boldRemoved, 39);
       expect(fillRemoved, 5);
     });
 

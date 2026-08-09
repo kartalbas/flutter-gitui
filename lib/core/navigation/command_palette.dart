@@ -340,21 +340,25 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     );
   }
 
+  /// One footer hint: the key, and what pressing it does.
+  ///
+  /// The key wears the SAME pill the command rows above already use for a
+  /// command's own shortcut (`trailing: BaseBadge(...)`), and until now this
+  /// file drew the two differently: the row's shortcut went through the
+  /// member, and the footer hand-painted a lookalike at a 8 dp corner with a
+  /// 1 px outline and an 8/8 inset. One meaning, two drawings, one file - and
+  /// the footer could not see the mismatch, because the drawn copy has no way
+  /// to ask what the member rounds at. Deleting the corner is what removes
+  /// the ability to disagree; the outline goes with it, since the pill the
+  /// footer was imitating has never had one.
   Widget _buildKeyHint(BuildContext context, String key, String label) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            border: Border.all(color: Theme.of(context).colorScheme.outline),
-          ),
-          child: BaseInset(
-            x: Inset.tight,
-            y: Inset.tight,
-            child: BaseLabel(key, role: TextRole.micro),
-          ),
+        BaseBadge(
+          label: key,
+          variant: BadgeVariant.neutral,
+          size: BadgeSize.small,
         ),
         const BaseGap(Proximity.hairline),
         BaseLabel(label, role: TextRole.detail),

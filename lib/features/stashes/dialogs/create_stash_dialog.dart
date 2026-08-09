@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_text_field.dart';
@@ -135,44 +136,49 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
               ],
             ),
             const BaseGap(Proximity.related),
-            Container(
+            // The bordered box round the file list is a CARD, and `Inset.none`
+            // is the rung `BaseCard`'s own doc names for the case: "a list
+            // that must reach the card's border". The stroke and the 4 dp
+            // corner were the card's edge drawn by hand - and the identical
+            // list in `squash_commits_dialog.dart` drew the same edge at 8,
+            // which is what a corner named in a screen costs. Both are the
+            // member's corner now.
+            ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 300),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-                borderRadius: BorderRadius.circular(AppTheme.radiusS),
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: allStatuses.length,
-                itemBuilder: (context, index) {
-                  final file = allStatuses[index];
-                  final isSelected = _selectedFiles.contains(file.path);
+              child: BaseCard(
+                isSelectable: false,
+                inset: Inset.none,
+                content: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: allStatuses.length,
+                  itemBuilder: (context, index) {
+                    final file = allStatuses[index];
+                    final isSelected = _selectedFiles.contains(file.path);
 
-                  return CheckboxListTile(
-                    value: isSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value == true) {
-                          _selectedFiles.add(file.path);
-                        } else {
-                          _selectedFiles.remove(file.path);
-                        }
-                      });
-                    },
-                    title: BaseLabel(file.path, role: TextRole.body),
-                    subtitle: BaseLabel(
-                      file.primaryStatus.displayName,
-                      role: TextRole.detail,
-                      tone: file.primaryStatus.toneOf,
-                    ),
-                    dense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.paddingS,
-                    ),
-                  );
-                },
+                    return CheckboxListTile(
+                      value: isSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          if (value == true) {
+                            _selectedFiles.add(file.path);
+                          } else {
+                            _selectedFiles.remove(file.path);
+                          }
+                        });
+                      },
+                      title: BaseLabel(file.path, role: TextRole.body),
+                      subtitle: BaseLabel(
+                        file.primaryStatus.displayName,
+                        role: TextRole.detail,
+                        tone: file.primaryStatus.toneOf,
+                      ),
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppTheme.paddingS,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ] else if (!_stashAllFiles && allStatuses.isEmpty) ...[

@@ -11,6 +11,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuAnchorSpec,
         MenuEntry,
         Overlays,
+        PressableSpec,
         Proximity,
         Skin,
         SkinScope,
@@ -19,6 +20,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -301,12 +303,13 @@ class RepositoryCard extends ConsumerWidget {
           // Status badges - show loading or actual status
           const BaseGap(Proximity.grouped),
           if (status.isGitNotConfigured)
+            // A setting the user has to supply before git will commit at all:
+            // "this may not be what you intended", not a destruction.
             _buildStatusBadge(
               context,
-              PhosphorIconsRegular.gear,
+              IconRole.gear,
               'Git not configured',
-              Theme.of(context).colorScheme.tertiary,
-              isSelected,
+              BadgeVariant.warning,
             )
           else if (status.isLoading)
             // Show loading indicator while analyzing
@@ -371,22 +374,25 @@ class RepositoryCard extends ConsumerWidget {
                       ContentPort(
                         _buildStatusBadge(
                           context,
-                          PhosphorIconsRegular.warningCircle,
+                          IconRole.warningCircle,
                           'Broken',
-                          Theme.of(context).colorScheme.error,
-                          isSelected,
+                          BadgeVariant.danger,
                         ),
                       ),
 
-                    // Commits behind (need to pull)
+                    // Commits behind (need to pull). Worth knowing and nothing
+                    // is wrong, which is what `info` says; the arrow and the
+                    // count are what tell it apart from the pill below, and
+                    // they always were - Material answers `info` and `primary`
+                    // with the same role, a collapse the contract records
+                    // rather than hides (material_ink.dart:173-177).
                     if (status.hasIncoming)
                       ContentPort(
                         _buildStatusBadge(
                           context,
-                          PhosphorIconsRegular.arrowDown,
+                          IconRole.arrowDown,
                           '↓${status.commitsBehind}',
-                          Theme.of(context).colorScheme.tertiary,
-                          isSelected,
+                          BadgeVariant.info,
                         ),
                       ),
 
@@ -395,22 +401,23 @@ class RepositoryCard extends ConsumerWidget {
                       ContentPort(
                         _buildStatusBadge(
                           context,
-                          PhosphorIconsRegular.arrowUp,
+                          IconRole.arrowUp,
                           '↑${status.commitsAhead}',
-                          Theme.of(context).colorScheme.primary,
-                          isSelected,
+                          BadgeVariant.primary,
                         ),
                       ),
 
-                    // Uncommitted changes
+                    // Uncommitted changes. The pill stands for tracked files
+                    // whose content differs from the index, which is the git
+                    // palette's modified colour by definition rather than a
+                    // scheme role picked for contrast.
                     if (status.hasUncommittedChanges)
                       ContentPort(
                         _buildStatusBadge(
                           context,
-                          PhosphorIconsRegular.pencilSimple,
+                          IconRole.pencilSimple,
                           'Changes',
-                          Theme.of(context).colorScheme.secondary,
-                          isSelected,
+                          BadgeVariant.warning,
                         ),
                       ),
 
@@ -448,6 +455,16 @@ class RepositoryCard extends ConsumerWidget {
           if (!isValid) ...[
             const BaseGap(Proximity.grouped),
             Container(
+              // NOT converted, and reported as a contract finding rather than
+              // rounded onto the nearest member. The meaning is banner's -
+              // "something about this whole surface needs saying" - but
+              // `BannerSpec` carries no rung for how loudly, and Material's
+              // answer to it is the shell's screen-wide warning strip: a
+              // 16 dp inset around a 24 dp mark and a `titleMedium`
+              // statement, ~56 dp tall. This note is a 32 dp strip inside a
+              // grid tile whose height `childAspectRatio: 1.2` fixes, so the
+              // member as specified cannot draw it. The fill and the corner
+              // stay until `BannerSpec` can say "inline, inside a surface".
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(AppTheme.radiusS),
@@ -578,20 +595,31 @@ class RepositoryCard extends ConsumerWidget {
     bool isSelected,
   ) {
     if (status.needsSignIn) {
-      return Tooltip(
-        message: 'This repository needs a sign-in. Click to authenticate.',
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radiusL),
-          onTap: () => _signIn(context, ref),
-          child: _buildStatusBadge(
-            context,
-            PhosphorIconsRegular.signIn,
-            'Sign-in required',
-            Theme.of(context).colorScheme.tertiary,
-            isSelected,
+      // The pill is a control here and nowhere else on the card, so the press
+      // target, its state layer and its tooltip are `surfaces.pressable` -
+      // the member that exists precisely because a bare detector gives a tap
+      // target with no state layer. The `InkWell`'s own corner went with it:
+      // it existed only to round the ripple to the pill's radius, and neither
+      // number is the application's any more.
+      return SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.surfaces.pressable(
+          inner,
+          PressableSpec(
+            tooltip: 'This repository needs a sign-in. Click to authenticate.',
+            onTap: () => _signIn(context, ref),
+            child: ContentPort(
+              _buildStatusBadge(
+                context,
+                IconRole.signIn,
+                'Sign-in required',
+                // Something is missing that the user must supply before the
+                // check can run - a doubt to resolve, not a destruction.
+                BadgeVariant.warning,
+              ),
+            ),
           ),
-        ),
-      );
+        );
+      });
     }
 
     if (status.isRemoteUnreachable) {
@@ -599,10 +627,11 @@ class RepositoryCard extends ConsumerWidget {
         message: 'The remote could not be reached. It will be retried.',
         child: _buildStatusBadge(
           context,
-          PhosphorIconsRegular.cloudSlash,
+          IconRole.cloudSlash,
           'Unreachable',
-          Theme.of(context).colorScheme.onSurfaceVariant,
-          isSelected,
+          // No particular meaning: the check will be retried and nothing is
+          // asked of the user, which is the neutral chip.
+          BadgeVariant.neutral,
         ),
       );
     }
@@ -612,10 +641,9 @@ class RepositoryCard extends ConsumerWidget {
         message: 'The remote check failed. See the command log for details.',
         child: _buildStatusBadge(
           context,
-          PhosphorIconsRegular.warningCircle,
+          IconRole.warningCircle,
           'Check failed',
-          Theme.of(context).colorScheme.error,
-          isSelected,
+          BadgeVariant.danger,
         ),
       );
     }
@@ -625,20 +653,21 @@ class RepositoryCard extends ConsumerWidget {
         message: 'Not compared against the remote yet.',
         child: _buildStatusBadge(
           context,
-          PhosphorIconsRegular.clockCountdown,
+          IconRole.clockCountdown,
           'Not checked',
-          Theme.of(context).colorScheme.onSurfaceVariant,
-          isSelected,
+          BadgeVariant.neutral,
         ),
       );
     }
 
     return _buildStatusBadge(
       context,
-      PhosphorIconsRegular.checkCircle,
+      IconRole.checkCircle,
       'Up to date',
-      Theme.of(context).colorScheme.primary,
-      isSelected,
+      // "This finished, and it finished well" is what a repository in sync
+      // with its remote is saying, and it is the one pill on the card that
+      // reports an outcome rather than an amount.
+      BadgeVariant.success,
     );
   }
 
@@ -652,48 +681,41 @@ class RepositoryCard extends ConsumerWidget {
         .refreshStatus(repository, fetchRemote: true, allowPrompts: true);
   }
 
+  /// One status pill, drawn by `surfaces.badge` through [BaseBadge].
+  ///
+  /// The whole micro-surface has left: the pill's fill, its 50 % edge, its
+  /// corner, its h8/v4 inset, the 14 px mark and the `Color` that painted all
+  /// four are the badge member's geometry now, and what the card states is
+  /// only what each pill MEANS. That is what unblocks the `Color` parameter
+  /// this helper used to carry — the note that stood here was right that a
+  /// tone cannot be resolved into a `Color` for a hand-painted decoration, and
+  /// wrong only about when: there is no decoration left to paint.
+  ///
+  /// **The pill is dense on purpose.** `BadgeSize.small` is `ControlScale`'s
+  /// `compact` rung — "a chip, a row-level action" in the vocabulary's own
+  /// words — and it is the rung this application's other row-level pill (the
+  /// current-branch mark in the merge dialog) already draws at. It is smaller
+  /// than the hand-painted copy in every direction (label 12 → 10, mark
+  /// 14 → 10, vertical inset 4 → 2, horizontal inset unchanged at 8), so the
+  /// wrap of badges can only get shorter inside a grid tile whose height
+  /// `childAspectRatio: 1.2` fixes.
+  ///
+  /// **`isSelected` is gone from the signature, not dropped.** It selected
+  /// between a 10 % and a 20 % wash of the badge's own colour, which was this
+  /// card restating its selection on every pill inside it; the member paints
+  /// one fill per tone, and the card's selection is already said once by the
+  /// card.
   Widget _buildStatusBadge(
     BuildContext context,
-    IconData icon,
+    IconRole icon,
     String label,
-    Color color,
-    bool isSelected,
+    BadgeVariant variant,
   ) {
-    return Container(
-      // A hand-painted status pill is one of the micro-surfaces the census
-      // sends to `surfaces.badge` whole: its inset is the badge member's own
-      // geometry, not an `Inset` rung. `Inset` cannot state this pill's h8/v4
-      // (both axes take the same rung), and resolving `tight` symmetrically
-      // grew the pill 8 px taller inside a grid tile whose height
-      // `childAspectRatio: 1.2` fixes - a Column that already had no slack.
-      // The literal therefore stays with the drawing until the whole badge
-      // moves onto its member, exactly like the fill, border and radius
-      // beside it.
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.paddingS,
-        vertical: AppTheme.paddingXS,
-      ),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? color.withValues(alpha: 0.2)
-            : color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusL),
-        border: Border.all(color: color.withValues(alpha: 0.5), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color),
-          const BaseGap(Proximity.hairline),
-          // Deliberately still the old label: this helper's Color parameter
-          // also paints the badge's fill, border and icon, so it can only
-          // become a Tone when the whole badge moves onto `surfaces.badge` in
-          // the surface sub-phase - the application cannot resolve a Tone to
-          // a Color for its own decoration, and the seam is right to forbid
-          // that.
-          LabelMediumLabel(label, color: color),
-        ],
-      ),
+    return BaseBadge(
+      label: label,
+      icon: icon,
+      variant: variant,
+      size: BadgeSize.small,
     );
   }
 }

@@ -2,25 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
         ControlScale,
         IconRole,
         NoticeAction,
         NoticeSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
-import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/branch.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../components/base_layout.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// The three notices in this file - "there is nothing to merge", "here is
+/// what merging will do" and "the merge failed" - were three copies of one
+/// hand-painted container: a tonal fill, a 12 dp corner, a 16 dp inset and a
+/// line of words. That construction is `surfaces.banner`, so it leaves whole
+/// and the corner leaves with it; what stays here is the tone, which is the
+/// only half of the decision the application owns.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// Dialog for merging a branch
 class MergeBranchDialog extends ConsumerStatefulWidget {
@@ -80,18 +95,18 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                     .toList();
 
                 if (availableBranches.isEmpty) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(
+                  // There is nothing to pick, and saying so is a statement
+                  // about the whole dialog rather than a control: the picker
+                  // is replaced by the notice that explains its absence. It
+                  // carries no mark, exactly as it did before - the sentence
+                  // is the whole of it.
+                  return _banner(
+                    context,
+                    BannerSpec(
+                      tone: Tone.info,
+                      title: AppLocalizations.of(
                         context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                    ),
-                    child: BaseInset(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.noOtherBranchesAvailable,
-                        role: TextRole.body,
-                      ),
+                      )!.noOtherBranchesAvailable,
                     ),
                   );
                 }
@@ -242,68 +257,38 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
               ),
             ],
 
-            // Info card
+            // What the merge will do, standing until the options change it.
+            // The same member as the two notices around it, differing only in
+            // what it means.
             const BaseGap(Proximity.grouped),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    // The mark of an ordinary notice, at the ordinary size: it
-                    // belongs to the line beside it rather than standing over
-                    // it.
-                    const BaseIcon(IconRole.info),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        _squash
-                            ? AppLocalizations.of(
-                                context,
-                              )!.squashMergeWillCombineAllCommits
-                            : AppLocalizations.of(
-                                context,
-                              )!.thisWillMergeSelectedBranch,
-                        role: TextRole.body,
-                      ),
-                    ),
-                  ],
-                ),
+            _banner(
+              context,
+              BannerSpec(
+                tone: Tone.info,
+                icon: IconRole.info,
+                title: _squash
+                    ? AppLocalizations.of(
+                        context,
+                      )!.squashMergeWillCombineAllCommits
+                    : AppLocalizations.of(context)!.thisWillMergeSelectedBranch,
               ),
             ),
 
             // Error message
             if (_errorMessage != null) ...[
               const BaseGap(Proximity.grouped),
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  child: Row(
-                    children: [
-                      // The mark says what the message beside it already says,
-                      // so it says it the same way: the danger this label had
-                      // already named, stated once as a meaning instead of a
-                      // second time as a scheme role. The mark stated no size
-                      // at all and took whatever the dialog's ambient theme
-                      // handed it; the info banner a few lines above asks for
-                      // the ordinary size, so the difference was drift rather
-                      // than a distinction and both now say the same rung.
-                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                      const BaseGap(Proximity.related),
-                      Expanded(
-                        child: BaseLabel(
-                          _errorMessage!,
-                          role: TextRole.body,
-                          tone: Tone.danger,
-                        ),
-                      ),
-                    ],
-                  ),
+              // The failure, as the same member with a different meaning.
+              // The mark and the words each named the danger separately and
+              // the words were painted in the error FOREGROUND on the error
+              // CONTAINER - a pairing nobody had measured. One tone now
+              // decides both halves, so the message reads against the fill it
+              // actually sits on.
+              _banner(
+                context,
+                BannerSpec(
+                  tone: Tone.danger,
+                  icon: IconRole.warningCircle,
+                  title: _errorMessage!,
                 ),
               ),
             ],

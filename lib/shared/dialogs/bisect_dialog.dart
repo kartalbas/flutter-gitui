@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, NoticeSpec, Overlays, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        IconRole,
+        Inset,
+        NoticeSpec,
+        Overlays,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
-import '../components/base_icon.dart';
+import '../components/base_card.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../theme/app_theme.dart';
@@ -16,6 +26,17 @@ import '../../core/git/models/bisect_state.dart';
 import '../../core/git/models/commit.dart';
 import '../components/base_layout.dart';
 import '../widgets/empty_state.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// The same move as the rebase dialog's: a tonal fill, a 12 dp corner, a
+/// 16 dp inset, a mark and a line of words are `surfaces.banner` — *something
+/// about this whole surface needs saying* — so the hand-painted container
+/// leaves whole and its corner leaves with it.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// Dialog for Git bisect operations
 class BisectDialog extends ConsumerStatefulWidget {
@@ -144,30 +165,18 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Info banner
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    // The mark of an ordinary notice, at the ordinary size: it
-                    // belongs to the line beside it rather than standing over
-                    // it.
-                    const BaseIcon(IconRole.info),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        AppLocalizations.of(
-                          context,
-                        )!.bisectHelpsFindCommitThatIntroducedBug,
-                        role: TextRole.detail,
-                      ),
-                    ),
-                  ],
-                ),
+            // What a bisect is for, said once and standing while the dialog
+            // is open: `surfaces.banner`. The fill, the corner, the inset and
+            // the words' own type step are the skin's; `info` is the whole of
+            // what this dialog still has to say about it.
+            _banner(
+              context,
+              BannerSpec(
+                tone: Tone.info,
+                icon: IconRole.info,
+                title: AppLocalizations.of(
+                  context,
+                )!.bisectHelpsFindCommitThatIntroducedBug,
               ),
             ),
             const BaseGap(Proximity.separate),
@@ -218,44 +227,22 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Status banner
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: BaseInset(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    // The mark of the status banner's headline, at the ordinary
-                    // size: it belongs to the line beside it. It names no
-                    // colour, so it keeps taking the one the banner around it
-                    // publishes.
-                    const BaseIcon(IconRole.gitBranch),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.bisectInProgress,
-                        role: TextRole.sectionTitle,
-                      ),
-                    ),
-                  ],
-                ),
-                if (state.stepsRemaining != null) ...[
-                  const BaseGap(Proximity.related),
-                  BaseLabel(
-                    AppLocalizations.of(context)!.approximatelyStepsRemaining(
-                      state.stepsRemaining.toString(),
-                      state.stepsRemaining as Object,
-                    ),
-                    role: TextRole.body,
+        // Where the bisect stands: a headline and, under it, how much is
+        // left. That pair is `surfaces.banner`, so the tonal container this
+        // dialog picked, its corner and the step line's own type step all
+        // move behind the member and only the meaning stays here.
+        _banner(
+          context,
+          BannerSpec(
+            tone: Tone.info,
+            icon: IconRole.gitBranch,
+            title: AppLocalizations.of(context)!.bisectInProgress,
+            body: state.stepsRemaining == null
+                ? null
+                : AppLocalizations.of(context)!.approximatelyStepsRemaining(
+                    state.stepsRemaining.toString(),
+                    state.stepsRemaining as Object,
                   ),
-                ],
-              ],
-            ),
           ),
         ),
         const BaseGap(Proximity.separate),
@@ -266,16 +253,15 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           role: TextRole.sectionTitle,
         ),
         const BaseGap(Proximity.related),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: BaseInset(
-            child: BaseLabel(
-              state.currentCommit ?? 'Unknown',
-              role: TextRole.body,
-            ),
+        // The commit the user is being asked to test: one git object, shown
+        // as its own surface. The divider-coloured outline and the corner it
+        // was drawn at were this dialog imitating a card; `surfaces.card`
+        // through the façade IS one, and how it is edged is the skin's.
+        BaseCard(
+          inset: Inset.normal,
+          content: BaseLabel(
+            state.currentCommit ?? 'Unknown',
+            role: TextRole.body,
           ),
         ),
         const BaseGap(Proximity.separate),
@@ -336,43 +322,42 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         const BaseGap(Proximity.related),
         ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 200),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (state.goodCommits.isNotEmpty) ...[
-                      BaseLabel(
-                        AppLocalizations.of(
-                          context,
-                        )!.goodCommits(state.goodCommits.length),
-                        role: TextRole.body,
-                        tone: Tone.gitAdded,
-                      ),
-                      ...state.goodCommits.map(
-                        (hash) => BaseLabel('  $hash', role: TextRole.detail),
-                      ),
-                      const BaseGap(Proximity.related),
-                    ],
-                    if (state.badCommits.isNotEmpty) ...[
-                      BaseLabel(
-                        AppLocalizations.of(
-                          context,
-                        )!.badCommits(state.badCommits.length),
-                        role: TextRole.body,
-                        tone: Tone.gitDeleted,
-                      ),
-                      ...state.badCommits.map(
-                        (hash) => BaseLabel('  $hash', role: TextRole.detail),
-                      ),
-                    ],
+          // What the bisect has learned so far, held on one surface: the
+          // outline and the corner this box drew for itself are the card's
+          // now. The height cap stays application structure - it is what
+          // keeps a long history from taking the dialog over.
+          child: BaseCard(
+            inset: Inset.normal,
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (state.goodCommits.isNotEmpty) ...[
+                    BaseLabel(
+                      AppLocalizations.of(
+                        context,
+                      )!.goodCommits(state.goodCommits.length),
+                      role: TextRole.body,
+                      tone: Tone.gitAdded,
+                    ),
+                    ...state.goodCommits.map(
+                      (hash) => BaseLabel('  $hash', role: TextRole.detail),
+                    ),
+                    const BaseGap(Proximity.related),
                   ],
-                ),
+                  if (state.badCommits.isNotEmpty) ...[
+                    BaseLabel(
+                      AppLocalizations.of(
+                        context,
+                      )!.badCommits(state.badCommits.length),
+                      role: TextRole.body,
+                      tone: Tone.gitDeleted,
+                    ),
+                    ...state.badCommits.map(
+                      (hash) => BaseLabel('  $hash', role: TextRole.detail),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
@@ -402,11 +387,17 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             role: TextRole.body,
           ),
           const BaseGap(Proximity.related),
-          Container(
-            decoration: BoxDecoration(
-              color: context.gitColors.deleted.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
+          // The commit the bisect blames, on its own surface. The wash and
+          // the corner were this dialog painting a card by hand; the card
+          // draws itself, and the tone it is given is the word the site
+          // already used - `gitColors.deleted`, carried across as
+          // `Tone.gitDeleted` rather than re-decided. That the vocabulary has
+          // no word for "the commit a bisect blames", and that this surface
+          // therefore borrows one about a FILE, is reported as a contract
+          // finding rather than rounded onto `danger`.
+          BaseCard(
+            tone: Tone.gitDeleted,
+            inset: Inset.normal,
             // Still a hand-set style, and the blocker is `FontWeight.bold`:
             // the hash this bisect found is the result the whole dialog exists
             // to report, and `BaseLabel(TextRole.code)` carries no weight, so
@@ -420,13 +411,11 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             // moves no pixel - it never needed a `Tone` or a `BaseLabel`,
             // because it never said anything the ramp does not. The weight
             // still waits for its word.
-            child: BaseInset(
-              child: SelectableText(
-                state.foundCommit ?? 'Unknown',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontFamily: 'monospace',
-                  fontWeight: FontWeight.bold,
-                ),
+            content: SelectableText(
+              state.foundCommit ?? 'Unknown',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

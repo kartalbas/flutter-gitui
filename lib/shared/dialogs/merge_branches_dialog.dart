@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BannerSpec,
+        ChoiceGroupSpec,
+        ChoiceOption,
         ControlScale,
         IconRole,
         NoticeAction,
         NoticeSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_badge.dart';
 import '../components/base_label.dart';
-import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/branch.dart';
@@ -22,6 +26,18 @@ import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../components/base_layout.dart';
 import '../components/base_icon.dart';
+
+/// One standing statement about the whole dialog, drawn by the skin.
+///
+/// Four notices in this file were four copies of one hand-painted container -
+/// a tonal fill, a 12 dp corner, a 16 dp inset, sometimes a mark, sometimes a
+/// second line. That construction is `surfaces.banner`: *something about this
+/// whole surface needs saying*. It leaves whole, and the corner leaves with
+/// it; the tone is the half of the decision that stays here.
+Widget _banner(BuildContext context, BannerSpec spec) => SkinScope.render(
+  context,
+  (Skin skin, BuildContext inner) => skin.surfaces.banner(inner, spec),
+);
 
 /// Dialog for merging two branches (select both source and target)
 class MergeBranchesDialog extends ConsumerStatefulWidget {
@@ -103,18 +119,16 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
 
                 if (filteredSourceBranches.isEmpty &&
                     filteredTargetBranches.isEmpty) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(
+                  // Nothing to pick, and saying so replaces both pickers: a
+                  // statement about the whole dialog rather than a control.
+                  // It carries no mark, exactly as it did before.
+                  return _banner(
+                    context,
+                    BannerSpec(
+                      tone: Tone.info,
+                      title: AppLocalizations.of(
                         context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                    ),
-                    child: BaseInset(
-                      child: BaseLabel(
-                        AppLocalizations.of(context)!.noOtherBranchesAvailable,
-                        role: TextRole.body,
-                      ),
+                      )!.noOtherBranchesAvailable,
                     ),
                   );
                 }
@@ -209,63 +223,22 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                           ),
                         ),
                         const BaseGap(Proximity.grouped),
-                        // Toggle switch for source
+                        // Which branches the source picker offers.
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             const BaseGap(Proximity.related),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusM,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildToggleButton(
-                                    context,
-                                    label: AppLocalizations.of(
-                                      context,
-                                    )!.localTab,
-                                    isSelected: !_showRemoteBranchesForSource,
-                                    onTap: _isMerging
-                                        ? null
-                                        : () {
-                                            if (_showRemoteBranchesForSource) {
-                                              setState(() {
-                                                _showRemoteBranchesForSource =
-                                                    false;
-                                                _sourceBranch = null;
-                                                _initialized = false;
-                                              });
-                                            }
-                                          },
-                                  ),
-                                  _buildToggleButton(
-                                    context,
-                                    label: AppLocalizations.of(
-                                      context,
-                                    )!.remoteTab,
-                                    isSelected: _showRemoteBranchesForSource,
-                                    onTap: _isMerging
-                                        ? null
-                                        : () {
-                                            if (!_showRemoteBranchesForSource) {
-                                              setState(() {
-                                                _showRemoteBranchesForSource =
-                                                    true;
-                                                _sourceBranch = null;
-                                                _initialized = false;
-                                              });
-                                            }
-                                          },
-                                  ),
-                                ],
-                              ),
+                            _branchScopeChoice(
+                              context,
+                              label: AppLocalizations.of(context)!.sourceBranch,
+                              showRemote: _showRemoteBranchesForSource,
+                              onChanged: (bool remote) {
+                                setState(() {
+                                  _showRemoteBranchesForSource = remote;
+                                  _sourceBranch = null;
+                                  _initialized = false;
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -330,61 +303,21 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                           ),
                         ),
                         const BaseGap(Proximity.grouped),
-                        // Toggle switch for target
+                        // Which branches the target picker offers.
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             const BaseGap(Proximity.related),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusM,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _buildToggleButton(
-                                    context,
-                                    label: AppLocalizations.of(
-                                      context,
-                                    )!.localTab,
-                                    isSelected: !_showRemoteBranchesForTarget,
-                                    onTap: _isMerging
-                                        ? null
-                                        : () {
-                                            if (_showRemoteBranchesForTarget) {
-                                              setState(() {
-                                                _showRemoteBranchesForTarget =
-                                                    false;
-                                                _targetBranch = null;
-                                              });
-                                            }
-                                          },
-                                  ),
-                                  _buildToggleButton(
-                                    context,
-                                    label: AppLocalizations.of(
-                                      context,
-                                    )!.remoteTab,
-                                    isSelected: _showRemoteBranchesForTarget,
-                                    onTap: _isMerging
-                                        ? null
-                                        : () {
-                                            if (!_showRemoteBranchesForTarget) {
-                                              setState(() {
-                                                _showRemoteBranchesForTarget =
-                                                    true;
-                                                _targetBranch = null;
-                                              });
-                                            }
-                                          },
-                                  ),
-                                ],
-                              ),
+                            _branchScopeChoice(
+                              context,
+                              label: AppLocalizations.of(context)!.targetBranch,
+                              showRemote: _showRemoteBranchesForTarget,
+                              onChanged: (bool remote) {
+                                setState(() {
+                                  _showRemoteBranchesForTarget = remote;
+                                  _targetBranch = null;
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -394,88 +327,56 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
                     // Show info message when remote target is selected
                     if (_targetBranch?.isRemote == true) ...[
                       const BaseGap(Proximity.grouped),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                          // The panel's FILL and its BORDER, both washes of
-                          // colours this notice is painted in rather than
-                          // foregrounds it states. They leave with the
-                          // surface in P5; only the words inside carry tones.
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withValues(alpha: 0.3),
-                          ),
+                      // What merging into a remote branch will actually do,
+                      // as one standing statement: a headline and the steps
+                      // under it, which is exactly the pair `surfaces.banner`
+                      // draws. The 30 % washes of the container AND of the
+                      // border were this dialog deciding how loud an
+                      // informational notice is, and the `onPrimaryContainer`
+                      // it published by hand was the other half of that same
+                      // decision - all three leave with the surface, and one
+                      // `Tone.info` says what is left.
+                      _banner(
+                        context,
+                        BannerSpec(
+                          tone: Tone.info,
+                          icon: IconRole.info,
+                          title: 'Merging to remote branch',
+                          body:
+                              'This will perform the following steps:\n'
+                              '1. Fetch latest changes from remote\n'
+                              '2. Create/update local tracking branch\n'
+                              '3. Merge ${_sourceBranch?.name ?? 'source'} into local branch\n'
+                              '4. ${_pushAfterMerge ? 'Push changes to remote' : 'Keep changes local (you can push later)'}',
                         ),
-                        // The panel is painted in `primaryContainer`, so it
-                        // publishes the foreground that pairs with it once,
-                        // here, instead of four lines below each naming it.
-                        child: BaseInset(
-                          child: DefaultTextStyle.merge(
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const BaseIcon(
-                                      IconRole.info,
-                                      scale: ControlScale.compact,
-                                      tone: Tone.accent,
-                                    ),
-                                    const BaseGap(Proximity.related),
-                                    Expanded(
-                                      child: BaseLabel(
-                                        'Merging to remote branch',
-                                        role: TextRole.sectionTitle,
-                                        tone: Tone.accent,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const BaseGap(Proximity.related),
-                                BaseLabel(
-                                  'This will perform the following steps:\n'
-                                  '1. Fetch latest changes from remote\n'
-                                  '2. Create/update local tracking branch\n'
-                                  '3. Merge ${_sourceBranch?.name ?? 'source'} into local branch\n'
-                                  '4. ${_pushAfterMerge ? 'Push changes to remote' : 'Keep changes local (you can push later)'}',
-                                  role: TextRole.detail,
-                                ),
-                                const BaseGap(Proximity.grouped),
-                                CheckboxListTile(
-                                  value: _pushAfterMerge,
-                                  onChanged: _isMerging
-                                      ? null
-                                      : (value) {
-                                          setState(() {
-                                            _pushAfterMerge = value ?? true;
-                                          });
-                                        },
-                                  title: BaseLabel(
-                                    'Push to remote after merge',
-                                    role: TextRole.body,
-                                  ),
-                                  subtitle: BaseLabel(
-                                    _pushAfterMerge
-                                        ? 'Changes will be immediately visible on remote'
-                                        : 'You can review and push manually later',
-                                    role: TextRole.detail,
-                                  ),
-                                  contentPadding: EdgeInsets.zero,
-                                  dense: true,
-                                ),
-                              ],
-                            ),
-                          ),
+                      ),
+                      // The choice the notice is about stays a control and
+                      // therefore stays outside it: `BannerSpec` carries
+                      // ACTIONS (things that happen when pressed) and has no
+                      // slot for a setting the notice describes. Reported as
+                      // a contract finding; placed directly under the banner
+                      // so the two still read as one statement.
+                      CheckboxListTile(
+                        value: _pushAfterMerge,
+                        onChanged: _isMerging
+                            ? null
+                            : (value) {
+                                setState(() {
+                                  _pushAfterMerge = value ?? true;
+                                });
+                              },
+                        title: BaseLabel(
+                          'Push to remote after merge',
+                          role: TextRole.body,
                         ),
+                        subtitle: BaseLabel(
+                          _pushAfterMerge
+                              ? 'Changes will be immediately visible on remote'
+                              : 'You can review and push manually later',
+                          role: TextRole.detail,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
                       ),
                     ],
                   ],
@@ -669,78 +570,44 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
               ),
             ],
 
-            // Info card
+            // What the chosen strategy will do, standing until the pickers
+            // change it: the same member as every other notice here.
             const BaseGap(Proximity.grouped),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    // The mark of an ordinary notice, at the ordinary size: it
-                    // belongs to the line beside it rather than standing over
-                    // it.
-                    const BaseIcon(IconRole.info),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        _sourceBranch != null && _targetBranch != null
-                            ? (_strategy == MergeStrategy.merge
-                                  ? AppLocalizations.of(
-                                      context,
-                                    )!.mergeSourceIntoTarget(
-                                      _sourceBranch!.name,
-                                      _targetBranch!.name,
-                                    )
-                                  : AppLocalizations.of(
-                                      context,
-                                    )!.rebaseSourceOntoTarget(
-                                      _sourceBranch!.name,
-                                      _targetBranch!.name,
-                                    ))
-                            : AppLocalizations.of(
-                                context,
-                              )!.selectBothBranchesToMerge,
-                        role: TextRole.body,
-                      ),
-                    ),
-                  ],
-                ),
+            _banner(
+              context,
+              BannerSpec(
+                tone: Tone.info,
+                icon: IconRole.info,
+                title: _sourceBranch != null && _targetBranch != null
+                    ? (_strategy == MergeStrategy.merge
+                          ? AppLocalizations.of(context)!.mergeSourceIntoTarget(
+                              _sourceBranch!.name,
+                              _targetBranch!.name,
+                            )
+                          : AppLocalizations.of(
+                              context,
+                            )!.rebaseSourceOntoTarget(
+                              _sourceBranch!.name,
+                              _targetBranch!.name,
+                            ))
+                    : AppLocalizations.of(context)!.selectBothBranchesToMerge,
               ),
             ),
 
             // Error message
             if (_errorMessage != null) ...[
               const BaseGap(Proximity.grouped),
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  child: Row(
-                    children: [
-                      // The mark says what the message beside it already says,
-                      // so it says it the same way: the danger this label had
-                      // already named, stated once as a meaning instead of a
-                      // second time as a scheme role. The mark stated no size
-                      // at all and took whatever the dialog's ambient theme
-                      // handed it; the info banner a few lines above asks for
-                      // the ordinary size, so the difference was drift rather
-                      // than a distinction and both now say the same rung.
-                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                      const BaseGap(Proximity.related),
-                      Expanded(
-                        child: BaseLabel(
-                          _errorMessage!,
-                          role: TextRole.body,
-                          tone: Tone.danger,
-                        ),
-                      ),
-                    ],
-                  ),
+              // The failure, as the same member with a different meaning.
+              // The mark and the words each named the danger separately, and
+              // the words were painted in the error FOREGROUND on the error
+              // CONTAINER - a pairing nobody had measured. One tone decides
+              // both halves now.
+              _banner(
+                context,
+                BannerSpec(
+                  tone: Tone.danger,
+                  icon: IconRole.warningCircle,
+                  title: _errorMessage!,
                 ),
               ),
             ],
@@ -992,39 +859,55 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
     size: BadgeSize.small,
   );
 
-  /// Build iOS-style toggle button
-  Widget _buildToggleButton(
+  /// **Local branches or remote ones?** - for one of the two pickers.
+  ///
+  /// This was an iOS-style pill built out of a `GestureDetector` inside a
+  /// tinted `Container`, once per picker, plus a per-segment `_buildToggleButton`
+  /// that painted the chosen half in the accent behind a 4 dp corner. "Which
+  /// one of these few is it?" is `controls.choiceGroup`, and the register
+  /// already names that member as the one this exact toggle is waiting for.
+  ///
+  /// Three things the hand-built pill could not do come with the member, and
+  /// they are the reason this is a repair rather than a swap: the segments are
+  /// now Tab stops with the language's own focus treatment, they wear its
+  /// hover and press state layers, and a disabled segment says so - a
+  /// `GestureDetector` with a null callback simply stopped responding while
+  /// looking unchanged.
+  Widget _branchScopeChoice(
     BuildContext context, {
     required String label,
-    required bool isSelected,
-    required VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          // The chosen segment's FILL, not a foreground: this is what the
-          // segment is painted in, and the word below is paired against it.
-          // It leaves with `controls.choiceGroup`, the member that owns a
-          // segmented control's selected surface.
-          color: isSelected ? Theme.of(context).colorScheme.primary : null,
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-        ),
-        // The chosen segment is painted in the accent, so its word is the
-        // foreground that goes ON the accent; the segment beside it is present
-        // but secondary to the one that is chosen. Those are the two meanings
-        // `onPrimary` and `onSurfaceVariant` were Material's answers to, and
-        // the word can now carry them itself instead of being handed a
-        // `TextStyle` from outside.
-        child: BaseLabel(
-          label,
-          role: TextRole.micro,
-          tone: isSelected ? Tone.onAccent : Tone.muted,
-        ),
+    required bool showRemote,
+    required ValueChanged<bool> onChanged,
+  }) => SkinScope.render(
+    context,
+    (Skin skin, BuildContext inner) => skin.controls.choiceGroup<bool>(
+      inner,
+      ChoiceGroupSpec<bool>(
+        // What the group is choosing, for a screen reader: the picker it
+        // scopes, exactly as the twin toggle in create_pull_request_dialog
+        // names its own. Each chip names only its half, so without this the
+        // group itself would have no accessible name.
+        label: label,
+        options: <ChoiceOption<bool>>[
+          ChoiceOption<bool>(
+            value: false,
+            label: AppLocalizations.of(context)!.localTab,
+            enabled: !_isMerging,
+          ),
+          ChoiceOption<bool>(
+            value: true,
+            label: AppLocalizations.of(context)!.remoteTab,
+            enabled: !_isMerging,
+          ),
+        ],
+        selected: showRemote,
+        // The group promises "exactly one", so re-choosing the chosen half is
+        // dropped by the member and never arrives here - which is the guard
+        // each hand-built segment used to write for itself.
+        onSelected: onChanged,
       ),
-    );
-  }
+    ),
+  );
 }
 
 /// Show merge branches dialog

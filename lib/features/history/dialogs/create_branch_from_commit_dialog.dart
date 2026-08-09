@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
@@ -50,41 +50,43 @@ class _CreateBranchFromCommitDialogState
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Source commit info
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            child: BaseInset(
-              child: Row(
-                children: [
-                  const BaseIcon(
-                    IconRole.gitCommit,
-                    scale: ControlScale.compact,
-                    tone: Tone.muted,
+          // Source commit info: **here is one self-contained object** - the
+          // commit this branch will start from. Its fill and its 4 dp corner
+          // were a card drawn by hand, and the corner is the sharpest evidence
+          // that the application should never have been naming one: the twin
+          // strip in `reset_mode_dialog.dart` says the same thing about the
+          // same kind of object and rounded it at 8. Neither screen could see
+          // the other; the member answers both with one corner.
+          BaseCard(
+            isSelectable: false,
+            inset: Inset.normal,
+            content: Row(
+              children: [
+                const BaseIcon(
+                  IconRole.gitCommit,
+                  scale: ControlScale.compact,
+                  tone: Tone.muted,
+                ),
+                const BaseGap(Proximity.related),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BaseLabel(
+                        l10n.sourceCommit,
+                        role: TextRole.micro,
+                        tone: Tone.muted,
+                      ),
+                      BaseLabel(
+                        '${widget.commit.shortHash} '
+                        '${widget.commit.shortSubject}',
+                        role: TextRole.body,
+                        maxLines: 2,
+                      ),
+                    ],
                   ),
-                  const BaseGap(Proximity.related),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        BaseLabel(
-                          l10n.sourceCommit,
-                          role: TextRole.micro,
-                          tone: Tone.muted,
-                        ),
-                        BaseLabel(
-                          '${widget.commit.shortHash} '
-                          '${widget.commit.shortSubject}',
-                          role: TextRole.body,
-                          maxLines: 2,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           // Two groups inside one form: `separate`.

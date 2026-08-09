@@ -115,26 +115,24 @@ class _CommandLogPanelState extends ConsumerState<CommandLogPanel> {
           // The heading and the count that qualifies it are two parts of one
           // statement.
           const BaseGap(Proximity.related),
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(AppTheme.radiusL),
-            ),
-            // A pill is barely set in across and reaches as close to its own
-            // edge as it can down the page, because it has to stay the height
-            // of the line it sits on.
-            child: BaseInset(
-              x: Inset.tight,
-              y: Inset.hairline,
-              // The pill states the foreground that pairs with its own fill;
-              // the count inside it just reads that.
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                child: BaseLabel(logCount.toString(), role: TextRole.micro),
-              ),
-            ),
+          // How many commands the log holds - a count riding on the heading
+          // it qualifies, which is `surfaces.badge`'s own question. It is the
+          // SAME construction `_buildMeta` below already converted (the
+          // burst's `x3` pill), and the two disagreed while one of them was
+          // still hand-painted: this one drew itself at a 12 dp corner with
+          // an 8/2 inset, and nothing in this file could see that the pill it
+          // was imitating rounds at whatever the skin's compact rung is. That
+          // is the whole point of deleting the corner rather than converting
+          // it - the disagreement stops being expressible.
+          //
+          // What moves with the fill is the foreground that paired with it:
+          // the `DefaultTextStyle` naming `onPrimaryContainer` for a
+          // container this file had just painted itself. `BadgeVariant
+          // .primary` is what that pair MEANT, and the skin re-decides both.
+          BaseBadge(
+            label: logCount.toString(),
+            variant: BadgeVariant.primary,
+            size: BadgeSize.small,
           ),
           const Spacer(),
           BaseIconButton(

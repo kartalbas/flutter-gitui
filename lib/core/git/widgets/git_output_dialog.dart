@@ -5,16 +5,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        BadgeFact,
+        BadgeSpec,
         ControlScale,
         IconRole,
         Inset,
         NoticeSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
 import '../../../generated/app_localizations.dart';
+import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -265,54 +270,35 @@ class _GitOutputContentState extends State<_GitOutputContent> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Auto-close countdown banner. Its bottom margin was a one-sided
-        // inset, which is a gap wearing a padding idiom: the distance
-        // belongs between the banner and the section below it, so the
-        // column states it and the banner states none.
+        // The auto-close countdown: a count riding on the dialog it belongs
+        // to, which is `surfaces.badge`'s own question, said once. The pill
+        // it used to hand-paint is the member's now — its fill, its corner,
+        // its inset, its glyph size and its type step move together, because
+        // a mark this small reads as a rendering fault when only one of them
+        // changes (the member's own rule). What leaves with the fill is the
+        // pair of ambient publications underneath it: a `DefaultTextStyle`
+        // and an `IconTheme` naming `onPrimaryContainer` for a container the
+        // application had just painted itself, which is precisely the
+        // fill-and-foreground pairing the seam exists to take off the
+        // application. `Tone.accent` is what that pairing MEANT.
+        //
+        // Not `surfaces.banner`, and that is a decision rather than an
+        // oversight: `BannerSpec`'s own doc says its actions exist because
+        // `MaterialBanner` asserts a non-empty list, so an action-less
+        // banner is the shape the spec says makes the canonical widget
+        // unreachable — and a banner is a full-width `titleMedium`
+        // statement, three times as loud as the quiet strip this is.
+        //
+        // Its bottom margin was a one-sided inset, which is a gap wearing a
+        // padding idiom: the distance belongs between the countdown and the
+        // section below it, so the column states it and the pill states none.
         if (_remainingSeconds > 0 && !_keepOpen) ...<Widget>[
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(AppTheme.radiusS),
-            ),
-            // The banner paints its own fill, so it states the paired
-            // foreground once here; the label inside then says nothing
-            // about colour, which is the arrangement that cannot be got
-            // wrong.
-            child: BaseInset(
-              all: Inset.tight,
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-                // The glyph is published exactly the way the words above it
-                // are - once, by the surface that paints underneath both -
-                // so the mark inside only has to say which idea it stands
-                // for and how much room it is owed. The colour leaves with
-                // the fill it pairs with when this banner becomes a member.
-                child: IconTheme.merge(
-                  data: IconThemeData(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                  child: Row(
-                    children: [
-                      // A countdown mark sitting inside one line of text.
-                      const BaseIcon(
-                        IconRole.clock,
-                        scale: ControlScale.compact,
-                      ),
-                      const BaseGap(Proximity.related),
-                      BaseLabel(
-                        AppLocalizations.of(
-                          context,
-                        )!.closingInSeconds(_remainingSeconds),
-                        role: TextRole.detail,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          BaseBadge(
+            label: AppLocalizations.of(
+              context,
+            )!.closingInSeconds(_remainingSeconds),
+            icon: IconRole.clock,
+            variant: BadgeVariant.primary,
           ),
           const BaseGap(Proximity.grouped),
         ],
@@ -390,47 +376,46 @@ class _GitOutputContentState extends State<_GitOutputContent> {
         _buildDetailChip(
           AppLocalizations.of(context)!.exitCode,
           widget.result.exitCode.toString(),
-          widget.result.isSuccess
-              ? context.gitColors.added
-              : context.gitColors.deleted,
+          widget.result.isSuccess ? Tone.gitAdded : Tone.gitDeleted,
         ),
         const BaseGap(Proximity.related),
         _buildDetailChip(
           AppLocalizations.of(context)!.time,
           '${widget.result.executionTime.inMilliseconds}ms',
-          Theme.of(context).colorScheme.primary,
+          Tone.accent,
         ),
       ],
     );
   }
 
-  Widget _buildDetailChip(String label, String value, Color color) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: BaseInset(
-        x: Inset.normal,
-        y: Inset.tight,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            BaseLabel(label, role: TextRole.micro, tone: Tone.muted),
-            const BaseGap(Proximity.hairline),
-            // Deliberately still the old label: this helper's Color parameter
-            // also paints the chip's fill, border and icon, so it can only
-            // become a Tone when the whole chip moves onto `surfaces.badge` in
-            // the surface sub-phase - the application cannot resolve a Tone to
-            // a Color for its own decoration, and the seam is right to forbid
-            // that.
-            LabelMediumLabel(value, color: color),
-          ],
-        ),
-      ),
-    );
-  }
+  /// One fact about the run, as the paired badge it always was: what the fact
+  /// is CALLED beside what the fact SAYS.
+  ///
+  /// This is the conversion the old helper's own comment asked for. Its
+  /// `Color` parameter painted the fill, the border and the value at once, so
+  /// naming the meaning was impossible while the decoration stayed here; with
+  /// the whole chip on `surfaces.badge` the parameter is a [Tone] and the
+  /// application never touches a colour again.
+  ///
+  /// The pairing is what fixes a real defect rather than merely moving it.
+  /// The chip used to wash its ENTIRE surface in the value's colour - a red
+  /// box behind the words "Exit Code", which mean nothing red - and the
+  /// member's rule is that one wash cannot mean two things: a paired badge
+  /// takes the neutral chip's fill and each half carries its own meaning as
+  /// its foreground, which is where the distinction actually lives.
+  Widget _buildDetailChip(String label, String value, Tone tone) =>
+      SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.surfaces.badge(
+          inner,
+          BadgeSpec(
+            label: label,
+            // "Exit Code", "Time": the name of the fact, secondary to the
+            // fact itself, which is exactly what the muted tone says.
+            tone: Tone.muted,
+            secondary: BadgeFact(label: value, tone: tone),
+          ),
+        );
+      });
 
   Widget _buildOutputSection() {
     final result = widget.result;

@@ -332,9 +332,24 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // conversion had handed `OverflowActionBar` a skin-dependent width - three
   // extra actions under the blueprint's collapsed insets - and was taken
   // back to literals (see base_switcher.dart for the finding it reports).
-  'shell': 174,
+  // The banner/badge/avatar wave moved three scenes, in both directions, and
+  // every number below is the closing agent's own measurement under BOTH
+  // skins - Material and the blueprint agree on each. The shell fell 1: the
+  // command log's hand-painted count pill was two fences (its BaseInset and
+  // the BaseLabel inside it) and is one `surfaces.badge` fence now.
+  // Repositories rose 1: the screen's hand-rolled drag overlay became
+  // `surfaces.dropTarget`, whose fence wraps the whole screen; the overlay's
+  // own internals render only mid-drag, which no scene performs, and the
+  // status pills' conversions to `surfaces.badge`/`surfaces.pressable` land
+  // on states this scene's fixture does not reach, so the count moves by the
+  // drop target alone. Merge_conflicts fell 5, and the fall is consolidation,
+  // not a component leaving its skin: the manual-resolution callout was six
+  // fences (a BaseInset, a BaseIcon, two BaseLabels and their two BaseGaps)
+  // and is one `surfaces.banner` fence now; the error callout converted the
+  // same way (-3) in a branch the scene never renders.
+  'shell': 173,
   'workspaces': 34,
-  'repositories': 60,
+  'repositories': 61,
   'changes': 50,
   'history': 90,
   'browse': 26,
@@ -350,7 +365,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   'stashes': 19,
   'tags': 39,
   'settings': 139,
-  'merge_conflicts': 36,
+  'merge_conflicts': 31,
 };
 
 /// The scenes whose count the SKIN changes, and by how much.

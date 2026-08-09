@@ -6,6 +6,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
+import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_viewer_dialog.dart';
@@ -186,34 +187,22 @@ class ChangelogDialog extends HookConsumerWidget {
                               'Version ${release.version}',
                               role: TextRole.pageTitle,
                             ),
+                            // **A named thing riding on the heading beside
+                            // it**, which is the badge member, and this site
+                            // already said the migration would take it: the
+                            // solid accent was a FILL the application picked,
+                            // and `Tone.onAccent` was the other half of that
+                            // pairing, kept only because the screen had
+                            // painted the first half. Both leave together with
+                            // the 12 dp corner, and what remains is the one
+                            // fact the application owns - this release is the
+                            // newest one.
                             if (index == 0) ...[
                               const BaseGap(Proximity.related),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: AppTheme.paddingS,
-                                  vertical: 3,
-                                ),
-                                // A surface FILL, not a foreground: the accent
-                                // is what this pill is painted IN, which is a
-                                // decision that leaves with the badge surface
-                                // in P5 rather than becoming a tone here.
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(
-                                    AppTheme.radiusL,
-                                  ),
-                                ),
-                                // Tone.onAccent, not a dropped override: the
-                                // pill behind this text is painted with the
-                                // accent by the application itself, which is
-                                // the exact case the tone's doc names. It
-                                // leaves with the pill when the badge surface
-                                // migrates.
-                                child: BaseLabel(
-                                  'LATEST',
-                                  role: TextRole.micro,
-                                  tone: Tone.onAccent,
-                                ),
+                              const BaseBadge(
+                                label: 'LATEST',
+                                variant: BadgeVariant.primary,
+                                size: BadgeSize.small,
                               ),
                             ],
                           ],

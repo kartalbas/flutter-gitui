@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole, Tone;
+    show BannerSpec, IconRole, Proximity, Skin, SkinScope, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
-import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../theme/app_theme.dart';
 import '../components/copyable_text.dart';
@@ -94,31 +93,28 @@ class ReflogDialog extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Info banner
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(AppTheme.radiusM),
-          ),
-          child: BaseInset(
-            child: Row(
-              children: [
-                // The mark of an ordinary notice, at the ordinary size: it
-                // belongs to the line beside it rather than standing over it.
-                const BaseIcon(IconRole.info),
-                const BaseGap(Proximity.related),
-                Expanded(
-                  child: BaseLabel(
-                    AppLocalizations.of(
-                      context,
-                    )!.reflogEntriesInfo(entries.length),
-                    role: TextRole.detail,
-                  ),
-                ),
-              ],
+        // **Something about this whole surface needs saying**: how many
+        // entries the reflog below is showing. The comment this line replaces
+        // called it a banner and then drew one by hand - a neutral wash, a
+        // 12 dp corner, an inset, a mark and a line of `detail` - and every
+        // one of those five is the SURFACE, which is the member's. `Tone.info`
+        // is the word for what it says ("this is worth knowing and nothing is
+        // wrong"), so the mark no longer has to carry that meaning alone
+        // beside a wash that carried none: Material answers info with the
+        // primary container, which is why the strip is tinted now rather than
+        // grey.
+        SkinScope.render(context, (Skin skin, BuildContext inner) {
+          return skin.surfaces.banner(
+            inner,
+            BannerSpec(
+              tone: Tone.info,
+              title: AppLocalizations.of(
+                context,
+              )!.reflogEntriesInfo(entries.length),
+              icon: IconRole.info,
             ),
-          ),
-        ),
+          );
+        }),
         const BaseGap(Proximity.grouped),
 
         // The list needs a bounded height: BaseDialog wraps the content in a
@@ -176,6 +172,13 @@ class ReflogDialog extends ConsumerWidget {
         // `tight` would grow every reflog row's leading chip 8px taller.
         // Both halves wait for `surfaces.badge`, whose skin owns a badge's
         // measure.
+        //
+        // The 4 dp corner stays for the same reason and only that reason. It
+        // is not waiting for a corner word - there is none and there will be
+        // none - it is waiting for the decoration it belongs to to become
+        // `surfaces.badge`, and it dies with that decoration in one move. It
+        // is the only radius left in this file, and the only one in it that a
+        // member cannot take today.
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.paddingS,
           vertical: AppTheme.paddingXS,

@@ -13,6 +13,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -134,11 +135,12 @@ class RepositoryListItem extends ConsumerWidget {
                   children: [
                     // Show loading while analyzing
                     if (status.isGitNotConfigured) ...[
+                      // A setting the user has to supply before git will
+                      // commit at all: "this may not be what you intended".
                       _buildCompactBadge(
                         context,
-                        PhosphorIconsRegular.gear,
-                        Theme.of(context).colorScheme.tertiary,
-                        isSelected,
+                        IconRole.gear,
+                        BadgeVariant.warning,
                         label: 'Git not configured',
                       ),
                     ] else if (status.isLoading) ...[
@@ -169,20 +171,23 @@ class RepositoryListItem extends ConsumerWidget {
                       if (status.isBroken)
                         _buildCompactBadge(
                           context,
-                          PhosphorIconsRegular.warningCircle,
-                          Theme.of(context).colorScheme.error,
-                          isSelected,
+                          IconRole.warningCircle,
+                          BadgeVariant.danger,
                           label: 'Broken',
                         ),
 
                       // Behind (pull)
                       if (status.hasIncoming) ...[
                         const BaseGap(Proximity.hairline),
+                        // Worth knowing and nothing is wrong. The arrow and
+                        // the count are what tell it from the pill below, and
+                        // they always were: Material answers `info` and
+                        // `primary` with one role, a collapse the contract
+                        // records rather than hides.
                         _buildCompactBadge(
                           context,
-                          PhosphorIconsRegular.arrowDown,
-                          Theme.of(context).colorScheme.tertiary,
-                          isSelected,
+                          IconRole.arrowDown,
+                          BadgeVariant.info,
                           label: '↓${status.commitsBehind}',
                         ),
                       ],
@@ -192,9 +197,8 @@ class RepositoryListItem extends ConsumerWidget {
                         const BaseGap(Proximity.hairline),
                         _buildCompactBadge(
                           context,
-                          PhosphorIconsRegular.arrowUp,
-                          Theme.of(context).colorScheme.primary,
-                          isSelected,
+                          IconRole.arrowUp,
+                          BadgeVariant.primary,
                           label: '↑${status.commitsAhead}',
                         ),
                       ],
@@ -202,11 +206,14 @@ class RepositoryListItem extends ConsumerWidget {
                       // Uncommitted
                       if (status.hasUncommittedChanges) ...[
                         const BaseGap(Proximity.hairline),
+                        // Tracked files whose content differs from the index,
+                        // which is the git palette's modified colour by
+                        // definition rather than a scheme role picked for
+                        // contrast.
                         _buildCompactBadge(
                           context,
-                          PhosphorIconsRegular.pencilSimple,
-                          Theme.of(context).colorScheme.secondary,
-                          isSelected,
+                          IconRole.pencilSimple,
+                          BadgeVariant.warning,
                           label: 'Changes',
                         ),
                       ],
@@ -224,41 +231,38 @@ class RepositoryListItem extends ConsumerWidget {
                         if (status.needsSignIn)
                           _buildCompactBadge(
                             context,
-                            PhosphorIconsRegular.signIn,
-                            Theme.of(context).colorScheme.tertiary,
-                            isSelected,
+                            IconRole.signIn,
+                            BadgeVariant.warning,
                             label: 'Sign-in required',
                           )
                         else if (status.isRemoteUnreachable)
                           _buildCompactBadge(
                             context,
-                            PhosphorIconsRegular.cloudSlash,
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                            isSelected,
+                            IconRole.cloudSlash,
+                            BadgeVariant.neutral,
                             label: 'Unreachable',
                           )
                         else if (status.remoteCheckFailedUnknown)
                           _buildCompactBadge(
                             context,
-                            PhosphorIconsRegular.warningCircle,
-                            Theme.of(context).colorScheme.error,
-                            isSelected,
+                            IconRole.warningCircle,
+                            BadgeVariant.danger,
                             label: 'Check failed',
                           )
                         else if (status.isRemoteUnchecked)
                           _buildCompactBadge(
                             context,
-                            PhosphorIconsRegular.clockCountdown,
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                            isSelected,
+                            IconRole.clockCountdown,
+                            BadgeVariant.neutral,
                             label: 'Not checked',
                           )
                         else
+                          // "This finished, and it finished well" is what a
+                          // repository in sync with its remote says.
                           _buildCompactBadge(
                             context,
-                            PhosphorIconsRegular.checkCircle,
-                            Theme.of(context).colorScheme.primary,
-                            isSelected,
+                            IconRole.checkCircle,
+                            BadgeVariant.success,
                             label: 'Up to date',
                           ),
                       ],
@@ -465,41 +469,38 @@ class RepositoryListItem extends ConsumerWidget {
     );
   }
 
+  /// One status pill, drawn by `surfaces.badge` through [BaseBadge].
+  ///
+  /// The twin of `repository_card.dart`'s, converted with it and for the same
+  /// reason: the whole micro-surface — the pill's two washes, its 60 % edge,
+  /// its corner, its 6/2 inset, the 12 px mark and the `Color` that painted
+  /// all of them — is the badge member's geometry, and what the row states is
+  /// only what each pill MEANS. That is what unblocks the `Color` parameter
+  /// the note here used to name: there is no decoration left to resolve a
+  /// tone into.
+  ///
+  /// `BadgeSize.small` is `ControlScale.compact`, the rung the vocabulary
+  /// describes as "a chip, a row-level action". The pill grows slightly
+  /// against the hand-painted copy — horizontal inset 6 → 8, mark 12 → 10,
+  /// label `labelSmall` → the badge's own 10 px — and its selected 30 % wash
+  /// is gone: that was the row restating its own selection on every pill
+  /// inside it, and the row already says it once.
+  ///
+  /// [label] stays nullable because the call sites still allow a mark-only
+  /// pill, and `BadgeSpec.label` is required — the empty string is what the
+  /// member is handed there, which is honest about the fact that no shipping
+  /// call site takes that branch today.
   Widget _buildCompactBadge(
     BuildContext context,
-    IconData icon,
-    Color color,
-    bool isSelected, {
+    IconRole icon,
+    BadgeVariant variant, {
     String? label,
   }) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: label != null ? 6 : 4,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? color.withValues(alpha: 0.3)
-            : color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppTheme.radiusM),
-        border: Border.all(color: color.withValues(alpha: 0.6), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          if (label != null) ...[
-            const BaseGap(Proximity.hairline),
-            // Deliberately still the old label: this helper's Color parameter
-            // also paints the badge's fill, border and icon, so it can only
-            // become a Tone when the whole badge moves onto `surfaces.badge`
-            // in the surface sub-phase - the application cannot resolve a
-            // Tone to a Color for its own decoration, and the seam is right
-            // to forbid that.
-            LabelSmallLabel(label, color: color),
-          ],
-        ],
-      ),
+    return BaseBadge(
+      label: label ?? '',
+      icon: icon,
+      variant: variant,
+      size: BadgeSize.small,
     );
   }
 }

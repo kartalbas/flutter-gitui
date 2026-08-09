@@ -13,6 +13,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Tone;
 
 import '../../../generated/app_localizations.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
@@ -156,48 +157,52 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Staged files summary
-            Container(
-              // The summary's fill and corner stay: they are the surface, and
-              // the surface leaves with `surfaces.card`. How far it holds its
-              // content off its own edge is the language's question.
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    const BaseIcon(
-                      IconRole.checkSquare,
-                      scale: ControlScale.compact,
-                      tone: Tone.accent,
+            // Staged files summary. The surface leaves with `surfaces.card`,
+            // exactly as this site predicted: the fill and the corner were the
+            // card drawn by hand, and how far it holds its content off its own
+            // edge was already stated as a rung.
+            //
+            // It stays a card and does NOT become `surfaces.disclosure`, even
+            // though it opens a list underneath. A disclosure makes the whole
+            // header the tap target and draws its own caret; this header
+            // carries a named, labelled control ("View files") that disables
+            // itself when nothing is staged, which a bare caret cannot say.
+            // Replacing a named control with an unnamed one would be a
+            // regression wearing a migration's clothes.
+            BaseCard(
+              isSelectable: false,
+              inset: Inset.normal,
+              content: Row(
+                children: [
+                  const BaseIcon(
+                    IconRole.checkSquare,
+                    scale: ControlScale.compact,
+                    tone: Tone.accent,
+                  ),
+                  const BaseGap(Proximity.related),
+                  BaseLabel(
+                    AppLocalizations.of(context)!.messageFilesStaged(
+                      stagedFiles.length,
+                      stagedFiles.length == 1 ? '' : 's',
                     ),
-                    const BaseGap(Proximity.related),
-                    BaseLabel(
-                      AppLocalizations.of(context)!.messageFilesStaged(
-                        stagedFiles.length,
-                        stagedFiles.length == 1 ? '' : 's',
-                      ),
-                      role: TextRole.body,
-                    ),
-                    const Spacer(),
-                    BaseButton(
-                      label: AppLocalizations.of(context)!.viewFiles,
-                      variant: ButtonVariant.tertiary,
-                      leadingIcon: _showStagedFiles
-                          ? IconRole.caretUp
-                          : IconRole.caretDown,
-                      onPressed: stagedFiles.isEmpty
-                          ? null
-                          : () {
-                              setState(() {
-                                _showStagedFiles = !_showStagedFiles;
-                              });
-                            },
-                    ),
-                  ],
-                ),
+                    role: TextRole.body,
+                  ),
+                  const Spacer(),
+                  BaseButton(
+                    label: AppLocalizations.of(context)!.viewFiles,
+                    variant: ButtonVariant.tertiary,
+                    leadingIcon: _showStagedFiles
+                        ? IconRole.caretUp
+                        : IconRole.caretDown,
+                    onPressed: stagedFiles.isEmpty
+                        ? null
+                        : () {
+                            setState(() {
+                              _showStagedFiles = !_showStagedFiles;
+                            });
+                          },
+                  ),
+                ],
               ),
             ),
 

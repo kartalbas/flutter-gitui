@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
-        ControlScale,
+        BannerSpec,
         IconRole,
         Inset,
         NoticeSpec,
         Overlays,
         Proximity,
+        Skin,
+        SkinScope,
         TextRole,
         Tone;
 
@@ -432,53 +434,33 @@ class _ConflictResolutionScreenState
         // one region, and the banner itself is inset from the pane's sides.
         // No per-side rung is minted for it; that would be the token bag
         // returning one side at a time.
+        // **Something about this whole surface needs saying**: the merge the
+        // pane is about came back with an error. The fill and the corner were
+        // this callout drawn by hand, and both leave with the member -
+        // `Tone.danger` resolves under Material to the same
+        // `errorContainer`/`onErrorContainer` pair the site named, so the
+        // mark, the words and the surface stop being three separate colour
+        // decisions and become one word.
+        //
+        // The tone stays `danger` for the reason this site already argued:
+        // #431 settled that a state standing in for a FAILURE says
+        // `Tone.danger`, so a failure and a destruction share the word
+        // deliberately rather than by rounding.
         if (_errorMessage != null) ...<Widget>[
           const BaseGap(Proximity.separate),
           BaseInset(
             x: Inset.roomy,
             y: Inset.none,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    // The mark now says what the label beside it has always
-                    // said. It kept a `Color` while the only argument
-                    // available was the definition of `Tone.danger` read in
-                    // isolation - "this destroys something you cannot get
-                    // back" - which does not cover "the command you asked for
-                    // came back with an error". #431 settled that question on
-                    // the contract's own terms instead: `EmptyStateSpec.tone`
-                    // says a state standing in for a FAILURE says
-                    // `Tone.danger`, so a failure and a destruction share the
-                    // word deliberately rather than by rounding. With the
-                    // meaning decided, the mark can follow its label, and the
-                    // two halves of one statement stop disagreeing.
-                    //
-                    // Pixel-identical: the bare `Icon` took the ambient 24 dp,
-                    // which is `ControlScale.prominent` (MaterialMetrics.iconL),
-                    // and `Tone.danger` resolves under Material to the same
-                    // scheme error role this site spelled out.
-                    const BaseIcon(
-                      IconRole.warningCircle,
-                      scale: ControlScale.prominent,
-                      tone: Tone.danger,
-                    ),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      child: BaseLabel(
-                        _errorMessage!,
-                        role: TextRole.body,
-                        tone: Tone.danger,
-                      ),
-                    ),
-                  ],
+            child: SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: Tone.danger,
+                  title: _errorMessage!,
+                  icon: IconRole.warningCircle,
                 ),
-              ),
-            ),
+              );
+            }),
           ),
         ],
 
@@ -588,38 +570,31 @@ class _ConflictResolutionScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Manual resolution info
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-            ),
-            child: BaseInset(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const BaseIcon(IconRole.info),
-                      const BaseGap(Proximity.related),
-                      BaseLabel(
-                        AppLocalizations.of(context)!.manualResolution,
-                        role: TextRole.sectionTitle,
-                      ),
-                    ],
-                  ),
-                  const BaseGap(Proximity.related),
-                  BaseLabel(
-                    AppLocalizations.of(
-                      context,
-                    )!.dialogContentManualResolutionInfo,
-                    role: TextRole.detail,
-                  ),
-                ],
+          // Manual resolution info: **something about this whole surface
+          // needs saying** - that the file can also be edited outside this
+          // pane. Its two lines were already a banner's own two slots drawn by
+          // hand: a heading beside a mark, and the longer form under it. The
+          // fill, the stroke and the corner were the surface, and they leave
+          // together.
+          //
+          // `Tone.neutral` and not `info`: the note is not a state the pane is
+          // IN, it is standing advice about the pane, so it keeps the ordinary
+          // surface it was painted on rather than being promoted into the
+          // accent. Material resolves it to `surfaceContainerHigh` on
+          // `onSurface`.
+          SkinScope.render(context, (Skin skin, BuildContext inner) {
+            return skin.surfaces.banner(
+              inner,
+              BannerSpec(
+                tone: Tone.neutral,
+                title: AppLocalizations.of(context)!.manualResolution,
+                body: AppLocalizations.of(
+                  context,
+                )!.dialogContentManualResolutionInfo,
+                icon: IconRole.info,
               ),
-            ),
-          ),
+            );
+          }),
 
           if (_isResolving) ...[
             const BaseGap(Proximity.separate),

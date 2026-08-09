@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
-import '../../generated/app_localizations.dart';
-import '../../shared/theme/app_theme.dart';
-import 'base_button.dart';
-import 'base_icon.dart';
+import 'package:flutter/widgets.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show
+        FieldActionAffordance,
+        FieldAffordance,
+        FieldClearAffordance,
+        FieldHandles,
+        FieldPurpose,
+        FieldRevealAffordance,
+        FieldSpec,
+        Fields,
+        IconRole;
 
 /// How loudly a text field asserts itself on the surface it sits on.
 ///
@@ -15,15 +20,24 @@ import 'base_icon.dart';
 /// such classes had nothing to map: Apple's HIG and Fluent 2 each give a text
 /// field exactly one appearance, and asking either of them for "the
 /// OutlineInputBorder one" is a question with no answer. Asking instead for
-/// "the one that recedes", "the ordinary form field" or "the one that carries
-/// the most weight" is a question every design language can answer, even when
-/// its answer is that all three look alike.
+/// "the ordinary form field" or "the one that carries the most weight" is a
+/// question every design language can answer, even when its answer is that
+/// both look alike.
+///
+/// **There used to be a third rung, `minimal`** — "the field recedes: it marks
+/// the writing line and nothing else", which Material drew as an
+/// `UnderlineInputBorder`. It is gone, and its removal is the contract
+/// arriving rather than a feature being dropped. No screen in `lib/` ever
+/// asked for it: its only consumers were the two package test suites that
+/// enumerate `TextFieldVariant.values`. `FieldPurpose` carries "only the
+/// values for which a language reaches for a different canonical widget",
+/// and a receding field is not one of them — macOS and Fluent 2 give a text
+/// field one appearance each, so Material's low-emphasis *rendering* was the
+/// only thing the rung ever named. Keeping it would have meant this component
+/// hand-painting one variant while the other two were drawn behind the seam,
+/// which is the half-migration the corner retirement exists to end. The
+/// missing word is reported as a contract finding, not invented here.
 enum TextFieldVariant {
-  /// The field recedes into what surrounds it: it marks the writing line and
-  /// nothing else. For dense rows and inline edits where a full box would be
-  /// more chrome than content. Material 3 draws it as an underline.
-  minimal,
-
   /// The ordinary form field, and the default: the input draws a complete
   /// boundary around itself so it reads as one editable unit among labels and
   /// buttons. Material 3 draws it as an outlined box.
@@ -38,7 +52,39 @@ enum TextFieldVariant {
 
 /// Base component for all text input patterns in the app.
 ///
-/// Provides unified text input behavior with variants and validation.
+/// **This is a façade** (#249, §2.11), on the same terms as `BaseCard`,
+/// `BaseDialog` and `BaseListItem`: the constructor is the one forty-five call
+/// sites already write, and the body is one delegation to `controls.textField`
+/// through [Fields.text]. Everything the field used to draw and drive itself —
+/// the outlined and filled border shapes and the 4 dp corner both repeated
+/// five times over, the spelled-out focus, error and focused-error sides of
+/// the filled variant, the controller ownership, the Escape-to-clear ladder,
+/// the double-click select-all and the in-field affordance — is in the skin
+/// already, comment for comment (`material_controls.dart`,
+/// `_fieldDecoration` and `_MaterialTextField`). Nothing was re-decided on the
+/// way.
+///
+/// **What the move deletes is every corner this file could state.** A field's
+/// corner is not a number the application knows: Material rounds a field at 4,
+/// Fluent at 4 and macOS at 6, and all three are right. The five
+/// `BorderRadius.circular` calls left with the decoration they belonged to,
+/// and there is no rung, word or token replacing them — asking for one would
+/// be the same mistake in a neutral costume.
+///
+/// **What the move changes, and why the member's answer is right:**
+///
+///  * A **clear** affordance is now stated as a fact about the field ("this
+///    one can be emptied") rather than built here, so the language decides
+///    whether it appears at all and what it is called;
+///    `MacosTextField.clearButtonMode` is the measured case the sealed set
+///    exists for. Its tooltip comes from `MaterialLocalizations` instead of
+///    this application's `l10n.clear`, which is the same word from the
+///    platform's own catalogue.
+///  * A **decorative** suffix — a mark with no handler — has no counterpart in
+///    the contract's sealed affordance set, because a field's trailing slot is
+///    where an ACTION lives. It is stated as an action that cannot be taken
+///    (`onPressed: null`), so the mark survives and now reads as inert instead
+///    of impersonating a button. Reported as a contract finding.
 ///
 /// Geometry, outline colors per state, typography and the disabled and error
 /// treatments are asserted against a real SDK `TextField` by
@@ -76,7 +122,7 @@ enum TextFieldVariant {
 ///   variant: TextFieldVariant.emphasized,
 /// )
 /// ```
-class BaseTextField extends StatefulWidget {
+class BaseTextField extends StatelessWidget {
   const BaseTextField({
     super.key,
     this.controller,
@@ -107,7 +153,7 @@ class BaseTextField extends StatefulWidget {
          'controller already carries the text the field starts with.',
        );
 
-  /// Text editing controller (optional - will create one if not provided)
+  /// Text editing controller (optional - the skin creates one if not provided)
   final TextEditingController? controller;
 
   /// The text the field starts with, for a caller that keeps no controller.
@@ -134,7 +180,8 @@ class BaseTextField extends StatefulWidget {
   /// Helper text (shown below field)
   final String? helperText;
 
-  /// Error text (shown below field in red, overrides helperText)
+  /// Error text (shown below field in the error treatment, overriding
+  /// whatever [validator] says)
   final String? errorText;
 
   /// The meaning of an optional leading mark.
@@ -161,7 +208,11 @@ class BaseTextField extends StatefulWidget {
   /// Whether text should be obscured (for passwords)
   final bool obscureText;
 
-  /// Show clear button when field has text
+  /// Show clear button when field has text.
+  ///
+  /// A statement that the field CAN be emptied, not an instruction to draw a
+  /// cross: whether the affordance is visible while the field is empty, and
+  /// what it looks like, is the language's own answer.
   final bool showClearButton;
 
   /// Show password visibility toggle (only if obscureText is true)
@@ -181,9 +232,12 @@ class BaseTextField extends StatefulWidget {
   /// The field registers with an enclosing [Form], so
   /// `formKey.currentState!.validate()` runs this validator, shows its message
   /// inline on the field, and returns false while the input is invalid — the
-  /// contract every dialog's primary action and Enter handler rely on. After
-  /// the first user edit the field also re-validates live on every change, so
-  /// an error appears (and clears) at the keystroke that caused it.
+  /// contract every dialog's primary action and Enter handler rely on. The
+  /// registration is `SkinFormFieldHost`'s, in one place for every skin,
+  /// precisely because a language whose canonical text control knows nothing
+  /// about forms must not be able to forget it. After the first user edit the
+  /// field also re-validates live on every change, so an error appears (and
+  /// clears) at the keystroke that caused it.
   final String? Function(String?)? validator;
 
   /// Whether to autofocus this field
@@ -201,273 +255,70 @@ class BaseTextField extends StatefulWidget {
   /// need a second Escape.
   final bool escapeClears;
 
-  @override
-  State<BaseTextField> createState() => _BaseTextFieldState();
-}
-
-class _BaseTextFieldState extends State<BaseTextField> {
-  late TextEditingController _controller;
-
-  /// Whether [_controller] was created here rather than handed in.
+  /// What KIND of asking this is, as the contract names it.
   ///
-  /// Ownership has to be tracked separately from `widget.controller == null`:
-  /// a caller that swaps a controller in later leaves this state holding an
-  /// internally created controller that `widget.controller == null` no longer
-  /// describes, and disposing on that test alone would leak the one we made
-  /// (or, the other way round, dispose one the caller still uses).
-  bool _ownsController = false;
-  bool _obscureText = false;
-  bool _hasText = false;
+  /// A hidden answer is a password whatever else the caller said about
+  /// emphasis: obscuring is a fact about the ANSWER, and every language
+  /// reaches for a different canonical control for it, while the emphasis
+  /// rungs only choose between two renderings of the same one.
+  FieldPurpose get _purpose => obscureText
+      ? FieldPurpose.password
+      : switch (variant) {
+          TextFieldVariant.bordered => FieldPurpose.text,
+          TextFieldVariant.emphasized => FieldPurpose.search,
+        };
 
-  @override
-  void initState() {
-    super.initState();
-    _adoptController();
-    _obscureText = widget.obscureText;
-  }
-
-  @override
-  void didUpdateWidget(BaseTextField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.controller != oldWidget.controller) {
-      // What the field currently shows, captured before the old controller is
-      // released. It survives only into an internally created replacement: a
-      // caller who hands us a controller is handing us its text too, and
-      // overwriting that would be the field second-guessing its owner.
-      final carriedText = _controller.text;
-      _releaseController();
-      _adoptController(carriedText: carriedText);
-    }
-    if (widget.obscureText != oldWidget.obscureText) {
-      _obscureText = widget.obscureText;
-    }
-  }
-
-  @override
-  void dispose() {
-    _releaseController();
-    super.dispose();
-  }
-
-  /// Takes the caller's controller, or creates one and remembers that this
-  /// state owns it.
+  /// The one action that belongs inside this field.
   ///
-  /// [carriedText] is what the field was showing a moment ago, passed only
-  /// when replacing one controller with another. An internally created
-  /// replacement continues from it rather than from
-  /// [BaseTextField.initialValue]: a caller who stops supplying a controller
-  /// is changing who owns the text, not asking for the user's typing to be
-  /// thrown away. On the first build there is nothing to carry, so the seed
-  /// is [BaseTextField.initialValue].
-  void _adoptController({String? carriedText}) {
-    _ownsController = widget.controller == null;
-    _controller =
-        widget.controller ??
-        TextEditingController(text: carriedText ?? widget.initialValue);
-    _hasText = _controller.text.isNotEmpty;
-    _controller.addListener(_onTextChanged);
-  }
-
-  /// Detaches from the current controller, disposing it only when this state
-  /// created it.
-  void _releaseController() {
-    _controller.removeListener(_onTextChanged);
-    if (_ownsController) {
-      _controller.dispose();
-    }
-  }
-
-  void _onTextChanged() {
-    final hasText = _controller.text.isNotEmpty;
-    if (hasText != _hasText) {
-      setState(() {
-        _hasText = hasText;
-      });
-    }
-  }
-
-  void _clearText() {
-    _controller.clear();
-    widget.onChanged?.call('');
-  }
-
-  void _togglePasswordVisibility() {
-    setState(() {
-      _obscureText = !_obscureText;
-    });
+  /// The precedence is the one this component always had — reveal, then
+  /// clear, then the caller's own action — now expressed as a single slot
+  /// rather than as an if/else chain building three different widgets, which
+  /// is what makes "never two affordances for one job" unsayable instead of
+  /// merely discouraged.
+  FieldAffordance? get _affordance {
+    if (showPasswordToggle && obscureText) return const FieldRevealAffordance();
+    if (showClearButton) return const FieldClearAffordance();
+    if (suffixIcon == null) return null;
+    return FieldActionAffordance(
+      icon: suffixIcon!,
+      // A mark-only control has to name itself, and every call site that gives
+      // the suffix a handler already names it. The label is the honest
+      // fallback if one ever does not: it says which field the action belongs
+      // to rather than inventing a verb.
+      tooltip: suffixTooltip ?? label ?? '',
+      // A suffix with no handler is an action that cannot be taken. Stating it
+      // that way keeps the mark and makes its inertness visible, instead of
+      // drawing something that looks like a button and does nothing.
+      onPressed: onSuffixTap,
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-
-    // Determine if we should show suffix icon
-    Widget? suffixIconWidget;
-
-    if (widget.showPasswordToggle && widget.obscureText) {
-      // Password toggle takes priority
-      suffixIconWidget = BaseIconButton(
-        icon: _obscureText ? IconRole.eye : IconRole.eyeSlash,
-        onPressed: _togglePasswordVisibility,
-        tooltip: _obscureText ? l10n.showPassword : l10n.hidePassword,
-        size: ButtonSize.small,
-      );
-    } else if (widget.showClearButton && _hasText) {
-      // Clear button
-      suffixIconWidget = BaseIconButton(
-        icon: IconRole.x,
-        onPressed: _clearText,
-        tooltip: l10n.clear,
-        size: ButtonSize.small,
-      );
-    } else if (widget.suffixIcon != null) {
-      // An action that belongs to this field belongs inside it; only a suffix
-      // without a handler stays decorative.
-      suffixIconWidget = widget.onSuffixTap == null
-          ? BaseIcon(widget.suffixIcon!)
-          : BaseIconButton(
-              icon: widget.suffixIcon!,
-              onPressed: widget.enabled ? widget.onSuffixTap : null,
-              // A mark-only control has to name itself, and every call site
-              // that gives the suffix a handler already names it. The label
-              // is the honest fallback if one ever does not: it says which
-              // field the action belongs to rather than inventing a verb.
-              tooltip: widget.suffixTooltip ?? widget.label ?? '',
-              size: ButtonSize.small,
-            );
-    }
-
-    // The decoration only decides the border *shape* per variant. The side —
-    // its color and width in every state: enabled, hovered, focused, error and
-    // disabled — is resolved by InputDecorator from the Material 3 defaults
-    // (_InputDecoratorDefaultsM3.outlineBorder, Flutter 3.44.4
-    // packages/flutter/lib/src/material/input_decorator.dart:5995), which it
-    // does for any border whose side is not BorderSide.none
-    // (input_decorator.dart:2266-2283). Hand-writing enabledBorder /
-    // errorBorder / disabledBorder here is what used to freeze the field at
-    // one color per state: it painted the error outline at the 2 dp weight M3
-    // reserves for focus, the disabled outline at `outline` 38% instead of
-    // `onSurface` 12%, and dropped the hover indication altogether, because a
-    // spelled-out enabledBorder also wins in the hovered state.
-    final OutlineInputBorder outlinedShape = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppTheme.radiusS),
-    );
-    final OutlineInputBorder filledShape = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppTheme.radiusS),
-      borderSide: BorderSide.none,
-    );
-
-    final InputDecoration commonDecoration = InputDecoration(
-      labelText: widget.label,
-      hintText: widget.hintText,
-      helperText: widget.helperText,
-      errorText: widget.errorText,
-      prefixIcon: widget.prefixIcon == null
-          ? null
-          : BaseIcon(widget.prefixIcon!),
-      suffixIcon: suffixIconWidget,
-    );
-
-    final InputDecoration decoration = switch (widget.variant) {
-      TextFieldVariant.minimal => commonDecoration.copyWith(
-        border: const UnderlineInputBorder(),
-      ),
-      TextFieldVariant.bordered => commonDecoration.copyWith(
-        border: outlinedShape,
-      ),
-      // The emphasized variant is the app's search/inline field, and Material
-      // draws it as a filled box with no active indicator (FIELD-003) and all
-      // four corners rounded (FIELD-002). A border with `BorderSide.none`
-      // makes InputDecorator return it unchanged for every state
-      // (input_decorator.dart:2266), so the states that must stay visible are
-      // spelled out here — and only those.
-      TextFieldVariant.emphasized => commonDecoration.copyWith(
-        filled: true,
-        border: filledShape,
-        disabledBorder: filledShape,
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-          borderSide: BorderSide(color: colorScheme.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-          borderSide: BorderSide(color: colorScheme.error, width: 2),
-        ),
-      ),
-    };
-
-    return GestureDetector(
-      onDoubleTap: () {
-        // Select all text on double click
-        _controller.selection = TextSelection(
-          baseOffset: 0,
-          extentOffset: _controller.text.length,
-        );
-      },
-      // Escape in a filled field clears it and keeps focus there — correcting
-      // a typo must not throw the keyboard out of the field. An empty field
-      // ignores the key, so it bubbles on to the innermost enclosing dismiss
-      // scope (close the dialog, collapse the search, leave the mode): this is
-      // the "clear the text" rung of the Escape ladder. The watcher node never
-      // takes focus and is not a Tab stop.
-      child: Focus(
-        debugLabel: 'BaseTextField.escapeToClear',
-        canRequestFocus: false,
-        skipTraversal: true,
-        onKeyEvent: (node, event) {
-          if (!widget.escapeClears) return KeyEventResult.ignored;
-          if (event is! KeyDownEvent) return KeyEventResult.ignored;
-          if (event.logicalKey != LogicalKeyboardKey.escape) {
-            return KeyEventResult.ignored;
-          }
-          if (_controller.text.isEmpty) return KeyEventResult.ignored;
-          _clearText();
-          return KeyEventResult.handled;
-        },
-        // A FormField, not a plain TextField: the widget always accepted a
-        // validator, but a TextField never runs one, so every dialog's
-        // `formKey.currentState!.validate()` found no fields and waved invalid
-        // input through. TextFormField registers with the enclosing Form, runs
-        // the validator, and shows its message on the field.
-        // ignore: avoid_text_field
-        child: TextFormField(
-          controller: _controller,
-          focusNode: widget.focusNode,
-          decoration: decoration,
-          obscureText: _obscureText,
-          maxLines: widget.maxLines,
-          onChanged: widget.onChanged,
-          onFieldSubmitted: widget.onSubmitted,
-          validator: widget.validator,
-          // Re-validate on every change once the user has touched the field:
-          // the error appears (and clears) at the keystroke that caused it,
-          // instead of going stale until the next submit attempt.
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          autofocus: widget.autofocus,
-          enabled: widget.enabled,
-          // No `style`: the Material 3 input text role is bodyLarge
-          // (text_field.dart:1893, _m3InputStyle) and the SDK also derives the
-          // disabled treatment from it — bodyLarge at 38% opacity
-          // (text_field.dart:1886-1890). Overriding the style with bodyMedium
-          // shrank the text a user types to the size of supporting text and
-          // replaced that disabled treatment with a flat color.
-          //
-          // That role carries its *colour* too: the SDK reads
-          // `textTheme.bodyLarge.color` and nothing else. It used to be the
-          // light `onSurface` baked into the Google Fonts base theme, so a
-          // dark-mode field painted the value at 1.17 : 1 — the third finding
-          // of #402. The fix is in the type scale rather than here
-          // (AppTheme._brightnessCorrectedTextTheme), precisely so this field
-          // keeps deriving both the colour and the disabled treatment from one
-          // role instead of pinning either.
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Fields.text(
+    context,
+    FieldSpec(
+      // An empty label is a field with no floating label rather than a label
+      // with no words; the skin reads it that way, and a search box inside an
+      // overlay names itself with its hint.
+      label: label ?? '',
+      purpose: _purpose,
+      hint: hintText,
+      helper: helperText,
+      error: errorText,
+      validator: validator,
+      leading: prefixIcon,
+      suffix: _affordance,
+      maxLines: maxLines,
+      enabled: enabled,
+      autofocus: autofocus,
+      escapeClears: escapeClears,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+    ),
+    handles: FieldHandles(
+      controller: controller,
+      focusNode: focusNode,
+      initialValue: initialValue,
+    ),
+  );
 }

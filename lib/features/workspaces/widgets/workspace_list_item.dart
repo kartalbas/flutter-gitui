@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show AvatarSpec, IconRole, Proximity, Skin, SkinScope, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -51,22 +51,32 @@ class WorkspaceListItem extends StatelessWidget {
       // workspace keeps the muted tinted treatment.
       containerHasFocus: isHighlighted && containerHasFocus,
       onTap: onTap,
-      leading: Container(
-        decoration: BoxDecoration(
-          color: project.color.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(AppTheme.radiusS),
-        ),
-        child: BaseInset(
-          all: Inset.tight,
-          child: Icon(
-            project.isDefaultWorkspace
-                ? PhosphorIconsBold.house
-                : PhosphorIconsBold.folder,
-            color: project.color,
-            size: AppTheme.iconL,
+      // The row's twin of the workspace card's identity mark, converted with
+      // it: `surfaces.avatar` is the member whose own doc names this case,
+      // and the tile that stood here - a fill, a corner, an inset and a glyph
+      // size - was the application drawing an avatar by hand.
+      //
+      // The BOX does not move: Material's `normal` rung is a 20 dp radius, so
+      // the mark still occupies 40 dp, exactly what a 24 dp glyph inside an
+      // 8 dp inset occupied. The FILL does not move either - the member washes
+      // the series colour at 20 %, which is this `alpha: 0.2` - and the glyph
+      // keeps the series colour itself. What moves is the SHAPE, from an 4 dp
+      // rounded square to the circle an avatar is in Material; the glyph, from
+      // 24 dp to the 20 dp the member sizes it at off the same rung; and the
+      // stroke, from Bold to the ordinary one, because the weight was
+      // unconditional here and therefore distinguished nothing.
+      leading: SkinScope.render(context, (Skin skin, BuildContext inner) {
+        return skin.surfaces.avatar(
+          inner,
+          AvatarSpec(
+            glyph: project.isDefaultWorkspace
+                ? IconRole.house
+                : IconRole.folder,
+            tone: Tone.series(project.colorIndex),
+            semanticsLabel: project.displayName(l10n),
           ),
-        ),
-      ),
+        );
+      }),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

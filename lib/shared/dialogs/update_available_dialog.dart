@@ -1,9 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        ContentPort,
+        IconRole,
+        PanelSpec,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -16,7 +24,6 @@ import '../../core/services/progress_service.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
 import '../components/base_label.dart';
-import '../theme/app_theme.dart';
 import '../components/base_layout.dart';
 
 /// Dialog shown when an update is available
@@ -61,79 +68,74 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Version info
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            // The panel names the foreground that pairs with its own fill, so
-            // the two lines inside it do not have to name it again — and cannot
-            // disagree with it.
-            child: BaseInset(
-              child: DefaultTextStyle.merge(
-                style: TextStyle(color: theme.colorScheme.onPrimaryContainer),
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.package,
-                      size: 24,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                    const BaseGap(Proximity.grouped),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          BaseLabel(
-                            l10n.updateVersionHeading(
-                              widget.updateInfo.version,
-                            ),
-                            role: TextRole.sectionTitle,
-                          ),
-                          const BaseGap(Proximity.hairline),
-                          BaseLabel(
-                            l10n.updateReleasedOn(
-                              _formatDate(
-                                context,
-                                widget.updateInfo.releaseDate,
-                              ),
-                              widget.updateInfo.fileSizeFormatted,
-                            ),
-                            role: TextRole.detail,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+          // **Something about this whole surface needs saying**: a version is
+          // waiting, and here is when it was published and how big it is. The
+          // hand-painted copy of that member was exact to the pixel - a
+          // `primaryContainer` fill with its paired foreground spelled out in
+          // a `DefaultTextStyle.merge`, a 24 dp mark, `grouped` between the
+          // mark and the words, a `sectionTitle` statement over a `detail`
+          // qualifier, `hairline` between them - and the member draws all of
+          // it: `Tone.accent` resolves to the same pair, `titleMedium` IS
+          // `sectionTitle`, `bodySmall` IS `detail`, and its own 16/16/4 are
+          // the rungs this column stated. What does NOT survive is the 12 dp
+          // corner, because a corner is the one thing on that list the
+          // application was never entitled to say.
+          SkinScope.render(context, (Skin skin, BuildContext inner) {
+            return skin.surfaces.banner(
+              inner,
+              BannerSpec(
+                tone: Tone.accent,
+                title: l10n.updateVersionHeading(widget.updateInfo.version),
+                body: l10n.updateReleasedOn(
+                  _formatDate(context, widget.updateInfo.releaseDate),
+                  widget.updateInfo.fileSizeFormatted,
                 ),
+                icon: IconRole.package,
               ),
-            ),
-          ),
+            );
+          }),
 
           const BaseGap(Proximity.separate),
 
-          // Changelog
+          // **Here is a named standing region of the interface**: "What's new",
+          // and the release notes under it. The heading and the box were one
+          // region drawn as two things - a `sectionTitle` line, a gap, and a
+          // filled, stroked, 12 dp-cornered container - which is exactly what
+          // `PanelSpec` says with a title and a content port. The fill, the
+          // stroke and the corner leave together, because all three are the
+          // surface and none of them is something this dialog knows.
+          //
+          // The content keeps its 300 dp cap and its scroll view: how tall a
+          // region may grow before it scrolls is a decision about THIS content
+          // in THIS dialog, and the member's `Flexible` honours a bounded
+          // child (BaseDialog's own content assertion spells out why a loose
+          // flex child in a min-axis column is legal under its scroll view).
+          //
+          // The panel's own inset comes with it rather than being restated:
+          // the header's horizontal distance is what keeps the title on the
+          // same optical left edge as the content below the rule (PANEL-001),
+          // so a content inset chosen here would misalign the two by exactly
+          // the difference.
           if (widget.updateInfo.changelog.isNotEmpty) ...[
-            BaseLabel(l10n.updateWhatsNew, role: TextRole.sectionTitle),
-            const BaseGap(Proximity.related),
-            Container(
-              constraints: const BoxConstraints(maxHeight: 300),
-
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                border: Border.all(color: theme.colorScheme.outlineVariant),
-              ),
-              child: BaseInset(
-                child: SingleChildScrollView(
-                  child: BaseLabel(
-                    widget.updateInfo.changelog,
-                    role: TextRole.body,
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.panel(
+                inner,
+                PanelSpec(
+                  title: l10n.updateWhatsNew,
+                  content: ContentPort(
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 300),
+                      child: SingleChildScrollView(
+                        child: BaseLabel(
+                          widget.updateInfo.changelog,
+                          role: TextRole.body,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
             const BaseGap(Proximity.separate),
           ],
 
@@ -157,37 +159,26 @@ class _UpdateAvailableDialogState extends ConsumerState<UpdateAvailableDialog> {
             ),
           ],
 
-          // Error message
+          // The same member as the version notice above, saying the other
+          // thing this dialog has to say: the download or the install did not
+          // work. It was the identical hand-painted surface one tone over -
+          // `errorContainer` with its paired foreground written out - and the
+          // three ways it had drifted from its sibling twelve lines up (a 20 dp
+          // mark instead of the member's, `related` instead of `grouped`
+          // beside it, `detail` instead of the statement role) all go away by
+          // being asked of one member instead of copied twice.
           if (_errorMessage != null) ...[
             const BaseGap(Proximity.grouped),
-            Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              child: BaseInset(
-                child: Row(
-                  children: [
-                    Icon(
-                      PhosphorIconsRegular.warningCircle,
-                      size: 20,
-                      color: theme.colorScheme.onErrorContainer,
-                    ),
-                    const BaseGap(Proximity.related),
-                    Expanded(
-                      // The error panel states its own paired foreground; the
-                      // message inside reads it.
-                      child: DefaultTextStyle.merge(
-                        style: TextStyle(
-                          color: theme.colorScheme.onErrorContainer,
-                        ),
-                        child: BaseLabel(_errorMessage!, role: TextRole.detail),
-                      ),
-                    ),
-                  ],
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                BannerSpec(
+                  tone: Tone.danger,
+                  title: _errorMessage!,
+                  icon: IconRole.warningCircle,
                 ),
-              ),
-            ),
+              );
+            }),
           ],
 
           // Checkbox for dismissing update

@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_label.dart';
@@ -49,19 +50,20 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Commit message (prominent)
-              Container(
+              // Commit message (prominent).
+              //
+              // **Here is one self-contained object** - the commit's own
+              // message, which is what this panel exists to show. The fill and
+              // the corner were that card drawn by hand; `roomy` was already
+              // stated here and is the rung the member defaults to, so the
+              // breathing room does not move. What the member adds is the edge
+              // this card never had: a card in this language carries a resting
+              // outline, and the hand-painted copy had only a fill.
+              SizedBox(
                 width: double.infinity,
-                // The card's fill and corner stay; only its breathing room is
-                // the language's question, and a card is the surface the
-                // vocabulary calls deliberately generous: `roomy`.
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: BaseInset(
-                  all: Inset.roomy,
-                  child: Column(
+                child: BaseCard(
+                  isSelectable: false,
+                  content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -110,7 +112,42 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
 
               const BaseGap(Proximity.grouped),
 
-              // Expandable details section
+              // Expandable details section.
+              //
+              // **This is `surfaces.disclosure` and it cannot go yet**, and
+              // the blocker is in the member's Material implementation rather
+              // than in `DisclosureSpec`, which says everything this site
+              // needs. `MaterialSurfaces.disclosure` reveals with an
+              // `AnimatedCrossFade`, and that widget keeps the collapsed body
+              // MOUNTED - it only stops PAINTING it. For a settings section,
+              // whose body is a handful of rows, nobody noticed. For this
+              // panel the body is the whole details card, and mounting it
+              // while closed costs two things that are not this screen's to
+              // absorb: thirty-two widgets built on every rebuild of a
+              // collapsed section, and a count the scene sweep can no longer
+              // state in one number, because the blueprint skin mounts its
+              // body only while expanded (`if (spec.expanded)`) and Material
+              // does not - 119 against 87 for the same screen at the same
+              // distance, which `kContractRenderedUnderBlueprint` can only
+              // express for a STRETCHED run.
+              //
+              // M3's own canonical widget already does the right thing:
+              // `ExpansionTile` drops its children when closed
+              // (`shouldRemoveChildren`, expansion_tile.dart). The member
+              // should follow the canon it already claims to follow, and when
+              // it does this construction becomes one call with no corner in
+              // it - the header box, its stroke, the caret the screen swaps by
+              // hand and the Show/Hide word beside it (two affordances for one
+              // job, which this repository's own rules forbid) all leave
+              // together. Reported rather than converted, because converting
+              // it first would leave a shared register with no number that
+              // makes both skins agree.
+              //
+              // The FOCUS of a collapsed body was never part of the defect:
+              // `AnimatedCrossFade` excludes the hidden child's focus by
+              // default (`excludeBottomFocus` defaults to true), so a closed
+              // section's buttons were never Tab-reachable. Only the
+              // mounted-widgets cost above stands.
               InkWell(
                 onTap: () {
                   setState(() {
@@ -155,16 +192,17 @@ class _CommitDetailsPanelState extends State<CommitDetailsPanel> {
               // Details content (expandable)
               if (_showDetails) ...[
                 const BaseGap(Proximity.grouped),
-                Container(
+                // **Here is one self-contained object** again: everything git
+                // records about this commit besides its message. The same
+                // hand-painted card as the message above it, down to the fill
+                // and the corner, so it becomes the same member and the two
+                // cannot round differently again.
+                SizedBox(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                  ),
-                  child: BaseInset(
-                    child: Column(
+                  child: BaseCard(
+                    isSelectable: false,
+                    inset: Inset.normal,
+                    content: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Author info

@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        BannerSpec,
+        ControlScale,
+        IconRole,
+        Inset,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
-import '../../../shared/theme/app_theme.dart';
+import '../../../shared/components/base_card.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
@@ -172,40 +181,29 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // **Something about this whole surface needs saying**, and the
+          // surface leaves with it, exactly as this site predicted. The fill
+          // and the corner were the callout; so was the
+          // `DefaultTextStyle.merge` that had to state the paired foreground
+          // because the application had chosen the fill. `Tone.danger`
+          // resolves under Material to the same
+          // `errorContainer`/`onErrorContainer` pair, so the pairing survives
+          // without either half crossing the seam.
           if (errorMessage != null)
-            Container(
-              // The callout's fill and corner stay: they are the surface, and
-              // the surface leaves with `surfaces.banner`.
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.errorContainer,
-                borderRadius: BorderRadius.circular(AppTheme.radiusM),
-              ),
-              // The callout paints its own fill, so it states the paired
-              // foreground once here and the message inside says nothing
-              // about colour.
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onErrorContainer,
+            SkinScope.render(context, (Skin skin, BuildContext inner) {
+              return skin.surfaces.banner(
+                inner,
+                // The message is the banner's `title` and not its `body`,
+                // because `title` is "the statement" in the spec's own words
+                // and this callout has exactly one - what it says is why the
+                // selection cannot be squashed.
+                BannerSpec(
+                  tone: Tone.danger,
+                  title: errorMessage,
+                  icon: IconRole.warningCircle,
                 ),
-                child: BaseInset(
-                  child: Row(
-                    children: [
-                      // The error banner's mark, at the same rung as the
-                      // identical banner in the clone, initialize and merge
-                      // dialogs: one meaning, one scale, and that scale is
-                      // the ordinary one. What it means is that the selection
-                      // this dialog was opened on cannot be squashed, which
-                      // is `danger` rather than a colour slot.
-                      const BaseIcon(IconRole.warningCircle, tone: Tone.danger),
-                      const BaseGap(Proximity.grouped),
-                      Expanded(
-                        child: BaseLabel(errorMessage, role: TextRole.body),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+              );
+            }),
           const BaseGap(Proximity.grouped),
 
           BaseLabel(
@@ -216,40 +214,48 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
           // statement: `related`.
           const BaseGap(Proximity.related),
 
-          // List of commits being squashed
-          Container(
+          // List of commits being squashed.
+          //
+          // The bordered box round the list is a CARD, and `Inset.none` is
+          // the rung `BaseCard`'s own doc names for it: "a list that must
+          // reach the card's border". The stroke and the corner were the
+          // card's edge drawn by hand - the application picking Material's
+          // `outline` and its own 8 - and both are the skin's now, so the
+          // rows inside are clipped by whatever corner this language rounds
+          // its cards at instead of overhanging one the screen invented.
+          ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 200),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _selectedCommits.length,
-              itemBuilder: (context, index) {
-                final commit = _selectedCommits[index];
-                return BaseListItem(
-                  leading: const BaseIcon(
-                    IconRole.gitCommit,
-                    scale: ControlScale.compact,
-                    tone: Tone.accent,
-                  ),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      BaseLabel(
-                        commit.shortSubject,
-                        role: TextRole.body,
-                        maxLines: 1,
-                      ),
-                      BaseLabel(
-                        '${commit.shortHash} by ${commit.author}',
-                        role: TextRole.detail,
-                      ),
-                    ],
-                  ),
-                );
-              },
+            child: BaseCard(
+              isSelectable: false,
+              inset: Inset.none,
+              content: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _selectedCommits.length,
+                itemBuilder: (context, index) {
+                  final commit = _selectedCommits[index];
+                  return BaseListItem(
+                    leading: const BaseIcon(
+                      IconRole.gitCommit,
+                      scale: ControlScale.compact,
+                      tone: Tone.accent,
+                    ),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        BaseLabel(
+                          commit.shortSubject,
+                          role: TextRole.body,
+                          maxLines: 1,
+                        ),
+                        BaseLabel(
+                          '${commit.shortHash} by ${commit.author}',
+                          role: TextRole.detail,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
 
@@ -268,33 +274,23 @@ class _SquashCommitsDialogState extends ConsumerState<_SquashCommitsDialog> {
 
           const BaseGap(Proximity.grouped),
 
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-            child: BaseInset(
-              child: Row(
-                children: [
-                  // A note's own mark: dense, and carrying the application's
-                  // colour. It named a number on no ladder in the application,
-                  // for want of a word for the job.
-                  const BaseIcon(
-                    IconRole.info,
-                    scale: ControlScale.compact,
-                    tone: Tone.accent,
-                  ),
-                  const BaseGap(Proximity.related),
-                  Expanded(
-                    child: BaseLabel(
-                      l10n.squashCommitsInfo,
-                      role: TextRole.detail,
-                    ),
-                  ),
-                ],
+          // The second banner in this dialog, and it passes the test the
+          // member's own question sets: it says what the dialog's action will
+          // do to the whole selection, not what one control above it means.
+          // `Tone.info` - "this is worth knowing and nothing is wrong" - is
+          // what the accent info mark was already saying in Material's words,
+          // and it is now said once instead of split between a mark's tone
+          // and a container's fill.
+          SkinScope.render(context, (Skin skin, BuildContext inner) {
+            return skin.surfaces.banner(
+              inner,
+              BannerSpec(
+                tone: Tone.info,
+                title: l10n.squashCommitsInfo,
+                icon: IconRole.info,
               ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
       actions: [

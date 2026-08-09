@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        IconRole,
+        Inset,
+        ProgressExtent,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../theme/app_theme.dart';
 import '../components/base_icon.dart';
@@ -165,13 +174,31 @@ class ProgressOverlay extends ConsumerWidget {
                     // of one card.
                     const BaseGap(Proximity.separate),
 
-                    // Progress bar
+                    // How far along the blocking work is, as
+                    // `controls.progress`. The thickness and the corner are
+                    // gone rather than converted: how thick a bar is and what
+                    // its ends look like is the language's arithmetic, and an
+                    // 8 dp bar with an 8 dp corner was this card deciding a
+                    // length. `ProgressExtent.inline` is the rung the
+                    // vocabulary defines as "inside a line of content", which
+                    // is the arrangement here - the bar is one line of a
+                    // column that also carries a heading, a readout and a
+                    // status message. `block` would be the wrong word: it
+                    // means "its own region, with nothing else competing for
+                    // the space", and Material draws it as a centred ring,
+                    // which would delete the linear read the "3 of 10 / 30 %"
+                    // row underneath exists to spell out.
                     if (!progress.isIndeterminate) ...[
-                      LinearProgressIndicator(
-                        value: progress.progress,
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                      ),
+                      SkinScope.render(context, (
+                        Skin skin,
+                        BuildContext inner,
+                      ) {
+                        return skin.controls.progress(
+                          inner,
+                          fraction: progress.progress,
+                          extent: ProgressExtent.inline,
+                        );
+                      }),
                       // The bar and the numbers that read it out belong to one
                       // group.
                       const BaseGap(Proximity.grouped),
@@ -190,10 +217,19 @@ class ProgressOverlay extends ConsumerWidget {
                         ],
                       ),
                     ] else ...[
-                      LinearProgressIndicator(
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-                      ),
+                      // The same member with no fraction, which is how the
+                      // contract says "the end is unknowable" - each language
+                      // then draws the indeterminate form it actually has,
+                      // instead of this card implying a bar it cannot fill.
+                      SkinScope.render(context, (
+                        Skin skin,
+                        BuildContext inner,
+                      ) {
+                        return skin.controls.progress(
+                          inner,
+                          extent: ProgressExtent.inline,
+                        );
+                      }),
                     ],
 
                     // Status message

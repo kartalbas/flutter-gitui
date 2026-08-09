@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show BadgeSpec, IconRole, Inset, Proximity, Skin, SkinScope, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
-import '../../../shared/components/base_icon.dart';
-import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_layout.dart';
 
@@ -59,56 +57,39 @@ class BatchOperationsToolbar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Selection count. The accent FILL below is the pill this
-              // count is painted on, and it stays for the same reason the
-              // bar's own box does: it is a surface, and it leaves with the
-              // badge member. It is also what makes `Tone.onAccent` the
-              // truthful word for the mark and the label inside it.
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusL),
-                ),
-                child: BaseInset(
-                  x: Inset.normal,
-                  y: Inset.tight,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Tone.onAccent for the same reason the words beside it
-                      // take it: the pill behind both is painted with the
-                      // accent by the application itself, three lines up. 16 is
-                      // exactly the `compact` rung, so the mark does not change
-                      // size.
-                      //
-                      // The Bold stroke does NOT survive, and that is measured
-                      // rather than overlooked. It was unconditional here - one
-                      // mark, no second state to tell apart - so it drew no
-                      // distinction; the same check-square IS a state elsewhere
-                      // (git_status_tree_view.dart:374, 481, where Bold means
-                      // "staged"), and that is the case a weight has to be kept
-                      // for. Recorded in test/shared/icons/
-                      // icon_weight_census_test.dart.
-                      BaseIcon(
-                        IconRole.checkSquare,
-                        scale: ControlScale.compact,
-                        tone: Tone.onAccent,
-                      ),
-                      const BaseGap(Proximity.related),
-                      // Tone.onAccent, not a dropped override: the count pill
-                      // behind this text is painted with the accent by the
-                      // application itself, which is the exact case the tone's doc
-                      // names. It leaves with the pill when the badge surface
-                      // migrates.
-                      BaseLabel(
-                        l10n.repositoriesSelected(selectedCount),
-                        role: TextRole.emphasis,
-                        tone: Tone.onAccent,
-                      ),
-                    ],
+              // Selection count: "how many, riding on something else", which
+              // is `surfaces.badge` in the member's own words. The pill the
+              // bar was painting - the accent fill, the corner and both
+              // insets - is the member's geometry now, and so are the mark's
+              // size and the gap between mark and words.
+              //
+              // `Tone.onAccent` leaves with the fill, exactly as the two notes
+              // that stood here predicted: it was truthful only while the
+              // APPLICATION painted the accent behind the words, and it is the
+              // skin that paints the pill now. What the bar states instead is
+              // that the count MEANS the accent, and Material answers that
+              // with its own badge treatment - the accent washed to 15 %
+              // behind an accent-coloured mark and label, where the pill used
+              // to be solid `primary` under `onPrimary`. Quieter, and it is
+              // the same pill every other badge in the application draws.
+              //
+              // The Bold stroke does NOT survive, and that is measured rather
+              // than overlooked. It was unconditional here - one mark, no
+              // second state to tell apart - so it drew no distinction; the
+              // same check-square IS a state elsewhere
+              // (git_status_tree_view.dart:374, 481, where Bold means
+              // "staged"), and that is the case a weight has to be kept for.
+              // Recorded in test/shared/icons/icon_weight_census_test.dart.
+              SkinScope.render(context, (Skin skin, BuildContext inner) {
+                return skin.surfaces.badge(
+                  inner,
+                  BadgeSpec(
+                    label: l10n.repositoriesSelected(selectedCount),
+                    icon: IconRole.checkSquare,
+                    tone: Tone.accent,
                   ),
-                ),
-              ),
+                );
+              }),
 
               const BaseGap(Proximity.separate),
 

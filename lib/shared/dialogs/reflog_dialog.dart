@@ -6,6 +6,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
+import '../components/base_progress.dart';
 import '../theme/app_theme.dart';
 import '../components/copyable_text.dart';
 import '../../core/git/git_providers.dart';
@@ -34,7 +35,7 @@ class ReflogDialog extends ConsumerWidget {
           }
           return _buildReflogList(context, entries);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, _) => _buildError(context, error),
       ),
       actions: [

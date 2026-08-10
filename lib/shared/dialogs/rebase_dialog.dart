@@ -18,6 +18,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../generated/app_localizations.dart';
 import '../components/base_card.dart';
+import '../components/base_progress.dart';
 import '../components/base_toggle_row.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
@@ -87,7 +88,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             return _buildStart(context, currentBranchAsync.value);
           }
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, _) => _buildError(context, error),
       ),
       actions: rebaseStateAsync.when(
@@ -261,7 +262,7 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const BaseProgress.block(),
       error: (error, _) =>
           Center(child: BaseLabel('Error: $error', role: TextRole.body)),
     );

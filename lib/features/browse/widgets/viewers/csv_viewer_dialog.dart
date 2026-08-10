@@ -16,6 +16,7 @@ import 'package:csv/csv.dart';
 
 import '../../../../generated/app_localizations.dart';
 import '../../../../shared/components/base_label.dart';
+import '../../../../shared/components/base_progress.dart';
 import '../../../../shared/components/base_layout.dart';
 import '../../../../shared/components/base_viewer_dialog.dart';
 
@@ -99,7 +100,7 @@ class _CsvViewerDialogState extends State<CsvViewerDialog> {
             )
           : null,
       content: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const BaseProgress.block()
           : _error != null
           ? Center(
               child: Column(

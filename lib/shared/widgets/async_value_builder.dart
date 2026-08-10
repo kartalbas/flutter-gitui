@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import '../components/base_progress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
@@ -55,8 +56,7 @@ class AsyncValueBuilder<T> extends StatelessWidget {
         return dataBuilder(context, data);
       },
       loading: () =>
-          loadingBuilder?.call(context) ??
-          const Center(child: CircularProgressIndicator()),
+          loadingBuilder?.call(context) ?? const BaseProgress.block(),
       error: (error, stack) =>
           errorBuilder?.call(context, error, stack) ??
           ErrorState(message: error.toString()),

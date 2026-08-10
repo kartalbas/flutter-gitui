@@ -16,6 +16,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../generated/app_localizations.dart';
 import '../components/base_card.dart';
+import '../components/base_progress.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../theme/app_theme.dart';
@@ -83,7 +84,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
             return _buildStart(context);
           }
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, _) => _buildError(context, error),
       ),
       actions: bisectStateAsync.when(
@@ -217,7 +218,7 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const BaseProgress.block(),
       error: (error, _) =>
           Center(child: BaseLabel('Error: $error', role: TextRole.body)),
     );

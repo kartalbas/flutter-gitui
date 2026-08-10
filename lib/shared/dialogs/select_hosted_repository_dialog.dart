@@ -8,6 +8,7 @@ import '../../core/hosting/hosted_repository.dart';
 import '../../core/hosting/hosting_providers.dart';
 import '../../generated/app_localizations.dart';
 import '../components/base_button.dart';
+import '../components/base_progress.dart';
 import '../components/base_dialog.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
@@ -296,7 +297,7 @@ class _SourceResults extends ConsumerWidget {
     final asyncRepositories = ref.watch(sourceRepositoriesProvider(source));
 
     return asyncRepositories.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const BaseProgress.block(),
       error: (error, _) => _Message(
         icon: IconRole.warningCircle,
         text: 'Could not list ${source.label}: $error',

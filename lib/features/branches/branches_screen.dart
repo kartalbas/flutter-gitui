@@ -19,6 +19,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../generated/app_localizations.dart';
 import '../../shared/components/base_icon.dart';
+import '../../shared/components/base_progress.dart';
 import '../../shared/components/base_layout.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
@@ -322,7 +323,7 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const BaseProgress.block(),
       error: (error, stack) => BranchesErrorState(error: error),
     );
   }

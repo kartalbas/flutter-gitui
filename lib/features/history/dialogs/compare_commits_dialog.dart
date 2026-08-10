@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
@@ -6,6 +6,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -64,7 +65,7 @@ class _CompareCommitsDialogState extends ConsumerState<CompareCommitsDialog> {
         future: _commitsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const BaseProgress.block();
           }
 
           if (snapshot.hasError) {

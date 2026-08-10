@@ -8,6 +8,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
 import '../../shared/components/base_badge.dart';
 import '../../shared/components/base_button.dart';
+import '../../shared/components/base_progress.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_viewer_dialog.dart';
 import '../../shared/utils/keyboard_guards.dart';
@@ -108,7 +109,7 @@ class ChangelogDialog extends HookConsumerWidget {
         // action: Enter, Esc and the X all do the same thing.
         onSubmit: () => Navigator.of(context).pop(),
         content: changelogAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const BaseProgress.block(),
           // The twin of the "no release history" pane below, and no longer the
           // one shape the facade could not take. This pane was hand-rolled for
           // a single reason - its hero is RED and `EmptyStateWidget` painted

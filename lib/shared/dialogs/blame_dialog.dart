@@ -10,6 +10,7 @@ import '../../generated/app_localizations.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/blame.dart';
 import '../components/base_label.dart';
+import '../components/base_progress.dart';
 import '../components/base_viewer_dialog.dart';
 import '../components/base_card.dart';
 import '../components/base_layout.dart';
@@ -50,7 +51,7 @@ class BlameDialog extends ConsumerWidget {
           }
           return _buildBlameView(context, blame);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, stack) => _buildError(context, error.toString()),
       ),
     );

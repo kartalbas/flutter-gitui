@@ -18,6 +18,7 @@ import 'package:file_picker/file_picker.dart';
 
 import '../../generated/app_localizations.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_progress.dart';
 import '../../shared/components/base_layout.dart';
 import '../../shared/components/base_button.dart';
 import '../../shared/components/base_dialog.dart';
@@ -187,7 +188,7 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const BaseProgress.block(),
       error: (error, stack) => ChangesErrorState(error: error),
     );
 

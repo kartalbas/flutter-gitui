@@ -7,6 +7,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import 'package:path/path.dart' as path;
 
 import '../../../../shared/components/base_layout.dart';
+import '../../../../shared/components/base_progress.dart';
 import '../../../../shared/components/base_viewer_dialog.dart';
 
 /// Enhanced markdown viewer dialog with rendering
@@ -70,7 +71,7 @@ class _MarkdownViewerDialogState extends State<MarkdownViewerDialog> {
       widthFactor: 0.85,
       heightFactor: 0.85,
       content: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const BaseProgress.block()
           : _error != null
           ? Center(
               child: Column(

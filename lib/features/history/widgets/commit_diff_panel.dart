@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
@@ -7,6 +7,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -80,7 +81,7 @@ class CommitDiffPanel extends ConsumerWidget {
                 message: l10n.messageNoFilesChanged,
               )
             : _CommitFileDiff(commitHash: commitHash, filePath: path),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, stack) => PanelNote(
           icon: PhosphorIconsRegular.warningCircle,
           message: l10n.errorLoadingData('diff'),
@@ -116,7 +117,7 @@ class _CommitFileDiff extends ConsumerWidget {
           l10n.lineCopiedToClipboard,
         ),
       ),
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const BaseProgress.block(),
       error: (error, stack) => PanelNote(
         icon: PhosphorIconsRegular.warningCircle,
         message: l10n.errorLoadingData('diff'),

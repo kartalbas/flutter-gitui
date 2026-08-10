@@ -17,6 +17,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
@@ -77,7 +78,7 @@ class FileBlamePanel extends ConsumerWidget {
           }
           return _buildBlameView(context, blame);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, stack) => _buildError(context, error.toString()),
       ),
     );

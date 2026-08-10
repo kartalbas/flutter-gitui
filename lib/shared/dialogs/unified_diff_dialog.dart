@@ -14,6 +14,7 @@ import '../../core/git/models/stash.dart';
 import '../components/base_badge.dart';
 import '../components/base_diff_viewer.dart';
 import '../components/base_button.dart';
+import '../components/base_progress.dart';
 import '../components/base_viewer_dialog.dart';
 import '../widgets/empty_state.dart';
 
@@ -143,7 +144,7 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
       future: _diffFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const BaseProgress.block();
         }
 
         if (snapshot.hasError) {

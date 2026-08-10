@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/legacy.dart';
@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_speed_dial.dart';
 import '../../../shared/models/tree_node.dart';
 import '../../../shared/controllers/tree_view_controller.dart';
@@ -632,11 +633,11 @@ class FileTreeViewState extends ConsumerState<FileTreeView> {
     // This ensures updates when files are restored/modified externally
 
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const BaseProgress.block();
     }
 
     if (_isSearching) {
-      return const Center(child: CircularProgressIndicator());
+      return const BaseProgress.block();
     }
 
     // File operation shortcuts, scoped by the navigable view to the tree's

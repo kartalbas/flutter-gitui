@@ -25,6 +25,7 @@ import '../../generated/app_localizations.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_icon.dart';
+import '../../shared/components/base_progress.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/components/base_layout.dart';
 import '../../shared/components/base_filter_chip.dart';
@@ -542,7 +543,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
             }
             return _buildCommitHistory(context, commits);
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const BaseProgress.block(),
           error: (error, stack) => _buildError(context, error),
         );
     }

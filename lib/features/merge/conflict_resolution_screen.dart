@@ -19,6 +19,7 @@ import '../../shared/theme/app_theme.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/merge_conflict.dart';
 import '../../shared/components/base_button.dart';
+import '../../shared/components/base_progress.dart';
 import '../../shared/components/base_list_item.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../shared/components/base_icon.dart';
@@ -598,7 +599,7 @@ class _ConflictResolutionScreenState
 
           if (_isResolving) ...[
             const BaseGap(Proximity.separate),
-            const Center(child: CircularProgressIndicator()),
+            const BaseProgress.block(),
             const BaseGap(Proximity.related),
             // Still a hand-built style, and the italic is why. `TextRole` says
             // what a line is FOR and `Tone` says what it MEANS; neither says

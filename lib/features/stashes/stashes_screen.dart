@@ -20,6 +20,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/components/base_label.dart';
+import '../../shared/components/base_progress.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../shared/widgets/screen_body_host.dart';
@@ -162,8 +163,7 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
                     Expanded(
                       child: stashesAsync.when(
                         data: (stashes) => _buildStashList(context, stashes),
-                        loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                        loading: () => const BaseProgress.block(),
                         error: (error, stack) =>
                             StashesErrorState(error: error),
                       ),

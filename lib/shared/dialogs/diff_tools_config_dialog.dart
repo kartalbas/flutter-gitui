@@ -14,6 +14,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         TextRole,
         Tone;
 import '../components/base_dialog.dart';
+import '../components/base_progress.dart';
 
 import '../../generated/app_localizations.dart';
 import '../components/base_badge.dart';
@@ -80,7 +81,7 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
           }
           return _buildToolsConfig(context, tools);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         error: (error, _) => _buildError(context, error),
       ),
       actions: [

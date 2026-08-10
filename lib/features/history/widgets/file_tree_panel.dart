@@ -23,6 +23,7 @@ import 'package:path/path.dart' as path;
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_panel.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/widgets/diff_stat_badge.dart';
@@ -220,7 +221,7 @@ class _FileTreePanelState extends ConsumerState<FileTreePanel> {
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const BaseProgress.block(),
         // The same note as the empty case above, saying the other of the two
         // things the shape can say.
         error: (error, stack) => PanelNote(

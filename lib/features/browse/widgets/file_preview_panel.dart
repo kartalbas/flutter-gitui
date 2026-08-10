@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/widgets/empty_state.dart';
@@ -260,7 +261,7 @@ class _FilePreviewPanelState extends ConsumerState<FilePreviewPanel> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const BaseProgress.block();
     }
 
     if (_error != null) {

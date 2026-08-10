@@ -10,11 +10,13 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Overlays,
         Proximity,
         TextRole,
+        ToggleKind,
         Tone;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_list_item.dart';
@@ -337,16 +339,17 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
           ),
 
           // Background download of a found update; installing stays manual
-          SwitchListTile(
-            secondary: const BaseIcon(
-              IconRole.cloudArrowDown,
-              scale: ControlScale.prominent,
-            ),
-            title: Text(l10n.autoDownloadUpdates),
-            subtitle: Text(l10n.autoDownloadUpdatesDescription),
+          BaseToggleRow(
+            leading: IconRole.cloudArrowDown,
+            label: l10n.autoDownloadUpdates,
+            description: l10n.autoDownloadUpdatesDescription,
             value: updates.autoDownload,
+            // Takes effect the moment it changes; nothing to confirm.
+            kind: ToggleKind.switching,
             onChanged: (value) {
-              ref.read(configProvider.notifier).setUpdateAutoDownload(value);
+              ref
+                  .read(configProvider.notifier)
+                  .setUpdateAutoDownload(value ?? false);
             },
           ),
 

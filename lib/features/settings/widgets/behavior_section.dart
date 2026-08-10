@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole;
+    show ControlScale, IconRole, TextRole, ToggleKind;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
@@ -9,6 +9,7 @@ import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_list_item.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_button.dart';
 import 'settings_section.dart';
 
@@ -27,16 +28,16 @@ class BehaviorSection extends ConsumerWidget {
       title: l10n.behavior,
       icon: IconRole.sliders,
       children: [
-        SwitchListTile(
-          secondary: const BaseIcon(
-            IconRole.arrowsClockwise,
-            scale: ControlScale.prominent,
-          ),
-          title: Text(l10n.autoFetch),
-          subtitle: Text(l10n.autoFetchDescription),
+        BaseToggleRow(
+          leading: IconRole.arrowsClockwise,
+          label: l10n.autoFetch,
+          description: l10n.autoFetchDescription,
           value: behavior.autoFetch,
+          // `switching` and not `check`: this takes effect the moment it
+          // changes, and there is nothing to confirm afterwards.
+          kind: ToggleKind.switching,
           onChanged: (value) {
-            ref.read(configProvider.notifier).setAutoFetch(value);
+            ref.read(configProvider.notifier).setAutoFetch(value ?? false);
           },
         ),
         if (behavior.autoFetch)
@@ -65,30 +66,26 @@ class BehaviorSection extends ConsumerWidget {
             ),
           ),
         const BaseSeparator(),
-        SwitchListTile(
-          secondary: const BaseIcon(
-            IconRole.arrowUp,
-            scale: ControlScale.prominent,
-          ),
-          title: Text(l10n.confirmPush),
-          subtitle: Text(l10n.confirmPushDescription),
+        BaseToggleRow(
+          leading: IconRole.arrowUp,
+          label: l10n.confirmPush,
+          description: l10n.confirmPushDescription,
           value: behavior.confirmPush,
+          kind: ToggleKind.switching,
           onChanged: (value) {
-            ref.read(configProvider.notifier).setConfirmPush(value);
+            ref.read(configProvider.notifier).setConfirmPush(value ?? false);
           },
         ),
-        SwitchListTile(
-          secondary: const BaseIcon(
-            IconRole.warningDiamond,
-            scale: ControlScale.prominent,
-          ),
-          title: Text(l10n.confirmDestructiveActions),
-          subtitle: Text(l10n.confirmDestructiveActionsDescription),
+        BaseToggleRow(
+          leading: IconRole.warningDiamond,
+          label: l10n.confirmDestructiveActions,
+          description: l10n.confirmDestructiveActionsDescription,
           value: behavior.confirmDestructiveActions,
+          kind: ToggleKind.switching,
           onChanged: (value) {
             ref
                 .read(configProvider.notifier)
-                .setConfirmDestructiveActions(value);
+                .setConfirmDestructiveActions(value ?? false);
           },
         ),
       ],

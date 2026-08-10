@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole;
+    show ControlScale, IconRole, TextRole, ToggleKind;
 import '../../../generated/app_localizations.dart';
 
 import '../../../core/config/config_providers.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_list_item.dart';
 import '../../../shared/components/base_button.dart';
@@ -53,16 +54,17 @@ class HistorySection extends ConsumerWidget {
             onPressed: onEditCommitHistoryLimit,
           ),
         ),
-        SwitchListTile(
-          secondary: const BaseIcon(
-            IconRole.graph,
-            scale: ControlScale.prominent,
-          ),
-          title: Text(l10n.showCommitGraph),
-          subtitle: Text(l10n.showCommitGraphDescription),
+        BaseToggleRow(
+          leading: IconRole.graph,
+          label: l10n.showCommitGraph,
+          description: l10n.showCommitGraphDescription,
           value: history.showCommitGraph,
+          // Takes effect the moment it changes; nothing to confirm.
+          kind: ToggleKind.switching,
           onChanged: (value) {
-            ref.read(configProvider.notifier).setShowCommitGraph(value);
+            ref
+                .read(configProvider.notifier)
+                .setShowCommitGraph(value ?? false);
           },
         ),
       ],

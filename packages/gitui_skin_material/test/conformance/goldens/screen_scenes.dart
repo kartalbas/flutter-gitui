@@ -44,9 +44,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gitui/core/git/models/file_status.dart';
 import 'package:flutter_gitui/core/git/models/tag.dart';
-import 'package:flutter_gitui/features/changes/widgets/file_list_item.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
 import 'package:flutter_gitui/features/tags/widgets/tag_filter_chips.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
@@ -93,12 +91,6 @@ List<GoldenScene> screenGoldenScenes() => <GoldenScene>[
     width: _kSceneWidth,
     build: (BuildContext context) =>
         _atEachWidth(context, (BuildContext context) => _shellToolbar(context)),
-  ),
-  GoldenScene(
-    name: 'screen_changes_file_rows',
-    width: _kSceneWidth,
-    build: (BuildContext context) =>
-        _atEachWidth(context, (BuildContext context) => _changesFileRows()),
   ),
   GoldenScene(
     name: 'screen_tags_filter_band',
@@ -313,73 +305,6 @@ final List<ToolbarAction> _utilityActions = <ToolbarAction>[
     onPressed: _noop,
   ),
 ];
-
-// ---------------------------------------------------------------------------
-// Changes screen file rows
-// ---------------------------------------------------------------------------
-
-/// The changes screen's file list, built from the real `FileListItem`.
-///
-/// Each row puts up to three small `BaseIconButton`s into a
-/// `Row(mainAxisSize: min)` that shares its line with an ellipsizing path and a
-/// status badge. It is the textbook case of the breakage these scenes exist
-/// for: widen the small icon button and the action cluster starts eating the
-/// path instead of the path ellipsizing sooner, and at the narrow width it
-/// stops fitting altogether.
-Widget _changesFileRows() {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: <Widget>[
-      FileListItem(
-        file: const FileStatus(
-          path: 'lib/shared/components/base_button.dart',
-          indexStatus: FileStatusType.modified,
-          workTreeStatus: FileStatusType.unchanged,
-        ),
-        isStaged: true,
-        onUnstage: _noop,
-        onDiff: _noop,
-      ),
-      FileListItem(
-        file: const FileStatus(
-          path: 'test/conformance/goldens/component_scenes.dart',
-          indexStatus: FileStatusType.unchanged,
-          workTreeStatus: FileStatusType.added,
-        ),
-        isStaged: false,
-        isSelected: true,
-        onStage: _noop,
-        onDiscard: _noop,
-        onDiff: _noop,
-      ),
-      FileListItem(
-        file: const FileStatus(
-          path: 'lib/features/history/widgets/history_list_footer.dart',
-          oldPath: 'lib/features/history/history_footer.dart',
-          indexStatus: FileStatusType.renamed,
-          workTreeStatus: FileStatusType.unchanged,
-        ),
-        isStaged: true,
-        onUnstage: _noop,
-        onDiff: _noop,
-      ),
-      FileListItem(
-        file: const FileStatus(
-          path:
-              'docs/a-deliberately-long-path/that-forces-the-label-to-'
-              'ellipsize-before-the-action-cluster-does.md',
-          indexStatus: FileStatusType.unchanged,
-          workTreeStatus: FileStatusType.modified,
-        ),
-        isStaged: false,
-        onStage: _noop,
-        onDiscard: _noop,
-        onDiff: _noop,
-      ),
-    ],
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Tags screen search-and-filter band

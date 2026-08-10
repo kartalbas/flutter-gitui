@@ -99,11 +99,11 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 247 references', () {
+  test('the census still accounts for all 236 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 247-entry diff.
-    // 247 = the 246 the conversion measured, plus the diff viewer's `file`
+    // agreeing and this says so in one line instead of a 236-entry diff.
+    // 236 = the 246 the conversion measured, plus the diff viewer's `file`
     // and `gitDiff` that moved into git_status_tree_view.dart with the
     // view-mode toggle (recorded at that entry), minus the three marks the
     // tree conversion moved across the seam (the disclosure caret pair and
@@ -112,18 +112,22 @@ void main() {
     // screen names since it adopted `chrome.screen` (#442) - the refresh
     // arrow and the overflow dots, which `StandardAppBar` used to name from
     // outside this census and the screen states on `ScreenSpec.toolbar` now,
-    // recorded at that entry. Every mark involved was and stays in the
-    // distinct set, so the 77 below is unchanged.
+    // recorded at that entry; minus the eleven references file_list_item.dart
+    // named, deleted with the widget itself, which nothing in the application
+    // built and only a golden scene still rendered (#445). Every mark
+    // involved stays in the distinct set except one: `filePlus` was named
+    // ONLY by the deleted file, so the distinct count falls with it, from 77
+    // to 76.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 247);
+    expect(total, 236);
     expect(
       _kMarkCensus.values
           .expand((Map<String, int> marks) => marks.keys)
           .toSet()
           .length,
-      77,
+      76,
     );
   });
 
@@ -530,17 +534,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'gitCommit': 1,
     'lightbulb': 1,
     'warningCircle': 1,
-  },
-  'lib/features/changes/widgets/file_list_item.dart': <String, int>{
-    'arrowsLeftRight': 1,
-    'copy': 1,
-    'file': 1,
-    'filePlus': 1,
-    'gitDiff': 1,
-    'minus': 2,
-    'pencilSimple': 1,
-    'plus': 2,
-    'trash': 1,
   },
   // `file` and the second `gitDiff` arrived from base_diff_viewer.dart with
   // the view-mode toggle: #438 resolved the floating speed dial as the site

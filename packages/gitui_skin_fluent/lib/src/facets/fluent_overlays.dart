@@ -11,15 +11,18 @@ import '../fluent_motion.dart';
 import '../fluent_resources.dart';
 import '../fluent_theme.dart';
 import '../fluent_typography.dart';
+import 'fluent_controls.dart';
 
 /// Things that appear on top, the Fluent way - one member at a time.
 ///
-/// **This facet is registered but not yet whole.** [presentMenu] - the
-/// point-anchored menu, WinUI's context flyout - is implemented and
-/// behaviour-tested; the other four members throw an [UnimplementedError]
-/// naming themselves, exactly the fence the skin's own class doc demands: a
-/// loud refusal keeps a gap honest, where quietly rendering another
-/// language's overlay would be the substitution failure pointed inward.
+/// **This facet is registered but not yet whole.** The three attached and
+/// point-anchored members - [presentMenu], [presentPopover] and [menuAnchor],
+/// all three of them the WinUI flyout under different anchors - are
+/// implemented and behaviour-tested; [presentDialog] and [notify] still throw
+/// an [UnimplementedError] naming themselves, exactly the fence the skin's own
+/// class doc demands: a loud refusal keeps a gap honest, where quietly
+/// rendering another language's overlay would be the substitution failure
+/// pointed inward.
 ///
 /// **On the point anchor, because the finding has been asked for from four
 /// directions now:** a bare `Offset` does NOT force Fluent into anything
@@ -115,20 +118,66 @@ final class FluentOverlays implements SkinOverlays {
     ),
   );
 
-  /// Not yet: the anchored trigger is the icon-button-plus-flyout pair -
-  /// the language's own placement resolution against a control's edge -
-  /// and lands with its own slice.
+  /// The anchored trigger: a command button that opens the flyout beneath
+  /// itself.
+  ///
+  /// It builds the trigger through `controls.iconButton` rather than drawing
+  /// one, so an anchor and an ordinary command button in the same toolbar
+  /// cannot come out different - the disagreement a second drawing invites,
+  /// and the one this skin has already had to remove once from its flyout
+  /// surface.
+  ///
+  /// The trigger is announced as a TOGGLE only when the anchor's subject is
+  /// engaged. An ordinary anchor has no state to report, and saying "not
+  /// pressed" about a control that is never pressed is noise a screen reader
+  /// then has to carry - which is what null means in that slot.
+  ///
+  /// Where it opens is the reference's own answer for an attached flyout:
+  /// beneath the control, at its leading edge (`FlyoutPlacementMode.bottomLeft`
+  /// is the default attached placement, flyout.dart:788), clamped to the same
+  /// 8 epx margin the point-anchored menu uses. Fluent's `auto` mode can flip
+  /// a target-attached flyout to the other side of its TARGET near an edge;
+  /// this member states the placement rather than resolving it, which is a
+  /// registered simplification and not a hidden one - the clamp keeps it on
+  /// screen, and the difference shows only for a control within a flyout's
+  /// height of the bottom edge.
   @override
   Widget menuAnchor(
     BuildContext context,
     MenuAnchorSpec spec,
     SkinMenuHost host,
-  ) => throw UnimplementedError(
-    'FluentOverlays.menuAnchor is not implemented yet: the anchored trigger '
-    '(FluentIconButton opening a MenuFlyout with Fluent placement '
-    'resolution) lands with its own slice. presentMenu already carries the '
-    'menu surface it will open.',
+  ) => Builder(
+    builder: (BuildContext anchorContext) => const FluentControls().iconButton(
+      anchorContext,
+      IconButtonSpec(
+        icon: spec.icon,
+        tooltip: spec.tooltip,
+        tone: spec.tone,
+        scale: spec.scale,
+        selected: spec.selected ? true : null,
+        badgeCount: spec.badgeCount,
+        onPressed: spec.enabled
+            ? () => _openBeneath(anchorContext, host)
+            : null,
+      ),
+    ),
   );
+
+  /// Opens [host]'s menu at the bottom-leading corner of the control built at
+  /// [anchorContext].
+  ///
+  /// The zero fallback is deliberate rather than defensive: a control that has
+  /// not been laid out has no corner to open at, and the placement delegate
+  /// clamps the origin onto the surface anyway, so the menu still appears
+  /// somewhere the user can see and dismiss instead of nowhere.
+  Future<int?> _openBeneath(BuildContext anchorContext, SkinMenuHost host) {
+    Offset at = Offset.zero;
+    final RenderObject? renderObject = anchorContext.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      at = renderObject.localToGlobal(Offset(0, renderObject.size.height));
+    }
+    return presentMenu(anchorContext, at: at, host: host);
+  }
 
   /// The plain Flyout: the same surface the menu opens on, carrying the
   /// application's own content instead of rows.

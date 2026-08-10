@@ -99,11 +99,11 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 235 references', () {
+  test('the census still accounts for all 236 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 235-entry diff.
-    // 235 = the 246 the conversion measured, plus the diff viewer's `file`
+    // agreeing and this says so in one line instead of a 236-entry diff.
+    // 236 = the 246 the conversion measured, plus the diff viewer's `file`
     // and `gitDiff` that moved into git_status_tree_view.dart with the
     // view-mode toggle (recorded at that entry), minus the three marks the
     // tree conversion moved across the seam (the disclosure caret pair and
@@ -117,11 +117,12 @@ void main() {
     // built and only a golden scene still rendered (#445). Every mark
     // involved stays in the distinct set except one: `filePlus` was named
     // ONLY by the deleted file, so the distinct count falls with it, from 77
-    // to 76.
+    // to 76. Plus the `trash` the bulk-delete command brought to the branches
+    // screen when the switcher's menu stopped being its only home (#412).
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 235);
+    expect(total, 236);
     expect(
       _kMarkCensus.values
           .expand((Map<String, int> marks) => marks.keys)
@@ -416,12 +417,15 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
   // its own bar as `ScreenSpec.toolbar` now, so the two names moved from the
   // shared bar into the screen that asks for them. What the user sees is
   // unchanged; what this file counts is the naming, and the naming moved.
+  // `trash` arrived with the bulk-delete command, whose only home used to be
+  // a row in the shell switcher's menu (#412).
   'lib/features/branches/branches_screen.dart': <String, int>{
     'arrowsClockwise': 1,
     'cloud': 1,
     'dotsThreeVertical': 1,
     'folder': 1,
     'plus': 1,
+    'trash': 1,
   },
   'lib/features/branches/dialogs/delete_branch_dialog.dart': <String, int>{
     'lock': 1,

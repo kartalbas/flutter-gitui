@@ -2,34 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show
-        ControlScale,
-        DialogRouteSpec,
-        IconRole,
-        Inset,
-        Overlays,
-        Proximity,
-        TextRole,
-        Tone;
+    show DialogRouteSpec, IconRole, Inset, Overlays, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../components/base_badge.dart';
-import '../components/base_icon.dart';
 import '../components/base_layout.dart';
-import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
 import '../components/base_dialog.dart';
-import '../components/base_button.dart';
 import '../components/base_label.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/destructive_action.dart';
 import '../../core/git/models/branch.dart';
 import '../../core/services/notification_service.dart';
 import '../dialogs/confirm_destructive.dart';
-import '../../features/branches/dialogs/delete_branch_dialog.dart';
-import '../../features/branches/dialogs/rename_branch_dialog.dart';
-import '../../core/config/app_config.dart';
+import '../dialogs/branch_switcher_dialog.dart';
 
 /// Branch switcher widget - displays current branch and allows switching
 class BranchSwitcher extends ConsumerWidget {
@@ -65,362 +52,152 @@ class BranchSwitcher extends ConsumerWidget {
           ? AppLocalizations.of(context)!.tooltipSwitchBranch
           : branchName,
       showDropdown: branches.length > 1,
+      // The switcher's job is switching, and the dialog that does it already
+      // existed - searchable, keyboard-navigable, swept for the keyboard
+      // contract - with no caller anywhere in lib/. What stood here instead
+      // was a hand-rolled `showMenu` whose rows carried their own rename and
+      // delete buttons: two affordances for a job the branches screen already
+      // owns, and a row shape no design language outside Material can state
+      // (#412).
       onTap: branches.length > 1
-          ? () => _showBranchMenu(context, ref, branches)
+          ? () => Overlays.dialogFrom<void>(
+              context,
+              route: DialogRouteSpec(
+                title: AppLocalizations.of(context)!.switchBranch,
+              ),
+              builder: (_) => const BranchSwitcherDialog(),
+            )
           : null,
     );
   }
+}
 
-  void _showBranchMenu(
-    BuildContext context,
-    WidgetRef ref,
-    List<GitBranch> branches,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
+/// Offers to delete every branch that is neither current nor protected.
+///
+/// A top-level function because its only entry point used to be a row in the
+/// switcher's menu, and that menu is gone (#412). The branches screen offers
+/// it now, which is where branches are managed. The dialog it shows still
+/// lives in this file, which is one tidy-up short of right.
+Future<void> showDeleteAllUnprotectedBranches(
+  BuildContext context,
+  WidgetRef ref,
+  List<GitBranch> branches,
+) async {
+  // Get list of deletable branches
+  final deletableBranches = branches
+      .where((b) => !b.isCurrent && !b.isProtected)
+      .toList();
 
-    // Check animation speed setting
-    final animationSpeed =
-        Theme.of(context).extension<AnimationSpeedExtension>()?.speed ??
-        AppAnimationSpeed.normal;
+  if (deletableBranches.isEmpty) return;
 
-    // Sort branches: protected branches first, then by name
-    final sortedBranches = List<GitBranch>.from(branches)
-      ..sort((a, b) {
-        // Protected branches come first
-        if (a.isProtected && !b.isProtected) return -1;
-        if (!a.isProtected && b.isProtected) return 1;
-        // Within same protection level, sort alphabetically
-        return a.name.compareTo(b.name);
-      });
+  final gitService = ref.read(gitServiceProvider);
+  if (gitService == null) return;
 
-    // Check if there are any deletable branches (non-current, non-protected)
-    final hasDeletableBranches = sortedBranches.any(
-      (b) => !b.isCurrent && !b.isProtected,
+  // The dialog states which branches it will keep before the user presses
+  // anything, so this has to be git's own answer to "would `git branch -d`
+  // take this one" - see getBranchesDeletableWithoutForce, which reproduces
+  // git's rule (upstream when the branch tracks one, HEAD otherwise) rather
+  // than approximating it with `git branch --merged`.
+  final Set<String> deletableWithoutForce;
+  try {
+    deletableWithoutForce =
+        (await gitService.getBranchesDeletableWithoutForce()).unwrap();
+  } catch (e) {
+    if (!context.mounted) return;
+    NotificationService.showError(
+      context,
+      'Failed to determine merged branches: $e',
     );
-
-    final menuItems = <PopupMenuEntry<dynamic>>[
-      // Branch items
-      ...sortedBranches.map((branch) {
-        final isSelected = branch.isCurrent;
-        return PopupMenuItem<GitBranch>(
-          value: branch,
-          child: Row(
-            children: [
-              Expanded(
-                child: MenuItemContentTwoLine(
-                  icon: PhosphorIconsBold.gitBranch,
-                  primaryLabel: branch.name,
-                  secondaryLabel: branch.lastCommitMessage,
-                  // The mark carries the application's own colour, which is a
-                  // meaning: `Tone.accent`. The glyph itself stays a Phosphor
-                  // Bold constant on this component - its stroke is a fact
-                  // `IconRole` cannot carry - but the COLOUR no longer has to
-                  // be Material's word for it at this call site.
-                  tone: Tone.accent,
-                  isSelected: isSelected,
-                  showCheck: true,
-                ),
-              ),
-              // Protected branch lock icon
-              if (branch.isProtected) ...[
-                const BaseIcon(
-                  IconRole.lock,
-                  scale: ControlScale.compact,
-                  tone: Tone.muted,
-                ),
-                // The lock and the row actions beside it are two parts of one
-                // entry; the trailing padding was that space wearing a padding
-                // idiom.
-                const BaseGap(Proximity.related),
-              ],
-              // Action buttons (disabled for protected branches)
-              if (!branch.isProtected)
-                BaseIconButton(
-                  icon: IconRole.pencilSimple,
-                  tooltip: l10n.renameBranch(branch.name),
-                  size: ButtonSize.small,
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close menu
-                    _showRenameBranchDialog(context, ref, branch);
-                  },
-                ),
-              if (!isSelected &&
-                  !branch
-                      .isProtected) // Only show delete for non-current, non-protected branches
-                BaseIconButton(
-                  icon: IconRole.trash,
-                  tooltip: l10n.deleteBranch,
-                  size: ButtonSize.small,
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close menu
-                    _showDeleteBranchDialog(context, ref, branch);
-                  },
-                ),
-            ],
-          ),
-        );
-      }),
-      // Add separator and "Delete all except protected" option if there are deletable branches
-      if (hasDeletableBranches) ...[
-        const PopupMenuDivider(),
-        PopupMenuItem<String>(
-          value: 'delete_all_unprotected',
-          child: MenuItemContent(
-            icon: IconRole.trash,
-            label: l10n.deleteAllUnprotectedBranches,
-            tone: Tone.danger,
-          ),
-        ),
-      ],
-    ];
-
-    // Show menu with animation duration adapted to settings
-    final menuFuture = showMenu<dynamic>(
-      context: context,
-      position: _getMenuPosition(context),
-      items: menuItems,
-      popUpAnimationStyle: AnimationStyle(
-        duration: AppTheme.getStandardAnimation(animationSpeed),
-      ),
-    );
-
-    menuFuture.then((result) {
-      if (!context.mounted) return;
-
-      if (result is GitBranch && !result.isCurrent) {
-        _switchBranch(context, ref, result);
-      } else if (result == 'delete_all_unprotected') {
-        _showDeleteAllUnprotectedDialog(context, ref, sortedBranches);
-      }
-    });
+    return;
   }
 
-  Future<void> _switchBranch(
-    BuildContext context,
-    WidgetRef ref,
-    GitBranch branch,
-  ) async {
+  if (!context.mounted) return;
+
+  final result = await Overlays.dialogFrom<BulkDeleteResult>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.deleteAllUnprotectedBranches,
+    ),
+    builder: (context) => BulkDeleteBranchesDialog(
+      branches: deletableBranches,
+      deletableWithoutForce: deletableWithoutForce,
+    ),
+  );
+
+  if (result != null && result.selectedBranches.isNotEmpty && context.mounted) {
+    // Deleting branches is reflog-recoverable, so the batch confirmation
+    // runs under the master "confirm destructive actions" switch; force
+    // deleting adds the unmerged-loss warning to the same prompt.
+    final l10n = AppLocalizations.of(context)!;
+    final message = l10n.deleteAllUnprotectedBranchesConfirm(
+      result.selectedBranches.length,
+    );
+    final confirmed = await confirmDestructive(
+      context: context,
+      ref: ref,
+      action: DestructiveAction.deleteLocalBranch,
+      icon: IconRole.trash,
+      title: l10n.deleteAllUnprotectedBranches,
+      // The bulk phrasing, not `forceDeleteWarning`: that one says "This
+      // branch is not fully merged", which is the wrong sentence in front
+      // of a list of them.
+      message: result.force
+          ? '$message\n\n${l10n.forceDeleteBranchesWarning}'
+          : message,
+      confirmLabel: l10n.deleteAll,
+    );
+    if (!confirmed || !context.mounted) return;
+    await _deleteAllUnprotectedBranches(
+      context,
+      ref,
+      result.selectedBranches,
+      force: result.force,
+    );
+  }
+}
+
+Future<void> _deleteAllUnprotectedBranches(
+  BuildContext context,
+  WidgetRef ref,
+  List<GitBranch> branches, {
+  bool force = false,
+}) async {
+  int successCount = 0;
+  int failCount = 0;
+  final errors = <String>[];
+
+  for (final branch in branches) {
     try {
+      // confirmed-by: confirmDestructive(DestructiveAction.deleteLocalBranch)
+      // in _showDeleteAllUnprotectedDialog, this method's only caller.
       await ref
           .read(gitActionsProvider)
-          .switchBranch(branch.name, createIfMissing: false);
+          .deleteBranch(branch.name, force: force);
+      successCount++;
     } catch (e) {
-      if (!context.mounted) return;
-      NotificationService.showError(context, 'Failed to switch branch: $e');
+      failCount++;
+      errors.add('${branch.name}: $e');
     }
   }
 
-  Future<void> _showDeleteBranchDialog(
-    BuildContext context,
-    WidgetRef ref,
-    GitBranch branch,
-  ) async {
-    // DeleteBranchDialog returns a DeleteBranchResult (it also collects the
-    // force choice), so the old `showDialog<bool>` + `result == true` guard
-    // never matched and the delete silently did nothing.
-    final result = await Overlays.dialogFrom<DeleteBranchResult>(
+  if (!context.mounted) return;
+
+  // Show summary notification
+  if (failCount == 0) {
+    NotificationService.showSuccess(
       context,
-      route: DialogRouteSpec(
-        title: AppLocalizations.of(context)!.deleteBranchDialog,
-      ),
-      builder: (context) => DeleteBranchDialog(branch: branch),
+      'Successfully deleted $successCount branch${successCount == 1 ? '' : 'es'}',
     );
-    if (result != null &&
-        result != DeleteBranchResult.cancel &&
-        context.mounted) {
-      try {
-        final force = result == DeleteBranchResult.forceDelete;
-        // confirmed-by: DeleteBranchDialog above; it collects the force
-        // choice and confirms.
-        await ref
-            .read(gitActionsProvider)
-            .deleteBranch(branch.name, force: force);
-        if (!context.mounted) return;
-        NotificationService.showSuccess(
-          context,
-          'Branch "${branch.name}" deleted',
-        );
-      } catch (e) {
-        if (!context.mounted) return;
-        NotificationService.showError(context, 'Failed to delete branch: $e');
-      }
-    }
-  }
-
-  Future<void> _showRenameBranchDialog(
-    BuildContext context,
-    WidgetRef ref,
-    GitBranch branch,
-  ) async {
-    final result = await Overlays.dialogFrom<String>(
+  } else if (successCount == 0) {
+    NotificationService.showError(
       context,
-      route: DialogRouteSpec(
-        title: AppLocalizations.of(context)!.renameBranch(branch.name),
-      ),
-      builder: (context) => RenameBranchDialog(branch: branch),
+      'Failed to delete all branches:\n${errors.join('\n')}',
     );
-    // Dialog returns new branch name if rename was confirmed
-    if (result != null && context.mounted) {
-      try {
-        await ref
-            .read(gitActionsProvider)
-            .renameBranch(result, oldName: branch.name);
-        if (!context.mounted) return;
-        NotificationService.showSuccess(
-          context,
-          'Branch "${branch.name}" renamed to "$result"',
-        );
-      } catch (e) {
-        if (!context.mounted) return;
-        NotificationService.showError(context, 'Failed to rename branch: $e');
-      }
-    }
-  }
-
-  Future<void> _showDeleteAllUnprotectedDialog(
-    BuildContext context,
-    WidgetRef ref,
-    List<GitBranch> branches,
-  ) async {
-    // Get list of deletable branches
-    final deletableBranches = branches
-        .where((b) => !b.isCurrent && !b.isProtected)
-        .toList();
-
-    if (deletableBranches.isEmpty) return;
-
-    final gitService = ref.read(gitServiceProvider);
-    if (gitService == null) return;
-
-    // The dialog states which branches it will keep before the user presses
-    // anything, so this has to be git's own answer to "would `git branch -d`
-    // take this one" - see getBranchesDeletableWithoutForce, which reproduces
-    // git's rule (upstream when the branch tracks one, HEAD otherwise) rather
-    // than approximating it with `git branch --merged`.
-    final Set<String> deletableWithoutForce;
-    try {
-      deletableWithoutForce =
-          (await gitService.getBranchesDeletableWithoutForce()).unwrap();
-    } catch (e) {
-      if (!context.mounted) return;
-      NotificationService.showError(
-        context,
-        'Failed to determine merged branches: $e',
-      );
-      return;
-    }
-
-    if (!context.mounted) return;
-
-    final result = await Overlays.dialogFrom<BulkDeleteResult>(
+  } else {
+    NotificationService.showWarning(
       context,
-      route: DialogRouteSpec(
-        title: AppLocalizations.of(context)!.deleteAllUnprotectedBranches,
-      ),
-      builder: (context) => BulkDeleteBranchesDialog(
-        branches: deletableBranches,
-        deletableWithoutForce: deletableWithoutForce,
-      ),
+      'Deleted $successCount branch${successCount == 1 ? '' : 'es'}, but $failCount failed:\n${errors.join('\n')}',
     );
-
-    if (result != null &&
-        result.selectedBranches.isNotEmpty &&
-        context.mounted) {
-      // Deleting branches is reflog-recoverable, so the batch confirmation
-      // runs under the master "confirm destructive actions" switch; force
-      // deleting adds the unmerged-loss warning to the same prompt.
-      final l10n = AppLocalizations.of(context)!;
-      final message = l10n.deleteAllUnprotectedBranchesConfirm(
-        result.selectedBranches.length,
-      );
-      final confirmed = await confirmDestructive(
-        context: context,
-        ref: ref,
-        action: DestructiveAction.deleteLocalBranch,
-        icon: IconRole.trash,
-        title: l10n.deleteAllUnprotectedBranches,
-        // The bulk phrasing, not `forceDeleteWarning`: that one says "This
-        // branch is not fully merged", which is the wrong sentence in front
-        // of a list of them.
-        message: result.force
-            ? '$message\n\n${l10n.forceDeleteBranchesWarning}'
-            : message,
-        confirmLabel: l10n.deleteAll,
-      );
-      if (!confirmed || !context.mounted) return;
-      await _deleteAllUnprotectedBranches(
-        context,
-        ref,
-        result.selectedBranches,
-        force: result.force,
-      );
-    }
-  }
-
-  Future<void> _deleteAllUnprotectedBranches(
-    BuildContext context,
-    WidgetRef ref,
-    List<GitBranch> branches, {
-    bool force = false,
-  }) async {
-    int successCount = 0;
-    int failCount = 0;
-    final errors = <String>[];
-
-    for (final branch in branches) {
-      try {
-        // confirmed-by: confirmDestructive(DestructiveAction.deleteLocalBranch)
-        // in _showDeleteAllUnprotectedDialog, this method's only caller.
-        await ref
-            .read(gitActionsProvider)
-            .deleteBranch(branch.name, force: force);
-        successCount++;
-      } catch (e) {
-        failCount++;
-        errors.add('${branch.name}: $e');
-      }
-    }
-
-    if (!context.mounted) return;
-
-    // Show summary notification
-    if (failCount == 0) {
-      NotificationService.showSuccess(
-        context,
-        'Successfully deleted $successCount branch${successCount == 1 ? '' : 'es'}',
-      );
-    } else if (successCount == 0) {
-      NotificationService.showError(
-        context,
-        'Failed to delete all branches:\n${errors.join('\n')}',
-      );
-    } else {
-      NotificationService.showWarning(
-        context,
-        'Deleted $successCount branch${successCount == 1 ? '' : 'es'}, but $failCount failed:\n${errors.join('\n')}',
-      );
-    }
-  }
-
-  RelativeRect _getMenuPosition(BuildContext context) {
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button.localToGlobal(
-      button.size.bottomRight(Offset.zero),
-      ancestor: overlay,
-    );
-
-    // Position menu below the button by using bottomLeft instead of topLeft
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        Offset(topLeft.dx, bottomRight.dy), // Start from bottom-left of button
-        bottomRight,
-      ),
-      Offset.zero & overlay.size,
-    );
-    return position;
   }
 }
 

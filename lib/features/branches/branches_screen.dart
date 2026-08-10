@@ -6,6 +6,8 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         IconRole,
         Inset,
+        MenuActionRole,
+        MenuSeparator,
         ScreenSpec,
         Skin,
         SkinScope,
@@ -36,6 +38,7 @@ import 'widgets/branches_empty_state.dart';
 import 'widgets/branches_error_state.dart';
 import 'services/branches_service.dart';
 import '../../shared/components/base_menu_item.dart';
+import '../../shared/widgets/branch_switcher.dart';
 
 /// Branches screen - Local, remote, and tags
 class BranchesScreen extends ConsumerStatefulWidget {
@@ -181,6 +184,22 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
                     icon: IconRole.plus,
                     label: l10n.createBranch,
                     onPressed: () => _showCreateBranchDialog(context),
+                  ),
+                  const MenuSeparator(),
+                  // Its previous and only home was a row inside the shell
+                  // switcher's hand-rolled menu (#412). Branches are managed
+                  // here, so the command that deletes several of them at once
+                  // belongs here too - and it says what it is by its role
+                  // rather than by being drawn red at the call site.
+                  MenuAction(
+                    icon: IconRole.trash,
+                    label: l10n.deleteAllUnprotectedBranches,
+                    role: MenuActionRole.destructive,
+                    onPressed: () => showDeleteAllUnprotectedBranches(
+                      context,
+                      ref,
+                      _visibleLocalBranches,
+                    ),
                   ),
                 ],
               ),

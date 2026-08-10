@@ -156,7 +156,7 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/shared/dialogs/repository_switcher_dialog.dart': _Weights(4, 0, 3, 0),
   'lib/shared/utils/file_icon_utils.dart': _Weights(21, 0, 21, 0),
   'lib/shared/widgets/base_tree_item.dart': _Weights(3, 0, 3, 0),
-  'lib/shared/widgets/branch_switcher.dart': _Weights(3, 0, 3, 0),
+  'lib/shared/widgets/branch_switcher.dart': _Weights(3, 0, 2, 0),
   'lib/shared/widgets/language_selector.dart': _Weights(1, 0, 1, 0),
   'lib/shared/widgets/repository_switcher.dart': _Weights(2, 0, 1, 0),
   'lib/shared/widgets/workspace_switcher.dart': _Weights(4, 0, 2, 0),
@@ -195,6 +195,16 @@ class _GivenUp {
 /// so the two measurements have to agree; the third test makes them.
 const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
   // ---- Bold: the switcher menus that became MenuChoice data ---------------
+  _GivenUp(
+    'lib/shared/widgets/branch_switcher.dart',
+    'gitBranch',
+    'Bold',
+    _Fate.superseded,
+    'The mark on each row of the branch menu, which this file drew by hand. '
+        'The menu is gone: the switcher opens BranchSwitcherDialog, which '
+        'already existed and had no caller, and that dialog draws its own '
+        'rows. Its header mark gave up the same weight when it was converted.',
+  ),
   _GivenUp(
     'lib/shared/widgets/workspace_switcher.dart',
     'house',
@@ -699,8 +709,9 @@ void main() {
       // disposition note left with it, one bold on each side, so the pin
       // follows without the two lists drifting apart. 41 adds the three the
       // switcher menus gave up when their rows became MenuChoice data: two in
-      // the workspace menu (house and folder) and one in the repository menu.
-      expect(boldRemoved, 41);
+      // the workspace menu (house and folder) and one in the repository menu;
+      // 42 adds the branch menu's own row mark, which left with that menu.
+      expect(boldRemoved, 42);
       expect(fillRemoved, 5);
     });
 

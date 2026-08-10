@@ -103,7 +103,7 @@
 ///    all any more; `async_value_builder.dart` still names `file`, and
 ///    `gitDiff` leaves the distinct set with the move.
 ///
-/// The tally therefore reads 65 references: the 81 the conversion measured,
+/// The tally therefore reads 60 references: the 81 the conversion measured,
 /// less the seven recorded up to P3d, less the diff viewer's two that moved
 /// out of scope, less the dialog surface's two that the skin draws now, less
 /// the text field's three that became affordance facts, less the batch bar's
@@ -187,22 +187,25 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 65 references', () {
+  test('the census still accounts for all 60 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 65-entry diff.
+    // agreeing and this says so in one line instead of a 60-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 65);
-    // 36 distinct marks: `quick_settings_menu.dart`'s gained `check` was
+    expect(total, 60);
+    // 34 distinct marks: `lock` and `pencilSimple` were named ONLY by the
+    // branch switcher's hand-rolled menu rows, which left with that menu
+    // (#412), so the distinct set falls by two. Before that:
+    // `quick_settings_menu.dart`'s gained `check` was
     // already drawn by `language_selector.dart`, `gitDiff` left with the
     // diff viewer's toggle when it moved into the changes screen's panel
     // header (`file` stays - `async_value_builder.dart` still names it), and
     // `eye` / `eyeSlash` left with the text field's reveal affordance - the
     // application states that a secret MAY be unhidden and the skin decides
     // what that looks like, so nothing in `lib/` names either mark now.
-    expect(_marksInCensus().length, 36);
+    expect(_marksInCensus().length, 34);
   });
 
   test('the Material skin maps every one of those marks to the same glyph', () {
@@ -635,11 +638,13 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'folder': 1,
     'folderOpen': 1,
   },
+  // The switcher's hand-rolled menu left with #412, and its rows' marks with
+  // it: the protected-branch lock, the per-row rename pencil, and two of the
+  // four trash marks. What stays is the bulk-delete flow this file still
+  // hosts and the trigger's own branch mark.
   'lib/shared/widgets/branch_switcher.dart': <String, int>{
-    'gitBranch': 2,
-    'lock': 1,
-    'pencilSimple': 1,
-    'trash': 4,
+    'gitBranch': 1,
+    'trash': 2,
     'warning': 1,
   },
   'lib/shared/widgets/command_log_panel.dart': <String, int>{

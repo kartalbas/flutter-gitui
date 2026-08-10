@@ -67,21 +67,10 @@
   "done": "Done",
   "refresh": "Refresh",
   "search": "Search",
-  "browse_": "Browse",
   "apply": "Apply",
   "checkout": "Checkout",
   "push": "Push",
   "pull": "Pull",
-  "repositoriesSelected": "{count} selected",
-  "@repositoriesSelected": {
-    "description": "Count of selected repositories",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "3"
-      }
-    }
-  },
   "repositoryCount": "{count} repositories",
   "@repositoryCount": {
     "description": "Count of repositories in workspace",
@@ -92,14 +81,7 @@
       }
     }
   },
-  "checkoutToMain": "Checkout to Main",
-  "checkoutAllReposTooltip": "Checkout all selected repos to their main branch",
-  "allReposMustHaveCleanStatus": "All selected repos must have clean status",
-  "pullAllReposTooltip": "Pull changes for all selected repos",
-  "createBranchTooltip": "Create a new branch in the selected repo",
-  "selectOnlyOneRepoForBranch": "Select only one repository to create a branch",
   "createPr": "Create PR",
-  "createPrTooltip": "Create a pull request for the selected repo",
   "selectOnlyOneRepoForPr": "Select only one repository to create a PR",
   "fetch": "Fetch",
   "merge": "Merge",
@@ -123,13 +105,12 @@
     }
   },
   "retry": "Retry",
-  "selectedCount": "{count} Selected",
+  "selectedCount": "{count} selected",
   "@selectedCount": {
-    "description": "Count of selected items",
+    "description": "Number of selected items",
     "placeholders": {
       "count": {
-        "type": "int",
-        "example": "5"
+        "type": "int"
       }
     }
   },
@@ -149,7 +130,6 @@
       }
     }
   },
-  "regexSearchPlaceholder": "Regex search...",
   "itemCount": "{count, plural, =1{{count} {itemType}} other{{count} {itemTypePlural}}}",
   "@itemCount": {
     "description": "Count of items with proper pluralization",
@@ -208,36 +188,6 @@
   "byVersion": "By Version",
   "byAuthor": "By Author",
   "byDate": "By Date",
-  "allWithCount": "All ({count})",
-  "@allWithCount": {
-    "description": "All items filter with count",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "42"
-      }
-    }
-  },
-  "annotatedWithCount": "Annotated ({count})",
-  "@annotatedWithCount": {
-    "description": "Annotated tags filter with count",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "15"
-      }
-    }
-  },
-  "lightweightWithCount": "Lightweight ({count})",
-  "@lightweightWithCount": {
-    "description": "Lightweight tags filter with count",
-    "placeholders": {
-      "count": {
-        "type": "int",
-        "example": "27"
-      }
-    }
-  },
   "pushCount": "Push {count}",
   "@pushCount": {
     "description": "Push count of items",
@@ -270,7 +220,6 @@
   "pushAll": "Push All",
   "fetchAll": "Fetch All",
   "noTags": "No Tags",
-  "createTagToMarkHistory": "Create a tag to mark important points in history",
   "authorFilter": "Author: {author}",
   "@authorFilter": {
     "description": "Active author filter chip",
@@ -317,31 +266,18 @@
   "allAuthors": "All authors",
   "noAuthorsFound": "No authors found in tags",
   "useRegularExpressions": "Use Regular Expressions",
-  "enableRegexMatching": "Enable regex pattern matching in search",
   "today": "Today",
   "lastWeek": "Last Week",
   "lastMonth": "Last Month",
   "lastYear": "Last Year",
   "customRange": "Custom Range",
   "allTime": "All Time",
-  "createTagDialogTitle": "Create Tag",
-  "createTagDescription": "Create a new tag at the current HEAD",
   "tagName": "Tag Name",
   "tagNameHint": "v1.0.0",
   "annotatedTag": "Annotated Tag",
   "includeMessageWithTag": "Include a message with the tag",
   "message": "Message",
   "releaseNotesPlaceholder": "Release notes or description...",
-  "tagCreatedSuccess": "Tag \"{tagName}\" created successfully",
-  "@tagCreatedSuccess": {
-    "description": "Tag creation success message",
-    "placeholders": {
-      "tagName": {
-        "type": "String",
-        "example": "v1.0.0"
-      }
-    }
-  },
   "tagCreatedError": "Failed to create tag: {error}",
   "@tagCreatedError": {
     "description": "Tag creation error message",
@@ -351,256 +287,20 @@
       }
     }
   },
-  "tagsFetchedSuccess": "Tags fetched successfully",
-  "tagsFetchedError": "Failed to fetch tags: {error}",
-  "@tagsFetchedError": {
-    "description": "Tags fetch error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "noRemotesConfigured": "No remotes configured",
-  "selectRemote": "Select Remote",
-  "allTagsPushedSuccess": "All tags pushed to {remoteName}",
-  "@allTagsPushedSuccess": {
-    "description": "All tags pushed success message",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "pushTagsError": "Failed to push tags: {error}",
-  "@pushTagsError": {
-    "description": "Push tags error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "pushingTags": "Pushing Tags",
-  "pushedTagToRemote": "Pushed {tagName} to {remoteName}",
-  "@pushedTagToRemote": {
-    "description": "Tag pushed progress message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      },
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "tagsPushedSuccess": "{count, plural, =1{{count} tag pushed to {remoteName}} other{{count} tags pushed to {remoteName}}}",
-  "@tagsPushedSuccess": {
-    "description": "Multiple tags pushed success message",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "deleteTagsDialogTitle": "Delete Tags?",
-  "deleteTagsConfirmation": "Delete {count, plural, =1{{count} tag} other{{count} tags}}?\n\nThis action cannot be undone.",
-  "@deleteTagsConfirmation": {
-    "description": "Delete tags confirmation message",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "tagsToDelete": "Tags to delete:",
   "alsoDeleteFromRemote": "Also delete from remote",
-  "deleteFromRemoteDescription": "Delete tags from remote repository to prevent them from coming back when fetching",
-  "deletingTagsLocalAndRemote": "Deleting Tags (Local & Remote)",
-  "deletingTagsLocal": "Deleting Tags",
-  "deletedTagLocally": "Deleted {tagName} locally",
-  "@deletedTagLocally": {
-    "description": "Tag deleted locally progress message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
-  "deletedTagFromRemote": "Deleted {tagName} from {remoteName}",
-  "@deletedTagFromRemote": {
-    "description": "Tag deleted from remote progress message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      },
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "tagsDeletedSuccess": "{count, plural, =1{{count} tag deleted} other{{count} tags deleted}}",
-  "@tagsDeletedSuccess": {
-    "description": "Tags deleted success message",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "deleteTagsError": "Failed to delete tags: {error}",
-  "@deleteTagsError": {
-    "description": "Delete tags error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "localBadge": "LOCAL",
   "viewDiff": "View Diff",
   "type": "Type",
   "annotated": "Annotated",
   "lightweight": "Lightweight",
-  "tagger": "Tagger",
   "date": "Date",
-  "checkoutTagDialogTitle": "Checkout Tag?",
-  "checkoutTagConfirmation": "Checkout tag \"{tagName}\"?\n\nThis will put you in a detached HEAD state.",
-  "@checkoutTagConfirmation": {
-    "description": "Checkout tag confirmation message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
-  "checkedOutTagSuccess": "Checked out tag \"{tagName}\"",
-  "@checkedOutTagSuccess": {
-    "description": "Checkout tag success message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
-  "checkoutTagError": "Failed to checkout tag: {error}",
-  "@checkoutTagError": {
-    "description": "Checkout tag error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "tagPushedSuccess": "Tag \"{tagName}\" pushed to {remoteName}",
-  "@tagPushedSuccess": {
-    "description": "Tag pushed success message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      },
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "pushTagError": "Failed to push tag: {error}",
-  "@pushTagError": {
-    "description": "Push tag error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "deleteTagDialogTitle": "Delete Tag?",
-  "deletingTagLocalAndRemote": "Deleting Tag (Local & Remote)",
-  "deletingTag": "Deleting Tag",
-  "deletingTagLocally": "Deleting \"{tagName}\" locally...",
-  "@deletingTagLocally": {
-    "description": "Deleting tag locally progress message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
-  "deletingTagFromRemote": "Deleting \"{tagName}\" from {remoteName}...",
-  "@deletingTagFromRemote": {
-    "description": "Deleting tag from remote progress message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      },
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "updatingList": "Updating list...",
-  "tagDeletedSuccess": "Tag \"{tagName}\" deleted",
-  "@tagDeletedSuccess": {
-    "description": "Tag deleted success message",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
-  "deleteTagError": "Failed to delete tag: {error}",
-  "@deleteTagError": {
-    "description": "Delete tag error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "thisWeek": "This week",
   "thisMonth": "This month",
-  "thisYear": "This Year",
-  "yearsAgo": "{count, plural, =1{1 Year Ago} other{{count} Years Ago}}",
-  "@yearsAgo": {
-    "description": "Years ago date group",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "nonVersioned": "Non-versioned",
-  "groupTagCount": "{count, plural, =1{{count} tag} other{{count} tags}}",
-  "@groupTagCount": {
-    "description": "Tag count in group header",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "noStashes": "No Stashes",
-  "createStashToSaveWork": "Create a stash to save your work in progress",
   "createStash": "Create Stash",
   "openRepositoryToManageStashes": "Open a repository to manage stashes",
-  "stashCount": "{count, plural, =1{{count} Stash} other{{count} Stashes}}",
-  "@stashCount": {
-    "description": "Stash count label",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "createStashDialogTitle": "Create Stash",
   "saveChangesToStash": "Save your current changes to a stash",
   "messageOptional": "Message (optional)",
-  "describeWorkPlaceholder": "Describe what you were working on...",
   "stashAllFiles": "Stash all files",
-  "toggleSelectSpecificFiles": "Toggle to select specific files",
   "selectFilesToStash": "Select files to stash ({selected}/{total})",
   "@selectFilesToStash": {
     "description": "Label for file selection section with counts",
@@ -616,7 +316,6 @@
   "noFilesToStash": "No files to stash",
   "includeUntrackedFiles": "Include untracked files",
   "keepStagedChanges": "Keep staged changes",
-  "keepChangesInIndex": "Keep changes in the index after stashing",
   "stashCreatedSuccess": "Stash created successfully",
   "createStashError": "Failed to create stash: {error}",
   "@createStashError": {
@@ -627,8 +326,6 @@
       }
     }
   },
-  "clearAllStashesDialogTitle": "Clear All Stashes?",
-  "clearAllStashesConfirmation": "This will permanently delete all stashes.\n\nThis action cannot be undone.",
   "allStashesClearedSuccess": "All stashes cleared",
   "clearStashesError": "Failed to clear stashes: {error}",
   "@clearStashesError": {
@@ -654,51 +351,6 @@
   "checkoutBranchAfterCreation": "Checkout branch after creation",
   "checkoutBranchAfterCreationHint": "Switch to the new branch immediately",
   "viewCommitInHistory": "View Commit in History",
-  "appliedStashSuccess": "Applied {stashRef}",
-  "@appliedStashSuccess": {
-    "description": "Applied stash success message",
-    "placeholders": {
-      "stashRef": {
-        "type": "String"
-      }
-    }
-  },
-  "applyStashError": "Failed to apply stash: {error}",
-  "@applyStashError": {
-    "description": "Apply stash error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "poppedStashSuccess": "Popped {stashRef}",
-  "@poppedStashSuccess": {
-    "description": "Popped stash success message",
-    "placeholders": {
-      "stashRef": {
-        "type": "String"
-      }
-    }
-  },
-  "popStashError": "Failed to pop stash: {error}",
-  "@popStashError": {
-    "description": "Pop stash error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "loadDiffError": "Failed to load diff: {error}",
-  "@loadDiffError": {
-    "description": "Load diff error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "createBranchFromStash": "Create Branch from Stash",
   "createBranchFromStashDescription": "Create a new branch from {stashRef}",
   "@createBranchFromStashDescription": {
@@ -710,18 +362,6 @@
     }
   },
   "branchName": "Branch name...",
-  "createdBranchFromStashSuccess": "Created branch \"{branchName}\" from {stashRef}",
-  "@createdBranchFromStashSuccess": {
-    "description": "Created branch from stash success message",
-    "placeholders": {
-      "branchName": {
-        "type": "String"
-      },
-      "stashRef": {
-        "type": "String"
-      }
-    }
-  },
   "createBranchError": "Failed to create branch: {error}",
   "@createBranchError": {
     "description": "Create branch error message",
@@ -731,61 +371,18 @@
       }
     }
   },
-  "dropStashDialogTitle": "Drop Stash?",
-  "dropStashConfirmation": "Drop {stashRef}?\n\nThis action cannot be undone.",
-  "@dropStashConfirmation": {
-    "description": "Drop stash confirmation message",
-    "placeholders": {
-      "stashRef": {
-        "type": "String"
-      }
-    }
-  },
-  "droppedStashSuccess": "Dropped {stashRef}",
-  "@droppedStashSuccess": {
-    "description": "Dropped stash success message",
-    "placeholders": {
-      "stashRef": {
-        "type": "String"
-      }
-    }
-  },
-  "dropStashError": "Failed to drop stash: {error}",
-  "@dropStashError": {
-    "description": "Drop stash error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "stashDiffDialogTitle": "Stash Diff - {stashRef}",
-  "@stashDiffDialogTitle": {
-    "description": "Stash diff dialog title",
-    "placeholders": {
-      "stashRef": {
-        "type": "String"
-      }
-    }
-  },
   "noChanges": "No changes",
   "cloneRepository": "Clone Repository",
-  "cloneRepositoryDescription": "Clone a Git repository from a URL",
   "repositoryUrl": "Repository URL",
   "repositoryUrlHint": "https://github.com/user/repo.git",
   "destinationPath": "Destination Path",
   "destinationPathHint": "C:\\Users\\...\\repo",
   "branchOptional": "Branch (optional)",
-  "mainBranchHint": "main",
   "shallowClone": "Shallow Clone",
   "shallowCloneDescription": "Clone only recent history to save space",
   "depth": "Depth:",
-  "cloningRepositoryProgress": "Cloning repository... This may take a while.",
   "clone": "Clone",
-  "directorySelectionNotAvailableInBrowser": "Directory selection is not available in web browsers",
   "selectDestinationForClone": "Select Destination for Clone",
-  "pleaseEnterRepositoryUrl": "Please enter a repository URL",
-  "pleaseEnterDestinationPath": "Please enter a destination path",
   "repositoryClonedSuccess": "Repository cloned successfully to {path}",
   "@repositoryClonedSuccess": {
     "description": "Success message after cloning repository",
@@ -796,15 +393,6 @@
     }
   },
   "repositoryClonedButFailedToOpen": "Repository cloned but failed to open",
-  "cloneRepositoryError": "Failed to clone repository: {error}",
-  "@cloneRepositoryError": {
-    "description": "Clone repository error message",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "reference": "Reference",
   "created": "Created",
   "openRepositoryToManageTags": "Open a repository to manage tags",
@@ -821,28 +409,14 @@
   "noRemoteBranches": "No remote branches",
   "errorLoadingBranches": "Error loading branches: {error}",
   "@errorLoadingBranches": {
-    "description": "Error message when loading branches fails",
+    "description": "Error loading branches",
     "placeholders": {
       "error": {
         "type": "String"
       }
     }
   },
-  "noRemotes": "No Remotes",
-  "addRemoteToCollaborate": "Add a remote repository to collaborate",
   "addRemote": "Add Remote",
-  "noResults": "No Results",
-  "noRemotesMatchQuery": "No remotes match \"{query}\"",
-  "@noRemotesMatchQuery": {
-    "description": "Message when no remotes match search query",
-    "placeholders": {
-      "query": {
-        "type": "String"
-      }
-    }
-  },
-  "clearSearch": "Clear Search",
-  "errorLoadingRemotes": "Error loading remotes",
   "noWorkspacesYet": "No Workspaces Yet",
   "createWorkspaceToOrganize": "Create a workspace to organize your repositories",
   "noRepositoriesYet": "No Repositories Yet",
@@ -852,34 +426,6 @@
   "cloneFromRemoteUrl": "Clone from a remote URL",
   "initializeRepository": "Create Git Repository",
   "createNewGitRepository": "Create a new Git repository in a directory",
-  "addedRemoteSuccess": "Added remote \"{remoteName}\"",
-  "@addedRemoteSuccess": {
-    "description": "Success message when remote is added",
-    "placeholders": {
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "addRemoteError": "Failed to add remote: {error}",
-  "@addRemoteError": {
-    "description": "Error message when adding remote fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "fetchedAllRemotesSuccess": "Fetched from all remotes",
-  "fetchRemotesError": "Failed to fetch: {error}",
-  "@fetchRemotesError": {
-    "description": "Error message when fetching from remotes fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "blame": "Blame",
   "preview": "Preview",
   "viewOptions": "View Options",
@@ -897,48 +443,11 @@
       }
     }
   },
-  "commitsSquashedSuccess": "Commits squashed successfully",
-  "cherryPickingCommits": "Cherry-picking {count, plural, =1{{count} commit} other{{count} commits}}...",
-  "@cherryPickingCommits": {
-    "description": "Progress message when cherry-picking commits",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "cherryPickedSuccess": "Cherry-picked {count, plural, =1{{count} commit} other{{count} commits}} successfully",
-  "@cherryPickedSuccess": {
-    "description": "Success message after cherry-picking commits",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "cherryPickFailed": "Cherry-pick failed: {error}",
   "@cherryPickFailed": {
     "description": "Error message when cherry-pick fails",
     "placeholders": {
       "error": {
-        "type": "String"
-      }
-    }
-  },
-  "revertingCommit": "Reverting commit {hash}...",
-  "@revertingCommit": {
-    "description": "Progress message when reverting a commit",
-    "placeholders": {
-      "hash": {
-        "type": "String"
-      }
-    }
-  },
-  "revertedSuccess": "Reverted commit {hash} successfully",
-  "@revertedSuccess": {
-    "description": "Success message after reverting a commit",
-    "placeholders": {
-      "hash": {
         "type": "String"
       }
     }
@@ -952,48 +461,9 @@
       }
     }
   },
-  "resettingToCommit": "Resetting to {hash}...",
-  "@resettingToCommit": {
-    "description": "Progress message when resetting to a commit",
-    "placeholders": {
-      "hash": {
-        "type": "String"
-      }
-    }
-  },
-  "resetSuccess": "Reset to {hash} successfully",
-  "@resetSuccess": {
-    "description": "Success message after resetting",
-    "placeholders": {
-      "hash": {
-        "type": "String"
-      }
-    }
-  },
   "resetFailed": "Reset failed: {error}",
   "@resetFailed": {
     "description": "Error message when reset fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "pullingFromRemote": "Pulling from remote...",
-  "pullSuccess": "Pull completed successfully",
-  "pullFailed": "Pull failed: {error}",
-  "@pullFailed": {
-    "description": "Error message when pull fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "pushSuccess": "Push completed successfully",
-  "pushFailed": "Push failed: {error}",
-  "@pushFailed": {
-    "description": "Error message when push fails",
     "placeholders": {
       "error": {
         "type": "String"
@@ -1070,18 +540,7 @@
   "repositoryClosed": "Repository closed",
   "switchBranch": "Switch Branch",
   "searchBranches": "Search branches...",
-  "showRemoteBranches": "Show remote branches",
-  "includeRemoteBranchesInList": "Include remote branches in the selection list",
   "noBranchesFound": "No branches found",
-  "switchedToBranch": "Switched to branch: {name}",
-  "@switchedToBranch": {
-    "description": "SnackBar message after switching branch",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "failedToSwitchBranch": "Failed to switch branch: {error}",
   "@failedToSwitchBranch": {
     "description": "Error message when switching branch fails",
@@ -1114,16 +573,16 @@
   "mergeBranchDialog": "Merge Branch",
   "mergeBranchConfirm": "Merge \"{sourceBranch}\" into \"{targetBranch}\"?",
   "@mergeBranchConfirm": {
-      "description": "Confirmation message for merging branch",
-      "placeholders": {
-        "sourceBranch": {
-          "type": "String"
-        },
-        "targetBranch": {
-          "type": "String"
-        }
+    "description": "Confirmation message for merging branch",
+    "placeholders": {
+      "sourceBranch": {
+        "type": "String"
+      },
+      "targetBranch": {
+        "type": "String"
       }
-    },
+    }
+  },
   "deleteBranchDialog": "Delete Branch",
   "deleteBranchConfirm": "Delete branch \"{branchName}\"?\n\nThis action cannot be undone.",
   "@deleteBranchConfirm": {
@@ -1146,7 +605,6 @@
       }
     }
   },
-  "protectedBranchesNotDeleted": "Protected branches and the current branch will not be deleted.",
   "deleteAll": "Delete All",
   "branchesSelectedForDeletion": "{count, plural, =0{Select the branches to delete} =1{1 branch selected for deletion} other{{count} branches selected for deletion}}",
   "@branchesSelectedForDeletion": {
@@ -1178,17 +636,9 @@
   "@forceDeleteBranchesWarning": {
     "description": "The standing subtitle of the force opt-in in the bulk delete dialog - shown whether or not the box is ticked, so the cost is read before the choice - and the extra paragraph of the confirmation that follows a forced bulk delete. Self-contained on purpose, since it has to read alone in the second of those. The plural counterpart of forceDeleteWarning, which talks about a single branch."
   },
-  "searchRemotesDialog": "Search Remotes",
   "searchQuery": "Search query",
-  "remoteNameOrUrl": "Remote name or URL",
-  "addRemoteDialog": "Add Remote",
   "remoteName": "Remote name",
-  "remoteNameHint": "e.g., origin, upstream",
-  "enterRemoteName": "Please enter a remote name",
-  "remoteNameNoSpaces": "Remote name cannot contain spaces",
   "remoteUrlLabel": "Remote URL",
-  "remoteUrlHintDialog": "https://github.com/user/repo.git",
-  "enterRemoteUrl": "Please enter a remote URL",
   "add": "Add",
   "openFolderInEditor": "Open folder in editor",
   "@openFolderInEditor": {
@@ -1227,16 +677,6 @@
   },
   "pruneRemoteConfirm": "This will remove remote-tracking branches that no longer exist on the remote.\n\nContinue?",
   "prune": "Prune",
-  "deleteRemote": "Delete \"{remoteName}\"",
-  "@deleteRemote": {
-    "description": "Title for delete remote dialog",
-    "placeholders": {
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "deleteRemoteConfirm": "This will permanently remove this remote.\n\nAre you sure?",
   "clearAllStashesDialog": "Clear All Stashes?",
   "clearAllStashesConfirm": "This will permanently delete all stashes.\n\nThis action cannot be undone.",
   "branchNameLabel": "Branch name",
@@ -1324,7 +764,7 @@
       }
     }
   },
-  "squashCommits": "Squash commits",
+  "squashCommits": "Squash Commits",
   "resetToCommit": "Reset to Commit",
   "resetCurrentBranchTo": "Reset current branch to:",
   "chooseResetMode": "Choose reset mode:",
@@ -1335,8 +775,6 @@
   "keepChangesUnstagedMixed": "keep changes unstaged",
   "hard": "Hard",
   "discardAllChangesHard": "discard all changes",
-  "pushRejected": "Push Rejected",
-  "pushRejectedHistoryRewritten": "Your push was rejected because you've rewritten history (e.g., by squashing commits).",
   "forcePushOnlyIfAlone": "Only do this if you're working alone or have coordinated with your team",
   "forcePushOthersNeedReset": "Others will need to reset their local branches",
   "forcePushCannotBeEasilyUndone": "This cannot be easily undone",
@@ -1390,7 +828,6 @@
   "authorLabel": "Author",
   "filterByAuthorNameOrEmail": "Filter by author name or email",
   "committerLabel": "Committer",
-  "filterByCommitterNameOrEmail": "Filter by committer name or email",
   "filePathLabel": "File path",
   "filterByFilePathExample": "Filter by file path (e.g., src/main.dart)",
   "commitHashLabel": "Commit hash",
@@ -1411,25 +848,9 @@
   "fromDate": "From date",
   "toDate": "To date",
   "last30Days": "Last 30 days",
-  "searchSyntax": "Search Syntax",
-  "syntaxAuthorFilter": "Filter by author",
-  "syntaxFileFilter": "Filter by file path",
-  "syntaxHashFilter": "Filter by hash prefix",
-  "syntaxFromDateFilter": "From date (YYYY-MM-DD)",
-  "syntaxToDateFilter": "To date (or \"yesterday\", \"week\")",
-  "syntaxExactPhrase": "Exact phrase (use quotes)",
   "selectDate": "Select date",
   "clearFiltersButton": "Clear filters",
   "advancedSearchButton": "Search",
-  "batchOperationProgressDialogTitle": "{title}",
-  "@batchOperationProgressDialogTitle": {
-    "description": "Title for batch operation progress dialog",
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
   "operationInProgress": "Waiting...",
   "operationsCompleted": "All operations completed successfully",
   "operationsCompletedWithErrors": "Completed with errors",
@@ -1482,8 +903,7 @@
   "createPullRequestDialogTitle": "Create Pull Request",
   "sourceBranchLabel": "Source Branch",
   "targetBranchLabel": "Target Branch",
-  "searchOrSelectBranch": "Search or select a branch",
-  "selectTargetBranch": "Select target branch...",
+  "selectTargetBranch": "Select target branch",
   "pullRequestTitleLabel": "Pull Request Title",
   "enterPRTitle": "Enter PR title",
   "enterPRTitleValidation": "Please enter a title",
@@ -1586,7 +1006,6 @@
       }
     }
   },
-  "rebasingOnto": "Rebasing onto",
   "currentCommit": "Current Commit",
   "conflictsDetected": "Conflicts Detected",
   "resolveConflictsInChangesScreen": "Resolve conflicts in the Changes screen, then click Continue to proceed with the rebase.",
@@ -1665,7 +1084,6 @@
   "targetBranch": "Target Branch",
   "selectSourceAndTargetBranches": "Select source and target branches to merge or rebase",
   "selectSourceBranch": "Select source branch",
-  "selectTargetBranch": "Select target branch",
   "mergingBranches": "Merging branches...",
   "continueOperation": "Continue",
   "rebaseStartedSuccessfully": "Rebase started successfully",
@@ -1899,21 +1317,10 @@
   "commandConfigureDiffTools": "Configure Diff Tools",
   "commandConfigureDiffToolsDesc": "Set up external diff and merge tools",
   "folderSelectionNotAvailableWeb": "Folder selection is not available in web browsers",
-  "openedRepository": "Opened repository: {repositoryName}",
-  "@openedRepository": {
-    "description": "Success message when repository opened",
-    "placeholders": {
-      "repositoryName": {
-        "type": "String",
-        "example": "my-repo"
-      }
-    }
-  },
   "notValidGitRepository": "Not a valid Git repository",
   "selectGitRepository": "Select Git Repository",
   "amendLastCommitDialog": "Amend Last Commit",
   "amendLastCommitConfirm": "This will amend the last commit with currently staged changes. The commit message will remain the same. Continue?",
-  "lastCommitAmendedSuccess": "Last commit amended successfully",
   "failedToAmendCommit": "Failed to amend commit: {error}",
   "@failedToAmendCommit": {
     "description": "Error message when amend fails",
@@ -1934,7 +1341,6 @@
   "resetToCommitInstructions": "To reset your branch to a specific commit:\n\n1. Navigate to the History tab\n2. Right-click on the commit you want to reset to\n3. Select \"Reset current branch to here\"\n4. Choose reset mode (soft/mixed/hard)\n\nWarning: Hard reset will discard all changes!",
   "cleanWorkingDirectoryDialog": "Clean Working Directory",
   "cleanWorkingDirectoryConfirm": "This will permanently remove all untracked files and directories from your working directory.\n\nWarning: This operation cannot be undone!\n\nDo you want to continue?",
-  "workingDirectoryCleanedSuccess": "Working directory cleaned successfully",
   "failedToCleanWorkingDirectory": "Failed to clean working directory: {error}",
   "@failedToCleanWorkingDirectory": {
     "description": "Error message when clean fails",
@@ -1945,8 +1351,6 @@
       }
     }
   },
-  "navigatedToTagsScreenDeleteYourTagThere": "Navigated to Tags screen - delete your tag there",
-  "navigatedToTagsScreenPushYourTagsThere": "Navigated to Tags screen - push your tags there",
   "collapse": "Collapse",
   "expand": "Expand",
   "commandPaletteTooltip": "Command Palette (Ctrl+K)",
@@ -1954,16 +1358,6 @@
   "goToSettings": "Go to Settings",
   "resetToDefaults": "Reset to Defaults",
   "selectGitExecutable": "Select Git Executable",
-  "gitVersionDetected": "Git {version} detected successfully",
-  "@gitVersionDetected": {
-    "description": "Success message when git executable is validated",
-    "placeholders": {
-      "version": {
-        "type": "String",
-        "example": "2.43.0"
-      }
-    }
-  },
   "invalidGitExecutable": "Invalid Git Executable",
   "invalidGitExecutableMessage": "The selected file is not a valid Git executable.\n\nSelected: {path}\n\nOutput: {output}",
   "@invalidGitExecutableMessage": {
@@ -2018,7 +1412,6 @@
     }
   },
   "useAnyway": "Use Anyway",
-  "textEditorSetSuccessfully": "Text editor set successfully",
   "defaultUserName": "Default User Name",
   "userName": "User Name",
   "userNameHint": "John Doe",
@@ -2026,38 +1419,11 @@
   "email": "Email",
   "emailHint": "john@example.com",
   "autoFetchInterval": "Auto Fetch Interval",
-  "minutes": "Minutes",
-  "minutesHint": "5",
   "defaultCommitLimit": "Default Commit Limit",
   "commits": "Commits",
   "commitsHint": "100",
   "resetSettings": "Reset Settings",
   "resetSettingsMessage": "Reset all settings to defaults?\n\nThis cannot be undone.",
-  "settingsResetToDefaults": "Settings reset to defaults",
-  "selectDiffToolExecutable": "Select Diff Tool Executable",
-  "unknownDiffTool": "Unknown Diff Tool",
-  "unknownDiffToolMessage": "The selected file \"{fileName}\" is not a recognized diff/merge tool.\n\nKnown diff tools:\n• VS Code (Code.exe)\n• Beyond Compare (BCompare.exe)\n• KDiff3 (kdiff3.exe)\n• WinMerge (WinMergeU.exe)\n• P4Merge (p4merge.exe)\n• Meld (meld.exe)\n• TortoiseMerge (TortoiseGitMerge.exe)\n• Araxis Merge (compare.exe)\n• etc.\n\nDo you want to use this file anyway?",
-  "@unknownDiffToolMessage": {
-    "description": "Warning message for unknown diff tool",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "diffToolSetSuccessfully": "Diff tool set successfully",
-  "selectMergeToolExecutable": "Select Merge Tool Executable",
-  "unknownMergeTool": "Unknown Merge Tool",
-  "unknownMergeToolMessage": "The selected file \"{fileName}\" is not a recognized diff/merge tool.\n\nKnown merge tools:\n• VS Code (Code.exe)\n• Beyond Compare (BCompare.exe)\n• KDiff3 (kdiff3.exe)\n• WinMerge (WinMergeU.exe)\n• P4Merge (p4merge.exe)\n• Meld (meld.exe)\n• TortoiseMerge (TortoiseGitMerge.exe)\n• Araxis Merge (compare.exe)\n• etc.\n\nDo you want to use this file anyway?",
-  "@unknownMergeToolMessage": {
-    "description": "Warning message for unknown merge tool",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "mergeToolSetSuccessfully": "Merge tool set successfully",
   "colorSchemeDeepPurple": "Deep Purple",
   "colorSchemeIndigo": "Indigo",
   "colorSchemeBlue": "Blue",
@@ -2084,7 +1450,6 @@
       }
     }
   },
-  "gitExecutableCleared": "Git executable cleared",
   "preferredTextEditor": "Preferred Text Editor",
   "textEditorNotSet": "Not set - Please select text editor manually",
   "version": "Version: {version}",
@@ -2096,15 +1461,11 @@
       }
     }
   },
-  "textEditorCleared": "Text editor cleared",
   "searchToolsAutoDetect": "Search Tools (Auto-detect)",
   "diffToolTitle": "Diff Tool",
   "diffToolNotSet": "Not set",
-  "diffToolCleared": "Diff tool cleared",
   "mergeToolTitle": "Merge Tool",
   "mergeToolNotSet": "Not set",
-  "mergeToolCleared": "Merge tool cleared",
-  "configure": "Configure",
   "edit": "Edit",
   "userNameNotSet": "Not set - Please enter your name",
   "userEmailNotSet": "Not set - Please enter your email",
@@ -2130,45 +1491,9 @@
   "fontSize": "App Font Size",
   "previewFontFamily": "Code Font",
   "previewFontSize": "Code Font Size",
-  "colorSchemeUpdated": "Color scheme updated",
-  "fontChangedTo": "Font changed to {fontName}",
-  "@fontChangedTo": {
-    "description": "Success message when font is changed",
-    "placeholders": {
-      "fontName": {
-        "type": "String"
-      }
-    }
-  },
-  "fontSizeUpdated": "Font size updated",
-  "diffAndMergeTools": "Diff & Merge Tools",
-  "preferredDiffTool": "Preferred Diff Tool",
-  "diffToolCleared": "Diff tool cleared",
-  "browseForDiffTool": "Browse for diff tool",
-  "preferredMergeTool": "Preferred Merge Tool",
-  "mergeToolCleared": "Merge tool cleared",
-  "browseForMergeTool": "Browse for merge tool",
-  "loadingAvailableTools": "Loading available tools...",
-  "failedToLoadTools": "Failed to load tools",
   "behavior": "Behavior",
   "autoFetch": "Auto Fetch",
-  "autoFetchDescription": "Automatically fetch from remote periodically",
-  "autoFetchIntervalMinutes": "{minutes} minutes",
-  "@autoFetchIntervalMinutes": {
-    "description": "Display text for auto fetch interval",
-    "placeholders": {
-      "minutes": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
   "confirmPush": "Confirm Push",
-  "confirmPushDescription": "Show confirmation before pushing",
-  "confirmForcePush": "Confirm Force Push",
-  "confirmForcePushDescription": "Show confirmation before force pushing",
-  "confirmDelete": "Confirm Delete",
-  "confirmDeleteDescription": "Show confirmation before deleting branches",
   "defaultCommitLimitDescription": "Load {count} commits by default",
   "@defaultCommitLimitDescription": {
     "description": "Subtitle for default commit limit setting",
@@ -2182,11 +1507,9 @@
   "showCommitGraph": "Show Commit Graph",
   "showCommitGraphDescription": "Display visual branch graph in history",
   "showPassword": "Show password",
-  "hidePassword": "Hide password",
   "clearLog": "Clear log",
   "commandCopiedToClipboard": "Command copied to clipboard",
   "confirm": "Confirm",
-  "operationCompletedSuccessfully": "Operation completed successfully",
   "textEditor": "Text Editor",
   "userEmail": "User Email",
   "windowsReservedNameError": "The file \"{filePath}\" contains a Windows reserved name \"{reservedName}\".\n\nWindows does not allow files named: {reservedNames}.\n\nThis file was likely created on Linux/Unix and cannot be staged on Windows.\n\nSolutions:\n• Use WSL or Linux to remove/rename the file\n• Use git from Git Bash with: git rm \"{filePath}\"\n• Skip this file and stage others individually",
@@ -2214,71 +1537,13 @@
     }
   },
   "language": "Language",
-  "languageDescription": "Select your preferred language",
   "systemDefault": "System Default",
   "english": "English",
-  "arabic": "Arabic",
   "german": "German",
   "spanish": "Spanish",
   "french": "French",
   "italian": "Italian",
-  "russian": "Russian",
   "turkish": "Turkish",
-  "chinese": "Chinese (Simplified)",
-  "languageUpdated": "Language updated",
-  "secondsAgo": "{count, plural, =1{1 second ago} other{{count} seconds ago}}",
-  "@secondsAgo": {
-    "description": "Relative time: seconds ago",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "minuteAgo": "1 minute ago",
-  "minutesAgo": "{count} minutes ago",
-  "@minutesAgo": {
-    "description": "Relative time: plural minutes ago",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "hourAgo": "1 hour ago",
-  "hoursAgo": "{count} hours ago",
-  "@hoursAgo": {
-    "description": "Relative time: plural hours ago",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "dayAgo": "1 day ago",
-  "daysAgo": "{count} days ago",
-  "@daysAgo": {
-    "description": "Relative time: plural days ago",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "monthJan": "Jan",
-  "monthFeb": "Feb",
-  "monthMar": "Mar",
-  "monthApr": "Apr",
-  "monthMay": "May",
-  "monthJun": "Jun",
-  "monthJul": "Jul",
-  "monthAug": "Aug",
-  "monthSep": "Sep",
-  "monthOct": "Oct",
-  "monthNov": "Nov",
-  "monthDec": "Dec",
-  "am": "AM",
-  "pm": "PM",
   "tooltipLanguage": "Language",
   "tooltipQuickSettings": "Quick Settings",
   "tooltipCopyCommand": "Copy command",
@@ -2286,18 +1551,13 @@
   "tooltipNewWorkspace": "New Workspace",
   "tooltipBlameStatistics": "Blame Statistics",
   "tooltipOpenEnhancedViewer": "Open in Enhanced Viewer",
-  "tooltipPreviousPage": "Previous page",
-  "tooltipNextPage": "Next page",
   "tooltipDiscardAllChanges": "Discard All Changes",
   "tooltipViewDiff": "View Diff",
   "tooltipUnstage": "Unstage",
   "tooltipStage": "Stage",
   "tooltipDiscardChanges": "Discard Changes",
-  "tooltipFileActions": "File actions",
   "tooltipAbortMerge": "Abort Merge",
-  "tooltipCopy": "Copy",
   "tooltipAddRepository": "Add Repository",
-  "tooltipMoreActions": "More Actions",
   "tooltipRemoveFromWorkspace": "Remove from workspace",
   "tooltipRemoveFromFavorites": "Remove from favorites",
   "tooltipAddToFavorites": "Add to favorites",
@@ -2308,30 +1568,24 @@
   "openInEditor": "Open in Editor",
   "copyFile": "Copy File",
   "paste": "Paste",
-  "keepBoth": "Keep Both",
   "replace": "Replace",
   "deleteFile": "Delete File",
-  "renameFile": "Rename File",
   "stageAllAndCommit": "Stage All & Commit",
   "discardChangesQuestion": "Discard Changes",
   "discardAllChangesQuestion": "Discard All Changes?",
   "stageAllChangesQuestion": "Stage All Changes?",
   "unstageAllChangesQuestion": "Unstage All Changes?",
   "webBrowserLimitation": "Web Browser Limitation",
-  "windowsReservedFilename": "Windows Reserved Filename",
   "mergeConflicts": "Merge Conflicts",
-  "selectConflictToResolve": "Select a conflict to resolve",
   "resolved": "Resolved",
   "continueMerge": "Continue Merge",
   "abortMerge": "Abort Merge",
   "commitChanges": "Commit Changes",
-  "amendLastCommit": "Amend last commit",
   "viewFiles": "View files",
   "cleanOnly": "Clean only",
   "withRemote": "With remote",
   "removeRepository": "Remove Repository",
   "clearAllRepositories": "Remove All from Workspace",
-  "editProject": "Edit Project",
   "deleteWorkspace": "Delete Workspace",
   "blameStatistics": "Blame Statistics",
   "fileHistory": "File History",
@@ -2362,27 +1616,6 @@
   "useVersionFromCurrentBranch": "Use the version from the current branch",
   "useVersionFromMergingBranch": "Use the version from the merging branch",
   "keepBothVersionsConcatenated": "Keep both versions (concatenated)",
-  "noMergeInProgress": "No merge in progress",
-  "allMergeConflictsResolved": "All merge conflicts have been resolved.",
-  "mergeCompletedSuccessfully": "Merge completed successfully",
-  "mergeAborted": "Merge aborted",
-  "resolvedUsing": "Resolved {fileName} using {choice}",
-  "@resolvedUsing": {
-    "description": "Message when conflict is resolved",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      },
-      "choice": {
-        "type": "String"
-      }
-    }
-  },
-  "thisMayTakeAWhile": "This may take a while.",
-  "noUnstagedChanges": "No Unstaged Changes",
-  "noStagedChanges": "No Staged Changes",
-  "stageFilesFromUnstagedTab": "Stage files from the Unstaged tab",
-  "changesCommittedSuccessfully": "Changes committed successfully",
   "commitFailed": "Commit failed: {error}",
   "@commitFailed": {
     "description": "Error message when commit fails",
@@ -2403,7 +1636,6 @@
   "emptyStateNoCommitsMessage": "This repository has no commit history",
   "emptyStateNoCommitSelected": "No Commit Selected",
   "emptyStateNoCommitSelectedMessage": "Select a commit to view details",
-  "emptyStateNoFilesChanged": "No files changed",
   "emptyStateNoCommandsYet": "No Commands Yet",
   "emptyStateNoCommandsYetMessage": "Git commands will appear here",
   "emptyStateNoData": "No Data",
@@ -2411,188 +1643,6 @@
   "emptyStateNoResultsFound": "No Results Found",
   "emptyStateTryAdjustingSearchCriteria": "Try adjusting your search criteria",
   "emptyStateNoRepository": "No Repository",
-  "emptyStateNoSearchResults": "No {itemType} match \"{query}\"",
-  "@emptyStateNoSearchResults": {
-    "description": "Empty search results message for specific item type",
-    "placeholders": {
-      "itemType": {
-        "type": "String",
-        "example": "tags"
-      },
-      "query": {
-        "type": "String",
-        "example": "v1.0"
-      }
-    }
-  },
-  "emptyStateNoValidRepositories": "No valid Git repositories found",
-  "messageNoFileCopied": "No file copied",
-  "messageNoRepositoryOpen": "No repository open",
-  "messageNoRemotesConfigured": "No remotes configured",
-  "messageGitServiceNotAvailable": "Git service not available",
-  "messageCommitNotFound": "Commit not found",
-  "messageNoTextEditorConfigured": "No text editor configured. Please set one in Settings.",
-  "messageNoMergeInProgress": "No merge in progress",
-  "messageCopiedToClipboard": "Copied to clipboard",
-  "messageNoRemoteConfigured": "No remote configured",
-  "messageNoDateGroup": "No Date",
-  "snackbarFetchedFrom": "Fetched from \"{remoteName}\"",
-  "@snackbarFetchedFrom": {
-    "description": "SnackBar message after fetching from remote",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "snackbarFailedToFetch": "Failed to fetch: {error}",
-  "@snackbarFailedToFetch": {
-    "description": "SnackBar error when fetch fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarPulledFrom": "Pulled from \"{remoteName}\"",
-  "@snackbarPulledFrom": {
-    "description": "SnackBar message after pulling from remote",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "snackbarFailedToPull": "Failed to pull: {error}",
-  "@snackbarFailedToPull": {
-    "description": "SnackBar error when pull fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarPushedTo": "Pushed to \"{remoteName}\"",
-  "@snackbarPushedTo": {
-    "description": "SnackBar message after pushing to remote",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "snackbarFailedToPush": "Failed to push: {error}",
-  "@snackbarFailedToPush": {
-    "description": "SnackBar error when push fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarUpdatedRemoteUrl": "Updated \"{remoteName}\" URL",
-  "@snackbarUpdatedRemoteUrl": {
-    "description": "SnackBar message after updating remote URL",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "snackbarFailedToUpdateUrl": "Failed to update URL: {error}",
-  "@snackbarFailedToUpdateUrl": {
-    "description": "SnackBar error when URL update fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToRename": "Failed to rename: {error}",
-  "@snackbarFailedToRename": {
-    "description": "SnackBar error when rename fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarPruned": "Pruned \"{remoteName}\"",
-  "@snackbarPruned": {
-    "description": "SnackBar message after pruning remote",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "snackbarFailedToPrune": "Failed to prune: {error}",
-  "@snackbarFailedToPrune": {
-    "description": "SnackBar error when prune fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarDeleted": "Deleted \"{remoteName}\"",
-  "@snackbarDeleted": {
-    "description": "SnackBar message after deleting remote",
-    "placeholders": {
-      "remoteName": {
-        "type": "String",
-        "example": "origin"
-      }
-    }
-  },
-  "snackbarFailedToDelete": "Failed to delete: {error}",
-  "@snackbarFailedToDelete": {
-    "description": "SnackBar error when delete fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarAppliedStash": "Applied {stashRef}",
-  "@snackbarAppliedStash": {
-    "description": "SnackBar message after applying stash",
-    "placeholders": {
-      "stashRef": {
-        "type": "String",
-        "example": "stash@{0}"
-      }
-    }
-  },
-  "snackbarPoppedStash": "Popped {stashRef}",
-  "@snackbarPoppedStash": {
-    "description": "SnackBar message after popping stash",
-    "placeholders": {
-      "stashRef": {
-        "type": "String",
-        "example": "stash@{0}"
-      }
-    }
-  },
-  "snackbarCreatedBranchFrom": "Created branch \"{branchName}\" from {stashRef}",
-  "@snackbarCreatedBranchFrom": {
-    "description": "SnackBar message after creating branch from stash",
-    "placeholders": {
-      "branchName": {
-        "type": "String",
-        "example": "feature/new-feature"
-      },
-      "stashRef": {
-        "type": "String",
-        "example": "stash@{0}"
-      }
-    }
-  },
   "snackbarBranchCreatedSuccess": "Created branch \"{branchName}\"",
   "@snackbarBranchCreatedSuccess": {
     "description": "SnackBar message after successfully creating a branch",
@@ -2600,26 +1650,6 @@
       "branchName": {
         "type": "String",
         "example": "feature/new-feature"
-      }
-    }
-  },
-  "snackbarDroppedStash": "Dropped {stashRef}",
-  "@snackbarDroppedStash": {
-    "description": "SnackBar message after dropping stash",
-    "placeholders": {
-      "stashRef": {
-        "type": "String",
-        "example": "stash@{0}"
-      }
-    }
-  },
-  "snackbarTagCreated": "Tag \"{tagName}\" created successfully",
-  "@snackbarTagCreated": {
-    "description": "SnackBar message after creating tag",
-    "placeholders": {
-      "tagName": {
-        "type": "String",
-        "example": "v1.0.0"
       }
     }
   },
@@ -2636,24 +1666,6 @@
       }
     }
   },
-  "snackbarFailedToCreateTag": "Failed to create tag: {error}",
-  "@snackbarFailedToCreateTag": {
-    "description": "SnackBar error when tag creation fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToFetchTags": "Failed to fetch tags: {error}",
-  "@snackbarFailedToFetchTags": {
-    "description": "SnackBar error when fetching tags fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "snackbarNoRemotesConfigured": "No remotes configured",
   "@snackbarNoRemotesConfigured": {
     "description": "SnackBar warning when no remotes are configured"
@@ -2662,18 +1674,6 @@
   "@snackbarAllTagsPushed": {
     "description": "SnackBar message after pushing all tags",
     "placeholders": {
-      "remoteName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarTagPushed": "Tag \"{tagName}\" pushed to {remoteName}",
-  "@snackbarTagPushed": {
-    "description": "SnackBar message after pushing a single tag",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      },
       "remoteName": {
         "type": "String"
       }
@@ -2700,38 +1700,11 @@
       }
     }
   },
-  "snackbarFailedToPushTags": "Failed to push tags: {error}",
-  "@snackbarFailedToPushTags": {
-    "description": "SnackBar error when pushing multiple tags fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarCheckedOutTag": "Checked out tag \"{tagName}\"",
-  "@snackbarCheckedOutTag": {
-    "description": "SnackBar message after checking out a tag",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
   "snackbarFailedToCheckoutTag": "Failed to checkout tag: {error}",
   "@snackbarFailedToCheckoutTag": {
     "description": "SnackBar error when tag checkout fails",
     "placeholders": {
       "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarTagDeleted": "Tag \"{tagName}\" deleted",
-  "@snackbarTagDeleted": {
-    "description": "SnackBar message after deleting a tag",
-    "placeholders": {
-      "tagName": {
         "type": "String"
       }
     }
@@ -2754,64 +1727,9 @@
       }
     }
   },
-  "snackbarFailedToDeleteTags": "Failed to delete tags: {error}",
-  "@snackbarFailedToDeleteTags": {
-    "description": "SnackBar error when deleting multiple tags fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "snackbarDiffCopied": "Diff copied to clipboard",
   "@snackbarDiffCopied": {
     "description": "SnackBar message when diff is copied"
-  },
-  "snackbarCopiedToClipboard": "Copied to clipboard",
-  "@snackbarCopiedToClipboard": {
-    "description": "SnackBar message when content is copied"
-  },
-  "snackbarLineCopied": "Line copied to clipboard",
-  "@snackbarLineCopied": {
-    "description": "SnackBar message when a line is copied"
-  },
-  "snackbarPathCopied": "Path copied: {filePath}",
-  "@snackbarPathCopied": {
-    "description": "SnackBar message when file path is copied",
-    "placeholders": {
-      "filePath": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFileCopied": "Copied: {fileName}",
-  "@snackbarFileCopied": {
-    "description": "SnackBar message when file is copied",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarOutputCopied": "Output copied to clipboard",
-  "@snackbarOutputCopied": {
-    "description": "SnackBar message when output is copied"
-  },
-  "snackbarGitServiceNotAvailable": "Git service not available",
-  "@snackbarGitServiceNotAvailable": {
-    "description": "SnackBar error when git service is not available"
-  },
-  "snackbarCommitNotFound": "Commit not found",
-  "@snackbarCommitNotFound": {
-    "description": "SnackBar error when commit is not found"
-  },
-  "snackbarNoRepositoryOpen": "No repository open",
-  "@snackbarNoRepositoryOpen": {
-    "description": "SnackBar error when no repository is open"
-  },
-  "snackbarRepositoryPathNotAvailable": "Repository path not available",
-  "@snackbarRepositoryPathNotAvailable": {
-    "description": "SnackBar error when repository path is not available"
   },
   "snackbarFailedToOpenExternalTool": "Failed to open external tool: {error}",
   "@snackbarFailedToOpenExternalTool": {
@@ -2831,149 +1749,9 @@
       }
     }
   },
-  "snackbarFileNotFound": "File not found",
-  "@snackbarFileNotFound": {
-    "description": "SnackBar error when file is not found"
-  },
-  "snackbarSourceFileNotFound": "Source file not found",
-  "@snackbarSourceFileNotFound": {
-    "description": "SnackBar error when source file is not found"
-  },
-  "snackbarNoFileCopied": "No file copied",
-  "@snackbarNoFileCopied": {
-    "description": "SnackBar warning when no file is copied"
-  },
-  "snackbarFileRenamed": "Renamed to {newName}",
-  "@snackbarFileRenamed": {
-    "description": "SnackBar message after renaming file",
-    "placeholders": {
-      "newName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToRenameFile": "Failed to rename file: {error}",
-  "@snackbarFailedToRenameFile": {
-    "description": "SnackBar error when file rename fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFileDeleted": "Deleted: {fileName}",
-  "@snackbarFileDeleted": {
-    "description": "SnackBar message after deleting file",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToDeleteFile": "Failed to delete file: {error}",
-  "@snackbarFailedToDeleteFile": {
-    "description": "SnackBar error when file deletion fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFilePasted": "Pasted: {newFileName}",
-  "@snackbarFilePasted": {
-    "description": "SnackBar message after pasting file",
-    "placeholders": {
-      "newFileName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToPasteFile": "Failed to paste file: {error}",
-  "@snackbarFailedToPasteFile": {
-    "description": "SnackBar error when file paste fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFileSaved": "File saved to {outputPath}",
-  "@snackbarFileSaved": {
-    "description": "SnackBar message after saving file",
-    "placeholders": {
-      "outputPath": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFileDownloaded": "File downloaded to repository and folder opened",
-  "@snackbarFileDownloaded": {
-    "description": "SnackBar message after downloading file"
-  },
-  "snackbarFailedToDownloadFile": "Failed to download file: {error}",
-  "@snackbarFailedToDownloadFile": {
-    "description": "SnackBar error when file download fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToDownloadAndOpenFolder": "Failed to download and open folder: {error}",
-  "@snackbarFailedToDownloadAndOpenFolder": {
-    "description": "SnackBar error when download and open folder fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToOpenFileManager": "Failed to open file manager: {error}",
-  "@snackbarFailedToOpenFileManager": {
-    "description": "SnackBar error when opening file manager fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToOpenEditor": "Failed to open editor: {error}",
-  "@snackbarFailedToOpenEditor": {
-    "description": "SnackBar error when opening editor fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToOpenFileInEditor": "Failed to open file in editor: {error}",
-  "@snackbarFailedToOpenFileInEditor": {
-    "description": "SnackBar error when opening file in editor fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarMergeCompleted": "Merge completed successfully",
-  "@snackbarMergeCompleted": {
-    "description": "SnackBar message after merge completes"
-  },
   "snackbarMergeAborted": "Merge aborted",
   "@snackbarMergeAborted": {
     "description": "SnackBar message after merge is aborted"
-  },
-  "snackbarConflictResolved": "Resolved {fileName} using {choice}",
-  "@snackbarConflictResolved": {
-    "description": "SnackBar message after resolving conflict",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      },
-      "choice": {
-        "type": "String"
-      }
-    }
   },
   "snackbarFailedToApplyStash": "Failed to apply stash: {error}",
   "@snackbarFailedToApplyStash": {
@@ -3011,27 +1789,6 @@
       }
     }
   },
-  "snackbarRemoteRenamed": "Renamed \"{remoteName}\" to \"{newName}\"",
-  "@snackbarRemoteRenamed": {
-    "description": "SnackBar message after renaming remote",
-    "placeholders": {
-      "remoteName": {
-        "type": "String"
-      },
-      "newName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarViewDiffComingSoon": "View diff for {commitHash} (coming soon)",
-  "@snackbarViewDiffComingSoon": {
-    "description": "SnackBar message for future feature",
-    "placeholders": {
-      "commitHash": {
-        "type": "String"
-      }
-    }
-  },
   "clearFiltersAction": "Clear filters",
   "noBranchAvailable": "No branch",
   "hintTextCommandPalette": "What do you want to do?",
@@ -3058,7 +1815,6 @@
       }
     }
   },
-  "hintTextSearchFiles": "Search files...",
   "hintTextCommitMessage": "Enter commit message...",
   "hintTextSearchCommits": "Search commits (try: author:john, hash:abc123, date:today)",
   "hintTextSearchStashes": "Search stashes...",
@@ -3109,20 +1865,6 @@
   "dialogActionContinue": "Continue",
   "dialogTitleAbortMerge": "Abort Merge",
   "dialogContentAbortMerge": "This will abort the merge and return to the state before merging. All conflict resolutions will be lost. Continue?",
-  "dialogContentResolvedConflict": "Resolved {fileName} using {choice}",
-  "@dialogContentResolvedConflict": {
-    "description": "Success message after resolving conflict",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      },
-      "choice": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarMergeCompleted": "Merge completed successfully",
-  "snackbarMergeAborted": "Merge aborted",
   "dialogContentDeleteWorkspace": "Are you sure you want to delete \"{workspaceName}\"? Repositories will not be deleted.",
   "@dialogContentDeleteWorkspace": {
     "description": "Confirmation message for deleting workspace",
@@ -3166,93 +1908,6 @@
     }
   },
   "dialogActionKeepBoth": "Keep Both",
-  "contextMenuRename": "Rename",
-  "contextMenuCopyPath": "Copy Path",
-  "contextMenuRevealInExplorer": "Reveal in Explorer",
-  "snackbarPathCopied": "Path copied: {path}",
-  "@snackbarPathCopied": {
-    "description": "Message when path is copied",
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFileNotFound": "File not found",
-  "snackbarFailedToOpenFileManager": "Failed to open file manager: {error}",
-  "@snackbarFailedToOpenFileManager": {
-    "description": "Error message when file manager fails to open",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarRenamedTo": "Renamed to {newName}",
-  "@snackbarRenamedTo": {
-    "description": "Success message after renaming",
-    "placeholders": {
-      "newName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToRenameFile": "Failed to rename file: {error}",
-  "@snackbarFailedToRenameFile": {
-    "description": "Error message when renaming fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarCopiedFile": "Copied: {fileName}",
-  "@snackbarCopiedFile": {
-    "description": "Message when file is copied",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarNoFileCopied": "No file copied",
-  "snackbarSourceFileNotFound": "Source file not found",
-  "snackbarPastedFile": "Pasted: {fileName}",
-  "@snackbarPastedFile": {
-    "description": "Success message after pasting file",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToPasteFile": "Failed to paste file: {error}",
-  "@snackbarFailedToPasteFile": {
-    "description": "Error message when pasting fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarDeletedFile": "Deleted: {fileName}",
-  "@snackbarDeletedFile": {
-    "description": "Success message after deleting file",
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarFailedToDeleteFile": "Failed to delete file: {error}",
-  "@snackbarFailedToDeleteFile": {
-    "description": "Error message when deleting fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "dialogTitleDeleteTag": "Delete Tag?",
   "dialogContentDeleteTagLocal": "Delete tag \"{tagName}\"?\n\nThis tag is local only and will be deleted from your repository.\n\nThis action cannot be undone.",
   "@dialogContentDeleteTagLocal": {
@@ -3296,24 +1951,6 @@
     }
   },
   "progressUpdatingList": "Updating list...",
-  "snackbarTagDeletedLocalAndRemote": "Tag \"{tagName}\" deleted from local and remote",
-  "@snackbarTagDeletedLocalAndRemote": {
-    "description": "Success message after deleting tag from local and remote",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
-  "snackbarTagDeleted": "Tag \"{tagName}\" deleted",
-  "@snackbarTagDeleted": {
-    "description": "Success message after deleting tag",
-    "placeholders": {
-      "tagName": {
-        "type": "String"
-      }
-    }
-  },
   "tagDetailsType": "Type",
   "tagDetailsCommit": "Commit",
   "tagDetailsTagger": "Tagger",
@@ -3360,7 +1997,6 @@
   },
   "menuItemCreateBranch": "Create Branch",
   "menuItemViewDiff": "View Diff",
-  "snackbarOutputCopied": "Output copied to clipboard",
   "gitCommandSuccessful": "Git Command Successful",
   "gitCommandFailed": "Git Command Failed",
   "closingInSeconds": "Closing in {seconds}",
@@ -3389,12 +2025,9 @@
   "labelOpenInExternalTool": "Open in External Tool",
   "labelCommitMessage": "Commit Message",
   "labelAmendCommit": "Amend Commit",
-  "labelLines": "lines",
   "labelFile": "file",
   "labelFiles": "files",
   "messageFileNotFound": "File not found",
-  "messageNoFileCopied": "No file copied",
-  "messageSourceFileNotFound": "Source file not found",
   "messageErrorLoadingDiff": "Error loading diff: {error}",
   "@messageErrorLoadingDiff": {
     "description": "Error message when diff fails to load",
@@ -3404,7 +2037,6 @@
       }
     }
   },
-  "messageLineCopiedToClipboard": "Line copied to clipboard",
   "messageCommitMessageRequired": "Commit message is required",
   "messageErrorLoadingHistory": "Error Loading History",
   "messageNoFilesChanged": "No files changed",
@@ -3418,59 +2050,12 @@
       }
     }
   },
-  "messageFailedToDownloadFile": "Failed to download file: {error}",
-  "@messageFailedToDownloadFile": {
-    "description": "Error message when file download fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "messageNoTextEditorConfigured": "No text editor configured. Please set one in Settings.",
-  "messageFailedToOpenEditor": "Failed to open editor: {error}",
-  "@messageFailedToOpenEditor": {
-    "description": "Error message when editor fails to open",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "messageFailedToOpenFileInEditor": "Failed to open file in editor: {error}",
-  "@messageFailedToOpenFileInEditor": {
-    "description": "Error message when file fails to open in editor",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "messageRepositoryPathNotAvailable": "Repository path not available",
   "messageFileDownloadedAndFolderOpened": "File downloaded to repository and folder opened",
-  "messageFailedToDownloadAndOpenFolder": "Failed to download and open folder: {error}",
-  "@messageFailedToDownloadAndOpenFolder": {
-    "description": "Error message when download and open folder fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "messageFileSavedTo": "File saved to {path}",
   "@messageFileSavedTo": {
     "description": "Success message after saving file",
     "placeholders": {
       "path": {
-        "type": "String"
-      }
-    }
-  },
-  "messageViewDiffForCommit": "View diff for {hash} (coming soon)",
-  "@messageViewDiffForCommit": {
-    "description": "Placeholder message for future feature",
-    "placeholders": {
-      "hash": {
         "type": "String"
       }
     }
@@ -3501,14 +2086,10 @@
     }
   },
   "tipCommitMessage": "Tip: Use present tense (\"Add feature\" not \"Added feature\")",
-  "editUrl": "Edit URL",
   "fetchUrl": "Fetch URL",
   "pushUrl": "Push URL",
   "mergeIntoCurrent": "Merge into current",
   "moreActions": "More actions",
-  "switchBranch": "Switch Branch",
-  "createPullRequest": "Create Pull Request",
-  "removeFromWorkspace": "Remove from Workspace",
   "repositoriesCount": "{count} repositories",
   "@repositoriesCount": {
     "description": "Count of repositories",
@@ -3518,10 +2099,6 @@
       }
     }
   },
-  "unassignedRepositories": "Unassigned Repositories",
-  "editProject": "Edit Project",
-  "deleteProject": "Delete Project",
-  "blame": "Blame",
   "couldNotLoadBlame": "Could not load blame information",
   "emptyFile": "Empty File",
   "noContent": "This file has no content",
@@ -3550,60 +2127,11 @@
   "time": "Time",
   "noOutput": "No output",
   "commitDiff": "Commit Diff",
-  "errorLoadingDiff": "Error loading diff",
-  "noChanges": "No changes",
   "lineCopiedToClipboard": "Line copied to clipboard",
-  "copyAll": "Copy All",
   "local": "LOCAL",
-  "annotatedCount": "Annotated ({count})",
-  "@annotatedCount": {
-    "description": "Count of annotated tags",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "lightweightCount": "Lightweight ({count})",
-  "@lightweightCount": {
-    "description": "Count of lightweight tags",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "allCount": "All ({count})",
-  "@allCount": {
-    "description": "Count of all items",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "dropFoldersHere": "Drop folders here to add repositories",
-  "webBrowserLimitation": "Web Browser Limitation",
-  "cloneRepository": "Clone Repository",
-  "initializeRepository": "Create Git Repository",
   "validateAll": "Validate All",
-  "clearAll": "Clear All",
-  "onBranchAt": "on {branch} • {timestamp}",
-  "@onBranchAt": {
-    "description": "Branch and timestamp display",
-    "placeholders": {
-      "branch": {
-        "type": "String"
-      },
-      "timestamp": {
-        "type": "String"
-      }
-    }
-  },
   "quickFilters": "Quick filters:",
-  "thisWeek": "This week",
-  "thisMonth": "This month",
-  "last30Days": "Last 30 days",
   "commitsCount": "{count} commits",
   "@commitsCount": {
     "description": "Number of commits",
@@ -3696,28 +2224,7 @@
     }
   },
   "accessed": "Accessed:",
-  "edit": "Edit",
-  "pullFromRemote": "Pull from remote",
-  "pullFromRemoteWithCount": "Pull from remote ({count} commits behind)",
-  "@pullFromRemoteWithCount": {
-    "description": "Pull from remote with count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "pushToRemote": "Push to remote",
-  "pushToRemoteWithCount": "Push to remote ({count} commits ahead)",
-  "@pushToRemoteWithCount": {
-    "description": "Push to remote with count",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "squashCommits": "Squash Commits",
   "cherryPick": "Cherry-pick",
   "revert": "Revert",
   "revertCommitConfirmTitle": "Revert commit?",
@@ -3741,44 +2248,9 @@
     }
   },
   "confirmDestructiveActions": "Confirm destructive actions",
-  "confirmDestructiveActionsDescription": "Ask before revert, cherry-pick and other reversible history changes",
   "resetToHere": "Reset to here",
-  "forcePushingToRemote": "Force pushing to remote...",
-  "pushingToRemote": "Pushing to remote...",
-  "pushAll": "Push All",
-  "fetchAll": "Fetch All",
-  "openRepository": "Open Repository",
   "remove": "Remove",
-  "emptyCsvFile": "Empty CSV file",
-  "errorLoadingDiff": "Error loading diff:",
-  "switchedToBranch": "Switched to branch: {branch}",
-  "@switchedToBranch": {
-    "description": "Switched to branch message",
-    "placeholders": {
-      "branch": {
-        "type": "String"
-      }
-    }
-  },
-  "selectedCount": "{count} selected",
-  "@selectedCount": {
-    "description": "Number of selected items",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "errorLoadingCommits": "Error loading commits",
-  "errorLoadingBranches": "Error loading branches: {error}",
-  "@errorLoadingBranches": {
-    "description": "Error loading branches",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "error": "Error: {error}",
   "@error": {
     "description": "Error message",
@@ -3794,7 +2266,6 @@
   "animationSpeedFast": "Fast",
   "animationSpeedNormal": "Normal",
   "animationSpeedSlow": "Slow",
-  "animationSpeedUpdated": "Animation speed updated",
   "animationSpeedInfo": "Controls the speed of UI animations like menus, dialogs, and transitions. Select 'None' to disable animations for better accessibility or faster response.",
   "configAndLogs": "Config and Logs",
   "openAppLog": "Open app.log",

@@ -79,7 +79,7 @@ class _Weights {
 /// own census reported.
 const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/core/navigation/app_shell.dart': _Weights(2, 1, 2, 0),
-  'lib/core/navigation/navigation_item.dart': _Weights(0, 9, 0, 9),
+  'lib/core/navigation/navigation_item.dart': _Weights(0, 9, 0, 0),
   'lib/features/branches/widgets/branch_list_tile.dart': _Weights(1, 0, 1, 0),
   'lib/features/changes/widgets/git_status_tree_view.dart': _Weights(
     4,
@@ -230,6 +230,78 @@ const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
     'The same, on the rows of the repository menu. The trigger of each '
         'switcher keeps its own Bold glyph until the shell carries these four '
         'as ToolbarPickerEntry (#413).',
+  ),
+  // ---- Fill: the nine navigation destinations -----------------------------
+  //
+  // Each destination named a Regular codepoint for "available" and the Fill
+  // codepoint of the SAME glyph for "you are here" - one picture, two weights,
+  // decided in application code. Both slots are one role now, and the weight
+  // is re-decided by the facet filling it: the Material rail draws its
+  // selected destination through MaterialGlyphs.filledOf, asserted in that
+  // skin's own shell suite. Nine entries because the census counts nine
+  // references, and a ledger that summarised them would stop matching it.
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'house',
+    'Fill',
+    _Fate.restored,
+    'The house destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'gitCommit',
+    'Fill',
+    _Fate.restored,
+    'The gitCommit destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'pencilSimple',
+    'Fill',
+    _Fate.restored,
+    'The pencilSimple destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'chartLine',
+    'Fill',
+    _Fate.restored,
+    'The chartLine destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'folderOpen',
+    'Fill',
+    _Fate.restored,
+    'The folderOpen destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'gitBranch',
+    'Fill',
+    _Fate.restored,
+    'The gitBranch destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'package',
+    'Fill',
+    _Fate.restored,
+    'The package destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'tag',
+    'Fill',
+    _Fate.restored,
+    'The tag destination, restored by the rail.',
+  ),
+  _GivenUp(
+    'lib/core/navigation/navigation_item.dart',
+    'gear',
+    'Fill',
+    _Fate.restored,
+    'The gear destination, restored by the rail.',
   ),
   // ---- Fill: four sites, all four still drawn solid -----------------------
   _GivenUp(
@@ -712,7 +784,7 @@ void main() {
       // the workspace menu (house and folder) and one in the repository menu;
       // 42 adds the branch menu's own row mark, which left with that menu.
       expect(boldRemoved, 42);
-      expect(fillRemoved, 5);
+      expect(fillRemoved, 14);
     });
 
     test('every removal names the file it happened in', () {

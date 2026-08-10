@@ -396,8 +396,11 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // Settings rose 5, and the shell rose the same 5 because its scene parks
   // the shell on the settings destination. Measured at closing under BOTH
   // skins - Material and the blueprint land on the same two numbers - so the
-  // register stays skin-independent.
-  'shell': 183,
+  // register stays skin-independent. 192 adds the nine navigation
+  // destinations, whose marks were Phosphor codepoints named in
+  // `navigation_item.dart` and are roles drawn through `BaseIcon` now - the
+  // step that lets the rail become `chrome.shell`'s (#413).
+  'shell': 192,
   'workspaces': 33,
   'repositories': 59,
   'changes': 54,
@@ -481,8 +484,8 @@ const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
   // precisely because nothing in the resting gates can see this number go
   // stale. Re-measured at DISTANCE=64 when the #441 skin picker raised the
   // resting shell to 175: the stretched run lands on 174, the gap still
-  // exactly the one shed action.
-  'shell': 174,
+  // exactly the one shed action. 183 adds the same nine destination marks.
+  'shell': 183,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

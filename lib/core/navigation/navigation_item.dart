@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:riverpod/legacy.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole;
 
 import '../../generated/app_localizations.dart';
 
@@ -47,50 +47,63 @@ enum AppDestination {
   }
 
   /// Icon for the destination
-  IconData get icon {
+  /// The destination's mark, as a MEANING.
+  ///
+  /// It was a `PhosphorIconsRegular` codepoint, and [iconSelected] the Fill
+  /// codepoint of the same glyph - nine destinations separating "available"
+  /// from "you are here" by weight alone, decided in application code. A role
+  /// carries no weight, deliberately, because the three languages weight their
+  /// marks differently; the SKIN re-decides it for the slot it is filling, and
+  /// the navigation rail is such a slot (`MaterialGlyphs.filledOf`).
+  IconRole get icon {
     switch (this) {
       case AppDestination.workspaces:
-        return PhosphorIconsRegular.house;
+        return IconRole.house;
       case AppDestination.repositories:
-        return PhosphorIconsRegular.gitCommit;
+        return IconRole.gitCommit;
       case AppDestination.changes:
-        return PhosphorIconsRegular.pencilSimple;
+        return IconRole.pencilSimple;
       case AppDestination.history:
-        return PhosphorIconsRegular.chartLine;
+        return IconRole.chartLine;
       case AppDestination.browse:
-        return PhosphorIconsRegular.folderOpen;
+        return IconRole.folderOpen;
       case AppDestination.branches:
-        return PhosphorIconsRegular.gitBranch;
+        return IconRole.gitBranch;
       case AppDestination.stashes:
-        return PhosphorIconsRegular.package;
+        return IconRole.package;
       case AppDestination.tags:
-        return PhosphorIconsRegular.tag;
+        return IconRole.tag;
       case AppDestination.settings:
-        return PhosphorIconsRegular.gear;
+        return IconRole.gear;
     }
   }
 
-  /// Selected icon for the destination
-  IconData get iconSelected {
+  /// The same mark while this is the destination the user is on.
+  ///
+  /// The same ROLE, and that is the honest statement: the application never
+  /// meant a different picture, it meant the same one drawn to say "here".
+  /// Kept as its own member because the contract has the slot - a language
+  /// that answers with a genuinely different glyph is allowed to.
+  IconRole get iconSelected {
     switch (this) {
       case AppDestination.workspaces:
-        return PhosphorIconsFill.house;
+        return IconRole.house;
       case AppDestination.repositories:
-        return PhosphorIconsFill.gitCommit;
+        return IconRole.gitCommit;
       case AppDestination.changes:
-        return PhosphorIconsFill.pencilSimple;
+        return IconRole.pencilSimple;
       case AppDestination.history:
-        return PhosphorIconsFill.chartLine;
+        return IconRole.chartLine;
       case AppDestination.browse:
-        return PhosphorIconsFill.folderOpen;
+        return IconRole.folderOpen;
       case AppDestination.branches:
-        return PhosphorIconsFill.gitBranch;
+        return IconRole.gitBranch;
       case AppDestination.stashes:
-        return PhosphorIconsFill.package;
+        return IconRole.package;
       case AppDestination.tags:
-        return PhosphorIconsFill.tag;
+        return IconRole.tag;
       case AppDestination.settings:
-        return PhosphorIconsFill.gear;
+        return IconRole.gear;
     }
   }
 

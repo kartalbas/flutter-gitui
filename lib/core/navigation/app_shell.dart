@@ -72,6 +72,7 @@ import '../services/update_providers.dart';
 import '../services/update_service.dart';
 import '../../features/about/about_dialog.dart';
 import '../../shared/components/base_layout.dart';
+import '../../shared/components/base_icon.dart';
 
 /// Provider to track if "What's New" dialog has been checked this session
 /// This persists across widget rebuilds to prevent showing dialog multiple times
@@ -418,12 +419,17 @@ class _AppShellState extends ConsumerState<AppShell> {
                         return NavigationRailDestination(
                           icon: _buildIconWithBadge(
                             context,
-                            Icon(dest.icon),
+                            BaseIcon(dest.icon),
                             badgeCount,
                           ),
                           selectedIcon: _buildIconWithBadge(
                             context,
-                            Icon(dest.iconSelected),
+                            // The same role. The rail draws the "you are
+                            // here" weight itself once this whole region is
+                            // `chrome.shell` (#413); until then both slots
+                            // resolve through the ordinary glyph table, which
+                            // is the weight loss the ledger records.
+                            BaseIcon(dest.iconSelected),
                             badgeCount,
                           ),
                           // Deliberately a bare Text, not a BaseLabel, and

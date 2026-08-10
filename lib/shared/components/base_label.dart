@@ -6,7 +6,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart';
 // file which already imports `base_label.dart` keeps compiling while those
 // sites convert. The export line and the file behind it are deleted together,
 // the moment the last call site is gone; nothing new may reach for them.
-export 'base_label_legacy.dart';
 
 /// The application's way of saying one piece of text.
 ///

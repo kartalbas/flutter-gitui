@@ -16,7 +16,6 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'generated/app_localizations.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/components/base_dialog.dart';
-import 'shared/components/base_label.dart';
 import 'core/config/app_config.dart';
 import 'core/constants/app_constants.dart';
 import 'core/config/config_providers.dart';
@@ -617,8 +616,18 @@ class _NativeLoadingScreen extends StatelessWidget {
                 color: primaryColor,
               ),
               const SizedBox(height: AppTheme.paddingXL),
-              // App title
-              HeadlineMediumLabel('Flutter GitUI', color: primaryColor),
+              // App title. A bare `Text` with an explicit ramp step, and not
+              // `BaseLabel`, because this whole screen is the registered
+              // pre-scope carve-out: it is built before `SkinScope.install`
+              // runs, so a role has nobody to resolve it. The step is the one
+              // the retired `HeadlineMediumLabel` handed over, written out
+              // rather than reached through a bridge that no longer exists.
+              Text(
+                'Flutter GitUI',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  color: primaryColor,
+                ),
+              ),
               const SizedBox(height: AppTheme.iconXL * 2),
               // Loading indicator
               SizedBox(
@@ -630,8 +639,13 @@ class _NativeLoadingScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppTheme.paddingM),
-              // Loading text
-              BodyMediumLabel('Initializing...', color: subtextColor),
+              // Loading text. Same carve-out, same reasoning.
+              Text(
+                'Initializing...',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: subtextColor,
+                ),
+              ),
             ],
           ),
         ),

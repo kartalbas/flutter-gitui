@@ -99,6 +99,15 @@ jobs:
             exit 1
           fi
 
+      # Six locales, and every one of them carries every key in app_en.arb
+      # today. Until now nothing ran this check: it printed a coverage report
+      # and exited zero, so a locale could fall behind and every run still
+      # looked like a pass -- and this project's own progress notes cited
+      # "check_translations clean" as evidence while nothing invoked it (#445).
+      # It now exits non-zero on a missing key, and this step is what asks.
+      - name: Check translation coverage
+        run: dart run tools/check_translations.dart
+
   test:
     name: Test
     runs-on: ubuntu-latest

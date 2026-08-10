@@ -178,6 +178,28 @@ void main() async {
 
   print('');
   print('✨ Done! Check tools/translation_reports/ for detailed missing keys.');
+
+  // A gate, not a report. It used to print its findings and exit zero, so a
+  // locale could fall behind and every run still looked like a pass — and this
+  // programme's own progress notes cited "check_translations clean" as evidence
+  // while nothing ran it at all (#445). This repository has shipped an
+  // unenforced check three times (#385, #388, #429); a fourth is not a mistake
+  // to make quietly.
+  //
+  // The threshold is every key in every locale, and that is deliberate rather
+  // than strict: six locales stand at 100 % today, so anything less is a
+  // regression somebody introduced rather than a backlog somebody inherited.
+  final int incomplete = results.values
+      .where((MissingKeysInfo info) => info.missingKeys.isNotEmpty)
+      .length;
+  if (incomplete > 0) {
+    print('');
+    print(
+      '❌ $incomplete locale(s) are missing keys. Every locale must carry '
+      'every key in app_en.arb.',
+    );
+    exit(1);
+  }
 }
 
 class MissingKeysInfo {

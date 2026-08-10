@@ -109,11 +109,10 @@ The fix belongs in the client, not in this pipeline: suppress the in-app update 
 
 | Path | Purpose |
 |------|---------|
-| `docker/Dockerfile.linux-base` | Pins the Flutter image so the glibc floor of a Linux build cannot drift. Both workflows cite it by name. |
-| `docker/Dockerfile.linux-build` | Carries the `objdump` gate that fails a build requiring glibc above the core22 floor of 2.35. Mirrored as a step in both workflows. |
+| `docker/Dockerfile.linux-base` | **Documentation, not a build input.** Pins the Flutter image so the glibc floor of a Linux build cannot drift — but nothing builds it: `ci.yml:214` and `release.yml:121` cite it in comments only, and the image they actually use is stated in the workflows. It exists so the invariant has one written home. |
+| `docker/Dockerfile.linux-build` | **Documentation, not a build input**, for the same reason. It carries the `objdump` gate that fails a build requiring glibc above the core22 floor of 2.35, and that gate runs as a *step* in both workflows rather than from here. Change one and the other is now wrong, which is the cost of writing an invariant twice. |
 | `manifests/snap/` | Snap packaging, consumed by `publish-stores.yml`. Declares the `core22` base that fixes the glibc floor. |
 | `manifests/winget/` | winget manifest templates, filled from the published release and submitted by `publish-stores.yml`. |
-| `shared/changelog-generator.ps1` | Regenerates `assets/changelog.json`. Not yet part of the tagged build, which is why the bundled changelog can trail the shipped version. |
 | `updater/` | A small standalone program the application launches to replace its own files during an update. Built by `release.yml` and shipped inside the Windows and Linux archives; stripped from the snap, which updates through the store. |
 
 ## Not here any more
@@ -121,5 +120,9 @@ The fix belongs in the client, not in this pipeline: suppress the in-app update 
 The PowerShell orchestrators that used to build and publish from a developer machine are gone; CI is the only path. Two pipelines producing the same artifact by different rules had already caused one defect, where a winget manifest paired the digest of a locally built archive with the URL of a CI-built one, under names that could never match.
 
 `shared/update-winget-manifest.ps1`, `shared/build-snap.ps1` and `docker/Dockerfile.snap-build` followed for the same reason once `publish-stores.yml` took over the package channels (issue #283): the workflow carries the winget script's fill-from-the-published-release logic and runs the same snapcraft container the Dockerfile pointed at, so keeping the local variants would have re-created exactly the two-pipeline situation the defect came from.
+
+`shared/changelog-generator.ps1` went last (issue #424). CI generates the changelog with `tools/changelog/generate_changelog.dart`, called twice in `release.yml` — once **before** `flutter build`, so the changelog bundled into the binary describes the build the user installed. The row that used to stand here said the opposite: *"not yet part of the tagged build, which is why the bundled changelog can trail the shipped version."* Both halves had stopped being true, and a sentence describing a limitation CI has already removed is worse than the dead file it described, because a reader distrusts something that in fact works.
+
+The `.last-build-commit` files went with it. They were the retired pipeline's memory of what it had already built; nothing reads them now. `release/artifacts/` — that pipeline's output directory — is gone from disk too, and its `.gitignore` entry with it, along with the entries for `universal-build/`, a directory that no longer exists. An ignore rule for a path nothing produces implies the path is expected.
 
 Icon synchronisation moved to `tools/sync-icons.ps1`, since it is a maintenance task whose output is committed like any other change rather than a step in a release.

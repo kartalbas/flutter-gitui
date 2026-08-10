@@ -62,10 +62,6 @@ linux/flutter/ephemeral/
 lib/generated/
 
 # Build script artifacts
-universal-build/.last-build-commit
-universal-build/release/
-.last-build-commit
-.last-build-commit-*
 # Secrets. Broad on purpose: a single missed pattern publishes a live
 # credential, and .env.example below is the only file that must stay tracked.
 .env
@@ -79,9 +75,6 @@ universal-build/release/
 *.p12
 *.pfx
 *.obj
-
-# Release build system - commit source, ignore artifacts
-release/artifacts/
 
 build_windows.log
 build_linux.log

@@ -18,15 +18,20 @@ import 'facets/fluent_type.dart';
 /// be rewritten - or landed by a different slice - without anybody touching
 /// this file beyond its one line.
 ///
-/// **This skin is registered but not yet whole.** Every facet getter now
-/// answers - chrome, controls, surfaces, layout, type and motion are
-/// implemented, and the overlay facet carries the menu under both of its
-/// anchors, the popover and the notice - but its dialog still throws an
-/// [UnimplementedError] naming itself, from its own fence inside
-/// [FluentOverlays]. Failing loudly is the only honest answer a partial
-/// skin can give: a facet that quietly delegated to another design
-/// language would be exactly the substitution failure the blueprint exists
-/// to catch, pointed inward.
+/// **Whole.** All seven facets are implemented and no member throws any
+/// more: chrome, controls, surfaces, layout, type, motion, and - last to
+/// land - the overlays, which carry the flyout under all three of its
+/// anchors, the InfoBar notice and the ContentDialog route. The fences the
+/// skin kept while it grew were the point of growing it that way: failing
+/// loudly is the only honest answer a partial skin can give, where a facet
+/// that quietly delegated to another design language would be exactly the
+/// substitution failure the blueprint exists to catch, pointed inward.
+///
+/// What is still owed is not a member but a vocabulary: the [IconRole]
+/// glyph table, whose 155 marks are a provenance question of their own and
+/// whose slot every control here already holds open at its exact extent -
+/// see [FluentButton]'s doc. Control anatomy (a check, a chevron, a dismiss
+/// cross, a severity mark) is drawn as geometry and is NOT waiting on it.
 final class FluentSkin implements Skin {
   /// Builds the Fluent skin.
   const FluentSkin();
@@ -97,11 +102,9 @@ final class FluentSkin implements Skin {
   @override
   SkinMotion get motion => const FluentMotionFacet();
 
-  /// Things that appear on top: the menu at a point and off an anchor, the
-  /// popover and the InfoBar notice are implemented; only the dialog still
-  /// refuses loudly, from its own fence inside [FluentOverlays] - so the
-  /// facet getter no longer throws, and the remaining gap sits on the one
-  /// member that is actually missing.
+  /// Things that appear on top: the flyout at a point, off an anchor and as
+  /// a popover, the InfoBar notice, and the ContentDialog route around
+  /// `chrome.dialogSurface`. No member throws.
   @override
   SkinOverlays get overlays => const FluentOverlays();
 

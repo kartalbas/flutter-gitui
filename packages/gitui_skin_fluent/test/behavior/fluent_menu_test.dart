@@ -1,7 +1,6 @@
 /// The menu, measured under both of its anchors: WinUI's context flyout from
-/// the paint stream and the route's own clock at a point, the same flyout
-/// hanging off a command button's corner, plus the one loud fence the rest of
-/// the overlay facet still keeps.
+/// the paint stream and the route's own clock at a point, and the same flyout
+/// hanging off a command button's corner.
 ///
 /// What a reimplementation gets wrong is what is asserted: that the menu
 /// opens ON the language's clock and closes on NONE (the reference's
@@ -616,28 +615,6 @@ void main() {
       await tester.tap(find.byType(FluentIconButton));
       await tester.pump(const Duration(milliseconds: 200));
       expect(find.byType(FluentMenuSurface), findsNothing);
-    });
-  });
-
-  group('the fence that remains', () {
-    // Was four; the popover, the anchor and the notice have landed, so it is
-    // one. The count is asserted rather than described because a fence that
-    // quietly stops refusing is a member that quietly started guessing.
-    testWidgets('the dialog refuses loudly, naming itself', (
-      WidgetTester tester,
-    ) async {
-      late BuildContext host;
-      await pumpFluentOverlayApp(tester, (BuildContext context) {
-        host = context;
-        return const SizedBox.shrink();
-      });
-      expect(
-        () => Overlays.dialog<void>(
-          host,
-          DialogSpec(title: 'x', content: const ContentPort(SizedBox.shrink())),
-        ),
-        throwsUnimplementedError,
-      );
     });
   });
 }

@@ -18,14 +18,13 @@ import 'fluent_surfaces.dart';
 
 /// Things that appear on top, the Fluent way - one member at a time.
 ///
-/// **This facet is registered but not yet whole.** The three attached and
-/// point-anchored members - [presentMenu], [presentPopover] and [menuAnchor],
-/// all three of them the WinUI flyout under different anchors - are
-/// implemented and behaviour-tested, and so is [notify], the InfoBar popup;
-/// only [presentDialog] still throws an [UnimplementedError] naming itself,
-/// exactly the fence the skin's own class doc demands: a loud refusal keeps a
-/// gap honest, where quietly rendering another language's overlay would be the
-/// substitution failure pointed inward.
+/// **Whole, as of the dialog.** The three flyout members - [presentMenu],
+/// [presentPopover] and [menuAnchor], the same WinUI flyout under three
+/// different anchors - [notify]'s InfoBar popup and [presentDialog]'s
+/// ContentDialog route are all implemented and behaviour-tested, and no member
+/// throws any more. The fences this facet kept while it grew were the point:
+/// a loud refusal keeps a gap honest, where quietly rendering another
+/// language's overlay would be the substitution failure pointed inward.
 ///
 /// **On the point anchor, because the finding has been asked for from four
 /// directions now:** a bare `Offset` does NOT force Fluent into anything
@@ -46,17 +45,102 @@ final class FluentOverlays implements SkinOverlays {
   /// Builds the overlay facet.
   const FluentOverlays();
 
-  /// Not yet: the dialog is the ContentDialog idiom and lands with its own
-  /// slice, beside `chrome.dialogSurface` - the two halves of one surface.
+  /// Takes the application away until the user answers: the ContentDialog
+  /// route.
+  ///
+  /// The other half of this surface is `chrome.dialogSurface`, already
+  /// composed into [host] - so this member owns only the ROUTE, which is the
+  /// same three-layer split the Material skin's dialog member records and
+  /// `docs/SKIN-CONTRACT.md` §2.8 demands.
+  ///
+  /// The route is the reference's `FluentDialogRoute`
+  /// (fluent_ui@4.16.1 lib/src/controls/flyouts/content_dialog.dart:307-345),
+  /// half by half:
+  ///
+  ///  * the smoke layer at `0x8A000000` (content_dialog.dart:241), which is
+  ///    the whole difference between a flyout - transparent barrier, the
+  ///    application still readable behind it - and a dialog, which takes the
+  ///    application away;
+  ///  * pushed on the ROOT navigator (content_dialog.dart:239), so a dialog
+  ///    opened from inside a nested navigator still covers the window;
+  ///  * opening over `fastAnimationDuration`, 167 ms (theme.dart:441),
+  ///    resolved through `FluentMotionDurations` so the user's motion
+  ///    preference scales it;
+  ///  * the entrance itself, [_settleIn], which fades in while the surface
+  ///    settles very slightly SMALLER - the ContentDialog gesture, and the
+  ///    opposite of a Material dialog, which only fades;
+  ///  * a focus scope that autofocuses (content_dialog.dart:330), so the
+  ///    keyboard is inside the dialog the moment it opens.
+  ///
+  /// Whether the barrier dismisses is the APPLICATION's word here, not the
+  /// reference's default of false: `DialogSpec.barrierDismissible` is exactly
+  /// that question asked, and a skin that overrode it would be answering a
+  /// question it was not asked.
+  ///
+  /// **The keyboard contract is deliberately absent**, for the same reason it
+  /// is absent from Material's dialog member: Escape-cancels, Enter-submits
+  /// and the destructive withholding live in the application's
+  /// `DialogKeyboardHost`, which the API package composes into [host] before
+  /// this member ever sees it. The reference wraps its own `DismissAction`
+  /// around the page (content_dialog.dart:327-329); doing that here would
+  /// have this skin answering Escape twice, and one of the two answers would
+  /// not be the application's.
   @override
   Future<T?> presentDialog<T>(
     BuildContext context,
     DialogSpec spec,
     SkinContentHost host,
-  ) => throw UnimplementedError(
-    'FluentOverlays.presentDialog is not implemented yet: the ContentDialog '
-    'route (smoke layer, 250 ms open) lands with the dialog slice, beside '
-    'chrome.dialogSurface.',
+  ) => Navigator.of(context, rootNavigator: true).push<T>(
+    RawDialogRoute<T>(
+      // content_dialog.dart:241: the smoke the application is read through.
+      barrierColor: const Color(0x8A000000),
+      barrierDismissible: spec.barrierDismissible,
+      // A literal, for the reason the menu route's own barrier label
+      // records: a skin package owns no translations, and the reference
+      // reads this off FluentLocalizations, which a drawn skin has none of.
+      barrierLabel: 'Dismiss',
+      transitionDuration: FluentMotionDurations.resolve(
+        context,
+        MotionRole.feedback,
+      ),
+      transitionBuilder: _settleIn,
+      pageBuilder:
+          (
+            BuildContext routeContext,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => SafeArea(
+            child: FocusScope(autofocus: true, child: host.build(routeContext)),
+          ),
+    ),
+  );
+
+  /// The ContentDialog entrance: a fade while the surface settles smaller.
+  ///
+  /// Verbatim from content_dialog.dart:337-353, including the arithmetic slip
+  /// that shapes what the library actually looks like. The reference feeds a
+  /// `Tween(begin: 1, end: 0.85)` into a [CurvedAnimation], which reads its
+  /// parent's VALUE as if it were 0..1 progress - so the scale travels
+  /// `easeOut(1) = 1` to `easeOut(0.85) ~ 0.977` rather than to the 0.85 the
+  /// tween names. The gesture is right and it is WinUI's (a dialog settles
+  /// inward as it arrives); only its depth is a twentieth of what the source
+  /// reads like. Reproduced rather than corrected, because the shipped
+  /// library's look is the thing being matched, and a "fixed" 0.85 would be
+  /// a pop no Windows dialog makes.
+  static Widget _settleIn(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => FadeTransition(
+    opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+    child: ScaleTransition(
+      scale: CurvedAnimation(
+        parent: Tween<double>(begin: 1, end: 0.85).animate(animation),
+        curve: Curves.easeOut,
+      ),
+      child: child,
+    ),
   );
 
   /// Offers the entries at the asked-for point: the WinUI context menu.

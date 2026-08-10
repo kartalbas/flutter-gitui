@@ -5,19 +5,24 @@
 /// An overlay member cannot be measured the way a control is, because its
 /// entries are reachable only through a host and a host is constructable
 /// only by the API package's own `Overlays` door - which requires a
-/// [SkinScope], whose installation calls `chrome.wrapRoot`. The real Fluent
-/// chrome is another slice's work and still throws, so this harness supplies
-/// the one thing the overlay members need from it: a chrome whose `wrapRoot`
-/// installs exactly what the real one will install for them - the request
-/// scope, the theme, and the page's default text treatment - and whose other
-/// members keep the same loud fence the skin itself keeps. Every facet the
-/// harness skin answers with is the REAL Fluent facet, so what the suite
-/// measures is the skin, not the harness.
+/// [SkinScope], whose installation calls `chrome.wrapRoot`.
+///
+/// So this harness supplies exactly two chrome members and fences the rest.
+/// `wrapRoot` installs what the overlay members need from it - the request
+/// scope, the theme, and the page's default text treatment - WITHOUT the real
+/// one's opaque page ground, which would paint over the application behind a
+/// transparent-barrier flyout and make every fill this suite reads off the
+/// paint stream a measurement of the ground instead. `dialogSurface` is the
+/// real one, because the dialog member's whole subject is the route around
+/// it. `shell` and `screen` keep the loud fence: no overlay opens one.
+/// Every other facet the harness skin answers with is the REAL Fluent facet,
+/// so what the suite measures is the skin, not the harness.
 library;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_chrome.dart';
 import 'package:gitui_skin_fluent/src/fluent_request_scope.dart';
 import 'package:gitui_skin_fluent/src/fluent_skin.dart';
 import 'package:gitui_skin_fluent/src/fluent_theme.dart';
@@ -121,9 +126,11 @@ final class _HarnessChrome implements SkinChrome {
   Widget screen(BuildContext context, ScreenSpec spec) =>
       throw UnimplementedError('The harness chrome only wraps the root.');
 
+  /// The real one: a dialog route with a stand-in surface inside it would
+  /// measure nothing the application will ever see.
   @override
   Widget dialogSurface(BuildContext context, DialogSpec spec) =>
-      throw UnimplementedError('The harness chrome only wraps the root.');
+      const FluentChrome().dialogSurface(context, spec);
 }
 
 /// Pumps [screen] as the home page of a bare [WidgetsApp] with a real

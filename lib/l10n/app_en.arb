@@ -2596,5 +2596,18 @@
   },
   "@viewModeList": {
     "description": "Tooltip and accessible name of the list segment of a screen's view-mode switch."
-  }
+  },
+  "autoFetchDescription": "Automatically fetch from remote periodically",
+  "autoFetchIntervalMinutes": "{minutes} minutes",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmDestructiveActionsDescription": "Ask before revert, cherry-pick and other reversible history changes",
+  "confirmPushDescription": "Show confirmation before pushing"
 }

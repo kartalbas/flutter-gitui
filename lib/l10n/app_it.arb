@@ -1051,5 +1051,9 @@
   "updateInstallFailed": "Non è stato possibile installare l'aggiornamento. Consulta il registro dell'applicazione per i dettagli.",
   "updateUnexpectedError": "Si è verificato un errore: {error}",
   "viewModeGrid": "Vista a griglia",
-  "viewModeList": "Vista a elenco"
+  "viewModeList": "Vista a elenco",
+  "autoFetchDescription": "Automatically fetch from remote periodically",
+  "autoFetchIntervalMinutes": "{minutes} minutes",
+  "confirmDestructiveActionsDescription": "Chiedi prima di revert, cherry-pick e altre modifiche reversibili della cronologia",
+  "confirmPushDescription": "Show confirmation before pushing"
 }

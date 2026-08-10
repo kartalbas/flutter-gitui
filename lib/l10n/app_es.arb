@@ -1709,5 +1709,18 @@
   "updateInstallFailed": "No se ha podido instalar la actualización. Consulte el registro de la aplicación para más detalles.",
   "updateUnexpectedError": "Se ha producido un error: {error}",
   "viewModeGrid": "Vista de cuadrícula",
-  "viewModeList": "Vista de lista"
+  "viewModeList": "Vista de lista",
+  "autoFetchDescription": "Obtener automáticamente cambios de remotos",
+  "autoFetchIntervalMinutes": "{minutes} minutos",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmDestructiveActionsDescription": "Preguntar antes de revertir, cherry-pick y otros cambios de historial reversibles",
+  "confirmPushDescription": "Esto enviará sus commits locales al remoto"
 }

@@ -33,6 +33,7 @@ import '../../core/tools/version_detector.dart';
 import '../../core/services/notification_service.dart';
 import 'widgets/git_config_section.dart';
 import 'widgets/theme_section.dart';
+import 'widgets/behavior_section.dart';
 import 'widgets/animation_section.dart';
 import 'widgets/history_section.dart';
 import 'widgets/updates_section.dart';
@@ -128,6 +129,11 @@ class SettingsScreen extends ConsumerWidget {
                               _getColorSchemeName(context, scheme),
                           getFontSizeName: (size) =>
                               _getFontSizeName(context, size),
+                        ),
+                        const BaseGap(Proximity.sectioned),
+                        BehaviorSection(
+                          onEditAutoFetchInterval: () =>
+                              _editAutoFetchInterval(context, ref),
                         ),
                         const BaseGap(Proximity.sectioned),
                         const AnimationSection(),
@@ -713,6 +719,61 @@ class SettingsScreen extends ConsumerWidget {
 
     if (result != null && result.isNotEmpty) {
       await ref.read(configProvider.notifier).setDefaultUserEmail(result);
+    }
+  }
+
+  /// The auto-fetch interval, in minutes.
+  ///
+  /// Modelled on [_editCommitHistoryLimit] rather than invented: the two ask
+  /// the same question - one positive whole number - and a second arrangement
+  /// for it would be the kind of per-screen drift this project's UI rules
+  /// exist to prevent.
+  Future<void> _editAutoFetchInterval(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final behavior = ref.read(behaviorConfigProvider);
+    // See _editUserName: the field owns its controller so nothing outlives it.
+    var minutes = behavior.autoFetchInterval.toString();
+
+    void submit() {
+      final value = int.tryParse(minutes);
+      if (value != null && value > 0) {
+        Navigator.of(context).pop(value);
+      }
+    }
+
+    final result = await BaseDialog.show<int>(
+      context: context,
+      dialog: BaseDialog(
+        title: l10n.autoFetchInterval,
+        icon: IconRole.timer,
+        onSubmit: submit,
+        content: BaseTextField(
+          initialValue: minutes,
+          onChanged: (value) => minutes = value,
+          autofocus: true,
+          label: l10n.autoFetchInterval,
+          prefixIcon: IconRole.timer,
+        ),
+        actions: [
+          DialogAction(
+            onPressed: () => Navigator.of(context).pop(),
+            label: l10n.cancel,
+            role: DialogActionRole.dismissive,
+          ),
+          DialogAction(
+            onPressed: submit,
+            label: l10n.save,
+            role: DialogActionRole.affirmative,
+          ),
+        ],
+      ),
+    );
+
+    if (result != null) {
+      await ref.read(configProvider.notifier).setAutoFetchInterval(result);
     }
   }
 

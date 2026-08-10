@@ -1116,5 +1116,9 @@
   "updateInstallFailed": "Güncelleme kurulamadı. Ayrıntılar için uygulama günlüğüne bakın.",
   "updateUnexpectedError": "Bir hata oluştu: {error}",
   "viewModeGrid": "Izgara görünümü",
-  "viewModeList": "Liste görünümü"
+  "viewModeList": "Liste görünümü",
+  "autoFetchDescription": "Periyodik olarak uzaktan otomatik getirme yap",
+  "autoFetchIntervalMinutes": "{minutes} dakika",
+  "confirmDestructiveActionsDescription": "Geri alma, cherry-pick ve diğer geri alınabilir geçmiş değişikliklerinden önce sor",
+  "confirmPushDescription": "Push yapmadan önce onay iste"
 }

@@ -1709,5 +1709,18 @@
   "updateInstallFailed": "La mise à jour n'a pas pu être installée. Consultez le journal de l'application pour plus de détails.",
   "updateUnexpectedError": "Une erreur s'est produite : {error}",
   "viewModeGrid": "Vue en grille",
-  "viewModeList": "Vue en liste"
+  "viewModeList": "Vue en liste",
+  "autoFetchDescription": "Récupérer automatiquement depuis le distant périodiquement",
+  "autoFetchIntervalMinutes": "{minutes} minutes",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmDestructiveActionsDescription": "Demander avant un revert, un cherry-pick et d'autres modifications d'historique réversibles",
+  "confirmPushDescription": "Afficher une confirmation avant le push"
 }

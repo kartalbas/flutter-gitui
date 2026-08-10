@@ -1709,5 +1709,18 @@
   "updateInstallFailed": "Das Update konnte nicht installiert werden. Einzelheiten stehen im Anwendungsprotokoll.",
   "updateUnexpectedError": "Ein Fehler ist aufgetreten: {error}",
   "viewModeGrid": "Kachelansicht",
-  "viewModeList": "Listenansicht"
+  "viewModeList": "Listenansicht",
+  "autoFetchDescription": "Automatisch regelmäßig vom Remote abrufen",
+  "autoFetchIntervalMinutes": "{minutes} Minuten",
+  "@autoFetchIntervalMinutes": {
+    "description": "Display text for auto fetch interval",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "confirmDestructiveActionsDescription": "Vor Revert, Cherry-Pick und anderen umkehrbaren Verlaufsänderungen nachfragen",
+  "confirmPushDescription": "Bestätigung vor dem Pushen anzeigen"
 }

@@ -179,6 +179,13 @@ const List<String> _readingOrder = <String>[
   'dropdown:AppFontSize.medium',
   'dropdown:JetBrains Mono', // preview font family
   'dropdown:AppFontSize.medium', // preview font size
+  // Behavior (#444). The interval's Edit button is deliberately absent: it is
+  // only built while Auto Fetch is on, and the setting defaults to off, so a
+  // stop for it here would assert a control this fixture never draws.
+  'sectionHeader:Behavior',
+  'switch:Auto Fetch',
+  'switch:Confirm Push',
+  'switch:Confirm destructive actions',
 
   'sectionHeader:Animations',
   'dropdown:AppAnimationSpeed.normal',

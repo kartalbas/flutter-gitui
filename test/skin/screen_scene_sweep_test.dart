@@ -397,7 +397,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // the shell on the settings destination. Measured at closing under BOTH
   // skins - Material and the blueprint land on the same two numbers - so the
   // register stays skin-independent.
-  'shell': 175,
+  'shell': 183,
   'workspaces': 33,
   'repositories': 59,
   'changes': 54,
@@ -414,7 +414,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // application reaching the contract, not a skin drawing more of itself.
   'stashes': 17,
   'tags': 37,
-  'settings': 141,
+  'settings': 149,
   'merge_conflicts': 31,
 };
 

@@ -99,6 +99,19 @@ final class FluentChrome implements SkinChrome {
   /// skin's control fills are translucent and only composite correctly
   /// over the ground the language itself specifies.
   ///
+  /// **The ground is painted by the OUTERMOST establishment only** (#446).
+  /// This member is not called once: `SkinEnvelope._establish` re-runs it
+  /// inside every overlay route, which is what makes an overlay carry the
+  /// same skin and the same brightness as the surface that opened it. A
+  /// ground painted there too would sit between a flyout's deliberately
+  /// transparent barrier and the flyout itself, covering the application
+  /// the user is supposed to still be reading - measured as two full-window
+  /// `#F3F3F3` boxes above an open menu. The two cases are told apart
+  /// without a contract change: at the application root there is no ancestor
+  /// [FluentRequestScope], and inside a re-established route there always
+  /// is. Neither other skin is affected, because neither paints a ground
+  /// here at all.
+  ///
   /// Where each of the request's seven fields goes:
   ///
   ///  * `brightness` picks the resource dictionary here;
@@ -125,12 +138,13 @@ final class FluentChrome implements SkinChrome {
         ? const FluentThemeData.dark()
         : const FluentThemeData.light();
     final FluentResources res = data.resources;
+    final bool isPage = FluentRequestScope.maybeOf(context) == null;
     return FluentRequestScope(
       request: request,
       child: FluentTheme(
         data: data,
-        child: ColoredBox(
-          color: res.solidBackgroundFillColorBase,
+        child: _Ground(
+          color: isPage ? res.solidBackgroundFillColorBase : null,
           child: IconTheme(
             // The reference's own icon default: black in light, white in
             // dark, size 18 (styles/theme.dart:474-475).
@@ -183,6 +197,28 @@ final class FluentChrome implements SkinChrome {
       spec.extent == DialogExtent.browser
       ? FluentViewerDialogSurface(spec: spec)
       : FluentDialogSurface(spec: spec);
+}
+
+/// The page ground, or nothing at all.
+///
+/// A [ColoredBox] when this establishment is the page's, and a plain
+/// pass-through when it is an overlay route's re-establishment - see
+/// [FluentChrome.wrapRoot] and #446. A widget rather than a conditional at the
+/// call site so the subtree keeps ONE shape in both cases: swapping a
+/// `ColoredBox` in and out of the middle of the root would remount everything
+/// below it the first time an overlay opened.
+final class _Ground extends StatelessWidget {
+  const _Ground({required this.color, required this.child});
+
+  /// The ground to paint, or null to paint none.
+  final Color? color;
+
+  /// The root treatment below it.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      color == null ? child : ColoredBox(color: color!, child: child);
 }
 
 // ---------------------------------------------------------------------------

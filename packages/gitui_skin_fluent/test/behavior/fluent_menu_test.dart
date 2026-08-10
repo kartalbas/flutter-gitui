@@ -1,7 +1,7 @@
 /// The menu, measured under both of its anchors: WinUI's context flyout from
 /// the paint stream and the route's own clock at a point, the same flyout
-/// hanging off a command button's corner, plus the two loud fences the rest
-/// of the overlay facet still keeps.
+/// hanging off a command button's corner, plus the one loud fence the rest of
+/// the overlay facet still keeps.
 ///
 /// What a reimplementation gets wrong is what is asserted: that the menu
 /// opens ON the language's clock and closes on NONE (the reference's
@@ -619,11 +619,11 @@ void main() {
     });
   });
 
-  group('the fences that remain', () {
-    // Was four; the popover and the anchor have landed, so it is two. The
-    // count is asserted rather than described because a fence that quietly
-    // stops refusing is a member that quietly started guessing.
-    testWidgets('dialog and notice refuse loudly, each naming itself', (
+  group('the fence that remains', () {
+    // Was four; the popover, the anchor and the notice have landed, so it is
+    // one. The count is asserted rather than described because a fence that
+    // quietly stops refusing is a member that quietly started guessing.
+    testWidgets('the dialog refuses loudly, naming itself', (
       WidgetTester tester,
     ) async {
       late BuildContext host;
@@ -635,13 +635,6 @@ void main() {
         () => Overlays.dialog<void>(
           host,
           DialogSpec(title: 'x', content: const ContentPort(SizedBox.shrink())),
-        ),
-        throwsUnimplementedError,
-      );
-      expect(
-        () => Overlays.notify(
-          host,
-          const NoticeSpec(tone: Tone.info, title: 'x'),
         ),
         throwsUnimplementedError,
       );

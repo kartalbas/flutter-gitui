@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/semantics.dart' show SemanticsRole;
 import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
@@ -12,17 +14,18 @@ import '../fluent_resources.dart';
 import '../fluent_theme.dart';
 import '../fluent_typography.dart';
 import 'fluent_controls.dart';
+import 'fluent_surfaces.dart';
 
 /// Things that appear on top, the Fluent way - one member at a time.
 ///
 /// **This facet is registered but not yet whole.** The three attached and
 /// point-anchored members - [presentMenu], [presentPopover] and [menuAnchor],
 /// all three of them the WinUI flyout under different anchors - are
-/// implemented and behaviour-tested; [presentDialog] and [notify] still throw
-/// an [UnimplementedError] naming themselves, exactly the fence the skin's own
-/// class doc demands: a loud refusal keeps a gap honest, where quietly
-/// rendering another language's overlay would be the substitution failure
-/// pointed inward.
+/// implemented and behaviour-tested, and so is [notify], the InfoBar popup;
+/// only [presentDialog] still throws an [UnimplementedError] naming itself,
+/// exactly the fence the skin's own class doc demands: a loud refusal keeps a
+/// gap honest, where quietly rendering another language's overlay would be the
+/// substitution failure pointed inward.
 ///
 /// **On the point anchor, because the finding has been asked for from four
 /// directions now:** a bare `Offset` does NOT force Fluent into anything
@@ -246,13 +249,208 @@ final class FluentOverlays implements SkinOverlays {
     );
   }
 
-  /// Not yet: the notice is the InfoBar idiom and lands with its own slice.
+  /// Says something the user did not ask about: WinUI's InfoBar, shown as a
+  /// popup over the page.
+  ///
+  /// **It draws nothing of its own.** The bar itself is `surfaces.banner` -
+  /// already this skin's InfoBar, down to the severity ground, the 1 epx card
+  /// stroke, the 4 epx corner and the dismiss cross - and this member only
+  /// places it and schedules it, which is exactly the division the reference
+  /// makes between `InfoBar` and `displayInfoBar`
+  /// (fluent_ui@4.16.1 lib/src/controls/surfaces/info_bar.dart:31-99). An
+  /// inline banner and a popped-up notice saying the same thing in two
+  /// different shapes would be this skin disagreeing with itself.
+  ///
+  /// The placement and the clock are the reference's, step for step:
+  ///
+  ///  * an overlay entry rather than a route (info_bar.dart:98), so the
+  ///    notice never takes the keyboard away from what the user is doing;
+  ///  * bottom-centre, inside a safe area, at 24 vertical and 16 horizontal
+  ///    (info_bar.dart:50-57) - the ramp's own `spaceXXL` and `spaceL`;
+  ///  * elevation 8 (info_bar.dart:87), the one rung Fluent shadows;
+  ///  * it fades in and out across an `AnimatedSwitcher` at the medium step
+  ///    (info_bar.dart:78-81), and the FIRST swap is scheduled one medium
+  ///    step out (info_bar.dart:69-71) because a switcher needs a previous
+  ///    child to animate away from - the notice therefore arrives a quarter
+  ///    of a second after the event, which is the reference's own feel and
+  ///    not a delay invented here;
+  ///  * a brief notice lingers three seconds (info_bar.dart:34) - Fluent's
+  ///    own number, where Material's snackbar says two.
+  ///
+  /// Two departures from the reference, both deliberate:
+  ///
+  ///  1. **A new notice takes the previous one away.** `displayInfoBar`
+  ///     inserts entries at one alignment with no queue of its own, so two
+  ///     live notices land on top of each other. The application never
+  ///     dismisses the handle it is given and its errors are persistent, so
+  ///     stacking is how the pile-up ships; replacing is the queue handling
+  ///     the shipped service had from `clearSnackBars()`, kept.
+  ///  2. **The popup hugs its content.** WinUI's InfoBar spans its container
+  ///     and `surfaces.banner` is that inline bar; the reference's popup gets
+  ///     its hug from `MainAxisSize.min` INSIDE the bar. Asking for the hug
+  ///     from outside keeps one banner instead of growing it a popup mode.
   @override
-  NoticeHandle notify(BuildContext context, SkinNoticeHost host) =>
-      throw UnimplementedError(
-        'FluentOverlays.notify is not implemented yet: the InfoBar strip '
-        'lands with its own slice.',
+  NoticeHandle notify(BuildContext context, SkinNoticeHost host) {
+    final _FluentNoticeHandle handle = _FluentNoticeHandle(
+      overlay: Overlay.of(context, rootOverlay: true),
+      fade: FluentMotionDurations.resolve(context, MotionRole.transition),
+      // A notice that must be read is taken away by the user, not by a
+      // clock; a brief one takes itself away and needs no affordance.
+      linger: host.lifetime == NoticeLifetime.persistent
+          ? null
+          : _FluentNoticeHandle.brief,
+    );
+    handle.present(host);
+    return handle;
+  }
+}
+
+/// One live notice: the overlay entry, its clock, and the two things the
+/// application is allowed to ask of it.
+final class _FluentNoticeHandle implements NoticeHandle {
+  _FluentNoticeHandle({
+    required OverlayState overlay,
+    required Duration fade,
+    required Duration? linger,
+  }) : _overlay = overlay,
+       _fade = fade,
+       _linger = linger;
+
+  /// How long a brief notice stays once it is up (info_bar.dart:34).
+  static const Duration brief = Duration(seconds: 3);
+
+  /// The notice on screen, if any. One at a time - see [notify].
+  static _FluentNoticeHandle? _live;
+
+  final OverlayState _overlay;
+  final Duration _fade;
+  final Duration? _linger;
+
+  OverlayEntry? _entry;
+  Timer? _clock;
+  StateSetter? _refresh;
+  bool _up = false;
+
+  /// Puts the notice up and starts its clock.
+  void present(SkinNoticeHost host) {
+    _live?.dismiss();
+    _live = this;
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) => SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: FluentMetrics.spaceXXL,
+              horizontal: FluentMetrics.spaceL,
+            ),
+            child: StatefulBuilder(
+              builder: (BuildContext inner, StateSetter refresh) {
+                _refresh = refresh;
+                return AnimatedSwitcher(
+                  duration: _fade,
+                  switchInCurve: FluentMotion.curve,
+                  switchOutCurve: FluentMotion.curve,
+                  child: _up
+                      ? _bar(inner, host)
+                      : const SizedBox.shrink(key: ValueKey<bool>(false)),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    _entry = entry;
+    _overlay.insert(entry);
+    _clock = Timer(_fade, _raise);
+  }
+
+  /// The bar itself: this skin's banner, hugged and shadowed.
+  Widget _bar(BuildContext context, SkinNoticeHost host) => IntrinsicWidth(
+    key: const ValueKey<bool>(true),
+    child: host.build(context, (BuildContext inner, NoticeSpec spec) {
+      final FluentThemeData theme = FluentTheme.of(inner);
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(
+            FluentGeometry.controlCornerRadius,
+          ),
+          boxShadow: FluentInk.depth(
+            theme,
+            Elevation.overlay,
+          ).shadows(FluentInk.shadowInk(theme.brightness)),
+        ),
+        child: const FluentSurfaces().banner(
+          inner,
+          BannerSpec(
+            tone: spec.tone,
+            title: spec.title,
+            body: spec.body,
+            icon: spec.icon,
+            actions: spec.actions,
+            // Only a notice that stays carries the cross: a brief one is
+            // gone before the pointer arrives, and the reference draws no
+            // close button where `onClose` is null (info_bar.dart:453).
+            onDismiss: _linger == null ? dismiss : null,
+          ),
+        ),
       );
+    }),
+  );
+
+  /// Fades the bar in, then arms the linger for a brief notice.
+  void _raise() {
+    _up = true;
+    _rebuild();
+    final Duration? linger = _linger;
+    _clock = linger == null ? null : Timer(linger, _lower);
+  }
+
+  /// Fades the bar out, then takes the entry away.
+  void _lower() {
+    _up = false;
+    _rebuild();
+    _clock = Timer(_fade, _remove);
+  }
+
+  /// Shows the overlay what changed.
+  ///
+  /// The flag is the handle's, not the builder's, because the clock can reach
+  /// it before the overlay has ever built - `notify` is answered inside the
+  /// caller's frame and the entry is built in the next one. Setting the flag
+  /// through the builder's [StateSetter] alone lost the raise entirely in that
+  /// order: the notice was inserted, never shown, and taken away three seconds
+  /// later.
+  void _rebuild() {
+    final StateSetter? refresh = _refresh;
+    if (refresh != null) {
+      refresh(() {});
+    } else {
+      _entry?.markNeedsBuild();
+    }
+  }
+
+  void _remove() {
+    _clock = null;
+    _entry?.remove();
+    _entry = null;
+    _refresh = null;
+    if (identical(_live, this)) _live = null;
+  }
+
+  @override
+  void dismiss() {
+    if (_entry == null) return;
+    _clock?.cancel();
+    // Before the first swap there is nothing faded in to fade out, so the
+    // entry goes straight away rather than animating from a state it never
+    // reached.
+    _up ? _lower() : _remove();
+  }
+
+  @override
+  bool get isShowing => _entry != null;
 }
 
 /// The menu's route: a dialog route with the flyout's asymmetric clock.

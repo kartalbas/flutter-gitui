@@ -20,9 +20,9 @@ import 'facets/fluent_type.dart';
 ///
 /// **This skin is registered but not yet whole.** Every facet getter now
 /// answers - chrome, controls, surfaces, layout, type and motion are
-/// implemented, and the overlay facet carries the point-anchored menu -
-/// but the overlay facet's remaining members still throw an
-/// [UnimplementedError] naming themselves, each with its own fence inside
+/// implemented, and the overlay facet carries the menu under both of its
+/// anchors, the popover and the notice - but its dialog still throws an
+/// [UnimplementedError] naming itself, from its own fence inside
 /// [FluentOverlays]. Failing loudly is the only honest answer a partial
 /// skin can give: a facet that quietly delegated to another design
 /// language would be exactly the substitution failure the blueprint exists
@@ -97,11 +97,11 @@ final class FluentSkin implements Skin {
   @override
   SkinMotion get motion => const FluentMotionFacet();
 
-  /// Things that appear on top: the point-anchored menu is implemented;
-  /// the dialog, the anchored trigger, the popover and the notice still
-  /// refuse loudly, each with its own fence inside [FluentOverlays] - so
-  /// the facet getter no longer throws, and the remaining gaps moved from
-  /// the facet's door to the members that are actually missing.
+  /// Things that appear on top: the menu at a point and off an anchor, the
+  /// popover and the InfoBar notice are implemented; only the dialog still
+  /// refuses loudly, from its own fence inside [FluentOverlays] - so the
+  /// facet getter no longer throws, and the remaining gap sits on the one
+  /// member that is actually missing.
   @override
   SkinOverlays get overlays => const FluentOverlays();
 

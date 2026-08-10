@@ -4,6 +4,7 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
+        DialogRouteSpec,
         IconRole,
         Inset,
         NoticeSpec,
@@ -602,8 +603,9 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
 
 /// Show bisect dialog
 Future<void> showBisectDialog(BuildContext context) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(title: AppLocalizations.of(context)!.gitBisect),
     builder: (context) => const BisectDialog(),
   );
 }

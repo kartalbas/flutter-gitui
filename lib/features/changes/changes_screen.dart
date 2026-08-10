@@ -5,7 +5,9 @@ import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ContentPort,
+        DialogRouteSpec,
         IconRole,
+        Overlays,
         Proximity,
         ScreenSpec,
         Skin,
@@ -415,8 +417,11 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
   }
 
   Future<void> _showCommitDialog(BuildContext context, WidgetRef ref) async {
-    await showDialog(
-      context: context,
+    await Overlays.dialogFrom(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.commitChanges,
+      ),
       builder: (context) => const CommitDialog(),
     );
   }

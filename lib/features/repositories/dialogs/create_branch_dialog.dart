@@ -3,8 +3,10 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         Inset,
+        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -61,8 +63,11 @@ Future<CreateBranchDialogResult?> showCreateBranchDialog(
   BuildContext context, {
   required List<WorkspaceRepository> repositories,
 }) {
-  return showDialog<CreateBranchDialogResult>(
-    context: context,
+  return Overlays.dialogFrom<CreateBranchDialogResult>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.createBranchDialogTitle,
+    ),
     builder: (context) => _CreateBranchDialog(repositories: repositories),
   );
 }

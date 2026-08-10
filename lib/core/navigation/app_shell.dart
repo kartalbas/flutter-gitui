@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show DialogRouteSpec, IconRole, Inset, Overlays, Proximity, TextRole, Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
@@ -971,8 +971,11 @@ class _AppShellState extends ConsumerState<AppShell> {
         tooltip: l10n.cloneRepository,
         // Cloning brings a repository in rather than acting on one, so unlike
         // its neighbours it needs no target and is never blocked.
-        onPressed: () => showDialog(
-          context: context,
+        onPressed: () => Overlays.dialogFrom(
+          context,
+          route: DialogRouteSpec(
+            title: AppLocalizations.of(context)!.cloneRepository,
+          ),
           builder: (context) => const CloneRepositoryDialog(),
         ),
       ),

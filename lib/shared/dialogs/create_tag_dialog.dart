@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         NoticeSpec,
         Overlays,
@@ -427,8 +428,9 @@ Future<bool?> showCreateTagDialog(
   BuildContext context, {
   String? initialCommit,
 }) {
-  return showDialog<bool>(
-    context: context,
+  return Overlays.dialogFrom<bool>(
+    context,
+    route: DialogRouteSpec(title: AppLocalizations.of(context)!.createTag),
     builder: (context) => CreateTagDialog(initialCommit: initialCommit),
   );
 }

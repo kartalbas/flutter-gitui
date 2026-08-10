@@ -3,7 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, MarkdownSpec, Proximity, Skin, SkinScope;
+    show
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        MarkdownSpec,
+        Overlays,
+        Proximity,
+        Skin,
+        SkinScope;
 import 'package:path/path.dart' as path;
 
 import '../../../../shared/components/base_layout.dart';
@@ -136,8 +144,12 @@ Future<void> showMarkdownViewerDialog(
   BuildContext context, {
   required String filePath,
 }) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(
+      title: 'Markdown Viewer',
+      extent: DialogExtent.browser,
+    ),
     builder: (context) => MarkdownViewerDialog(filePath: filePath),
   );
 }

@@ -4,8 +4,10 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         Inset,
+        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -31,8 +33,11 @@ Future<bool?> showSquashCommitsDialog(
   BuildContext context, {
   required List<GitCommit> selectedCommits,
 }) {
-  return showDialog<bool>(
-    context: context,
+  return Overlays.dialogFrom<bool>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.squashCommitsDialog,
+    ),
     builder: (context) =>
         _SquashCommitsDialog(selectedCommits: selectedCommits),
   );

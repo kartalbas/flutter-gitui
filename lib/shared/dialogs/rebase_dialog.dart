@@ -4,6 +4,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         Inset,
         NoticeAction,
@@ -621,8 +622,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
 
 /// Show rebase dialog
 Future<void> showRebaseDialog(BuildContext context) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(title: AppLocalizations.of(context)!.rebaseBranch),
     builder: (context) => const RebaseDialog(),
   );
 }

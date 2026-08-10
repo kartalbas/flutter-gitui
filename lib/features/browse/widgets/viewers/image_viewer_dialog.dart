@@ -1,7 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:path/path.dart' as path;
 import 'package:photo_view/photo_view.dart';
 
@@ -77,8 +85,9 @@ Future<void> showImageViewerDialog(
   BuildContext context, {
   required String filePath,
 }) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(title: 'Image Viewer', extent: DialogExtent.browser),
     builder: (context) => ImageViewerDialog(filePath: filePath),
   );
 }

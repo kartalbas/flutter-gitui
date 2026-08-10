@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
+        DialogRouteSpec,
         IconRole,
         NoticeSpec,
         Overlays,
@@ -399,9 +400,12 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
 
 /// Show clone repository dialog
 Future<String?> showCloneRepositoryDialog(BuildContext context) {
-  return showDialog<String>(
-    context: context,
-    barrierDismissible: false,
+  return Overlays.dialogFrom<String>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.cloneRepository,
+      barrierDismissible: false,
+    ),
     builder: (context) => const CloneRepositoryDialog(),
   );
 }

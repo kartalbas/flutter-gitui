@@ -6,7 +6,10 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ContentPort,
         DataGridSpec,
+        DialogExtent,
+        DialogRouteSpec,
         IconRole,
+        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -194,8 +197,12 @@ Future<void> showCsvViewerDialog(
   BuildContext context, {
   required String filePath,
 }) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(
+      title: 'CSV/Spreadsheet Viewer',
+      extent: DialogExtent.browser,
+    ),
     builder: (context) => CsvViewerDialog(filePath: filePath),
   );
 }

@@ -8,6 +8,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ChoiceGroupSpec,
         ChoiceOption,
         ContentPort,
+        DialogRouteSpec,
         DropTargetSpec,
         GridDensity,
         IconRole,
@@ -15,6 +16,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuAction,
         MenuActionRole,
         MenuSeparator,
+        Overlays,
         Proximity,
         ScreenSpec,
         Skin,
@@ -832,15 +834,21 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
   }
 
   Future<void> _showCloneDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
+    await Overlays.dialogFrom(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.cloneRepository,
+      ),
       builder: (context) => const CloneRepositoryDialog(),
     );
   }
 
   Future<void> _showInitDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
+    await Overlays.dialogFrom(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.initializeRepository,
+      ),
       builder: (context) => const InitializeRepositoryDialog(),
     );
   }

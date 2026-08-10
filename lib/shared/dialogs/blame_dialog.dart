@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        Inset,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -27,8 +35,12 @@ class BlameDialog extends ConsumerWidget {
     required BuildContext context,
     required String filePath,
   }) {
-    showDialog(
-      context: context,
+    Overlays.dialogFrom(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.blame,
+        extent: DialogExtent.browser,
+      ),
       builder: (context) => BlameDialog(filePath: filePath),
     );
     return BlameDialog(filePath: filePath);
@@ -284,8 +296,12 @@ class CommitGroup {
 
 /// Show blame dialog for a file
 Future<void> showBlameDialog(BuildContext context, {required String filePath}) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.blame,
+      extent: DialogExtent.browser,
+    ),
     builder: (context) => BlameDialog(filePath: filePath),
   );
 }

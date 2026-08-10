@@ -5,6 +5,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ContentPort,
         ControlScale,
+        DialogRouteSpec,
         Emphasis,
         IconRole,
         Inset,
@@ -908,8 +909,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     if (context.mounted) {
       final remoteName = remotes.length == 1
           ? remotes.first
-          : await showDialog<String>(
-              context: context,
+          : await Overlays.dialogFrom<String>(
+              context,
+              route: DialogRouteSpec(
+                title: AppLocalizations.of(context)!.selectRemoteDialog,
+              ),
               builder: (context) => SelectRemoteDialog(remotes: remotes),
             );
 
@@ -939,8 +943,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     if (context.mounted) {
       final remoteName = remotes.length == 1
           ? remotes.first
-          : await showDialog<String>(
-              context: context,
+          : await Overlays.dialogFrom<String>(
+              context,
+              route: DialogRouteSpec(
+                title: AppLocalizations.of(context)!.selectRemoteDialog,
+              ),
               builder: (context) => SelectRemoteDialog(remotes: remotes),
             );
 
@@ -988,8 +995,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
         // picked explicitly instead of guessed, just like the push flows.
         remoteName = remotes.length == 1
             ? remotes.first
-            : await showDialog<String>(
-                context: context,
+            : await Overlays.dialogFrom<String>(
+                context,
+                route: DialogRouteSpec(
+                  title: AppLocalizations.of(context)!.selectRemoteDialog,
+                ),
                 builder: (context) => SelectRemoteDialog(remotes: remotes),
               );
         if (remoteName == null || !context.mounted) return;

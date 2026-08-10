@@ -4,7 +4,9 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         BannerSpec,
         ChoiceGroupSpec,
         ChoiceOption,
+        DialogRouteSpec,
         IconRole,
+        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -541,8 +543,11 @@ Future<CreatePullRequestResult?> showCreatePullRequestDialog(
   required String currentBranch,
   required List<GitBranch> availableBranches,
 }) {
-  return showDialog<CreatePullRequestResult>(
-    context: context,
+  return Overlays.dialogFrom<CreatePullRequestResult>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.createPullRequestDialogTitle,
+    ),
     builder: (context) => CreatePullRequestDialog(
       currentBranch: currentBranch,
       availableBranches: availableBranches,

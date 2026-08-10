@@ -8,6 +8,8 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ContentPort,
         ControlScale,
+        DialogExtent,
+        DialogRouteSpec,
         IconRole,
         Inset,
         MenuAction,
@@ -1219,8 +1221,12 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
     // Display order is newest first, so first and last map onto the newer
     // and older end of the range git log expects.
-    showDialog(
-      context: context,
+    Overlays.dialogFrom(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.compareCommits,
+        extent: DialogExtent.browser,
+      ),
       builder: (context) =>
           CompareCommitsDialog(newer: commits.first, older: commits.last),
     );

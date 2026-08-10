@@ -4,6 +4,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         NoticeAction,
         NoticeSpec,
@@ -421,9 +422,12 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
 
 /// Show merge branch dialog
 Future<bool?> showMergeBranchDialog(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    barrierDismissible: false,
+  return Overlays.dialogFrom<bool>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.merge,
+      barrierDismissible: false,
+    ),
     builder: (context) => const MergeBranchDialog(),
   );
 }

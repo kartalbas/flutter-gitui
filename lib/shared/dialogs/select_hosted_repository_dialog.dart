@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        DialogRouteSpec,
+        IconRole,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../core/hosting/hosted_repository.dart';
 import '../../core/hosting/hosting_providers.dart';
@@ -459,8 +466,9 @@ class _Message extends StatelessWidget {
 Future<HostedRepository?> showSelectHostedRepositoryDialog(
   BuildContext context,
 ) {
-  return showDialog<HostedRepository>(
-    context: context,
+  return Overlays.dialogFrom<HostedRepository>(
+    context,
+    route: DialogRouteSpec(title: 'Select repository'),
     builder: (context) => const SelectHostedRepositoryDialog(),
   );
 }

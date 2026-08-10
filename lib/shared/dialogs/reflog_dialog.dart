@@ -2,7 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show BannerSpec, IconRole, Proximity, Skin, SkinScope, TextRole, Tone;
+    show
+        BannerSpec,
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        Overlays,
+        Proximity,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_label.dart';
@@ -237,8 +247,12 @@ class ReflogDialog extends ConsumerWidget {
 
 /// Show reflog dialog
 Future<void> showReflogDialog(BuildContext context) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.gitReflog,
+      extent: DialogExtent.browser,
+    ),
     builder: (context) => const ReflogDialog(),
   );
 }

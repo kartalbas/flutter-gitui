@@ -499,8 +499,11 @@ class TagListTile extends ConsumerWidget {
     if (context.mounted) {
       final remoteName = remotes.length == 1
           ? remotes.first
-          : await showDialog<String>(
-              context: context,
+          : await Overlays.dialogFrom<String>(
+              context,
+              route: DialogRouteSpec(
+                title: AppLocalizations.of(context)!.selectRemoteDialog,
+              ),
               builder: (context) => SelectRemoteDialog(remotes: remotes),
             );
 
@@ -565,8 +568,11 @@ class TagListTile extends ConsumerWidget {
       if (willDeleteFromRemote) {
         remoteName = remotes.length == 1
             ? remotes.first
-            : await showDialog<String>(
-                context: context,
+            : await Overlays.dialogFrom<String>(
+                context,
+                route: DialogRouteSpec(
+                  title: AppLocalizations.of(context)!.selectRemoteDialog,
+                ),
                 builder: (context) => SelectRemoteDialog(remotes: remotes),
               );
         if (remoteName == null || !context.mounted) return;

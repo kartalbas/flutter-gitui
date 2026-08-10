@@ -311,8 +311,11 @@ class StashListTile extends ConsumerWidget {
   }
 
   Future<void> _createBranch(BuildContext context, WidgetRef ref) async {
-    final result = await showDialog<String>(
-      context: context,
+    final result = await Overlays.dialogFrom<String>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.createBranchFromStash,
+      ),
       builder: (context) => CreateBranchFromStashDialog(stash: stash),
     );
 

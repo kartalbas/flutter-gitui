@@ -804,6 +804,7 @@ final class FluentMenuSurface extends StatelessWidget {
                   ? const _MenuLeadingMark(kind: _LeadingMark.bullet)
                   : null,
               label: choice.label,
+              detail: choice.detail,
               dispatch: enabled ? () => choice.onSelect!() : null,
             ),
           );
@@ -992,6 +993,7 @@ class _FluentMenuRow extends StatelessWidget {
     required this.leading,
     required this.label,
     required this.dispatch,
+    this.detail,
     this.destructive = false,
     this.checked,
     this.chosen,
@@ -1015,6 +1017,11 @@ class _FluentMenuRow extends StatelessWidget {
 
   /// The row's words.
   final String label;
+
+  /// The second fact about the row, or null - a repository's path under its
+  /// name. WinUI's own two-line flyout item: the detail in the caption step on
+  /// the secondary ink, under the words it qualifies.
+  final String? detail;
 
   /// Runs the entry after the route has popped. Null while disabled.
   final VoidCallback? dispatch;
@@ -1113,18 +1120,40 @@ class _FluentMenuRow extends StatelessWidget {
                         // The 10 before the trailing edge,
                         // flyout_content.dart:240-241.
                         padding: const EdgeInsetsDirectional.only(end: 10),
-                        child: Text(
-                          label,
-                          style:
-                              FluentTypeResolution.styleOf(
-                                context,
-                                TextRole.control,
-                              ).copyWith(
-                                color: foreground,
-                                // flyout_content.dart:245: the flyout
-                                // tile's own tightening.
-                                letterSpacing: -0.15,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              label,
+                              style:
+                                  FluentTypeResolution.styleOf(
+                                    context,
+                                    TextRole.control,
+                                  ).copyWith(
+                                    color: foreground,
+                                    // flyout_content.dart:245: the flyout
+                                    // tile's own tightening.
+                                    letterSpacing: -0.15,
+                                  ),
+                            ),
+                            if (detail != null)
+                              Text(
+                                detail!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    FluentTypeResolution.styleOf(
+                                      context,
+                                      TextRole.detail,
+                                    ).copyWith(
+                                      color: FluentTheme.of(
+                                        context,
+                                      ).resources.textFillColorSecondary,
+                                      letterSpacing: -0.15,
+                                    ),
                               ),
+                          ],
                         ),
                       ),
                     ),

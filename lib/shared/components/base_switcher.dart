@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show TextRole;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show MenuEntry, Overlays, TextRole;
 import '../theme/app_theme.dart';
 import '../components/base_label.dart';
 import '../../core/config/app_config.dart';
@@ -130,4 +131,33 @@ class BaseSwitcher extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Opens a switcher's own list of choices, anchored under the switcher.
+///
+/// The four switchers each computed a `RelativeRect` by hand and handed it to
+/// Material's `showMenu` - four copies of one geometry, and four decisions
+/// about how a menu arrives taken in application code where the contract says
+/// the skin takes them (#412). `Overlays.menu` takes the point and the skin
+/// decides the rest: the surface, the transition, whether it drops in from
+/// above or grows from the anchor.
+///
+/// The point is the switcher's own bottom-leading corner, which is where all
+/// four already opened. A switcher that has not been laid out has no corner,
+/// and the zero fallback is harmless rather than defensive: the skin's
+/// placement clamps the origin onto the window, so the menu appears somewhere
+/// the user can see and dismiss instead of nowhere.
+///
+/// This is a stop on the way rather than the destination. The contract carries
+/// these four as `ToolbarPickerEntry` on `ShellSpec.toolbar` - data, so that a
+/// pre-built control can still become a `MacosPulldownButton` - and they reach
+/// it when the shell is wired (#413). Until then the menu is the skin's even
+/// though the trigger is not, which is one seam crossed of the two.
+Future<int?> openSwitcherMenu(BuildContext context, List<MenuEntry> entries) {
+  Offset at = Offset.zero;
+  final RenderObject? box = context.findRenderObject();
+  if (box is RenderBox && box.hasSize) {
+    at = box.localToGlobal(Offset(0, box.size.height));
+  }
+  return Overlays.menu(context, at: at, entries: entries);
 }

@@ -538,17 +538,38 @@ class _MaterialMenuSurface extends StatelessWidget {
                     const SizedBox(width: MaterialMetrics.spaceS),
                   ],
                   Expanded(
-                    // ignore: avoid_text_with_style
-                    child: Text(
-                      choice.label,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: choice.selected
-                            ? primary
-                            : DefaultTextStyle.of(context).style.color,
-                        fontWeight: choice.selected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
+                    // A second line when the application knows more about the
+                    // choice than its name - a repository's path, how many
+                    // repositories a workspace holds. Material's own two-line
+                    // list treatment: the detail in the body-small step on the
+                    // variant ink, under the words it qualifies.
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        // ignore: avoid_text_with_style
+                        Text(
+                          choice.label,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: choice.selected
+                                ? primary
+                                : DefaultTextStyle.of(context).style.color,
+                            fontWeight: choice.selected
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        if (choice.detail != null)
+                          // ignore: avoid_text_with_style
+                          Text(
+                            choice.detail!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   if (choice.selected) ...<Widget>[

@@ -408,6 +408,13 @@ class _BlueprintMenuSurface extends StatelessWidget {
                 if (choice.icon != null)
                   BlueprintMark(BlueprintMarks.icon(choice.icon!)),
                 BlueprintText(choice.label),
+                // The detail is a second FACT, and the naked skin says a fact
+                // by showing it - at the one size and the one ink, in the row
+                // it belongs to. Whether a language puts it on a second line,
+                // in a quieter ink or in a trailing column is precisely what
+                // this skin refuses to decide, which is what makes a skin that
+                // silently drops it visible here.
+                if (choice.detail != null) BlueprintText(choice.detail!),
               ],
             ),
           );

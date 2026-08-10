@@ -158,8 +158,8 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   'lib/shared/widgets/base_tree_item.dart': _Weights(3, 0, 3, 0),
   'lib/shared/widgets/branch_switcher.dart': _Weights(3, 0, 3, 0),
   'lib/shared/widgets/language_selector.dart': _Weights(1, 0, 1, 0),
-  'lib/shared/widgets/repository_switcher.dart': _Weights(2, 0, 2, 0),
-  'lib/shared/widgets/workspace_switcher.dart': _Weights(4, 0, 4, 0),
+  'lib/shared/widgets/repository_switcher.dart': _Weights(2, 0, 1, 0),
+  'lib/shared/widgets/workspace_switcher.dart': _Weights(4, 0, 2, 0),
 };
 
 /// What happened to a weight that left the source.
@@ -194,6 +194,33 @@ class _GivenUp {
 /// Forty-four entries against a ledger difference of 39 Bold plus 5 Fill,
 /// so the two measurements have to agree; the third test makes them.
 const List<_GivenUp> _kWeightsGivenUp = <_GivenUp>[
+  // ---- Bold: the switcher menus that became MenuChoice data ---------------
+  _GivenUp(
+    'lib/shared/widgets/workspace_switcher.dart',
+    'house',
+    'Bold',
+    _Fate.superseded,
+    'The mark on a default-workspace row of the workspace menu, which this '
+        'file drew by hand as a PopupMenuItem. The rows are MenuChoice data '
+        'now and the menu belongs to the skin (#412), so the mark is stated '
+        'as a role and its weight is the language answer.',
+  ),
+  _GivenUp(
+    'lib/shared/widgets/workspace_switcher.dart',
+    'folder',
+    'Bold',
+    _Fate.superseded,
+    'The same, on an ordinary workspace row of the same menu.',
+  ),
+  _GivenUp(
+    'lib/shared/widgets/repository_switcher.dart',
+    'gitCommit',
+    'Bold',
+    _Fate.superseded,
+    'The same, on the rows of the repository menu. The trigger of each '
+        'switcher keeps its own Bold glyph until the shell carries these four '
+        'as ToolbarPickerEntry (#413).',
+  ),
   // ---- Fill: four sites, all four still drawn solid -----------------------
   _GivenUp(
     'lib/core/navigation/app_shell.dart',
@@ -670,8 +697,10 @@ void main() {
       // is deleted outright now - it had lost its callers, so there is no
       // destination to move its entry to - and its ledger entry and its
       // disposition note left with it, one bold on each side, so the pin
-      // follows without the two lists drifting apart.
-      expect(boldRemoved, 38);
+      // follows without the two lists drifting apart. 41 adds the three the
+      // switcher menus gave up when their rows became MenuChoice data: two in
+      // the workspace menu (house and folder) and one in the repository menu.
+      expect(boldRemoved, 41);
       expect(fillRemoved, 5);
     });
 

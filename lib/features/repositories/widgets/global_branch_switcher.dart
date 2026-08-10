@@ -2,19 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show
-        ControlScale,
-        DialogRouteSpec,
-        IconRole,
-        Inset,
-        Overlays,
-        Proximity,
-        TextRole,
-        Tone;
+    show DialogRouteSpec, MenuChoice, MenuEntry, Overlays;
 
 import '../../../shared/components/base_switcher.dart';
-import '../../../shared/components/base_icon.dart';
-import '../../../shared/components/base_label.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/config/config_providers.dart';
@@ -25,7 +15,6 @@ import '../repository_multi_select_provider.dart';
 import '../services/batch_operations_service.dart';
 import '../dialogs/batch_operation_progress_dialog.dart';
 import '../repository_batch_error_provider.dart';
-import '../../../shared/components/base_layout.dart';
 
 /// Global branch switcher widget - displays most common branch and allows batch checkout
 class GlobalBranchSwitcher extends ConsumerWidget {
@@ -93,100 +82,23 @@ class GlobalBranchSwitcher extends ConsumerWidget {
     WidgetRef ref,
     List<GlobalBranchInfo> branches,
   ) {
-    showMenu<GlobalBranchInfo>(
-      context: context,
-      position: _getMenuPosition(context),
-      items: branches.map((branchInfo) {
-        return PopupMenuItem<GlobalBranchInfo>(
-          value: branchInfo,
-          child: _buildBranchMenuItem(context, branchInfo),
-        );
-      }).toList(),
-    ).then((selectedBranchInfo) {
-      if (!context.mounted || selectedBranchInfo == null) return;
-      _checkoutBranchInAll(context, ref, selectedBranchInfo);
-    });
-  }
-
-  Widget _buildBranchMenuItem(
-    BuildContext context,
-    GlobalBranchInfo branchInfo,
-  ) {
-    return BaseInset(
-      x: Inset.normal,
-      y: Inset.tight,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // "This row is about a branch" is `Tone.accent`, which is the answer
-          // branch_list_tile.dart:66 and repository_list_item.dart:263 already
-          // give for the identical fact. `AppTheme.iconS` is the 16 dp
-          // `compact` rung, so the mark keeps its size.
-          //
-          // The Bold stroke does not survive, and it was not carrying anything:
-          // it is unconditional on EVERY row of this menu, so it separates no
-          // row from another, and the application already draws this same mark
-          // at the ordinary stroke for the same meaning
-          // (repository_card.dart, commit_list_item.dart:158). Where the weight
-          // IS the meaning - branch_list_tile.dart:53-54, Bold for the current
-          // branch - it is a state and the skin re-decides it. Recorded in
-          // test/shared/icons/icon_weight_census_test.dart.
-          BaseIcon(
-            IconRole.gitBranch,
-            scale: ControlScale.compact,
-            tone: Tone.accent,
-          ),
-          const BaseGap(Proximity.grouped),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                BaseLabel(branchInfo.branchName, role: TextRole.body),
-                const BaseGap(Proximity.hairline),
-                BaseLabel(
-                  'Switch ${branchInfo.repositoryCount} of ${branchInfo.totalRepositories} repos:',
-                  role: TextRole.detail,
-                  tone: Tone.muted,
-                ),
-                // The list of affected repositories used a literal two-pixel
-                // gap and a one-sided top padding per name - two spellings of
-                // one relationship, and both of them numbers. The names touch
-                // the line that introduces them and touch each other, which
-                // is what the hairline rung says.
-                ...branchInfo.repositoryNames.expand(
-                  (repoName) => <Widget>[
-                    const BaseGap(Proximity.hairline),
-                    BaseLabel(
-                      '• $repoName',
-                      role: TextRole.detail,
-                      tone: Tone.muted,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  RelativeRect _getMenuPosition(BuildContext context) {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final Offset position = button.localToGlobal(
-      Offset.zero,
-      ancestor: overlay,
-    );
-
-    return RelativeRect.fromLTRB(
-      position.dx,
-      position.dy + button.size.height,
-      overlay.size.width - position.dx - button.size.width,
-      overlay.size.height - position.dy,
-    );
+    // Each branch states its name and, as one detail, which repositories
+    // switching would touch. The row used to draw the branch name, a summary
+    // line and a bulleted list of repository names by hand - three levels of
+    // typography decided in application code. The names join the summary in
+    // the detail slot, so the fact survives and the arrangement goes back to
+    // the language.
+    openSwitcherMenu(context, <MenuEntry>[
+      for (final GlobalBranchInfo info in branches)
+        MenuChoice(
+          label: info.branchName,
+          detail:
+              'Switch ${info.repositoryCount} of ${info.totalRepositories} '
+              'repos: ${info.repositoryNames.join(', ')}',
+          selected: false,
+          onSelect: () => _checkoutBranchInAll(context, ref, info),
+        ),
+    ]);
   }
 
   Future<void> _checkoutBranchInAll(

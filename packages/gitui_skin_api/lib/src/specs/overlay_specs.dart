@@ -108,12 +108,25 @@ final class MenuChoice extends MenuEntry {
     required this.label,
     required this.selected,
     required this.onSelect,
+    this.detail,
     this.icon,
     this.enabled = true,
   });
 
   /// What choosing it means, in words.
   final String label;
+
+  /// What ELSE the application knows about this choice, or null.
+  ///
+  /// A repository's path under its name, how many repositories a workspace
+  /// holds, which repositories a branch exists in. The application states the
+  /// fact; whether the language draws it on a second line, after the label in
+  /// a quieter ink, or in a trailing column is the SKIN's arrangement - which
+  /// is exactly why the four switchers could not reach this contract without
+  /// it. Three of them were rendering a two-line row by hand, and the only way
+  /// to state it here was to glue the two strings together with a dash, which
+  /// is the application inventing typography rather than stating a fact.
+  final String? detail;
 
   /// Whether this is the one currently in force. The SKIN draws the
   /// selection signal - a dot, a moving check, an emphasised row - so the

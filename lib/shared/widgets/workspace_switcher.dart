@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 
 import '../../generated/app_localizations.dart';
-import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, MenuChoice, MenuEntry;
 import '../../core/workspace/workspace_list_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
 import '../../core/workspace/default_workspace_text.dart';
@@ -52,53 +53,25 @@ class WorkspaceSwitcher extends ConsumerWidget {
     final selectedProject = ref.read(selectedProjectProvider);
     final l10n = AppLocalizations.of(context)!;
 
-    showMenu<Workspace>(
-      context: context,
-      position: _getMenuPosition(context),
-      items: projects.map((project) {
-        final isSelected = selectedProject?.id == project.id;
-        return PopupMenuItem<Workspace>(
-          value: project,
-          child: MenuItemContentTwoLine(
-            icon: project.isDefaultWorkspace
-                ? PhosphorIconsBold.house
-                : PhosphorIconsBold.folder,
-            primaryLabel: project.displayName(l10n),
-            secondaryLabel: l10n.repositoryCount(
-              project.repositoryPaths.length,
-            ),
-            iconColor: project.color,
-            isSelected: isSelected,
-            showCheck: true,
-          ),
-        );
-      }).toList(),
-    ).then((selectedProjectFromMenu) {
-      if (!context.mounted || selectedProjectFromMenu == null) return;
-      ref
-          .read(selectedProjectProvider.notifier)
-          .selectProject(selectedProjectFromMenu);
-    });
-  }
-
-  RelativeRect _getMenuPosition(BuildContext context) {
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button.localToGlobal(
-      button.size.bottomRight(Offset.zero),
-      ancestor: overlay,
-    );
-
-    // Position menu below the button by using bottomLeft instead of topLeft
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        Offset(topLeft.dx, bottomRight.dy), // Start from bottom-left of button
-        bottomRight,
-      ),
-      Offset.zero & overlay.size,
-    );
-    return position;
+    // The repository count is a second FACT about each workspace, so it goes
+    // in the slot for one. It used to be a second line drawn by hand here,
+    // which is the application deciding an arrangement; `MenuChoice.detail`
+    // states it and lets each language place it.
+    openSwitcherMenu(context, <MenuEntry>[
+      for (final Workspace project in projects)
+        MenuChoice(
+          // The mark is stated as a ROLE and drawn by the skin. It was a
+          // Phosphor Bold glyph placed here by hand; a role carries no weight
+          // (#249 conflict C3), so the row now renders at whatever stroke the
+          // language uses for a menu's leading mark. Recorded in the weight
+          // ledger rather than fought.
+          icon: project.isDefaultWorkspace ? IconRole.house : IconRole.folder,
+          label: project.displayName(l10n),
+          detail: l10n.repositoryCount(project.repositoryPaths.length),
+          selected: selectedProject?.id == project.id,
+          onSelect: () =>
+              ref.read(selectedProjectProvider.notifier).selectProject(project),
+        ),
+    ]);
   }
 }

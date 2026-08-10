@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart' show Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart'
+    show IconRole, MenuChoice, MenuEntry;
 
 import '../../generated/app_localizations.dart';
-import '../components/base_menu_item.dart';
 import '../components/base_switcher.dart';
 import '../../core/workspace/workspace_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
@@ -68,50 +68,20 @@ class RepositorySwitcher extends ConsumerWidget {
   ) {
     final currentPath = ref.read(currentRepositoryPathProvider);
 
-    showMenu<WorkspaceRepository>(
-      context: context,
-      position: _getMenuPosition(context),
-      items: repositories.map((repo) {
-        final isSelected = currentPath == repo.path;
-        return PopupMenuItem<WorkspaceRepository>(
-          value: repo,
-          child: MenuItemContentTwoLine(
-            icon: PhosphorIconsBold.gitCommit,
-            primaryLabel: repo.displayName,
-            secondaryLabel: repo.path,
-            // As in `branch_switcher`: the mark wears the application's own
-            // colour, and that is `Tone.accent`. The Bold glyph stays the
-            // component's, for the weight reason recorded there.
-            tone: Tone.accent,
-            isSelected: isSelected,
-            showCheck: true,
-          ),
-        );
-      }).toList(),
-    ).then((selectedRepo) {
-      if (!context.mounted || selectedRepo == null) return;
-      ref.read(configProvider.notifier).setCurrentRepository(selectedRepo.path);
-    });
-  }
-
-  RelativeRect _getMenuPosition(BuildContext context) {
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
-    final Offset topLeft = button.localToGlobal(Offset.zero, ancestor: overlay);
-    final Offset bottomRight = button.localToGlobal(
-      button.size.bottomRight(Offset.zero),
-      ancestor: overlay,
-    );
-
-    // Position menu below the button by using bottomLeft instead of topLeft
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        Offset(topLeft.dx, bottomRight.dy), // Start from bottom-left of button
-        bottomRight,
-      ),
-      Offset.zero & overlay.size,
-    );
-    return position;
+    // The path is a second FACT about each repository, stated rather than
+    // arranged: it used to be a second line drawn by hand here.
+    openSwitcherMenu(context, <MenuEntry>[
+      for (final WorkspaceRepository repo in repositories)
+        MenuChoice(
+          // A role, not the Bold glyph this row used to place by hand: the
+          // weight is the skin's once the mark is a meaning. See the ledger.
+          icon: IconRole.gitCommit,
+          label: repo.displayName,
+          detail: repo.path,
+          selected: currentPath == repo.path,
+          onSelect: () =>
+              ref.read(configProvider.notifier).setCurrentRepository(repo.path),
+        ),
+    ]);
   }
 }

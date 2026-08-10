@@ -15,20 +15,26 @@ import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/git/git_providers.dart';
 import 'package:flutter_gitui/core/git/models/tag.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
-import 'package:flutter_gitui/shared/widgets/standard_app_bar.dart';
 
 import '../../skin/pump_under_skin.dart';
 
-/// The app bar's own overflow anchor, addressed by its place rather than by
+/// The screen's own overflow anchor, addressed by its place rather than by
 /// its name. The name used to be unique on this screen only by accident: the
 /// tag rows' menus were Material `PopupMenuButton`s wearing the framework's
 /// default "Show menu" tooltip, so 'More actions' matched exactly the app
 /// bar. Now that the rows' menus are `Overlays.anchor`s too, each row trigger
 /// carries the app's own overflow name ('More actions' — the vocabulary the
-/// repository cards already used), and only the scope to [StandardAppBar]
-/// says which overflow the test means.
+/// repository cards already used), so only a scope to the screen's BAR says
+/// which overflow the test means.
+///
+/// That scope used to be [StandardAppBar], an application widget. The screen
+/// is `chrome.screen`'s now (#442), so the bar is the SKIN's and the test
+/// names the skin's own: this suite runs under the Material skin (the default
+/// `kSkinUnderTest`), whose frame is a [Scaffold] with an [AppBar]. The
+/// premise is unchanged — "the overflow in the screen's bar, not the one in a
+/// row" — only the widget that expresses it moved behind the contract.
 final Finder _appBarMoreActions = find.descendant(
-  of: find.byType(StandardAppBar),
+  of: find.byType(AppBar),
   matching: find.byTooltip('More actions'),
 );
 

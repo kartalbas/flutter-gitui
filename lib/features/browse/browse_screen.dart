@@ -5,6 +5,7 @@ import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        ContentPort,
         IconRole,
         Inset,
         MenuAction,
@@ -14,6 +15,9 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuSeparator,
         Overlays,
         Proximity,
+        ScreenSpec,
+        Skin,
+        SkinScope,
         TextRole;
 import 'package:path/path.dart' as path;
 
@@ -146,146 +150,176 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       child: BaseDismissScope(
         enabled: _fabIsExpanded,
         onDismiss: _collapseFAB,
-        child: Scaffold(
-          appBar: AppBar(title: Text(AppDestination.browse.label(context))),
-          // The screen's ordered focus regions: toolbar with the search
-          // field (1), tree (2), viewer pane (3), action dial (4). Nested
-          // inside the shell's content region, so F6 and the focus of last
-          // resort stay with the shell.
-          body: BaseFocusRegionHost(
-            debugLabel: 'BrowseScreen.regions',
-            // The screen holds its panes off the window's edge at the
-            // generous distance every screen of the application uses:
-            // `Inset.roomy`.
-            child: BaseInset(
-              all: Inset.roomy,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Toolbar
-                  BaseFocusRegion(
-                    order: 1,
-                    debugLabel: 'BrowseScreen.toolbarRegion',
-                    child: _buildToolbar(context),
-                  ),
-                  // The toolbar and the panes under it are members of one
-                  // group: `grouped`.
-                  const BaseGap(Proximity.grouped),
-                  // Main content
-                  Expanded(
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (notification) {
-                        // Collapse FAB when scrolling starts
-                        if (notification is ScrollStartNotification &&
-                            _fabIsExpanded) {
-                          _collapseFAB();
-                        }
-                        return false; // Allow notification to continue bubbling
-                      },
-                      child: GestureDetector(
-                        // Tap-outside dismissal
-                        onTap: _collapseFAB,
-                        behavior: HitTestBehavior.translucent,
-                        child: Stack(
-                          children: [
-                            Row(
-                              children: [
-                                // Left: File tree view (resizable)
-                                BaseFocusRegion(
-                                  order: 2,
-                                  debugLabel: 'BrowseScreen.treeRegion',
-                                  child: SizedBox(
-                                    width: treeViewWidth,
-                                    child: FileTreeView(
-                                      key: _treeViewKey,
-                                      repositoryPath: repositoryPath,
-                                      searchQuery: _searchController.text,
-                                      searchMode: _searchMode,
-                                      showHidden: showHidden,
-                                      showIgnored: showIgnored,
-                                    ),
-                                  ),
-                                ),
-
-                                // Resizable divider
-                                MouseRegion(
-                                  cursor: SystemMouseCursors.resizeColumn,
-                                  child: GestureDetector(
-                                    onHorizontalDragUpdate: (details) {
-                                      final newWidth =
-                                          (treeViewWidth + details.delta.dx)
-                                              .clamp(
-                                                _minTreeViewWidth,
-                                                _maxTreeViewWidth,
-                                              );
-                                      ref
-                                              .read(
-                                                _browseTreeWidthProvider
-                                                    .notifier,
-                                              )
-                                              .state =
-                                          newWidth;
-                                    },
-                                    child: Container(
-                                      width: 8,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surface
-                                          .withValues(alpha: 0),
-                                      child: Center(
-                                        child: Container(
-                                          width: 1,
-                                          color: Theme.of(context).dividerColor,
+        // The frame is the skin's. This screen's own strip - the search
+        // field, the two segmented toggles and the options menu - stays in
+        // the BODY rather than moving to `ScreenSpec.toolbar`: a toolbar
+        // carries actions, pickers and menus, and a text field and a
+        // segmented control are none of those, so splitting the strip across
+        // two homes would be two arrangements for one band. The screen
+        // therefore states a title and nothing else, which is exactly what
+        // the hand-built `AppBar` carried.
+        //
+        // No `ScreenBodyHost` here, and that is a MEASUREMENT rather than an
+        // omission: this body crosses the port with nothing left in it that
+        // asserts a `Material` ancestor - the three viewer panes still build
+        // their own - so the scene sweep renders it under the blueprint,
+        // which builds no Material at all, without a single "No Material
+        // widget found".
+        child: SkinScope.render(
+          context,
+          (Skin skin, BuildContext inner) => skin.chrome.screen(
+            inner,
+            ScreenSpec(
+              title: AppDestination.browse.label(context),
+              // The screen's ordered focus regions: toolbar with the search
+              // field (1), tree (2), viewer pane (3), action dial (4). Nested
+              // inside the shell's content region, so F6 and the focus of last
+              // resort stay with the shell.
+              body: ContentPort(
+                BaseFocusRegionHost(
+                  debugLabel: 'BrowseScreen.regions',
+                  // The screen holds its panes off the window's edge at the
+                  // generous distance every screen of the application uses:
+                  // `Inset.roomy`.
+                  child: BaseInset(
+                    all: Inset.roomy,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Toolbar
+                        BaseFocusRegion(
+                          order: 1,
+                          debugLabel: 'BrowseScreen.toolbarRegion',
+                          child: _buildToolbar(context),
+                        ),
+                        // The toolbar and the panes under it are members of one
+                        // group: `grouped`.
+                        const BaseGap(Proximity.grouped),
+                        // Main content
+                        Expanded(
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (notification) {
+                              // Collapse FAB when scrolling starts
+                              if (notification is ScrollStartNotification &&
+                                  _fabIsExpanded) {
+                                _collapseFAB();
+                              }
+                              return false; // Allow notification to continue bubbling
+                            },
+                            child: GestureDetector(
+                              // Tap-outside dismissal
+                              onTap: _collapseFAB,
+                              behavior: HitTestBehavior.translucent,
+                              child: Stack(
+                                children: [
+                                  Row(
+                                    children: [
+                                      // Left: File tree view (resizable)
+                                      BaseFocusRegion(
+                                        order: 2,
+                                        debugLabel: 'BrowseScreen.treeRegion',
+                                        child: SizedBox(
+                                          width: treeViewWidth,
+                                          child: FileTreeView(
+                                            key: _treeViewKey,
+                                            repositoryPath: repositoryPath,
+                                            searchQuery: _searchController.text,
+                                            searchMode: _searchMode,
+                                            showHidden: showHidden,
+                                            showIgnored: showIgnored,
+                                          ),
                                         ),
                                       ),
+
+                                      // Resizable divider
+                                      MouseRegion(
+                                        cursor: SystemMouseCursors.resizeColumn,
+                                        child: GestureDetector(
+                                          onHorizontalDragUpdate: (details) {
+                                            final newWidth =
+                                                (treeViewWidth +
+                                                        details.delta.dx)
+                                                    .clamp(
+                                                      _minTreeViewWidth,
+                                                      _maxTreeViewWidth,
+                                                    );
+                                            ref
+                                                    .read(
+                                                      _browseTreeWidthProvider
+                                                          .notifier,
+                                                    )
+                                                    .state =
+                                                newWidth;
+                                          },
+                                          child: Container(
+                                            width: 8,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surface
+                                                .withValues(alpha: 0),
+                                            child: Center(
+                                              child: Container(
+                                                width: 1,
+                                                color: Theme.of(
+                                                  context,
+                                                ).dividerColor,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Right: File history, preview, or blame
+                                      Expanded(
+                                        child: BaseFocusRegion(
+                                          order: 3,
+                                          debugLabel:
+                                              'BrowseScreen.viewerRegion',
+                                          child:
+                                              shouldClearSelection ||
+                                                  selectedFile == null
+                                              ? const BrowseNoFileSelectedState()
+                                              : viewMode ==
+                                                    BrowseViewMode.history
+                                              ? FileHistoryPanel(
+                                                  filePath: selectedFile,
+                                                )
+                                              : viewMode == BrowseViewMode.blame
+                                              ? FileBlamePanel(
+                                                  filePath: selectedFile,
+                                                )
+                                              : FilePreviewPanel(
+                                                  filePath: selectedFile,
+                                                ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  // Draggable Speed Dial FAB for file operations —
+                                  // the screen's action bar, last on the Tab walk.
+                                  BaseFocusRegion(
+                                    order: 4,
+                                    debugLabel: 'BrowseScreen.actionsRegion',
+                                    child: BaseSpeedDial(
+                                      actions:
+                                          (_treeViewKey.currentState
+                                                  as FileTreeViewState?)
+                                              ?.fabActions ??
+                                          [],
+                                      isExpanded: _fabIsExpanded,
+                                      onToggle: _toggleFAB,
+                                      onCollapse: _collapseFAB,
                                     ),
                                   ),
-                                ),
-
-                                // Right: File history, preview, or blame
-                                Expanded(
-                                  child: BaseFocusRegion(
-                                    order: 3,
-                                    debugLabel: 'BrowseScreen.viewerRegion',
-                                    child:
-                                        shouldClearSelection ||
-                                            selectedFile == null
-                                        ? const BrowseNoFileSelectedState()
-                                        : viewMode == BrowseViewMode.history
-                                        ? FileHistoryPanel(
-                                            filePath: selectedFile,
-                                          )
-                                        : viewMode == BrowseViewMode.blame
-                                        ? FileBlamePanel(filePath: selectedFile)
-                                        : FilePreviewPanel(
-                                            filePath: selectedFile,
-                                          ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            // Draggable Speed Dial FAB for file operations —
-                            // the screen's action bar, last on the Tab walk.
-                            BaseFocusRegion(
-                              order: 4,
-                              debugLabel: 'BrowseScreen.actionsRegion',
-                              child: BaseSpeedDial(
-                                actions:
-                                    (_treeViewKey.currentState
-                                            as FileTreeViewState?)
-                                        ?.fabActions ??
-                                    [],
-                                isExpanded: _fabIsExpanded,
-                                onToggle: _toggleFAB,
-                                onCollapse: _collapseFAB,
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ),

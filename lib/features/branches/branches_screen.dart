@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, NoticeSpec, Overlays, Tone;
+    show
+        ContentPort,
+        ControlScale,
+        IconRole,
+        Inset,
+        NoticeSpec,
+        Overlays,
+        ScreenSpec,
+        Skin,
+        SkinScope,
+        Tone,
+        ToolbarActionEntry,
+        ToolbarEntry,
+        ToolbarGroup,
+        ToolbarMenuEntry;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/components/base_icon.dart';
@@ -9,8 +23,8 @@ import '../../shared/components/base_layout.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/theme/app_theme.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
-import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
+import '../../shared/widgets/screen_body_host.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../../core/git/models/branch.dart';
@@ -141,84 +155,114 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
       return const NoRepositoryEmptyState();
     }
 
-    return Scaffold(
-      appBar: StandardAppBar(
-        title: AppDestination.branches.label(context),
-        onRefresh: () => ref.read(gitActionsProvider).refreshBranches(),
-        moreMenuItems: [
-          // Create action always first
-          MenuAction(
-            icon: IconRole.plus,
-            label: l10n.createBranch,
-            onPressed: () => _showCreateBranchDialog(context),
-          ),
-        ],
-      ),
-      // The screen's body is deliberately generous with its content: a search
-      // field, a tab bar and a list, none of which should touch the window's
-      // edge. That is `Inset.roomy` - the question - where the 24 logical
-      // pixels it used to spell out were Material's answer to it.
-      body: BaseInset(
-        all: Inset.roomy,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Inline search field; arrows hand off to the list of the tab
-            // in front while typing continues in the field.
-            InlineSearchField(
-              controller: _searchController,
-              hintText: l10n.searchBranches,
-              navigationController: _tabController.index == 0
-                  ? _localListController
-                  : _remoteListController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              onClear: () {
-                setState(() {
-                  _searchQuery = '';
-                });
-              },
-            ),
-            TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(
-                  text: l10n.localTab,
-                  // A tab's mark is a dense one: `compact`, the 16 pixels this
-                  // site named, and a glyph the skin picks.
-                  icon: const BaseIcon(
-                    IconRole.folder,
-                    scale: ControlScale.compact,
-                  ),
-                ),
-                Tab(
-                  text: l10n.remoteTab,
-                  icon: const BaseIcon(
-                    IconRole.cloud,
-                    scale: ControlScale.compact,
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // Local Branches
-                  _buildBranchList(context, localBranchesAsync, isLocal: true),
-                  // Remote Branches
-                  _buildBranchList(
-                    context,
-                    remoteBranchesAsync,
-                    isLocal: false,
+    // The frame is `chrome.screen`'s (#442): the screen states its name, the
+    // two things its bar offers and what is on it, and the skin answers with
+    // the app bar, the spacing between its actions and the arrangement around
+    // the body - which is what `StandardAppBar` and the raw `Scaffold`
+    // answered here before.
+    return SkinScope.render(
+      context,
+      (Skin skin, BuildContext inner) => skin.chrome.screen(
+        inner,
+        ScreenSpec(
+          title: AppDestination.branches.label(context),
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              ToolbarActionEntry(
+                icon: IconRole.arrowsClockwise,
+                label: l10n.refresh,
+                tooltip: l10n.refresh,
+                onPressed: () => ref.read(gitActionsProvider).refreshBranches(),
+              ),
+              ToolbarMenuEntry(
+                icon: IconRole.dotsThreeVertical,
+                tooltip: l10n.moreActions,
+                entries: [
+                  // Create action always first
+                  MenuAction(
+                    icon: IconRole.plus,
+                    label: l10n.createBranch,
+                    onPressed: () => _showCreateBranchDialog(context),
                   ),
                 ],
               ),
-            ),
+            ]),
           ],
+          // The screen's body is deliberately generous with its content: a
+          // search field, a tab bar and a list, none of which should touch the
+          // window's edge. That is `Inset.roomy` - the question - where the 24
+          // logical pixels it used to spell out were Material's answer to it.
+          body: ContentPort(
+            ScreenBodyHost(
+              child: BaseInset(
+                all: Inset.roomy,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Inline search field; arrows hand off to the list of the
+                    // tab in front while typing continues in the field.
+                    InlineSearchField(
+                      controller: _searchController,
+                      hintText: l10n.searchBranches,
+                      navigationController: _tabController.index == 0
+                          ? _localListController
+                          : _remoteListController,
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                      onClear: () {
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                    ),
+                    TabBar(
+                      controller: _tabController,
+                      tabs: [
+                        Tab(
+                          text: l10n.localTab,
+                          // A tab's mark is a dense one: `compact`, the 16
+                          // pixels this site named, and a glyph the skin picks.
+                          icon: const BaseIcon(
+                            IconRole.folder,
+                            scale: ControlScale.compact,
+                          ),
+                        ),
+                        Tab(
+                          text: l10n.remoteTab,
+                          icon: const BaseIcon(
+                            IconRole.cloud,
+                            scale: ControlScale.compact,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // Local Branches
+                          _buildBranchList(
+                            context,
+                            localBranchesAsync,
+                            isLocal: true,
+                          ),
+                          // Remote Branches
+                          _buildBranchList(
+                            context,
+                            remoteBranchesAsync,
+                            isLocal: false,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

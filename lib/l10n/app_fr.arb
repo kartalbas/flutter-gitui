@@ -2596,5 +2596,7 @@
   "updateBrowserOpenError": "Le navigateur n'a pas pu être ouvert : {error}",
   "updateDownloadFailed": "La mise à jour n'a pas pu être téléchargée. Veuillez réessayer plus tard.",
   "updateInstallFailed": "La mise à jour n'a pas pu être installée. Consultez le journal de l'application pour plus de détails.",
-  "updateUnexpectedError": "Une erreur s'est produite : {error}"
+  "updateUnexpectedError": "Une erreur s'est produite : {error}",
+  "viewModeGrid": "Vue en grille",
+  "viewModeList": "Vue en liste"
 }

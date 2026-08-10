@@ -4,10 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, MenuAction, MenuActionRole, Proximity, TextRole;
+    show
+        ContentPort,
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuActionRole,
+        Proximity,
+        ScreenSpec,
+        Skin,
+        SkinScope,
+        TextRole,
+        ToolbarEntry,
+        ToolbarGroup,
+        ToolbarMenuEntry;
 import '../../generated/app_localizations.dart';
 
-import '../../shared/widgets/standard_app_bar.dart';
+import '../../shared/widgets/screen_body_host.dart';
 import '../../shared/components/base_text_field.dart';
 import '../../shared/components/base_label.dart';
 import '../../core/config/app_config.dart';
@@ -34,76 +47,104 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: StandardAppBar(
-        title: l10n.settings,
-        moreMenuItems: [
-          // Reset to defaults (destructive action). What the entry MEANS -
-          // that it destroys something - is `MenuActionRole.destructive`, and
-          // the skin decides how a destructive row reads; `Tone.danger` was
-          // the application answering that question for it.
-          MenuAction(
-            icon: IconRole.arrowCounterClockwise,
-            label: l10n.resetToDefaults,
-            role: MenuActionRole.destructive,
-            onPressed: () => _confirmReset(context, ref),
-          ),
-        ],
-      ),
-      // Deliberately not a ListView: a lazy list destroys the focus nodes of
-      // every section scrolled out of the viewport, and the traversal policy
-      // only sees nodes that are currently built. Tabbing to the bottom of the
-      // form therefore trapped the keyboard there - Tab cycled between the last
-      // two sections and never returned to Git Configuration. The form is a
-      // fixed handful of sections, so building all of them keeps every control
-      // in one complete Tab cycle; the policy scrolls the focused control into
-      // view on its own.
-      //
-      // The form is its own traversal group so the app bar keeps a fixed place
-      // in the Tab cycle. Reading order sorts by on-screen position, and a
-      // scrolled form moves its controls past the app bar's fixed rect, which
-      // made the overflow button surface in the middle of the sequence; as a
-      // group the form is sorted as one block that always sits below the bar.
-      body: FocusTraversalGroup(
-        // A scroll view's padding is the inset its CONTENT owes the
-        // viewport's edge - it scrolls with the content, exactly as a
-        // `Padding` around the child does - so it is stated as one.
-        child: SingleChildScrollView(
-          child: BaseInset(
-            all: Inset.roomy,
-            child: Column(
-              // A Column centers its children, while the ListView it replaces
-              // stretched every section card to the full width.
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                GitConfigSection(
-                  onSelectGitExecutable: () =>
-                      _selectGitExecutable(context, ref),
-                  onSelectTextEditor: () => _selectTextEditor(context, ref),
-                  onDetectTools: () => _detectTools(context, ref),
-                  onSelectDiffTool: () => _selectDiffTool(context, ref),
-                  onSelectMergeTool: () => _selectMergeTool(context, ref),
-                  onEditUserName: () => _editUserName(context, ref),
-                  onEditUserEmail: () => _editUserEmail(context, ref),
+    // The frame is `chrome.screen`'s (#442). This screen states its name, the
+    // one thing its bar offers and what is on it; the bar itself, the spacing
+    // between its actions and the arrangement around the form are the skin's
+    // answers, exactly as `StandardAppBar` and the raw `Scaffold` used to
+    // answer them here. Nothing about the settings form itself moves.
+    return SkinScope.render(
+      context,
+      (Skin skin, BuildContext inner) => skin.chrome.screen(
+        inner,
+        ScreenSpec(
+          title: l10n.settings,
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              ToolbarMenuEntry(
+                icon: IconRole.dotsThreeVertical,
+                tooltip: l10n.moreActions,
+                entries: [
+                  // Reset to defaults (destructive action). What the entry
+                  // MEANS - that it destroys something - is
+                  // `MenuActionRole.destructive`, and the skin decides how a
+                  // destructive row reads; `Tone.danger` was the application
+                  // answering that question for it.
+                  MenuAction(
+                    icon: IconRole.arrowCounterClockwise,
+                    label: l10n.resetToDefaults,
+                    role: MenuActionRole.destructive,
+                    onPressed: () => _confirmReset(context, ref),
+                  ),
+                ],
+              ),
+            ]),
+          ],
+          // Deliberately not a ListView: a lazy list destroys the focus nodes
+          // of every section scrolled out of the viewport, and the traversal
+          // policy only sees nodes that are currently built. Tabbing to the
+          // bottom of the form therefore trapped the keyboard there - Tab
+          // cycled between the last two sections and never returned to Git
+          // Configuration. The form is a fixed handful of sections, so
+          // building all of them keeps every control in one complete Tab
+          // cycle; the policy scrolls the focused control into view on its
+          // own.
+          //
+          // The form is its own traversal group so the app bar keeps a fixed
+          // place in the Tab cycle. Reading order sorts by on-screen position,
+          // and a scrolled form moves its controls past the app bar's fixed
+          // rect, which made the overflow button surface in the middle of the
+          // sequence; as a group the form is sorted as one block that always
+          // sits below the bar.
+          body: ContentPort(
+            ScreenBodyHost(
+              child: FocusTraversalGroup(
+                // A scroll view's padding is the inset its CONTENT owes the
+                // viewport's edge - it scrolls with the content, exactly as a
+                // `Padding` around the child does - so it is stated as one.
+                child: SingleChildScrollView(
+                  child: BaseInset(
+                    all: Inset.roomy,
+                    child: Column(
+                      // A Column centers its children, while the ListView it
+                      // replaces stretched every section card to the full
+                      // width.
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        GitConfigSection(
+                          onSelectGitExecutable: () =>
+                              _selectGitExecutable(context, ref),
+                          onSelectTextEditor: () =>
+                              _selectTextEditor(context, ref),
+                          onDetectTools: () => _detectTools(context, ref),
+                          onSelectDiffTool: () => _selectDiffTool(context, ref),
+                          onSelectMergeTool: () =>
+                              _selectMergeTool(context, ref),
+                          onEditUserName: () => _editUserName(context, ref),
+                          onEditUserEmail: () => _editUserEmail(context, ref),
+                        ),
+                        const BaseGap(Proximity.sectioned),
+                        ThemeSection(
+                          getColorSchemeName: (scheme) =>
+                              _getColorSchemeName(context, scheme),
+                          getFontSizeName: (size) =>
+                              _getFontSizeName(context, size),
+                        ),
+                        const BaseGap(Proximity.sectioned),
+                        const AnimationSection(),
+                        const BaseGap(Proximity.sectioned),
+                        HistorySection(
+                          onEditCommitHistoryLimit: () =>
+                              _editCommitHistoryLimit(context, ref),
+                        ),
+                        const BaseGap(Proximity.sectioned),
+                        const UpdatesSection(),
+                        const BaseGap(Proximity.sectioned),
+                        const ConfigAndLogsSection(),
+                      ],
+                    ),
+                  ),
                 ),
-                const BaseGap(Proximity.sectioned),
-                ThemeSection(
-                  getColorSchemeName: (scheme) =>
-                      _getColorSchemeName(context, scheme),
-                  getFontSizeName: (size) => _getFontSizeName(context, size),
-                ),
-                const BaseGap(Proximity.sectioned),
-                const AnimationSection(),
-                const BaseGap(Proximity.sectioned),
-                HistorySection(
-                  onEditCommitHistoryLimit: () =>
-                      _editCommitHistoryLimit(context, ref),
-                ),
-                const BaseGap(Proximity.sectioned),
-                const UpdatesSection(),
-                const BaseGap(Proximity.sectioned),
-                const ConfigAndLogsSection(),
-              ],
+              ),
             ),
           ),
         ),

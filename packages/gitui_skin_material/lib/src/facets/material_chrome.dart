@@ -129,8 +129,17 @@ final class MaterialChrome implements SkinChrome {
   ) {
     if (actions.length == 1) {
       final ToolbarActionEntry action = actions.single;
+      // A neutral action keeps the theme's own floating-action colours, which
+      // is what every FAB in this application has always rendered; only an
+      // action that MEANS something else states a fill, so honouring the new
+      // tone slot cannot move the ordinary case.
+      final Color? fill = action.tone == Tone.neutral
+          ? null
+          : MaterialInk.foreground(context, action.tone);
       return FloatingActionButton(
         tooltip: action.tooltip,
+        backgroundColor: fill,
+        foregroundColor: fill == null ? null : MaterialInk.foregroundOn(fill),
         onPressed: action.onPressed,
         child: Icon(MaterialGlyphs.of(action.icon)),
       );
@@ -143,6 +152,9 @@ final class MaterialChrome implements SkinChrome {
             MenuAction(
               label: action.label,
               icon: action.icon,
+              role: action.tone == Tone.danger
+                  ? MenuActionRole.destructive
+                  : MenuActionRole.normal,
               onPressed: action.onPressed,
             ),
         ]),
@@ -163,27 +175,104 @@ final class MaterialChrome implements SkinChrome {
           IconButtonSpec(
             icon: action.icon,
             tooltip: action.tooltip,
+            tone: action.tone,
             onPressed: action.onPressed,
             badgeCount: action.badgeCount,
           ),
         );
       case final ToolbarPickerEntry picker:
         return _MaterialToolbarPicker(picker: picker);
+      case final ToolbarChoiceEntry choice:
+        // Material's answer to "the same subject, shown a different way" in a
+        // bar is the segmented button - the contract names it
+        // (`ToolbarChoiceEntry`: "Material a segmented button") - and NOT
+        // `controls.choiceGroup`, which in this skin is a wrap of choice
+        // chips whose labels are visible words. An earlier draft routed the
+        // entry through the chip group on the claim that it "already IS"
+        // the segmented control; it is not, and the two screens that used
+        // to place a raw `SegmentedButton` in `StandardAppBar
+        // .additionalActions` came back wearing worded chips - an unnamed
+        // appearance change. The bar keeps the segmented button those
+        // screens always drew, built in [_toolbarChoice] the way
+        // `_MaterialSelectionBar` is: chrome-internal, below the fence, so
+        // the sweep's crossing count does not move with the rendering.
+        //
+        // Through `withSpec` and not through `choice.spec`: the switch matched
+        // at the bound, and the spec's callback only survives at the type the
+        // application declared it with. See `ToolbarChoiceEntry.withSpec`.
+        return choice.withSpec(
+          <S>(ChoiceGroupSpec<S> spec) => _toolbarChoice<S>(spec),
+        );
       case final ToolbarMenuEntry menu:
-        return Builder(
-          builder: (BuildContext anchorContext) => controls.iconButton(
-            anchorContext,
-            IconButtonSpec(
-              icon: menu.icon,
-              tooltip: menu.tooltip,
-              badgeCount: menu.badgeCount,
-              onPressed: menu.entries.isEmpty
-                  ? null
-                  : () => _openMenuUnder(anchorContext, menu.entries),
-            ),
+        // Through `Overlays.anchor`, not through a trigger built here, and for
+        // two reasons that are one reason. The first is this file's own rule:
+        // where the frame contains a thing another member already owns, it
+        // renders it through that member rather than sketching a second
+        // version - and `overlays.menuAnchor` IS this skin's anchored menu,
+        // trigger and geometry together, so building a second copy out of an
+        // icon button plus `_openMenuUnder` was two renderings of one spec
+        // inside one skin.
+        //
+        // The second is measured. `Overlays.anchor` plants `SkinMenuAnchor`
+        // ABOVE the skin's fence, which is the only thing that keeps WHAT
+        // stands here and what it is CALLED readable from the application's
+        // side of the seam. A screen's overflow menu built without it goes
+        // anonymous to every instrument that walks the element tree: the
+        // settings screen's keyboard sweep read `unnamed:Focus` where it used
+        // to read the anchor's name, the first time that screen moved behind
+        // this member. That regression has its own name in the contract
+        // (`SkinMenuAnchor`) and this is the call that avoids re-earning it.
+        return Overlays.anchor(
+          spec: MenuAnchorSpec(
+            icon: menu.icon,
+            tooltip: menu.tooltip,
+            badgeCount: menu.badgeCount,
+            enabled: menu.entries.isNotEmpty,
           ),
+          entries: menu.entries,
         );
     }
+  }
+
+  /// "The same subject, shown a different way", offered from the bar: the M3
+  /// segmented button.
+  ///
+  /// Two repairs against the raw `SegmentedButton` the calling screens used
+  /// to hand `StandardAppBar`, both named. Each segment now carries a
+  /// tooltip - the option's stated tooltip, or its label (the accessible
+  /// name) when none is stated - where the old control was icon-only with
+  /// NO tooltip, which this repository's rules forbid outright. And the
+  /// group names itself to a screen reader through [ChoiceGroupSpec.label].
+  /// Everything else keeps the old control's rendering: a segment shows the
+  /// option's mark when it has one (its words only when it does not), the
+  /// icon takes the M3 default box (the same 18 the screens used to state
+  /// by hand, now the skin's number), and the selected segment keeps M3's
+  /// own checkmark treatment.
+  static Widget _toolbarChoice<T>(ChoiceGroupSpec<T> spec) {
+    final T? selected = spec.selected;
+    return Semantics(
+      label: spec.label,
+      container: true,
+      child: SegmentedButton<T>(
+        segments: <ButtonSegment<T>>[
+          for (final ChoiceOption<T> option in spec.options)
+            ButtonSegment<T>(
+              value: option.value,
+              icon: option.icon == null
+                  ? null
+                  : Icon(MaterialGlyphs.of(option.icon!)),
+              label: option.icon == null ? Text(option.label) : null,
+              tooltip: option.tooltip ?? option.label,
+              enabled: option.enabled,
+            ),
+        ],
+        selected: <T>{?selected},
+        emptySelectionAllowed: selected == null,
+        onSelectionChanged: (Set<T> selection) {
+          if (selection.isNotEmpty) spec.onSelected(selection.first);
+        },
+      ),
+    );
   }
 
   /// The inside of a dialog: the title, the content and the ways out.
@@ -916,6 +1005,7 @@ class _OverflowActionRow extends StatelessWidget {
                 IconButtonSpec(
                   icon: actions[index].icon,
                   tooltip: actions[index].tooltip,
+                  tone: actions[index].tone,
                   onPressed: actions[index].onPressed,
                   scale: ControlScale.compact,
                   badgeCount: actions[index].badgeCount,
@@ -943,6 +1033,12 @@ class _OverflowActionRow extends StatelessWidget {
                         MenuAction(
                           label: action.label,
                           icon: action.icon,
+                          // A shed action keeps what it MEANS as well as its
+                          // name: `Tone.danger` is the menu's own destructive
+                          // role, which is the same statement a row makes.
+                          role: action.tone == Tone.danger
+                              ? MenuActionRole.destructive
+                              : MenuActionRole.normal,
                           onPressed: action.onPressed,
                         ),
                     ]),
@@ -1099,7 +1195,13 @@ class _MaterialSelectionBar extends StatelessWidget {
                         label: entry.label,
                         onPressed: entry.onPressed,
                         emphasis: entry.emphasis,
-                        tone: Tone.neutral,
+                        // What the batch action MEANS, which is the one thing
+                        // `BatchOperationsBar`'s `BatchAction.isDestructive`
+                        // said and this bar could not (#442): a hard-coded
+                        // neutral drew "delete these three tags" exactly like
+                        // "push these three tags". It is the entry's own
+                        // answer now.
+                        tone: entry.tone,
                         leading: entry.icon,
                         tooltip: entry.tooltip,
                       ),

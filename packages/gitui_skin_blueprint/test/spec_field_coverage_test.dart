@@ -175,6 +175,7 @@ const Map<String, _Coverage> _specs = <String, _Coverage>{
   'ToolbarActionEntry': _Coverage(_toolbarSpecs, <String>[_chrome, _surfaces]),
   'ToolbarPickerEntry': _Coverage(_toolbarSpecs, <String>[_chrome]),
   'ToolbarMenuEntry': _Coverage(_toolbarSpecs, <String>[_chrome]),
+  'ToolbarChoiceEntry': _Coverage(_toolbarSpecs, <String>[_chrome]),
   'ToolbarGroup': _Coverage(_toolbarSpecs, <String>[_chrome]),
   // type
   'TextRun': _Coverage(_typeSpecs, <String>[_type, _surfaces]),

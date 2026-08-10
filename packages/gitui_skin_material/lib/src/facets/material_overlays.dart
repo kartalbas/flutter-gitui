@@ -158,6 +158,7 @@ final class MaterialOverlays implements SkinOverlays {
             // Only an ENGAGED anchor is announced as a toggle; an ordinary
             // one has no state to report, which is what null means there.
             selected: spec.selected ? true : null,
+            badgeCount: spec.badgeCount,
             onPressed: spec.enabled
                 ? () => _openBelow(anchorContext, host)
                 : null,

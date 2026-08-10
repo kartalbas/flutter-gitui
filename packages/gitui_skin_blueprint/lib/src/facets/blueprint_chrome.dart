@@ -649,6 +649,13 @@ Widget _toolbarEntry(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               BlueprintMark(BlueprintMarks.icon(action.icon)),
+              // What the action MEANS, drawn as the tone's own mark exactly as
+              // `controls.button` draws it - an ordinary command has no mark
+              // to show, a destructive one does. Without it the instrument
+              // would be ignoring a slot the contract carries, which is the
+              // one thing this skin may never do.
+              if (BlueprintMarks.tone(action.tone).isNotEmpty)
+                BlueprintMark(BlueprintMarks.tone(action.tone)),
               BlueprintText(action.label),
               if (action.badgeCount != null)
                 BlueprintMark(BlueprintMarks.count(action.badgeCount!)),
@@ -685,23 +692,61 @@ Widget _toolbarEntry(
         ),
       );
     case final ToolbarMenuEntry menu:
-      return _menuAnchor(
-        context,
-        distance: distance,
-        entries: menu.entries,
-        tooltip: menu.tooltip,
-        semanticsLabel: menu.label,
-        enabled: menu.entries.isNotEmpty,
-        scale: scale,
-        content: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            BlueprintMark(BlueprintMarks.icon(menu.icon)),
-            if (menu.label != null) BlueprintText(menu.label!),
-            if (menu.badgeCount != null)
-              BlueprintMark(BlueprintMarks.count(menu.badgeCount!)),
-          ],
+      // Through `Overlays.anchor`, the contract's own front door, and not
+      // through this file's `_menuAnchor` helper - which is what the picker
+      // above still uses, because a picker's content is a sentence this
+      // instrument writes ("Repository: gitui") and no anchor spec says that.
+      //
+      // The reason is a measurement, not a preference. `Overlays.anchor`
+      // plants the contract's `SkinMenuAnchor` identity, and the scene sweep
+      // counts it: with Material's screen frame going through the front door
+      // and this one not, the settings scene measured 136 components through
+      // the contract under Material and 135 under the blueprint - a
+      // resting-state disagreement, which the register's own text calls a
+      // defect rather than an entry. Both frames now mount the same one
+      // anchor, so the count is skin-independent again by construction.
+      //
+      // NAMED, not silent: this drops `ToolbarMenuEntry.label`, the optional
+      // words beside the mark, because `MenuAnchorSpec` has no word for them
+      // and the anchor is mark-only in both languages that implement it. No
+      // call site passes the label today, and the slot's own doc makes it the
+      // frame's option ("where the frame has room for them") rather than an
+      // obligation - but it is a real gap in the anchor vocabulary and is
+      // reported as one.
+      return Overlays.anchor(
+        spec: MenuAnchorSpec(
+          icon: menu.icon,
+          tooltip: menu.tooltip,
+          badgeCount: menu.badgeCount,
+          enabled: menu.entries.isNotEmpty,
+          scale: scale,
         ),
+        entries: menu.entries,
+      );
+    case final ToolbarChoiceEntry choice:
+      // Through this skin's own `controls.choiceGroup`, at the bar's scale.
+      // "Pick exactly one of a few" is a control the instrument already draws
+      // - a row of outlined boxes with the chosen one filled - and drawing a
+      // second version of it here would be the instrument disagreeing with
+      // itself about what a choice looks like. The scale is the bar's rather
+      // than the spec's, for the same reason every other entry takes it: how
+      // much room a control gets INSIDE a bar is the frame's arithmetic.
+      //
+      // Through `withSpec` and not through `choice.spec`: the switch matched
+      // at the bound, and the spec's callback only survives at the type the
+      // application declared it with. See `ToolbarChoiceEntry.withSpec`.
+      return choice.withSpec(
+        <S>(ChoiceGroupSpec<S> spec) =>
+            BlueprintControls(distance).choiceGroup<S>(
+              context,
+              ChoiceGroupSpec<S>(
+                options: spec.options,
+                selected: spec.selected,
+                onSelected: spec.onSelected,
+                label: spec.label,
+                scale: scale,
+              ),
+            ),
       );
   }
 }

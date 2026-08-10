@@ -4101,5 +4101,13 @@
         "type": "String"
       }
     }
+  },
+  "viewModeGrid": "Grid view",
+  "viewModeList": "List view",
+  "@viewModeGrid": {
+    "description": "Tooltip and accessible name of the grid segment of a screen's view-mode switch."
+  },
+  "@viewModeList": {
+    "description": "Tooltip and accessible name of the list segment of a screen's view-mode switch."
   }
 }

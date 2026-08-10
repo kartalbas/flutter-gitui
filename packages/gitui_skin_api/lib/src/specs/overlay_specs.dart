@@ -195,6 +195,7 @@ final class MenuAnchorSpec {
     this.scale = ControlScale.normal,
     this.selected = false,
     this.enabled = true,
+    this.badgeCount,
   });
 
   /// The trigger's mark.
@@ -220,6 +221,18 @@ final class MenuAnchorSpec {
 
   /// Whether the menu may be opened right now.
   final bool enabled;
+
+  /// A count riding on the trigger, or null for "nothing to report".
+  ///
+  /// The same word `ToolbarMenuEntry.badgeCount` already carries, and it is
+  /// here because that entry is rendered THROUGH this spec: a frame that
+  /// builds a toolbar's menu goes through `overlays.menuAnchor`, so that the
+  /// trigger it mounts is the one canonical anchor of the language and
+  /// carries the contract's anchor identity. Without this field that route
+  /// silently dropped the count - a parameter accepted at one end of the
+  /// contract and discarded at the other, which is the failure the blueprint's
+  /// spec-field coverage exists to make impossible.
+  final int? badgeCount;
 }
 
 /// Something the user can do from a notice or a banner.

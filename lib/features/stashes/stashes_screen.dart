@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, MenuAction, MenuActionRole, MenuSeparator, TextRole;
+    show
+        ContentPort,
+        IconRole,
+        Inset,
+        MenuAction,
+        MenuActionRole,
+        MenuSeparator,
+        ScreenSpec,
+        Skin,
+        SkinScope,
+        TextRole,
+        ToolbarActionEntry,
+        ToolbarEntry,
+        ToolbarGroup,
+        ToolbarMenuEntry;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/components/base_label.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
-import '../../shared/widgets/standard_app_bar.dart';
 import '../../shared/widgets/inline_search_field.dart';
+import '../../shared/widgets/screen_body_host.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/destructive_action.dart';
 import '../../core/config/config_providers.dart';
@@ -92,42 +106,73 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
       return const StashesNoRepositoryState();
     }
 
-    return Scaffold(
-      appBar: StandardAppBar(
-        title: AppDestination.stashes.label(context),
-        onRefresh: () => ref.read(gitActionsProvider).refreshStashes(),
-        moreMenuItems: [
-          // Create action always first
-          MenuAction(
-            icon: IconRole.plus,
-            label: AppLocalizations.of(context)!.createStash,
-            onPressed: () => _showCreateStashDialog(context),
-          ),
-          const MenuSeparator(),
-          // Clear All action. It states its ROLE - this entry destroys
-          // something - and the skin decides what a destructive row looks
-          // like; `Tone.danger` was the application deciding that itself.
-          MenuAction(
-            icon: IconRole.trash,
-            label: AppLocalizations.of(context)!.clearAll,
-            role: MenuActionRole.destructive,
-            onPressed: () => _confirmClearAllStashes(context),
-          ),
-        ],
-      ),
-      body: BaseInset(
-        all: Inset.roomy,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: stashesAsync.when(
-                data: (stashes) => _buildStashList(context, stashes),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => StashesErrorState(error: error),
+    final l10n = AppLocalizations.of(context)!;
+
+    // The frame is `chrome.screen`'s (#442). What this screen states is its
+    // name, the two things its bar offers and what is on it; the app bar, the
+    // spacing between its actions and the arrangement around the body are the
+    // skin's answers, exactly as `StandardAppBar` and the raw `Scaffold` used
+    // to answer them here.
+    return SkinScope.render(
+      context,
+      (Skin skin, BuildContext inner) => skin.chrome.screen(
+        inner,
+        ScreenSpec(
+          title: AppDestination.stashes.label(context),
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              ToolbarActionEntry(
+                icon: IconRole.arrowsClockwise,
+                label: l10n.refresh,
+                tooltip: l10n.refresh,
+                onPressed: () => ref.read(gitActionsProvider).refreshStashes(),
+              ),
+              ToolbarMenuEntry(
+                icon: IconRole.dotsThreeVertical,
+                tooltip: l10n.moreActions,
+                entries: [
+                  // Create action always first
+                  MenuAction(
+                    icon: IconRole.plus,
+                    label: l10n.createStash,
+                    onPressed: () => _showCreateStashDialog(context),
+                  ),
+                  const MenuSeparator(),
+                  // Clear All action. It states its ROLE - this entry destroys
+                  // something - and the skin decides what a destructive row
+                  // looks like; `Tone.danger` was the application deciding
+                  // that itself.
+                  MenuAction(
+                    icon: IconRole.trash,
+                    label: l10n.clearAll,
+                    role: MenuActionRole.destructive,
+                    onPressed: () => _confirmClearAllStashes(context),
+                  ),
+                ],
+              ),
+            ]),
+          ],
+          body: ContentPort(
+            ScreenBodyHost(
+              child: BaseInset(
+                all: Inset.roomy,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: stashesAsync.when(
+                        data: (stashes) => _buildStashList(context, stashes),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (error, stack) =>
+                            StashesErrorState(error: error),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

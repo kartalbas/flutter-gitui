@@ -104,12 +104,12 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
   ),
   'lib/features/repositories/dialogs/project_dialog.dart': _Weights(4, 0, 0, 0),
   'lib/features/repositories/repositories_screen.dart': _Weights(1, 0, 0, 0),
-  'lib/features/repositories/screens/icon_comparison_screen.dart': _Weights(
-    10,
-    0,
-    10,
-    0,
-  ),
+  // icon_comparison_screen.dart held 10 bold marks before and 10 now - a
+  // specimen sheet whose whole subject was the raw weight difference - and
+  // the file is deleted outright now, the same disposition
+  // batch_operations_toolbar.dart got. Its ledger row left with it. Neither
+  // pin below moves: the row's before and now were equal, so it contributed
+  // nothing to boldRemoved, and it named no site in _kWeightsGivenUp.
   'lib/features/repositories/widgets/global_branch_switcher.dart': _Weights(
     4,
     0,

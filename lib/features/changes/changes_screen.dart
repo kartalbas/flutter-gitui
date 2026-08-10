@@ -3,7 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show
+        ContentPort,
+        IconRole,
+        Proximity,
+        ScreenSpec,
+        Skin,
+        SkinScope,
+        TextRole,
+        ToolbarActionEntry,
+        ToolbarEntry,
+        ToolbarGroup;
 import 'package:file_picker/file_picker.dart';
 
 import '../../generated/app_localizations.dart';
@@ -63,122 +73,149 @@ class _ChangesScreenState extends ConsumerState<ChangesScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppDestination.changes.label(context)),
-        actions: [
-          BaseIconButton(
-            icon: IconRole.arrowsClockwise,
-            tooltip: AppLocalizations.of(context)!.refresh,
-            onPressed: () {
-              ref.read(gitActionsProvider).refreshStatus();
-            },
-          ),
-        ],
-      ),
-      body: statusAsync.when(
-        data: (allStatuses) {
-          if (allStatuses.isEmpty) {
-            return const ChangesCleanState();
-          }
+    // The frame is the skin's: `chrome.screen` is what the hand-built
+    // Scaffold + AppBar pair was an instance of, and the refresh command
+    // travels as a `ToolbarActionEntry` rather than as a pre-built button, so
+    // whether it sits in a bar, a command bar or an overflow menu is the
+    // design language's answer and no longer this file's.
+    //
+    // One thing moves on screen, named: the refresh button gains a trailing
+    // 8-pixel inset it never had. This file's raw `AppBar` ended its actions
+    // flush; the member closes every entry with the bar's uniform spacing -
+    // the same follower that keeps the six ex-`StandardAppBar` screens
+    // pixel-neutral, because their bars already ended on
+    // `BaseGap(Proximity.related)` = 8. Adopting the member is adopting its
+    // arithmetic, not re-stating this file's.
+    //
+    // No `ScreenBodyHost` here, and that is a MEASUREMENT rather than an
+    // omission: this body crosses the port with nothing left in it that
+    // asserts a `Material` ancestor, so the scene sweep renders it under the
+    // blueprint - which builds no Material at all - without a single "No
+    // Material widget found". Adding the migration host anyway would hide
+    // that from the next reader and from the instrument.
+    final Widget body = statusAsync.when(
+      data: (allStatuses) {
+        if (allStatuses.isEmpty) {
+          return const ChangesCleanState();
+        }
 
-          // The screen's ordered focus regions: quick actions (1), tree (2)
-          // and diff (3) — declared inside GitStatusTreeView, which owns
-          // that split — then the commit bar (4). Nested inside the shell's
-          // content region, so F6 and the focus of last resort stay with
-          // the shell.
-          return BaseFocusRegionHost(
-            debugLabel: 'ChangesScreen.regions',
-            child: Column(
-              children: [
-                Expanded(
-                  child: _buildFileList(
-                    context,
-                    ref,
-                    stagedFiles,
-                    unstagedFiles,
-                  ),
-                ),
-                // Fixed commit button bar
-                if (stagedFiles.isNotEmpty)
-                  BaseFocusRegion(
-                    order: 4,
-                    debugLabel: 'ChangesScreen.commitBarRegion',
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHigh,
-                        border: Border(
-                          top: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                        ),
-                      ),
-                      // The bar's fill and its top rule stay spelled out: they
-                      // are the surface, and the surface leaves with its
-                      // member. Only how far the bar holds its buttons off its
-                      // own edge is the design language's question, and that is
-                      // `Inset.normal`.
-                      child: BaseInset(
-                        child: SafeArea(
-                          child: unstagedFiles.isEmpty
-                              ? // Only staged files - show single "Commit" button
-                                BaseButton(
-                                  label: AppLocalizations.of(context)!.commit,
-                                  leadingIcon: IconRole.check,
-                                  onPressed: () =>
-                                      _commitStagedOnly(context, ref),
-                                  variant: ButtonVariant.primary,
-                                  size: ButtonSize.medium,
-                                  fullWidth: true,
-                                )
-                              : // Both staged and unstaged - show two buttons
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: BaseButton(
-                                        label: AppLocalizations.of(
-                                          context,
-                                        )!.commit,
-                                        leadingIcon: IconRole.check,
-                                        onPressed: () =>
-                                            _commitStagedOnly(context, ref),
-                                        variant: ButtonVariant.secondary,
-                                        size: ButtonSize.medium,
-                                      ),
-                                    ),
-                                    // Two actions of one bar: members of one
-                                    // group, not two halves of one gesture.
-                                    const BaseGap(Proximity.grouped),
-                                    Expanded(
-                                      child: BaseButton(
-                                        label: AppLocalizations.of(
-                                          context,
-                                        )!.stageAllAndCommit,
-                                        leadingIcon: IconRole.checkCircle,
-                                        onPressed: () => _handleCommit(
-                                          context,
-                                          ref,
-                                          unstagedFiles,
-                                          stagedFiles,
-                                        ),
-                                        variant: ButtonVariant.primary,
-                                        size: ButtonSize.medium,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+        // The screen's ordered focus regions: quick actions (1), tree (2)
+        // and diff (3) — declared inside GitStatusTreeView, which owns
+        // that split — then the commit bar (4). Nested inside the shell's
+        // content region, so F6 and the focus of last resort stay with
+        // the shell.
+        return BaseFocusRegionHost(
+          debugLabel: 'ChangesScreen.regions',
+          child: Column(
+            children: [
+              Expanded(
+                child: _buildFileList(context, ref, stagedFiles, unstagedFiles),
+              ),
+              // Fixed commit button bar
+              if (stagedFiles.isNotEmpty)
+                BaseFocusRegion(
+                  order: 4,
+                  debugLabel: 'ChangesScreen.commitBarRegion',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      border: Border(
+                        top: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
                         ),
                       ),
                     ),
+                    // The bar's fill and its top rule stay spelled out: they
+                    // are the surface, and the surface leaves with its
+                    // member. Only how far the bar holds its buttons off its
+                    // own edge is the design language's question, and that is
+                    // `Inset.normal`.
+                    child: BaseInset(
+                      child: SafeArea(
+                        child: unstagedFiles.isEmpty
+                            ? // Only staged files - show single "Commit" button
+                              BaseButton(
+                                label: AppLocalizations.of(context)!.commit,
+                                leadingIcon: IconRole.check,
+                                onPressed: () =>
+                                    _commitStagedOnly(context, ref),
+                                variant: ButtonVariant.primary,
+                                size: ButtonSize.medium,
+                                fullWidth: true,
+                              )
+                            : // Both staged and unstaged - show two buttons
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: BaseButton(
+                                      label: AppLocalizations.of(
+                                        context,
+                                      )!.commit,
+                                      leadingIcon: IconRole.check,
+                                      onPressed: () =>
+                                          _commitStagedOnly(context, ref),
+                                      variant: ButtonVariant.secondary,
+                                      size: ButtonSize.medium,
+                                    ),
+                                  ),
+                                  // Two actions of one bar: members of one
+                                  // group, not two halves of one gesture.
+                                  const BaseGap(Proximity.grouped),
+                                  Expanded(
+                                    child: BaseButton(
+                                      label: AppLocalizations.of(
+                                        context,
+                                      )!.stageAllAndCommit,
+                                      leadingIcon: IconRole.checkCircle,
+                                      onPressed: () => _handleCommit(
+                                        context,
+                                        ref,
+                                        unstagedFiles,
+                                        stagedFiles,
+                                      ),
+                                      variant: ButtonVariant.primary,
+                                      size: ButtonSize.medium,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
                   ),
-              ],
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => ChangesErrorState(error: error),
+                ),
+            ],
+          ),
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => ChangesErrorState(error: error),
+    );
+
+    return SkinScope.render(
+      context,
+      (Skin skin, BuildContext inner) => skin.chrome.screen(
+        inner,
+        ScreenSpec(
+          title: AppDestination.changes.label(context),
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              ToolbarActionEntry(
+                icon: IconRole.arrowsClockwise,
+                label: AppLocalizations.of(context)!.refresh,
+                tooltip: AppLocalizations.of(context)!.refresh,
+                onPressed: () {
+                  ref.read(gitActionsProvider).refreshStatus();
+                },
+              ),
+            ]),
+          ],
+          // The commit bar stays INSIDE the body rather than moving to
+          // `ScreenSpec.footer`: it is the fourth focus region of
+          // `BaseFocusRegionHost`, and the host is planted inside the body,
+          // so a footer would take the region out of the traversal root that
+          // orders it.
+          body: ContentPort(body),
+        ),
       ),
     );
   }

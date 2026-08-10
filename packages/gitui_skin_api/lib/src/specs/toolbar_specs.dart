@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../icon_role.dart';
 import '../vocabulary.dart';
+import 'control_specs.dart';
 import 'overlay_specs.dart';
 
 /// One entry in a frame's action bar.
@@ -23,6 +24,7 @@ final class ToolbarActionEntry extends ToolbarEntry {
     required this.tooltip,
     required this.onPressed,
     this.emphasis = Emphasis.secondary,
+    this.tone = Tone.neutral,
     this.badgeCount,
   });
 
@@ -45,6 +47,24 @@ final class ToolbarActionEntry extends ToolbarEntry {
 
   /// How loudly this action asks to be used.
   final Emphasis emphasis;
+
+  /// What the action MEANS: an ordinary command, or one that destroys
+  /// something.
+  ///
+  /// Added because the selection bar could not say it (#442). `SelectionBarSpec`
+  /// is filled from what `BatchOperationsBar` used to be handed, and a
+  /// `BatchAction` carried an `isDestructive` flag that the skin drew as a
+  /// danger-sided button - the same statement `MenuAction.role` already makes
+  /// for a menu row. With no slot for it here that flag had nowhere to go, so
+  /// the Material selection bar hard-coded `Tone.neutral` and "delete these
+  /// three tags" read exactly like "push these three tags". A meaning with no
+  /// word is the one thing this contract may not round off, so the word is
+  /// here rather than the meaning being dropped.
+  ///
+  /// [Emphasis] is a separate question and stays separate: how LOUDLY an
+  /// action asks to be used is not what it means, and the two combine (a quiet
+  /// destructive action and a prominent one are both real).
+  final Tone tone;
 
   /// A count riding on the action, or null.
   final int? badgeCount;
@@ -112,10 +132,61 @@ final class ToolbarMenuEntry extends ToolbarEntry {
   final List<MenuEntry> entries;
 
   /// Words beside the mark, where the frame has room for them.
+  ///
+  /// A standing contract finding (#442 closing): no skin can currently
+  /// render this. Both chromes route the entry through `Overlays.anchor`,
+  /// and [MenuAnchorSpec] has no label slot, so the words go nowhere -
+  /// silently, because no caller passes them today. Under the blueprint's
+  /// own rule (a parameter it ignores does not exist) the field is a
+  /// promise waiting on a decision: either `MenuAnchorSpec` grows the word,
+  /// implemented in every skin that has overlays, or this field is retired.
   final String? label;
 
   /// A count riding on the anchor, or null.
   final int? badgeCount;
+}
+
+/// A choice among a few mutually exclusive presentations, offered from the
+/// bar.
+///
+/// Distinct from [ToolbarPickerEntry] and NOT a rounding onto it. A picker
+/// names the SUBJECT the other controls act on - this workspace, this
+/// repository, this branch - and every language answers that with a pull-down
+/// naming one thing. This entry answers a different question: the same subject,
+/// shown a different way. Two screens of this application put exactly that in
+/// their bar (the repositories and workspaces grid/list switch), each with a
+/// raw `SegmentedButton` because the bar had no word for it, and filing them
+/// under "picker" would have said the view mode is the thing being named.
+///
+/// It carries a [ChoiceGroupSpec] rather than re-declaring options, because
+/// "pick exactly one of a few" is already a control every skin implements
+/// (`controls.choiceGroup`), and a second declaration of it in the toolbar
+/// vocabulary would be two spellings of one question. What each language does
+/// with it in a BAR stays the language's answer: Material a segmented button,
+/// Fluent a `CommandBar` toggle set, macOS a segmented control in the toolbar.
+final class ToolbarChoiceEntry<T> extends ToolbarEntry {
+  /// Declares one choice in the bar.
+  const ToolbarChoiceEntry(this.spec);
+
+  /// The choices, which one is chosen, and how to report a new one.
+  final ChoiceGroupSpec<T> spec;
+
+  /// Hands [spec] back at the type it was DECLARED with.
+  ///
+  /// A sealed switch matches this entry at its bound -
+  /// `ToolbarChoiceEntry&lt;Object?&gt;` - which is enough to reach the spec
+  /// but not to use it: reading
+  /// `spec.onSelected` through that view types the callback as
+  /// `ValueChanged<Object?>`, and a `ValueChanged<ProjectsViewMode>` is not
+  /// one. That is not a cast a skin could tighten; it fails at runtime the
+  /// first time the entry is built, which is exactly how it was found.
+  ///
+  /// So the type argument is handed back through a polymorphic callback
+  /// instead of through a cast: [use] is called at this entry's own `T`, and a
+  /// skin writes `entry.withSpec(<S>(ChoiceGroupSpec<S> spec) => controls
+  /// .choiceGroup<S>(context, spec))` with nothing to get wrong. It builds no
+  /// widget and decides nothing - the spec stays data.
+  R withSpec<R>(R Function<S>(ChoiceGroupSpec<S> spec) use) => use<T>(spec);
 }
 
 /// A rule between two runs of entries, carrying nothing of its own.

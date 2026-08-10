@@ -305,7 +305,7 @@ void main() {
         (sum, entry) => sum + entry.reads,
       );
 
-      // 33 is the 2026-08-09 census (77) less the 10 reads P5 converted when
+      // 29 is the 2026-08-09 census (77) less the 10 reads P5 converted when
       // `BaseBadge` stopped hand-painting its pill and started calling
       // `surfaces.badge` / `surfaces.tag`, less the 5 it converted when the
       // repositories card grid started calling `layout.grid` (3) and the
@@ -339,16 +339,24 @@ void main() {
       // PopupMenuButton constraints died with the construction - and less the
       // 1 the menu family surrendered when every anchored menu in the
       // application became `overlays.menuAnchor`, so `BasePopupMenuButton`'s
-      // anchor-glyph fallback had no caller left to size: 20 reads
+      // anchor-glyph fallback had no caller left to size - and less the 4
+      // that died with the developer-only icon specimen sheet when the
+      // chrome.screen adoption DELETED it. Those four were the whole of the
+      // second carve-out: their own entries argued that no member and no
+      // word would ever free them because the screen's subject is the raw
+      // weight difference between two Phosphor fonts, and that the file was
+      // recorded for deletion in the screen-population census. It was
+      // deleted, and the entries went with it in that same change, which is
+      // the only way a carve-out ever leaves: 20 reads
       // waiting for a named P5 member, 6 blocked on a
-      // missing vocabulary word, 7 kept by a named permanent carve-out
+      // missing vocabulary word, 3 kept by a named permanent carve-out
       // (#433). Converting a read lowers this number in the same change that
       // deletes its entry. Raising it is the forbidden direction: new code
       // states its lengths through the contract, it does not register
       // exceptions.
       expect(
         total,
-        33,
+        29,
         reason:
             'The register must shrink deliberately: update this pin in the '
             'same change that shrinks (never grows) the register.',
@@ -388,13 +396,15 @@ void main() {
       );
       expect(
         readsWhere((entry) => entry.carveOut != null),
-        7,
+        3,
         reason:
             'Reads kept by a named permanent carve-out: outside the '
-            'contract\'s reach (the pre-scope boot splash) or outside its '
-            'scope (the unreachable icon-comparison specimen sheet, which '
-            'is deleted rather than converted). These die with their '
-            'code, never with a member or a word.',
+            'contract\'s reach - the pre-scope boot splash, which renders '
+            'before any skin scope exists and is now the only one left. The '
+            'second carve-out (the unreachable icon-comparison specimen '
+            'sheet) is gone because its file is: a carve-out dies with its '
+            'code, never with a member or a word, and this is what that '
+            'looks like when it happens.',
       );
     });
   });

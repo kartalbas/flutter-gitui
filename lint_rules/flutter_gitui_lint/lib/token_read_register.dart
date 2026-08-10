@@ -183,10 +183,11 @@ TokenReadReconciliation reconcileTokenReads({
   return TokenReadReconciliation(unregistered: unregistered, stale: stale);
 }
 
-/// The register itself: 77 reads at the 2026-08-09 census, 33 standing after
-/// the #438 conversions and the menu family's move behind the contract — 20
-/// waiting for a named P5 member, 6 blocked on a missing word, 7 kept by a
-/// named permanent carve-out (#433). Of the 20, the speed dial's 15 were
+/// The register itself: 77 reads at the 2026-08-09 census, 29 standing after
+/// the #438 conversions, the menu family's move behind the contract and the
+/// #442 chrome.screen adoption (which deleted the specimen sheet and its 4
+/// carved-out reads with it) — 20 waiting for a named P5 member, 6 blocked on
+/// a missing word, 3 kept by a named permanent carve-out (#433). Of the 20, the speed dial's 15 were
 /// REFILED off `chrome.screen (ScreenSpec.primaryActions)` and onto
 /// `surfaces.tree (TreeNodeSpec.menu)`: the cause is unchanged — they still
 /// wait for a member — but the member they named was one no conversion here
@@ -475,7 +476,7 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'at: Offset, so this length survives the overlay funnel.',
   ),
 
-  // ── Named carve-outs (7 reads, decided in #433) ─────────────────────────
+  // ── Named carve-outs (3 reads, decided in #433) ─────────────────────────
   // Not waiting for anything. Each of these sites is outside the contract's
   // reach or scope by construction, so no P5 member and no new vocabulary
   // word would ever free it; the read dies with its code - deleted or
@@ -507,50 +508,13 @@ const List<TokenReadRegisterEntry> tokenReadRegister = [
         'The same pre-scope boot splash: the separation under the brand '
         'mark, kept for the same structural reason.',
   ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
-    site: 'size: AppTheme.iconXL * 2,',
-    reads: 2,
-    carveOut:
-        'developer-only specimen sheet: unreachable in the shipping '
-        'application and recorded for deletion',
-    reason:
-        'The screen\'s subject IS the raw weight difference between two '
-        'Phosphor fonts, so rendering its specimens through the contract '
-        'would measure the skin instead of the fonts: IconRole lets the '
-        'skin re-decide the weight, which deletes the comparison (#249 '
-        'conflict C3). No vocabulary is grown for it - a specimen is not a '
-        'control, and ControlScale\'s own doc caps the contract at the '
-        'three rungs every language honours - because the contract\'s scope '
-        'is the shipping application and this screen is not in it: zero '
-        'references anywhere in lib/, and the screen-population census '
-        '(test/skin/screen_population.dart, kScreensNoSceneCovers) already '
-        'records that it is to be DELETED rather than covered. These reads '
-        'die with the file, and this two-way register forces their entries '
-        'out in that same change.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
-    site: 'crossAxisSpacing: AppTheme.paddingM,',
-    reads: 1,
-    carveOut:
-        'developer-only specimen sheet: unreachable in the shipping '
-        'application and recorded for deletion',
-    reason:
-        'Formerly filed under layout.grid (GridSpec), which claimed a P5 '
-        'conversion would visit this gutter. It will not: the screen is '
-        'unreachable and recorded for deletion (see the entry above), and '
-        'a dead screen is deleted, not converted. Refiled in #433 so the '
-        'GridSpec remainder counts only reads a conversion will actually '
-        'reach.',
-  ),
-  TokenReadRegisterEntry(
-    file: 'lib/features/repositories/screens/icon_comparison_screen.dart',
-    site: 'mainAxisSpacing: AppTheme.paddingM,',
-    reads: 1,
-    carveOut:
-        'developer-only specimen sheet: unreachable in the shipping '
-        'application and recorded for deletion',
-    reason: 'The other gutter of the same dead grid; see the entries above.',
-  ),
+  // The developer-only icon specimen sheet's four reads stood here until the
+  // chrome.screen adoption, and they left the way their own entries said they
+  // would: the file was DELETED rather than converted. Its carve-out argued
+  // that the screen's subject is the raw weight difference between two
+  // Phosphor fonts, so no member and no word would ever free those reads -
+  // only the file's death would - and it named the screen-population census
+  // (test/skin/screen_population.dart) as the second place recording the same
+  // decision. Both entries went with the file in that one change, exactly as
+  // this two-way register forces.
 ];

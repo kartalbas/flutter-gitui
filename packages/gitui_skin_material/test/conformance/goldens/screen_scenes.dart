@@ -49,7 +49,6 @@ import 'package:flutter_gitui/core/git/models/tag.dart';
 import 'package:flutter_gitui/features/changes/widgets/file_list_item.dart';
 import 'package:flutter_gitui/features/tags/tags_screen.dart';
 import 'package:flutter_gitui/features/tags/widgets/tag_filter_chips.dart';
-import 'package:flutter_gitui/features/tags/widgets/tags_batch_operations_bar.dart';
 import 'package:flutter_gitui/shared/components/base_button.dart';
 import 'package:flutter_gitui/shared/components/base_shrinking_row.dart';
 import 'package:flutter_gitui/shared/components/base_switcher.dart';
@@ -58,7 +57,21 @@ import 'package:flutter_gitui/shared/theme/app_theme.dart';
 import 'package:flutter_gitui/shared/widgets/inline_search_field.dart';
 import 'package:flutter_gitui/shared/widgets/overflow_action_bar.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, MenuAnchorSpec, MenuChoice, MenuEntry, Overlays;
+    show
+        ContentPort,
+        IconRole,
+        MenuAnchorSpec,
+        MenuChoice,
+        MenuEntry,
+        Overlays,
+        ScreenSpec,
+        SelectionBarSpec,
+        Skin,
+        SkinScope,
+        Tone,
+        ToolbarActionEntry,
+        ToolbarEntry,
+        ToolbarGroup;
 
 import 'golden_scene.dart';
 
@@ -90,8 +103,10 @@ List<GoldenScene> screenGoldenScenes() => <GoldenScene>[
   GoldenScene(
     name: 'screen_tags_filter_band',
     width: _kSceneWidth,
-    build: (BuildContext context) =>
-        _atEachWidth(context, (BuildContext context) => _tagsFilterBand()),
+    build: (BuildContext context) => _atEachWidth(
+      context,
+      (BuildContext context) => _tagsFilterBand(context),
+    ),
   ),
 ];
 
@@ -388,7 +403,7 @@ Widget _changesFileRows() {
 /// the old `BasePopupMenuButton` would keep this golden green while the real
 /// bar changed. Only the data is fixed: real `GitTag` value objects, so
 /// `TagFilterChips` counts them exactly as it does on the screen.
-Widget _tagsFilterBand() {
+Widget _tagsFilterBand(BuildContext context) {
   return Padding(
     padding: const EdgeInsets.all(AppTheme.paddingM),
     child: Column(
@@ -437,10 +452,46 @@ Widget _tagsFilterBand() {
           selectedFilter: TagFilterType.annotated,
           onFilterChanged: _ignoreFilter,
         ),
-        TagsBatchOperationsBar(
-          selectedCount: 3,
-          onPush: _noop,
-          onDelete: _noop,
+        // The batch bar, which is the SKIN's since #442: the screen states
+        // the selection and the two operations on `ScreenSpec.selectionBar`
+        // and `chrome.screen` places the bar. Reconstructing the retired
+        // `TagsBatchOperationsBar` here would keep this baseline green while
+        // the real bar changed - the same reason the anchors above go through
+        // `Overlays.anchor` - so the scene asks the member for it, inside a
+        // box that gives the frame the bounded height a `Scaffold` needs.
+        SizedBox(
+          height: 96,
+          child: SkinScope.render(
+            context,
+            (Skin skin, BuildContext inner) => skin.chrome.screen(
+              inner,
+              ScreenSpec(
+                title: '',
+                body: const ContentPort(SizedBox.shrink()),
+                selectionBar: SelectionBarSpec(
+                  selectedCount: 3,
+                  onClear: _noop,
+                  actions: <ToolbarGroup>[
+                    ToolbarGroup(<ToolbarEntry>[
+                      const ToolbarActionEntry(
+                        icon: IconRole.upload,
+                        label: 'Push 3 tags',
+                        tooltip: 'Push 3 tags',
+                        onPressed: _noop,
+                      ),
+                      const ToolbarActionEntry(
+                        icon: IconRole.trash,
+                        label: 'Delete 3 tags',
+                        tooltip: 'Delete 3 tags',
+                        tone: Tone.danger,
+                        onPressed: _noop,
+                      ),
+                    ]),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     ),

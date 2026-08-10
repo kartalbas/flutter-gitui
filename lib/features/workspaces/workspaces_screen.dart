@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show GridDensity, IconRole, Inset, Proximity, TileHeight;
+    show
+        ChoiceGroupSpec,
+        ChoiceOption,
+        ContentPort,
+        GridDensity,
+        IconRole,
+        Inset,
+        MenuAction,
+        ScreenSpec,
+        Skin,
+        SkinScope,
+        TileHeight,
+        ToolbarChoiceEntry,
+        ToolbarEntry,
+        ToolbarGroup,
+        ToolbarMenuEntry;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
-import '../../shared/widgets/standard_app_bar.dart';
-import '../../shared/components/base_menu_item.dart';
+import '../../shared/widgets/screen_body_host.dart';
 import '../../shared/components/base_dialog.dart';
 import '../../core/workspace/workspace_list_provider.dart';
 import '../../core/workspace/selected_workspace_provider.dart';
@@ -74,72 +87,100 @@ class _WorkspacesScreenState extends ConsumerState<WorkspacesScreen> {
       _navigationController.scheduleInitialHighlight();
     }
 
-    return Scaffold(
-      appBar: StandardAppBar(
-        title: AppDestination.workspaces.label(context),
-        additionalActions: hasProjects
-            ? [
-                // View mode toggle
-                Consumer(
-                  builder: (context, ref, child) {
-                    final viewMode = ref.watch(projectsViewModeProvider);
-                    return SegmentedButton<ProjectsViewMode>(
-                      segments: const [
-                        ButtonSegment(
-                          value: ProjectsViewMode.grid,
-                          icon: Icon(PhosphorIconsRegular.gridFour, size: 18),
-                        ),
-                        ButtonSegment(
-                          value: ProjectsViewMode.list,
-                          icon: Icon(
-                            PhosphorIconsRegular.listBullets,
-                            size: 18,
-                          ),
-                        ),
-                      ],
-                      selected: {viewMode},
-                      onSelectionChanged: (Set<ProjectsViewMode> newSelection) {
-                        ref
-                            .read(configProvider.notifier)
-                            .setProjectsViewMode(newSelection.first);
-                      },
-                    );
-                  },
+    final l10n = AppLocalizations.of(context)!;
+
+    // The frame is `chrome.screen`'s (#442), and with it the view switch stops
+    // being a Material widget this screen names. It used to be a raw
+    // `SegmentedButton` handed to `StandardAppBar.additionalActions` - the one
+    // slot in that bar that took a pre-built widget, and therefore the one
+    // place a design language's own control was welded into an application
+    // file. It is now a `ToolbarChoiceEntry` carrying a `ChoiceGroupSpec`, and
+    // each language answers "pick one of a few, in a bar" for itself.
+    //
+    // What changes on screen, named. The segments were icon-only with NO
+    // tooltip, which this repository's rules forbid outright;
+    // `ChoiceOption.label` is required and doubles as the accessible name,
+    // and Material's bar renders each segment with it as the tooltip, so the
+    // switch now names itself to the pointer and to a screen reader. The
+    // segment's box is the skin's segmented-button arithmetic instead of the
+    // 18-pixel glyph this file specified (M3's default lands on the same
+    // number, stated by the skin). And the gap between the switch and the
+    // overflow anchor is the bar's uniform entry spacing (8) where this file
+    // used to state `BaseGap(Proximity.grouped)` = 16 - the member's rhythm
+    // is one spacing for every bar entry, and the screen no longer states
+    // its own.
+    return SkinScope.render(
+      context,
+      (Skin skin, BuildContext inner) => skin.chrome.screen(
+        inner,
+        ScreenSpec(
+          title: AppDestination.workspaces.label(context),
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              if (hasProjects)
+                ToolbarChoiceEntry<ProjectsViewMode>(
+                  ChoiceGroupSpec<ProjectsViewMode>(
+                    label: l10n.viewOptions,
+                    selected: ref.watch(projectsViewModeProvider),
+                    onSelected: (ProjectsViewMode mode) => ref
+                        .read(configProvider.notifier)
+                        .setProjectsViewMode(mode),
+                    options: <ChoiceOption<ProjectsViewMode>>[
+                      ChoiceOption<ProjectsViewMode>(
+                        value: ProjectsViewMode.grid,
+                        label: l10n.viewModeGrid,
+                        icon: IconRole.gridFour,
+                      ),
+                      ChoiceOption<ProjectsViewMode>(
+                        value: ProjectsViewMode.list,
+                        label: l10n.viewModeList,
+                        icon: IconRole.listBullets,
+                      ),
+                    ],
+                  ),
                 ),
-                const BaseGap(Proximity.grouped),
-              ]
-            : null,
-        moreMenuItems: [
-          // New workspace action (first)
-          MenuAction(
-            icon: IconRole.plus,
-            label: AppLocalizations.of(context)!.tooltipNewWorkspace,
-            onPressed: () => _createProject(context, ref),
+              ToolbarMenuEntry(
+                icon: IconRole.dotsThreeVertical,
+                tooltip: l10n.moreActions,
+                entries: [
+                  // New workspace action (first)
+                  MenuAction(
+                    icon: IconRole.plus,
+                    label: l10n.tooltipNewWorkspace,
+                    onPressed: () => _createProject(context, ref),
+                  ),
+                ],
+              ),
+            ]),
+          ],
+          body: ContentPort(
+            ScreenBodyHost(
+              child: BaseInset(
+                all: Inset.roomy,
+                child: hasProjects
+                    ? Consumer(
+                        builder: (context, ref, child) {
+                          final viewMode = ref.watch(projectsViewModeProvider);
+                          return viewMode == ProjectsViewMode.grid
+                              ? _buildProjectGrid(
+                                  context,
+                                  ref,
+                                  projects,
+                                  selectedProject,
+                                )
+                              : _buildProjectList(
+                                  context,
+                                  ref,
+                                  projects,
+                                  selectedProject,
+                                );
+                        },
+                      )
+                    : const WorkspacesEmptyState(),
+              ),
+            ),
           ),
-        ],
-      ),
-      body: BaseInset(
-        all: Inset.roomy,
-        child: hasProjects
-            ? Consumer(
-                builder: (context, ref, child) {
-                  final viewMode = ref.watch(projectsViewModeProvider);
-                  return viewMode == ProjectsViewMode.grid
-                      ? _buildProjectGrid(
-                          context,
-                          ref,
-                          projects,
-                          selectedProject,
-                        )
-                      : _buildProjectList(
-                          context,
-                          ref,
-                          projects,
-                          selectedProject,
-                        );
-                },
-              )
-            : const WorkspacesEmptyState(),
+        ),
       ),
     );
   }

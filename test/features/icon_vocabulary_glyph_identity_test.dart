@@ -99,21 +99,25 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 245 references', () {
+  test('the census still accounts for all 247 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 245-entry diff.
-    // 245 = the 246 the conversion measured, plus the diff viewer's `file`
+    // agreeing and this says so in one line instead of a 247-entry diff.
+    // 247 = the 246 the conversion measured, plus the diff viewer's `file`
     // and `gitDiff` that moved into git_status_tree_view.dart with the
     // view-mode toggle (recorded at that entry), minus the three marks the
     // tree conversion moved across the seam (the disclosure caret pair and
     // the row-menu trigger are `surfaces.tree`'s own affordances now,
-    // recorded at the file_tree_panel.dart entry); every mark involved was
-    // and stays in the distinct set, so the 77 below is unchanged.
+    // recorded at the file_tree_panel.dart entry); plus the two the branches
+    // screen names since it adopted `chrome.screen` (#442) - the refresh
+    // arrow and the overflow dots, which `StandardAppBar` used to name from
+    // outside this census and the screen states on `ScreenSpec.toolbar` now,
+    // recorded at that entry. Every mark involved was and stays in the
+    // distinct set, so the 77 below is unchanged.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 245);
+    expect(total, 247);
     expect(
       _kMarkCensus.values
           .expand((Map<String, int> marks) => marks.keys)
@@ -401,8 +405,17 @@ const Map<String, String> _kDrawnAtBold = <String, String>{
 /// stroke. The nine references that are drawn bold are named separately in
 /// [_kDrawnAtBold] and asserted there.
 const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
+  // `arrowsClockwise` and `dotsThreeVertical` are the #442 adoption, and they
+  // are not two new marks on this screen: the refresh arrow and the overflow
+  // dots have always been drawn at the top of the branches screen, named by
+  // `StandardAppBar` - a file this census does not cover. The screen states
+  // its own bar as `ScreenSpec.toolbar` now, so the two names moved from the
+  // shared bar into the screen that asks for them. What the user sees is
+  // unchanged; what this file counts is the naming, and the naming moved.
   'lib/features/branches/branches_screen.dart': <String, int>{
+    'arrowsClockwise': 1,
     'cloud': 1,
+    'dotsThreeVertical': 1,
     'folder': 1,
     'plus': 1,
   },

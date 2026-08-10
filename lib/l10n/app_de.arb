@@ -2596,5 +2596,7 @@
   "updateBrowserOpenError": "Der Browser konnte nicht geöffnet werden: {error}",
   "updateDownloadFailed": "Das Update konnte nicht heruntergeladen werden. Bitte versuchen Sie es später erneut.",
   "updateInstallFailed": "Das Update konnte nicht installiert werden. Einzelheiten stehen im Anwendungsprotokoll.",
-  "updateUnexpectedError": "Ein Fehler ist aufgetreten: {error}"
+  "updateUnexpectedError": "Ein Fehler ist aufgetreten: {error}",
+  "viewModeGrid": "Kachelansicht",
+  "viewModeList": "Listenansicht"
 }

@@ -1407,5 +1407,7 @@
   "updateBrowserOpenError": "Non è stato possibile aprire il browser: {error}",
   "updateDownloadFailed": "Non è stato possibile scaricare l'aggiornamento. Riprova più tardi.",
   "updateInstallFailed": "Non è stato possibile installare l'aggiornamento. Consulta il registro dell'applicazione per i dettagli.",
-  "updateUnexpectedError": "Si è verificato un errore: {error}"
+  "updateUnexpectedError": "Si è verificato un errore: {error}",
+  "viewModeGrid": "Vista a griglia",
+  "viewModeList": "Vista a elenco"
 }

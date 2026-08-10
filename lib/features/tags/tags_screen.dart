@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
+        ContentPort,
         ControlScale,
+        Emphasis,
         IconRole,
         Inset,
         MenuAnchorSpec,
@@ -12,13 +14,22 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         MenuSeparator,
         Overlays,
         Proximity,
-        TextRole;
+        ScreenSpec,
+        SelectionBarSpec,
+        Skin,
+        SkinScope,
+        TextRole,
+        Tone,
+        ToolbarActionEntry,
+        ToolbarEntry,
+        ToolbarGroup,
+        ToolbarMenuEntry;
 
 import '../../generated/app_localizations.dart';
 import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/widgets/base_dismiss_scope.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
-import '../../shared/widgets/standard_app_bar.dart';
+import '../../shared/widgets/screen_body_host.dart';
 import '../../shared/widgets/inline_search_field.dart';
 import '../../shared/components/base_icon.dart';
 import '../../shared/components/base_label.dart';
@@ -42,7 +53,6 @@ import 'widgets/tags_no_repository_state.dart';
 import 'widgets/tags_error_state.dart';
 import 'widgets/tags_empty_state.dart';
 import 'widgets/tags_active_filters.dart';
-import 'widgets/tags_batch_operations_bar.dart';
 import 'services/tags_service.dart';
 import '../../shared/components/base_layout.dart';
 
@@ -190,6 +200,7 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     final localOnlyTags = ref.watch(localOnlyTagsProvider).value ?? {};
     final remoteOnlyTags = ref.watch(remoteOnlyTagsProvider).value ?? {};
     final remotes = ref.watch(remoteNamesProvider).value ?? [];
+    final l10n = AppLocalizations.of(context)!;
 
     if (repositoryPath == null) {
       return _buildNoRepository(context);
@@ -208,85 +219,165 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
       child: BaseDismissScope(
         enabled: _searchQuery.isNotEmpty,
         onDismiss: _clearSearch,
-        child: Scaffold(
-          appBar: _selectionMode
-              ? AppBar(
-                  title: Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.selectedCount(_selectedTags.length),
-                  ),
-                  leading: BaseIconButton(
-                    icon: IconRole.x,
-                    tooltip: AppLocalizations.of(context)!.exitSelection,
-                    onPressed: _exitSelectionMode,
-                  ),
-                  actions: [
-                    BaseIconButton(
-                      icon: IconRole.checkSquareOffset,
-                      tooltip: AppLocalizations.of(context)!.selectAll,
-                      onPressed: () => _selectAllTags(tagsAsync.value ?? []),
+        child: SkinScope.render(
+          context,
+          (Skin skin, BuildContext inner) => skin.chrome.screen(
+            inner,
+            ScreenSpec(
+              // What the screen is called, and while things are being picked,
+              // what has been picked - the same sentence the selection app bar
+              // carried as its title, in the same slot, still the
+              // application's own translation.
+              title: _selectionMode
+                  ? l10n.selectedCount(_selectedTags.length)
+                  : AppDestination.tags.label(context),
+              toolbar: _selectionMode
+                  ? _selectionToolbar(l10n, tagsAsync.value ?? const [])
+                  : _browsingToolbar(l10n, tagsAsync.value ?? const []),
+              body: ContentPort(
+                ScreenBodyHost(
+                  child: BaseInset(
+                    all: Inset.roomy,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: tagsAsync.when(
+                            data: (tags) => _buildTagList(
+                              context,
+                              tags,
+                              localOnlyTags,
+                              remoteOnlyTags,
+                              remotes,
+                            ),
+                            loading: () => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            error: (error, stack) =>
+                                _buildError(context, error),
+                          ),
+                        ),
+                      ],
                     ),
-                    BaseIconButton(
-                      icon: IconRole.square,
-                      tooltip: AppLocalizations.of(context)!.clearSelection,
-                      onPressed: () {
+                  ),
+                ),
+              ),
+              // What can be done to all of them at once. The screen states the
+              // selection and the two operations; WHERE that lands - a bar
+              // along the bottom here, a command bar plus a notice elsewhere -
+              // is the skin's, which is why this is a slot and not a widget.
+              selectionBar: _selectionMode && _selectedTags.isNotEmpty
+                  ? SelectionBarSpec(
+                      selectedCount: _selectedTags.length,
+                      onClear: () {
                         setState(() {
                           _selectedTags.clear();
                         });
                       },
-                    ),
-                  ],
-                )
-              : StandardAppBar(
-                  title: AppDestination.tags.label(context),
-                  onRefresh: () => ref.read(gitActionsProvider).refreshTags(),
-                  moreMenuItems: [
-                    // Select Tags action (only show if tags exist)
-                    if (tagsAsync.value?.isNotEmpty == true)
-                      MenuAction(
-                        icon: IconRole.checkSquare,
-                        label: AppLocalizations.of(context)!.selectTags,
-                        onPressed: _enterSelectionMode,
-                      ),
-                    // Fetch Tags action
-                    if (tagsAsync.value?.isNotEmpty == true)
-                      const MenuSeparator(),
-                    MenuAction(
-                      icon: IconRole.downloadSimple,
-                      label: AppLocalizations.of(context)!.fetchTags,
-                      onPressed: () => _fetchTags(context),
-                    ),
-                  ],
-                ),
-          body: BaseInset(
-            all: Inset.roomy,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: tagsAsync.when(
-                    data: (tags) => _buildTagList(
-                      context,
-                      tags,
-                      localOnlyTags,
-                      remoteOnlyTags,
-                      remotes,
-                    ),
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stack) => _buildError(context, error),
-                  ),
-                ),
-              ],
+                      actions: <ToolbarGroup>[
+                        ToolbarGroup(<ToolbarEntry>[
+                          ToolbarActionEntry(
+                            icon: IconRole.upload,
+                            label: l10n.pushTagsCount(_selectedTags.length),
+                            tooltip: l10n.pushTagsCount(_selectedTags.length),
+                            // What the action MEANS, carried over:
+                            // `TagsBatchOperationsBar` drew push with
+                            // `ButtonVariant.secondary`, whose mapping is
+                            // Tone.accent - the selection's affirmative
+                            // action in the scheme's primary. An entry that
+                            // stated nothing would default to neutral and
+                            // come back onSurface, an appearance change
+                            // nothing named.
+                            tone: Tone.accent,
+                            onPressed: () => _pushSelectedTags(context),
+                          ),
+                          ToolbarActionEntry(
+                            icon: IconRole.trash,
+                            label: l10n.deleteTagsCount(_selectedTags.length),
+                            tooltip: l10n.deleteTagsCount(_selectedTags.length),
+                            // What the action MEANS. `TagsBatchOperationsBar`
+                            // said it with `ButtonVariant.danger`; the entry
+                            // says it and the skin decides what destroying
+                            // something looks like.
+                            emphasis: Emphasis.primary,
+                            tone: Tone.danger,
+                            onPressed: () => _deleteSelectedTags(context),
+                          ),
+                        ]),
+                      ],
+                    )
+                  : null,
             ),
           ),
-          bottomNavigationBar: _selectionMode && _selectedTags.isNotEmpty
-              ? _buildBatchOperationsBar(context)
-              : null,
         ),
       ),
     );
+  }
+
+  /// The bar while the user is reading the tags: refresh, and everything else
+  /// behind the overflow anchor.
+  List<ToolbarGroup> _browsingToolbar(
+    AppLocalizations l10n,
+    List<GitTag> tags,
+  ) {
+    return <ToolbarGroup>[
+      ToolbarGroup(<ToolbarEntry>[
+        ToolbarActionEntry(
+          icon: IconRole.arrowsClockwise,
+          label: l10n.refresh,
+          tooltip: l10n.refresh,
+          onPressed: () => ref.read(gitActionsProvider).refreshTags(),
+        ),
+        ToolbarMenuEntry(
+          icon: IconRole.dotsThreeVertical,
+          tooltip: l10n.moreActions,
+          entries: [
+            // Select Tags action (only show if tags exist)
+            if (tags.isNotEmpty)
+              MenuAction(
+                icon: IconRole.checkSquare,
+                label: l10n.selectTags,
+                onPressed: _enterSelectionMode,
+              ),
+            // Fetch Tags action
+            if (tags.isNotEmpty) const MenuSeparator(),
+            MenuAction(
+              icon: IconRole.downloadSimple,
+              label: l10n.fetchTags,
+              onPressed: () => _fetchTags(context),
+            ),
+          ],
+        ),
+      ]),
+    ];
+  }
+
+  /// The bar while tags are being picked.
+  ///
+  /// The way OUT of the mode and "check every one" are the two things this bar
+  /// still offers; emptying the selection without leaving the mode is the
+  /// selection bar's own `onClear`, which is where the contract puts it, so
+  /// the app bar no longer carries a second control for it.
+  List<ToolbarGroup> _selectionToolbar(
+    AppLocalizations l10n,
+    List<GitTag> tags,
+  ) {
+    return <ToolbarGroup>[
+      ToolbarGroup(<ToolbarEntry>[
+        ToolbarActionEntry(
+          icon: IconRole.x,
+          label: l10n.exitSelection,
+          tooltip: l10n.exitSelection,
+          onPressed: _exitSelectionMode,
+        ),
+        ToolbarActionEntry(
+          icon: IconRole.checkSquareOffset,
+          label: l10n.selectAll,
+          tooltip: l10n.selectAll,
+          onPressed: () => _selectAllTags(tags),
+        ),
+      ]),
+    ];
   }
 
   Widget _buildNoRepository(BuildContext context) {
@@ -755,14 +846,6 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
         });
       },
       tagsService: _tagsService,
-    );
-  }
-
-  Widget _buildBatchOperationsBar(BuildContext context) {
-    return TagsBatchOperationsBar(
-      selectedCount: _selectedTags.length,
-      onPush: () => _pushSelectedTags(context),
-      onDelete: () => _deleteSelectedTags(context),
     );
   }
 

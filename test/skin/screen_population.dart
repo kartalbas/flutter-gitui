@@ -700,10 +700,4 @@ const Map<String, String> kScreensNoSceneCovers = <String, String>{
       'screens extend (RepositoryScreen / RepositoryScreenState). It cannot '
       'be instantiated, and everything it draws - the "no repository" empty '
       'state - is drawn through subclasses that ARE in the population.',
-  'lib/features/repositories/screens/icon_comparison_screen.dart':
-      'a temporary comparison sheet for choosing a repository glyph, with '
-      'zero references anywhere in lib/: nothing routes to it and no user can '
-      'reach it. Rendering it would measure a screen the application does not '
-      'have. It should be deleted rather than covered, and when it is, this '
-      'entry fails the census as stale and goes with it.',
 };

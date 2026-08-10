@@ -2596,5 +2596,7 @@
   "updateBrowserOpenError": "No se ha podido abrir el navegador: {error}",
   "updateDownloadFailed": "No se ha podido descargar la actualización. Inténtelo de nuevo más tarde.",
   "updateInstallFailed": "No se ha podido instalar la actualización. Consulte el registro de la aplicación para más detalles.",
-  "updateUnexpectedError": "Se ha producido un error: {error}"
+  "updateUnexpectedError": "Se ha producido un error: {error}",
+  "viewModeGrid": "Vista de cuadrícula",
+  "viewModeList": "Vista de lista"
 }

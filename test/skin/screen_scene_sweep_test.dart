@@ -370,13 +370,32 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // left to render. Measured at closing under BOTH skins - Material and the
   // blueprint land on the same two numbers - so the register stays
   // skin-independent.
+  // The #442 chrome.screen adoption moved six scenes, five DOWN and one UP,
+  // and every fall is consolidation into the member, verified fence by
+  // fence and by driving: the retired `StandardAppBar` planted a fence per
+  // control it built (a BaseIconButton, a BaseGap either side, the overflow
+  // `Overlays.anchor`), and the member plants two on these scenes - the
+  // screen's own `SkinScope.render` crossing and the anchor the skin still
+  // opens through `Overlays.anchor` - while it draws the icon buttons and
+  // spacing itself, below the fence. Branches, stashes and tags each fell 2
+  // (four bar fences became two); workspaces fell 1 (its bar had no refresh
+  // button, three fences became two); repositories fell 2 (three bar fences
+  // plus the body's `BaseGap` after its batch toolbar became two). Browse
+  // rose 1: its hand-built raw `AppBar` planted NOTHING, so the member's
+  // crossing is the whole rise. The keyboard sweep drove the moved controls
+  // on the adopted screens - Refresh and 'More actions' Tab-reachable,
+  // named, responding - so the falls are accounting, not a component
+  // leaving its skin. Measured at closing under BOTH skins - Material and
+  // the blueprint land on the same six numbers - so the register stays
+  // skin-independent (the Material bar's segmented button is built inside
+  // the chrome, below the fence, and moves no count).
   'shell': 170,
-  'workspaces': 34,
-  'repositories': 61,
+  'workspaces': 33,
+  'repositories': 59,
   'changes': 52,
   'history': 90,
-  'browse': 27,
-  'branches': 19,
+  'browse': 28,
+  'branches': 17,
   // #249 P4's overlay migration raised exactly two scenes, both for the same
   // reason: their row overflow menus now open through the contract's anchored
   // menu (`Overlays.anchor`). Stashes +2 is its fixture's two stash rows'
@@ -385,8 +404,8 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // said 'Show menu'. Measured at closing under BOTH skins - Material and
   // the blueprint land on the same two numbers - so the rise is the
   // application reaching the contract, not a skin drawing more of itself.
-  'stashes': 19,
-  'tags': 39,
+  'stashes': 17,
+  'tags': 37,
   'settings': 136,
   'merge_conflicts': 31,
 };

@@ -161,6 +161,11 @@ final class BlueprintOverlays implements SkinOverlays {
             children: <Widget>[
               BlueprintMark(BlueprintMarks.icon(spec.icon)),
               if (toneMark != BlueprintMarks.none) BlueprintMark(toneMark),
+              // The count rides on the trigger, as a mark like every other
+              // fact: the same `(n)` the rail's destinations and the toolbar's
+              // actions already draw for the same word.
+              if (spec.badgeCount != null)
+                BlueprintMark(BlueprintMarks.count(spec.badgeCount!)),
               if (!spec.enabled) const BlueprintMark(BlueprintMarks.disabled),
             ],
           ),

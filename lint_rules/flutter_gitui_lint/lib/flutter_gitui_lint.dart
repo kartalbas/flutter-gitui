@@ -24,6 +24,7 @@ import 'src/lints/avoid_text_with_style.dart';
 import 'src/lints/avoid_null_color_in_copy_with.dart';
 import 'src/lints/avoid_print.dart';
 import 'src/lints/avoid_raw_dialog_route.dart';
+import 'src/lints/avoid_raw_notice.dart';
 import 'src/lints/avoid_raw_shortcuts.dart';
 import 'src/lints/no_value_in_contract.dart';
 import 'src/lints/no_widget_in_contract.dart';
@@ -79,6 +80,7 @@ class _FlutterGitUILint extends PluginBase {
     // Logging lints
     AvoidPrint(),
     AvoidRawDialogRoute(),
+    AvoidRawNotice(),
 
     // Keyboard lints
     AvoidRawShortcuts(),

@@ -2,15 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show
-        ControlScale,
-        IconRole,
-        Inset,
-        NoticeSpec,
-        Overlays,
-        Proximity,
-        TextRole,
-        Tone;
+    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
 import 'package:path/path.dart' as path;
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -29,6 +21,7 @@ import '../../../core/git/git_providers.dart';
 import '../../../core/git/models/blame.dart';
 import '../../history/widgets/commit_details_panel.dart';
 import '../../history/widgets/file_tree_panel.dart';
+import '../../../core/services/notification_service.dart';
 
 /// GitHub-style Git Blame panel with two-column layout
 /// Left: Commit metadata (grouped by commit)
@@ -427,12 +420,9 @@ ${line.summary}
         if (context.mounted) {
           // The blamed line names a commit the log cannot produce, so the
           // action the user asked for did not happen.
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            const NoticeSpec(
-              tone: Tone.danger,
-              title: 'Commit not found in repository history',
-            ),
+            'Commit not found in repository history',
           );
         }
         return;
@@ -479,12 +469,9 @@ ${line.summary}
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: l10n.snackbarErrorLoadingCommit(e.toString()),
-          ),
+          l10n.snackbarErrorLoadingCommit(e.toString()),
         );
       }
     }

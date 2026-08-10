@@ -7,7 +7,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         DialogRouteSpec,
         IconRole,
         Inset,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -27,6 +26,7 @@ import '../../core/diff/models/diff_tool.dart';
 import '../../core/config/config_providers.dart';
 import '../components/base_layout.dart';
 import '../widgets/empty_state.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -345,12 +345,9 @@ class _DiffToolsConfigDialogState extends ConsumerState<DiffToolsConfigDialog> {
     if (mounted) {
       Navigator.of(context).pop();
       // The settings are written: something that finished, and finished well.
-      Overlays.notify(
+      NotificationService.showSuccess(
         context,
-        NoticeSpec(
-          tone: Tone.success,
-          title: AppLocalizations.of(context)!.diffMergeToolSettingsSaved,
-        ),
+        AppLocalizations.of(context)!.diffMergeToolSettingsSaved,
       );
     }
   }

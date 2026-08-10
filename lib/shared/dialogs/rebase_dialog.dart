@@ -8,7 +8,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         IconRole,
         Inset,
         NoticeAction,
-        NoticeSpec,
         Overlays,
         ProgressExtent,
         Proximity,
@@ -31,6 +30,7 @@ import '../../core/git/models/branch.dart';
 import '../../core/navigation/navigation_item.dart';
 import '../components/base_layout.dart';
 import '../widgets/empty_state.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -481,12 +481,9 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         // index is; none of them says "this worked", "check this" or "this
         // was thrown away". Each notice states its own meaning now, and the
         // skin picks the colours.
-        Overlays.notify(
+        NotificationService.showSuccess(
           context,
-          NoticeSpec(
-            tone: Tone.success,
-            title: AppLocalizations.of(context)!.rebaseStartedSuccessfully,
-          ),
+          AppLocalizations.of(context)!.rebaseStartedSuccessfully,
         );
       }
     } catch (e) {
@@ -497,24 +494,14 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         if (errorMsg.contains('conflict') || errorMsg.contains('merge')) {
           // The rebase is running but did not go through: not a failure the
           // user can do nothing about, a state that needs their attention.
-          Overlays.notify(
+          NotificationService.showWarning(
             context,
-            NoticeSpec(
-              tone: Tone.warning,
-              title: AppLocalizations.of(
-                context,
-              )!.rebaseStartedConflictNeedsResolution,
-            ),
+            AppLocalizations.of(context)!.rebaseStartedConflictNeedsResolution,
           );
         } else {
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            NoticeSpec(
-              tone: Tone.danger,
-              title: AppLocalizations.of(
-                context,
-              )!.failedToStartRebase(e.toString()),
-            ),
+            AppLocalizations.of(context)!.failedToStartRebase(e.toString()),
           );
         }
       }
@@ -532,24 +519,16 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       await ref.read(gitActionsProvider).continueRebase();
 
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showSuccess(
           context,
-          NoticeSpec(
-            tone: Tone.success,
-            title: AppLocalizations.of(context)!.rebaseContinued,
-          ),
+          AppLocalizations.of(context)!.rebaseContinued,
         );
       }
     } catch (e) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(
-              context,
-            )!.failedToContinueRebase(e.toString()),
-          ),
+          AppLocalizations.of(context)!.failedToContinueRebase(e.toString()),
         );
       }
     }
@@ -564,22 +543,16 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
       if (mounted) {
         // A commit was passed over rather than applied: worth flagging, and
         // possibly not what the user meant to do.
-        Overlays.notify(
+        NotificationService.showWarning(
           context,
-          NoticeSpec(
-            tone: Tone.warning,
-            title: AppLocalizations.of(context)!.commitSkipped,
-          ),
+          AppLocalizations.of(context)!.commitSkipped,
         );
       }
     } catch (e) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(context)!.failedToSkip(e.toString()),
-          ),
+          AppLocalizations.of(context)!.failedToSkip(e.toString()),
         );
       }
     }
@@ -596,24 +569,16 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
         // The rewrite was thrown away and the branch tip moved back, which
         // the site said with the git-DELETED red. `danger` is that meaning
         // without borrowing a word about a file.
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(context)!.rebaseAborted,
-          ),
+          AppLocalizations.of(context)!.rebaseAborted,
         );
       }
     } catch (e) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(
-              context,
-            )!.failedToAbortRebase(e.toString()),
-          ),
+          AppLocalizations.of(context)!.failedToAbortRebase(e.toString()),
         );
       }
     }

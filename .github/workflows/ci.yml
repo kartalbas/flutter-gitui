@@ -113,6 +113,20 @@ jobs:
             exit 1
           fi
 
+      # And for the notice gate. What a notice guarantees - whether it stays
+      # until it is read, and what the user can do about it - is decided once,
+      # in NotificationService. An ignore comment naming this rule is that
+      # decision handed back to a call site, which is the defect #449
+      # measured at 54 sites.
+      - name: Forbid ignores of avoid_raw_notice
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rnE 'ignore(_for_file)?:.*avoid_raw_notice' lib/; then
+            echo "::error::avoid_raw_notice must not be silenced with ignore comments; use a NotificationService method, or add one there if none says what this means"
+            exit 1
+          fi
+
       # Six locales, and every one of them carries every key in app_en.arb
       # today. Until now nothing ran this check: it printed a coverage report
       # and exited zero, so a locale could fall behind and every run still

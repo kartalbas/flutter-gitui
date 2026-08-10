@@ -6,8 +6,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         BannerSpec,
         IconRole,
         Inset,
-        NoticeSpec,
-        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -29,6 +27,7 @@ import '../../shared/controllers/item_navigation_controller.dart';
 import '../../shared/widgets/base_dismiss_scope.dart';
 import '../../shared/widgets/base_focus_region.dart';
 import '../../shared/widgets/keyboard_navigable_view.dart';
+import '../../core/services/notification_service.dart';
 
 /// Screen for resolving merge conflicts.
 ///
@@ -864,12 +863,9 @@ class _ConflictResolutionScreenState
         // The fill left with the surface, exactly as this site said it would.
         // The tone is `danger` because aborting throws the merge's work away
         // and the site painted it in the error role to say so.
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(context)!.snackbarMergeAborted,
-          ),
+          AppLocalizations.of(context)!.snackbarMergeAborted,
         );
       }
     } catch (e) {

@@ -8,8 +8,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         DialogRouteSpec,
         IconRole,
-        NoticeAction,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -28,6 +26,7 @@ import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../components/base_layout.dart';
 import '../components/base_icon.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -766,27 +765,15 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
             // only description the application has for it - and because the
             // action itself does nothing here, which is a pre-existing defect
             // this conversion carries across rather than hides.
-            Overlays.notify(
+            NotificationService.showError(
               context,
-              NoticeSpec(
-                tone: Tone.danger,
-                title: _strategy == MergeStrategy.merge
-                    ? AppLocalizations.of(
-                        context,
-                      )!.mergeHasConflicts(mergeState.conflictCount)
-                    : AppLocalizations.of(
-                        context,
-                      )!.rebaseHasConflicts(mergeState.conflictCount),
-                actions: <NoticeAction>[
-                  NoticeAction(
-                    label: AppLocalizations.of(context)!.resolve,
-                    tooltip: AppLocalizations.of(context)!.resolve,
-                    onPressed: () {
-                      // Navigate to conflict resolution (will be handled by main screen)
-                    },
-                  ),
-                ],
-              ),
+              _strategy == MergeStrategy.merge
+                  ? AppLocalizations.of(
+                      context,
+                    )!.mergeHasConflicts(mergeState.conflictCount)
+                  : AppLocalizations.of(
+                      context,
+                    )!.rebaseHasConflicts(mergeState.conflictCount),
             );
           }
         } else {
@@ -797,20 +784,17 @@ class _MergeBranchesDialogState extends ConsumerState<MergeBranchesDialog> {
             // The merge finished and finished well, which is `success` - not
             // the git-ADDED green the fill used to borrow, a word about a
             // file's state in the index rather than about an operation.
-            Overlays.notify(
+            NotificationService.showSuccess(
               context,
-              NoticeSpec(
-                tone: Tone.success,
-                title: _strategy == MergeStrategy.merge
-                    ? AppLocalizations.of(context)!.successfullyMergedBranch(
-                        _sourceBranch!.name,
-                        _targetBranch!.name,
-                      )
-                    : AppLocalizations.of(context)!.successfullyRebasedBranch(
-                        _targetBranch!.name,
-                        _sourceBranch!.name,
-                      ),
-              ),
+              _strategy == MergeStrategy.merge
+                  ? AppLocalizations.of(context)!.successfullyMergedBranch(
+                      _sourceBranch!.name,
+                      _targetBranch!.name,
+                    )
+                  : AppLocalizations.of(context)!.successfullyRebasedBranch(
+                      _targetBranch!.name,
+                      _sourceBranch!.name,
+                    ),
             );
           }
         }

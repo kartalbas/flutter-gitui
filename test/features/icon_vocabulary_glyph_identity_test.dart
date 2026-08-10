@@ -99,11 +99,11 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 236 references', () {
+  test('the census still accounts for all 235 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 236-entry diff.
-    // 236 = the 246 the conversion measured, plus the diff viewer's `file`
+    // agreeing and this says so in one line instead of a 235-entry diff.
+    // 235 = the 246 the conversion measured, plus the diff viewer's `file`
     // and `gitDiff` that moved into git_status_tree_view.dart with the
     // view-mode toggle (recorded at that entry), minus the three marks the
     // tree conversion moved across the seam (the disclosure caret pair and
@@ -121,7 +121,7 @@ void main() {
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 236);
+    expect(total, 235);
     expect(
       _kMarkCensus.values
           .expand((Map<String, int> marks) => marks.keys)
@@ -526,6 +526,9 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
   'lib/features/changes/widgets/changes_error_state.dart': <String, int>{
     'warningCircle': 1,
   },
+  // `warningCircle` left with the hand-written NoticeSpec this dialog used to
+  // build for a failed commit (#449): the mark is now the notification
+  // service's, stated once for every failure instead of at each site.
   'lib/features/changes/widgets/commit_dialog.dart': <String, int>{
     'caretDown': 1,
     'caretUp': 1,
@@ -533,7 +536,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'checkSquare': 1,
     'gitCommit': 1,
     'lightbulb': 1,
-    'warningCircle': 1,
   },
   // `file` and the second `gitDiff` arrived from base_diff_viewer.dart with
   // the view-mode toggle: #438 resolved the floating speed dial as the site

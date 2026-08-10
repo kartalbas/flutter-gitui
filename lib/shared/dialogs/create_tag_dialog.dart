@@ -7,7 +7,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         DialogRouteSpec,
         IconRole,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -28,6 +27,7 @@ import '../../core/git/models/tag.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../components/base_layout.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -411,12 +411,9 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
     } catch (e) {
       if (mounted) {
         setState(() => _isCreating = false);
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(context)!.tagCreatedError(e.toString()),
-          ),
+          AppLocalizations.of(context)!.tagCreatedError(e.toString()),
         );
       }
     }

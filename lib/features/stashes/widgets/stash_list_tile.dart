@@ -15,6 +15,7 @@ import '../../../shared/dialogs/confirm_destructive.dart';
 import '../dialogs/create_branch_from_stash_dialog.dart';
 import '../dialogs/stash_diff_dialog.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../core/services/notification_service.dart';
 
 /// Individual stash list tile with expansion and action buttons
 class StashListTile extends ConsumerWidget {
@@ -261,12 +262,9 @@ class StashListTile extends ConsumerWidget {
         // the service's errors do all three. That disagreement is #418, and
         // adopting the service here would be that redesign rather than this
         // conversion.
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: l10n.snackbarFailedToApplyStash(e.toString()),
-          ),
+          l10n.snackbarFailedToApplyStash(e.toString()),
         );
       }
     }
@@ -280,12 +278,9 @@ class StashListTile extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: l10n.snackbarFailedToPopStash(e.toString()),
-          ),
+          l10n.snackbarFailedToPopStash(e.toString()),
         );
       }
     }
@@ -299,12 +294,9 @@ class StashListTile extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         final l10n = AppLocalizations.of(context)!;
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: l10n.snackbarFailedToLoadDiff(e.toString()),
-          ),
+          l10n.snackbarFailedToLoadDiff(e.toString()),
         );
       }
     }
@@ -325,12 +317,9 @@ class StashListTile extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           final l10n = AppLocalizations.of(context)!;
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            NoticeSpec(
-              tone: Tone.danger,
-              title: l10n.snackbarFailedToCreateBranch(e.toString()),
-            ),
+            l10n.snackbarFailedToCreateBranch(e.toString()),
           );
         }
       }
@@ -356,12 +345,9 @@ class StashListTile extends ConsumerWidget {
             .dropStash(stash.ref, expectedHash: stash.hash);
       } catch (e) {
         if (context.mounted) {
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            NoticeSpec(
-              tone: Tone.danger,
-              title: l10n.snackbarFailedToDropStash(e.toString()),
-            ),
+            l10n.snackbarFailedToDropStash(e.toString()),
           );
         }
       }

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show DialogExtent, DialogRouteSpec, IconRole, NoticeSpec, Overlays, Tone;
+    show DialogExtent, DialogRouteSpec, IconRole, Overlays, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_parser.dart';
@@ -17,6 +17,7 @@ import '../components/base_button.dart';
 import '../components/base_progress.dart';
 import '../components/base_viewer_dialog.dart';
 import '../widgets/empty_state.dart';
+import '../../core/services/notification_service.dart';
 
 /// Unified diff dialog that handles all diff viewing use cases
 class UnifiedDiffDialog extends ConsumerStatefulWidget {
@@ -163,9 +164,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             // The clipboard holds the line: something that finished, and
             // finished well. How long "brief" lasts is the skin's answer, so
             // the one second this asked for goes with the construction.
-            Overlays.notify(
+            NotificationService.showSuccess(
               context,
-              NoticeSpec(tone: Tone.success, title: l10n.lineCopiedToClipboard),
+              l10n.lineCopiedToClipboard,
             );
           },
         );
@@ -216,22 +217,16 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
             final diffOutput = await _diffFuture;
             await Clipboard.setData(ClipboardData(text: diffOutput));
             if (context.mounted) {
-              Overlays.notify(
-                context,
-                NoticeSpec(tone: Tone.success, title: l10n.snackbarDiffCopied),
-              );
+              NotificationService.showSuccess(context, l10n.snackbarDiffCopied);
             }
           } catch (e) {
             // The button stays enabled while the content area shows the load
             // error, and awaiting the failed future rethrows here, so the
             // failure has to be reported instead of escaping unhandled.
             if (context.mounted) {
-              Overlays.notify(
+              NotificationService.showError(
                 context,
-                NoticeSpec(
-                  tone: Tone.danger,
-                  title: l10n.messageErrorLoadingDiff(e.toString()),
-                ),
+                l10n.messageErrorLoadingDiff(e.toString()),
               );
             }
           }
@@ -274,12 +269,9 @@ class _UnifiedDiffDialogState extends ConsumerState<UnifiedDiffDialog> {
               // popped route but not the application shutting down under a
               // launch that is still in flight.
               if (!host.mounted) return;
-              Overlays.notify(
+              NotificationService.showError(
                 host,
-                NoticeSpec(
-                  tone: Tone.danger,
-                  title: l10n.snackbarFailedToOpenExternalTool(e.toString()),
-                ),
+                l10n.snackbarFailedToOpenExternalTool(e.toString()),
               );
             }
           },

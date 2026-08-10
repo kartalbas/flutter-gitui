@@ -7,7 +7,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         BannerSpec,
         DialogRouteSpec,
         IconRole,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -26,6 +25,7 @@ import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
 import '../components/base_layout.dart';
+import '../../core/services/notification_service.dart';
 
 /// Dialog for initializing a new Git repository
 class InitializeRepositoryDialog extends ConsumerStatefulWidget {
@@ -261,14 +261,9 @@ class _InitializeRepositoryDialogState
 
           // As in the clone dialog: the repository exists and is open, which
           // is `success` rather than the git-added green it used to borrow.
-          Overlays.notify(
+          NotificationService.showSuccess(
             context,
-            NoticeSpec(
-              tone: Tone.success,
-              title: AppLocalizations.of(
-                context,
-              )!.repositoryInitializedSuccess(path),
-            ),
+            AppLocalizations.of(context)!.repositoryInitializedSuccess(path),
           );
         } else if (mounted) {
           setState(() {

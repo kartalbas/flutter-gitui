@@ -7,7 +7,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         BannerSpec,
         DialogRouteSpec,
         IconRole,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -27,6 +26,7 @@ import '../../core/config/config_providers.dart';
 import '../components/base_dialog.dart';
 import 'select_hosted_repository_dialog.dart';
 import '../components/base_layout.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -367,14 +367,9 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
           // `success` says. The fill it used to borrow was the git-ADDED
           // green - a word about a file's state in the index, not about an
           // operation that worked.
-          Overlays.notify(
+          NotificationService.showSuccess(
             context,
-            NoticeSpec(
-              tone: Tone.success,
-              title: AppLocalizations.of(
-                context,
-              )!.repositoryClonedSuccess(clonedPath),
-            ),
+            AppLocalizations.of(context)!.repositoryClonedSuccess(clonedPath),
           );
         } else if (mounted) {
           setState(() {

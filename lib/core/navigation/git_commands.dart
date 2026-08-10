@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, NoticeSpec, Overlays, TextRole, Tone;
+import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, TextRole;
 import 'package:file_picker/file_picker.dart';
 import '../../generated/app_localizations.dart';
 
@@ -315,12 +314,9 @@ class GitCommands {
         if (kIsWeb) {
           // The command cannot be carried out at all here, which is the same
           // meaning every other failure notice in this file states.
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            NoticeSpec(
-              tone: Tone.danger,
-              title: l10n.folderSelectionNotAvailableWeb,
-            ),
+            l10n.folderSelectionNotAvailableWeb,
           );
           return;
         }
@@ -338,12 +334,9 @@ class GitCommands {
             final l10n = AppLocalizations.of(context);
             if (l10n == null) return;
 
-            Overlays.notify(
+            NotificationService.showError(
               context,
-              NoticeSpec(
-                tone: Tone.danger,
-                title: l10n.notValidGitRepository(result),
-              ),
+              l10n.notValidGitRepository(result),
             );
           }
         }
@@ -402,12 +395,9 @@ class GitCommands {
                 // The fill this used to name is the member's answer now: the
                 // site says the amend failed, and the skin resolves the tone
                 // inside its own notice host, where a tone is legal.
-                Overlays.notify(
+                NotificationService.showError(
                   context,
-                  NoticeSpec(
-                    tone: Tone.danger,
-                    title: l10n.failedToAmendCommit(e.toString()),
-                  ),
+                  l10n.failedToAmendCommit(e.toString()),
                 );
               }
             }
@@ -890,12 +880,9 @@ class GitCommands {
             if (l10n != null) {
               // The same meaning as the amend failure above, said the same
               // way.
-              Overlays.notify(
+              NotificationService.showError(
                 context,
-                NoticeSpec(
-                  tone: Tone.danger,
-                  title: l10n.failedToCleanWorkingDirectory(e.toString()),
-                ),
+                l10n.failedToCleanWorkingDirectory(e.toString()),
               );
             }
           }

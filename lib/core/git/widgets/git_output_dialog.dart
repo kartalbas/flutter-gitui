@@ -10,8 +10,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         IconRole,
         Inset,
-        NoticeSpec,
-        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -27,6 +25,7 @@ import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../services/notification_service.dart';
 
 /// Result of a Git command execution
 class GitCommandResult {
@@ -192,12 +191,9 @@ ${result.fullOutput}
     // The clipboard now holds what the dialog showed: something that finished
     // and finished well, which is what the notice says. Its fill, its
     // placement and how long two seconds of "brief" lasts are the skin's.
-    Overlays.notify(
+    NotificationService.showSuccess(
       context,
-      NoticeSpec(
-        tone: Tone.success,
-        title: AppLocalizations.of(context)!.outputCopiedToClipboard,
-      ),
+      AppLocalizations.of(context)!.outputCopiedToClipboard,
     );
   }
 }

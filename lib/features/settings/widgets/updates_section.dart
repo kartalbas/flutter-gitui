@@ -6,8 +6,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         DialogRouteSpec,
         IconRole,
         Inset,
-        NoticeLifetime,
-        NoticeSpec,
         Overlays,
         Proximity,
         TextRole,
@@ -32,6 +30,7 @@ import '../../../shared/dialogs/update_available_dialog.dart';
 import '../../../features/changelog/changelog_dialog.dart';
 import 'settings_section.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../core/services/notification_service.dart';
 
 /// Updates section for settings
 ///
@@ -157,14 +156,7 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       // Material's two-second brief it vanishes unread. So it states
       // `persistent`, which keeps the message until the user dismisses it;
       // what it trades away is the self-dismissal, which is the smaller loss.
-      Overlays.notify(
-        context,
-        NoticeSpec(
-          tone: Tone.danger,
-          title: failureReason.message(l10n),
-          lifetime: NoticeLifetime.persistent,
-        ),
-      );
+      NotificationService.showError(context, failureReason.message(l10n));
       return;
     }
 
@@ -181,13 +173,9 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       // not one that may be missed without harm - so it takes `persistent`
       // rather than vanishing at the brief rung's two seconds. The missing
       // middle rung stays a reported contract finding.
-      Overlays.notify(
+      NotificationService.showStandingInfo(
         context,
-        NoticeSpec(
-          tone: Tone.info,
-          title: manualUpdate.reason.message(l10n, manualUpdate.info.version),
-          lifetime: NoticeLifetime.persistent,
-        ),
+        manualUpdate.reason.message(l10n, manualUpdate.info.version),
       );
       return;
     }
@@ -213,12 +201,9 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
       //
       // The fill left with the surface. The check ran and found nothing to
       // do, which is `info`: worth knowing, and nothing is wrong.
-      Overlays.notify(
+      NotificationService.showInfo(
         context,
-        NoticeSpec(
-          tone: Tone.info,
-          title: l10n.upToDateMessage(_currentVersion ?? ''),
-        ),
+        l10n.upToDateMessage(_currentVersion ?? ''),
       );
     }
   }

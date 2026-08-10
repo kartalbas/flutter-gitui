@@ -6,8 +6,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         DialogRouteSpec,
         IconRole,
-        NoticeAction,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -25,6 +23,7 @@ import '../../core/git/models/branch.dart';
 import '../components/base_dialog.dart';
 import '../components/base_dropdown.dart';
 import '../components/base_layout.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -369,23 +368,11 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
             // only description the application has for it - and the action
             // itself does nothing here, a pre-existing defect this conversion
             // carries across rather than hides.
-            Overlays.notify(
+            NotificationService.showError(
               context,
-              NoticeSpec(
-                tone: Tone.danger,
-                title: AppLocalizations.of(
-                  context,
-                )!.mergeHasConflicts(mergeState.conflictCount),
-                actions: <NoticeAction>[
-                  NoticeAction(
-                    label: AppLocalizations.of(context)!.resolve,
-                    tooltip: AppLocalizations.of(context)!.resolve,
-                    onPressed: () {
-                      // Navigate to conflict resolution (will be handled by main screen)
-                    },
-                  ),
-                ],
-              ),
+              AppLocalizations.of(
+                context,
+              )!.mergeHasConflicts(mergeState.conflictCount),
             );
           }
         } else {
@@ -394,14 +381,11 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
             Navigator.of(context).pop(false);
 
             // `success`, not the git-added green: see the sibling dialog.
-            Overlays.notify(
+            NotificationService.showSuccess(
               context,
-              NoticeSpec(
-                tone: Tone.success,
-                title: AppLocalizations.of(context)!.successfullyMergedBranch(
-                  _selectedBranch!.name,
-                  ref.read(currentBranchProvider).value ?? 'unknown',
-                ),
+              AppLocalizations.of(context)!.successfullyMergedBranch(
+                _selectedBranch!.name,
+                ref.read(currentBranchProvider).value ?? 'unknown',
               ),
             );
           }

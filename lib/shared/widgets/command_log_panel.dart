@@ -9,8 +9,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         DisclosureSpec,
         IconRole,
         Inset,
-        NoticeSpec,
-        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -33,6 +31,7 @@ import '../../core/git/git_command_log_filters.dart';
 import '../../core/git/git_command_log_provider.dart';
 import '../../core/git/models/git_command_log.dart';
 import 'empty_state.dart';
+import '../../core/services/notification_service.dart';
 
 /// Expandable panel showing git command log history
 class CommandLogPanel extends ConsumerStatefulWidget {
@@ -377,12 +376,9 @@ class _LogEntryCardState extends State<_LogEntryCard> {
                       // finished, and finished well. How long "brief" lasts
                       // is the skin's answer, so the one second goes with the
                       // construction.
-                      Overlays.notify(
+                      NotificationService.showSuccess(
                         context,
-                        NoticeSpec(
-                          tone: Tone.success,
-                          title: l10n.commandCopiedToClipboard,
-                        ),
+                        l10n.commandCopiedToClipboard,
                       );
                     },
                   ),

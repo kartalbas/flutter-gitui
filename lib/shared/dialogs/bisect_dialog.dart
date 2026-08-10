@@ -7,7 +7,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         DialogRouteSpec,
         IconRole,
         Inset,
-        NoticeSpec,
         Overlays,
         Proximity,
         Skin,
@@ -28,6 +27,7 @@ import '../../core/git/models/bisect_state.dart';
 import '../../core/git/models/commit.dart';
 import '../components/base_layout.dart';
 import '../widgets/empty_state.dart';
+import '../../core/services/notification_service.dart';
 
 /// One standing statement about the whole dialog, drawn by the skin.
 ///
@@ -489,24 +489,16 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
         // The fill it used to borrow was the git-ADDED green, which says
         // "this file is new to git" and not "this worked" - the tone says the
         // meaning, and the skin picks the colour.
-        Overlays.notify(
+        NotificationService.showSuccess(
           context,
-          NoticeSpec(
-            tone: Tone.success,
-            title: AppLocalizations.of(context)!.bisectStarted,
-          ),
+          AppLocalizations.of(context)!.bisectStarted,
         );
       }
     } catch (e) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(
-              context,
-            )!.failedToStartBisect(e.toString()),
-          ),
+          AppLocalizations.of(context)!.failedToStartBisect(e.toString()),
         );
       }
     } finally {
@@ -539,26 +531,20 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       if (mounted) {
         // The same git-added green as the start notice, and the same
         // correction: the commit was marked, which is `success`.
-        Overlays.notify(
+        NotificationService.showSuccess(
           context,
-          NoticeSpec(
-            tone: Tone.success,
-            title: AppLocalizations.of(
-              context,
-            )!.markedAs(step.displayName, step.displayName),
-          ),
+          AppLocalizations.of(
+            context,
+          )!.markedAs(step.displayName, step.displayName),
         );
       }
     } catch (e) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(
-              context,
-            )!.failedToMarkCommit(e.toString(), 'status'),
-          ),
+          AppLocalizations.of(
+            context,
+          )!.failedToMarkCommit(e.toString(), 'status'),
         );
       }
     }
@@ -577,24 +563,16 @@ class _BisectDialogState extends ConsumerState<BisectDialog> {
       if (mounted) {
         Navigator.of(context).pop();
         // The third git-added green in this file, corrected the same way.
-        Overlays.notify(
+        NotificationService.showSuccess(
           context,
-          NoticeSpec(
-            tone: Tone.success,
-            title: AppLocalizations.of(context)!.bisectReset,
-          ),
+          AppLocalizations.of(context)!.bisectReset,
         );
       }
     } catch (e) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(
-              context,
-            )!.failedToResetBisect(e.toString()),
-          ),
+          AppLocalizations.of(context)!.failedToResetBisect(e.toString()),
         );
       }
     }

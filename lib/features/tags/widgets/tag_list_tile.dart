@@ -24,6 +24,7 @@ import '../../history/providers/history_search_provider.dart';
 import '../../history/models/history_search_filter.dart';
 import '../../../core/navigation/navigation_item.dart';
 import '../../../shared/components/base_layout.dart';
+import '../../../core/services/notification_service.dart';
 
 /// Individual tag list tile widget
 class TagListTile extends ConsumerWidget {
@@ -424,12 +425,9 @@ class TagListTile extends ConsumerWidget {
         // copy affordance where the service's errors do all three. That
         // disagreement is #418, and adopting the service here would be that
         // redesign rather than this conversion.
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: l10n.snackbarFailedToCheckoutTag(e.toString()),
-          ),
+          l10n.snackbarFailedToCheckoutTag(e.toString()),
         );
       }
     }
@@ -457,21 +455,15 @@ class TagListTile extends ConsumerWidget {
         if (!context.mounted) return;
         // One meaning over from the checkout failure above: a branch that
         // exists now, which is what `success` says.
-        Overlays.notify(
+        NotificationService.showSuccess(
           context,
-          NoticeSpec(
-            tone: Tone.success,
-            title: l10n.snackbarBranchCreatedSuccess(branchName),
-          ),
+          l10n.snackbarBranchCreatedSuccess(branchName),
         );
       } catch (e) {
         if (!context.mounted) return;
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: l10n.snackbarFailedToCreateBranch(e.toString()),
-          ),
+          l10n.snackbarFailedToCreateBranch(e.toString()),
         );
       }
     }
@@ -516,12 +508,9 @@ class TagListTile extends ConsumerWidget {
         } catch (e) {
           if (context.mounted) {
             final l10n = AppLocalizations.of(context)!;
-            Overlays.notify(
+            NotificationService.showError(
               context,
-              NoticeSpec(
-                tone: Tone.danger,
-                title: l10n.snackbarFailedToPushTag(e.toString()),
-              ),
+              l10n.snackbarFailedToPushTag(e.toString()),
             );
           }
         }
@@ -642,12 +631,9 @@ class TagListTile extends ConsumerWidget {
         progress.completeOperation();
 
         if (context.mounted) {
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            NoticeSpec(
-              tone: Tone.danger,
-              title: l10n.snackbarFailedToDeleteTag(e.toString()),
-            ),
+            l10n.snackbarFailedToDeleteTag(e.toString()),
           );
         }
       }

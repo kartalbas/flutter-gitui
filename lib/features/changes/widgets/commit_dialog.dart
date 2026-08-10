@@ -6,9 +6,6 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         IconRole,
         Inset,
-        NoticeLifetime,
-        NoticeSpec,
-        Overlays,
         Proximity,
         Skin,
         SkinScope,
@@ -27,6 +24,7 @@ import '../../../core/git/git_providers.dart';
 import '../../../core/services/exit_guard.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/widgets/file_status_badge.dart';
+import '../../../core/services/notification_service.dart';
 
 /// Dialog for committing staged changes
 class CommitDialog extends ConsumerStatefulWidget {
@@ -131,14 +129,9 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
         // read, not one the user may miss without harm - and the brief rung
         // Material resolves to two seconds. The five seconds were this raw
         // site's drift from that convention, not a meaning to preserve.
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(context)!.commitFailed(e.toString()),
-            icon: IconRole.warningCircle,
-            lifetime: NoticeLifetime.persistent,
-          ),
+          AppLocalizations.of(context)!.commitFailed(e.toString()),
         );
       }
     }

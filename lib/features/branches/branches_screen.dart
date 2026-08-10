@@ -6,12 +6,9 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         ControlScale,
         IconRole,
         Inset,
-        NoticeSpec,
-        Overlays,
         ScreenSpec,
         Skin,
         SkinScope,
-        Tone,
         ToolbarActionEntry,
         ToolbarEntry,
         ToolbarGroup,
@@ -353,12 +350,9 @@ class _BranchesScreenState extends ConsumerState<BranchesScreen>
           // stays brief and without the service's copy affordance: adopting
           // `NotificationService.showError` here is the second half of #418,
           // and it would be a behaviour change this slice did not measure.
-          Overlays.notify(
+          NotificationService.showError(
             context,
-            NoticeSpec(
-              tone: Tone.danger,
-              title: l10n.snackbarFailedToCreateBranch(e.toString()),
-            ),
+            l10n.snackbarFailedToCreateBranch(e.toString()),
           );
         }
       }

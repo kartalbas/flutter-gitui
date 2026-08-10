@@ -2,14 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show
-        ControlScale,
-        IconRole,
-        NoticeSpec,
-        Overlays,
-        Proximity,
-        TextRole,
-        Tone;
+    show ControlScale, IconRole, Proximity, TextRole, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
@@ -26,6 +19,7 @@ import '../controllers/item_navigation_controller.dart';
 import '../widgets/keyboard_navigable_view.dart';
 import '../widgets/search_field_handoff.dart';
 import '../components/base_layout.dart';
+import '../../core/services/notification_service.dart';
 
 /// Dialog for switching between workspace repositories (Ctrl+R).
 ///
@@ -321,12 +315,9 @@ class _RepositorySwitcherDialogState
   Future<void> _switchRepository(WorkspaceRepository repo) async {
     if (!repo.isValidGitRepo) {
       if (mounted) {
-        Overlays.notify(
+        NotificationService.showError(
           context,
-          NoticeSpec(
-            tone: Tone.danger,
-            title: AppLocalizations.of(context)!.repositoryInvalidOrMissing,
-          ),
+          AppLocalizations.of(context)!.repositoryInvalidOrMissing,
         );
       }
       return;
@@ -349,16 +340,11 @@ class _RepositorySwitcherDialogState
       // The switch went through, which is `success` - not the git-added
       // green the fill borrowed. The one second it asked for is the skin's
       // answer to "brief" now.
-      Overlays.notify(
+      NotificationService.showSuccess(
         context,
-        NoticeSpec(
-          tone: Tone.success,
-          title: AppLocalizations.of(context)!.switchedToRepository(
-            repo.displayName,
-            repo.path,
-            repo.displayName,
-          ),
-        ),
+        AppLocalizations.of(
+          context,
+        )!.switchedToRepository(repo.displayName, repo.path, repo.displayName),
       );
     }
   }
@@ -373,12 +359,9 @@ class _RepositorySwitcherDialogState
     await ref.read(gitActionsProvider).closeRepository();
 
     if (mounted) {
-      Overlays.notify(
+      NotificationService.showInfo(
         context,
-        NoticeSpec(
-          tone: Tone.info,
-          title: AppLocalizations.of(context)!.repositoryClosed,
-        ),
+        AppLocalizations.of(context)!.repositoryClosed,
       );
     }
   }

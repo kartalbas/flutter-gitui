@@ -127,6 +127,13 @@ dependencies:
   # The skin the application ships. `main.dart` is the only file that names it.
   gitui_skin_material:
     path: packages/gitui_skin_material
+  # Fluent 2, registered by `main.dart` under the same debug guard as the
+  # blueprint - not because it is an instrument, but because it is not yet
+  # whole (#415): its controls are drawn, its chrome and surfaces are not, so
+  # offering it in a release build would offer a choice that cannot render.
+  # The guard is lifted, by moving one line, as the last step of #415.
+  gitui_skin_fluent:
+    path: packages/gitui_skin_fluent
 
   # Utilities
   freezed_annotation: ^3.1.0             # Immutable models

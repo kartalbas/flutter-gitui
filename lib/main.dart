@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:gitui_skin_blueprint/gitui_skin_blueprint.dart';
+import 'package:gitui_skin_fluent/gitui_skin_fluent.dart';
 import 'package:gitui_skin_material/gitui_skin_material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
@@ -168,20 +169,11 @@ void main() async {
   );
 }
 
-/// The design language the application renders under.
-///
-/// An id rather than a class, because that is what a saved preference, a test
-/// parameterisation and a bug report all name, and because the settings picker
-/// that will let a user change it (P6) resolves exactly this way. It is the one
-/// place outside [registerSkins] where the application says which language it
-/// is in.
-const String kShippingSkinId = 'material';
-
 /// Adds this build's design languages to the registry (#249, P2).
 ///
 /// This is the whole of what "plugin" can mean on a desktop AOT build with no
 /// dynamic code loading: one pubspec dependency and one `register()` call.
-/// Nothing else in the application learns either package's name - every other
+/// Nothing else in the application learns any package's name - every other
 /// file reaches the active language through `SkinScope`, which is the property
 /// the blueprint exists to falsify.
 ///
@@ -189,6 +181,16 @@ const String kShippingSkinId = 'material';
 /// user who selected it would find the application drawn in blue outlines on
 /// white paper, which is exactly what makes it useful to a developer measuring
 /// where design still leaks out of the skin and into `lib/`.
+///
+/// Fluent registers only in debug too, for a different reason and only for
+/// now (#415): it is a real skin but not yet a whole one - its controls are
+/// drawn, its chrome and surfaces still throw `UnimplementedError` by design -
+/// so a release build offering it would offer a choice that cannot render.
+/// Debug registration is also what keeps a `skin: fluent` preference saved
+/// from a debug session from taking a release build down on its first frame:
+/// unregistered ids fall back to [kShippingSkinId] in [_skinForId]. The guard
+/// is lifted, by moving one line out of the `kDebugMode` block, as the last
+/// step of #415.
 ///
 /// Public, and idempotent, because [FlutterGitUIApp] can be booted without
 /// going through [main] - a test that pumps the real application root does
@@ -200,7 +202,27 @@ void registerSkins() {
   MaterialSkin.register();
   if (kDebugMode) {
     BlueprintSkin.register();
+    FluentSkin.register();
   }
+}
+
+/// Resolves the user's saved skin id against this build's registry.
+///
+/// Falls back to [kShippingSkinId] when the id names a skin this build does
+/// not register, rather than letting `SkinRegistry.byId` throw before the
+/// first frame: the blueprint and Fluent register only in debug, so the same
+/// configuration file must boot a release build too. The fallback changes no
+/// stored value - the preference survives for the build that can honour it.
+Skin _skinForId(String id) {
+  if (SkinRegistry.all.any((Skin skin) => skin.id == id)) {
+    return SkinRegistry.byId(id);
+  }
+  Logger.warning(
+    '[SKIN] "$id" is not registered in this build; rendering under '
+    '"$kShippingSkinId". Registered: '
+    '${SkinRegistry.all.map((Skin skin) => skin.id).join(', ')}',
+  );
+  return SkinRegistry.byId(kShippingSkinId);
 }
 
 /// The user's configuration, as the data a skin resolves a look from.
@@ -406,6 +428,7 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
 
     // Config loaded - now we can read user's theme preferences
     final themeMode = ref.watch(themeModeProvider);
+    final skinId = ref.watch(skinIdProvider);
     final colorScheme = ref.watch(colorSchemeProvider);
     final fontFamily = ref.watch(fontFamilyProvider);
     final fontSize = ref.watch(fontSizeProvider);
@@ -491,8 +514,15 @@ class _FlutterGitUIAppState extends ConsumerState<FlutterGitUIApp> {
         // the surfaces and leave the git colours behind.
         final Brightness brightness = _brightnessFor(context, themeMode);
 
+        // The user's design language, resolved from the same configuration
+        // every other appearance setting travels in. A change arrives like
+        // theirs do: the provider rebuilds this widget, the builder re-runs,
+        // and SkinScope notifies through updateShouldNotify - no remount, for
+        // the reasons recorded above (#425). The navigator survives the swap
+        // through its GlobalKey, which
+        // test/settings_propagation_test.dart pins.
         return SkinScope.install(
-          skin: SkinRegistry.byId(kShippingSkinId),
+          skin: _skinForId(skinId),
           request: _skinRequest(
             brightness: brightness,
             colorScheme: colorScheme,

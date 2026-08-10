@@ -2109,6 +2109,22 @@
   "userNameNotSet": "Not set - Please enter your name",
   "userEmailNotSet": "Not set - Please enter your email",
   "appearance": "Appearance",
+  "designLanguage": "Design Language",
+  "@designLanguage": {
+    "description": "Label of the settings row choosing the skin (design language) the application renders under"
+  },
+  "skinMaterial": "Material",
+  "@skinMaterial": {
+    "description": "Display name of the Material skin; a proper noun, identical in every locale"
+  },
+  "skinBlueprint": "Blueprint",
+  "@skinBlueprint": {
+    "description": "Display name of the blueprint instrument skin; a proper noun, identical in every locale"
+  },
+  "skinFluent": "Fluent",
+  "@skinFluent": {
+    "description": "Display name of the Fluent skin; a proper noun, identical in every locale"
+  },
   "colorScheme": "Color Scheme",
   "fontFamily": "App Font",
   "fontSize": "App Font Size",

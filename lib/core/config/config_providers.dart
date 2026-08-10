@@ -651,6 +651,11 @@ class ConfigNotifier extends StateNotifier<AppConfig> {
     await _saveConfig();
   }
 
+  Future<void> setSkinId(String skinId) async {
+    state = state.copyWith(ui: state.ui.copyWith(skinId: skinId));
+    await _saveConfig();
+  }
+
   Future<void> setColorScheme(AppColorScheme scheme) async {
     state = state.copyWith(ui: state.ui.copyWith(colorScheme: scheme));
     await _saveConfig();
@@ -1052,6 +1057,9 @@ final projectsViewModeProvider = Provider<ProjectsViewMode>(
 );
 final navigationRailExtendedProvider = Provider<bool>(
   (ref) => ref.watch(uiConfigProvider).navigationRailExtended,
+);
+final skinIdProvider = Provider<String>(
+  (ref) => ref.watch(uiConfigProvider).skinId,
 );
 final colorSchemeProvider = Provider<AppColorScheme>(
   (ref) => ref.watch(uiConfigProvider).colorScheme,

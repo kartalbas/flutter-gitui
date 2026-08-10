@@ -174,6 +174,7 @@ void main() {
     for (final String package in <String>[
       'gitui_skin_api',
       'gitui_skin_blueprint',
+      'gitui_skin_fluent',
       'gitui_skin_material',
     ]) {
       expect(
@@ -189,7 +190,7 @@ void main() {
       );
     }
 
-    // The two SKIN packages - not the contract, which every component names -
+    // The SKIN packages - not the contract, which every component names -
     // may be written in exactly one file. `gitui_skin_api` is deliberately
     // absent from this list: reaching the active language through `SkinScope`
     // is what every façade is supposed to do.
@@ -198,7 +199,8 @@ void main() {
             .where(
               (_Directive d) =>
                   d.uri.startsWith('package:gitui_skin_material/') ||
-                  d.uri.startsWith('package:gitui_skin_blueprint/'),
+                  d.uri.startsWith('package:gitui_skin_blueprint/') ||
+                  d.uri.startsWith('package:gitui_skin_fluent/'),
             )
             .where((_Directive d) => d.file != 'lib/main.dart')
             .toList();

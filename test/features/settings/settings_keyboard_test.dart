@@ -173,6 +173,7 @@ const List<String> _readingOrder = <String>[
   'iconButton:Edit', // default user email
 
   'sectionHeader:Appearance',
+  'dropdown:material', // design language (#441)
   'dropdown:AppColorScheme.deepPurple',
   'dropdown:Inter', // font family
   'dropdown:AppFontSize.medium',

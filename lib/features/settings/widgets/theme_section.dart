@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, TextRole;
+    show ControlScale, IconRole, Skin, SkinRegistry, TextRole;
 import '../../../generated/app_localizations.dart';
 
 import '../../../shared/theme/app_theme.dart';
@@ -23,10 +23,44 @@ class ThemeSection extends ConsumerWidget {
     required this.getFontSizeName,
   });
 
+  /// The name a skin answers to in the settings picker.
+  ///
+  /// A skin names ITSELF, with a localisation key (`Skin.nameKey`) rather
+  /// than a string, because the application owns its translations and a skin
+  /// package must not ship its own. This switch is the application's side of
+  /// that agreement - the keys it has translations for. A skin whose key is
+  /// not translated yet is shown by its id instead of being silently renamed
+  /// to the nearest known skin.
+  String _skinName(BuildContext context, Skin skin) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (skin.nameKey) {
+      'skinMaterial' => l10n.skinMaterial,
+      'skinBlueprint' => l10n.skinBlueprint,
+      'skinFluent' => l10n.skinFluent,
+      _ => skin.id,
+    };
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final ui = ref.watch(uiConfigProvider);
+
+    // The design languages a user may choose in THIS build: the registry's
+    // own list, in registration order, minus the instruments in release. The
+    // section never names a skin - a package that registers itself appears
+    // here without this file changing, which is the property #249 calls
+    // "plugin".
+    final List<Skin> skins = SkinRegistry.selectable;
+
+    // A saved id this build does not offer (a debug-only skin in a release
+    // build, a package that left the build) must not crash the dropdown; the
+    // shipping skin is what main.dart renders under in that case, so it is
+    // what the picker shows too.
+    final String currentSkinId = skins.any((skin) => skin.id == ui.skinId)
+        ? ui.skinId
+        : kShippingSkinId;
+    final Skin currentSkin = SkinRegistry.byId(currentSkinId);
 
     // Ensure current font is in the available list, otherwise use default
     final currentFont = AppTheme.availableFonts.contains(ui.fontFamily)
@@ -43,6 +77,42 @@ class ThemeSection extends ConsumerWidget {
       title: l10n.appearance,
       icon: IconRole.palette,
       children: [
+        BaseListItem(
+          // The row's own mark, same shape as every sibling below: prominent
+          // scale, colour left to the row.
+          leading: const BaseIcon(
+            IconRole.desktop,
+            scale: ControlScale.prominent,
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BaseLabel(l10n.designLanguage, role: TextRole.body),
+              BaseLabel(_skinName(context, currentSkin), role: TextRole.detail),
+            ],
+          ),
+          // The same dropdown as its four siblings, saying the same thing the
+          // same way: each entry is a `BaseLabel` at `TextRole.body`, taking
+          // only its colour from the surface. Switching redraws the running
+          // application in place - the config provider rebuilds the root,
+          // `SkinScope` notifies on the skin change, and the navigator
+          // survives through its GlobalKey
+          // (test/settings_propagation_test.dart pins both halves).
+          trailing: DropdownButton<String>(
+            value: currentSkinId,
+            items: skins.map((skin) {
+              return DropdownMenuItem(
+                value: skin.id,
+                child: BaseLabel(_skinName(context, skin), role: TextRole.body),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                ref.read(configProvider.notifier).setSkinId(value);
+              }
+            },
+          ),
+        ),
         BaseListItem(
           // The row's own mark. The prominent scale is what a bare `Icon`
           // rendered at under the row's ambient icon theme, and the neutral

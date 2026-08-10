@@ -69,6 +69,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:riverpod/misc.dart' show Override;
 
 import 'package:flutter_gitui/generated/app_localizations.dart';
+import 'package:flutter_gitui/main.dart' show registerSkins;
 import 'package:flutter_gitui/shared/components/base_dialog.dart';
 import 'package:flutter_gitui/shared/theme/app_theme.dart';
 
@@ -138,6 +139,14 @@ Widget skinRoot({
   GlobalKey<NavigatorState>? navigatorKey,
 }) {
   _refuseASkinThatDoesNotExist();
+  // The registry is part of the application's boot, and from #441 on a screen
+  // may genuinely read it: the settings picker lists `SkinRegistry.selectable`
+  // by the skins' own names. main() populates it before the first frame, so a
+  // harness that pumps real screens populates it the same way - idempotently,
+  // which registerSkins() documents and the propagation tests exercise. The
+  // skin RENDERED under stays the one this file constructs below; the
+  // registry only answers what this build could offer.
+  registerSkins();
   return ProviderScope(
     overrides: overrides,
     child: _root(
@@ -317,6 +326,9 @@ Widget installSkinUnderTest(
   Brightness brightness = Brightness.light,
 }) {
   _refuseASkinThatDoesNotExist();
+  // See skinRoot: the suites that build their own root around this call pump
+  // real screens too, and the settings picker reads the registry.
+  registerSkins();
   return SkinScope.install(
     skin: kSkinUnderTest == kBlueprintSkinId
         ? BlueprintSkin(distance: _distance)

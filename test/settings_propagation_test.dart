@@ -12,13 +12,22 @@
 // `didChangeDependencies`), so the remount had nothing left to compensate
 // for. These tests are the proof that deleting the key loses nothing: each
 // changes one setting on the RUNNING application and asserts the rendering
-// follows, and the last one pins the very thing the key used to destroy -
+// follows, and the last ones pin the very thing the key used to destroy -
 // that the navigator survives a settings change.
+//
+// The design language travels the same channel as the four appearance
+// settings (#441): the skin id is a config value, the provider rebuilds the
+// root, and `SkinScope.updateShouldNotify` fires on the skin change. The two
+// skin tests at the bottom are the running-application proof of #249's
+// central claim - a person can pick another skin and watch the application
+// redraw itself in place, navigator and shell intact.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gitui_skin_blueprint/gitui_skin_blueprint.dart'
+    show BlueprintText;
 
 import 'package:flutter_gitui/core/config/app_config.dart';
 import 'package:flutter_gitui/core/config/config_providers.dart';
@@ -78,6 +87,11 @@ class _InMemoryConfigNotifier extends ConfigNotifier {
   @override
   Future<void> setAnimationSpeed(AppAnimationSpeed speed) async {
     state = state.copyWith(ui: state.ui.copyWith(animationSpeed: speed));
+  }
+
+  @override
+  Future<void> setSkinId(String skinId) async {
+    state = state.copyWith(ui: state.ui.copyWith(skinId: skinId));
   }
 }
 
@@ -280,6 +294,92 @@ void main() {
       identical(appShellBefore, tester.state(find.byType(AppShell))),
       isTrue,
       reason: 'A settings change must not remount the shell.',
+    );
+
+    await _drainDeferredTimers(tester);
+  });
+
+  testWidgets('a design language change reaches the pixels', (tester) async {
+    final notifier = await _bootApp(tester);
+
+    // Under the shipping skin the shell's bar is Material's own AppBar, and
+    // nothing on screen is drawn by the blueprint.
+    expect(find.byType(AppBar), findsOneWidget);
+    expect(find.byType(BlueprintText), findsNothing);
+
+    await notifier.setSkinId('blueprint');
+    await tester.pumpAndSettle();
+
+    // The application is now DRAWN by the other design language: Material's
+    // app bar is gone and the blueprint's own text primitive is what renders
+    // the words. This is #249's claim made visible - the look changed because
+    // the skin did, with no other input changing.
+    expect(
+      find.byType(AppBar),
+      findsNothing,
+      reason:
+          'After switching to the blueprint, the shell must no longer be '
+          'drawn by the Material skin.',
+    );
+    expect(
+      find.byType(BlueprintText),
+      findsWidgets,
+      reason:
+          'After switching to the blueprint, the words on screen must be '
+          'rendered by the blueprint\'s own primitives.',
+    );
+
+    await _drainDeferredTimers(tester);
+  });
+
+  testWidgets('a design language change does not tear the application down', (
+    tester,
+  ) async {
+    final notifier = await _bootApp(tester);
+
+    final NavigatorState navigatorBefore = tester.state<NavigatorState>(
+      find.byType(Navigator).first,
+    );
+    final State appShellBefore = tester.state(find.byType(AppShell));
+
+    await notifier.setSkinId('blueprint');
+    await tester.pumpAndSettle();
+
+    // The swap travels like every other appearance setting (#425): the
+    // provider rebuilds the root, SkinScope notifies, and the navigator -
+    // held by its GlobalKey - is reparented into the new skin's root
+    // treatment rather than recreated. Same State objects means the user's
+    // place, focus and scroll positions survive the redraw.
+    expect(
+      identical(
+        navigatorBefore,
+        tester.state<NavigatorState>(find.byType(Navigator).first),
+      ),
+      isTrue,
+      reason: 'A design language change must not recreate the navigator.',
+    );
+    expect(
+      identical(appShellBefore, tester.state(find.byType(AppShell))),
+      isTrue,
+      reason: 'A design language change must not remount the shell.',
+    );
+
+    // And back again: the return trip is the same dissolve, not a fresh boot.
+    await notifier.setSkinId(kShippingSkinId);
+    await tester.pumpAndSettle();
+    expect(find.byType(AppBar), findsOneWidget);
+    expect(
+      identical(
+        navigatorBefore,
+        tester.state<NavigatorState>(find.byType(Navigator).first),
+      ),
+      isTrue,
+      reason: 'Switching back must not recreate the navigator either.',
+    );
+    expect(
+      identical(appShellBefore, tester.state(find.byType(AppShell))),
+      isTrue,
+      reason: 'Switching back must not remount the shell either.',
     );
 
     await _drainDeferredTimers(tester);

@@ -389,7 +389,15 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // the blueprint land on the same six numbers - so the register stays
   // skin-independent (the Material bar's segmented button is built inside
   // the chrome, below the fence, and moves no count).
-  'shell': 170,
+  // The #441 skin picker added one row to the settings Appearance section -
+  // the design-language dropdown - and it measures +5: the row's BaseIcon
+  // mark, its two BaseLabels (title and current name), and the dropdown
+  // entries' BaseLabels the closed button keeps built in its IndexedStack.
+  // Settings rose 5, and the shell rose the same 5 because its scene parks
+  // the shell on the settings destination. Measured at closing under BOTH
+  // skins - Material and the blueprint land on the same two numbers - so the
+  // register stays skin-independent.
+  'shell': 175,
   'workspaces': 33,
   'repositories': 59,
   'changes': 52,
@@ -406,7 +414,7 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   // application reaching the contract, not a skin drawing more of itself.
   'stashes': 17,
   'tags': 37,
-  'settings': 136,
+  'settings': 141,
   'merge_conflicts': 31,
 };
 
@@ -471,8 +479,10 @@ const Map<String, int> kContractRenderedUnderBlueprint = <String, int>{
   // resting shell to 173 and left this entry EQUAL to it at 173, its own
   // invariant broken in the register's text - which is worth recording
   // precisely because nothing in the resting gates can see this number go
-  // stale.
-  'shell': 169,
+  // stale. Re-measured at DISTANCE=64 when the #441 skin picker raised the
+  // resting shell to 175: the stretched run lands on 174, the gap still
+  // exactly the one shed action.
+  'shell': 174,
 };
 
 /// Whether this run is the blueprint stretched to a non-zero distance - the

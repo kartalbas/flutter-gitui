@@ -387,12 +387,30 @@ class ToolsConfig {
 /// copyWith, so a nullable field can actually be cleared.
 const Object _unset = Object();
 
+/// The design language the application ships with, and the default for
+/// [UiConfig.skinId].
+///
+/// An id rather than a class, because that is what a saved preference, a test
+/// parameterisation and a bug report all name. It lives here, on the
+/// configuration default, so the application states its shipping language in
+/// exactly one place: `main.dart` resolves the saved id against the registry
+/// and falls back to this constant when the id names a skin the running build
+/// does not register (the blueprint and Fluent register only in debug), and
+/// the settings picker applies the same fallback to keep its dropdown valid.
+const String kShippingSkinId = 'material';
+
 class UiConfig {
   final ThemeMode themeMode;
   final bool useSystemTheme;
   final RepositoriesViewMode repositoriesViewMode;
   final ProjectsViewMode projectsViewMode;
   final bool navigationRailExtended;
+
+  /// The id of the design language the application renders under, as
+  /// registered in `SkinRegistry`. A free string rather than an enum, because
+  /// the set of skins is the registry's to know - a package that registers
+  /// itself must be choosable without this file learning its name.
+  final String skinId;
   final AppColorScheme colorScheme;
   final String fontFamily;
   final String previewFontFamily;
@@ -408,6 +426,7 @@ class UiConfig {
     this.repositoriesViewMode = RepositoriesViewMode.grid,
     this.projectsViewMode = ProjectsViewMode.grid,
     this.navigationRailExtended = false,
+    this.skinId = kShippingSkinId,
     this.colorScheme = AppColorScheme.deepPurple,
     this.fontFamily = 'Inter',
     this.previewFontFamily = 'JetBrains Mono',
@@ -426,6 +445,7 @@ class UiConfig {
     RepositoriesViewMode? repositoriesViewMode,
     ProjectsViewMode? projectsViewMode,
     bool? navigationRailExtended,
+    String? skinId,
     AppColorScheme? colorScheme,
     String? fontFamily,
     String? previewFontFamily,
@@ -445,6 +465,7 @@ class UiConfig {
       projectsViewMode: projectsViewMode ?? this.projectsViewMode,
       navigationRailExtended:
           navigationRailExtended ?? this.navigationRailExtended,
+      skinId: skinId ?? this.skinId,
       colorScheme: colorScheme ?? this.colorScheme,
       fontFamily: fontFamily ?? this.fontFamily,
       previewFontFamily: previewFontFamily ?? this.previewFontFamily,
@@ -463,6 +484,7 @@ class UiConfig {
       'repositories_view_mode': repositoriesViewMode.name,
       'projects_view_mode': projectsViewMode.name,
       'navigation_rail_extended': navigationRailExtended,
+      'skin': skinId,
       'color_scheme': colorScheme.name,
       'font_family': fontFamily,
       'preview_font_family': previewFontFamily,
@@ -497,6 +519,11 @@ class UiConfig {
           : ProjectsViewMode.grid,
       navigationRailExtended:
           yaml['navigation_rail_extended'] as bool? ?? false,
+      // Kept verbatim rather than validated: the registry is not populated
+      // when a config file is parsed, so whether the id resolves is answered
+      // where the skin is resolved (main.dart, with a fallback to the
+      // shipping skin) instead of being silently rewritten here.
+      skinId: yaml['skin'] as String? ?? kShippingSkinId,
       colorScheme: yaml['color_scheme'] != null
           ? AppColorScheme.values.firstWhere(
               (e) => e.name == yaml['color_scheme'],

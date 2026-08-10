@@ -7,7 +7,7 @@ export '../../../shared/dialogs/unified_diff_dialog.dart'
 
 // Alias for backward compatibility
 import '../../../shared/dialogs/unified_diff_dialog.dart' as unified;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 Future<void> showDiffViewerDialog(
   BuildContext context, {

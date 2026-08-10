@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/widgets/empty_state.dart';

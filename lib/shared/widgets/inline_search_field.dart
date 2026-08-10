@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart' show IconRole, Inset;
 import '../controllers/item_navigation_controller.dart';
 import '../components/base_layout.dart';

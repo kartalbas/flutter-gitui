@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../shared/components/base_filter_chip.dart';
 import '../../../core/git/models/tag.dart';

@@ -14,7 +14,7 @@
 /// against these thresholds.
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'git_semantic_colors.dart';
 

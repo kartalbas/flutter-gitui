@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Proximity, TextRole;
 

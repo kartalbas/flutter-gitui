@@ -73,9 +73,9 @@ final class FluentOverlays implements SkinOverlays {
   ///    keyboard is inside the dialog the moment it opens.
   ///
   /// Whether the barrier dismisses is the APPLICATION's word here, not the
-  /// reference's default of false: `DialogSpec.barrierDismissible` is exactly
-  /// that question asked, and a skin that overrode it would be answering a
-  /// question it was not asked.
+  /// reference's default of false: `DialogRouteSpec.barrierDismissible` is
+  /// exactly that question asked, and a skin that overrode it would be
+  /// answering a question it was not asked.
   ///
   /// **The keyboard contract is deliberately absent**, for the same reason it
   /// is absent from Material's dialog member: Escape-cancels, Enter-submits
@@ -88,13 +88,13 @@ final class FluentOverlays implements SkinOverlays {
   @override
   Future<T?> presentDialog<T>(
     BuildContext context,
-    DialogSpec spec,
+    DialogRouteSpec route,
     SkinContentHost host,
   ) => Navigator.of(context, rootNavigator: true).push<T>(
     RawDialogRoute<T>(
       // content_dialog.dart:241: the smoke the application is read through.
       barrierColor: const Color(0x8A000000),
-      barrierDismissible: spec.barrierDismissible,
+      barrierDismissible: route.barrierDismissible,
       // A literal, for the reason the menu route's own barrier label
       // records: a skin package owns no translations, and the reference
       // reads this off FluentLocalizations, which a drawn skin has none of.

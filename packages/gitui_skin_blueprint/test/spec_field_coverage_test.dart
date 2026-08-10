@@ -112,7 +112,10 @@ const Map<String, _Coverage> _specs = <String, _Coverage>{
   'SelectionBarSpec': _Coverage(_chromeSpecs, <String>[_chrome]),
   'ScreenSpec': _Coverage(_chromeSpecs, <String>[_chrome]),
   'DialogAction': _Coverage(_chromeSpecs, <String>[_chrome]),
-  'DialogSpec': _Coverage(_chromeSpecs, <String>[_chrome, _overlays]),
+  // The surface reads the whole dialog; the ROUTE reads only what cannot
+  // change while it is open, which is why the two are different types.
+  'DialogSpec': _Coverage(_chromeSpecs, <String>[_chrome]),
+  'DialogRouteSpec': _Coverage(_chromeSpecs, <String>[_overlays]),
   // controls
   'ButtonSpec': _Coverage(_controlSpecs, <String>[_controls]),
   'IconButtonSpec': _Coverage(_controlSpecs, <String>[_controls]),
@@ -223,6 +226,12 @@ const Map<String, String> _consumedElsewhere = <String, String>{
       "BETWEEN the skin's route and the skin's surface: Enter-submits is "
       'what the user can do, so no skin may weaken it and no skin is asked '
       'to implement it',
+  'DialogSpec.barrierDismissible':
+      'read by the ROUTE, off DialogRouteSpec, and by the same '
+      'DialogKeyboardHost - Escape only cancels a dialog the user was '
+      'allowed to click away from. A surface has nothing to draw for it: '
+      'whether the barrier completes the dialog is a fact about the barrier, '
+      'and the barrier belongs to the route',
 };
 
 void main() {

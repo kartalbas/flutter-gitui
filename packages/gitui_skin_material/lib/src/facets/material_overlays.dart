@@ -49,11 +49,11 @@ final class MaterialOverlays implements SkinOverlays {
   @override
   Future<T?> presentDialog<T>(
     BuildContext context,
-    DialogSpec spec,
+    DialogRouteSpec route,
     SkinContentHost host,
   ) => showDialog<T>(
     context: context,
-    barrierDismissible: spec.barrierDismissible,
+    barrierDismissible: route.barrierDismissible,
     builder: (BuildContext routeContext) => host.build(routeContext),
   );
 

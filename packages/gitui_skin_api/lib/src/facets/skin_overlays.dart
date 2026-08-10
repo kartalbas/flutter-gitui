@@ -37,9 +37,20 @@ abstract interface class SkinOverlays {
   ///
   /// A skin that forgets [host] does not get a wrongly themed dialog - it gets
   /// an EMPTY one, which is a loud failure rather than a silent one.
+  ///
+  /// **[route] is deliberately NOT the whole dialog.** It carries only what a
+  /// route can honestly know: the name the barrier answers to, what kind of
+  /// thing is inside, and whether clicking outside completes it - the three
+  /// facts that cannot change while the dialog is open. Everything the surface
+  /// shows is a view of application state, rebuilt every frame inside the
+  /// route, and a skin never sees it: `chrome.dialogSurface` does, from within
+  /// [host]. That split is what lets `Overlays.dialogFrom` exist at all - a
+  /// dialog whose affirmative action turns on once a field validates has to be
+  /// routed BEFORE the state deciding its frame exists, and demanding a whole
+  /// `DialogSpec` here would have made every such call site invent one.
   Future<T?> presentDialog<T>(
     BuildContext context,
-    DialogSpec spec,
+    DialogRouteSpec route,
     SkinContentHost host,
   );
 

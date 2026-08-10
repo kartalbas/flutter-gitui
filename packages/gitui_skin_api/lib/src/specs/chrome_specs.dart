@@ -558,6 +558,58 @@ final class DialogAction {
   bool get isEnabled => enabled && !isLoading && onPressed != null;
 }
 
+/// What a dialog's ROUTE needs, which is only what cannot change once it is
+/// open.
+///
+/// Three facts, and the test for membership is the same each time: could this
+/// honestly change while the user is looking at the dialog? A dialog does not
+/// become non-modal halfway through, does not turn from an alert into a
+/// browser, and does not acquire a different name for its barrier. Everything
+/// else a dialog says - its title in the surface, its mark, its tone, its ways
+/// out and whether they are available yet - is a view of application state and
+/// is rebuilt every frame inside the route, which is what [DialogSpec] is for.
+///
+/// Splitting the two is not a convenience - it is what makes the second door
+/// expressible. `Overlays.dialog` takes a whole dialog as a VALUE, and a value
+/// does not change, so a dialog that must enable its affirmative action once a
+/// field validates cannot go through it. `Overlays.dialogFrom` is for those,
+/// and it has to push a route BEFORE the state that decides the frame exists.
+/// Asking it for a whole `DialogSpec` would have forced every such call site
+/// to invent a title, a content and a set of actions purely to satisfy the
+/// route - a fiction the surface would then contradict a frame later. This
+/// type is the honest subset instead, and it says in three fields what was
+/// previously true only by accident and written down nowhere.
+@immutable
+final class DialogRouteSpec {
+  /// Declares the route.
+  const DialogRouteSpec({
+    required this.title,
+    this.extent = DialogExtent.form,
+    this.barrierDismissible = true,
+  });
+
+  /// Derives the route's facts from a whole dialog, for the case where the
+  /// dialog CAN be stated before it exists.
+  factory DialogRouteSpec.of(DialogSpec spec) => DialogRouteSpec(
+    title: spec.title,
+    extent: spec.extent,
+    barrierDismissible: spec.barrierDismissible,
+  );
+
+  /// What the route is, for a screen reader that reaches the barrier rather
+  /// than the surface. The surface's own title is [DialogSpec.title] and may
+  /// differ - a dialog whose heading counts something ("3 branches selected")
+  /// still has one unchanging name as a route.
+  final String title;
+
+  /// What KIND of thing the dialog contains, which is what lets a skin choose
+  /// between an alert route and a sheet.
+  final DialogExtent extent;
+
+  /// Whether clicking outside completes the dialog.
+  final bool barrierDismissible;
+}
+
 /// What a dialog is asking.
 @immutable
 final class DialogSpec {

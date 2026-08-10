@@ -320,39 +320,43 @@ final class SkinMenuAnchor extends StatelessWidget {
 abstract final class Overlays {
   /// Takes the application away until the user answers [spec].
   static Future<T?> dialog<T>(BuildContext context, DialogSpec spec) {
-    assert(
-      spec.actions
-              .where((DialogAction a) => a.role == DialogActionRole.affirmative)
-              .length <=
-          1,
-      'A dialog has at most one affirmative action: it is the one a design '
-      'language may single out as its default, and "the default" is not a '
-      'set. A dialog offering several equally weighted ways forward gives '
-      'them all DialogActionRole.neutral. Offending dialog: "${spec.title}".',
-    );
     final SkinEnvelope envelope = SkinEnvelope.capture(context);
     return envelope.skin.overlays.presentDialog<T>(
       context,
-      spec,
+      DialogRouteSpec.of(spec),
       SkinContentHost._(
         envelope,
-        // Three layers, and the fences between them are what makes the
-        // attribution exact: the keyboard host is the APPLICATION's (it owns
-        // Escape and Enter), so it resumes at a boundary; the surface inside
-        // it is the SKIN's again, so it is fenced again; and the surface
-        // mounts `spec.content`, which resumes once more.
-        (BuildContext inner) => ContentPort(
-          envelope.dialogKeyboardHost(
-            inner,
-            spec,
-            SkinPainted._(
-              child: Builder(
-                builder: (BuildContext surfaceContext) =>
-                    envelope.skin.chrome.dialogSurface(surfaceContext, spec),
-              ),
-            ),
-          ),
-        ).mount(),
+        (BuildContext inner) => ContentPort(SkinDialog(spec: spec)).mount(),
+      ),
+    );
+  }
+
+  /// Takes the application away until the user answers a dialog whose FRAME is
+  /// only knowable from inside it.
+  ///
+  /// The same route and the same surface as [dialog] - there is exactly one of
+  /// each - reached the other way round. [builder] is the application's own
+  /// dialog widget, mounted inside the route, and whatever state it creates
+  /// there states the dialog through [SkinDialog] on every build. That is the
+  /// only arrangement that works for a dialog whose affirmative action turns
+  /// on when a field validates: the state cannot exist before the route does,
+  /// so the frame cannot either.
+  ///
+  /// [route] carries the three facts a route can honestly know before that
+  /// state exists. If the whole dialog IS knowable up front, [dialog] says so
+  /// in one line and is the door to use.
+  static Future<T?> dialogFrom<T>(
+    BuildContext context, {
+    required DialogRouteSpec route,
+    required WidgetBuilder builder,
+  }) {
+    final SkinEnvelope envelope = SkinEnvelope.capture(context);
+    return envelope.skin.overlays.presentDialog<T>(
+      context,
+      route,
+      SkinContentHost._(
+        envelope,
+        (BuildContext inner) => ContentPort(Builder(builder: builder)).mount(),
       ),
     );
   }
@@ -424,6 +428,62 @@ abstract final class Overlays {
     return envelope.skin.overlays.notify(
       context,
       SkinNoticeHost._(envelope, spec),
+    );
+  }
+}
+
+/// One dialog, stated: the application's keyboard contract over the skin's
+/// surface.
+///
+/// **The only place a dialog surface is composed.** Both doors reach it -
+/// [Overlays.dialog] mounts it directly, [Overlays.dialogFrom] mounts the
+/// application's own widget which builds it - so a dialog opened either way
+/// is the same three layers in the same order, and there is no second
+/// arrangement to drift from. It used to be written twice: once here for the
+/// route path and once in the application's own dialog component for the
+/// widget path, where it lost the paint fence because that fence is private
+/// to this library.
+///
+/// The three layers, and why the fences fall where they do: the keyboard host
+/// is the APPLICATION's - it owns Escape, Enter and the destructive
+/// withholding - so the attribution resumes at its boundary; the surface
+/// inside it is the SKIN's, so it is fenced again; and the surface mounts
+/// [DialogSpec.content], which resumes once more.
+///
+/// [spec] is read on every build, which is the whole point: a dialog states
+/// what it is asking NOW. An affirmative action that turns on when a field
+/// validates, a heading that counts the selection, an action that shows
+/// progress while it runs - all of them are ordinary here and were impossible
+/// while the route held a frozen copy.
+final class SkinDialog extends StatelessWidget {
+  /// States one dialog.
+  const SkinDialog({super.key, required this.spec});
+
+  /// What the dialog is asking, as of this frame.
+  final DialogSpec spec;
+
+  @override
+  Widget build(BuildContext context) {
+    assert(
+      spec.actions
+              .where((DialogAction a) => a.role == DialogActionRole.affirmative)
+              .length <=
+          1,
+      'A dialog has at most one affirmative action: it is the one a design '
+      'language may single out as its default, and "the default" is not a '
+      'set. A dialog offering several equally weighted ways forward gives '
+      'them all DialogActionRole.neutral. Offending dialog: "${spec.title}".',
+    );
+    final SkinEnvelope envelope = SkinScope.of(context).envelope;
+    return envelope.dialogKeyboardHost(
+      context,
+      spec,
+      SkinPainted._(
+        child: Builder(
+          builder: (BuildContext surfaceContext) =>
+              envelope.skin.chrome.dialogSurface(surfaceContext, spec),
+        ),
+      ),
     );
   }
 }

@@ -51,12 +51,12 @@ final class BlueprintOverlays implements SkinOverlays {
   @override
   Future<T?> presentDialog<T>(
     BuildContext context,
-    DialogSpec spec,
+    DialogRouteSpec route,
     SkinContentHost host,
   ) => showGeneralDialog<T>(
     context: context,
-    barrierDismissible: spec.barrierDismissible,
-    barrierLabel: spec.title,
+    barrierDismissible: route.barrierDismissible,
+    barrierLabel: route.title,
     barrierColor: const Color(0x00000000),
     transitionDuration: Duration.zero,
     pageBuilder:

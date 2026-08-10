@@ -9,8 +9,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         DialogSpec,
         IconRole,
         Overlays,
-        Skin,
-        SkinScope,
+        SkinDialog,
         Tone;
 import '../../generated/app_localizations.dart';
 import '../utils/keyboard_guards.dart';
@@ -280,23 +279,16 @@ class BaseDialog extends StatelessWidget {
     );
   }
 
+  /// Hands this dialog's statement to the API package, which composes it.
+  ///
+  /// The composition used to be written out here as well - the keyboard host
+  /// over `chrome.dialogSurface` - which made it the SECOND place a dialog
+  /// surface was built, and the copy that could drift. It also lost the paint
+  /// attribution fence, because that fence is private to the API package and
+  /// cannot be planted from application code. `SkinDialog` is the one place
+  /// now, and this widget's whole job is to say what the dialog asks.
   @override
-  Widget build(BuildContext context) {
-    final DialogSpec spec = _spec();
-    // The keyboard host is the application's and stays outside the fence; the
-    // surface below it is the skin's. That is the same two-layer arrangement
-    // `Overlays.dialog` composes for the route path, written once here for the
-    // widget path so a dialog opened either way behaves and looks identical.
-    return DialogKeyboardHost(
-      barrierDismissible: barrierDismissible,
-      onSubmit: onSubmit,
-      child: SkinScope.render(
-        context,
-        (Skin skin, BuildContext inner) =>
-            skin.chrome.dialogSurface(inner, spec),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => SkinDialog(spec: _spec());
 
   /// Takes the application away until the user answers this dialog.
   ///

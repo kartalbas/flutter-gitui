@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         Inset,
+        Overlays,
         Proximity,
         SeriesPickerSpec,
         Skin,
@@ -370,8 +372,15 @@ Future<ProjectDialogResult?> showProjectDialog(
   BuildContext context, {
   Workspace? project,
 }) {
-  return showDialog<ProjectDialogResult>(
-    context: context,
+  return Overlays.dialogFrom<ProjectDialogResult>(
+    context,
+    // Editing and creating are two routes with two names, decided here
+    // because the caller is what knows which one this is.
+    route: DialogRouteSpec(
+      title: project == null
+          ? AppLocalizations.of(context)!.projectDialogCreateTitle
+          : AppLocalizations.of(context)!.projectDialogEditTitle,
+    ),
     builder: (context) => ProjectDialog(project: project),
   );
 }

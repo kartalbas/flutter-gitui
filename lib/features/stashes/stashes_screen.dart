@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ContentPort,
+        DialogRouteSpec,
         IconRole,
         Inset,
         MenuAction,
         MenuActionRole,
         MenuSeparator,
+        Overlays,
         ScreenSpec,
         Skin,
         SkinScope,
@@ -247,8 +249,11 @@ class _StashesScreenState extends ConsumerState<StashesScreen> {
   }
 
   Future<void> _showCreateStashDialog(BuildContext context) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
+    final result = await Overlays.dialogFrom<Map<String, dynamic>>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.createStashDialog,
+      ),
       builder: (context) => const CreateStashDialog(),
     );
 

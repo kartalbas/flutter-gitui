@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show DialogRouteSpec, IconRole, Inset, Overlays, Proximity, TextRole, Tone;
 import '../../core/services/shell_service.dart';
 
 import '../../generated/app_localizations.dart';
@@ -381,8 +381,9 @@ Future<Map<String, dynamic>?> showDetectToolsDialog(
   DiffToolType? currentDiffTool,
   String? currentTextEditor,
 }) async {
-  return showDialog<Map<String, dynamic>>(
-    context: context,
+  return Overlays.dialogFrom<Map<String, dynamic>>(
+    context,
+    route: DialogRouteSpec(title: AppLocalizations.of(context)!.detectTools),
     builder: (context) => DetectToolsDialog(
       currentGitPath: currentGitPath,
       currentDiffTool: currentDiffTool,

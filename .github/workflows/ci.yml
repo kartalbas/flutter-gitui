@@ -99,6 +99,20 @@ jobs:
             exit 1
           fi
 
+      # And the same for the dialog route gate. A dialog opened with a
+      # framework helper decides the barrier, the transition and the navigator
+      # for every design language at once, which is the one decision a skin
+      # exists to make - so an ignore comment naming this rule under lib/ is
+      # not a local exception, it is the ban switched off for that file.
+      - name: Forbid ignores of avoid_raw_dialog_route
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rnE 'ignore(_for_file)?:.*avoid_raw_dialog_route' lib/; then
+            echo "::error::avoid_raw_dialog_route must not be silenced with ignore comments; open the dialog through Overlays.dialog or Overlays.dialogFrom instead"
+            exit 1
+          fi
+
       # Six locales, and every one of them carries every key in app_en.arb
       # today. Until now nothing ran this check: it printed a coverage report
       # and exited zero, so a locale could fall behind and every run still

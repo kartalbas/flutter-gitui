@@ -3,8 +3,10 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         BannerSpec,
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         Inset,
+        Overlays,
         ProgressExtent,
         Proximity,
         Skin,
@@ -512,9 +514,11 @@ Future<List<BatchOperationResult>?> showBatchOperationProgressDialog(
   )
   operation,
 }) {
-  return showDialog<List<BatchOperationResult>>(
-    context: context,
-    barrierDismissible: false,
+  return Overlays.dialogFrom<List<BatchOperationResult>>(
+    context,
+    // The caller names the operation, so the caller names the route too - the
+    // dialog reads the same string off its own widget.
+    route: DialogRouteSpec(title: title, barrierDismissible: false),
     builder: (context) => BatchOperationProgressDialog(
       title: title,
       repositories: repositories,

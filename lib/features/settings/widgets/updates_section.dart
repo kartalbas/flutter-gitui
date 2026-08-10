@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
         ControlScale,
+        DialogRouteSpec,
         IconRole,
         Inset,
         NoticeLifetime,
@@ -194,11 +195,14 @@ class _UpdatesSectionState extends ConsumerState<UpdatesSection> {
     final update = report.update;
     if (update != null) {
       Logger.info('Update found: ${update.version}');
-      await showDialog(
-        context: context,
-        // A download can run inside this dialog; dismissing it by tapping
-        // outside would abandon the transfer.
-        barrierDismissible: false,
+      await Overlays.dialogFrom<void>(
+        context,
+        route: DialogRouteSpec(
+          title: AppLocalizations.of(context)!.updateAvailableTitle,
+          // A download can run inside this dialog; dismissing it by tapping
+          // outside would abandon the transfer.
+          barrierDismissible: false,
+        ),
         builder: (context) => UpdateAvailableDialog(updateInfo: update),
       );
     } else {

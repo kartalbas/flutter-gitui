@@ -1182,8 +1182,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final commit = selection.single;
     if (commit == null) return;
 
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
+    final result = await Overlays.dialogFrom<Map<String, dynamic>>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.createBranchFromCommit,
+      ),
       builder: (context) => CreateBranchFromCommitDialog(commit: commit),
     );
     if (result == null || !context.mounted) return;
@@ -1235,8 +1238,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   void _showAdvancedSearch(BuildContext context) {
     final currentFilter = ref.read(historySearchFilterProvider);
 
-    showDialog(
-      context: context,
+    Overlays.dialogFrom<void>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.advancedSearch,
+      ),
       builder: (context) => AdvancedSearchDialog(initialFilter: currentFilter),
     );
   }

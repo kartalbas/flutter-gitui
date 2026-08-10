@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, NoticeSpec, Overlays, Tone;
+    show DialogExtent, DialogRouteSpec, IconRole, NoticeSpec, Overlays, Tone;
 
 import '../../generated/app_localizations.dart';
 import '../../core/diff/diff_parser.dart';
@@ -319,8 +319,12 @@ Future<void> showUnifiedDiffDialog(
   required String filePath,
   bool staged = false,
 }) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom<void>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.labelDiffViewer,
+      extent: DialogExtent.browser,
+    ),
     builder: (context) =>
         UnifiedDiffDialog.file(filePath: filePath, staged: staged),
   );
@@ -332,8 +336,12 @@ Future<void> showCommitFileDiffDialog(
   required String commitHash,
   required String filePath,
 }) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom<void>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.commitDiff,
+      extent: DialogExtent.browser,
+    ),
     builder: (context) =>
         UnifiedDiffDialog.commit(commitHash: commitHash, filePath: filePath),
   );
@@ -344,8 +352,12 @@ Future<void> showStashDiffDialog(
   BuildContext context, {
   required GitStash stash,
 }) {
-  return showDialog(
-    context: context,
+  return Overlays.dialogFrom<void>(
+    context,
+    route: DialogRouteSpec(
+      title: AppLocalizations.of(context)!.stashDiffTitle(stash.ref),
+      extent: DialogExtent.browser,
+    ),
     builder: (context) => UnifiedDiffDialog.stash(stash: stash),
   );
 }

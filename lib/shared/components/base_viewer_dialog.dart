@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import '../../generated/app_localizations.dart';
 import 'base_dialog.dart' show DialogKeyboardHost;
 import '../../shared/theme/app_theme.dart';
@@ -239,15 +247,24 @@ class BaseViewerDialog extends StatelessWidget {
     );
   }
 
-  /// Show viewer dialog helper
+  /// Opens [dialog] on the skin's own dialog route.
+  ///
+  /// The ROUTE is the skin's now; the SURFACE below still is not. A viewer
+  /// draws its own full-screen frame here instead of reaching
+  /// `chrome.dialogSurface`'s browser branch, because `DialogSpec` has no slot
+  /// for the four things this component adds to a dialog - a subtitle, header
+  /// actions, header metadata and a footer. Closing that gap is contract work
+  /// (#442); moving the route is not, and is done.
   static Future<T?> show<T>({
     required BuildContext context,
     required BaseViewerDialog dialog,
-  }) {
-    return showDialog<T>(
-      context: context,
+  }) => Overlays.dialogFrom<T>(
+    context,
+    route: DialogRouteSpec(
+      title: dialog.title,
+      extent: DialogExtent.browser,
       barrierDismissible: dialog.barrierDismissible,
-      builder: (context) => dialog,
-    );
-  }
+    ),
+    builder: (context) => dialog,
+  );
 }

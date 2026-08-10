@@ -319,8 +319,13 @@ class _AppShellState extends ConsumerState<AppShell> {
                           // App logo/title - double-tap to show About dialog
                           GestureDetector(
                             onDoubleTap: () {
-                              showDialog(
-                                context: context,
+                              Overlays.dialogFrom<void>(
+                                context,
+                                route: const DialogRouteSpec(
+                                  // The dialog's own literal: the product
+                                  // name is not translated.
+                                  title: 'About Flutter GitUI',
+                                ),
                                 builder: (_) => const AppAboutDialog(),
                               );
                             },
@@ -822,8 +827,11 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Show repository switcher dialog
   void _showRepositorySwitcher(BuildContext context) {
-    showDialog(
-      context: context,
+    Overlays.dialogFrom<void>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.switchRepository,
+      ),
       builder: (context) => const RepositorySwitcherDialog(),
     );
   }
@@ -938,9 +946,12 @@ class _AppShellState extends ConsumerState<AppShell> {
           tooltip: l10n.updateReadyTooltip(updateAvailable.version),
           variant: ButtonVariant.primary,
           onPressed: () {
-            showDialog(
-              context: context,
-              barrierDismissible: false,
+            Overlays.dialogFrom<void>(
+              context,
+              route: DialogRouteSpec(
+                title: l10n.updateAvailableTitle,
+                barrierDismissible: false,
+              ),
               builder: (_) =>
                   UpdateAvailableDialog(updateInfo: updateAvailable),
             );

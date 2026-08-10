@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show DialogRouteSpec, IconRole, Overlays, Proximity, TextRole;
 
 import '../../core/config/config_providers.dart';
 import '../../core/git/destructive_action.dart';
@@ -67,8 +67,11 @@ Future<bool> confirmDestructive({
   final l10n = AppLocalizations.of(context)!;
 
   if (tier == DangerTier.remotePermanent) {
-    final confirmed = await showDialog<bool>(
-      context: context,
+    final confirmed = await Overlays.dialogFrom<bool>(
+      context,
+      // The caller states what is about to be destroyed, so the caller names
+      // the route: the dialog reads the same string off its own widget.
+      route: DialogRouteSpec(title: title),
       builder: (context) => _TypeToConfirmDialog(
         title: title,
         message: message,

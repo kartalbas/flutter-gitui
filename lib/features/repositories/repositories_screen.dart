@@ -892,8 +892,11 @@ class _RepositoriesScreenState extends ConsumerState<RepositoriesScreen> {
     if (!context.mounted) return;
 
     // Show edit dialog
-    final newUrl = await showDialog<String>(
-      context: context,
+    final newUrl = await Overlays.dialogFrom<String>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.editRemoteUrl(originRemote.name),
+      ),
       builder: (context) => EditRemoteUrlDialog(remote: originRemote),
     );
 

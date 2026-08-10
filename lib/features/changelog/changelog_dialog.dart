@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        Inset,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
@@ -439,8 +447,13 @@ class ChangelogDialog extends HookConsumerWidget {
   static Future<void> show(BuildContext context, {int initialIndex = 0}) async {
     // Dismissable from every path: the checkbox persists on toggle, so a
     // barrier click or Esc cannot lose anything.
-    await showDialog(
-      context: context,
+    await Overlays.dialogFrom<void>(
+      context,
+      route: const DialogRouteSpec(
+        // The dialog's own literal, and a viewer rather than a question.
+        title: 'Release History',
+        extent: DialogExtent.browser,
+      ),
       builder: (_) => ChangelogDialog(initialIndex: initialIndex),
     );
   }
@@ -500,8 +513,13 @@ class ChangelogDialog extends HookConsumerWidget {
 
     // Show dialog with latest release
     Logger.info('[ChangelogDialog] Showing dialog now');
-    await showDialog(
-      context: context,
+    await Overlays.dialogFrom<void>(
+      context,
+      route: const DialogRouteSpec(
+        // The dialog's own literal, and a viewer rather than a question.
+        title: 'Release History',
+        extent: DialogExtent.browser,
+      ),
       builder: (_) => const ChangelogDialog(initialIndex: 0),
     );
 

@@ -436,8 +436,11 @@ class TagListTile extends ConsumerWidget {
   }
 
   Future<void> _createBranchFromTag(BuildContext context, WidgetRef ref) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
+    final result = await Overlays.dialogFrom<Map<String, dynamic>>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.createBranchFromTag,
+      ),
       builder: (context) => CreateBranchFromTagDialog(tagName: tag.name),
     );
 

@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        DialogRouteSpec,
+        IconRole,
+        Inset,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../shared/components/base_switcher.dart';
 import '../../../shared/components/base_icon.dart';
@@ -214,9 +222,12 @@ class GlobalBranchSwitcher extends ConsumerWidget {
     if (!context.mounted) return;
 
     // Show progress dialog
-    final results = await showDialog<List<BatchOperationResult>>(
-      context: context,
-      barrierDismissible: false,
+    final results = await Overlays.dialogFrom<List<BatchOperationResult>>(
+      context,
+      route: DialogRouteSpec(
+        title: 'Checking out ${branchInfo.branchName}',
+        barrierDismissible: false,
+      ),
       builder: (context) => BatchOperationProgressDialog(
         title: 'Checking out ${branchInfo.branchName}',
         repositories: reposToCheckout,

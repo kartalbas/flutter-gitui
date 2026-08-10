@@ -854,8 +854,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     BuildContext context,
     List<GitTag> allTags,
   ) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
+    final result = await Overlays.dialogFrom<Map<String, dynamic>>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.advancedFiltersDialog,
+      ),
       builder: (context) => AdvancedFiltersDialog(
         allTags: allTags,
         initialDateFilter: _dateFilter,
@@ -979,8 +982,11 @@ class _TagsScreenState extends ConsumerState<TagsScreen> {
     final hasRemotes = remotes.isNotEmpty;
 
     if (!context.mounted) return;
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
+    final result = await Overlays.dialogFrom<Map<String, dynamic>>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.deleteTagsDialog,
+      ),
       builder: (context) =>
           DeleteTagsDialog(tagNames: _selectedTags, hasRemotes: hasRemotes),
     );

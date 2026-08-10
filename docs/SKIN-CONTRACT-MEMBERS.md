@@ -207,7 +207,9 @@ abstract interface class SkinControls {
 
 ```dart
 /// The 36 labelled toggle rows: 26 `CheckboxListTile(` + 10 `SwitchListTile(`,
-/// e.g. behavior_section.dart:27-33 and create_stash_dialog.dart:179.
+/// e.g. create_stash_dialog.dart:179. (The census also cited
+/// behavior_section.dart, a settings section that turned out never to have been
+/// mounted - its switches controlled nothing and the file was deleted.)
 enum ToggleKind { check, switching }
 
 final class ToggleRowSpec {

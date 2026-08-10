@@ -1159,6 +1159,7 @@
   "collapse": "Einklappen",
   "expand": "Erweitern",
   "commandPaletteTooltip": "Befehlspalette (Strg+K)",
+  "commandPalette": "Befehlspalette",
   "toggleCommandLogTooltip": "Befehlsprotokoll umschalten (Strg+L)",
   "goToSettings": "Zu Einstellungen gehen",
   "resetToDefaults": "Auf Standardwerte zurücksetzen",

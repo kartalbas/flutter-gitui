@@ -1159,6 +1159,7 @@
   "collapse": "Contraer",
   "expand": "Expandir",
   "commandPaletteTooltip": "Paleta de comandos",
+  "commandPalette": "Paleta de comandos",
   "toggleCommandLogTooltip": "Alternar registro de comandos",
   "goToSettings": "Ir a configuración",
   "resetToDefaults": "Restablecer a predeterminados",

@@ -1159,6 +1159,7 @@
   "collapse": "Réduire",
   "expand": "Développer",
   "commandPaletteTooltip": "Palette de commandes (Ctrl+K)",
+  "commandPalette": "Palette de commandes",
   "toggleCommandLogTooltip": "Basculer le journal des commandes",
   "goToSettings": "Aller aux paramètres",
   "resetToDefaults": "Réinitialiser aux valeurs par défaut",

@@ -1,7 +1,7 @@
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
-/// Application code opens dialogs through the contract, never through a
+/// Application code opens OVERLAYS through the contract, never through a
 /// framework route helper.
 ///
 /// `showDialog` and `showGeneralDialog` are Material's own routes: they decide
@@ -32,16 +32,35 @@ class AvoidRawDialogRoute extends DartLintRule {
   static const _code = LintCode(
     name: 'avoid_raw_dialog_route',
     problemMessage:
-        'Do not open a dialog with a framework route helper: it decides the '
+        'Do not open an overlay with a framework route helper: it decides the '
         'barrier, the transition and the navigator for every skin at once. '
-        'Use Overlays.dialog for a dialog that can be stated up front, or '
+        'Use Overlays.dialog for a dialog that can be stated up front, '
         'Overlays.dialogFrom when its frame depends on state created inside '
-        'the route.',
+        'the route, Overlays.menu or Overlays.anchor for a menu, and '
+        'Overlays.popover for content attached to a control.',
   );
 
+  /// The whole FAMILY, not the two names I first thought of.
+  ///
+  /// The first version of this rule watched `showDialog` and
+  /// `showGeneralDialog`, and I closed #412 on a search for `showMenu(` that
+  /// returned zero - because the four switchers wrote `showMenu<Workspace>(`,
+  /// with a type argument between the name and the paren. Five raw overlay
+  /// routes were still in the application, in a phase called "move every
+  /// OVERLAY behind the contract". A set is what stops the next member being
+  /// missed the same way; the analyzer sees the invocation whatever type
+  /// arguments it carries.
   static const Set<String> _banned = <String>{
     'showDialog',
     'showGeneralDialog',
+    'showMenu',
+    'showModalBottomSheet',
+    'showBottomSheet',
+    'showDatePicker',
+    'showTimePicker',
+    'showAboutDialog',
+    'showLicensePage',
+    'showSearch',
   };
 
   @override

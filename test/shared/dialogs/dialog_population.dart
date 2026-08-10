@@ -23,6 +23,7 @@ import 'package:riverpod/misc.dart' show Override;
 
 import '../../skin/pump_under_skin.dart';
 
+import 'package:flutter_gitui/core/navigation/command_palette.dart';
 import 'package:flutter_gitui/core/config/app_config.dart';
 import 'package:flutter_gitui/core/config/config_providers.dart';
 import 'package:flutter_gitui/core/diff/diff_providers.dart';
@@ -450,6 +451,15 @@ List<DialogCase> dialogPopulation() => <DialogCase>[
         (ref) => _NoProjectSelectedNotifier(ref),
       ),
     ],
+  ),
+  DialogCase(
+    name: 'CommandPalette',
+    source: 'lib/core/navigation/command_palette.dart',
+    // It became a dialog when it stopped being a Material bottom sheet
+    // (#412), so it enters the sweeps that hold every dialog to the same
+    // keyboard contract - which is the coverage it never had while it was a
+    // sheet with its own key handling.
+    open: (context, ref) => _show(context, const CommandPalette()),
   ),
   DialogCase(
     name: 'BranchSwitcherDialog',

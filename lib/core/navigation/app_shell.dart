@@ -4,7 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show DialogRouteSpec, IconRole, Inset, Overlays, Proximity, TextRole, Tone;
+    show
+        DialogExtent,
+        DialogRouteSpec,
+        IconRole,
+        Inset,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 import 'package:riverpod/legacy.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:flutter_gitui/generated/app_localizations.dart';
@@ -813,12 +821,17 @@ class _AppShellState extends ConsumerState<AppShell> {
   void _showCommandPalette(BuildContext context) async {
     // The palette's own context and ref die with the sheet, so it returns the
     // chosen command and we execute it here with this State's long-lived ones.
-    final command = await showModalBottomSheet<GitCommand>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Theme.of(
-        context,
-      ).colorScheme.surface.withValues(alpha: 0),
+    final command = await Overlays.dialogFrom<GitCommand>(
+      context,
+      // A palette takes the application away until the user answers and then
+      // reports the answer - which is a dialog, and a browser-extent one: a
+      // searchable list is a thing to look through. The sheet it used to
+      // arrive in, transparent-backed and scroll-controlled, was Material's
+      // shape for that stated in application code (#412).
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.commandPalette,
+        extent: DialogExtent.browser,
+      ),
       builder: (context) => const CommandPalette(),
     );
     if (command == null || !mounted) return;

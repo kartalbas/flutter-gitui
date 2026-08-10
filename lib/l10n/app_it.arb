@@ -589,6 +589,7 @@
   "collapse": "Collapse",
   "expand": "Expand",
   "commandPaletteTooltip": "Palette dei comandi (Ctrl+K)",
+  "commandPalette": "Palette dei comandi",
   "toggleCommandLogTooltip": "Toggle Command Log (Ctrl+L)",
   "goToSettings": "Go to Settings",
   "resetToDefaults": "Reset to Defaults",

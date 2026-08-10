@@ -1354,6 +1354,10 @@
   "collapse": "Collapse",
   "expand": "Expand",
   "commandPaletteTooltip": "Command Palette (Ctrl+K)",
+  "commandPalette": "Command Palette",
+  "@commandPalette": {
+    "description": "The command palette, as the name of its own overlay"
+  },
   "toggleCommandLogTooltip": "Toggle Command Log (Ctrl+L)",
   "goToSettings": "Go to Settings",
   "resetToDefaults": "Reset to Defaults",

@@ -682,6 +682,7 @@
   "resetToCommitInstructions": "Bu, dal işaretçisini bu commit'e taşıyacaktır",
   "failedToCleanWorkingDirectory": "Çalışma dizini temizleme başarısız: {error}",
   "commandPaletteTooltip": "Komut Paleti (Ctrl+K)",
+  "commandPalette": "Komut Paleti",
   "toggleCommandLogTooltip": "Komut Günlüğünü Değiştir",
   "goToSettings": "Ayarlara Git",
   "resetToDefaults": "Varsayılanlara Sıfırla",

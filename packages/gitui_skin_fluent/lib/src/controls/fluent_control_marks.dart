@@ -21,6 +21,64 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 
+/// The cross of a dismiss affordance.
+///
+/// WinUI closes an InfoBar with the `ChromeClose` glyph (Segoe Fluent Icons
+/// U+E8BB) at 16 epx (fluent_ui@4.16.1
+/// lib/src/controls/surfaces/info_bar.dart:603 names the glyph,
+/// info_bar.dart:631 pins the close button's icon size at 16), and a
+/// TabView's per-tab close draws the same cross smaller. The path is the
+/// glyph's two crossing strokes at the same bounding box.
+final class FluentDismissMark extends StatelessWidget {
+  /// Draws the cross in [color] inside a box of [size] logical pixels.
+  const FluentDismissMark({super.key, required this.color, this.size = 16});
+
+  /// The ink of the cross.
+  final Color color;
+
+  /// The glyph box, 16 epx for the InfoBar close (info_bar.dart:631).
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+    size: Size.square(size),
+    painter: _StrokePathPainter(
+      color: color,
+      strokeWidth: size / 10,
+      polylines: const <List<Offset>>[
+        <Offset>[Offset(0.2, 0.2), Offset(0.8, 0.8)],
+        <Offset>[Offset(0.8, 0.2), Offset(0.2, 0.8)],
+      ],
+    ),
+  );
+}
+
+/// The "more" mark a row hangs its own menu off.
+///
+/// WinUI's overflow anchor is the `More` glyph (Segoe Fluent Icons U+E712),
+/// three dots on the horizontal midline, drawn at the standard 16 epx
+/// command mark (fluent_ui@4.16.1
+/// lib/src/controls/surfaces/commandbar.dart:676 pins the command bar's
+/// glyph size at 16). Control anatomy rather than an [IconRole]: the anchor
+/// is the skin's own control, so its mark is part of that control the way a
+/// combo box's chevron is.
+final class FluentMoreMark extends StatelessWidget {
+  /// Draws the three dots in [color] inside a box of [size] logical pixels.
+  const FluentMoreMark({super.key, required this.color, this.size = 16});
+
+  /// The ink of the dots.
+  final Color color;
+
+  /// The glyph box.
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => CustomPaint(
+    size: Size.square(size),
+    painter: _DotRowPainter(color: color),
+  );
+}
+
 /// The check mark inside a checked checkbox.
 ///
 /// WinUI draws the `CheckMark` glyph (Segoe Fluent Icons U+E73E) at 12 epx
@@ -47,10 +105,8 @@ final class FluentCheckMark extends StatelessWidget {
       // and the mark clogs the 20 epx box, lighter and it breaks up at
       // 100% scaling.
       strokeWidth: size / 8,
-      points: const <Offset>[
-        Offset(0.08, 0.52),
-        Offset(0.38, 0.82),
-        Offset(0.92, 0.2),
+      polylines: const <List<Offset>>[
+        <Offset>[Offset(0.08, 0.52), Offset(0.38, 0.82), Offset(0.92, 0.2)],
       ],
     ),
   );
@@ -78,7 +134,9 @@ final class FluentMixedMark extends StatelessWidget {
     painter: _StrokePathPainter(
       color: color,
       strokeWidth: size / 8,
-      points: const <Offset>[Offset(0.15, 0.5), Offset(0.85, 0.5)],
+      polylines: const <List<Offset>>[
+        <Offset>[Offset(0.15, 0.5), Offset(0.85, 0.5)],
+      ],
     ),
   );
 }
@@ -118,28 +176,27 @@ final class FluentChevron extends StatelessWidget {
       painter: _StrokePathPainter(
         color: color,
         strokeWidth: size / 10,
-        points: const <Offset>[
-          Offset(0.15, 0.35),
-          Offset(0.5, 0.68),
-          Offset(0.85, 0.35),
+        polylines: const <List<Offset>>[
+          <Offset>[Offset(0.15, 0.35), Offset(0.5, 0.68), Offset(0.85, 0.35)],
         ],
       ),
     ),
   );
 }
 
-/// A polyline in unit coordinates, stroked with round caps and joins - the
-/// stroke discipline Segoe's marks share.
+/// Polylines in unit coordinates, stroked with round caps and joins - the
+/// stroke discipline Segoe's marks share. Several, because the dismiss
+/// cross is two strokes that never meet.
 final class _StrokePathPainter extends CustomPainter {
   const _StrokePathPainter({
     required this.color,
     required this.strokeWidth,
-    required this.points,
+    required this.polylines,
   });
 
   final Color color;
   final double strokeWidth;
-  final List<Offset> points;
+  final List<List<Offset>> polylines;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -149,10 +206,12 @@ final class _StrokePathPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = ui.StrokeCap.round
       ..strokeJoin = ui.StrokeJoin.round;
-    final Path path = Path()
-      ..moveTo(points.first.dx * size.width, points.first.dy * size.height);
-    for (final Offset point in points.skip(1)) {
-      path.lineTo(point.dx * size.width, point.dy * size.height);
+    final Path path = Path();
+    for (final List<Offset> points in polylines) {
+      path.moveTo(points.first.dx * size.width, points.first.dy * size.height);
+      for (final Offset point in points.skip(1)) {
+        path.lineTo(point.dx * size.width, point.dy * size.height);
+      }
     }
     canvas.drawPath(path, paint);
   }
@@ -161,5 +220,27 @@ final class _StrokePathPainter extends CustomPainter {
   bool shouldRepaint(_StrokePathPainter oldDelegate) =>
       oldDelegate.color != color ||
       oldDelegate.strokeWidth != strokeWidth ||
-      oldDelegate.points != points;
+      oldDelegate.polylines != polylines;
+}
+
+/// Three filled dots on the horizontal midline: the `More` glyph's geometry.
+///
+/// The dot radius is the stroke reading of the glyph at its box - one
+/// sixteenth of the box per dot, the weight the 16 epx Segoe mark carries.
+final class _DotRowPainter extends CustomPainter {
+  const _DotRowPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()..color = color;
+    final double radius = size.width / 16;
+    for (final double x in const <double>[0.25, 0.5, 0.75]) {
+      canvas.drawCircle(Offset(x * size.width, size.height / 2), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DotRowPainter oldDelegate) => oldDelegate.color != color;
 }

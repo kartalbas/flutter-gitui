@@ -2,13 +2,12 @@ import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 
 import '../fluent_focus_ring.dart';
-import '../fluent_geometry.dart';
 import '../fluent_ink.dart';
 import '../fluent_motion.dart';
 import '../fluent_resources.dart';
 import '../fluent_theme.dart';
-import '../fluent_typography.dart';
 import 'fluent_checkbox.dart';
+import 'fluent_info_badge.dart';
 import 'fluent_pressable.dart';
 
 /// The Fluent answer to `SkinControls.iconButton`: WHAT CAN THE USER DO
@@ -122,59 +121,10 @@ final class FluentIconButton extends StatelessWidget {
             focused: states.contains(WidgetState.focused),
             child: spec.badgeCount == null
                 ? box
-                : _Badged(count: spec.badgeCount!, child: box),
+                : FluentInfoBadgeRider(count: spec.badgeCount!, child: box),
           );
         },
       ),
-    );
-  }
-}
-
-/// A count riding the control's top end corner, drawn as the WinUI
-/// InfoBadge (fluent_ui@4.16.1 lib/src/controls/utils/info_badge.dart:
-/// 106-125): a 16 epx minimum stadium, 4 epx side padding, the value at
-/// 11 epx (:119, the `InfoBadgeValueFontSize` resource) - in the accent
-/// brush under the on-accent foreground, which is WinUI's attention badge.
-final class _Badged extends StatelessWidget {
-  const _Badged({required this.count, required this.child});
-
-  final int count;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final FluentThemeData theme = FluentTheme.of(context);
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        child,
-        PositionedDirectional(
-          top: -4,
-          end: -4,
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-            padding: const EdgeInsetsDirectional.only(
-              start: 4,
-              end: 4,
-              bottom: 1,
-            ),
-            decoration: BoxDecoration(
-              color: theme.accent.defaultBrushFor(theme.brightness),
-              borderRadius: BorderRadius.circular(FluentGeometry.stadiumRadius),
-            ),
-            child: Text(
-              '$count',
-              textAlign: TextAlign.center,
-              style: FluentTypeResolution.styleOf(context, TextRole.micro)
-                  .copyWith(
-                    // InfoBadgeValueFontSize, info_badge.dart:119.
-                    fontSize: 11,
-                    color: theme.resources.textOnAccentFillColorPrimary,
-                  ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

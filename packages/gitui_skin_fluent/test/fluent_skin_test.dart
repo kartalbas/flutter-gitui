@@ -1,11 +1,18 @@
-/// The Skin implementation: what the package promises the registry, and
-/// what it honestly refuses until the remaining slices land.
+/// The Skin implementation: what the package promises the registry - every
+/// facet getter now answers with this package's own facet, and the only
+/// remaining fences are the overlay facet's pending members.
 library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 import 'package:gitui_skin_fluent/gitui_skin_fluent.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_chrome.dart';
 import 'package:gitui_skin_fluent/src/facets/fluent_controls.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_surfaces.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_layout.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_motion_facet.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_overlays.dart';
+import 'package:gitui_skin_fluent/src/facets/fluent_type.dart';
 
 void main() {
   setUp(SkinRegistry.reset);
@@ -37,20 +44,19 @@ void main() {
     expect(skin.rootClaims.windowChrome, WindowChrome.hostDefault);
   });
 
-  test('the controls facet is implemented', () {
-    expect(const FluentSkin().controls, isA<FluentControls>());
+  test('the implemented facets are this package\'s own', () {
+    const FluentSkin skin = FluentSkin();
+    expect(skin.chrome, isA<FluentChrome>());
+    expect(skin.controls, isA<FluentControls>());
+    expect(skin.surfaces, isA<FluentSurfaces>());
+    expect(skin.type, isA<FluentType>());
+    expect(skin.layout, isA<FluentLayout>());
+    expect(skin.motion, isA<FluentMotionFacet>());
+    expect(skin.overlays, isA<FluentOverlays>());
   });
 
-  test('every pending facet refuses loudly rather than delegating quietly', () {
-    const FluentSkin skin = FluentSkin();
-    // Each facet lands with its own slice; until it does, reaching it is a
-    // wiring error the assembler must see - never a silent fallback to
-    // another design language.
-    expect(() => skin.chrome, throwsUnimplementedError);
-    expect(() => skin.surfaces, throwsUnimplementedError);
-    expect(() => skin.type, throwsUnimplementedError);
-    expect(() => skin.layout, throwsUnimplementedError);
-    expect(() => skin.motion, throwsUnimplementedError);
-    expect(() => skin.overlays, throwsUnimplementedError);
-  });
+  // The overlay facet's four pending members each fence themselves with a
+  // throw of their own. That is asserted where real hosts exist - the
+  // overlay behaviour suite (`test/behavior/fluent_menu_test.dart`) - since
+  // a host's constructor is deliberately private to the API package.
 }

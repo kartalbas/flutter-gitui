@@ -54,12 +54,25 @@ final class FluentResources {
     required this.solidBackgroundFillColorSecondary,
     required this.solidBackgroundFillColorTertiary,
     required this.solidBackgroundFillColorQuarternary,
+    required this.layerOnAcrylicFillColorDefault,
+    required this.smokeFillColorDefault,
     required this.cardBackgroundFillColorDefault,
+    required this.cardBackgroundFillColorSecondary,
     required this.cardStrokeColorDefault,
+    required this.dividerStrokeColorDefault,
     required this.surfaceStrokeColorFlyout,
+    required this.layerOnMicaBaseAltFillColorDefault,
+    required this.layerOnMicaBaseAltFillColorSecondary,
+    required this.layerOnMicaBaseAltFillColorTransparent,
     required this.systemFillColorSuccess,
     required this.systemFillColorCaution,
     required this.systemFillColorCritical,
+    required this.systemFillColorSolidNeutral,
+    required this.systemFillColorNeutralBackground,
+    required this.systemFillColorAttentionBackground,
+    required this.systemFillColorSuccessBackground,
+    required this.systemFillColorCautionBackground,
+    required this.systemFillColorCriticalBackground,
   });
 
   /// WinUI light theme.
@@ -151,18 +164,45 @@ final class FluentResources {
       solidBackgroundFillColorTertiary = const Color(0xFFf9f9f9),
       // SolidBackgroundFillColorQuarternary, color_resources.dart:343.
       solidBackgroundFillColorQuarternary = const Color(0xFFffffff),
+      // LayerOnAcrylicFillColorDefault, color_resources.dart:334.
+      layerOnAcrylicFillColorDefault = const Color(0x40ffffff),
+      // SmokeFillColorDefault, color_resources.dart:331. The same 30% black
+      // in BOTH dictionaries - the smoke does not invert with the theme.
+      smokeFillColorDefault = const Color(0x4d000000),
       // CardBackgroundFillColorDefault, color_resources.dart:328.
       cardBackgroundFillColorDefault = const Color(0xb3ffffff),
+      // CardBackgroundFillColorSecondary, color_resources.dart:329.
+      cardBackgroundFillColorSecondary = const Color(0x80f6f6f6),
       // CardStrokeColorDefault, color_resources.dart:318.
       cardStrokeColorDefault = const Color(0x0f000000),
+      // DividerStrokeColorDefault, color_resources.dart:325.
+      dividerStrokeColorDefault = const Color(0x0f000000),
       // SurfaceStrokeColorFlyout, color_resources.dart:323.
       surfaceStrokeColorFlyout = const Color(0x0f000000),
+      // LayerOnMicaBaseAltFillColorDefault, color_resources.dart:336.
+      layerOnMicaBaseAltFillColorDefault = const Color(0xb3ffffff),
+      // LayerOnMicaBaseAltFillColorSecondary, color_resources.dart:337.
+      layerOnMicaBaseAltFillColorSecondary = const Color(0x0a000000),
+      // LayerOnMicaBaseAltFillColorTransparent, color_resources.dart:339.
+      layerOnMicaBaseAltFillColorTransparent = const Color(0x00000000),
       // SystemFillColorSuccess, color_resources.dart:348.
       systemFillColorSuccess = const Color(0xFF0f7b0f),
       // SystemFillColorCaution, color_resources.dart:349.
       systemFillColorCaution = const Color(0xFF9d5d00),
       // SystemFillColorCritical, color_resources.dart:350.
-      systemFillColorCritical = const Color(0xFFc42b1c);
+      systemFillColorCritical = const Color(0xFFc42b1c),
+      // SystemFillColorSolidNeutral, color_resources.dart:352.
+      systemFillColorSolidNeutral = const Color(0xFF8a8a8a),
+      // SystemFillColorNeutralBackground, color_resources.dart:357.
+      systemFillColorNeutralBackground = const Color(0x06000000),
+      // SystemFillColorAttentionBackground, color_resources.dart:353.
+      systemFillColorAttentionBackground = const Color(0x80f6f6f6),
+      // SystemFillColorSuccessBackground, color_resources.dart:354.
+      systemFillColorSuccessBackground = const Color(0xFFdff6dd),
+      // SystemFillColorCautionBackground, color_resources.dart:355.
+      systemFillColorCautionBackground = const Color(0xFFfff4ce),
+      // SystemFillColorCriticalBackground, color_resources.dart:356.
+      systemFillColorCriticalBackground = const Color(0xFFfde7e9);
 
   /// WinUI dark theme.
   ///
@@ -251,18 +291,44 @@ final class FluentResources {
       solidBackgroundFillColorTertiary = const Color(0xFF282828),
       // SolidBackgroundFillColorQuarternary, color_resources.dart:256.
       solidBackgroundFillColorQuarternary = const Color(0xFF2c2c2c),
+      // LayerOnAcrylicFillColorDefault, color_resources.dart:247.
+      layerOnAcrylicFillColorDefault = const Color(0x09ffffff),
+      // SmokeFillColorDefault, color_resources.dart:244.
+      smokeFillColorDefault = const Color(0x4d000000),
       // CardBackgroundFillColorDefault, color_resources.dart:241.
       cardBackgroundFillColorDefault = const Color(0x0dffffff),
+      // CardBackgroundFillColorSecondary, color_resources.dart:242.
+      cardBackgroundFillColorSecondary = const Color(0x08ffffff),
       // CardStrokeColorDefault, color_resources.dart:231.
       cardStrokeColorDefault = const Color(0x19000000),
+      // DividerStrokeColorDefault, color_resources.dart:238.
+      dividerStrokeColorDefault = const Color(0x15ffffff),
       // SurfaceStrokeColorFlyout, color_resources.dart:236.
       surfaceStrokeColorFlyout = const Color(0x33000000),
+      // LayerOnMicaBaseAltFillColorDefault, color_resources.dart:249.
+      layerOnMicaBaseAltFillColorDefault = const Color(0x733a3a3a),
+      // LayerOnMicaBaseAltFillColorSecondary, color_resources.dart:250.
+      layerOnMicaBaseAltFillColorSecondary = const Color(0x0fffffff),
+      // LayerOnMicaBaseAltFillColorTransparent, color_resources.dart:252.
+      layerOnMicaBaseAltFillColorTransparent = const Color(0x00ffffff),
       // SystemFillColorSuccess, color_resources.dart:261.
       systemFillColorSuccess = const Color(0xFF6ccb5f),
       // SystemFillColorCaution, color_resources.dart:262.
       systemFillColorCaution = const Color(0xFFfce100),
       // SystemFillColorCritical, color_resources.dart:263.
-      systemFillColorCritical = const Color(0xFFff99a4);
+      systemFillColorCritical = const Color(0xFFff99a4),
+      // SystemFillColorSolidNeutral, color_resources.dart:265.
+      systemFillColorSolidNeutral = const Color(0xFF9d9d9d),
+      // SystemFillColorNeutralBackground, color_resources.dart:270.
+      systemFillColorNeutralBackground = const Color(0x08ffffff),
+      // SystemFillColorAttentionBackground, color_resources.dart:266.
+      systemFillColorAttentionBackground = const Color(0x08ffffff),
+      // SystemFillColorSuccessBackground, color_resources.dart:267.
+      systemFillColorSuccessBackground = const Color(0xFF393d1b),
+      // SystemFillColorCautionBackground, color_resources.dart:268.
+      systemFillColorCautionBackground = const Color(0xFF433519),
+      // SystemFillColorCriticalBackground, color_resources.dart:269.
+      systemFillColorCriticalBackground = const Color(0xFF442726);
 
   /// Ordinary text.
   final Color textFillColorPrimary;
@@ -399,16 +465,54 @@ final class FluentResources {
   /// The most raised solid ground: a popup's opaque stand-in.
   final Color solidBackgroundFillColorQuarternary;
 
+  /// The content layer the selected destination's body sits on, one step
+  /// off the window ground.
+  ///
+  /// The reference installs this resource as the whole application's
+  /// `scaffoldBackgroundColor` (fluent_ui@4.16.1
+  /// lib/src/styles/theme.dart:456) and the NavigationView paints its body
+  /// with it (navigation/navigation_view/body.dart:82-83) - which is how a
+  /// Fluent window separates the pane from the content without drawing a
+  /// line between them.
+  final Color layerOnAcrylicFillColorDefault;
+
+  /// The smoke layer behind a dialog: WinUI's `SmokeFillColorDefault`, 30%
+  /// black on either brightness. The barrier a blocking operation draws over
+  /// the window.
+  final Color smokeFillColorDefault;
+
   /// A resting card's fill; translucent, composited over the page ground
   /// (fluent_ui@4.16.1 lib/src/controls/surfaces/card.dart:107-112).
   final Color cardBackgroundFillColorDefault;
 
+  /// The quieter card layer: an Expander's opened body
+  /// (fluent_ui@4.16.1 lib/src/controls/surfaces/expander.dart:441-443).
+  final Color cardBackgroundFillColorSecondary;
+
   /// The 1px stroke every card carries (card.dart:110-112).
   final Color cardStrokeColorDefault;
+
+  /// The rule that separates content into groups: the fill of the
+  /// language's own Divider (fluent_ui@4.16.1
+  /// lib/src/controls/utils/divider.dart:186-195, `DividerThemeData.standard`
+  /// - thickness 1, this resource as the decoration).
+  final Color dividerStrokeColorDefault;
 
   /// The 1px stroke around a flyout or menu surface
   /// (fluent_ui@4.16.1 lib/src/controls/flyouts/flyout_content.dart:74).
   final Color surfaceStrokeColorFlyout;
+
+  /// A pressed tab strip item's fill (fluent_ui@4.16.1
+  /// lib/src/controls/navigation/tab_view/tab.dart:368-382, the WinUI
+  /// TabView item resources).
+  final Color layerOnMicaBaseAltFillColorDefault;
+
+  /// A hovered tab strip item's fill (tab.dart:368-382).
+  final Color layerOnMicaBaseAltFillColorSecondary;
+
+  /// A resting, unselected tab strip item's fill: nothing
+  /// (tab.dart:368-382).
+  final Color layerOnMicaBaseAltFillColorTransparent;
 
   /// This finished, and it finished well; the InfoBar success foreground
   /// (fluent_ui@4.16.1 lib/src/controls/surfaces/info_bar.dart:623).
@@ -424,4 +528,25 @@ final class FluentResources {
   /// (info_bar.dart:619-620) - which is why `Tone.info` collapses onto the
   /// accent in `FluentInk`.
   final Color systemFillColorCritical;
+
+  /// The solid neutral: WinUI's informational InfoBadge fill
+  /// (microsoft-ui-xaml InfoBadge_themeresources.xaml, the Informational
+  /// preset's `InfoBadgeBackground`).
+  final Color systemFillColorSolidNeutral;
+
+  /// The quiet neutral wash a surface with no particular meaning wears.
+  final Color systemFillColorNeutralBackground;
+
+  /// The informational InfoBar's ground (fluent_ui@4.16.1
+  /// lib/src/controls/surfaces/info_bar.dart:588-589).
+  final Color systemFillColorAttentionBackground;
+
+  /// The success InfoBar's ground (info_bar.dart:592-593).
+  final Color systemFillColorSuccessBackground;
+
+  /// The warning InfoBar's ground (info_bar.dart:590-591).
+  final Color systemFillColorCautionBackground;
+
+  /// The error InfoBar's ground (info_bar.dart:594-595).
+  final Color systemFillColorCriticalBackground;
 }

@@ -62,6 +62,14 @@ dependencies:
   # user's choice is application configuration, not a design language.
   google_fonts: ^8.2.0
 
+  # A Markdown PARSER and builder, not a widget library: `surfaces.markdown`
+  # exists precisely so the skin owns the style sheet, and this package
+  # supplies the parsing while every style in the sheet is this skin's own
+  # ramp and resources. The same renderer the Material skin uses, restyled
+  # completely - two parsers rendering one document differently would be a
+  # divergence with no design meaning.
+  flutter_markdown_plus: ^1.0.12
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

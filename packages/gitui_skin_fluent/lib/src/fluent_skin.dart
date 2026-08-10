@@ -1,7 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart';
 
+import 'facets/fluent_chrome.dart';
 import 'facets/fluent_controls.dart';
+import 'facets/fluent_layout.dart';
+import 'facets/fluent_motion_facet.dart';
+import 'facets/fluent_overlays.dart';
+import 'facets/fluent_surfaces.dart';
+import 'facets/fluent_type.dart';
 
 /// Fluent 2, behind the contract - drawn by this package, with no widget
 /// library underneath.
@@ -12,15 +18,15 @@ import 'facets/fluent_controls.dart';
 /// be rewritten - or landed by a different slice - without anybody touching
 /// this file beyond its one line.
 ///
-/// **This skin is registered but not yet whole.** The controls facet is
-/// implemented; the other six land with their own slices, and until each
-/// does, its getter throws an [UnimplementedError] naming itself. Failing
-/// loudly is the only honest answer a partial skin can give: a facet that
-/// quietly delegated to another design language would be exactly the
-/// substitution failure the blueprint exists to catch, pointed inward. The
-/// application does not register this skin yet (nothing in `lib/` names
-/// this package), so the throw is a fence for the assembling slice, not a
-/// crash a user can reach.
+/// **This skin is registered but not yet whole.** Every facet getter now
+/// answers - chrome, controls, surfaces, layout, type and motion are
+/// implemented, and the overlay facet carries the point-anchored menu -
+/// but the overlay facet's remaining members still throw an
+/// [UnimplementedError] naming themselves, each with its own fence inside
+/// [FluentOverlays]. Failing loudly is the only honest answer a partial
+/// skin can give: a facet that quietly delegated to another design
+/// language would be exactly the substitution failure the blueprint exists
+/// to catch, pointed inward.
 final class FluentSkin implements Skin {
   /// Builds the Fluent skin.
   const FluentSkin();
@@ -48,8 +54,8 @@ final class FluentSkin implements Skin {
   /// `showDialog` checks its own localisations before it pushes, which is
   /// the exact case the `localizationsDelegates` claim was declared for.
   /// This package pushes no such dependency: its controls read only its
-  /// own `FluentTheme` scope, installed by `chrome.wrapRoot` when that
-  /// facet lands. The scroll behaviour and window chrome are the host's.
+  /// own `FluentTheme` scope, installed by `chrome.wrapRoot`. The scroll
+  /// behaviour and window chrome are the host's.
   @override
   SkinRootClaims get rootClaims => const SkinRootClaims(
     localizationsDelegates: <LocalizationsDelegate<Object?>>[],
@@ -57,62 +63,47 @@ final class FluentSkin implements Skin {
     windowChrome: WindowChrome.hostDefault,
   );
 
-  /// Not yet: the frame is its own slice.
+  /// The frame: implemented. `wrapRoot` installs FluentTheme,
+  /// FluentRequestScope and the page ground; shell, screen and
+  /// dialogSurface are the NavigationView, PageHeader and ContentDialog
+  /// idioms - the dialog deriving its action order from the roles, with
+  /// the affirmative on the LEFT.
   @override
-  SkinChrome get chrome => throw UnimplementedError(
-    'The Fluent chrome facet is not implemented yet: wrapRoot must install '
-    'FluentTheme, FluentRequestScope and the page ground; shell, screen and '
-    'dialogSurface are the NavigationView, PageHeader and ContentDialog '
-    'idioms. It lands as its own slice.',
-  );
+  SkinChrome get chrome => const FluentChrome();
 
   /// Things you operate: implemented, and behaviour-tested from the paint
   /// stream.
   @override
   SkinControls get controls => const FluentControls();
 
-  /// Not yet: containers are their own slice.
+  /// Things that hold other things: implemented, drawn in Fluent's own
+  /// depth grammar - layer fills plus 1 epx strokes, never tonal
+  /// elevation - and behaviour-tested from the paint stream.
   @override
-  SkinSurfaces get surfaces => throw UnimplementedError(
-    'The Fluent surfaces facet is not implemented yet. The depth grammar it '
-    'will draw with (layer fills plus 1px strokes, FluentInk.depth) is '
-    'already in place.',
-  );
+  SkinSurfaces get surfaces => const FluentSurfaces();
 
-  /// Not yet: reading is its own slice, though the ramp and the resolution
-  /// door (`FluentTypeRamp`, `FluentTypeResolution`) are already in place.
+  /// Things you read: implemented over the ramp and resolution door in
+  /// `fluent_typography.dart`. The glyph table stays the registered gap.
   @override
-  SkinType get type => throw UnimplementedError(
-    'The Fluent type facet is not implemented yet. Its foundations - the '
-    'Windows 11 type ramp and the single resolution door - are in '
-    'fluent_typography.dart.',
-  );
+  SkinType get type => const FluentType();
 
-  /// Not yet: arrangement is its own slice, though the spacing ramp
-  /// (`FluentSpacing`) is already in place.
+  /// How things sit next to one another: implemented against the Fluent 2
+  /// spacing ramp (`FluentSpacing`).
   @override
-  SkinLayout get layout => throw UnimplementedError(
-    'The Fluent layout facet is not implemented yet. The Fluent 2 spacing '
-    'ramp it will resolve Proximity and Inset against is in '
-    'fluent_ink.dart (FluentSpacing).',
-  );
+  SkinLayout get layout => const FluentLayout();
 
-  /// Not yet: change is its own slice, though the duration set
-  /// (`FluentMotion`) is already in place.
+  /// How things change: implemented on the published WinUI duration set
+  /// (`FluentMotion` / `FluentMotionDurations`).
   @override
-  SkinMotion get motion => throw UnimplementedError(
-    'The Fluent motion facet is not implemented yet. The published WinUI '
-    'duration set it will answer with is in fluent_motion.dart.',
-  );
+  SkinMotion get motion => const FluentMotionFacet();
 
-  /// Not yet: what appears on top is its own slice, and it is the one the
-  /// controls facet is waiting on for tooltips, pickers and flyout lists.
+  /// Things that appear on top: the point-anchored menu is implemented;
+  /// the dialog, the anchored trigger, the popover and the notice still
+  /// refuse loudly, each with its own fence inside [FluentOverlays] - so
+  /// the facet getter no longer throws, and the remaining gaps moved from
+  /// the facet's door to the members that are actually missing.
   @override
-  SkinOverlays get overlays => throw UnimplementedError(
-    'The Fluent overlays facet is not implemented yet. Until it lands, the '
-    'controls facet announces tooltips to the semantics tree and opens its '
-    'lists in place - both registered in FluentControls\'s doc.',
-  );
+  SkinOverlays get overlays => const FluentOverlays();
 
   /// Adds Fluent to this build's list of design languages.
   ///

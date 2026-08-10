@@ -327,15 +327,43 @@ abstract final class FluentTypeResolution {
     final TextStyle step = FluentTypeScale.stepOf(role);
     final SkinRequest? request = FluentRequestScope.maybeOf(context);
     if (request == null) return step;
-    final TextStyle scaled = _scaled(
+    return _resolve(
       step,
-      role == TextRole.code
+      scale: role == TextRole.code
           ? request.textScale * request.codeScale
           : request.textScale,
+      family: role == TextRole.code ? request.monoFamily : request.uiFamily,
     );
-    final String family = role == TextRole.code
-        ? request.monoFamily
-        : request.uiFamily;
+  }
+
+  /// The style a CHROME ramp step takes under the request in force at
+  /// [context] - the door for the upper rungs no [TextRole] reaches.
+  ///
+  /// The mapping doc on [FluentTypeScale] records that the reference spends
+  /// Title on window-scale chrome (`PageHeader`, `controls/layout/
+  /// page.dart:279`; the `ContentDialog` title, `flyouts/
+  /// content_dialog.dart:508`), which arrives through `ScreenSpec.title` and
+  /// `DialogSpec.title` rather than through a role. The chrome facet still
+  /// owes those lines the user's interface family and text scale, and it
+  /// owes them through THIS file: a second copy of the family-and-scale
+  /// arithmetic in the chrome would be exactly the drift the single door
+  /// exists to prevent. [step] is one of [FluentTypeRamp]'s members; the
+  /// resolution is the interface half of [styleOf]'s (never the monospace
+  /// half, because no chrome line is code).
+  static TextStyle chromeStyleOf(BuildContext context, TextStyle step) {
+    final SkinRequest? request = FluentRequestScope.maybeOf(context);
+    if (request == null) return step;
+    return _resolve(step, scale: request.textScale, family: request.uiFamily);
+  }
+
+  /// [step] under the user's [scale] and [family] - the one place the two
+  /// halves of the request become a style.
+  static TextStyle _resolve(
+    TextStyle step, {
+    required double scale,
+    required String family,
+  }) {
+    final TextStyle scaled = _scaled(step, scale);
     if (family.isEmpty) return scaled;
     try {
       return GoogleFonts.getFont(family, textStyle: scaled);

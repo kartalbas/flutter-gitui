@@ -40,9 +40,11 @@ final class FluentPressable extends StatefulWidget {
     super.key,
     required this.builder,
     this.onPressed,
+    this.onContextMenu,
     this.semanticsLabel,
     this.focusNode,
     this.autofocus = false,
+    this.mergeSemantics = true,
   });
 
   /// Draws the control for the current states. Called on every state change.
@@ -52,17 +54,39 @@ final class FluentPressable extends StatefulWidget {
   /// contract's `ButtonSpec.onPressed`.
   final VoidCallback? onPressed;
 
+  /// What asking for the control's own menu does, and where the user asked.
+  ///
+  /// Carried here rather than in each surface because the secondary button
+  /// belongs to the same interaction shell as the primary one: a region that
+  /// is ONLY right-clickable still hovers and still participates in the
+  /// state machine, exactly as the blueprint's content pressable records.
+  final ValueChanged<Offset>? onContextMenu;
+
   /// The accessible name, merged over the child semantics.
   final String? semanticsLabel;
 
   /// The application's own handle on this control's focus, when it has one.
+  ///
+  /// A SURFACE that lives inside a roving-highlight collection passes a node
+  /// with `canRequestFocus: false` here, so the collection stays a single
+  /// Tab stop - the same decision the Material card registers as CARD-003.
   final FocusNode? focusNode;
 
   /// Whether to take focus when first built.
   final bool autofocus;
 
-  /// Whether the control answers input at all.
-  bool get enabled => onPressed != null;
+  /// Whether the whole subtree collapses into one semantics node.
+  ///
+  /// True for a CONTROL, whose meaning is its own visible label. False for a
+  /// SURFACE that holds other controls - a list row hangs a checkbox, a
+  /// badge and a menu anchor beside its content, and merging would take all
+  /// of them away from a screen reader. The same split the blueprint's
+  /// `_ContentPressable` documents.
+  final bool mergeSemantics;
+
+  /// Whether the control answers input at all. A region whose only
+  /// affordance is its context menu is still operable.
+  bool get enabled => onPressed != null || onContextMenu != null;
 
   @override
   State<FluentPressable> createState() => _FluentPressableState();
@@ -125,14 +149,18 @@ class _FluentPressableState extends State<FluentPressable> {
     Widget child = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: widget.enabled ? widget.onPressed : null,
-      onTapDown: widget.enabled
+      onTapDown: widget.enabled && widget.onPressed != null
           ? (TapDownDetails details) => setState(() => _pressing = true)
           : null,
-      onTapUp: widget.enabled
+      onTapUp: widget.enabled && widget.onPressed != null
           ? (TapUpDetails details) => _releasePress()
           : null,
-      onTapCancel: widget.enabled
+      onTapCancel: widget.enabled && widget.onPressed != null
           ? () => setState(() => _pressing = false)
+          : null,
+      onSecondaryTapUp: widget.enabled && widget.onContextMenu != null
+          ? (TapUpDetails details) =>
+                widget.onContextMenu!(details.globalPosition)
           : null,
       child: widget.builder(context, _states),
     );
@@ -145,12 +173,11 @@ class _FluentPressableState extends State<FluentPressable> {
       onShowHoverHighlight: (bool value) => setState(() => _hovering = value),
       child: child,
     );
-    return MergeSemantics(
-      child: Semantics(
-        label: widget.semanticsLabel,
-        enabled: widget.enabled,
-        child: child,
-      ),
+    child = Semantics(
+      label: widget.semanticsLabel,
+      enabled: widget.enabled,
+      child: child,
     );
+    return widget.mergeSemantics ? MergeSemantics(child: child) : child;
   }
 }

@@ -400,8 +400,8 @@ const Map<String, int> kContractRenderedPerScene = <String, int>{
   'shell': 175,
   'workspaces': 33,
   'repositories': 59,
-  'changes': 52,
-  'history': 90,
+  'changes': 54,
+  'history': 93,
   'browse': 28,
   'branches': 17,
   // #249 P4's overlay migration raised exactly two scenes, both for the same

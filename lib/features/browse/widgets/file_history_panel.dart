@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_pressable.dart';
 import '../../../shared/components/base_progress.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../shared/components/base_card.dart';
@@ -97,7 +98,7 @@ class FileHistoryPanel extends ConsumerWidget {
       // roving highlight - and this is a plain `ListView`, where each commit
       // card is its own Tab stop today. Handing the tap to the member would
       // take these cards off the keyboard.
-      content: InkWell(
+      content: BasePressable(
         onTap: () => _viewCommitDiff(context, commit),
         child: BaseInset(
           child: Column(

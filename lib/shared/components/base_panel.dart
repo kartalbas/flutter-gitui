@@ -3,6 +3,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Inset, Proximity, Tone;
 import '../../shared/theme/app_theme.dart';
 import 'base_icon.dart';
+import 'base_pressable.dart';
 import 'base_layout.dart';
 
 /// Base component for all panel patterns in the app.
@@ -177,7 +178,7 @@ class _BasePanelState extends State<BasePanel> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Header section
-                InkWell(
+                BasePressable(
                   onTap: widget.isCollapsible ? _toggleExpanded : null,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(

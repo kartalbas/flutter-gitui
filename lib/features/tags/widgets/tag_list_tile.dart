@@ -7,6 +7,7 @@ import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_icon.dart';
+import '../../../shared/components/base_pressable.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_card.dart';
@@ -76,7 +77,7 @@ class TagListTile extends ConsumerWidget {
         isMultiSelected: selectionMode && isSelected,
         containerHasFocus: containerHasFocus,
         content: selectionMode
-            ? InkWell(
+            ? BasePressable(
                 onTap: () => onSelectionChanged?.call(!isSelected),
                 child: BaseInset(
                   all: Inset.normal,

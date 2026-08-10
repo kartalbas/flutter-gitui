@@ -130,19 +130,72 @@ final class FluentOverlays implements SkinOverlays {
     'menu surface it will open.',
   );
 
-  /// Not yet: the popover is the plain Flyout idiom and lands with its own
-  /// slice - it is what the controls facet's suggest and combo lists are
-  /// waiting on.
+  /// The plain Flyout: the same surface the menu opens on, carrying the
+  /// application's own content instead of rows.
+  ///
+  /// It reuses [_FluentMenuRoute] and [_FluentFlyoutPlacement] rather than
+  /// growing a second arrangement, because a popover and a menu ARE one thing
+  /// in this language - `FlyoutController.showFlyout` opens both at a position
+  /// and clamps both to the same 8 epx margin (flyout.dart:493-516, 787). The
+  /// only difference is what stands on the surface.
+  ///
+  /// The anchor is measured here rather than passed in, because the member's
+  /// `context` IS the anchor's: a control that opens a suggestion list should
+  /// not also have to report where it is.
   @override
   Future<T?> presentPopover<T>(
     BuildContext context,
     PopoverSpec spec,
     SkinContentHost host,
-  ) => throw UnimplementedError(
-    'FluentOverlays.presentPopover is not implemented yet: the anchored '
-    'Flyout surface lands with its own slice, and the controls facet\'s '
-    'in-place lists move into it when it does.',
-  );
+  ) {
+    Offset at = Offset.zero;
+    double? anchorWidth;
+    final RenderObject? renderObject = context.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      at = renderObject.localToGlobal(Offset(0, renderObject.size.height));
+      anchorWidth = renderObject.size.width;
+    }
+    // `continuesAnchor` is a statement of RELATIONSHIP, not of width, and
+    // this is the skin deciding what that relationship means: a list that
+    // continues its field takes the field's measure, so the two read as one
+    // control rather than as a surface that happens to be nearby.
+    final double? matchWidth = spec.continuesAnchor ? anchorWidth : null;
+
+    return Navigator.of(context, rootNavigator: true).push<T>(
+      _FluentMenuRoute<T>(
+        barrierDismissible: spec.barrierDismissible,
+        barrierLabel: spec.semanticsLabel,
+        // The overlay this replaces appeared the moment it was inserted, and
+        // a suggestion list that fades in lags the typing that opened it.
+        transitionDuration: Duration.zero,
+        pageBuilder:
+            (
+              BuildContext routeContext,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => host.build(
+              routeContext,
+              // Everything the skin puts around the content - the anchoring,
+              // the surface, the dismiss handling - is applied inside the
+              // host's own fence, so none of it is attributed to the
+              // application and the content resumes at its own boundary.
+              frame: (BuildContext inner, Widget content) => _Dismissible(
+                child: CustomSingleChildLayout(
+                  delegate: _FluentFlyoutPlacement(at: at),
+                  child: Semantics(
+                    container: true,
+                    label: spec.semanticsLabel,
+                    child: FluentFlyoutSurface(
+                      width: matchWidth,
+                      child: content,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+      ),
+    );
+  }
 
   /// Not yet: the notice is the InfoBar idiom and lands with its own slice.
   @override
@@ -164,8 +217,10 @@ final class _FluentMenuRoute<T> extends RawDialogRoute<T> {
     required super.pageBuilder,
     required super.transitionDuration,
     super.barrierLabel,
+    // A menu is always light-dismissible; a popover says whether it is, and
+    // the two share this route because the language opens them the same way.
+    super.barrierDismissible = true,
   }) : super(
-         barrierDismissible: true,
          // flyout.dart:1029: the flyout barrier is transparent - a menu
          // does not smoke the application behind it.
          barrierColor: const Color(0x00000000),
@@ -290,6 +345,45 @@ class _FluentFlyoutPlacement extends SingleChildLayoutDelegate {
 /// Public within the package (never exported) so the behaviour suite can
 /// find the surface and measure it - the same visibility every drawn
 /// control in `controls/` has.
+/// The surface a flyout stands on: the fill, the stroke, the 8 epx corner and
+/// the overlay shadow, with nothing said about what is on it.
+///
+/// Extracted so the menu and the popover cannot disagree. They are one surface
+/// in this language — `FlyoutController.showFlyout` opens both — and drawing it
+/// twice would be two chances to drift, which is the defect the whole contract
+/// exists to end, arriving inside a single skin.
+final class FluentFlyoutSurface extends StatelessWidget {
+  /// Draws the flyout surface around [child].
+  const FluentFlyoutSurface({super.key, required this.child, this.width});
+
+  /// What stands on the surface.
+  final Widget child;
+
+  /// The anchor's width, when the caller said this surface CONTINUES its
+  /// anchor. Null lets the content size itself.
+  final double? width;
+
+  @override
+  Widget build(BuildContext context) {
+    final FluentThemeData theme = FluentTheme.of(context);
+    final FluentDepth depth = FluentInk.depth(theme, Elevation.overlay);
+    final Widget surface = DecoratedBox(
+      decoration: BoxDecoration(
+        color: depth.fill,
+        borderRadius: BorderRadius.circular(FluentGeometry.overlayCornerRadius),
+        border: Border.all(color: depth.stroke),
+        boxShadow: depth.shadows(FluentInk.shadowInk(theme.brightness)),
+      ),
+      child: ConstrainedBox(
+        // kFlyoutMinConstraints, flyout_content.dart:4.
+        constraints: const BoxConstraints(minWidth: 118),
+        child: child,
+      ),
+    );
+    return width == null ? surface : SizedBox(width: width, child: surface);
+  }
+}
+
 final class FluentMenuSurface extends StatelessWidget {
   /// Draws the menu over [entries].
   const FluentMenuSurface({super.key, required this.entries});
@@ -300,8 +394,6 @@ final class FluentMenuSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FluentThemeData theme = FluentTheme.of(context);
-    final FluentDepth depth = FluentInk.depth(theme, Elevation.overlay);
     // The leading gutter is reserved for EVERY row as soon as any row has a
     // leading mark, so words align down the menu - the reference's icon
     // placeholder behaviour (menu_flyout.dart:97-99,122,331-336). A
@@ -389,28 +481,18 @@ final class FluentMenuSurface extends StatelessWidget {
     return Semantics(
       role: SemanticsRole.menu,
       explicitChildNodes: true,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: depth.fill,
-          borderRadius: BorderRadius.circular(
-            FluentGeometry.overlayCornerRadius,
-          ),
-          border: Border.all(color: depth.stroke),
-          boxShadow: depth.shadows(FluentInk.shadowInk(theme.brightness)),
-        ),
-        child: ConstrainedBox(
-          // kFlyoutMinConstraints, flyout_content.dart:4.
-          constraints: const BoxConstraints(minWidth: 118),
-          child: IntrinsicWidth(
-            child: Padding(
-              // kDefaultMenuPadding, menu_flyout.dart:7.
-              padding: const EdgeInsetsDirectional.symmetric(vertical: 2),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: rows,
-                ),
+      // The surface itself is [FluentFlyoutSurface]: a menu and a popover
+      // stand on one surface in this language, so it is drawn once.
+      child: FluentFlyoutSurface(
+        child: IntrinsicWidth(
+          child: Padding(
+            // kDefaultMenuPadding, menu_flyout.dart:7.
+            padding: const EdgeInsetsDirectional.symmetric(vertical: 2),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: rows,
               ),
             ),
           ),

@@ -11,6 +11,8 @@
 /// and dispatches after.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -435,9 +437,102 @@ void main() {
     });
   });
 
-  group('the four fences', () {
-    testWidgets('dialog, anchor, popover and notice refuse loudly, each '
-        'naming itself', (WidgetTester tester) async {
+  group('the popover', () {
+    // A popover is not a second surface: it is the menu's surface carrying the
+    // application's content. These pin the two things a caller can state about
+    // it, because both are meaning rather than measurement.
+    testWidgets('a popover that CONTINUES its anchor takes that width', (
+      WidgetTester tester,
+    ) async {
+      late BuildContext anchorContext;
+      await pumpFluentOverlayApp(tester, (BuildContext context) {
+        anchorContext = context;
+        return const SizedBox.expand();
+      });
+      unawaited(
+        Overlays.popover<void>(
+          anchorContext,
+          const PopoverSpec(semanticsLabel: 'x', continuesAnchor: true),
+          const ContentPort(SizedBox(width: 40, height: 40)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The anchor fills the 1280 surface, and the content inside is 40 wide -
+      // so a surface this wide can only have come from the anchor.
+      expect(
+        tester.getSize(find.byType(FluentFlyoutSurface)).width,
+        greaterThan(1000),
+      );
+      Navigator.of(anchorContext, rootNavigator: true).pop();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a popover that does not continue its anchor sizes itself', (
+      WidgetTester tester,
+    ) async {
+      late BuildContext anchorContext;
+      await pumpFluentOverlayApp(tester, (BuildContext context) {
+        anchorContext = context;
+        return const SizedBox.expand();
+      });
+      unawaited(
+        Overlays.popover<void>(
+          anchorContext,
+          const PopoverSpec(semanticsLabel: 'x'),
+          const ContentPort(SizedBox(width: 40, height: 40)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      // The flyout's own minimum is 118, so this cannot reach the anchor's
+      // width by accident.
+      expect(
+        tester.getSize(find.byType(FluentFlyoutSurface)).width,
+        lessThan(200),
+      );
+      Navigator.of(anchorContext, rootNavigator: true).pop();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a popover that is not barrier-dismissible survives a tap '
+        'outside it', (WidgetTester tester) async {
+      late BuildContext anchorContext;
+      await pumpFluentOverlayApp(tester, (BuildContext context) {
+        anchorContext = context;
+        return const SizedBox.expand();
+      });
+      unawaited(
+        Overlays.popover<void>(
+          anchorContext,
+          const PopoverSpec(
+            semanticsLabel: 'sticky',
+            barrierDismissible: false,
+          ),
+          const ContentPort(SizedBox(width: 40, height: 40)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(FluentFlyoutSurface), findsOneWidget);
+
+      await tester.tapAt(const Offset(2, 2));
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(FluentFlyoutSurface),
+        findsOneWidget,
+        reason: 'barrierDismissible: false must keep the surface up',
+      );
+
+      Navigator.of(anchorContext, rootNavigator: true).pop();
+      await tester.pumpAndSettle();
+    });
+  });
+
+  group('the fences that remain', () {
+    // Was four; the popover has landed, so it is three. The count is asserted
+    // rather than described because a fence that quietly stops refusing is a
+    // member that quietly started guessing.
+    testWidgets('dialog, anchor and notice refuse loudly, each naming itself', (
+      WidgetTester tester,
+    ) async {
       late BuildContext host;
       await pumpFluentOverlayApp(tester, (BuildContext context) {
         host = context;
@@ -447,14 +542,6 @@ void main() {
         () => Overlays.dialog<void>(
           host,
           DialogSpec(title: 'x', content: const ContentPort(SizedBox.shrink())),
-        ),
-        throwsUnimplementedError,
-      );
-      expect(
-        () => Overlays.popover<void>(
-          host,
-          const PopoverSpec(semanticsLabel: 'x'),
-          const ContentPort(SizedBox.shrink()),
         ),
         throwsUnimplementedError,
       );

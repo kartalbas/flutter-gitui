@@ -354,4 +354,154 @@ void main() {
       );
     });
   });
+
+  group('the toolbar, whose arithmetic was reported broken four times', () {
+    ToolbarActionEntry action(String name) => ToolbarActionEntry(
+      label: name,
+      tooltip: name,
+      icon: IconRole.download,
+      onPressed: () {},
+    );
+
+    ShellSpec withUtilities(int count) => _shell(
+      density: NavigationDensity.hidden,
+      toolbar: <ToolbarGroup>[
+        ToolbarGroup(<ToolbarEntry>[
+          const ToolbarPickerEntry(
+            label: 'Repository',
+            value: 'flutter-gitui',
+            icon: IconRole.gitBranch,
+            entries: <MenuEntry>[],
+          ),
+        ], priority: ToolbarPriority.pinned),
+        ToolbarGroup(<ToolbarEntry>[
+          for (int i = 0; i < count; i++) action('Utility $i'),
+        ], priority: ToolbarPriority.sheddable),
+      ],
+    );
+
+    /// Which utility actions reached the bar itself, by index.
+    List<int> onBar(int count) => <int>[
+      for (int i = 0; i < count; i++)
+        if (find.byTooltip('Utility $i').evaluate().isNotEmpty) i,
+    ];
+
+    testWidgets('a sheddable group is CAPPED, so it collapses into its own '
+        'overflow instead of pushing the picker off the bar (#359)', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(2400, 800);
+      addTearDown(tester.view.resetPhysicalSize);
+      await _pumpShell(tester, withUtilities(10));
+
+      // The measured invariant, and the one a naive bar gets wrong: the
+      // sheddable cluster does NOT grow into the room a wide window offers.
+      // It claims three item widths at most, which is two actions and its own
+      // overflow button, and everything else goes into that menu.
+      expect(onBar(10), <int>[0, 1]);
+      expect(find.text('flutter-gitui'), findsOneWidget);
+
+      tester.view.physicalSize = const Size(700, 800);
+      await tester.pumpAndSettle();
+      expect(
+        onBar(10),
+        <int>[0, 1],
+        reason:
+            'the cap is what makes the narrow window behave like the wide '
+            'one - the subject every other control acts on never gives way to '
+            'the utilities',
+      );
+      expect(find.text('flutter-gitui'), findsOneWidget);
+    });
+
+    testWidgets('a group that fits keeps every action on the bar', (
+      WidgetTester tester,
+    ) async {
+      await _pumpShell(tester, withUtilities(2));
+      expect(onBar(2), <int>[0, 1]);
+    });
+
+    testWidgets('a picker names its subject and offers the rest - the shape '
+        'the four switchers become', (WidgetTester tester) async {
+      final List<String> chosen = <String>[];
+      await _pumpShell(
+        tester,
+        _shell(
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              ToolbarPickerEntry(
+                label: 'Repository',
+                value: 'flutter-gitui',
+                icon: IconRole.gitBranch,
+                entries: <MenuEntry>[
+                  MenuAction(
+                    label: 'other-repo',
+                    onPressed: () => chosen.add('other-repo'),
+                  ),
+                ],
+              ),
+            ], priority: ToolbarPriority.pinned),
+          ],
+        ),
+      );
+      expect(find.text('flutter-gitui'), findsOneWidget);
+
+      await tester.tap(find.text('flutter-gitui'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('other-repo'));
+      await tester.pumpAndSettle();
+      expect(chosen, <String>['other-repo']);
+    });
+
+    testWidgets('a picker with nothing to choose from says so and does not '
+        'open', (WidgetTester tester) async {
+      await _pumpShell(
+        tester,
+        _shell(
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              const ToolbarPickerEntry(
+                label: 'Repository',
+                value: '',
+                emptyLabel: 'No repository',
+                icon: IconRole.gitBranch,
+                entries: <MenuEntry>[],
+              ),
+            ], priority: ToolbarPriority.pinned),
+          ],
+        ),
+      );
+      expect(find.text('No repository'), findsOneWidget);
+
+      await tester.tap(find.text('No repository'));
+      await tester.pumpAndSettle();
+      // A picker over an empty set is a statement, not a control: nothing
+      // opened, and the words are still the only thing on screen.
+      expect(find.text('No repository'), findsOneWidget);
+    });
+
+    testWidgets('a standing menu is a popup of its own and is never folded '
+        'into an overflow', (WidgetTester tester) async {
+      await _pumpShell(
+        tester,
+        _shell(
+          toolbar: <ToolbarGroup>[
+            ToolbarGroup(<ToolbarEntry>[
+              ToolbarMenuEntry(
+                icon: IconRole.gear,
+                tooltip: 'Quick settings',
+                entries: <MenuEntry>[
+                  MenuAction(label: 'Dark mode', onPressed: () {}),
+                ],
+              ),
+            ], priority: ToolbarPriority.pinned),
+          ],
+        ),
+      );
+
+      await tester.tap(find.byTooltip('Quick settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('Dark mode'), findsOneWidget);
+    });
+  });
 }

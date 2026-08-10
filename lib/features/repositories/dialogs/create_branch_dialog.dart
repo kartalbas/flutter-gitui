@@ -12,6 +12,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Tone;
 
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
@@ -379,39 +380,26 @@ class _CreateBranchDialogState extends State<_CreateBranchDialog> {
           const BaseGap(Proximity.separate),
 
           // Options
-          CheckboxListTile(
+          BaseToggleRow(
             value: _setUpstream,
             onChanged: (value) {
               setState(() {
                 _setUpstream = value ?? false;
               });
             },
-            title: BaseLabel(l10n.setUpstreamLabel, role: TextRole.body),
-            subtitle: BaseLabel(
-              l10n.setUpstreamDescription,
-              role: TextRole.detail,
-            ),
-            dense: true,
-            controlAffinity: ListTileControlAffinity.leading,
+            label: l10n.setUpstreamLabel,
+            description: l10n.setUpstreamDescription,
           ),
 
-          CheckboxListTile(
+          BaseToggleRow(
             value: _checkout,
             onChanged: (value) {
               setState(() {
                 _checkout = value ?? false;
               });
             },
-            title: BaseLabel(
-              l10n.checkoutAfterCreationLabel,
-              role: TextRole.body,
-            ),
-            subtitle: BaseLabel(
-              l10n.checkoutAfterCreationDescription,
-              role: TextRole.detail,
-            ),
-            dense: true,
-            controlAffinity: ListTileControlAffinity.leading,
+            label: l10n.checkoutAfterCreationLabel,
+            description: l10n.checkoutAfterCreationDescription,
           ),
         ],
       ),

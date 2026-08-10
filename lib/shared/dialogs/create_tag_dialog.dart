@@ -12,11 +12,13 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Skin,
         SkinScope,
         TextRole,
+        ToggleKind,
         Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_toggle_row.dart';
 import '../theme/app_theme.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
@@ -228,16 +230,14 @@ class _CreateTagDialogState extends ConsumerState<CreateTagDialog> {
               const BaseGap(Proximity.separate),
 
               // Annotated tag option
-              SwitchListTile(
-                title: BaseLabel(l10n.annotatedTag, role: TextRole.body),
-                subtitle: BaseLabel(
-                  l10n.includeMessageWithTag,
-                  role: TextRole.detail,
-                ),
+              BaseToggleRow(
+                label: l10n.annotatedTag,
+                description: l10n.includeMessageWithTag,
                 value: _isAnnotated,
                 onChanged: (value) {
-                  setState(() => _isAnnotated = value);
+                  setState(() => _isAnnotated = value ?? false);
                 },
+                kind: ToggleKind.switching,
               ),
               const BaseGap(Proximity.grouped),
 

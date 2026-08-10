@@ -16,6 +16,7 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../../shared/theme/app_theme.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_dropdown.dart';
 import '../../../generated/app_localizations.dart';
@@ -345,17 +346,15 @@ class _CreatePullRequestDialogState extends State<CreatePullRequestDialog> {
             const BaseGap(Proximity.separate),
 
             // Draft checkbox
-            CheckboxListTile(
+            BaseToggleRow(
               value: _isDraft,
               onChanged: (value) {
                 setState(() {
                   _isDraft = value ?? false;
                 });
               },
-              title: Text(l10n.createAsDraftLabel),
-              subtitle: Text(l10n.draftPRDescription),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
+              label: l10n.createAsDraftLabel,
+              description: l10n.draftPRDescription,
             ),
 
             const BaseGap(Proximity.related),

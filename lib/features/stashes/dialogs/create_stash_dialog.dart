@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Inset, Proximity, TextRole, Tone;
+    show IconRole, Inset, Proximity, TextRole, ToggleKind, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/theme/app_theme.dart';
@@ -10,6 +10,7 @@ import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_button.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_label.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../core/git/git_providers.dart';
 import '../../../shared/components/base_layout.dart';
 
@@ -80,25 +81,24 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
           const BaseGap(Proximity.grouped),
 
           // File selection mode toggle
-          SwitchListTile(
+          BaseToggleRow(
             value: _stashAllFiles,
+            // `switching`: flipping it re-selects the file list immediately,
+            // so it is in force the moment it moves rather than something the
+            // dialog's confirm button applies later.
+            kind: ToggleKind.switching,
             onChanged: (value) {
               setState(() {
-                _stashAllFiles = value;
-                if (value) {
+                _stashAllFiles = value ?? false;
+                if (_stashAllFiles) {
                   // Select all files when switching to "all files" mode
                   _selectedFiles.clear();
                   _selectedFiles.addAll(allStatuses.map((f) => f.path));
                 }
               });
             },
-            title: BaseLabel(l10n.stashAllFiles, role: TextRole.body),
-            subtitle: BaseLabel(
-              l10n.stashAllFilesToggle,
-              role: TextRole.detail,
-            ),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
+            label: l10n.stashAllFiles,
+            description: l10n.stashAllFilesToggle,
           ),
 
           // File selection list (only show when not stashing all files)
@@ -155,6 +155,13 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
                     final file = allStatuses[index];
                     final isSelected = _selectedFiles.contains(file.path);
 
+                    // NOT `BaseToggleRow`, and the reason is a contract gap
+                    // rather than an oversight: this row's subtitle carries the
+                    // file's git status TONE, and `ToggleRowSpec.description`
+                    // is a bare String. Converting would silently drop the
+                    // colour that tells added from deleted at a glance, which
+                    // is an appearance change hiding inside a rename. Reported
+                    // against `controls.toggleRow` instead.
                     return CheckboxListTile(
                       value: isSelected,
                       onChanged: (value) {
@@ -191,31 +198,24 @@ class _CreateStashDialogState extends ConsumerState<CreateStashDialog> {
           ],
 
           const BaseGap(Proximity.grouped),
-          CheckboxListTile(
+          BaseToggleRow(
             value: _includeUntracked,
             onChanged: (value) {
               setState(() {
                 _includeUntracked = value ?? false;
               });
             },
-            title: BaseLabel(l10n.includeUntrackedFiles, role: TextRole.body),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
+            label: l10n.includeUntrackedFiles,
           ),
-          CheckboxListTile(
+          BaseToggleRow(
             value: _keepIndex,
             onChanged: (value) {
               setState(() {
                 _keepIndex = value ?? false;
               });
             },
-            title: BaseLabel(l10n.keepStagedChanges, role: TextRole.body),
-            subtitle: BaseLabel(
-              l10n.keepStagedChangesSubtitle,
-              role: TextRole.detail,
-            ),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
+            label: l10n.keepStagedChanges,
+            description: l10n.keepStagedChangesSubtitle,
           ),
         ],
       ),

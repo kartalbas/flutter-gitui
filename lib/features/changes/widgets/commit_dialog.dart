@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show
@@ -17,6 +17,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_dialog.dart';
 import '../../../shared/components/base_text_field.dart';
 import '../../../shared/components/base_icon.dart';
@@ -280,7 +281,7 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
             const BaseGap(Proximity.grouped),
 
             // Amend checkbox
-            CheckboxListTile(
+            BaseToggleRow(
               value: _isAmend,
               onChanged: (value) {
                 setState(() {
@@ -292,15 +293,10 @@ class _CommitDialogState extends ConsumerState<CommitDialog> {
                   _messageController.clear();
                 }
               },
-              title: Text(
-                AppLocalizations.of(context)!.checkboxAmendLastCommit,
-              ),
-              subtitle: BaseLabel(
-                AppLocalizations.of(context)!.checkboxAmendLastCommitSubtitle,
-                role: TextRole.detail,
-              ),
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
+              label: AppLocalizations.of(context)!.checkboxAmendLastCommit,
+              description: AppLocalizations.of(
+                context,
+              )!.checkboxAmendLastCommitSubtitle,
             ),
 
             // How to write a good commit message: "this is worth knowing and

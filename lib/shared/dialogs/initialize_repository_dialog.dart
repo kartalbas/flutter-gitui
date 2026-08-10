@@ -12,10 +12,12 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Skin,
         SkinScope,
         TextRole,
+        ToggleKind,
         Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_dialog.dart';
+import '../components/base_toggle_row.dart';
 import '../components/base_label.dart';
 import '../components/base_button.dart';
 import '../components/base_text_field.dart';
@@ -103,24 +105,20 @@ class _InitializeRepositoryDialogState
             const BaseGap(Proximity.grouped),
 
             // Bare repository option
-            SwitchListTile(
+            BaseToggleRow(
               value: _bare,
               onChanged: _isInitializing
                   ? null
                   : (value) {
                       setState(() {
-                        _bare = value;
+                        _bare = value ?? false;
                       });
                     },
-              title: BaseLabel(
-                AppLocalizations.of(context)!.bareRepository,
-                role: TextRole.body,
-              ),
-              subtitle: BaseLabel(
-                AppLocalizations.of(context)!.bareRepositoryDescription,
-                role: TextRole.detail,
-              ),
-              contentPadding: EdgeInsets.zero,
+              label: AppLocalizations.of(context)!.bareRepository,
+              description: AppLocalizations.of(
+                context,
+              )!.bareRepositoryDescription,
+              kind: ToggleKind.switching,
             ),
 
             // **Something about this whole surface needs saying**: what the

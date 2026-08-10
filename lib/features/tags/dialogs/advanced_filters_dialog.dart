@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show IconRole, Proximity, TextRole;
+    show IconRole, Proximity, TextRole, ToggleKind;
 
 import '../../../generated/app_localizations.dart';
 import '../../../core/git/models/tag.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_date_field.dart';
 import '../../../shared/components/base_dropdown.dart';
@@ -165,20 +165,16 @@ class _AdvancedFiltersDialogState extends State<AdvancedFiltersDialog> {
             const BaseGap(Proximity.separate),
 
             // Regex Search Toggle
-            SwitchListTile(
+            BaseToggleRow(
               value: _useRegex,
               onChanged: (value) {
                 setState(() {
-                  _useRegex = value;
+                  _useRegex = value ?? false;
                 });
               },
-              title: BaseLabel(loc.useRegularExpressions, role: TextRole.body),
-              subtitle: BaseLabel(
-                loc.enableRegexPatternMatching,
-                role: TextRole.detail,
-              ),
-              secondary: const Icon(PhosphorIconsRegular.code),
-              contentPadding: EdgeInsets.zero,
+              label: loc.useRegularExpressions,
+              description: loc.enableRegexPatternMatching,
+              kind: ToggleKind.switching,
             ),
           ],
         ),

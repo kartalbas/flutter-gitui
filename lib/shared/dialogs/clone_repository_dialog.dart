@@ -12,12 +12,14 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
         Skin,
         SkinScope,
         TextRole,
+        ToggleKind,
         Tone;
 
 import '../../generated/app_localizations.dart';
 import '../components/base_text_field.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_toggle_row.dart';
 import '../../core/git/git_service.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/config/config_providers.dart';
@@ -125,24 +127,20 @@ class _CloneRepositoryDialogState extends ConsumerState<CloneRepositoryDialog> {
             const BaseGap(Proximity.grouped),
 
             // Shallow clone option
-            SwitchListTile(
+            BaseToggleRow(
               value: _shallowClone,
               onChanged: _isCloning
                   ? null
                   : (value) {
                       setState(() {
-                        _shallowClone = value;
+                        _shallowClone = value ?? false;
                       });
                     },
-              title: BaseLabel(
-                AppLocalizations.of(context)!.shallowClone,
-                role: TextRole.body,
-              ),
-              subtitle: BaseLabel(
-                AppLocalizations.of(context)!.shallowCloneDescription,
-                role: TextRole.detail,
-              ),
-              contentPadding: EdgeInsets.zero,
+              label: AppLocalizations.of(context)!.shallowClone,
+              description: AppLocalizations.of(
+                context,
+              )!.shallowCloneDescription,
+              kind: ToggleKind.switching,
             ),
 
             if (_shallowClone) ...[

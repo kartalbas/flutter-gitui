@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
@@ -21,6 +21,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_badge.dart';
 import '../../../shared/components/base_card.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_icon.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_dialog.dart';
@@ -319,16 +320,14 @@ class _GitOutputContentState extends State<_GitOutputContent> {
 
         // Keep open checkbox (only for successful commands)
         if (result.isSuccess && widget.autoCloseOnSuccess)
-          CheckboxListTile(
+          BaseToggleRow(
             value: _keepOpen,
             onChanged: (value) {
               setState(() {
                 _keepOpen = value ?? false;
               });
             },
-            title: Text(AppLocalizations.of(context)!.checkboxKeepDialogOpen),
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
+            label: AppLocalizations.of(context)!.checkboxKeepDialogOpen,
           ),
       ],
     );

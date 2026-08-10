@@ -17,6 +17,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 import '../../generated/app_localizations.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
+import '../components/base_toggle_row.dart';
 import '../components/base_text_field.dart';
 import '../../core/git/git_providers.dart';
 import '../../core/git/models/branch.dart';
@@ -172,7 +173,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
             const BaseGap(Proximity.related),
 
             // Fast-forward only
-            CheckboxListTile(
+            BaseToggleRow(
               value: _fastForwardOnly,
               onChanged: _isMerging
                   ? null
@@ -184,15 +185,14 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                         }
                       });
                     },
-              title: Text(AppLocalizations.of(context)!.fastForwardOnly),
-              subtitle: Text(
-                AppLocalizations.of(context)!.abortIfFastForwardNotPossible,
-              ),
-              contentPadding: EdgeInsets.zero,
+              label: AppLocalizations.of(context)!.fastForwardOnly,
+              description: AppLocalizations.of(
+                context,
+              )!.abortIfFastForwardNotPossible,
             ),
 
             // No fast-forward
-            CheckboxListTile(
+            BaseToggleRow(
               value: _noFastForward,
               onChanged: _isMerging
                   ? null
@@ -204,15 +204,14 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                         }
                       });
                     },
-              title: Text(AppLocalizations.of(context)!.noFastForward),
-              subtitle: Text(
-                AppLocalizations.of(context)!.alwaysCreateMergeCommit,
-              ),
-              contentPadding: EdgeInsets.zero,
+              label: AppLocalizations.of(context)!.noFastForward,
+              description: AppLocalizations.of(
+                context,
+              )!.alwaysCreateMergeCommit,
             ),
 
             // Squash
-            CheckboxListTile(
+            BaseToggleRow(
               value: _squash,
               onChanged: _isMerging
                   ? null
@@ -221,17 +220,16 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                         _squash = value ?? false;
                       });
                     },
-              title: Text(AppLocalizations.of(context)!.squashCommits),
-              subtitle: Text(
-                AppLocalizations.of(context)!.combineAllCommitsIntoSingleCommit,
-              ),
-              contentPadding: EdgeInsets.zero,
+              label: AppLocalizations.of(context)!.squashCommits,
+              description: AppLocalizations.of(
+                context,
+              )!.combineAllCommitsIntoSingleCommit,
             ),
 
             const BaseGap(Proximity.grouped),
 
             // Custom message option
-            CheckboxListTile(
+            BaseToggleRow(
               value: _customMessage,
               onChanged: _isMerging
                   ? null
@@ -240,8 +238,7 @@ class _MergeBranchDialogState extends ConsumerState<MergeBranchDialog> {
                         _customMessage = value ?? false;
                       });
                     },
-              title: Text(AppLocalizations.of(context)!.customMergeMessage),
-              contentPadding: EdgeInsets.zero,
+              label: AppLocalizations.of(context)!.customMergeMessage,
             ),
 
             if (_customMessage) ...[

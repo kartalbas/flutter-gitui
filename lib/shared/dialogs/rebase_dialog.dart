@@ -18,6 +18,7 @@ import 'package:gitui_skin_api/gitui_skin_api.dart'
 
 import '../../generated/app_localizations.dart';
 import '../components/base_card.dart';
+import '../components/base_toggle_row.dart';
 import '../components/base_icon.dart';
 import '../components/base_label.dart';
 import '../../core/git/git_providers.dart';
@@ -231,11 +232,11 @@ class _RebaseDialogState extends ConsumerState<RebaseDialog> {
             const BaseGap(Proximity.separate),
 
             // Interactive option
-            CheckboxListTile(
-              title: Text(AppLocalizations.of(context)!.interactiveRebase),
-              subtitle: Text(
-                AppLocalizations.of(context)!.editCommitsDuringRebase,
-              ),
+            BaseToggleRow(
+              label: AppLocalizations.of(context)!.interactiveRebase,
+              description: AppLocalizations.of(
+                context,
+              )!.editCommitsDuringRebase,
               value: _interactive,
               onChanged: (value) {
                 setState(() => _interactive = value ?? false);

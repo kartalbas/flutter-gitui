@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show Proximity, IconRole, TextRole, Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 import '../../../core/git/models/branch.dart';
@@ -66,13 +67,10 @@ class _DeleteBranchDialogState extends State<DeleteBranchDialog> {
           // The question and the option qualifying it are two parts of one
           // statement: `related`.
           const BaseGap(Proximity.related),
-          CheckboxListTile(
+          BaseToggleRow(
             value: _force,
             onChanged: (value) => setState(() => _force = value ?? false),
-            title: BaseLabel(l10n.forceDelete, role: TextRole.body),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
+            label: l10n.forceDelete,
           ),
           if (_force)
             // A force delete discards unmerged commits, which is destruction

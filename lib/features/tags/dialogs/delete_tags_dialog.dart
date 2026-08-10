@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
     show IconRole, Proximity, TextRole;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_dialog.dart';
+import '../../../shared/components/base_toggle_row.dart';
 import '../../../shared/components/base_label.dart';
 import '../../../shared/components/base_layout.dart';
 
@@ -50,19 +51,15 @@ class _DeleteTagsDialogState extends State<DeleteTagsDialog> {
               const BaseGap(Proximity.separate),
               const BaseSeparator(),
               const BaseGap(Proximity.grouped),
-              CheckboxListTile(
+              BaseToggleRow(
                 value: _deleteFromRemote,
                 onChanged: (value) {
                   setState(() {
                     _deleteFromRemote = value ?? false;
                   });
                 },
-                title: BaseLabel(loc.alsoDeleteFromRemote, role: TextRole.body),
-                subtitle: BaseLabel(
-                  loc.deleteFromRemoteSubtitle,
-                  role: TextRole.detail,
-                ),
-                contentPadding: EdgeInsets.zero,
+                label: loc.alsoDeleteFromRemote,
+                description: loc.deleteFromRemoteSubtitle,
               ),
             ],
           ],

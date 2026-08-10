@@ -264,10 +264,11 @@ class BranchListTile extends ConsumerWidget {
           if (errorMessage.contains('conflict') ||
               errorMessage.contains('merge conflict') ||
               errorMessage.contains('conflicting')) {
-            NotificationService.showError(
-              context,
-              'Merge conflict detected! Please resolve conflicts in the Changes tab.',
-            );
+            // Where the other two merge paths go (#450). The old message sent
+            // the user to the Changes tab in an untranslated sentence, which
+            // is neither where conflicts are resolved nor a string this
+            // application is allowed to ship.
+            await Navigator.of(context).pushNamed('/conflicts');
           }
           // Detect uncommitted changes preventing merge
           else if (errorMessage.contains('uncommitted') ||

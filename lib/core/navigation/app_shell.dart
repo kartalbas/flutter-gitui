@@ -1488,7 +1488,16 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   /// Show merge branches dialog
+  ///
+  /// The result is the whole point and used to be discarded (#450): the dialog
+  /// answers `true` when the merge ended in conflicts, and a user who is told
+  /// that and left where they were has been informed of a problem and offered
+  /// nowhere to solve it. The command palette already did this for the
+  /// single-branch merge; this is the same answer for the multi-branch one.
   Future<void> _performMergeBranches(BuildContext context) async {
-    await showMergeBranchesDialog(context);
+    final bool? hasConflicts = await showMergeBranchesDialog(context);
+    if (hasConflicts == true && context.mounted) {
+      await Navigator.of(context).pushNamed('/conflicts');
+    }
   }
 }

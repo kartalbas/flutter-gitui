@@ -103,10 +103,12 @@
 ///    all any more; `async_value_builder.dart` still names `file`, and
 ///    `gitDiff` leaves the distinct set with the move.
 ///
-/// The tally therefore reads 67 references: the 81 the conversion measured,
+/// The tally therefore reads 65 references: the 81 the conversion measured,
 /// less the seven recorded up to P3d, less the diff viewer's two that moved
 /// out of scope, less the dialog surface's two that the skin draws now, less
-/// the text field's three that became affordance facts.
+/// the text field's three that became affordance facts, less the batch bar's
+/// two that left with the widget itself - it was never mounted by any screen
+/// and was deleted with the other unreachable files.
 ///
 /// **Two - the skin maps the mark back to the identical glyph.** The second
 /// test resolves every one of the 38 marks through `MaterialGlyphs` and
@@ -185,14 +187,14 @@ void main() {
     );
   });
 
-  test('the census still accounts for all 67 references', () {
+  test('the census still accounts for all 65 references', () {
     // A cheap arithmetic backstop for the map comparison above. If somebody
     // edits the census to make a failure go away, the two numbers stop
-    // agreeing and this says so in one line instead of a 67-entry diff.
+    // agreeing and this says so in one line instead of a 65-entry diff.
     final int total = _kMarkCensus.values
         .expand((Map<String, int> marks) => marks.values)
         .fold(0, (int sum, int count) => sum + count);
-    expect(total, 67);
+    expect(total, 65);
     // 36 distinct marks: `quick_settings_menu.dart`'s gained `check` was
     // already drawn by `language_selector.dart`, `gitDiff` left with the
     // diff viewer's toggle when it moved into the changes screen's panel
@@ -632,10 +634,6 @@ const Map<String, Map<String, int>> _kMarkCensus = <String, Map<String, int>>{
     'file': 1,
     'folder': 1,
     'folderOpen': 1,
-  },
-  'lib/shared/widgets/batch_operations_bar.dart': <String, int>{
-    'checkSquare': 1,
-    'x': 1,
   },
   'lib/shared/widgets/branch_switcher.dart': <String, int>{
     'gitBranch': 2,

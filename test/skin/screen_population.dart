@@ -694,10 +694,13 @@ List<ScreenScene> screenPopulation() => <ScreenScene>[
 /// An entry here is a decision on the record: it says the leak checks will
 /// never look at this screen, and why that is acceptable. Anything not listed
 /// and not covered fails the census.
-const Map<String, String> kScreensNoSceneCovers = <String, String>{
-  'lib/core/screens/repository_screen.dart':
-      'not a screen but the abstract base class the repository-dependent '
-      'screens extend (RepositoryScreen / RepositoryScreenState). It cannot '
-      'be instantiated, and everything it draws - the "no repository" empty '
-      'state - is drawn through subclasses that ARE in the population.',
-};
+// Empty, and that is the interesting state: the one entry this map ever held
+// excused `lib/core/screens/repository_screen.dart` as "the abstract base class
+// the repository-dependent screens extend". Nothing extended it any more - the
+// screens had moved off it and nobody noticed, because an exclusion says the
+// leak checks will never look, and a file nothing looks at cannot fail. It was
+// deleted with the other unreachable files; the excuse went with it.
+//
+// An entry here is a decision on the record. Anything not listed and not
+// covered fails the census.
+const Map<String, String> kScreensNoSceneCovers = <String, String>{};

@@ -116,12 +116,6 @@ const Map<String, _Weights> _kWeightLedger = <String, _Weights>{
     3,
     0,
   ),
-  'lib/features/repositories/widgets/project_section.dart': _Weights(
-    2,
-    0,
-    2,
-    0,
-  ),
   'lib/features/repositories/widgets/repositories_empty_state.dart': _Weights(
     1,
     0,

@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        DialogRouteSpec,
+        IconRole,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../../generated/app_localizations.dart';
 import '../../../shared/components/base_badge.dart';
@@ -216,8 +223,11 @@ class BranchListTile extends ConsumerWidget {
   }
 
   Future<void> _renameBranch(BuildContext context, WidgetRef ref) async {
-    final result = await showDialog<String>(
-      context: context,
+    final result = await Overlays.dialogFrom<String>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.renameBranch(branch.shortName),
+      ),
       builder: (context) => RenameBranchDialog(branch: branch),
     );
 
@@ -235,8 +245,11 @@ class BranchListTile extends ConsumerWidget {
   }
 
   Future<void> _mergeBranch(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
+    final confirmed = await Overlays.dialogFrom<bool>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.mergeBranchDialog,
+      ),
       builder: (context) => MergeBranchDialog(branch: branch),
     );
 
@@ -311,8 +324,11 @@ class BranchListTile extends ConsumerWidget {
       return;
     }
 
-    final result = await showDialog<DeleteBranchResult>(
-      context: context,
+    final result = await Overlays.dialogFrom<DeleteBranchResult>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.deleteBranchDialog,
+      ),
       builder: (context) => DeleteBranchDialog(branch: branch),
     );
 

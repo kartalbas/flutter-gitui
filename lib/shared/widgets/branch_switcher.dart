@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_gitui/shared/icons/phosphor_icons.dart';
 import 'package:gitui_skin_api/gitui_skin_api.dart'
-    show ControlScale, IconRole, Inset, Proximity, TextRole, Tone;
+    show
+        ControlScale,
+        DialogRouteSpec,
+        IconRole,
+        Inset,
+        Overlays,
+        Proximity,
+        TextRole,
+        Tone;
 
 import '../../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
@@ -210,8 +218,11 @@ class BranchSwitcher extends ConsumerWidget {
     // DeleteBranchDialog returns a DeleteBranchResult (it also collects the
     // force choice), so the old `showDialog<bool>` + `result == true` guard
     // never matched and the delete silently did nothing.
-    final result = await showDialog<DeleteBranchResult>(
-      context: context,
+    final result = await Overlays.dialogFrom<DeleteBranchResult>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.deleteBranchDialog,
+      ),
       builder: (context) => DeleteBranchDialog(branch: branch),
     );
     if (result != null &&
@@ -241,8 +252,11 @@ class BranchSwitcher extends ConsumerWidget {
     WidgetRef ref,
     GitBranch branch,
   ) async {
-    final result = await showDialog<String>(
-      context: context,
+    final result = await Overlays.dialogFrom<String>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.renameBranch(branch.name),
+      ),
       builder: (context) => RenameBranchDialog(branch: branch),
     );
     // Dialog returns new branch name if rename was confirmed
@@ -298,8 +312,11 @@ class BranchSwitcher extends ConsumerWidget {
 
     if (!context.mounted) return;
 
-    final result = await showDialog<BulkDeleteResult>(
-      context: context,
+    final result = await Overlays.dialogFrom<BulkDeleteResult>(
+      context,
+      route: DialogRouteSpec(
+        title: AppLocalizations.of(context)!.deleteAllUnprotectedBranches,
+      ),
       builder: (context) => BulkDeleteBranchesDialog(
         branches: deletableBranches,
         deletableWithoutForce: deletableWithoutForce,

@@ -89,3 +89,13 @@ docs/UI-CONCEPT.md.backup
 
 # Output of tools/check_translations.dart - regenerate locally, never commit
 tools/translation_reports/
+# setup-ai-core start: what agents and the harness put into a checkout is never committed
+/.ai-core/
+/AGENTS.md
+/.claude/
+/.agents/
+/.openhands/microagents/
+/.cursorrules
+/.windsurfrules
+/.github/copilot-instructions.md
+# setup-ai-core end
